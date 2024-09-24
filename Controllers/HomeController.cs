@@ -34,5 +34,7 @@ public class HomeController : Controller
     public IActionResult CloudCompute() { return View(); }
 
     public IActionResult AzurePaas() { return View(); }
-    
+
+    public IActionResult Oops() { return View(); }
+
 }
