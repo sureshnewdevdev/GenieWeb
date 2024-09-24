@@ -36,5 +36,6 @@ public class HomeController : Controller
     public IActionResult AzurePaas() { return View(); }
 
     public IActionResult Oops() { return View(); }
+    public IActionResult OopsQA() { return View(); }
 
 }
