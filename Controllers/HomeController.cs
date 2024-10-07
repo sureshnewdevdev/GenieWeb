@@ -7,7 +7,11 @@ public class HomeController : Controller
         ViewData["Title"] = "Start your better Learning from here";
         return View();
     }
-
+    public IActionResult CSharp()
+    {
+        ViewData["ActiveMenu"] = "CSharp";
+        return View("Index");
+    }
     public IActionResult Topic1()
     {
         ViewData["Title"] = "Azure Topics";
