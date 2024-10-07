@@ -7,78 +7,96 @@
     <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="~/css/site.css" rel="stylesheet" />
 
+    <!-- Custom Styles for Active Link Highlight -->
+    <style>
+        .active-link {
+            background-color: yellow !important;
+            color: black !important;
+        }
+    </style>
+
     <!-- Google AdSense script -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2270827713894017"
             crossorigin="anonymous"></script>
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="/">ItTechGenie</a>
+        <div class="container-fluid">
+            <!-- Logo Placeholder -->
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="~/images/logo-placeholder.png" alt="Logo" width="40" height="40" class="me-2" />
+                ItTechGenie
+            </a>
+            <!-- Navigation Links directly next to brand -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-3">
+                    <li class="nav-item">
+                        <a class="nav-link @((ViewData["ActiveMenu"] as string) == "Home" ? "active-link" : "")" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @((ViewData["ActiveMenu"] as string) == "CSharp" ? "active-link" : "")" data-bs-toggle="collapse" href="#csharpSection" role="button" aria-expanded="false" aria-controls="csharpSection">
+                            C#
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @((ViewData["ActiveMenu"] as string) == "DotNetCore" ? "active-link" : "")" href="@Url.Action("DotNetCore", "Home")">.NET Core</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @((ViewData["ActiveMenu"] as string) == "Azure" ? "active-link" : "")" href="@Url.Action("Azure", "Home")">Azure</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @((ViewData["ActiveMenu"] as string) == "Privacy" ? "active-link" : "")" href="@Url.Action("Privacy", "Home")">Privacy</a>
+                    </li>
+                </ul>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
     </header>
+
     <div class="container-fluid">
         <div class="row">
-            <!-- Left Menu -->
-            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <!-- Left Menu with Scrollable Feature -->
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" style="height: 100vh; overflow-y: auto;">
                 <div class="position-sticky pt-3">
-                    <h4>MCQ with Answer</h4>
+                    <h4>Navigate here to Learn</h4>
                     <ul class="nav flex-column">
-                        <!-- Azure DevOps -->
+                        <!-- C# TOC Section -->
                         <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("AzureDevOps", "Home")">Azure DevOps</a>
-                            <a class="nav-link" data-bs-toggle="collapse" href="#azureDevOpsMenu" role="button" aria-expanded="false" aria-controls="azureDevOpsMenu">
-                                <i class="bi bi-chevron-down"></i> Expand
+                            <a class="nav-link" data-bs-toggle="collapse" href="#csharpSection" role="button" aria-expanded="false" aria-controls="csharpSection">
+                                C#
                             </a>
-                            <ul class="collapse" id="azureDevOpsMenu">
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Introduction to Azure DevOps</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Why Azure DevOps?</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Components of Azure DevOps</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Pipelines</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Boards</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Artifacts</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Repos</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Test Plans</a></li>
-                            </ul>
-                        </li>
-
-                        <!-- Cloud Computing & Azure Fundamentals -->
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="collapse" href="#cloudComputingMenu" role="button" aria-expanded="false" aria-controls="cloudComputingMenu">
-                                Cloud Computing & Azure Fundamentals
-                            </a>
-                            <ul class="collapse" id="cloudComputingMenu">
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Cloud Computing & Microsoft Azure Fundamentals</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Microsoft Azure Portal Overview</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Overview of Cloud Computing</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Overview of Public, Private & Hybrid Cloud</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Core Azure Services</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Availability Zones</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Identity, Azure Active Directory</a></li>
-                            </ul>
-                        </li>
-
-                        <!-- Azure PaaS Services -->
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="collapse" href="#azurePaasMenu" role="button" aria-expanded="false" aria-controls="azurePaasMenu">
-                                Azure PaaS Services
-                            </a>
-                            <ul class="collapse" id="azurePaasMenu">
-                                <li><a class="nav-link" href="@Url.Action("AzurePaas", "Home")">Azure Web App</a></li>
-                                <li><a class="nav-link" href="@Url.Action("AzurePaas", "Home")">App Service Plan</a></li>
-                                <li><a class="nav-link" href="@Url.Action("AzurePaas", "Home")">Azure Function App</a></li>
-                                <li><a class="nav-link" href="@Url.Action("AzurePaas", "Home")">Service Bus Messaging</a></li>
-                                <li><a class="nav-link" href="@Url.Action("AzurePaas", "Home")">Azure Logic App</a></li>
-                                <li><a class="nav-link" href="@Url.Action("AzurePaas", "Home")">Azure Database Services</a></li>
-                            </ul>
-                        </li>
-
-                        <!-- Azure PaaS Services -->
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="collapse" href="#azurePaasMenu" role="button" aria-expanded="false" aria-controls="azurePaasMenu">
-                                Object Oreiented Programing System
-                            </a>
-                            <ul class="collapse" id="azurePaasMenu">
-                                <li><a class="nav-link" href="@Url.Action("Oops", "Home")">Oops Concepts</a></li>
-                                <li><a class="nav-link" href="@Url.Action("OopsQA", "Home")">Oops Concepts With Question Answer</a></li>
+                            <ul class="collapse @((ViewData["ActiveMenu"] as string) == "CSharp" ? "show" : "")" id="csharpSection">
+                                <li class="nav-item">
+                                    <h5 class="mt-2">C# Basics</h5>
+                                    <ul class="nav flex-column ms-3">
+                                        <li><a class="nav-link" href="@Url.Action("IntroductionToCSharp", "Home")">Introduction to C#</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("FeaturesOfCSharp", "Home")">Features of C#</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("CompilationAndExecution", "Home")">C# Compilation and Execution</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("GeneralStructure", "Home")">General Structure of a C# Program</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("CreatingUsingDLL", "Home")">Creating and Using a DLL</a></li>
+                                    </ul>
+                                    <h5 class="mt-2">Data Types and Arrays</h5>
+                                    <ul class="nav flex-column ms-3">
+                                        <li><a class="nav-link" href="@Url.Action("DataTypesAndArraysInCSharp", "Home")">Data Types and Arrays in C#</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("DataTypes", "Home")">Data Types in C#</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("ValueReferenceTypes", "Home")">Value Types and Reference Types</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("BoxingUnBoxing", "Home")">Boxing and UnBoxing</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("Arrays", "Home")">Single Dimensional, Multi-Dimensional & Jagged Arrays</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("NullableTypes", "Home")">Nullable Types</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("ImplicitlyTypedVariables", "Home")">Implicitly Typed Local Variables</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("VarVsDynamic", "Home")">Var vs dynamic</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("IsAsOperator", "Home")">Is and as Operator</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("RefOutKeywords", "Home")">Ref vs out Keywords</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("ObjectBaseClass", "Home")">The 'object' Base Class in .NET</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("EqualsVsDoubleEquals", "Home")">Equals() vs ==</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("StringVsStringBuilder", "Home")">String vs StringBuilder</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("StringMethods", "Home")">Various String Class Methods</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("DefaultNamedParameters", "Home")">Default Parameters, Named Parameters</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("ParseVsTryParse", "Home")">Parse() vs TryParse() vs Convert Class Methods</a></li>
+                                    </ul>
+                                </li>
                             </ul>
                         </li>
                     </ul>
@@ -112,116 +130,3 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-
-@* <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ItTechGenie</title>
-    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="~/css/site.css" rel="stylesheet" />
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2270827713894017"
-            crossorigin="anonymous"></script>
-</head>
-<body>
-    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="/">ItTechGenie</a>
-    </header>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Left Menu -->
-            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-                <div class="position-sticky pt-3">
-                    <h4>MCQ with Answer</h4>
-                    <ul class="nav flex-column">
-                        <!-- Azure DevOps -->
-                        <li class="nav-item">
-                            <!-- First link to navigate to the AzureDevOps action -->
-                            <a class="nav-link" href="@Url.Action("AzureDevOps", "Home")">
-                                Azure DevOps
-                            </a>
-
-                            <!-- Corrected the toggle link and used "#" instead of action for collapsing sub-items -->
-                            <a class="nav-link" data-bs-toggle="collapse" href="#azureDevOpsMenu" role="button" aria-expanded="false" aria-controls="azureDevOpsMenu">
-                                <i class="bi bi-chevron-down"></i> Expand
-                            </a>
-
-                            <!-- Collapsible content for sub-items -->
-                            <ul class="collapse" id="azureDevOpsMenu">
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Introduction to Azure DevOps</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Why Azure DevOps?</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Components of Azure DevOps</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Pipelines</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Boards</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Artifacts</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Repos</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Test Plans</a></li>
-                            </ul>
-                        </li>
-
-                        <!-- Cloud Computing & Azure Fundamentals -->
-                        <li class="nav-item">
-                            <!-- Use # for collapsing and expanding sub-menu -->
-                            <a class="nav-link" data-bs-toggle="collapse" href="#cloudComputingMenu" role="button" aria-expanded="false" aria-controls="cloudComputingMenu">
-                                Cloud Computing & Azure Fundamentals
-                            </a>
-                            <ul class="collapse" id="cloudComputingMenu">
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Cloud Computing & Microsoft Azure Fundamentals</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Microsoft Azure Portal Overview</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Overview of Cloud Computing</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Overview of Public, Private & Hybrid Cloud</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Core Azure Services</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Availability Zones</a></li>
-                                <li><a class="nav-link" href="@Url.Action("CloudCompute", "Home")">Identity, Azure Active Directory</a></li>
-                            </ul>
-                        </li>
-
-                        <!-- Azure PaaS Services -->
-                        <li class="nav-item">
-                            <!-- Use # for collapsing and expanding sub-menu -->
-                            <a class="nav-link" data-bs-toggle="collapse" href="#azurePaasMenu" role="button" aria-expanded="false" aria-controls="azurePaasMenu">
-                                Azure PaaS Services
-                            </a>
-                            <ul class="collapse" id="azurePaasMenu">
-                                <li><a class="nav-link" href="@Url.Action("AzurePaas", "Home")">Azure Web App</a></li>
-                                <li><a class="nav-link" href="@Url.Action("AzurePaas", "Home")">App Service Plan</a></li>
-                                <li><a class="nav-link" href="@Url.Action("AzurePaas", "Home")">Azure Function App</a></li>
-                                <li><a class="nav-link" href="@Url.Action("AzurePaas", "Home")">Service Bus Messaging</a></li>
-                                <li><a class="nav-link" href="@Url.Action("AzurePaas", "Home")">Azure Logic App</a></li>
-                                <li><a class="nav-link" href="@Url.Action("AzurePaas", "Home")">Azure Database Services</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-            <!-- Main Content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">@ViewData["Title"]</h1>
-                </div>
-                <div>
-                    @RenderBody()
-                </div>
-            </main>
-        </div>
-    </div>
-
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- google adsense-->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2270827713894017"
-            crossorigin="anonymous"></script>
-    <ins class="adsbygoogle"
-         style="display:block"
-         data-ad-client="ca-pub-2270827713894017"
-         data-ad-slot="3993585551"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-    <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-    <!-- google adsense-->
-</body>
-</html>
- *@
