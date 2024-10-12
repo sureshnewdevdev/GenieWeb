@@ -9,5 +9,6 @@ namespace GenieWeb.Controllers
             return View();
         }
         public IActionResult FeatureOfCSharp() => View();
+        public IActionResult CSharpCompliationAndExecution() => View();
     }
 }
