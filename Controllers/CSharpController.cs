@@ -10,5 +10,9 @@ namespace GenieWeb.Controllers
         }
         public IActionResult FeatureOfCSharp() => View();
         public IActionResult CSharpCompliationAndExecution() => View();
+
+        public IActionResult GeneralStructureOfCSharp() =>View();
+
+        public IActionResult CreatingAndUsingDLL() => View();
     }
 }
