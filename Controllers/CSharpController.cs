@@ -14,5 +14,13 @@ namespace GenieWeb.Controllers
         public IActionResult GeneralStructureOfCSharp() =>View();
 
         public IActionResult CreatingAndUsingDLL() => View();
+
+        public IActionResult DataTypesAndArrays() => View();
+
+        public IActionResult ValueAndReferenceType() => View();
+
+        public IActionResult BoxingUnBoxing() => View();    
+        public IActionResult TypeOfArrays() => View();  
+        public IActionResult NullableTypes() => View();
     }
 }
