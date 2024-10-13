@@ -24,6 +24,8 @@ namespace GenieWeb.Controllers
         public IActionResult VariousStringMethods() => View();
         public IActionResult DefaultNamedParameters() => View();  
         public IActionResult ParseTryParseVsConvert() => View();
+        public IActionResult OOPWithCSharp() => View();
+        public IActionResult StructuresAndEnums() => View();
 
     }
 }
