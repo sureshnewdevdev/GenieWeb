@@ -1,0 +1,154 @@
+﻿@{
+    ViewData["Title"] = "Result after calling Add function through delegates in C#";
+}
+
+<!-- Top Links Section -->
+<div class="top-links d-flex justify-content-start mb-4">
+    <a href="/InterviewQA" class="btn btn-success me-2">Interview Q&A</a>
+    <a href="/FreeMCQ" class="btn btn-primary me-2">Free MCQ Question and Answer</a>
+    <a href="/VideoTutorial" class="btn btn-info">Free Video Tutorial</a>
+</div>
+
+<!-- Main Heading -->
+<h1 class="display-4 text-primary mb-4">Delegates and Calling Functions in C#</h1>
+
+<!-- Section: Introduction to Delegates -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Delegates?</h2>
+    <p class="lead">
+        A delegate in C# is a type that holds references to methods. It is often described as a type-safe function pointer. Delegates are used to pass methods as arguments to other methods.
+    </p>
+</section>
+
+<!-- Section: Why Use Delegates? -->
+<section class="mb-5">
+    <h2 class="text-secondary">Why Use Delegates?</h2>
+    <p class="lead">
+        Delegates allow you to define callback methods and enable methods to be passed as parameters. They are commonly used in event handling, where one method can be called in response to an event.
+    </p>
+</section>
+
+<!-- Section: Example of Using Delegates -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Calling Add Function Through Delegates</h2>
+    <p class="lead">
+        In this example, we create a delegate that refers to an <code>Add</code> function and then use the delegate to call the method.
+    </p>
+
+    <!-- Example Code Block with Copy Option -->
+    <h3 class="text-info">Example Code:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>// Define a delegate
+public delegate int Operation(int x, int y);
+
+// Method that matches the delegate signature
+public static int Add(int a, int b)
+{
+    return a + b;
+}
+
+public static void Main(string[] args)
+{
+    // Create an instance of the delegate
+    Operation operation = Add;
+
+    // Call the method through the delegate
+    int result = operation(5, 10);
+
+    // Display the result
+    Console.WriteLine($"Result after calling Add function through delegates: {result}");
+}</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, the delegate <code>Operation</code> holds a reference to the <code>Add</code> method. When we call <code>operation(5, 10)</code>, it invokes the <code>Add</code> method, and the result is displayed.
+    </p>
+</section>
+
+<!-- Section: Key Characteristics of Delegates -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Characteristics of Delegates</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Delegates are type-safe and ensure that the method signature matches the delegate signature.</li>
+        <li class="list-group-item">Delegates can be used to encapsulate method references and pass methods as arguments.</li>
+        <li class="list-group-item">A delegate can refer to multiple methods using multicast delegates.</li>
+    </ul>
+</section>
+
+<!-- Section: Multicast Delegates -->
+<section class="mb-5">
+    <h2 class="text-secondary">Multicast Delegates</h2>
+    <p class="lead">
+        A delegate can reference multiple methods at once. When invoked, all the methods are called in the order they were added.
+    </p>
+
+    <!-- Example Code Block with Copy Option -->
+    <h3 class="text-info">Example of Multicast Delegates:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>// Define a delegate
+public delegate void Notify();
+
+// Methods that match the delegate signature
+public static void NotifyByEmail()
+{
+    Console.WriteLine("Notification sent by Email");
+}
+
+public static void NotifyBySMS()
+{
+    Console.WriteLine("Notification sent by SMS");
+}
+
+public static void Main(string[] args)
+{
+    // Create an instance of the delegate and add multiple methods
+    Notify notify = NotifyByEmail;
+    notify += NotifyBySMS;
+
+    // Call the delegate, which will invoke both methods
+    notify();
+}</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, the delegate <code>Notify</code> holds references to both <code>NotifyByEmail</code> and <code>NotifyBySMS</code>. When the delegate is invoked, both methods are called.
+    </p>
+</section>
+
+<!-- Section: Key Points to Remember -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Points to Remember</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Delegates can reference methods and allow methods to be passed as parameters.</li>
+        <li class="list-group-item">A delegate is type-safe and ensures that only methods matching the delegate signature can be referenced.</li>
+        <li class="list-group-item">Multicast delegates can reference and invoke multiple methods.</li>
+    </ul>
+</section>
+
+<!-- Previous Topic Link -->
+<div class="previous-topic mt-4">
+    <a href="@Url.Action("AbstractClasses", "CSharp")" class="btn btn-outline-secondary">Previous: Abstract Classes</a>
+</div>
+
+<!-- Next Topic Link -->
+<div class="next-topic mt-4">
+    <a href="@Url.Action("BaseClassLibrary", "CSharp")" class="btn btn-outline-secondary">Next:.NET Base class library</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

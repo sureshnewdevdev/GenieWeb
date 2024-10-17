@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Runtime.InteropServices;
 
 namespace GenieWeb.Controllers
 {
@@ -26,6 +27,17 @@ namespace GenieWeb.Controllers
         public IActionResult ParseTryParseVsConvert() => View();
         public IActionResult OOPWithCSharp() => View();
         public IActionResult StructuresAndEnums() => View();
-
+        public IActionResult ArchitectureOfClass() => View();
+        public IActionResult InstanceClassReference() => View();
+        public IActionResult AccessModifier() => View();
+        public IActionResult AbstractClasses() => View();
+        public IActionResult ResultAfterCallingFunction() => View();
+        public IActionResult BaseClassLibrary() => View();  
+        public IActionResult InheritanceinCSharp() => View();
+        public IActionResult MethodOverloading() => View();
+        public IActionResult MethodOverriding() => View();
+        public IActionResult OperatorOverloading() => View();
+        public IActionResult MethodHiding() => View();
+        public IActionResult AccessModifiers() => View();
     }
 }
