@@ -1,0 +1,193 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Or whatever the path to your layout is
+}
+@{
+    ViewData["Title"] = "LINQ Guide - ItTechGenie";
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ItTechGenie</title>
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/css/site.css" rel="stylesheet" />
+
+    <!-- Google AdSense script -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2270827713894017"
+            crossorigin="anonymous"></script>
+
+    <style>
+        /* Increase font size for the entire page */
+        body {
+            font-size: 1.2rem; /* Adjust this size as needed */
+        }
+
+        /* Adjust the layout to ensure the main content is full width */
+        main {
+            margin-left: 0;
+            padding: 20px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+        }
+
+        /* Responsive layout adjustments */
+        @@media (max-width: 991.98px) {
+            main {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <a class="navbar-brand" href="/">
+            <img src="~/css/images/logo.png" alt="ItTechGenie Logo" />
+            IT Tech Genie
+        </a>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Main Content -->
+            <main class="col-12">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Detailed LINQ Guide for Freshers</h1>
+                </div>
+
+                <section>
+                    <h2>What is LINQ?</h2>
+                    <p>LINQ (Language Integrated Query) is a powerful query language introduced by Microsoft within the .NET framework. It enables developers to write queries directly within C# code, using a unified syntax to query different types of data, such as collections, XML, and databases.</p>
+
+                    <h2>Why do we need LINQ?</h2>
+                    <ul>
+                        <li><strong>Simplified Data Access:</strong> LINQ provides a consistent syntax to work with different data sources like collections, XML, and databases.</li>
+                        <li><strong>Improved Readability:</strong> LINQ integrates queries into C# or VB.NET code, making it easier to understand and manage.</li>
+                        <li><strong>Compile-Time Checking:</strong> Queries written using LINQ are checked at compile time, reducing runtime errors.</li>
+                        <li><strong>Refactoring Support:</strong> LINQ queries are fully integrated with the IDE, making refactoring easier.</li>
+                    </ul>
+
+                    <h2>LINQ Syntax and Query Expressions</h2>
+                    <p>LINQ uses query expressions to retrieve data. It is a declarative way of working with data. The typical query syntax consists of:</p>
+                    <ul>
+                        <li><strong>From:</strong> Specifies the data source.</li>
+                        <li><strong>Where:</strong> Filters the data based on a condition.</li>
+                        <li><strong>Select:</strong> Specifies what data to return.</li>
+                    </ul>
+                    <pre><code>
+// Sample data
+List&lt;int&gt; numbers = new List&lt;int&gt; { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+// LINQ query expression
+var evenNumbers = from num in numbers
+                  where num % 2 == 0
+                  select num;
+
+foreach (var number in evenNumbers)
+{
+    Console.WriteLine(number);
+}
+                    </code></pre>
+                    <p>In this example, we are selecting even numbers from a list using a LINQ query.</p>
+
+                    <h2>LINQ Methods and Operators</h2>
+                    <p>LINQ also provides method-based syntax, which allows you to use extension methods such as <code>Where</code>, <code>Select</code>, <code>OrderBy</code>, and many others:</p>
+                    <pre><code>
+// Using LINQ methods
+var evenNumbersMethodSyntax = numbers.Where(n => n % 2 == 0).ToList();
+
+foreach (var number in evenNumbersMethodSyntax)
+{
+    Console.WriteLine(number);
+}
+                    </code></pre>
+                    <p>Here, we use the <code>Where</code> method to filter even numbers.</p>
+
+                    <h2>Deferred Execution in LINQ</h2>
+                    <p>Deferred execution means that the LINQ query is not executed until the query result is actually enumerated (e.g., using <code>foreach</code> or <code>ToList()</code>).</p>
+                    <pre><code>
+// Deferred Execution Example
+var deferredQuery = numbers.Where(n => n > 4);
+
+// The query is not executed until we enumerate it
+foreach (var num in deferredQuery)
+{
+    Console.WriteLine(num);
+}
+                    </code></pre>
+                    <p>This query is not executed when it is defined, but only when the result is iterated.</p>
+
+                    <h2>LINQ Joins</h2>
+                    <p>LINQ supports different types of joins similar to SQL, such as inner joins and outer joins. Here's an example of how to perform a join using LINQ:</p>
+                    <pre><code>
+// Sample data
+List&lt;Employee&gt; employees = new List&lt;Employee&gt;
+{
+    new Employee { EmployeeId = 1, Name = "Alice", DepartmentId = 1 },
+    new Employee { EmployeeId = 2, Name = "Bob", DepartmentId = 2 }
+};
+
+List&lt;Department&gt; departments = new List&lt;Department&gt;
+{
+    new Department { DepartmentId = 1, DepartmentName = "HR" },
+    new Department { DepartmentId = 2, DepartmentName = "IT" }
+};
+
+// LINQ Join
+var query = from e in employees
+            join d in departments on e.DepartmentId equals d.DepartmentId
+            select new { e.Name, d.DepartmentName };
+
+foreach (var result in query)
+{
+    Console.WriteLine($"{result.Name} works in {result.DepartmentName}");
+}
+                    </code></pre>
+
+                    <h2>LINQ to Objects, LINQ to SQL, and LINQ to XML</h2>
+                    <p>LINQ is versatile and can be used with different data sources:</p>
+
+                    <h3>LINQ to Objects</h3>
+                    <p>This refers to using LINQ with in-memory data collections like arrays, lists, and dictionaries.</p>
+                    <pre><code>
+// LINQ to Objects example
+List&lt;string&gt; fruits = new List&lt;string&gt; { "Apple", "Banana", "Mango", "Orange" };
+var longFruits = from fruit in fruits
+                 where fruit.Length > 5
+                 select fruit;
+                    </code></pre>
+
+                    <h3>LINQ to SQL</h3>
+                    <p>LINQ to SQL allows querying databases using LINQ syntax:</p>
+                    <pre><code>
+// LINQ to SQL example
+var db = new DataContext();
+var query = from c in db.Customers
+            where c.City == "New York"
+            select c;
+                    </code></pre>
+
+                    <h3>LINQ to XML</h3>
+                    <p>LINQ to XML allows querying and manipulating XML data:</p>
+                    <pre><code>
+// LINQ to XML example
+XDocument doc = XDocument.Load("data.xml");
+var query = from el in doc.Descendants("Employee")
+            where (int)el.Element("Age") > 30
+            select el;
+                    </code></pre>
+
+                    <h2>Conclusion</h2>
+                    <p>LINQ provides a consistent and powerful way to query different types of data within .NET. It simplifies data manipulation and enhances the readability of your code. As a beginner, mastering LINQ will help you write cleaner, more efficient code in C#.</p>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
