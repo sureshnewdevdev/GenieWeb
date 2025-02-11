@@ -10,19 +10,12 @@ namespace GenieWeb.Controllers
             return View("AbstractClasses");
         }
 
-<<<<<<< HEAD
+
     public IActionResult AccessModifier() 
     {
         ViewData["ActiveMenu"] = "AccessModifier";
         return View("/CSharp/AccessModifier");
     }
-=======
-//         public IActionResult AccessModifier()
-//         {
-//             ViewData["ActiveMenu"] = "AccessModifier";
-//             return View("/CSharp/AccessModifier");
-//         }
-// >>>>>>> e17f364ed9495ffb575654189b820095effcfd0c
 
         public IActionResult AccessModifiers()
         {
