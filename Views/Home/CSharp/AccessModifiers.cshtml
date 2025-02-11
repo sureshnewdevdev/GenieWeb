@@ -1,0 +1,184 @@
+﻿@{
+    ViewData["Title"] = "Access Modifiers in C#";
+}
+
+<!-- Top Links Section -->
+<div class="top-links d-flex justify-content-start mb-4">
+    <a href="/InterviewQA" class="btn btn-success me-2">Interview Q&A</a>
+    <a href="/FreeMCQ" class="btn btn-primary me-2">Free MCQ Question and Answer</a>
+    <a href="/VideoTutorial" class="btn btn-info">Free Video Tutorial</a>
+</div>
+
+<!-- Main Heading -->
+<h1 class="display-4 text-primary mb-4">Access Modifiers in C#</h1>
+
+<!-- Section: Introduction to Access Modifiers -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Access Modifiers?</h2>
+    <p class="lead">
+        Access modifiers in C# are keywords used to define the visibility and accessibility of classes, methods, variables, and other members. These modifiers control how objects interact and ensure encapsulation and proper design.
+    </p>
+</section>
+
+<!-- Section: Types of Access Modifiers -->
+<section class="mb-5">
+    <h2 class="text-secondary">Types of Access Modifiers</h2>
+    <p class="lead">
+        C# supports five main access modifiers: <b>private</b>, <b>public</b>, <b>protected</b>, <b>internal</b>, and <b>protected internal</b>. Each serves a unique purpose in controlling access within and across classes and assemblies.
+    </p>
+
+    <!-- Table listing access modifiers -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Modifier</th>
+                <th>Accessibility</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>private</code></td>
+                <td>Accessible only within the same class.</td>
+            </tr>
+            <tr>
+                <td><code>public</code></td>
+                <td>Accessible from any other class or assembly.</td>
+            </tr>
+            <tr>
+                <td><code>protected</code></td>
+                <td>Accessible within its class and by derived class instances.</td>
+            </tr>
+            <tr>
+                <td><code>internal</code></td>
+                <td>Accessible only within the same assembly.</td>
+            </tr>
+            <tr>
+                <td><code>protected internal</code></td>
+                <td>Accessible within the same assembly or from derived classes.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Example of Access Modifiers in C# -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Access Modifiers in C#</h2>
+    <p class="lead">
+        Below is an example that demonstrates how different access modifiers work in practice within a class hierarchy.
+    </p>
+
+    <!-- Example Code Block with Copy Option -->
+    <h3 class="text-info">Example Code:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class BaseClass
+{
+    private int privateValue = 10;     // Accessible only within BaseClass
+    public int publicValue = 20;       // Accessible from anywhere
+    protected int protectedValue = 30; // Accessible from BaseClass and derived classes
+    internal int internalValue = 40;   // Accessible within the same assembly
+    protected internal int protectedInternalValue = 50; // Accessible within assembly or derived classes
+
+    public void DisplayValues()
+    {
+        Console.WriteLine($"Private: {privateValue}, Public: {publicValue}, Protected: {protectedValue}, Internal: {internalValue}, Protected Internal: {protectedInternalValue}");
+    }
+}
+
+public class DerivedClass : BaseClass
+{
+    public void DisplayDerivedValues()
+    {
+        // Cannot access privateValue (only in BaseClass)
+        Console.WriteLine($"Public: {publicValue}, Protected: {protectedValue}, Internal: {internalValue}, Protected Internal: {protectedInternalValue}");
+    }
+}
+
+// Usage
+BaseClass baseObj = new BaseClass();
+baseObj.DisplayValues();  // Accessible: public, internal, protected internal
+DerivedClass derivedObj = new DerivedClass();
+derivedObj.DisplayDerivedValues(); // Accessible: public, protected, internal, protected internal
+</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, the <code>BaseClass</code> defines fields with various access modifiers. The <code>DerivedClass</code> can access all except the <code>private</code> member. The <code>internal</code> and <code>protected internal</code> members are accessible within the same assembly.
+    </p>
+</section>
+
+<!-- Section: The "new" Keyword -->
+<section class="mb-5">
+    <h2 class="text-secondary">The <code>new</code> Keyword</h2>
+    <p class="lead">
+        The <code>new</code> keyword in C# is used for two purposes: creating objects and hiding inherited members. When applied to methods or properties, it hides the base class implementation, allowing the derived class to define its own version.
+    </p>
+
+    <!-- Example Code Block with Copy Option -->
+    <h3 class="text-info">Example of <code>new</code> Keyword:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class BaseClass
+{
+    public void Display()
+    {
+        Console.WriteLine("BaseClass Display");
+    }
+}
+
+public class DerivedClass : BaseClass
+{
+    // Hides the BaseClass method
+    public new void Display()
+    {
+        Console.WriteLine("DerivedClass Display");
+    }
+}
+
+// Usage
+BaseClass baseObj = new BaseClass();
+baseObj.Display();  // Output: BaseClass Display
+
+DerivedClass derivedObj = new DerivedClass();
+derivedObj.Display();  // Output: DerivedClass Display
+</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, the <code>DerivedClass</code> hides the <code>Display</code> method of <code>BaseClass</code> using the <code>new</code> keyword. The base class method is still accessible when using a <code>BaseClass</code> reference.
+    </p>
+</section>
+
+<!-- Section: Key Points to Remember -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Points to Remember</h2>
+    <ul class="list-group">
+        <li class="list-group-item">The <code>private</code> modifier restricts access to within the class only.</li>
+        <li class="list-group-item">The <code>public</code> modifier allows access from anywhere.</li>
+        <li class="list-group-item">The <code>protected</code> modifier allows access within the class and its derived classes.</li>
+        <li class="list-group-item">The <code>internal</code> modifier restricts access to within the same assembly.</li>
+        <li class="list-group-item">The <code>protected internal</code> modifier allows access within the same assembly or by derived classes.</li>
+        <li class="list-group-item">The <code>new</code> keyword hides base class members in the derived class but does not override them.</li>
+    </ul>
+</section>
+
+<!-- Previous Topic Link -->
+<div class="previous-topic mt-4">
+    <a href="@Url.Action("MethodHiding", "CSharp")" class="btn btn-outline-secondary">Previous: Method Hiding</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

@@ -1,0 +1,159 @@
+﻿@{
+    ViewData["Title"] = "Parse() vs TryParse() vs Convert Class Methods in C#";
+}
+
+<!-- Top Links Section -->
+<div class="top-links d-flex justify-content-start mb-4">
+    <a href="/InterviewQA" class="btn btn-success me-2">Interview Q&A</a>
+    <a href="/FreeMCQ" class="btn btn-primary me-2">Free MCQ Question and Answer</a>
+    <a href="/VideoTutorial" class="btn btn-info">Free Video Tutorial</a>
+</div>
+
+<!-- Main Heading -->
+<h1 class="display-4 text-primary mb-4">Parse() vs TryParse() vs Convert Class Methods in C#</h1>
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <h2 class="text-secondary">Introduction</h2>
+    <p class="lead">
+        In C#, <code>Parse()</code>, <code>TryParse()</code>, and <code>Convert</code> methods are commonly used to convert strings into other data types like integers, decimals, or dates. Each of these methods works differently when dealing with invalid input, and choosing the right one depends on the use case.
+    </p>
+</section>
+
+<!-- Section: Parse() Method -->
+<section class="mb-5">
+    <h2 class="text-secondary">Parse() Method</h2>
+    <p class="lead">
+        The <code>Parse()</code> method is used to convert a string to a specific data type. It throws an exception if the conversion fails, so it’s best used when you’re sure the string contains a valid value.
+    </p>
+
+    <h3 class="text-info">Example: Using Parse()</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>string numberString = "123";
+int number = int.Parse(numberString);
+
+Console.WriteLine(number);  // Output: 123</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, <code>Parse()</code> successfully converts the string <code>"123"</code> into an integer. If the string were not a valid number, it would throw a <code>FormatException</code>.
+    </p>
+</section>
+
+<!-- Section: TryParse() Method -->
+<section class="mb-5">
+    <h2 class="text-secondary">TryParse() Method</h2>
+    <p class="lead">
+        The <code>TryParse()</code> method attempts to convert a string to a specific data type. It returns <code>true</code> if the conversion succeeds and <code>false</code> if it fails, without throwing an exception. This makes it safer to use when dealing with potentially invalid input.
+    </p>
+
+    <h3 class="text-info">Example: Using TryParse()</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>string numberString = "123";
+bool success = int.TryParse(numberString, out int number);
+
+if (success)
+{
+    Console.WriteLine(number);  // Output: 123
+}
+else
+{
+    Console.WriteLine("Invalid input");
+}</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, <code>TryParse()</code> converts the string to an integer if the conversion is valid. If the conversion fails, no exception is thrown, and it returns <code>false</code>.
+    </p>
+</section>
+
+<!-- Section: Convert Class Methods -->
+<section class="mb-5">
+    <h2 class="text-secondary">Convert Class Methods</h2>
+    <p class="lead">
+        The <code>Convert</code> class provides methods to convert a value to a specified type. If the input is <code>null</code>, it returns the default value for the target type (e.g., <code>0</code> for integers). It throws an exception if the conversion fails for non-null inputs.
+    </p>
+
+    <h3 class="text-info">Example: Using Convert.ToInt32()</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>string numberString = null;
+int number = Convert.ToInt32(numberString);
+
+Console.WriteLine(number);  // Output: 0</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, <code>Convert.ToInt32()</code> converts a <code>null</code> string to <code>0</code>. If the string were a non-null, invalid number, it would throw a <code>FormatException</code>.
+    </p>
+</section>
+
+<!-- Section: Comparison Between Parse(), TryParse(), and Convert -->
+<section class="mb-5">
+    <h2 class="text-secondary">Comparison Between Parse(), TryParse(), and Convert</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Method</th>
+                <th>Throws Exception</th>
+                <th>Handles Null</th>
+                <th>Return Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><b>Parse()</b></td>
+                <td>Yes, throws exception on invalid input.</td>
+                <td>No, throws exception on <code>null</code>.</td>
+                <td>Converted value or exception.</td>
+            </tr>
+            <tr>
+                <td><b>TryParse()</b></td>
+                <td>No, returns <code>false</code> on invalid input.</td>
+                <td>No, returns <code>false</code> on <code>null</code>.</td>
+                <td><code>true</code> or <code>false</code>, and converted value through <code>out</code> parameter.</td>
+            </tr>
+            <tr>
+                <td><b>Convert</b></td>
+                <td>Yes, throws exception on invalid non-null input.</td>
+                <td>Yes, returns default value on <code>null</code>.</td>
+                <td>Converted value or exception.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Key Points to Remember -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Points to Remember</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use <code>Parse()</code> when you are sure the string contains valid data and want an exception to be thrown if it doesn’t.</li>
+        <li class="list-group-item">Use <code>TryParse()</code> for safer conversions where you handle invalid input gracefully without exceptions.</li>
+        <li class="list-group-item">Use <code>Convert</code> when you need to handle <code>null</code> values without exceptions, returning default values for the target type.</li>
+    </ul>
+</section>
+
+<!-- Previous Topic Link -->
+<div class="previous-topic mt-4">
+    <a href="@Url.Action("DefaultNamedParameters", "CSharp")" class="btn btn-outline-secondary">Previous: Default parameters, named parameters</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>
