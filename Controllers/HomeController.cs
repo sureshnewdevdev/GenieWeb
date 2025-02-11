@@ -51,7 +51,7 @@ public class HomeController : Controller
     }
 
     public IActionResult AccessModifiers()
-    {
+    { 
         ViewData["ActiveMenu"] = "CSharp";
         return View("CSharp/AccessModifiers");
     }
