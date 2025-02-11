@@ -1,0 +1,121 @@
+﻿@{
+    ViewData["Title"] = "Nullable Types in C#";
+}
+
+<!-- Top Links Section -->
+<div class="top-links d-flex justify-content-start mb-4">
+    <a href="/InterviewQA" class="btn btn-success me-2">Interview Q&A</a>
+    <a href="/FreeMCQ" class="btn btn-primary me-2">Free MCQ Question and Answer</a>
+    <a href="/VideoTutorial" class="btn btn-info">Free Video Tutorial</a>
+</div>
+
+<!-- Main Heading -->
+<h1 class="display-4 text-primary mb-4">Nullable Types in C#</h1>
+
+<!-- Section: Introduction to Nullable Types -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Nullable Types?</h2>
+    <p class="lead">
+        In C#, all value types (such as <code>int</code>, <code>float</code>, <code>bool</code>) must have a value. However, there are scenarios where a value type needs to represent "no value" or <code>null</code>, especially when dealing with databases or optional values.
+        This is where <b>nullable types</b> come in. A nullable type can represent its normal value range plus <code>null</code>.
+    </p>
+
+    <p>
+        To declare a nullable type, use the <code>?</code> symbol after the type. For example:
+    </p>
+
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>int? nullableInt = null;</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: Working with Nullable Types -->
+<section class="mb-5">
+    <h2 class="text-secondary">Working with Nullable Types</h2>
+    <p class="lead">
+        You can check whether a nullable type has a value using the <code>.HasValue</code> property and retrieve the value using <code>.Value</code>. Additionally, the <code>null-coalescing</code> operator (<code>??</code>) allows you to assign a default value if the nullable type is <code>null</code>.
+    </p>
+
+    <h3 class="text-info">Example: Checking Nullable Types and Using Null-Coalescing Operator</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>int? nullableInt = null;
+
+if (nullableInt.HasValue)
+{
+    Console.WriteLine("Value: " + nullableInt.Value);
+}
+else
+{
+    Console.WriteLine("No value");
+}
+
+int defaultValue = nullableInt ?? 10;  // if nullableInt is null, use 10
+Console.WriteLine(defaultValue);</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, <code>nullableInt</code> is checked for a value using <code>.HasValue</code>, and the <code>null-coalescing</code> operator provides a default value if <code>nullableInt</code> is <code>null</code>.
+    </p>
+</section>
+
+<!-- Section: Nullable Types in Action -->
+<section class="mb-5">
+    <h2 class="text-secondary">Nullable Types in Action</h2>
+    <p class="lead">
+        Nullable types are particularly useful in scenarios where you interact with external data sources (e.g., databases) that might contain <code>null</code> values. For example, consider a situation where you fetch an integer value from a database, and the value might be <code>null</code>.
+    </p>
+
+    <h3 class="text-info">Example: Nullable Type in Database Interaction</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>int? fetchedAge = GetAgeFromDatabase();  // might return null
+
+int age = fetchedAge ?? -1;  // Use -1 as default if age is null
+Console.WriteLine(age);</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, the method <code>GetAgeFromDatabase</code> might return <code>null</code> if no age is available. The null-coalescing operator ensures that if <code>fetchedAge</code> is null, <code>-1</code> is assigned to <code>age</code>.
+    </p>
+</section>
+
+<!-- Section: Key Points to Remember -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Points to Remember</h2>
+    <ul class="list-group">
+        <li class="list-group-item">A nullable type is declared using <code>?</code> (e.g., <code>int?</code>, <code>bool?</code>).</li>
+        <li class="list-group-item">You can check if a nullable type has a value using <code>.HasValue</code>.</li>
+        <li class="list-group-item">Use the null-coalescing operator (<code>??</code>) to provide a default value if the nullable type is <code>null</code>.</li>
+        <li class="list-group-item">Nullable types are useful when dealing with optional values or values that might be null (e.g., database fields).</li>
+    </ul>
+</section>
+
+<!-- Previous Topic Link -->
+<div class="previous-topic mt-4">
+    <a href="@Url.Action("TypeOfArrays", "CSharp")" class="btn btn-outline-secondary">Previous: Type of Arrays</a>
+</div>
+
+<!-- Next Topic Link -->
+<div class="next-topic mt-4">
+    <a href="@Url.Action("ImplicitTypeLocalvariables", "CSharp")" class="btn btn-outline-secondary">Next: Implicitly Typed Local variables</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

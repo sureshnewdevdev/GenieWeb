@@ -2,13 +2,30 @@
 
 namespace GenieWeb.Controllers
 {
-    public class CSharpController : Controller
+public class CSharpController : Controller
+{
+    public IActionResult AbstractClasses()
     {
-        public IActionResult IntroductionToCSharp()
-        {
-            return View();
-        }
-        public IActionResult FeatureOfCSharp() => View();
-        public IActionResult CSharpCompliationAndExecution() => View();
+        ViewData["ActiveMenu"] = "AbstractClasses";
+        return View("AbstractClasses");
     }
+
+    public IActionResult AccessModifier()
+    {
+        ViewData["ActiveMenu"] = "AccessModifier";
+        return View("/CSharp/AccessModifier");
+    }
+
+    public IActionResult AccessModifiers()
+    {
+        ViewData["ActiveMenu"] = "AccessModifiers";
+        return View("AccessModifiers");
+    }
+
+    public IActionResult IntroductionToCSharp()
+    {
+        ViewData["ActiveMenu"] = "IntroductionToCSharp";
+        return View("IntroductionToCSharp");
+    }
+    
 }
