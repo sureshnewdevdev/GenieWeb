@@ -7,6 +7,7 @@
     <title>@ViewData["Title"] - ItTechGenie</title>
     <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="~/css/site.css" rel="stylesheet" />
+    <link href="~/js/site.js" rel="stylesheet" />
 
     <!-- Custom Styles for Active Link Highlight -->
     <style>
@@ -25,255 +26,307 @@
 </head>
 
 <body>
-    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
         <div class="container-fluid">
-            <!-- Logo Placeholder -->
+            <!-- Logo and Brand -->
             <a class="navbar-brand d-flex align-items-center" href="/">
-                <img src="~/images/logo-placeholder.png" alt="Logo" width="40" height="40" class="me-2" />
-                ItTechGenie
+                <img src="@Url.Content("~/images/vinayaga.png")" alt="Logo" width="40" height="40"
+                    class="me-2 rounded-circle" />
+                <span class="fw-bold">ItTechGenie</span>
             </a>
-            <!-- Navigation Links directly next to brand -->
+
+            <!-- Mobile Toggle Button -->
+            <button class="navbar-toggler" type="button" onclick="toggleNavbar()" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <script>
+                function toggleNavbar() {
+                    var navbar = document.getElementById('navbarNav');
+                    if (navbar.classList.contains('show')) {
+                        navbar.classList.remove('show');
+                    } else {
+                        navbar.classList.add('show');
+                    }
+                }
+            </script>
+
+            <!-- Navbar Content -->
             <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- Navigation Links -->
                 <ul class="navbar-nav ms-3">
                     <li class="nav-item">
-                        <a class="nav-link @((ViewData["ActiveMenu"] as string) == "Home" ? "active-link" : "")"
-                            href="/">Home</a>
+                        <a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "Home" ? "active" : "")" href="/"
+                            aria-current="page">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link @((ViewData["ActiveMenu"] as string) == "CSharp" ? "active-link" : "")"
-                            href="@Url.Action("CSharp", "Home")">C#</a>
+                        <a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "CSharp" ? "active" : "")"
+                            href="@Url.Action("IntroductionToCSharp", "CSharp")">C#</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link @((ViewData["ActiveMenu"] as string) == "DotNetCore" ? "active-link" : "")"
+                        <a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "DotNetCore" ? "active" : "")"
                             href="@Url.Action("DotNetCore", "Home")">.NET Core</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link @((ViewData["ActiveMenu"] as string) == "React" ? "active-link" : "")"
+                        <a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "React" ? "active" : "")"
                             href="@Url.Action("IntroductionToReact", "React")">React</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link @((ViewData["ActiveMenu"] as string) == "Azure" ? "active-link" : "")"
+                        <a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "Azure" ? "active" : "")"
                             href="@Url.Action("Azure", "Home")">Azure</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link @((ViewData["ActiveMenu"] as string) == "Privacy" ? "active-link" : "")"
+                        <a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "Privacy" ? "active" : "")"
                             href="@Url.Action("Privacy", "Home")">Privacy</a>
                     </li>
                 </ul>
             </div>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
         </div>
     </header>
 
+
     <div class="container-fluid">
         <div class="row">
+            <!-- Dropdown button with contents for mobiles -->
+            <button
+                class="btn btn-success d-md-none w-100 py-3 my-2 shadow rounded-3 d-flex align-items-center justify-content-center gap-2"
+                id="contentdropdownbtn" type="button" onclick="toggleContentmenu()" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+                <span class="fw-semibold">
+                    @(string.IsNullOrEmpty(ViewData["ActiveMenu"] as string) ? "☰ Quick Actions" :
+                                        ("☰ " + ViewData["ActiveMenu"] as string) + " Items")
+                </span>
+            </button>
+            <!--script to toggle the dropdown content-->
+            <script>
+                function toggleContentmenu() {
+                    var sidebar = document.getElementById('sidebarMenu');
+                    sidebar.classList.toggle('collapse'); // Toggle Bootstrap collapse class
+                }
+            </script>
+
             <!-- Left Menu with Scrollable Feature -->
+            <!-- Sidebar Menu-->
             <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse"
-                style="height: 100vh; overflow-y: auto;">
-                <div class="position-sticky pt-3">
-                    <h4>Navigate here to Learn</h4>
-                    <ul class="nav flex-column">
+                style="height: auto; overflow-y: auto;">
+                <div class="card card-body">
+                    <div class="position-sticky pt-3">
+                        <h4>Navigate here to Learn</h4>
+                        <ul class="nav flex-column">
 
-                        <!-- Show all modules when on Home -->
-                        @if (string.IsNullOrEmpty(ViewData["ActiveMenu"] as string))
-                        {
-                            <li class="nav-item">
-                                <h5 class="mt-2">C#</h5>
-                                <ul class="nav flex-column ms-3">
-                                    <li><a class="nav-link"
-                                            href="@Url.Action("IntroductionToCSharp", "CSharp")">Introduction
-                                            to C#</a></li>
-                                    <li><a class="nav-link" href="@Url.Action("FeaturesOfCSharp", "CSharp")">Features of
-                                            C#</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="nav-item">
-                                <h5 class="mt-2">.NET Core</h5>
-                                <ul class="nav flex-column ms-3">
-                                    <li><a class="nav-link"
-                                            href="@Url.Action("IntroductionToDotNetCore", "Home")">Introduction to .NET
-                                            Core</a></li>
-                                    <li><a class="nav-link" href="@Url.Action("DotNetCoreFeatures", "Home")">Features of
-                                            .NET Core</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="nav-item">
-                                <h5 class="mt-2">Azure</h5>
-                                <ul class="nav flex-column ms-3">
-                                    <li><a class="nav-link" href="@Url.Action("IntroductionToAzure", "Home")">Introduction
-                                            to Azure</a></li>
-                                    <li><a class="nav-link" href="@Url.Action("AzureServices", "Home")">Azure Services
-                                            Overview</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="nav-item">
-                                <h5 class="mt-2">Privacy & Security</h5>
-                                <ul class="nav flex-column ms-3">
-                                    <li><a class="nav-link" href="@Url.Action("PrivacyPolicy", "Home")">Privacy Policy</a>
-                                    </li>
-                                    <li><a class="nav-link" href="@Url.Action("TermsAndConditions", "Home")">Terms and
-                                            Conditions</a></li>
-                                </ul>
-                            </li>
-                        }
-
-                        <!-- C# Sidebar (Only shown when ActiveMenu = CSharp) -->
-                        @if ((ViewData["ActiveMenu"] as string) == "CSharp")
-                        {
-                            <li class="nav-item">
-
-                                <!-- C# Basics Dropdown -->
-                                <h5 class="mt-2">
-                                    <a class="nav-link text-dark fw-bold" data-bs-toggle="collapse" href="#csBasicsMenu"
-                                        role="button"
-                                        aria-expanded="@(new List<string> { "IntroductionToCSharp", "FeaturesOfCSharp", "CSharpCompliationAndExecution", "GeneralStructureOfCSharp", "CreatingAndUsingDLL" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")"
-                                        aria-controls="csBasicsMenu">
-                                        C# Basics
-                                    </a>
-                                </h5>
-
-                                <div class="collapse @(new List<string> { "IntroductionToCSharp", "FeaturesOfCSharp", "CSharpCompliationAndExecution", "GeneralStructureOfCSharp", "CreatingAndUsingDLL" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")"
-                                    id="csBasicsMenu">
+                            <!-- Show all modules when on Home -->
+                            @if (string.IsNullOrEmpty(ViewData["ActiveMenu"] as string))
+                            {
+                                <li class="nav-item">
+                                    <h5 class="mt-2">C#</h5>
                                     <ul class="nav flex-column ms-3">
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "IntroductionToCSharp" ? "active" : "")"
-                                                href="@Url.Action("IntroductionToCSharp", "CSharp")">Introduction to C#</a>
-                                        </li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "FeaturesOfCSharp" ? "active" : "")"
-                                                href="@Url.Action("FeaturesOfCSharp", "CSharp")">Features of C#</a></li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "CSharpCompliationAndExecution" ? "active" : "")"
-                                                href="@Url.Action("CSharpCompliationAndExecution", "CSharp")">C# Compilation
-                                                and Execution</a></li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "GeneralStructureOfCSharp" ? "active" : "")"
-                                                href="@Url.Action("GeneralStructureOfCSharp", "CSharp")">General Structure
-                                                of a C# Program</a></li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "CreatingAndUsingDLL" ? "active" : "")"
-                                                href="@Url.Action("CreatingAndUsingDLL", "CSharp")">Creating and Using a
-                                                DLL</a></li>
-                                    </ul>
-                                </div>
-
-                                <!-- Data Types and Arrays Dropdown -->
-                                <h5 class="mt-2">
-                                    <a class="nav-link text-dark fw-bold" data-bs-toggle="collapse" href="#dataTypesMenu"
-                                        role="button"
-                                        aria-expanded="@(new List<string> { "DataTypesAndArrays", "ValueAndReferenceType", "BoxingUnBoxing", "TypeOfArrays", "NullableTypes", "ImplicitTypeLocalvariables", "VarvsDynamic", "IsAndAsOperators", "RefVsOutKeywords", "ObjectBaseClass", "EqualsVsEqual", "StringVsStringBuilder", "VariousStringMethods", "DefaultNamedParameters", "ParseTryParseVsConvert" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")"
-                                        aria-controls="dataTypesMenu">
-                                        Data Types and Arrays
-                                    </a>
-                                </h5>
-
-                                <div class="collapse @(new List<string> { "DataTypesAndArrays", "ValueAndReferenceType", "BoxingUnBoxing", "TypeOfArrays", "NullableTypes", "ImplicitTypeLocalvariables", "VarvsDynamic", "IsAndAsOperators", "RefVsOutKeywords", "ObjectBaseClass", "EqualsVsEqual", "StringVsStringBuilder", "VariousStringMethods", "DefaultNamedParameters", "ParseTryParseVsConvert" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")"
-                                    id="dataTypesMenu">
-                                    <ul class="nav flex-column ms-3">
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "DataTypesAndArrays" ? "active" : "")"
-                                                href="@Url.Action("DataTypesAndArrays", "CSharp")">Data Types and Arrays in
+                                        <li><a class="nav-link"
+                                                href="@Url.Action("IntroductionToCSharp", "CSharp")">Introduction
+                                                to C#</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("FeaturesOfCSharp", "CSharp")">Features of
                                                 C#</a></li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "ValueAndReferenceType" ? "active" : "")"
-                                                href="@Url.Action("ValueAndReferenceType", "CSharp")">Value Types and
-                                                Reference Types</a></li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "BoxingUnBoxing" ? "active" : "")"
-                                                href="@Url.Action("BoxingUnBoxing", "CSharp")">Boxing and UnBoxing</a></li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "TypeOfArrays" ? "active" : "")"
-                                                href="@Url.Action("TypeOfArrays", "CSharp")">Single Dimensional,
-                                                Multi-Dimensional & Jagged Arrays</a></li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "NullableTypes" ? "active" : "")"
-                                                href="@Url.Action("NullableTypes", "CSharp")">Nullable Types</a></li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "ImplicitTypeLocalvariables" ? "active" : "")"
-                                                href="@Url.Action("ImplicitTypeLocalvariables", "CSharp")">Implicitly Typed
-                                                Local Variables</a></li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "VarvsDynamic" ? "active" : "")"
-                                                href="@Url.Action("VarvsDynamic", "CSharp")">Var vs dynamic</a></li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "IsAndAsOperators" ? "active" : "")"
-                                                href="@Url.Action("IsAndAsOperators", "CSharp")">Is and As Operator</a></li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "RefVsOutKeywords" ? "active" : "")"
-                                                href="@Url.Action("RefVsOutKeywords", "CSharp")">Ref vs Out Keywords</a>
-                                        </li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "ObjectBaseClass" ? "active" : "")"
-                                                href="@Url.Action("ObjectBaseClass", "CSharp")">The 'object' Base Class in
-                                                .NET</a></li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "EqualsVsEqual" ? "active" : "")"
-                                                href="@Url.Action("EqualsVsEqual", "CSharp")">Equals() vs ==</a></li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "StringVsStringBuilder" ? "active" : "")"
-                                                href="@Url.Action("StringVsStringBuilder", "CSharp")">String vs
-                                                StringBuilder</a></li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "VariousStringMethods" ? "active" : "")"
-                                                href="@Url.Action("VariousStringMethods", "CSharp")">Various String Class
-                                                Methods</a></li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "DefaultNamedParameters" ? "active" : "")"
-                                                href="@Url.Action("DefaultNamedParameters", "CSharp")">Default Parameters,
-                                                Named Parameters</a></li>
-                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "ParseTryParseVsConvert" ? "active" : "")"
-                                                href="@Url.Action("ParseTryParseVsConvert", "CSharp")">Parse() vs TryParse()
-                                                vs Convert Class Methods</a></li>
                                     </ul>
-                                </div>
+                                </li>
 
-                            </li>
-                        }
+                                <li class="nav-item">
+                                    <h5 class="mt-2">.NET Core</h5>
+                                    <ul class="nav flex-column ms-3">
+                                        <li><a class="nav-link" href="@Url.Action("DotNetCore", "Home")">Introduction to
+                                                .NET
+                                                Core</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("DotNetCoreOverview", "Home")">Features of
+                                                .NET Core</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="nav-item">
+                                    <h5 class="mt-2">Azure</h5>
+                                    <ul class="nav flex-column ms-3">
+                                        <li><a class="nav-link"
+                                                href="@Url.Action("Azure", "Home")">Introduction
+                                                to Azure</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("AzureDevops", "Home")">Azure Devops
+                                                Overview</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="nav-item">
+                                    <h5 class="mt-2">Privacy & Security</h5>
+                                    <ul class="nav flex-column ms-3">
+                                        <li><a class="nav-link" href="@Url.Action("Privacy", "Home")">Privacy
+                                                Policy</a>
+                                        </li>
+                                        <li><a class="nav-link" href="@Url.Action("TermsAndConditions", "Home")">Terms and
+                                                Conditions</a></li>
+                                    </ul>
+                                </li>
+                            }
+
+                            <!-- C# Sidebar (Only shown when ActiveMenu = CSharp) -->
+                            @if ((ViewData["ActiveMenu"] as string) == "CSharp")
+                            {
+                                <li class="nav-item">
+
+                                    <!-- C# Basics Dropdown -->
+                                    <h5 class="mt-2">
+                                        <a class="nav-link text-dark fw-bold" data-bs-toggle="collapse" href="#csBasicsMenu"
+                                            role="button"
+                                            aria-expanded="@(new List<string> { "IntroductionToCSharp", "FeaturesOfCSharp", "CSharpCompliationAndExecution", "GeneralStructureOfCSharp", "CreatingAndUsingDLL" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")"
+                                            aria-controls="csBasicsMenu">
+                                            C# Basics
+                                        </a>
+                                    </h5>
+
+                                    <div class="collapse @(new List<string> { "IntroductionToCSharp", "FeaturesOfCSharp", "CSharpCompliationAndExecution", "GeneralStructureOfCSharp", "CreatingAndUsingDLL" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")"
+                                        id="csBasicsMenu">
+                                        <ul class="nav flex-column ms-3">
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "IntroductionToCSharp" ? "active" : "")"
+                                                    href="@Url.Action("IntroductionToCSharp", "CSharp")">Introduction to
+                                                    C#</a>
+                                            </li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "FeaturesOfCSharp" ? "active" : "")"
+                                                    href="@Url.Action("FeaturesOfCSharp", "CSharp")">Features of C#</a></li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "CSharpCompliationAndExecution" ? "active" : "")"
+                                                    href="@Url.Action("CSharpCompliationAndExecution", "CSharp")">C#
+                                                    Compilation
+                                                    and Execution</a></li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "GeneralStructureOfCSharp" ? "active" : "")"
+                                                    href="@Url.Action("GeneralStructureOfCSharp", "CSharp")">General
+                                                    Structure
+                                                    of a C# Program</a></li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "CreatingAndUsingDLL" ? "active" : "")"
+                                                    href="@Url.Action("CreatingAndUsingDLL", "CSharp")">Creating and Using a
+                                                    DLL</a></li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Data Types and Arrays Dropdown -->
+                                    <h5 class="mt-2">
+                                        <a class="nav-link text-dark fw-bold" data-bs-toggle="collapse"
+                                            href="#dataTypesMenu" role="button"
+                                            aria-expanded="@(new List<string> { "DataTypesAndArrays", "ValueAndReferenceType", "BoxingUnBoxing", "TypeOfArrays", "NullableTypes", "ImplicitTypeLocalvariables", "VarvsDynamic", "IsAndAsOperators", "RefVsOutKeywords", "ObjectBaseClass", "EqualsVsEqual", "StringVsStringBuilder", "VariousStringMethods", "DefaultNamedParameters", "ParseTryParseVsConvert" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")"
+                                            aria-controls="dataTypesMenu">
+                                            Data Types and Arrays
+                                        </a>
+                                    </h5>
+
+                                    <div class="collapse @(new List<string> { "DataTypesAndArrays", "ValueAndReferenceType", "BoxingUnBoxing", "TypeOfArrays", "NullableTypes", "ImplicitTypeLocalvariables", "VarvsDynamic", "IsAndAsOperators", "RefVsOutKeywords", "ObjectBaseClass", "EqualsVsEqual", "StringVsStringBuilder", "VariousStringMethods", "DefaultNamedParameters", "ParseTryParseVsConvert" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")"
+                                        id="dataTypesMenu">
+                                        <ul class="nav flex-column ms-3">
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "DataTypesAndArrays" ? "active" : "")"
+                                                    href="@Url.Action("DataTypesAndArrays", "CSharp")">Data Types and Arrays
+                                                    in
+                                                    C#</a></li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "ValueAndReferenceType" ? "active" : "")"
+                                                    href="@Url.Action("ValueAndReferenceType", "CSharp")">Value Types and
+                                                    Reference Types</a></li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "BoxingUnBoxing" ? "active" : "")"
+                                                    href="@Url.Action("BoxingUnBoxing", "CSharp")">Boxing and UnBoxing</a>
+                                            </li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "TypeOfArrays" ? "active" : "")"
+                                                    href="@Url.Action("TypeOfArrays", "CSharp")">Single Dimensional,
+                                                    Multi-Dimensional & Jagged Arrays</a></li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "NullableTypes" ? "active" : "")"
+                                                    href="@Url.Action("NullableTypes", "CSharp")">Nullable Types</a></li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "ImplicitTypeLocalvariables" ? "active" : "")"
+                                                    href="@Url.Action("ImplicitTypeLocalvariables", "CSharp")">Implicitly
+                                                    Typed
+                                                    Local Variables</a></li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "VarvsDynamic" ? "active" : "")"
+                                                    href="@Url.Action("VarvsDynamic", "CSharp")">Var vs dynamic</a></li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "IsAndAsOperators" ? "active" : "")"
+                                                    href="@Url.Action("IsAndAsOperators", "CSharp")">Is and As Operator</a>
+                                            </li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "RefVsOutKeywords" ? "active" : "")"
+                                                    href="@Url.Action("RefVsOutKeywords", "CSharp")">Ref vs Out Keywords</a>
+                                            </li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "ObjectBaseClass" ? "active" : "")"
+                                                    href="@Url.Action("ObjectBaseClass", "CSharp")">The 'object' Base Class
+                                                    in
+                                                    .NET</a></li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "EqualsVsEqual" ? "active" : "")"
+                                                    href="@Url.Action("EqualsVsEqual", "CSharp")">Equals() vs ==</a></li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "StringVsStringBuilder" ? "active" : "")"
+                                                    href="@Url.Action("StringVsStringBuilder", "CSharp")">String vs
+                                                    StringBuilder</a></li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "VariousStringMethods" ? "active" : "")"
+                                                    href="@Url.Action("VariousStringMethods", "CSharp")">Various String
+                                                    Class
+                                                    Methods</a></li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "DefaultNamedParameters" ? "active" : "")"
+                                                    href="@Url.Action("DefaultNamedParameters", "CSharp")">Default
+                                                    Parameters,
+                                                    Named Parameters</a></li>
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "ParseTryParseVsConvert" ? "active" : "")"
+                                                    href="@Url.Action("ParseTryParseVsConvert", "CSharp")">Parse() vs
+                                                    TryParse()
+                                                    vs Convert Class Methods</a></li>
+                                        </ul>
+                                    </div>
+
+                                </li>
+                            }
 
 
-                        <!-- .NET Core Sidebar (Only shown when ActiveMenu = DotNetCore) -->
-                        @if ((ViewData["ActiveMenu"] as string) == "DotNetCore")
-                        {
-                            <li class="nav-item">
-                                <h5 class="mt-2">.NET Core Basics</h5>
-                                <ul class="nav flex-column ms-3">
-                                    <li><a class="nav-link"
-                                            href="@Url.Action("IntroductionToDotNetCore", "Home")">Introduction to .NET
-                                            Core</a></li>
-                                    <li><a class="nav-link" href="@Url.Action("DotNetCoreFeatures", "Home")">Features of
-                                            .NET Core</a></li>
-                                </ul>
-                            </li>
-                        }
+                            <!-- .NET Core Sidebar (Only shown when ActiveMenu = DotNetCore) -->
+                            @if ((ViewData["ActiveMenu"] as string) == "DotNetCore")
+                            {
+                                <li class="nav-item">
+                                    <h5 class="mt-2">.NET Core Basics</h5>
+                                    <ul class="nav flex-column ms-3">
+                                        <li><a class="nav-link"
+                                                href="@Url.Action("DotNetCore", "Home")">Introduction to .NET
+                                                Core</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("DotnetcoreOverview", "Home")">Features of
+                                                .NET Core</a></li>
+                                    </ul>
+                                </li>
+                            }
 
-                        <!-- .NET Core Sidebar (Only shown when ActiveMenu = DotNetCore) -->
-                        @if ((ViewData["ActiveMenu"] as string) == "React")
-                        {
-                            <li class="nav-item">
-                                <h5 class="mt-2">React Basics</h5>
-                                <ul class="nav flex-column ms-3">
-                                    <li><a class="nav-link" href="@Url.Action("IntroductionToReact", "React")">Introduction
-                                            to .NET
-                                            Core</a></li>
-                                </ul>
-                            </li>
-                        }
+                            <!-- .NET Core Sidebar (Only shown when ActiveMenu = DotNetCore) -->
+                            @if ((ViewData["ActiveMenu"] as string) == "React")
+                            {
+                                <li class="nav-item">
+                                    <h5 class="mt-2">React Basics</h5>
+                                    <ul class="nav flex-column ms-3">
+                                        <li><a class="nav-link"
+                                                href="@Url.Action("IntroductionToReact", "React")">Introduction
+                                                to React</a></li>
+                                    </ul>
+                                </li>
+                            }
 
-                        <!-- Azure Sidebar (Only shown when ActiveMenu = Azure) -->
-                        @if ((ViewData["ActiveMenu"] as string) == "Azure")
-                        {
-                            <li class="nav-item">
-                                <h5 class="mt-2">Azure Basics</h5>
-                                <ul class="nav flex-column ms-3">
-                                    <li><a class="nav-link" href="@Url.Action("IntroductionToAzure", "Home")">Introduction
-                                            to Azure</a></li>
-                                    <li><a class="nav-link" href="@Url.Action("AzureServices", "Home")">Azure Services
-                                            Overview</a></li>
-                                </ul>
-                            </li>
-                        }
+                            <!-- Azure Sidebar (Only shown when ActiveMenu = Azure) -->
+                            @if ((ViewData["ActiveMenu"] as string) == "Azure")
+                            {
+                                <li class="nav-item">
+                                    <h5 class="mt-2">Azure Basics</h5>
+                                    <ul class="nav flex-column ms-3">
+                                        <li><a class="nav-link"
+                                                href="@Url.Action("Azure", "Home")">Introduction
+                                                to Azure</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("AzureDevops", "Home")">Azure Devops
+                                                Overview</a></li>
+                                    </ul>
+                                </li>
+                            }
 
-                        <!-- Privacy Sidebar (Only shown when ActiveMenu = Privacy) -->
-                        @if ((ViewData["ActiveMenu"] as string) == "Privacy")
-                        {
-                            <li class="nav-item">
-                                <h5 class="mt-2">Privacy & Security</h5>
-                                <ul class="nav flex-column ms-3">
-                                    <li><a class="nav-link" href="@Url.Action("PrivacyPolicy", "Home")">Privacy Policy</a>
-                                    </li>
-                                    <li><a class="nav-link" href="@Url.Action("TermsAndConditions", "Home")">Terms and
-                                            Conditions</a></li>
-                                </ul>
-                            </li>
-                        }
-                    </ul>
+                            <!-- Privacy Sidebar (Only shown when ActiveMenu = Privacy) -->
+                            @if ((ViewData["ActiveMenu"] as string) == "Privacy")
+                            {
+                                <li class="nav-item">
+                                    <h5 class="mt-2">Privacy & Security</h5>
+                                    <ul class="nav flex-column ms-3">
+                                        <li><a class="nav-link" href="@Url.Action("Privacy", "Home")">Privacy
+                                                Policy</a>
+                                        </li>
+                                        <li><a class="nav-link" href="@Url.Action("TermsAndConditions", "Home")">Terms and
+                                                Conditions</a></li>
+                                    </ul>
+                                </li>
+                            }
+                        </ul>
+                    </div>
                 </div>
             </nav>
 

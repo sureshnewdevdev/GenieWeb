@@ -15,46 +15,38 @@ public class HomeController : Controller
 
      public IActionResult DotNetCore()
     {
-        ViewData["ActiveMenu"] = "DoNetCore";
+        ViewData["ActivePage"] = "DotNetCore";
+        ViewData["ActiveMenu"] = "DotNetCore";
         return View("Dotnet");
     }
 
-        public IActionResult AbstractClasses()
+    public IActionResult DotNetCoreOverview()
     {
-        ViewData["ActiveMenu"] = "AbstractClasses";
-        return View("AbstractClasses");
-    }
-
-    public IActionResult AccessModifier()
-    {
-        ViewData["ActiveMenu"] = "AccessModifier";
-        return View("/CSharp/AccessModifier");
+        ViewData["ActivePage"] = "DotnetcoreOverview";
+        ViewData["ActiveMenu"] = "DotNetCore";
+        return View("DotnetcoreOverview");
     }
 
      public IActionResult Azure()
     {
+        ViewData["ActivePage"] = "Azure";
         ViewData["ActiveMenu"] = "Azure";
         return View("Azure");
     }
 
-    
+    public IActionResult AzureDevops()
+    {
+        ViewData["ActivePage"] = "AzureDevops";
+        ViewData["ActiveMenu"] = "Azure";
+        return View("AzureDevOps");
+    }
      public IActionResult Privacy()
     {
+        ViewData["ActivePage"] = "Privacy";
         ViewData["ActiveMenu"] = "Privacy";
         return View("Privacy");
     }
 
-    public IActionResult IntroductionToCSharp()
-    {
-        ViewData["ActiveMenu"] = "CSharp";
-        return View("CSharp/IntroductionToCSharp");
-    }
-
-    public IActionResult AccessModifiers()
-    { 
-        ViewData["ActiveMenu"] = "CSharp";
-        return View("CSharp/AccessModifiers");
-    }
     public IActionResult Topic1()
     {
         ViewData["Title"] = "Azure Topics";
@@ -74,10 +66,7 @@ public class HomeController : Controller
     }
 
     // Action for loading the Azure DevOps content
-    public IActionResult AzureDevOps()
-    {
-        return View(); // This will render a partial view for the content
-    }
+
     public IActionResult CloudCompute() { return View(); }
 
     public IActionResult AzurePaas() { return View(); }
