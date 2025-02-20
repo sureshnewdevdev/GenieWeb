@@ -10,7 +10,8 @@ namespace GenieWeb.Controllers
             ViewData["ActivePage"] = "AbstractClasses";
             return View("AbstractClasses");
         }
-
+ 
+ 
         public IActionResult AccessModifier()
         {
             ViewData["ActiveMenu"] = "CSharp";
