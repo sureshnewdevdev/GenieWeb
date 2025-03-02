@@ -13,13 +13,18 @@ public class HomeController : Controller
         return View("Index");
     }
 
-     public IActionResult DotNetCore()
+    public IActionResult AzureDevops()
+    {
+        ViewData["ActiveMenu"] = "AzureDevops";
+        return View("AzureDevops");
+    }
+    public IActionResult DotNetCore()
     {
         ViewData["ActiveMenu"] = "DoNetCore";
         return View("Dotnet");
     }
 
-        public IActionResult AbstractClasses()
+    public IActionResult AbstractClasses()
     {
         ViewData["ActiveMenu"] = "AbstractClasses";
         return View("AbstractClasses");
@@ -31,14 +36,14 @@ public class HomeController : Controller
         return View("/CSharp/AccessModifier");
     }
 
-     public IActionResult Azure()
+    public IActionResult Azure()
     {
         ViewData["ActiveMenu"] = "Azure";
         return View("Azure");
     }
 
-    
-     public IActionResult Privacy()
+
+    public IActionResult Privacy()
     {
         ViewData["ActiveMenu"] = "Privacy";
         return View("Privacy");
@@ -51,7 +56,7 @@ public class HomeController : Controller
     }
 
     public IActionResult AccessModifiers()
-    { 
+    {
         ViewData["ActiveMenu"] = "CSharp";
         return View("CSharp/AccessModifiers");
     }
