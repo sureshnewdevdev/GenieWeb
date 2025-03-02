@@ -64,6 +64,10 @@
                             href="@Url.Action("IntroductionToCSharp", "CSharp")">C#</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "Azure" ? "active" : "")"
+                            href="@Url.Action("Azure", "Home")">Azure</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "DotNetCore" ? "active" : "")"
                             href="@Url.Action("DotNetCore", "Home")">.NET Core</a>
                     </li>
@@ -72,8 +76,8 @@
                             href="@Url.Action("IntroductionToReact", "React")">React</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "Azure" ? "active" : "")"
-                            href="@Url.Action("Azure", "Home")">Azure</a>
+                        <a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "AzureDevOps" ? "active" : "")"
+                            href="@Url.Action("WhatIsDevOps", "AzureDevOps")">Azure DevOps</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "Privacy" ? "active" : "")"
@@ -127,6 +131,15 @@
                                                 C#</a></li>
                                     </ul>
                                 </li>
+                                <li class="nav-item">
+                                    <h5 class="mt-2">Azure</h5>
+                                    <ul class="nav flex-column ms-3">
+                                        <li><a class="nav-link" href="@Url.Action("Azure", "Home")">Introduction
+                                                to Azure</a></li>
+                                        <li><a class="nav-link" href="@Url.Action("AzureDevops", "Home")">Azure Devops
+                                                Overview</a></li>
+                                    </ul>
+                                </li>
 
                                 <li class="nav-item">
                                     <h5 class="mt-2">.NET Core</h5>
@@ -140,13 +153,12 @@
                                 </li>
 
                                 <li class="nav-item">
-                                    <h5 class="mt-2">Azure</h5>
+                                    <h5 class="mt-2">Azure DevOps</h5>
                                     <ul class="nav flex-column ms-3">
-                                        <li><a class="nav-link"
-                                                href="@Url.Action("Azure", "Home")">Introduction
-                                                to Azure</a></li>
-                                        <li><a class="nav-link" href="@Url.Action("AzureDevops", "Home")">Azure Devops
-                                                Overview</a></li>
+                                        <li><a class="nav-link @(ViewData["ActivePage"] as string == "What is DevOps" ? "active" : "")"
+                                                href="@Url.Action("WhatIsDevOps", "AzureDevOps")">Introduction to DevOps
+                                            </a>
+                                        </li>
                                     </ul>
                                 </li>
 
@@ -274,13 +286,521 @@
                                 <li class="nav-item">
                                     <h5 class="mt-2">.NET Core Basics</h5>
                                     <ul class="nav flex-column ms-3">
-                                        <li><a class="nav-link"
-                                                href="@Url.Action("DotNetCore", "Home")">Introduction to .NET
+                                        <li><a class="nav-link" href="@Url.Action("DotNetCore", "Home")">Introduction to
+                                                .NET
                                                 Core</a></li>
                                         <li><a class="nav-link" href="@Url.Action("DotnetcoreOverview", "Home")">Features of
                                                 .NET Core</a></li>
                                     </ul>
                                 </li>
+                            }
+
+                            <!-- AzureDevOps Sidebar (Only shown when ActiveMenu = AzureDevOps) -->
+                            @if ((ViewData["ActiveMenu"] as string) == "AzureDevOps")
+                            {
+                                <li class="nav-item">
+                                    <!-- Introduction to Azure DevOps -->
+                                    <h5 class="mt-2">
+                                        <a class="nav-link text-dark fw-bold" data-bs-toggle="collapse"
+                                            href="#IntroductionDevOpsMenu" role="button"
+                                            aria-expanded="@(new List<string> { "What is DevOps", "DevOps vs Traditional", "Benefits of DevOps", "DevOps lifecycle" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")"
+                                            aria-controls="IntroductionDevOpsMenu">
+                                            Introduction to DevOps
+                                        </a>
+                                    </h5>
+
+                                    <div class="collapse @(new List<string> { "What is DevOps", "DevOps vs Traditional", "Benefits of DevOps", "DevOps lifecycle" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")"
+                                        id="IntroductionDevOpsMenu">
+                                        <ul class="nav flex-column ms-3">
+                                            <li><a class="nav-link @(ViewData["ActivePage"] as string == "What is DevOps" ? "active" : "")"
+                                                    href="@Url.Action("WhatIsDevOps", "AzureDevOps")">What is DevOps
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "DevOps vs Traditional" ? "active" : "")"
+                                                    href="@Url.Action("DevOpsvsTraditional", "AzureDevOps")"> DevOps vs
+                                                    Traditional IT</a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Benefits of DevOps" ? "active" : "")"
+                                                    href="@Url.Action("BenefitsOfDevOps", "AzureDevOps")"> Benefits of
+                                                    DevOps</a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "DevOps lifecycle" ? "active" : "")"
+                                                    href="@Url.Action("DevOpsLifecycle", "AzureDevOps")"> DevOps
+                                                    Lifecycle</a>
+                                            </li>
+
+                                        </ul>
+                                    </div>
+
+                                    <!-- Introduction to Azure & Azure DevOps -->
+                                    <h5 class="mt-2">
+                                        <a class="nav-link text-dark fw-bold" data-bs-toggle="collapse"
+                                            href="#IntroductionAzureDevOpsMenu" role="button"
+                                            aria-expanded="@(new List<string> { "Overview of Cloud Computing", "Introduction to Microsoft Azure", "What is Azure DevOps?", "Key Azure DevOps Services" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")"
+                                            aria-controls="IntroductionAzureDevOpsMenu">
+                                            Introduction to Azure & Azure DevOps
+                                        </a>
+                                    </h5>
+
+                                    <div class="collapse @(new List<string> { "Overview of Cloud Computing", "Introduction to Microsoft Azure", "What is Azure DevOps?", "Key Azure DevOps Services" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")"
+                                        id="IntroductionAzureDevOpsMenu">
+                                        <ul class="nav flex-column ms-3">
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Overview of Cloud Computing" ? "active" : "")"
+                                                    href="@Url.Action("OverviewCloudComputing", "AzureDevOps")">Overview of
+                                                    Cloud Computing
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Introduction to Microsoft Azure" ? "active" : "")"
+                                                    href="@Url.Action("IntroductionAzure", "AzureDevOps")">Introduction to
+                                                    Microsoft Azure
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "What is Azure DevOps?" ? "active" : "")"
+                                                    href="@Url.Action("WhatIsAzureDevOps", "AzureDevOps")">What is Azure
+                                                    DevOps?
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Key Azure DevOps Services" ? "active" : "")"
+                                                    href="@Url.Action("KeyAzureDevOpsServices", "AzureDevOps")">Key Azure
+                                                    DevOps Services
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Setting Up Azure DevOps -->
+                                    <h5 class="mt-2">
+                                        <a class="nav-link text-dark fw-bold" data-bs-toggle="collapse"
+                                            href="#SettingUpAzureDevOpsMenu" role="button"
+                                            aria-expanded="@(new List<string> { "Creating a Microsoft Azure account", "Setting up an Azure DevOps Organization", "Navigating Azure DevOps UI", "Creating and Managing Projects" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")"
+                                            aria-controls="SettingUpAzureDevOpsMenu">
+                                            Setting Up Azure DevOps
+                                        </a>
+                                    </h5>
+
+                                    <div class="collapse @(new List<string> { "Creating a Microsoft Azure account", "Setting up an Azure DevOps Organization", "Navigating Azure DevOps UI", "Creating and Managing Projects" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")"
+                                        id="SettingUpAzureDevOpsMenu">
+                                        <ul class="nav flex-column ms-3">
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Creating a Microsoft Azure account" ? "active" : "")"
+                                                    href="@Url.Action("CreateAzureAccount", "AzureDevOps")">Creating a
+                                                    Microsoft Azure account
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Setting up an Azure DevOps Organization" ? "active" : "")"
+                                                    href="@Url.Action("SetupAzureDevOpsOrg", "AzureDevOps")">Setting up an
+                                                    Azure DevOps Organization
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Navigating Azure DevOps UI" ? "active" : "")"
+                                                    href="@Url.Action("NavigateAzureDevOpsUI", "AzureDevOps")">Navigating
+                                                    Azure DevOps UI
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Creating and Managing Projects" ? "active" : "")"
+                                                    href="@Url.Action("ManageAzureDevOpsProjects", "AzureDevOps")">Creating
+                                                    and Managing Projects
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <!-- Version Control with Azure Repos -->
+                                    <h5 class="mt-2">
+                                        <a class="nav-link text-dark fw-bold" data-bs-toggle="collapse"
+                                            href="#VersionControlAzureReposMenu" role="button"
+                                            aria-expanded="@(new List<string> { "Introduction to Azure Repos", "Git vs TFVC", "Creating Repositories", "Cloning, Branching, Merging", "Pull Requests & Code Reviews" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")"
+                                            aria-controls="VersionControlAzureReposMenu">
+                                            Version Control with Azure Repos
+                                        </a>
+                                    </h5>
+
+                                    <div class="collapse @(new List<string> { "Introduction to Azure Repos", "Git vs TFVC", "Creating Repositories", "Cloning, Branching, Merging", "Pull Requests & Code Reviews" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")"
+                                        id="VersionControlAzureReposMenu">
+                                        <ul class="nav flex-column ms-3">
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Introduction to Azure Repos" ? "active" : "")"
+                                                    href="@Url.Action("IntroAzureRepos", "AzureDevOps")">Introduction to
+                                                    Azure Repos
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Git vs TFVC" ? "active" : "")"
+                                                    href="@Url.Action("GitVsTFVC", "AzureDevOps")">Git vs TFVC
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Creating Repositories" ? "active" : "")"
+                                                    href="@Url.Action("CreateAzureRepo", "AzureDevOps")">Creating
+                                                    Repositories
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Cloning, Branching, Merging" ? "active" : "")"
+                                                    href="@Url.Action("CloningBranchingMerging", "AzureDevOps")">Cloning,
+                                                    Branching, Merging
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Pull Requests & Code Reviews" ? "active" : "")"
+                                                    href="@Url.Action("PullRequestsCodeReviews", "AzureDevOps")">Pull
+                                                    Requests & Code Reviews
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <!-- Agile & Project Management with Azure Boards -->
+                                    <h5 class="mt-2">
+                                        <a class="nav-link text-dark fw-bold" data-bs-toggle="collapse"
+                                            href="#AgileProjectManagementMenu" role="button"
+                                            aria-expanded="@(new List<string> { "Introduction to Agile & Scrum", "Work Items, Epics, Features, User Stories", "Sprint Planning & Backlog Management", "Boards, Queries, Charts" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")"
+                                            aria-controls="AgileProjectManagementMenu">
+                                            Agile & Project Management with Azure Boards
+                                        </a>
+                                    </h5>
+
+                                    <div class="collapse @(new List<string> { "Introduction to Agile & Scrum", "Work Items, Epics, Features, User Stories", "Sprint Planning & Backlog Management", "Boards, Queries, Charts" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")"
+                                        id="AgileProjectManagementMenu">
+                                        <ul class="nav flex-column ms-3">
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Introduction to Agile & Scrum" ? "active" : "")"
+                                                    href="@Url.Action("IntroAgileScrum", "AzureDevOps")">Introduction to
+                                                    Agile & Scrum
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Work Items, Epics, Features, User Stories" ? "active" : "")"
+                                                    href="@Url.Action("WorkItemsEpicsFeatures", "AzureDevOps")">Work Items,
+                                                    Epics, Features, User Stories
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Sprint Planning & Backlog Management" ? "active" : "")"
+                                                    href="@Url.Action("SprintPlanningBacklog", "AzureDevOps")">Sprint
+                                                    Planning & Backlog Management
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Boards, Queries, Charts" ? "active" : "")"
+                                                    href="@Url.Action("BoardsQueriesCharts", "AzureDevOps")">Boards,
+                                                    Queries, Charts
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <!-- Continuous Integration (CI) with Azure Pipelines -->
+                                    <h5 class="mt-2">
+                                        <a class="nav-link text-dark fw-bold" data-bs-toggle="collapse"
+                                            href="#CIPipelinesMenu" role="button"
+                                            aria-expanded="@(new List<string> { "What is CI/CD?", "Creating & Configuring Build Pipelines", "YAML vs Classic Pipelines", "Integrating with Azure Repos & GitHub", "Running Automated Tests in Pipelines" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")"
+                                            aria-controls="CIPipelinesMenu">
+                                            Continuous Integration (CI) with Azure Pipelines
+                                        </a>
+                                    </h5>
+
+                                    <div class="collapse @(new List<string> { "What is CI/CD?", "Creating & Configuring Build Pipelines", "YAML vs Classic Pipelines", "Integrating with Azure Repos & GitHub", "Running Automated Tests in Pipelines" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")"
+                                        id="CIPipelinesMenu">
+                                        <ul class="nav flex-column ms-3">
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "What is CI/CD?" ? "active" : "")"
+                                                    href="@Url.Action("WhatIsCICD", "AzureDevOps")">What is CI/CD?
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Creating & Configuring Build Pipelines" ? "active" : "")"
+                                                    href="@Url.Action("CreateBuildPipeline", "AzureDevOps")">Creating &
+                                                    Configuring Build Pipelines
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "YAML vs Classic Pipelines" ? "active" : "")"
+                                                    href="@Url.Action("YAMLvsClassicPipelines", "AzureDevOps")">YAML vs
+                                                    Classic Pipelines
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Integrating with Azure Repos & GitHub" ? "active" : "")"
+                                                    href="@Url.Action("IntegrateAzureReposGitHub", "AzureDevOps")">Integrating
+                                                    with Azure Repos & GitHub
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Running Automated Tests in Pipelines" ? "active" : "")"
+                                                    href="@Url.Action("RunAutomatedTests", "AzureDevOps")">Running Automated
+                                                    Tests in Pipelines
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <!-- Continuous Deployment (CD) with Azure Pipelines -->
+                                    <h5 class="mt-2">
+                                        <a class="nav-link text-dark fw-bold" data-bs-toggle="collapse"
+                                            href="#CDPipelinesMenu" role="button"
+                                            aria-expanded="@(new List<string> { "Introduction to Release Pipelines", "Stages, Jobs & Tasks", "Deploying to Azure App Services", "Approvals & Gates", "Rollback Strategies" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")"
+                                            aria-controls="CDPipelinesMenu">
+                                            Continuous Deployment (CD) with Azure Pipelines
+                                        </a>
+                                    </h5>
+
+                                    <div class="collapse @(new List<string> { "Introduction to Release Pipelines", "Stages, Jobs & Tasks", "Deploying to Azure App Services", "Approvals & Gates", "Rollback Strategies" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")"
+                                        id="CDPipelinesMenu">
+                                        <ul class="nav flex-column ms-3">
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Introduction to Release Pipelines" ? "active" : "")"
+                                                    href="@Url.Action("IntroReleasePipelines", "AzureDevOps")">Introduction
+                                                    to Release Pipelines
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Stages, Jobs & Tasks" ? "active" : "")"
+                                                    href="@Url.Action("StagesJobsTasks", "AzureDevOps")">Stages, Jobs &
+                                                    Tasks
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Deploying to Azure App Services" ? "active" : "")"
+                                                    href="@Url.Action("DeployAzureAppServices", "AzureDevOps")">Deploying to
+                                                    Azure App Services
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Approvals & Gates" ? "active" : "")"
+                                                    href="@Url.Action("ApprovalsGates", "AzureDevOps")">Approvals & Gates
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Rollback Strategies" ? "active" : "")"
+                                                    href="@Url.Action("RollbackStrategies", "AzureDevOps")">Rollback
+                                                    Strategies
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <!-- Infrastructure as Code (IaC) with Azure -->
+                                    <h5 class="mt-2">
+                                        <a class="nav-link text-dark fw-bold" data-bs-toggle="collapse" href="#IaCMenu"
+                                            role="button"
+                                            aria-expanded="@(new List<string> { "Introduction to Infrastructure as Code", "ARM Templates vs Terraform", "Creating Resources with Azure DevOps", "Managing Environments" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")"
+                                            aria-controls="IaCMenu">
+                                            Infrastructure as Code (IaC) with Azure
+                                        </a>
+                                    </h5>
+
+                                    <div class="collapse @(new List<string> { "Introduction to Infrastructure as Code", "ARM Templates vs Terraform", "Creating Resources with Azure DevOps", "Managing Environments" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")"
+                                        id="IaCMenu">
+                                        <ul class="nav flex-column ms-3">
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Introduction to Infrastructure as Code" ? "active" : "")"
+                                                    href="@Url.Action("IntroInfrastructureCode", "AzureDevOps")">Introduction
+                                                    to Infrastructure as Code
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "ARM Templates vs Terraform" ? "active" : "")"
+                                                    href="@Url.Action("ARMvsTerraform", "AzureDevOps")">ARM Templates vs
+                                                    Terraform
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Creating Resources with Azure DevOps" ? "active" : "")"
+                                                    href="@Url.Action("CreateResourcesAzureDevOps", "AzureDevOps")">Creating
+                                                    Resources with Azure DevOps
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Managing Environments" ? "active" : "")"
+                                                    href="@Url.Action("ManageEnvironments", "AzureDevOps")">Managing
+                                                    Environments
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <!-- Azure Artifacts & Dependency Management -->
+                                    <h5 class="mt-2">
+                                        <a class="nav-link text-dark fw-bold" data-bs-toggle="collapse"
+                                            href="#AzureArtifactsMenu" role="button"
+                                            aria-expanded="@(new List<string> { "Introduction to Azure Artifacts", "Managing NuGet, npm, Maven Packages", "Integrating Artifacts with CI/CD" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")"
+                                            aria-controls="AzureArtifactsMenu">
+                                            Azure Artifacts & Dependency Management
+                                        </a>
+                                    </h5>
+
+                                    <div class="collapse @(new List<string> { "Introduction to Azure Artifacts", "Managing NuGet, npm, Maven Packages", "Integrating Artifacts with CI/CD" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")"
+                                        id="AzureArtifactsMenu">
+                                        <ul class="nav flex-column ms-3">
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Introduction to Azure Artifacts" ? "active" : "")"
+                                                    href="@Url.Action("IntroAzureArtifacts", "AzureDevOps")">Introduction to
+                                                    Azure Artifacts
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Managing NuGet, npm, Maven Packages" ? "active" : "")"
+                                                    href="@Url.Action("ManagePackages", "AzureDevOps")">Managing NuGet, npm,
+                                                    Maven Packages
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Integrating Artifacts with CI/CD" ? "active" : "")"
+                                                    href="@Url.Action("IntegrateArtifactsCICD", "AzureDevOps")">Integrating
+                                                    Artifacts with CI/CD
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <!-- Monitoring & Logging with Azure DevOps -->
+                                    <h5 class="mt-2">
+                                        <a class="nav-link text-dark fw-bold" data-bs-toggle="collapse"
+                                            href="#MonitoringLoggingMenu" role="button"
+                                            aria-expanded="@(new List<string> { "Introduction to Monitoring in DevOps", "Azure Monitor & Application Insights", "Log Analytics & Alerts" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")"
+                                            aria-controls="MonitoringLoggingMenu">
+                                            Monitoring & Logging with Azure DevOps
+                                        </a>
+                                    </h5>
+
+                                    <div class="collapse @(new List<string> { "Introduction to Monitoring in DevOps", "Azure Monitor & Application Insights", "Log Analytics & Alerts" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")"
+                                        id="MonitoringLoggingMenu">
+                                        <ul class="nav flex-column ms-3">
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Introduction to Monitoring in DevOps" ? "active" : "")"
+                                                    href="@Url.Action("IntroMonitoringDevOps", "AzureDevOps")">Introduction
+                                                    to Monitoring in DevOps
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Azure Monitor & Application Insights" ? "active" : "")"
+                                                    href="@Url.Action("AzureMonitorInsights", "AzureDevOps")">Azure Monitor
+                                                    & Application Insights
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Log Analytics & Alerts" ? "active" : "")"
+                                                    href="@Url.Action("LogAnalyticsAlerts", "AzureDevOps")">Log Analytics &
+                                                    Alerts
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <!-- Security & Compliance in Azure DevOps -->
+                                    <h5 class="mt-2">
+                                        <a class="nav-link text-dark fw-bold" data-bs-toggle="collapse"
+                                            href="#SecurityComplianceMenu" role="button"
+                                            aria-expanded="@(new List<string> { "Security Best Practices", "Role-Based Access Control (RBAC)", "Secure Code Analysis & Compliance Policies" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")"
+                                            aria-controls="SecurityComplianceMenu">
+                                            Security & Compliance in Azure DevOps
+                                        </a>
+                                    </h5>
+
+                                    <div class="collapse @(new List<string> { "Security Best Practices", "Role-Based Access Control (RBAC)", "Secure Code Analysis & Compliance Policies" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")"
+                                        id="SecurityComplianceMenu">
+                                        <ul class="nav flex-column ms-3">
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Security Best Practices" ? "active" : "")"
+                                                    href="@Url.Action("SecurityBestPractices", "AzureDevOps")">Security Best
+                                                    Practices
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Role-Based Access Control (RBAC)" ? "active" : "")"
+                                                    href="@Url.Action("RBAC", "AzureDevOps")">Role-Based Access Control
+                                                    (RBAC)
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Secure Code Analysis & Compliance Policies" ? "active" : "")"
+                                                    href="@Url.Action("SecureCodeAnalysis", "AzureDevOps")">Secure Code
+                                                    Analysis & Compliance Policies
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <!-- Hands-on Projects & Case Studies -->
+                                    <h5 class="mt-2">
+                                        <a class="nav-link text-dark fw-bold" data-bs-toggle="collapse"
+                                            href="#HandsOnProjectsMenu" role="button"
+                                            aria-expanded="@(new List<string> { "Real-world Project Implementation", "Setting Up End-to-End CI/CD Pipeline", "Deploying Applications on Azure", "Troubleshooting & Debugging" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")"
+                                            aria-controls="HandsOnProjectsMenu">
+                                            Hands-on Projects & Case Studies
+                                        </a>
+                                    </h5>
+
+                                    <div class="collapse @(new List<string> { "Real-world Project Implementation", "Setting Up End-to-End CI/CD Pipeline", "Deploying Applications on Azure", "Troubleshooting & Debugging" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")"
+                                        id="HandsOnProjectsMenu">
+                                        <ul class="nav flex-column ms-3">
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Real-world Project Implementation" ? "active" : "")"
+                                                    href="@Url.Action("RealWorldProject", "AzureDevOps")">Real-world Project
+                                                    Implementation
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Setting Up End-to-End CI/CD Pipeline" ? "active" : "")"
+                                                    href="@Url.Action("EndToEndCICD", "AzureDevOps")">Setting Up End-to-End
+                                                    CI/CD Pipeline
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Deploying Applications on Azure" ? "active" : "")"
+                                                    href="@Url.Action("DeployAppsAzure", "AzureDevOps")">Deploying
+                                                    Applications on Azure
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="nav-link @(ViewData["ActivePage"] as string == "Troubleshooting & Debugging" ? "active" : "")"
+                                                    href="@Url.Action("TroubleshootDebug", "AzureDevOps")">Troubleshooting &
+                                                    Debugging
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </li>
+
                             }
 
                             <!-- .NET Core Sidebar (Only shown when ActiveMenu = DotNetCore) -->
@@ -302,8 +822,7 @@
                                 <li class="nav-item">
                                     <h5 class="mt-2">Azure Basics</h5>
                                     <ul class="nav flex-column ms-3">
-                                        <li><a class="nav-link"
-                                                href="@Url.Action("Azure", "Home")">Introduction
+                                        <li><a class="nav-link" href="@Url.Action("Azure", "Home")">Introduction
                                                 to Azure</a></li>
                                         <li><a class="nav-link" href="@Url.Action("AzureDevops", "Home")">Azure Devops
                                                 Overview</a></li>
