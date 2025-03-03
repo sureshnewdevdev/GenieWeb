@@ -8,7 +8,7 @@ namespace GenieWeb.Controllers
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "WhatIsDevOps";
-            return View("Devops_Vs_TraditionalIT");
+            return View("IntroductionAzureDevops");
         }
 
         public IActionResult DevOpsVsTraditional()
