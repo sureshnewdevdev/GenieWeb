@@ -1,103 +1,97 @@
 @{
-    ViewData["Title"] = "Creating Resources in Azure DevOps";
+    ViewData["Title"] = "Creating Resources with Azure DevOps";
     ViewData["ActiveMenu"] = "AzureDevOps";
 }
 
 <div class="container py-4">
-    <p class="lead text-center">Learn how to create and manage resources in Azure DevOps efficiently.</p>
+    <p class="text-center lead">Azure DevOps provides a seamless way to create and manage cloud infrastructure using Infrastructure as Code (IaC). This ensures automated, consistent, and scalable deployments.</p>
     <hr />
 
-    <!-- Introduction -->
-    <div class="mt-4">
-        <h2 class="text-success">Overview</h2>
-        <p>
-            Azure DevOps provides a suite of services that help teams plan, develop, deliver, and monitor applications efficiently. 
-            To streamline DevOps workflows, you can create and manage various resources such as projects, repositories, pipelines, 
-            and service connections.
-        </p>
-        <div class="text-center my-3">
-            <img src="https://example.com/azure-devops-resources.jpg" alt="Azure DevOps Resources Overview" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Managing resources in Azure DevOps enables seamless development and deployment.</small></p>
-        </div>
-    </div>
-
-    <!-- Creating a Project -->
     <div class="mt-5">
-        <h2 class="text-warning">Creating a New Project</h2>
-        <p>To start using Azure DevOps, you need to create a project:</p>
-        <ol class="list-group list-group-numbered">
-            <li class="list-group-item">Navigate to <a href="https://dev.azure.com" target="_blank">Azure DevOps Portal</a> and sign in.</li>
-            <li class="list-group-item">Click on <strong>New Project</strong>.</li>
-            <li class="list-group-item">Enter a project name, description, and choose the visibility (Public or Private).</li>
-            <li class="list-group-item">Select the version control (Git or TFVC) and work item process (Agile, Scrum, Basic, or CMMI).</li>
-            <li class="list-group-item">Click <strong>Create</strong> to initialize the project.</li>
-        </ol>
-        <div class="text-center my-3">
-            <img src="https://example.com/create-project.jpg" alt="Creating a Project in Azure DevOps" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Setting up a project is the first step in Azure DevOps.</small></p>
-        </div>
-    </div>
-
-    <!-- Creating a Repository -->
-    <div class="mt-5">
-        <h2 class="text-info">Setting Up a Repository</h2>
-        <p>Repositories are essential for source code management. To create a repository:</p>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item">Go to your Azure DevOps project.</li>
-            <li class="list-group-item">Navigate to <strong>Repos</strong> and click <strong>New Repository</strong>.</li>
-            <li class="list-group-item">Choose a repository name, type (Git or TFVC), and default branch.</li>
-            <li class="list-group-item">Click <strong>Create</strong> to initialize the repository.</li>
+        <h2>Why Automate Resource Creation?</h2>
+        <p>Manually creating Azure resources can lead to **configuration drift, inefficiencies, and human errors**. Using Azure DevOps, we can:</p>
+        <ul>
+            <li>Automate resource provisioning.</li>
+            <li>Ensure **consistency and reproducibility**.</li>
+            <li>Enable **version control** for infrastructure.</li>
+            <li>Integrate with **CI/CD pipelines** for seamless deployments.</li>
         </ul>
-        <div class="text-center my-3">
-            <img src="https://example.com/create-repo.jpg" alt="Creating a Repository in Azure DevOps" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Repositories store and manage source code effectively.</small></p>
+    </div>
+
+    <div class="row align-items-center">
+        <div class="col-md-6 text-center">
+            <img src="https://learn.microsoft.com/en-us/azure/devops/media/create-resources.png" alt="Creating Resources in Azure DevOps" class="img-fluid rounded shadow-lg">
+            <p class="text-muted mt-2"><small>Automating resource creation using Azure DevOps</small></p>
+        </div>
+        <div class="col-md-6">
+            <h4>Commonly Automated Resources</h4>
+            <ul>
+                <li>Virtual Machines (VMs)</li>
+                <li>Storage Accounts</li>
+                <li>App Services</li>
+                <li>Databases (SQL, CosmosDB)</li>
+                <li>Networking (VNETs, Load Balancers)</li>
+            </ul>
         </div>
     </div>
 
-    <!-- Setting Up Pipelines -->
     <div class="mt-5">
-        <h2 class="text-danger">Configuring CI/CD Pipelines</h2>
-        <p>To automate builds and deployments, follow these steps:</p>
-        <ol class="list-group list-group-numbered">
-            <li class="list-group-item">Navigate to <strong>Pipelines</strong> in your Azure DevOps project.</li>
-            <li class="list-group-item">Click <strong>New Pipeline</strong> and choose the repository source (Azure Repos, GitHub, Bitbucket, etc.).</li>
-            <li class="list-group-item">Select the pipeline configuration (YAML or Classic Editor).</li>
-            <li class="list-group-item">Define the build and deployment stages.</li>
-            <li class="list-group-item">Save and run the pipeline.</li>
+        <h2>Step-by-Step: Creating Resources with Azure DevOps</h2>
+        <ol>
+            <li><strong>Set up a Repository:</strong> Store your ARM/Terraform files in Azure Repos or GitHub.</li>
+            <li><strong>Create a Build Pipeline:</strong> Validate infrastructure code (optional).</li>
+            <li><strong>Define a Release Pipeline:</strong> Deploy the infrastructure to Azure.</li>
+            <li><strong>Use Service Connections:</strong> Authenticate Azure DevOps with Azure.</li>
+            <li><strong>Monitor & Validate:</strong> Use logs, alerts, and monitoring tools.</li>
         </ol>
-        <div class="text-center my-3">
-            <img src="https://example.com/configure-pipeline.jpg" alt="Configuring Pipelines in Azure DevOps" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Pipelines automate build and deployment processes.</small></p>
+    </div>
+
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h4>Example YAML for Deploying Resources</h4>
+            <pre>
+stages:
+- stage: DeployResources
+  displayName: 'Deploy Resources to Azure'
+  jobs:
+  - job: TerraformApply
+    steps:
+    - task: TerraformTaskV2
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        workingDirectory: '$(Build.SourcesDirectory)/infra'
+            </pre>
+        </div>
+        <div class="col-md-6 text-center">
+            <img src="https://learn.microsoft.com/en-us/azure/devops/media/iac-deployment.png" alt="IaC Deployment in Azure DevOps" class="img-fluid rounded shadow-lg">
+            <p class="text-muted mt-2"><small>Infrastructure Deployment in Azure DevOps</small></p>
         </div>
     </div>
 
-    <!-- Best Practices -->
     <div class="mt-5">
-        <h2 class="text-secondary">Best Practices for Managing Azure DevOps Resources</h2>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item"><strong>Organize Projects Effectively:</strong> Use meaningful names and structure.</li>
-            <li class="list-group-item"><strong>Use Branching Strategies:</strong> Implement GitFlow or feature branching.</li>
-            <li class="list-group-item"><strong>Enable Security & Permissions:</strong> Restrict access based on roles.</li>
-            <li class="list-group-item"><strong>Monitor Pipelines:</strong> Set up alerts and logging for failures.</li>
-            <li class="list-group-item"><strong>Automate Deployments:</strong> Use Azure Pipelines for continuous integration and delivery.</li>
+        <h2>Best Practices</h2>
+        <ul>
+            <li>Use **parameterized templates** for flexibility.</li>
+            <li>Implement **role-based access control (RBAC)**.</li>
+            <li>Leverage **deployment approvals** to prevent unauthorized changes.</li>
+            <li>Monitor deployments using **Azure Monitor & Log Analytics**.</li>
+            <li>Test changes in **staging environments** before deploying to production.</li>
         </ul>
-        <div class="text-center my-3">
-            <img src="https://example.com/best-practices.jpg" alt="Azure DevOps Best Practices" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Following best practices ensures efficient DevOps workflows.</small></p>
-        </div>
     </div>
 
-    <!-- Conclusion -->
     <div class="mt-5">
-        <h2 class="text-dark">Conclusion</h2>
+        <h2>Conclusion</h2>
         <p>
-            Creating and managing resources in Azure DevOps is essential for modern software development. 
-            By leveraging repositories, pipelines, and best practices, teams can enhance collaboration, 
-            improve deployment efficiency, and streamline DevOps workflows.
+            Automating resource creation with Azure DevOps simplifies infrastructure management, reduces errors, and enhances scalability. Integrating IaC with pipelines enables fast, repeatable, and secure deployments.
         </p>
-        <div class="text-center my-3">
-            <img src="https://example.com/conclusion.jpg" alt="Azure DevOps Resource Management" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Efficient resource management in Azure DevOps accelerates development cycles.</small></p>
-        </div>
+        <p>
+            The next step is to explore **Managing Environments with Azure DevOps** for handling multiple deployment environments efficiently.
+        </p>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("ARMvsTerraform", "AzureDevOps")" class="btn btn-outline-secondary">&larr; Previous: ARM Templates vs Terraform</a>
+        <a href="@Url.Action("ManageEnvironments", "AzureDevOps")" class="btn btn-outline-secondary">Next: Managing Environments with Azure DevOps &rarr;</a>
     </div>
 </div>

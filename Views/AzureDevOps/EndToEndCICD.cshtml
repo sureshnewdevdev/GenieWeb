@@ -1,88 +1,85 @@
 @{
-    ViewData["Title"] = "End-to-End CI/CD with Azure DevOps";
+    ViewData["Title"] = "Setting Up End-to-End CI/CD Pipeline";
     ViewData["ActiveMenu"] = "AzureDevOps";
 }
 
 <div class="container py-4">
-    <p class="lead text-center">A comprehensive guide to implementing Continuous Integration and Continuous Deployment (CI/CD) using Azure DevOps.</p>
+    <p class="text-center lead">A well-structured CI/CD pipeline automates software build, testing, and deployment, ensuring fast and reliable delivery. Setting up an end-to-end CI/CD pipeline in Azure DevOps improves efficiency and reduces manual errors.</p>
     <hr />
 
-    <!-- Introduction -->
-    <div class="mt-4">
-        <h2 class="text-success">Introduction to CI/CD</h2>
-        <p>
-            Continuous Integration (CI) and Continuous Deployment (CD) are essential DevOps practices that automate software development, testing, and deployment.
-            CI/CD ensures faster releases, fewer manual errors, and improved software quality.
-        </p>
-        <p>
-            Azure DevOps provides a complete toolset for implementing CI/CD, allowing teams to build, test, and deploy applications efficiently.
-        </p>
-        <div class="text-center my-3">
-            <img src="https://example.com/ci-cd-overview.jpg" alt="CI/CD Overview" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>CI/CD streamlines software development and deployment.</small></p>
-        </div>
-    </div>
-
-    <!-- Key Benefits -->
     <div class="mt-5">
-        <h2 class="text-warning">Key Benefits of CI/CD</h2>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item"><strong>Automated Builds:</strong> Reduces manual intervention and accelerates development cycles.</li>
-            <li class="list-group-item"><strong>Improved Code Quality:</strong> Automated testing ensures that only stable code is deployed.</li>
-            <li class="list-group-item"><strong>Rapid Releases:</strong> Speeds up software delivery through continuous integration and deployment.</li>
-            <li class="list-group-item"><strong>Consistency:</strong> Ensures uniformity across different environments.</li>
-            <li class="list-group-item"><strong>Reduced Risk:</strong> Automated rollbacks and monitoring minimize deployment failures.</li>
+        <h2>What is CI/CD?</h2>
+        <p>Continuous Integration (CI) and Continuous Deployment (CD) streamline the development process by automating software delivery. The key benefits include:</p>
+        <ul>
+            <li><strong>Faster Releases:</strong> Automates build, test, and deployment processes.</li>
+            <li><strong>Improved Code Quality:</strong> Catches bugs early with automated testing.</li>
+            <li><strong>Consistent Deployments:</strong> Eliminates manual deployment errors.</li>
+            <li><strong>Scalability:</strong> Deploys changes across multiple environments seamlessly.</li>
         </ul>
-        <div class="text-center my-3">
-            <img src="https://example.com/benefits-ci-cd.jpg" alt="Benefits of CI/CD" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>CI/CD enhances efficiency and security in software delivery.</small></p>
-        </div>
     </div>
 
-    <!-- Step-by-Step CI/CD Pipeline Setup -->
+    <div class="text-center mt-4">
+        <img src="https://learn.microsoft.com/en-us/azure/devops/media/ci-cd-pipeline.png" alt="CI/CD Workflow" class="img-fluid rounded shadow-lg">
+        <p class="text-muted mt-2"><small>CI/CD Pipeline Flow</small></p>
+    </div>
+
     <div class="mt-5">
-        <h2 class="text-danger">Step-by-Step Guide to Implement CI/CD in Azure DevOps</h2>
-        <ol class="list-group list-group-numbered">
-            <li class="list-group-item">Create a new Azure DevOps project.</li>
-            <li class="list-group-item">Set up a repository in Azure Repos (Git or TFVC).</li>
-            <li class="list-group-item">Create and configure a build pipeline using YAML or classic editor.</li>
-            <li class="list-group-item">Integrate automated unit and integration testing.</li>
-            <li class="list-group-item">Define release pipelines for staging and production environments.</li>
-            <li class="list-group-item">Implement security policies and access control mechanisms.</li>
-            <li class="list-group-item">Monitor and optimize pipeline performance.</li>
+        <h2>Steps to Set Up a CI/CD Pipeline in Azure DevOps</h2>
+        <p>Follow these key steps to set up an end-to-end CI/CD pipeline:</p>
+        <ol>
+            <li><strong>Set Up a Source Code Repository:</strong> Use Azure Repos or GitHub to store and manage code.</li>
+            <li><strong>Define a Build Pipeline:</strong> Automate compilation, unit tests, and packaging.</li>
+            <li><strong>Configure Automated Testing:</strong> Include unit, integration, and security tests in the pipeline.</li>
+            <li><strong>Set Up Deployment Stages:</strong> Create separate environments for development, staging, and production.</li>
+            <li><strong>Implement Approval Gates:</strong> Require manual approvals for production releases.</li>
+            <li><strong>Monitor Deployments:</strong> Use Azure Monitor and Application Insights for tracking performance.</li>
         </ol>
-        <div class="text-center my-3">
-            <img src="https://example.com/ci-cd-steps.jpg" alt="CI/CD Pipeline Steps" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Follow these steps to implement a robust CI/CD pipeline.</small></p>
-        </div>
     </div>
 
-    <!-- Best Practices -->
     <div class="mt-5">
-        <h2 class="text-info">Best Practices for CI/CD</h2>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item"><strong>Use Infrastructure as Code (IaC):</strong> Define environments using ARM templates or Terraform.</li>
-            <li class="list-group-item"><strong>Implement Canary Releases:</strong> Deploy updates to a small subset of users before full rollout.</li>
-            <li class="list-group-item"><strong>Enable Automated Rollbacks:</strong> Detect failures and revert to a stable version automatically.</li>
-            <li class="list-group-item"><strong>Monitor Deployments:</strong> Use Azure Monitor and Application Insights for real-time tracking.</li>
-            <li class="list-group-item"><strong>Secure the Pipeline:</strong> Apply Role-Based Access Control (RBAC) and integrate security scans.</li>
+        <h3>Example YAML for a CI/CD Pipeline</h3>
+        <pre class="bg-light p-3 rounded">
+stages:
+- stage: Build
+  jobs:
+  - job: BuildJob
+    steps:
+    - script: echo "Building the application"
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'build'
+        projects: '**/*.csproj'
+
+- stage: Deploy
+  jobs:
+  - job: DeployJob
+    steps:
+    - script: echo "Deploying application"
+    - task: AzureWebApp@1
+      inputs:
+        azureSubscription: 'MySubscription'
+        appName: 'MyApp'
+        package: '$(Build.ArtifactStagingDirectory)/drop.zip'
+        </pre>
+    </div>
+
+    <div class="mt-5">
+        <h3>Best Practices for CI/CD Pipelines</h3>
+        <ul>
+            <li><strong>Automate Everything:</strong> From code integration to testing and deployment.</li>
+            <li><strong>Use Infrastructure as Code (IaC):</strong> Define infrastructure with Terraform or ARM templates.</li>
+            <li><strong>Enable Security Scanning:</strong> Use SonarQube, WhiteSource, or Snyk for vulnerability detection.</li>
+            <li><strong>Optimize Pipeline Speed:</strong> Use caching, parallel jobs, and incremental builds.</li>
+            <li><strong>Implement Rollback Strategies:</strong> Prepare automated rollback mechanisms for failed deployments.</li>
         </ul>
-        <div class="text-center my-3">
-            <img src="https://example.com/best-practices-ci-cd.jpg" alt="Best Practices for CI/CD" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Best practices help optimize CI/CD pipelines for better performance and security.</small></p>
-        </div>
     </div>
 
-    <!-- Conclusion -->
     <div class="mt-5">
-        <h2 class="text-secondary">Conclusion</h2>
-        <p>
-            End-to-End CI/CD with Azure DevOps ensures seamless software development and deployment by automating processes and reducing manual efforts.
-            By following best practices, organizations can achieve greater efficiency, security, and reliability in their software delivery pipelines.
-        </p>
-        <div class="text-center my-3">
-            <img src="https://example.com/conclusion-ci-cd.jpg" alt="CI/CD Integration Summary" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>CI/CD is an essential practice for modern software development.</small></p>
-        </div>
+        <p>By setting up an efficient CI/CD pipeline, teams can achieve faster development cycles, reduce downtime, and improve application quality. Implementing DevOps best practices ensures continuous delivery of high-quality software.</p>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("RealWorldProject", "AzureDevOps")" class="btn btn-outline-secondary">&larr; Previous: Real-World Project Implementation</a>
+        <a href="@Url.Action("DeployAppsAzure", "AzureDevOps")" class="btn btn-outline-secondary">Next: Deploying Applications on Azure &rarr;</a>
     </div>
 </div>

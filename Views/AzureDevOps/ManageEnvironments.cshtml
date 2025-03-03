@@ -1,71 +1,106 @@
 @{
-    ViewData["Title"] = "Managing Environments in Azure DevOps";
+    ViewData["Title"] = "Managing Environments with Azure DevOps";
     ViewData["ActiveMenu"] = "AzureDevOps";
 }
 
 <div class="container py-4">
-    <p class="lead text-center">Learn how to effectively manage environments in Azure DevOps for efficient deployment and testing.</p>
+    <p class="text-center lead">Managing environments in Azure DevOps allows organizations to separate and control different stages of deployment, such as Development, Testing, Staging, and Production.</p>
     <hr />
 
-    <!-- Introduction -->
-    <div class="mt-4">
-        <h2 class="text-success">What are Environments in Azure DevOps?</h2>
-        <p>
-            In Azure DevOps, an <strong>Environment</strong> is a logical grouping of resources that can be used for deployment and testing.
-            It provides a way to define and control the infrastructure and application lifecycle across different stages.
-        </p>
-        <p>
-            Environments support Kubernetes clusters, virtual machines, and other Azure services, ensuring a structured approach to managing deployments.
-        </p>
-        <div class="text-center my-3">
-            <img src="https://example.com/environments-overview.jpg" alt="Azure DevOps Environments Overview" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Environments enable controlled deployment stages and testing.</small></p>
-        </div>
-    </div>
-
-    <!-- Setting Up Environments -->
     <div class="mt-5">
-        <h2 class="text-warning">Setting Up Environments in Azure DevOps</h2>
-        <ol class="list-group list-group-numbered">
-            <li class="list-group-item">Go to your Azure DevOps project and navigate to <strong>Pipelines &rarr; Environments</strong>.</li>
-            <li class="list-group-item">Click on <strong>New Environment</strong> and give it a meaningful name.</li>
-            <li class="list-group-item">Choose the resource type (Kubernetes, Virtual Machine, or other Azure resources).</li>
-            <li class="list-group-item">Define deployment triggers and approval gates if required.</li>
-            <li class="list-group-item">Save the environment and integrate it with your pipeline.</li>
-        </ol>
-        <div class="text-center my-3">
-            <img src="https://example.com/setup-environment.jpg" alt="Setting Up Environments" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Creating an environment in Azure DevOps.</small></p>
-        </div>
-    </div>
-
-    <!-- Managing Deployments -->
-    <div class="mt-5">
-        <h2 class="text-danger">Managing Deployments Across Environments</h2>
-        <p>Best practices for managing deployments across environments include:</p>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item"><strong>Use Approval Gates:</strong> Set up pre-deployment and post-deployment approvals.</li>
-            <li class="list-group-item"><strong>Automate Testing:</strong> Run automated tests before moving to production.</li>
-            <li class="list-group-item"><strong>Use Variables and Secrets:</strong> Store environment-specific configurations securely.</li>
-            <li class="list-group-item"><strong>Monitor Deployments:</strong> Track logs and performance metrics for insights.</li>
-            <li class="list-group-item"><strong>Rollback Strategy:</strong> Define a rollback mechanism in case of failures.</li>
+        <h2>Why Manage Environments?</h2>
+        <p>In software development, different environments are required to ensure **reliability, scalability, and compliance** before releasing changes to production.</p>
+        <ul>
+            <li>Isolates **development, testing, and production environments**.</li>
+            <li>Ensures **consistent and controlled deployments**.</li>
+            <li>Facilitates **approvals and security policies** for different environments.</li>
+            <li>Enables **environment-specific configurations and variables**.</li>
         </ul>
-        <div class="text-center my-3">
-            <img src="https://example.com/deployment-management.jpg" alt="Managing Deployments in Azure DevOps" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Effective deployment strategies ensure stability and reliability.</small></p>
+    </div>
+
+    <div class="row align-items-center">
+        <div class="col-md-6 text-center">
+            <img src="https://learn.microsoft.com/en-us/azure/devops/media/environments.png" alt="Managing Environments in Azure DevOps" class="img-fluid rounded shadow-lg">
+            <p class="text-muted mt-2"><small>Environment-based deployments in Azure DevOps</small></p>
+        </div>
+        <div class="col-md-6">
+            <h4>Common Environments</h4>
+            <ul>
+                <li><strong>Development:</strong> Used for testing new features and code changes.</li>
+                <li><strong>Testing:</strong> QA and automated testing before production.</li>
+                <li><strong>Staging:</strong> A pre-production environment to mimic the production setup.</li>
+                <li><strong>Production:</strong> The live environment where end-users interact with the application.</li>
+            </ul>
         </div>
     </div>
 
-    <!-- Conclusion -->
     <div class="mt-5">
-        <h2 class="text-secondary">Conclusion</h2>
-        <p>
-            Managing environments in Azure DevOps is crucial for ensuring a smooth deployment pipeline. By setting up structured environments,
-            implementing approval workflows, and monitoring deployments, organizations can achieve continuous delivery with confidence.
-        </p>
-        <div class="text-center my-3">
-            <img src="https://example.com/conclusion.jpg" alt="Azure DevOps Environments Summary" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Environments help streamline deployments and improve software quality.</small></p>
+        <h2>Step-by-Step: Managing Environments in Azure DevOps</h2>
+        <ol>
+            <li><strong>Create an Environment:</strong> Go to Azure DevOps > Pipelines > Environments and add a new environment.</li>
+            <li><strong>Define Environment-Specific Variables:</strong> Configure settings like connection strings, resource names, and feature flags.</li>
+            <li><strong>Set Up Deployment Approvals:</strong> Enforce approvals before moving to higher environments (Staging/Production).</li>
+            <li><strong>Configure CI/CD Pipelines:</strong> Use environment-based conditions in pipelines.</li>
+            <li><strong>Monitor & Audit:</strong> Use logs and tracking to ensure deployments are secure.</li>
+        </ol>
+    </div>
+
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h4>Example YAML for Multi-Environment Deployment</h4>
+            <pre>
+stages:
+- stage: Development
+  jobs:
+  - job: DeployDev
+    steps:
+    - script: echo "Deploying to Development"
+
+- stage: Staging
+  jobs:
+  - job: DeployStaging
+    steps:
+    - script: echo "Deploying to Staging"
+    - task: ManualValidation@0
+      inputs:
+        notifyUsers: 'user@example.com'
+        instructions: 'Review and approve deployment to production'
+
+- stage: Production
+  jobs:
+  - job: DeployProduction
+    steps:
+    - script: echo "Deploying to Production"
+            </pre>
         </div>
+        <div class="col-md-6 text-center">
+            <img src="https://learn.microsoft.com/en-us/azure/devops/media/ci-cd-environments.png" alt="CI/CD with Environments" class="img-fluid rounded shadow-lg">
+            <p class="text-muted mt-2"><small>Managing CI/CD deployments across environments</small></p>
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <h2>Best Practices for Managing Environments</h2>
+        <ul>
+            <li>Use **separate environments** for development, testing, and production.</li>
+            <li>Apply **role-based access control (RBAC)** to limit who can deploy.</li>
+            <li>Define **environment-specific configurations** (e.g., API keys, secrets).</li>
+            <li>Enable **approval processes** for sensitive environments.</li>
+            <li>Monitor deployments using **Azure Monitor & Application Insights**.</li>
+        </ul>
+    </div>
+
+    <div class="mt-5">
+        <h2>Conclusion</h2>
+        <p>
+            Managing environments in Azure DevOps ensures **controlled and reliable software deployments** across different stages. By properly configuring environments, teams can enforce security, improve efficiency, and reduce deployment risks.
+        </p>
+        <p>
+            The next step is to explore **Azure Artifacts & Dependency Management** to manage and distribute software packages effectively.
+        </p>
+    </div>
+
+    <div class="d-flex justify-content-start mt-4">
+        <a href="@Url.Action("CreateResourcesAzureDevOps", "AzureDevOps")" class="btn btn-outline-secondary">&larr; Previous: Creating Resources with Azure DevOps</a>
     </div>
 </div>

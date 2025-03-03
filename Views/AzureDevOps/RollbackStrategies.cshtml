@@ -4,80 +4,105 @@
 }
 
 <div class="container py-4">
-    <p class="lead text-center">Learn how to implement rollback strategies to ensure stability and reliability in your deployments.</p>
+    <p class="text-center lead">Rollback strategies in Azure DevOps help organizations **mitigate deployment failures** and ensure application stability by reverting to a previous working state.</p>
     <hr />
 
-    <!-- Introduction -->
-    <div class="mt-4">
-        <h2 class="text-success">What is a Rollback Strategy?</h2>
-        <p>
-            A rollback strategy is a predefined approach to reverting a deployment when an issue is detected in a production environment. 
-            It helps maintain application stability, ensuring minimal downtime and mitigating risks associated with new releases.
-        </p>
-        <div class="text-center my-3">
-            <img src="https://example.com/rollback-strategy.jpg" alt="Rollback Strategies Overview" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Rollback strategies help maintain application availability and reliability.</small></p>
-        </div>
-    </div>
-
-    <!-- Common Rollback Strategies -->
     <div class="mt-5">
-        <h2 class="text-warning">Common Rollback Strategies</h2>
-        <p>There are several rollback strategies to handle deployment failures:</p>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item"><strong>Revert to Previous Deployment:</strong> Restore the last stable version of the application.</li>
-            <li class="list-group-item"><strong>Blue-Green Deployment:</strong> Maintain two environments and switch traffic to the stable one in case of failure.</li>
-            <li class="list-group-item"><strong>Canary Rollback:</strong> Gradually roll back an update if issues arise in early-stage deployments.</li>
-            <li class="list-group-item"><strong>Feature Flags:</strong> Disable problematic features dynamically without redeploying.</li>
-            <li class="list-group-item"><strong>Database Versioning:</strong> Ensure database changes can be rolled back without data loss.</li>
+        <h2>What Are Rollback Strategies?</h2>
+        <p>Rollback strategies provide a way to **undo faulty deployments** and restore a previous stable version of an application.</p>
+        <ul>
+            <li>Helps **minimize downtime** and ensure application reliability.</li>
+            <li>Supports **automated and manual rollbacks**.</li>
+            <li>Prevents failed deployments from affecting end users.</li>
+            <li>Can be configured with **Azure DevOps Pipelines**.</li>
         </ul>
-        <div class="text-center my-3">
-            <img src="https://example.com/rollback-methods.jpg" alt="Rollback Methods" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Different rollback strategies can be applied based on deployment needs.</small></p>
+    </div>
+
+    <div class="row align-items-center">
+        <div class="col-md-6 text-center">
+            <img src="https://learn.microsoft.com/en-us/azure/devops/media/rollback-strategy.png" alt="Rollback Strategies in Azure DevOps" class="img-fluid rounded shadow-lg">
+            <p class="text-muted mt-2"><small>Rollback Strategies in Azure DevOps Pipelines</small></p>
+        </div>
+        <div class="col-md-6">
+            <h4>Types of Rollback Strategies</h4>
+            <ul>
+                <li>**Manual Rollback** – Manually redeploy a previous stable build if issues occur.</li>
+                <li>**Automated Rollback** – Configure pipeline triggers to detect failures and revert automatically.</li>
+                <li>**Blue-Green Deployment** – Run two environments (one live, one idle) and switch traffic if a failure occurs.</li>
+                <li>**Canary Deployment** – Gradually roll out changes to a small set of users before full deployment.</li>
+            </ul>
         </div>
     </div>
 
-    <!-- Step-by-Step Guide to Implementing Rollbacks in Azure DevOps -->
     <div class="mt-5">
-        <h2 class="text-danger">Implementing Rollback Strategies in Azure DevOps</h2>
-        <ol class="list-group list-group-numbered">
-            <li class="list-group-item">Ensure all releases are version-controlled and tagged.</li>
-            <li class="list-group-item">Use deployment slots in Azure App Services for quick rollback.</li>
-            <li class="list-group-item">Create rollback tasks in Azure Pipelines for automated reversion.</li>
-            <li class="list-group-item">Maintain backups of database schema and configurations.</li>
-            <li class="list-group-item">Test rollback procedures regularly to ensure they function correctly.</li>
+        <h2>Configuring Rollbacks in Azure DevOps</h2>
+        <p>Follow these steps to configure rollback mechanisms:</p>
+        <ol>
+            <li>Enable **versioned artifact storage** to keep previous releases.</li>
+            <li>Define a **manual rollback process** for critical releases.</li>
+            <li>Use **deployment slots** to test updates before production release.</li>
+            <li>Configure automated rollback triggers in Azure Pipelines.</li>
+            <li>Monitor deployment logs to identify rollback conditions.</li>
         </ol>
-        <div class="text-center my-3">
-            <img src="https://example.com/rollback-steps.jpg" alt="Rollback Steps" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Implementing rollback strategies ensures smooth recovery from failures.</small></p>
+    </div>
+
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h4>Example YAML for Automated Rollback</h4>
+            <pre>
+stages:
+- stage: Deploy
+  displayName: 'Deploy to Production'
+  jobs:
+  - deployment: DeployWebApp
+    environment: 'Production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'AzureServiceConnection'
+              appName: 'my-web-app'
+              package: '$(Pipeline.Workspace)/drop/*.zip'
+
+          - task: PowerShell@2
+            inputs:
+              script: |
+                if ($LastExitCode -ne 0) {
+                    Write-Host "Deployment failed! Rolling back..."
+                    az webapp deployment slot swap --resource-group myResourceGroup --name my-web-app --slot staging
+                }
+            </pre>
+        </div>
+        <div class="col-md-6 text-center">
+            <img src="https://learn.microsoft.com/en-us/azure/devops/media/blue-green-deployment.png" alt="Blue-Green Deployment Strategy" class="img-fluid rounded shadow-lg">
+            <p class="text-muted mt-2"><small>Example of Blue-Green Deployment</small></p>
         </div>
     </div>
 
-    <!-- Best Practices -->
     <div class="mt-5">
-        <h2 class="text-info">Best Practices for Rollback Management</h2>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item"><strong>Automate Rollbacks:</strong> Use scripts and Azure DevOps pipelines to automate rollback processes.</li>
-            <li class="list-group-item"><strong>Monitor Deployments:</strong> Use Application Insights to detect and alert on failures.</li>
-            <li class="list-group-item"><strong>Maintain Backups:</strong> Regularly back up databases and configurations.</li>
-            <li class="list-group-item"><strong>Test Rollbacks:</strong> Simulate rollback scenarios in staging before production use.</li>
+        <h2>Best Practices for Rollbacks</h2>
+        <ul>
+            <li>Use **deployment slots** for zero-downtime rollbacks.</li>
+            <li>Automate rollback conditions to **detect and revert failed deployments**.</li>
+            <li>Enable **real-time monitoring** to identify issues quickly.</li>
+            <li>Implement **feature flags** to disable faulty features without redeployment.</li>
+            <li>Test rollback processes before production deployment.</li>
         </ul>
-        <div class="text-center my-3">
-            <img src="https://example.com/rollback-best-practices.jpg" alt="Rollback Best Practices" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Following best practices ensures a reliable rollback process.</small></p>
-        </div>
     </div>
 
-    <!-- Conclusion -->
     <div class="mt-5">
-        <h2 class="text-secondary">Conclusion</h2>
+        <h2>Conclusion</h2>
         <p>
-            Having a robust rollback strategy is essential for maintaining the stability of applications in production. 
-            By implementing automated rollbacks, monitoring deployments, and using Azure DevOps tools, teams can minimize downtime and quickly recover from failures.
+            Rollback strategies in Azure DevOps provide a **safety net** for deployments, ensuring that teams can **quickly recover from failures**. By implementing **automated and manual rollback mechanisms**, organizations can maintain high availability and reduce downtime.
         </p>
-        <div class="text-center my-3">
-            <img src="https://example.com/conclusion.jpg" alt="Rollback Strategies Summary" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Rollback strategies help mitigate risks and improve deployment reliability.</small></p>
-        </div>
+        <p>
+            The next step is to explore **Infrastructure as Code (IaC) with Azure DevOps** for automated provisioning and management.
+        </p>
+    </div>
+
+    <div class="d-flex justify-content-start mt-4">
+        <a href="@Url.Action("ApprovalsGates", "AzureDevOps")" class="btn btn-outline-secondary">&larr; Previous: Approvals & Gates</a>
     </div>
 </div>

@@ -4,71 +4,101 @@
 }
 
 <div class="container py-4">
-    <p class="lead text-center">Automate your testing process in CI/CD pipelines to enhance software quality and speed up delivery.</p>
+    <p class="text-center lead">Automated testing in Azure DevOps Pipelines ensures **code quality, stability, and reliability** before deployment. By integrating unit, integration, and UI tests, teams can catch defects early and streamline their CI/CD workflows.</p>
     <hr />
 
-    <!-- Introduction -->
-    <div class="mt-4">
-        <h2 class="text-success">Introduction</h2>
-        <p>
-            Automated testing in CI/CD pipelines ensures that your application functions correctly before deployment.
-            By integrating test suites into your build and release pipelines, teams can detect issues early and improve software reliability.
-        </p>
-        <div class="text-center my-3">
-            <img src="https://example.com/automated-testing-overview.jpg" alt="Automated Testing Overview" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Automated testing helps maintain high code quality in continuous integration workflows.</small></p>
-        </div>
-    </div>
-
-    <!-- Types of Automated Tests -->
     <div class="mt-5">
-        <h2 class="text-warning">Types of Automated Tests in Pipelines</h2>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item"><strong>Unit Tests:</strong> Test individual components or functions for expected behavior.</li>
-            <li class="list-group-item"><strong>Integration Tests:</strong> Ensure different modules work together as intended.</li>
-            <li class="list-group-item"><strong>Functional Tests:</strong> Validate business logic and workflows.</li>
-            <li class="list-group-item"><strong>Performance Tests:</strong> Measure system response times and stability.</li>
-            <li class="list-group-item"><strong>Security Tests:</strong> Identify vulnerabilities and enforce security best practices.</li>
+        <h2>What is Automated Testing in Pipelines?</h2>
+        <p>Automated testing in Azure Pipelines enables teams to execute test cases **automatically** as part of the Continuous Integration/Continuous Deployment (CI/CD) process.</p>
+        <ul>
+            <li>Ensures **code correctness** before deployment.</li>
+            <li>Speeds up the development lifecycle by **reducing manual testing efforts**.</li>
+            <li>Improves **software reliability** by catching issues early.</li>
+            <li>Enables **parallel test execution** for faster feedback.</li>
         </ul>
     </div>
 
-    <!-- Setting Up Automated Tests in Azure Pipelines -->
+    <div class="row align-items-center">
+        <div class="col-md-6 text-center">
+            <img src="https://learn.microsoft.com/en-us/azure/devops/media/test-automation.png" alt="Automated Testing Workflow" class="img-fluid rounded shadow-lg">
+            <p class="text-muted mt-2"><small>Automated Testing Workflow in Azure Pipelines</small></p>
+        </div>
+        <div class="col-md-6">
+            <h4>Types of Automated Tests</h4>
+            <ul>
+                <li><strong>Unit Tests:</strong> Verify individual components or functions.</li>
+                <li><strong>Integration Tests:</strong> Ensure different modules work together correctly.</li>
+                <li><strong>UI Tests:</strong> Simulate user interactions in applications.</li>
+                <li><strong>Load & Performance Tests:</strong> Test how the system behaves under heavy traffic.</li>
+            </ul>
+        </div>
+    </div>
+
     <div class="mt-5">
-        <h2 class="text-danger">Setting Up Automated Tests in Azure Pipelines</h2>
-        <p>Follow these steps to integrate automated tests in Azure Pipelines:</p>
-        <ol class="list-group list-group-numbered">
-            <li class="list-group-item">Define test cases using a framework like NUnit, JUnit, or Selenium.</li>
-            <li class="list-group-item">Ensure your tests are included in the source repository.</li>
-            <li class="list-group-item">Modify your pipeline YAML file to include test execution steps.</li>
-            <li class="list-group-item">Run the pipeline and analyze test results in Azure DevOps.</li>
+        <h2>Setting Up Automated Tests in Azure Pipelines</h2>
+        <p>Follow these steps to integrate automated testing into Azure DevOps Pipelines:</p>
+        <ol>
+            <li><strong>Add Test Framework Dependencies:</strong> Install necessary test libraries (e.g., NUnit, JUnit, Selenium).</li>
+            <li><strong>Write Test Cases:</strong> Develop test scripts for unit, integration, or UI testing.</li>
+            <li><strong>Configure Test Execution in YAML Pipeline:</strong> Define test tasks in the pipeline.</li>
+            <li><strong>Analyze Test Results:</strong> View test execution reports in Azure DevOps.</li>
         </ol>
-        <div class="text-center my-3">
-            <img src="https://example.com/azure-pipelines-tests.jpg" alt="Azure Pipelines Automated Testing" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Azure Pipelines enable seamless integration of automated tests.</small></p>
+    </div>
+
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h4>Example YAML Pipeline for Automated Testing</h4>
+            <pre>
+trigger:
+  - main
+
+jobs:
+  - job: Test
+    steps:
+      - task: UseDotNet@2
+        inputs:
+          packageType: 'sdk'
+          version: '6.x'
+
+      - script: dotnet test --logger trx
+        displayName: 'Run Unit Tests'
+
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'VSTest'
+          testResultsFiles: '**/*.trx'
+          mergeTestResults: true
+          failTaskOnFailedTests: true
+            </pre>
+        </div>
+        <div class="col-md-6 text-center">
+            <img src="https://learn.microsoft.com/en-us/azure/devops/media/test-reports.png" alt="Test Results in Azure DevOps" class="img-fluid rounded shadow-lg">
+            <p class="text-muted mt-2"><small>Viewing Test Results in Azure DevOps</small></p>
         </div>
     </div>
 
-    <!-- Best Practices -->
     <div class="mt-5">
-        <h2 class="text-info">Best Practices for Automated Testing</h2>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item"><strong>Run Tests Early & Often:</strong> Catch issues before they reach production.</li>
-            <li class="list-group-item"><strong>Use Parallel Execution:</strong> Speed up test execution using multiple agents.</li>
-            <li class="list-group-item"><strong>Ensure Test Isolation:</strong> Avoid dependencies between test cases.</li>
-            <li class="list-group-item"><strong>Automate Test Reporting:</strong> Generate detailed reports and logs for debugging.</li>
+        <h2>Best Practices for Running Automated Tests</h2>
+        <ul>
+            <li>Use **test categories** to separate unit, integration, and UI tests.</li>
+            <li>Enable **parallel test execution** for faster feedback.</li>
+            <li>Fail the pipeline if critical tests fail.</li>
+            <li>Store test artifacts and logs for debugging failed tests.</li>
+            <li>Integrate with **Azure Test Plans** for manual and exploratory testing.</li>
         </ul>
     </div>
 
-    <!-- Conclusion -->
     <div class="mt-5">
-        <h2 class="text-secondary">Conclusion</h2>
+        <h2>Conclusion</h2>
         <p>
-            Incorporating automated testing in CI/CD pipelines enhances software quality, accelerates releases, and ensures a seamless user experience.
-            By leveraging tools like Azure Pipelines, teams can efficiently integrate and manage automated tests within their workflows.
+            Running automated tests in Azure DevOps Pipelines enhances **software quality, reliability, and deployment confidence**. By integrating unit, integration, and UI testing, teams can detect and fix issues early in the development lifecycle.
         </p>
-        <div class="text-center my-3">
-            <img src="https://example.com/test-success.jpg" alt="CI/CD Test Success" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Automated testing in pipelines leads to more reliable and secure applications.</small></p>
-        </div>
+        <p>
+            The next step is to explore **Introduction to Release Pipelines in Azure DevOps**.
+        </p>
+    </div>
+
+    <div class="d-flex justify-content-start mt-4">
+        <a href="@Url.Action("IntegratingAzureReposGitHub", "AzureDevOps")" class="btn btn-outline-secondary">&larr; Previous: Integrating with Azure Repos & GitHub</a>
     </div>
 </div>

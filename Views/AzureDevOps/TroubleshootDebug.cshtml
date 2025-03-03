@@ -1,79 +1,88 @@
 @{
-    ViewData["Title"] = "Troubleshoot & Debug Azure Deployments";
+    ViewData["Title"] = "Troubleshooting & Debugging in Azure";
     ViewData["ActiveMenu"] = "AzureDevOps";
 }
 
 <div class="container py-4">
-    <p class="lead text-center">Learn how to identify and resolve common issues when deploying applications in Azure.</p>
+    <p class="text-center lead">Effective troubleshooting and debugging in Azure ensures application reliability, quick issue resolution, and optimal performance. Azure provides various tools for diagnosing and resolving issues efficiently.</p>
     <hr />
 
-    <!-- Common Deployment Issues -->
-    <div class="mt-4">
-        <h2>Common Deployment Issues</h2>
-        <p>When deploying applications to Azure, several challenges may arise. Understanding common issues can help troubleshoot effectively.</p>
+    <div class="mt-5">
+        <h2>Common Issues in Azure Deployments</h2>
+        <p>Applications deployed on Azure may encounter various issues related to configuration, performance, and networking. Some common issues include:</p>
         <ul>
-            <li><strong>Configuration Errors:</strong> Incorrect settings in app configurations or connection strings.</li>
-            <li><strong>Authentication Failures:</strong> Issues with Azure Active Directory, service principals, or managed identities.</li>
-            <li><strong>Networking Issues:</strong> Problems with Virtual Networks, DNS resolution, or firewall restrictions.</li>
-            <li><strong>Scaling and Performance:</strong> Inefficient resource allocation leading to performance bottlenecks.</li>
-            <li><strong>Dependency Failures:</strong> External services like databases or APIs being unavailable.</li>
+            <li><strong>Deployment Failures:</strong> Incorrect configurations, missing dependencies, or pipeline errors.</li>
+            <li><strong>Application Crashes:</strong> Unhandled exceptions, memory leaks, or resource limits.</li>
+            <li><strong>Performance Degradation:</strong> Slow response times due to inefficient queries or high resource utilization.</li>
+            <li><strong>Networking Issues:</strong> DNS failures, firewall restrictions, or incorrect VNet configurations.</li>
+            <li><strong>Authentication & Security Errors:</strong> Incorrect role assignments, expired tokens, or identity provider misconfigurations.</li>
         </ul>
-        <div class="text-center my-3">
-            <img src="~/css/images/AzureDevOps/troubleshooting-guide.png" 
-                 alt="Troubleshooting Guide" 
-                 class="img-fluid rounded shadow-lg">
-            <p class="text-muted mt-2"><small>Steps to troubleshoot common deployment issues.</small></p>
-        </div>
     </div>
 
-    <!-- Debugging Tools -->
-    <div class="mt-5">
-        <h2>Debugging Tools in Azure</h2>
-        <p>Azure provides multiple tools to help diagnose and resolve issues:</p>
-        <ul>
-            <li><strong>Application Insights:</strong> Monitors app performance and detects anomalies.</li>
-            <li><strong>Log Analytics:</strong> Collects and queries logs from different Azure services.</li>
-            <li><strong>Azure Monitor:</strong> Provides alerts and metrics for proactive monitoring.</li>
-            <li><strong>Kudu Console:</strong> Offers an advanced diagnostic tool for App Services.</li>
-            <li><strong>Remote Debugging:</strong> Enables debugging directly within Visual Studio.</li>
-        </ul>
-        <div class="text-center my-3">
-            <img src="~/css/images/AzureDevOps/debugging-tools.png" 
-                 alt="Debugging Tools" 
-                 class="img-fluid rounded shadow-lg">
-            <p class="text-muted mt-2"><small>Azure offers multiple debugging and monitoring tools.</small></p>
-        </div>
+    <div class="text-center mt-4">
+        <img src="https://learn.microsoft.com/en-us/azure/media/troubleshooting-azure.png" alt="Azure Troubleshooting Tools" class="img-fluid rounded shadow-lg">
+        <p class="text-muted mt-2"><small>Azure Troubleshooting and Debugging Tools</small></p>
     </div>
 
-    <!-- Step-by-Step Debugging Guide -->
     <div class="mt-5">
-        <h2>Step-by-Step Debugging Guide</h2>
-        <p>Follow these steps to troubleshoot and debug your Azure-deployed applications:</p>
+        <h2>Tools for Troubleshooting & Debugging in Azure</h2>
+        <p>Azure provides various tools to help diagnose and resolve application issues:</p>
+        <ul>
+            <li><strong>Azure Monitor:</strong> Provides insights into application performance and logs.</li>
+            <li><strong>Application Insights:</strong> Tracks application health, dependencies, and real-time telemetry.</li>
+            <li><strong>Azure Log Analytics:</strong> Aggregates logs from multiple resources for centralized analysis.</li>
+            <li><strong>Kudu Console:</strong> A built-in tool for Azure App Services to troubleshoot deployments.</li>
+            <li><strong>Azure Network Watcher:</strong> Helps diagnose and resolve network connectivity issues.</li>
+            <li><strong>Azure Security Center:</strong> Detects and mitigates security threats in the environment.</li>
+        </ul>
+    </div>
+
+    <div class="mt-5">
+        <h2>Step-by-Step Debugging Process</h2>
+        <p>Follow these steps to effectively troubleshoot issues in Azure:</p>
         <ol>
-            <li><strong>Check Deployment Logs:</strong> Use Azure DevOps or App Service logs to identify errors.</li>
-            <li><strong>Enable Diagnostic Logs:</strong> Capture detailed information on app behavior.</li>
-            <li><strong>Use Application Insights:</strong> Analyze telemetry data to pinpoint issues.</li>
-            <li><strong>Test with Kudu Console:</strong> Access Kudu to inspect files, restart services, or run commands.</li>
-            <li><strong>Perform Remote Debugging:</strong> Attach Visual Studio debugger to running Azure applications.</li>
-            <li><strong>Monitor Resource Usage:</strong> Use Azure Monitor to detect resource constraints.</li>
+            <li><strong>Review Deployment Logs:</strong> Check Azure DevOps pipeline logs for errors.</li>
+            <li><strong>Analyze Application Logs:</strong> Use Application Insights to identify exceptions and failures.</li>
+            <li><strong>Check Resource Utilization:</strong> Monitor CPU, memory, and disk usage in Azure Monitor.</li>
+            <li><strong>Verify Networking Configurations:</strong> Use Network Watcher to diagnose connectivity issues.</li>
+            <li><strong>Reproduce & Debug Locally:</strong> Test the issue in a local development environment.</li>
+            <li><strong>Enable Diagnostic Logging:</strong> Capture detailed logs using Azure Diagnostics settings.</li>
+            <li><strong>Automate Alerts:</strong> Set up alerts for performance degradation or security breaches.</li>
         </ol>
     </div>
 
-    <!-- Best Practices for Troubleshooting -->
     <div class="mt-5">
-        <h2>Best Practices for Troubleshooting</h2>
+        <h3>Example YAML for Enabling Application Insights in CI/CD</h3>
+        <pre class="bg-light p-3 rounded">
+stages:
+- stage: Deploy
+  jobs:
+  - job: DeployWithMonitoring
+    steps:
+    - task: AzureAppServiceSettings@1
+      inputs:
+        azureSubscription: 'MyAzureSubscription'
+        appName: 'MyWebApp'
+        appSettings: '[{"name":"APPINSIGHTS_INSTRUMENTATIONKEY", "value":"$(ApplicationInsightsKey)"}]'
+        </pre>
+    </div>
+
+    <div class="mt-5">
+        <h3>Best Practices for Troubleshooting in Azure</h3>
         <ul>
-            <li><strong>Automate Monitoring:</strong> Set up alerts and monitoring for early issue detection.</li>
-            <li><strong>Use Infrastructure as Code:</strong> Ensure consistent deployments with ARM templates or Terraform.</li>
-            <li><strong>Implement CI/CD:</strong> Automate deployments to reduce human errors.</li>
-            <li><strong>Regularly Update Dependencies:</strong> Keep libraries and services updated to avoid vulnerabilities.</li>
+            <li><strong>Enable Detailed Logging:</strong> Collect application, system, and security logs.</li>
+            <li><strong>Use Live Metrics:</strong> Monitor application health in real time with Application Insights.</li>
+            <li><strong>Implement Fault Tolerance:</strong> Use retries and circuit breakers to handle failures.</li>
+            <li><strong>Automate Recovery:</strong> Set up auto-healing and scaling for high availability.</li>
+            <li><strong>Regularly Review Alerts:</strong> Fine-tune alerting to avoid unnecessary notifications.</li>
         </ul>
     </div>
 
-    <!-- Conclusion -->
     <div class="mt-5">
-        <h2>Conclusion</h2>
-        <p>Debugging and troubleshooting are essential skills for maintaining Azure deployments. By leveraging Azure tools and following best practices, you can efficiently resolve issues and ensure smooth application performance.</p>
+        <p>By leveraging Azure’s troubleshooting tools, teams can quickly diagnose and resolve application issues, ensuring high availability and performance.</p>
+    </div>
+
+    <div class="d-flex justify-content-start mt-4"></div>
+        <a href="@Url.Action("DeployAppsAzure", "AzureDevOps")" class="btn btn-outline-secondary">&larr; Previous: Deploying Applications on Azure</a>
     </div>
 </div>
-

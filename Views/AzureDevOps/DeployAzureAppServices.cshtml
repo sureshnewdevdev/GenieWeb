@@ -4,84 +4,99 @@
 }
 
 <div class="container py-4">
-    <p class="lead text-center">Learn how to deploy web applications to Azure App Services efficiently using Azure DevOps.</p>
+    <p class="text-center lead">Azure App Services is a **fully managed platform** for deploying web applications, APIs, and mobile backends. Azure DevOps enables seamless deployment to Azure App Services using **Release Pipelines**.</p>
     <hr />
 
-    <!-- Introduction -->
-    <div class="mt-4">
-        <h2 class="text-success">What is Azure App Services?</h2>
-        <p>
-            Azure App Services is a fully managed platform-as-a-service (PaaS) offering for building, deploying, and scaling web applications. It supports multiple programming languages such as .NET, Java, Node.js, Python, PHP, and Ruby.
-        </p>
-        <p>
-            With built-in security, auto-scaling, and integration with Azure DevOps, Azure App Services is a preferred choice for cloud-based applications.
-        </p>
-        <div class="text-center my-3">
-            <img src="https://example.com/azure-app-services.jpg" alt="Azure App Services Overview" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Azure App Services simplifies application deployment and scaling.</small></p>
-        </div>
-    </div>
-
-    <!-- Deployment Methods -->
     <div class="mt-5">
-        <h2 class="text-warning">Deployment Methods</h2>
-        <p>Azure App Services supports multiple deployment methods, including:</p>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item"><strong>Azure DevOps Pipelines:</strong> Automate CI/CD for seamless deployments.</li>
-            <li class="list-group-item"><strong>FTP/SFTP:</strong> Upload files manually to the server.</li>
-            <li class="list-group-item"><strong>Local Git:</strong> Push code directly from a local Git repository.</li>
-            <li class="list-group-item"><strong>GitHub Actions:</strong> Deploy using GitHub-based workflows.</li>
-            <li class="list-group-item"><strong>Docker Containers:</strong> Deploy containerized applications to App Services.</li>
+        <h2>Why Use Azure App Services?</h2>
+        <p>Azure App Services provides a **scalable, secure, and easy-to-manage** hosting environment for applications.</p>
+        <ul>
+            <li>Supports multiple languages like **.NET, Java, Python, Node.js, PHP, and Ruby**.</li>
+            <li>Built-in **auto-scaling** and high availability.</li>
+            <li>Integrated **CI/CD with Azure DevOps**.</li>
+            <li>**Secure and compliant** with enterprise security standards.</li>
+            <li>Provides **custom domains, SSL certificates, and deployment slots**.</li>
         </ul>
-        <div class="text-center my-3">
-            <img src="https://example.com/deployment-methods.jpg" alt="Deployment Methods" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Various deployment options are available based on application needs.</small></p>
+    </div>
+
+    <div class="row align-items-center">
+        <div class="col-md-6 text-center">
+            <img src="https://learn.microsoft.com/en-us/azure/app-service/media/app-service-overview.png" alt="Azure App Services Overview" class="img-fluid rounded shadow-lg">
+            <p class="text-muted mt-2"><small>Overview of Azure App Services</small></p>
+        </div>
+        <div class="col-md-6">
+            <h4>Deployment Models</h4>
+            <ul>
+                <li>**Manual Deployment** – Upload files directly using FTP or the Azure Portal.</li>
+                <li>**Azure DevOps CI/CD Pipelines** – Automate deployments via pipelines.</li>
+                <li>**GitHub Actions** – Deploy from GitHub repositories.</li>
+                <li>**Container-based Deployment** – Deploy Docker containers to Azure App Services.</li>
+            </ul>
         </div>
     </div>
 
-    <!-- Step-by-Step Deployment Guide -->
     <div class="mt-5">
-        <h2 class="text-danger">Step-by-Step Deployment Guide</h2>
-        <ol class="list-group list-group-numbered">
-            <li class="list-group-item">Login to the <strong>Azure Portal</strong> and navigate to "App Services".</li>
-            <li class="list-group-item">Click on "Create App Service" and configure the app settings.</li>
-            <li class="list-group-item">Select the appropriate runtime, region, and service plan.</li>
-            <li class="list-group-item">Once created, go to the "Deployment Center" to set up deployment.</li>
-            <li class="list-group-item">Choose your preferred source control (Azure Repos, GitHub, Bitbucket, etc.).</li>
-            <li class="list-group-item">Configure Continuous Deployment settings for automatic deployments.</li>
-            <li class="list-group-item">Click "Save" and trigger the first deployment.</li>
+        <h2>Steps to Deploy an Application to Azure App Services</h2>
+        <p>Follow these steps to set up **continuous deployment** using Azure DevOps:</p>
+        <ol>
+            <li><strong>Create an App Service:</strong> In Azure Portal, create a new App Service instance.</li>
+            <li><strong>Connect to Azure DevOps:</strong> Set up a service connection in Azure DevOps.</li>
+            <li><strong>Define Build Pipeline:</strong> Create a **build pipeline** to generate artifacts.</li>
+            <li><strong>Configure Release Pipeline:</strong> Use Azure DevOps to deploy artifacts to the App Service.</li>
+            <li><strong>Trigger Deployment:</strong> Automatically deploy on code changes.</li>
         </ol>
-        <div class="text-center my-3">
-            <img src="https://example.com/deployment-steps.jpg" alt="Deployment Steps" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Setting up deployment in Azure App Services.</small></p>
+    </div>
+
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h4>Example YAML for Deploying to Azure App Service</h4>
+            <pre>
+stages:
+- stage: Deploy
+  displayName: 'Deploy to Azure App Service'
+  jobs:
+  - deployment: DeployWebApp
+    environment: 'Production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'AzureServiceConnection'
+              appName: 'my-web-app'
+              package: '$(Pipeline.Workspace)/drop/*.zip'
+            </pre>
+        </div>
+        <div class="col-md-6 text-center">
+            <img src="https://learn.microsoft.com/en-us/azure/app-service/media/deploy-app-service.png" alt="Deploying to Azure App Service" class="img-fluid rounded shadow-lg">
+            <p class="text-muted mt-2"><small>Deploying to Azure App Service Using Azure DevOps</small></p>
         </div>
     </div>
 
-    <!-- Best Practices -->
     <div class="mt-5">
-        <h2 class="text-info">Best Practices for Azure App Services Deployment</h2>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item"><strong>Enable Auto-Scaling:</strong> Scale applications dynamically based on traffic.</li>
-            <li class="list-group-item"><strong>Use Deployment Slots:</strong> Test changes in staging before moving to production.</li>
-            <li class="list-group-item"><strong>Implement CI/CD:</strong> Automate builds and releases using Azure Pipelines.</li>
-            <li class="list-group-item"><strong>Monitor Performance:</strong> Use Application Insights to track app performance.</li>
-            <li class="list-group-item"><strong>Secure Your App:</strong> Configure authentication and authorization settings.</li>
+        <h2>Best Practices for Deploying to Azure App Services</h2>
+        <ul>
+            <li>Use **deployment slots** for staging and testing before going live.</li>
+            <li>Enable **auto-scaling** to handle traffic spikes.</li>
+            <li>Implement **role-based access control (RBAC)** for security.</li>
+            <li>Monitor performance using **Azure Application Insights**.</li>
+            <li>Enable **zero-downtime deployments** using blue-green strategies.</li>
         </ul>
-        <div class="text-center my-3">
-            <img src="https://example.com/best-practices.jpg" alt="Best Practices" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Following best practices ensures smooth and secure deployments.</small></p>
-        </div>
     </div>
 
-    <!-- Conclusion -->
     <div class="mt-5">
-        <h2 class="text-secondary">Conclusion</h2>
+        <h2>Conclusion</h2>
         <p>
-            Deploying applications to Azure App Services provides a robust, scalable, and secure environment for hosting modern applications. By leveraging DevOps best practices, automated deployments, and monitoring tools, teams can achieve seamless application delivery and maintain high availability.
+            Deploying applications to **Azure App Services** using **Azure DevOps Pipelines** simplifies **automated deployments, scaling, and monitoring**. By implementing best practices, teams can ensure smooth and reliable software releases.
         </p>
-        <div class="text-center my-3">
-            <img src="https://example.com/conclusion.jpg" alt="Azure App Services Summary" class="img-fluid rounded shadow-lg w-100">
-            <p class="text-muted mt-2"><small>Azure App Services enables rapid and reliable application deployments.</small></p>
-        </div>
+        <p>
+            The next step is to explore **Approvals & Gates in Azure Pipelines** to enforce controlled deployments.
+        </p>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("StagesJobsTasks", "AzureDevOps")" class="btn btn-outline-secondary">&larr; Previous: Stages, Jobs & Tasks</a>
+        <a href="@Url.Action("ApprovalsGates", "AzureDevOps")" class="btn btn-outline-secondary">Next: Approvals & Gates &rarr;</a>
     </div>
 </div>
