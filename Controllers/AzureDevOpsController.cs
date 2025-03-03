@@ -15,331 +15,329 @@ namespace GenieWeb.Controllers
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "DevOpsVsTraditional";
-            return View("Devops_Vs_TraditionalIT");
+            return View("DevOpsVsTraditional");
         }
 
         public IActionResult BenefitsOfDevOps()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "BenefitsOfDevOps";
-            return Content("Welcome to BenefitsOfDevOps");
+            return View("BenefitsOfDevOps");
         }
 
         public IActionResult DevOpsLifecycle()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "DevOpsLifecycle";
-            return Content("Welcome to DevOpsLifecycle");
+            return View("DevOpsLifecycle");
         }
 
         public IActionResult OverviewOfCloudComputing()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "OverviewOfCloudComputing";
-            return Content("Welcome to OverviewOfCloudComputing");
+            return View("OverviewOfCloudComputing");
         }
 
         public IActionResult IntroductionToMicrosoftAzure()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "IntroductionToMicrosoftAzure";
-            return Content("Welcome to IntroductionToMicrosoftAzure");
+            return View("IntroductionToMicrosoftAzure");
         }
 
         public IActionResult WhatIsAzureDevOps()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "WhatIsAzureDevOps";
-            return Content("Welcome to WhatIsAzureDevOps");
+            return View("WhatIsAzureDevOps");
         }
 
         public IActionResult KeyAzureDevOpsServices()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "KeyAzureDevOpsServices";
-            return Content("Welcome to KeyAzureDevOpsServices");
+            return View("KeyAzureDevOpsServices");
         }
+
         public IActionResult CreatingAMicrosoftAzureAccount()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "CreatingAMicrosoftAzureAccount";
-            return Content("Welcome to CreatingAMicrosoftAzureAccount");
+            return View("CreatingAMicrosoftAzureAccount");
         }
 
         public IActionResult SettingUpAnAzureDevOpsOrganization()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "SettingUpAnAzureDevOpsOrganization";
-            return Content("Welcome to SettingUpAnAzureDevOpsOrganization");
+            return View("SettingUpAnAzureDevOpsOrganization");
         }
 
         public IActionResult NavigatingAzureDevOpsUI()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "NavigatingAzureDevOpsUI";
-            return Content("Welcome to NavigatingAzureDevOpsUI");
+            return View("NavigatingAzureDevOpsUI");
         }
 
         public IActionResult CreatingAndManagingProjects()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "CreatingAndManagingProjects";
-            return Content("Welcome to CreatingAndManagingProjects");
+            return View("CreatingAndManagingProjects");
         }
 
         public IActionResult IntroductionToAzureRepos()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "IntroductionToAzureRepos";
-            return Content("Welcome to IntroductionToAzureRepos");
+            return View("IntroductionToAzureRepos");
         }
 
         public IActionResult GitVsTFVC()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "GitVsTFVC";
-            return Content("Welcome to GitVsTFVC");
+            return View("GitVsTFVC");
         }
 
         public IActionResult CreatingRepositories()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "CreatingRepositories";
-            return Content("Welcome to CreatingRepositories");
+            return View("CreatingRepositories");
         }
 
         public IActionResult CloningBranchingMerging()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "CloningBranchingMerging";
-            return Content("Welcome to CloningBranchingMerging");
+            return View("CloningBranchingMerging");
         }
 
         public IActionResult PullRequestsCodeReviews()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "PullRequestsCodeReviews";
-            return Content("Welcome to PullRequestsCodeReviews");
+            return View("PullRequestsCodeReviews");
         }
 
         public IActionResult IntroductionToAgileScrum()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "IntroductionToAgileScrum";
-            return Content("Welcome to IntroductionToAgileScrum");
+            return View("IntroductionToAgileScrum");
         }
 
         public IActionResult WorkItemsEpicsFeaturesUserStories()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "WorkItemsEpicsFeaturesUserStories";
-            return Content("Welcome to WorkItemsEpicsFeaturesUserStories");
+            return View("WorkItemsEpicsFeaturesUserStories");
         }
 
         public IActionResult SprintPlanningBacklogManagement()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "SprintPlanningBacklogManagement";
-            return Content("Welcome to SprintPlanningBacklogManagement");
+            return View("SprintPlanningBacklogManagement");
         }
 
         public IActionResult BoardsQueriesCharts()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "BoardsQueriesCharts";
-            return Content("Welcome to BoardsQueriesCharts");
+            return View("BoardsQueriesCharts");
         }
 
         public IActionResult WhatIsCICD()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "WhatIsCICD";
-            return Content("Welcome to WhatIsCICD");
+            return View("WhatIsCICD");
         }
 
         public IActionResult CreatingConfiguringBuildPipelines()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "CreatingConfiguringBuildPipelines";
-            return Content("Welcome to CreatingConfiguringBuildPipelines");
+            return View("CreatingConfiguringBuildPipelines");
         }
 
         public IActionResult YAMLvsClassicPipelines()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "YAMLvsClassicPipelines";
-            return Content("Welcome to YAMLvsClassicPipelines");
+            return View("YAMLvsClassicPipelines");
         }
 
         public IActionResult IntegratingAzureReposGitHub()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "IntegratingAzureReposGitHub";
-            return Content("Welcome to IntegratingAzureReposGitHub");
+            return View("IntegratingAzureReposGitHub");
         }
 
         public IActionResult RunningAutomatedTestsPipelines()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "RunningAutomatedTestsPipelines";
-            return Content("Welcome to RunningAutomatedTestsPipelines");
+            return View("RunningAutomatedTestsPipelines");
         }
 
         public IActionResult IntroReleasePipelines()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "IntroReleasePipelines";
-            return Content("Welcome to IntroReleasePipelines");
+            return View("IntroReleasePipelines");
         }
 
         public IActionResult StagesJobsTasks()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "StagesJobsTasks";
-            return Content("Welcome to StagesJobsTasks");
+            return View("StagesJobsTasks");
         }
 
         public IActionResult DeployAzureAppServices()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "DeployAzureAppServices";
-            return Content("Welcome to DeployAzureAppServices");
+            return View("DeployAzureAppServices");
         }
 
         public IActionResult ApprovalsGates()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "ApprovalsGates";
-            return Content("Welcome to ApprovalsGates");
+            return View("ApprovalsGates");
         }
 
         public IActionResult RollbackStrategies()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "RollbackStrategies";
-            return Content("Welcome to RollbackStrategies");
+            return View("RollbackStrategies");
         }
 
         public IActionResult IntroInfrastructureCode()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "IntroInfrastructureCode";
-            return Content("Welcome to IntroInfrastructureCode");
+            return View("IntroInfrastructureCode");
         }
 
         public IActionResult ARMvsTerraform()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "ARMvsTerraform";
-            return Content("Welcome to ARMvsTerraform");
+            return View("ARMvsTerraform");
         }
 
         public IActionResult CreateResourcesAzureDevOps()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "CreateResourcesAzureDevOps";
-            return Content("Welcome to CreateResourcesAzureDevOps");
+            return View("CreateResourcesAzureDevOps");
         }
 
         public IActionResult ManageEnvironments()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "ManageEnvironments";
-            return Content("Welcome to ManageEnvironments");
+            return View("ManageEnvironments");
         }
 
         public IActionResult IntroAzureArtifacts()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "IntroAzureArtifacts";
-            return Content("Welcome to IntroAzureArtifacts");
+            return View("IntroAzureArtifacts");
         }
 
         public IActionResult ManagePackages()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "ManagePackages";
-            return Content("Welcome to ManagePackages");
+            return View("ManagePackages");
         }
 
         public IActionResult IntegrateArtifactsCICD()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "IntegrateArtifactsCICD";
-            return Content("Welcome to IntegrateArtifactsCICD");
+            return View("IntegrateArtifactsCICD");
         }
 
         public IActionResult IntroMonitoringDevOps()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "IntroMonitoringDevOps";
-            return Content("Welcome to IntroMonitoringDevOps");
+            return View("IntroMonitoringDevOps");
         }
 
         public IActionResult AzureMonitorInsights()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "AzureMonitorInsights";
-            return Content("Welcome to AzureMonitorInsights");
+            return View("AzureMonitorInsights");
         }
 
         public IActionResult LogAnalyticsAlerts()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "LogAnalyticsAlerts";
-            return Content("Welcome to LogAnalyticsAlerts");
+            return View("LogAnalyticsAlerts");
         }
 
         public IActionResult SecurityBestPractices()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "SecurityBestPractices";
-            return Content("Welcome to SecurityBestPractices");
+            return View("SecurityBestPractices");
         }
 
         public IActionResult RBAC()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "RBAC";
-            return Content("Welcome to RBAC");
+            return View("RBAC");
         }
 
         public IActionResult SecureCodeAnalysis()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "SecureCodeAnalysis";
-            return Content("Welcome to SecureCodeAnalysis");
+            return View("SecureCodeAnalysis");
         }
 
         public IActionResult RealWorldProject()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "RealWorldProject";
-            return Content("Welcome to RealWorldProject");
+            return View("RealWorldProject");
         }
 
         public IActionResult EndToEndCICD()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "EndToEndCICD";
-            return Content("Welcome to EndToEndCICD");
+            return View("EndToEndCICD");
         }
 
         public IActionResult DeployAppsAzure()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "DeployAppsAzure";
-            return Content("Welcome to DeployAppsAzure");
+            return View("DeployAppsAzure");
         }
 
         public IActionResult TroubleshootDebug()
         {
             ViewData["ActiveMenu"] = "AzureDevOps";
             ViewData["ActivePage"] = "TroubleshootDebug";
-            return Content("Welcome to TroubleshootDebug");
+            return View("TroubleshootDebug");
         }
-
-
     }
-    
 }
