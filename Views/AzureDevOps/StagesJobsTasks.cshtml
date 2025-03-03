@@ -1,0 +1,119 @@
+@{
+    ViewData["Title"] = "Stages, Jobs, and Tasks in Azure Pipelines";
+    ViewData["ActiveMenu"] = "AzureDevOps";
+}
+
+<div class="container py-4">
+    <p class="lead text-center">Understanding the building blocks of an Azure Pipeline: Stages, Jobs, and Tasks.</p>
+    <hr />
+
+    <!-- What are Stages, Jobs, and Tasks? -->
+    <div class="mt-4">
+        <h2 class="text-success">Understanding Stages, Jobs, and Tasks</h2>
+        <p>
+            In Azure Pipelines, **Stages, Jobs, and Tasks** help structure and organize the execution of CI/CD processes efficiently:
+        </p>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item"><strong>Stages:</strong> High-level groups of jobs representing different phases (e.g., Build, Test, Deploy).</li>
+            <li class="list-group-item"><strong>Jobs:</strong> A collection of tasks executed sequentially or in parallel within a stage.</li>
+            <li class="list-group-item"><strong>Tasks:</strong> The smallest execution unit, performing specific operations like compiling code, running tests, or deploying applications.</li>
+        </ul>
+        <div class="text-center my-3">
+            <img src="https://example.com/azure-pipeline-structure.jpg" alt="Azure Pipeline Structure" class="img-fluid rounded shadow-lg w-100">
+            <p class="text-muted mt-2"><small>Structure of Azure Pipelines with Stages, Jobs, and Tasks.</small></p>
+        </div>
+    </div>
+
+    <!-- Stages in Azure Pipelines -->
+    <div class="mt-5">
+        <h2 class="text-warning">Stages in Azure Pipelines</h2>
+        <p>Stages help break down the CI/CD pipeline into logical sections, such as:</p>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Build Stage – Compiles code and generates artifacts.</li>
+            <li class="list-group-item">Test Stage – Runs unit, integration, and functional tests.</li>
+            <li class="list-group-item">Deploy Stage – Deploys the application to different environments (Dev, Staging, Production).</li>
+        </ul>
+        <div class="text-center my-3">
+            <img src="https://example.com/stages-example.jpg" alt="Stages Example" class="img-fluid rounded shadow-lg w-100">
+            <p class="text-muted mt-2"><small>Each stage groups related jobs together for better organization.</small></p>
+        </div>
+    </div>
+
+    <!-- Jobs in Azure Pipelines -->
+    <div class="mt-5">
+        <h2 class="text-info">Jobs in Azure Pipelines</h2>
+        <p>A job represents a collection of tasks executed within a pipeline stage. Jobs can be:</p>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Single-job execution – Executes tasks sequentially.</li>
+            <li class="list-group-item">Multi-job execution – Runs jobs in parallel.</li>
+            <li class="list-group-item">Agent-based jobs – Runs on an Azure DevOps agent.</li>
+            <li class="list-group-item">Server jobs – Runs tasks on the Azure DevOps server without an agent.</li>
+        </ul>
+        <div class="text-center my-3">
+            <img src="https://example.com/jobs-example.jpg" alt="Jobs Example" class="img-fluid rounded shadow-lg w-100">
+            <p class="text-muted mt-2"><small>Each job contains multiple tasks and can run in parallel.</small></p>
+        </div>
+    </div>
+
+    <!-- Tasks in Azure Pipelines -->
+    <div class="mt-5">
+        <h2 class="text-danger">Tasks in Azure Pipelines</h2>
+        <p>Tasks define individual operations within a job, such as:</p>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Running scripts (PowerShell, Bash, Python).</li>
+            <li class="list-group-item">Building and compiling code.</li>
+            <li class="list-group-item">Deploying applications to Azure services.</li>
+            <li class="list-group-item">Running tests and code analysis.</li>
+        </ul>
+        <div class="text-center my-3">
+            <img src="https://example.com/tasks-example.jpg" alt="Tasks Example" class="img-fluid rounded shadow-lg w-100">
+            <p class="text-muted mt-2"><small>Tasks execute specific actions within jobs.</small></p>
+        </div>
+    </div>
+
+    <!-- YAML Example -->
+    <div class="mt-5">
+        <h2 class="text-secondary">Example: YAML Pipeline with Stages, Jobs, and Tasks</h2>
+        <pre class="bg-dark text-white p-3 rounded">
+stages:
+- stage: Build
+  jobs:
+  - job: Compile
+    steps:
+    - task: UseDotNet@2
+      inputs:
+        packageType: 'sdk'
+        version: '6.x'
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'build'
+
+- stage: Test
+  jobs:
+  - job: RunTests
+    steps:
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'test'
+
+- stage: Deploy
+  jobs:
+  - job: DeployToAzure
+    steps:
+    - task: AzureRmWebAppDeployment@4
+      inputs:
+        appType: 'webApp'
+        appName: 'myAzureApp'
+        package: '$(Build.ArtifactStagingDirectory)/drop.zip'
+        </pre>
+    </div>
+
+    <!-- Conclusion -->
+    <div class="mt-5">
+        <h2 class="text-success">Conclusion</h2>
+        <p>
+            Stages, Jobs, and Tasks in Azure Pipelines provide a structured approach to CI/CD. By leveraging these components effectively,
+            development teams can automate and optimize their build and deployment workflows.
+        </p>
+    </div>
+</div>
