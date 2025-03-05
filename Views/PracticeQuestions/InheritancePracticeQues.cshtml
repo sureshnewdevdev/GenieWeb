@@ -1,0 +1,246 @@
+@{
+    ViewData["ActiveMenu"] = "PracticeQuestions";
+}
+
+<h2>C# Inheritance Practical Questions</h2>
+<p>Click on "Show Answer" to reveal the answer.</p>
+
+@{
+    var questions = new List<dynamic>
+    {
+        new { 
+            Question = "1. Create a simple base class `Animal` with a method `Speak()`. Derive a `Dog` class that overrides it.",
+            Explanation = "This introduces basic inheritance. The `Dog` class will override the `Speak()` method of the `Animal` class.",
+            MaxTime = "5 minutes",
+            Answer = @"
+                using System;
+                class Animal {
+                    public virtual void Speak() {
+                        Console.WriteLine(""Animals make sounds"");
+                    }
+                }
+                class Dog : Animal {
+                    public override void Speak() {
+                        Console.WriteLine(""Dog barks"");
+                    }
+                }
+                class Program {
+                    static void Main() {
+                        Animal a = new Dog();
+                        a.Speak();
+                    }
+                }
+            "
+        },
+
+        new { 
+            Question = "2. Create a `Person` class with a method `GetDetails()`. Derive a `Student` class that overrides it.",
+            Explanation = "You'll learn how a derived class (`Student`) can provide a different implementation of a method inherited from the base class (`Person`).",
+            MaxTime = "8 minutes",
+            Answer = @"
+                using System;
+                class Person {
+                    public virtual void GetDetails() {
+                        Console.WriteLine(""This is a person."");
+                    }
+                }
+                class Student : Person {
+                    public override void GetDetails() {
+                        Console.WriteLine(""This is a student."");
+                    }
+                }
+                class Program {
+                    static void Main() {
+                        Person p = new Student();
+                        p.GetDetails();
+                    }
+                }
+            "
+        },
+
+        new { 
+            Question = "3. Implement an `Employee` base class with a method `CalculateSalary()`. Create a `Manager` class that adds a bonus to salary.",
+            Explanation = "This question introduces method overriding and the use of `base` to call the parent class method while adding additional logic.",
+            MaxTime = "10 minutes",
+            Answer = @"
+                using System;
+                class Employee {
+                    public virtual double CalculateSalary() {
+                        return 40000;
+                    }
+                }
+                class Manager : Employee {
+                    public override double CalculateSalary() {
+                        return base.CalculateSalary() + 10000;
+                    }
+                }
+                class Program {
+                    static void Main() {
+                        Employee emp = new Manager();
+                        Console.WriteLine($""Salary: {emp.CalculateSalary()}"");
+                    }
+                }
+            "
+        },
+
+        new { 
+            Question = "4. Create a `Vehicle` class with `StartEngine()`. Extend it to `Car` and `Motorcycle` with different behaviors.",
+            Explanation = "This demonstrates how multiple classes can inherit from the same parent and implement methods differently.",
+            MaxTime = "12 minutes",
+            Answer = @"
+                using System;
+                class Vehicle {
+                    public virtual void StartEngine() {
+                        Console.WriteLine(""Vehicle engine starting"");
+                    }
+                }
+                class Car : Vehicle {
+                    public override void StartEngine() {
+                        Console.WriteLine(""Car engine roaring!"");
+                    }
+                }
+                class Motorcycle : Vehicle {
+                    public override void StartEngine() {
+                        Console.WriteLine(""Motorcycle engine revving!"");
+                    }
+                }
+                class Program {
+                    static void Main() {
+                        Vehicle v1 = new Car();
+                        v1.StartEngine();
+                        
+                        Vehicle v2 = new Motorcycle();
+                        v2.StartEngine();
+                    }
+                }
+            "
+        },
+
+        new { 
+            Question = "5. Implement a `BankAccount` class with `Deposit()` and `Withdraw()`. Extend it to `SavingsAccount` with interest calculation.",
+            Explanation = "You'll implement a basic banking system where `SavingsAccount` adds extra functionality.",
+            MaxTime = "15 minutes",
+            Answer = @"
+                using System;
+                class BankAccount {
+                    protected double balance;
+                    public virtual void Deposit(double amount) {
+                        balance += amount;
+                        Console.WriteLine($""Deposited: {amount}"");
+                    }
+                }
+                class SavingsAccount : BankAccount {
+                    private double interestRate = 0.05;
+                    public override void Deposit(double amount) {
+                        balance += amount + (amount * interestRate);
+                        Console.WriteLine($""Deposited with interest: {amount * interestRate}"");
+                    }
+                }
+                class Program {
+                    static void Main() {
+                        SavingsAccount acc = new SavingsAccount();
+                        acc.Deposit(1000);
+                    }
+                }
+            "
+        },
+
+        new { 
+            Question = "6. Create a `Device` class and derive `Smartphone` and `Tablet`. Override `TurnOn()` differently in each class.",
+            Explanation = "You'll explore how different devices can have different start-up behaviors.",
+            MaxTime = "15 minutes",
+            Answer = @"
+                using System;
+                class Device {
+                    public virtual void TurnOn() {
+                        Console.WriteLine(""Device is turning on"");
+                    }
+                }
+                class Smartphone : Device {
+                    public override void TurnOn() {
+                        Console.WriteLine(""Smartphone is booting up!"");
+                    }
+                }
+                class Tablet : Device {
+                    public override void TurnOn() {
+                        Console.WriteLine(""Tablet is initializing!"");
+                    }
+                }
+                class Program {
+                    static void Main() {
+                        Device d1 = new Smartphone();
+                        d1.TurnOn();
+                        
+                        Device d2 = new Tablet();
+                        d2.TurnOn();
+                    }
+                }
+            "
+        },
+
+        new { 
+            Question = "7. Implement `Shape` class with `CalculateArea()`. Extend to `Rectangle` and `Circle` with area calculations.",
+            Explanation = "You'll learn how different classes can provide unique implementations for a common method.",
+            MaxTime = "15 minutes",
+            Answer = @"
+                using System;
+                class Shape {
+                    public virtual double CalculateArea() {
+                        return 0;
+                    }
+                }
+                class Rectangle : Shape {
+                    private double width, height;
+                    public Rectangle(double w, double h) {
+                        width = w;
+                        height = h;
+                    }
+                    public override double CalculateArea() {
+                        return width * height;
+                    }
+                }
+                class Circle : Shape {
+                    private double radius;
+                    public Circle(double r) {
+                        radius = r;
+                    }
+                    public override double CalculateArea() {
+                        return Math.PI * radius * radius;
+                    }
+                }
+                class Program {
+                    static void Main() {
+                        Shape rect = new Rectangle(5, 10);
+                        Console.WriteLine($""Rectangle Area: {rect.CalculateArea()}"");
+
+                        Shape circle = new Circle(7);
+                        Console.WriteLine($""Circle Area: {circle.CalculateArea()}"");
+                    }
+                }
+            "
+        }
+    };
+
+    foreach (var q in questions)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">@q.Question</h5>
+                <p><strong>Max Time:</strong> @q.MaxTime</p>
+                <p><strong>Explanation:</strong> @q.Explanation</p>
+                <button class="btn btn-primary show-answer">Show Answer</button>
+                <pre class="answer mt-3" style="display:none;"><code>@q.Answer</code></pre>
+            </div>
+        </div>
+    }
+}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $(".show-answer").click(function(){
+            $(this).next(".answer").toggle();
+            $(this).text($(this).text() === "Show Answer" ? "Hide Answer" : "Show Answer");
+        });
+    });
+</script>
