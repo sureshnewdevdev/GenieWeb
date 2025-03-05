@@ -17,6 +17,12 @@
             border-radius: 5px;
             padding: 5px 10px;
         }
+
+        .sidebar .nav-link.active{
+            font-weight: bold;
+            color: #007bff !important;
+        }
+    }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -40,16 +46,7 @@
                 aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <script>
-                function toggleNavbar() {
-                    var navbar = document.getElementById('navbarNav');
-                    if (navbar.classList.contains('show')) {
-                        navbar.classList.remove('show');
-                    } else {
-                        navbar.classList.add('show');
-                    }
-                }
-            </script>
+
 
             <!-- Navbar Content -->
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -104,33 +101,46 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Dropdown button with contents for mobiles -->
+            @* toggle button for mobiles function at the bottom *@
             <button
                 class="btn btn-success d-md-none w-100 py-3 my-2 shadow rounded-3 d-flex align-items-center justify-content-center gap-2"
-                id="contentdropdownbtn" type="button" onclick="toggleContentmenu()" aria-label="Toggle navigation">
+                id="contentdropdownbtn" type="button" onclick="toggleSidebar()" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
                 <span class="fw-semibold">
                     @(string.IsNullOrEmpty(ViewData["ActiveMenu"] as string) ? "☰ Quick Actions" :
                                         ("☰ " + ViewData["ActiveMenu"] as string) + " Items")
                 </span>
             </button>
-            <!--script to toggle the dropdown content-->
-            <script>
-                function toggleContentmenu() {
-                    var sidebar = document.getElementById('sidebarMenu');
-                    sidebar.classList.toggle('collapse'); // Toggle Bootstrap collapse class
-                }
-            </script>
+            <!--script to toggle the dropdown content active the bottom -->
+            
 
             <!-- Left Menu with Scrollable Feature -->
             <!-- Sidebar Menu-->
             <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse position-fixed"
-                style="height: 85vh; overflow-y:auto; ">
+                style="overflow-y:auto; ">
+                <style>
+                    #sidebarMenu {
+                        height: 85vh;
+                    }
+
+                    @@media screen and (max-width: 768px) {
+                        #sidebarMenu {
+                            height: 40vh;
+                        }
+                        
+                    }
+                </style>
+
                 <div class="card card-body">
+                    <div class="sticky-top">
+                        <div class="d-flex justify-content-end">
+                            @* toggle button for mobiles function at the bottom *@
+                            <button class="btn btn-danger d-md-none d-sm-block" onclick="toggleSidebar()">Close</button>
+                        </div>
+                    </div>
                     <div class="position-sticky pt-3">
                         <h4>Navigate here to Learn</h4>
                         <ul class="nav flex-column">
-                            @* debugging line to see active menu *@
-                            @* <h5>@ViewData["ActiveMenu"]</h5> *@
                             <!-- Show all modules when on Home -->
                             @if (string.IsNullOrEmpty(ViewData["ActiveMenu"] as string))
                             {
@@ -1097,6 +1107,20 @@
                 activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         });
+
+        function toggleNavbar() {
+            var navbar = document.getElementById('navbarNav');
+            if (navbar.classList.contains('show')) {
+                navbar.classList.remove('show');
+            } else {
+                navbar.classList.add('show');
+            }
+        }
+
+        function toggleSidebar() {
+            var sidebar = document.getElementById('sidebarMenu');
+            sidebar.classList.toggle('collapse'); // Toggle Bootstrap collapse class
+        }
     </script>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
