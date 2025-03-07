@@ -4,8 +4,8 @@ public class HomeController : Controller
 {
     public IActionResult Index()
     {
-        ViewData["Title"] = "Start your better Learning from here";
-        return View();
+        //ViewData["Title"] = "Start your better Learning from here";
+        return View("Index");
     }
     public IActionResult CSharp()
     {

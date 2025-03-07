@@ -1,0 +1,195 @@
+@{
+    ViewData["ActiveMenu"] = "PracticeQuestions";
+}
+
+<h2>C# Basics Practical Questions</h2>
+<p>Click on "Show Answer" to reveal the answer.</p>
+
+@{
+    var questions = new List<dynamic>
+    {
+        new { 
+            Question = "1. Reverse a string without using built-in functions.",
+            Explanation = "This tests string manipulation and loop usage.",
+            MaxTime = "5 minutes",
+            Answer = @"
+                using System;
+                class Program {
+                    static void Main() {
+                        string input = ""hello"";
+                        char[] arr = input.ToCharArray();
+                        Array.Reverse(arr);
+                        Console.WriteLine(new string(arr));
+                    }
+                }
+            "
+        },
+
+        new { 
+            Question = "2. Find the largest element in an integer array.",
+            Explanation = "This tests array traversal and comparison logic.",
+            MaxTime = "5 minutes",
+            Answer = @"
+                using System;
+                class Program {
+                    static void Main() {
+                        int[] numbers = {3, 8, 2, 5, 9, 1};
+                        int max = numbers[0];
+                        foreach(int num in numbers) {
+                            if (num > max) max = num;
+                        }
+                        Console.WriteLine($""Largest number: {max}"");
+                    }
+                }
+            "
+        },
+
+        new { 
+            Question = "3. Remove duplicates from a list using a HashSet.",
+            Explanation = "Demonstrates how sets automatically handle duplicates.",
+            MaxTime = "6 minutes",
+            Answer = @"
+                using System;
+                using System.Collections.Generic;
+                class Program {
+                    static void Main() {
+                        List<int> numbers = new List<int> {1, 2, 3, 2, 4, 1, 5};
+                        HashSet<int> uniqueNumbers = new HashSet<int>(numbers);
+                        Console.WriteLine(string.Join("", "", uniqueNumbers));
+                    }
+                }
+            "
+        },
+
+        new { 
+            Question = "4. Find the frequency of elements in an array using a Dictionary.",
+            Explanation = "Demonstrates dictionary usage for counting occurrences.",
+            MaxTime = "8 minutes",
+            Answer = @"
+                using System;
+                using System.Collections.Generic;
+                class Program {
+                    static void Main() {
+                        int[] arr = {1, 2, 3, 2, 1, 4, 2};
+                        Dictionary<int, int> freq = new Dictionary<int, int>();
+                        foreach (int num in arr) {
+                            if (freq.ContainsKey(num)) freq[num]++;
+                            else freq[num] = 1;
+                        }
+                        foreach (var item in freq) {
+                            Console.WriteLine($""{item.Key}: {item.Value}"");
+                        }
+                    }
+                }
+            "
+        },
+
+        new { 
+            Question = "5. Check if a given string is a palindrome.",
+            Explanation = "String reversal and comparison logic.",
+            MaxTime = "7 minutes",
+            Answer = @"
+                using System;
+                class Program {
+                    static void Main() {
+                        string input = ""racecar"";
+                        string reversed = new string(input.Reverse().ToArray());
+                        Console.WriteLine(input == reversed ? ""Palindrome"" : ""Not a palindrome"");
+                    }
+                }
+            "
+        },
+
+        new { 
+            Question = "6. Find the sum of all elements in an array.",
+            Explanation = "Demonstrates array traversal and summation logic.",
+            MaxTime = "5 minutes",
+            Answer = @"
+                using System;
+                class Program {
+                    static void Main() {
+                        int[] arr = {1, 2, 3, 4, 5};
+                        int sum = 0;
+                        foreach(int num in arr) sum += num;
+                        Console.WriteLine($""Sum: {sum}"");
+                    }
+                }
+            "
+        },
+
+        new { 
+            Question = "7. Merge two sorted arrays into a single sorted array.",
+            Explanation = "Demonstrates merging and sorting techniques.",
+            MaxTime = "10 minutes",
+            Answer = @"
+                using System;
+                using System.Linq;
+                class Program {
+                    static void Main() {
+                        int[] arr1 = {1, 3, 5};
+                        int[] arr2 = {2, 4, 6};
+                        int[] merged = arr1.Concat(arr2).OrderBy(x => x).ToArray();
+                        Console.WriteLine(string.Join("", "", merged));
+                    }
+                }
+            "
+        },
+
+        new { 
+            Question = "8. Implement a simple stack using an array.",
+            Explanation = "Demonstrates stack operations (push, pop, peek).",
+            MaxTime = "12 minutes",
+            Answer = @"
+                using System;
+                class Stack {
+                    private int[] elements;
+                    private int top;
+                    private int max;
+                    public Stack(int size) {
+                        elements = new int[size];
+                        top = -1;
+                        max = size;
+                    }
+                    public void Push(int item) {
+                        if (top == max - 1) Console.WriteLine(""Stack Overflow"");
+                        else elements[++top] = item;
+                    }
+                    public int Pop() {
+                        return top == -1 ? -1 : elements[top--];
+                    }
+                }
+                class Program {
+                    static void Main() {
+                        Stack stack = new Stack(5);
+                        stack.Push(10);
+                        stack.Push(20);
+                        Console.WriteLine(stack.Pop());
+                    }
+                }
+            "
+        }
+    };
+
+    foreach (var q in questions)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">@q.Question</h5>
+                <p><strong>Max Time:</strong> @q.MaxTime</p>
+                <p><strong>Explanation:</strong> @q.Explanation</p>
+                <button class="btn btn-primary show-answer">Show Answer</button>
+                <pre class="answer mt-3" style="display:none;"><code>@q.Answer</code></pre>
+            </div>
+        </div>
+    }
+}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $(".show-answer").click(function(){
+            $(this).next(".answer").toggle();
+            $(this).text($(this).text() === "Show Answer" ? "Hide Answer" : "Show Answer");
+        });
+    });
+</script>
