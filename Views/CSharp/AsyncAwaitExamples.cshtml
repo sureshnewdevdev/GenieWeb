@@ -1,0 +1,135 @@
+@{
+    ViewData["Title"] = "Examples of Async and Await in C#";
+}
+
+<!-- Section: Simple Async Method -->
+<section class="mb-5">
+    <h2 class="text-secondary">Simple Async Method Example</h2>
+    <p class="lead">
+        This example demonstrates an asynchronous method that simulates a delay using <code>Task.Delay</code>.
+    </p>
+
+    <h3 class="text-info">Code Example:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public async Task SimpleDelayAsync()
+{
+    Console.WriteLine("Task starting...");
+    await Task.Delay(2000);
+    Console.WriteLine("Task completed after 2 seconds.");
+}
+
+// Usage
+await SimpleDelayAsync();</code>
+        </pre>
+    </div>
+</section>
+
+<!-- Section: Fetching Data Asynchronously -->
+<section class="mb-5">
+    <h2 class="text-secondary">Fetching Data Asynchronously</h2>
+    <p class="lead">
+        This example demonstrates how to fetch data from a web API asynchronously using HttpClient.
+    </p>
+
+    <h3 class="text-info">Code Example:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public async Task<string> FetchDataAsync(string url)
+{
+    using (HttpClient client = new HttpClient())
+    {
+        var response = await client.GetStringAsync(url);
+        return response;
+    }
+}
+
+// Usage
+string data = await FetchDataAsync("https://api.example.com/data");
+Console.WriteLine(data);</code>
+        </pre>
+    </div>
+</section>
+
+<!-- Section: Handling Exceptions in Async Methods -->
+<section class="mb-5">
+    <h2 class="text-secondary">Handling Exceptions in Async Methods</h2>
+    <p class="lead">
+        This example demonstrates handling exceptions in an asynchronous method.
+    </p>
+
+    <h3 class="text-info">Code Example:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public async Task SafeFetchDataAsync(string url)
+{
+    try
+    {
+        string data = await FetchDataAsync(url);
+        Console.WriteLine(data);
+    }
+    catch (HttpRequestException e)
+    {
+        Console.WriteLine($"Request error: {e.Message}");
+    }
+}
+
+// Usage
+await SafeFetchDataAsync("https://api.example.com/data");</code>
+        </pre>
+    </div>
+</section>
+
+<!-- Section: Running Multiple Tasks in Parallel -->
+<section class="mb-5">
+    <h2 class="text-secondary">Running Multiple Tasks in Parallel</h2>
+    <p class="lead">
+        This example demonstrates how to run multiple asynchronous tasks concurrently using <code>Task.WhenAll</code>.
+    </p>
+
+    <h3 class="text-info">Code Example:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public async Task RunMultipleTasksAsync()
+{
+    Task task1 = Task.Delay(2000);
+    Task task2 = Task.Delay(3000);
+    Task task3 = Task.Delay(1000);
+    
+    await Task.WhenAll(task1, task2, task3);
+    Console.WriteLine("All tasks completed.");
+}
+
+// Usage
+await RunMultipleTasksAsync();</code>
+        </pre>
+    </div>
+</section>
+
+<!-- Section: Async with ConfigureAwait -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using ConfigureAwait(false)</h2>
+    <p class="lead">
+        This example demonstrates how to use <code>ConfigureAwait(false)</code> to avoid deadlocks in UI applications.
+    </p>
+
+    <h3 class="text-info">Code Example:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public async Task<string> FetchDataWithConfigureAwaitAsync(string url)
+{
+    using HttpClient client = new HttpClient();
+    return await client.GetStringAsync(url).ConfigureAwait(false);
+}
+
+// Usage
+string data = await FetchDataWithConfigureAwaitAsync("https://api.example.com/data");
+Console.WriteLine(data);</code>
+        </pre>
+    </div>
+</section>
+
+<!-- Previous Topic Link -->
+<div class="previous-topic mt-4 d-flex justify-content-start"></div>
+    <a href="@Url.Action("AsyncAwait", "CSharp")" class="btn btn-outline-secondary">Previous: Introduction to Async & Await</a>
+</div>

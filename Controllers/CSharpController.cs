@@ -40,6 +40,19 @@ namespace GenieWeb.Controllers
             return View("ArchitectureOfClass");
         }
 
+        public IActionResult AsyncAwait()
+        {
+            ViewData["ActiveMenu"] = "CSharp";
+            ViewData["ActivePage"] = "AsyncAwait";
+            return View("AsyncAwait");
+        }
+
+        public IActionResult AsyncAwaitExamples()
+        {
+            ViewData["ActiveMenu"] = "CSharp";
+            ViewData["ActivePage"] = "AsyncAwaitExamples";
+            return View("AsyncAwaitExamples");
+        }
         public IActionResult BaseClassLibrary()
         {
             ViewData["ActiveMenu"] = "CSharp";

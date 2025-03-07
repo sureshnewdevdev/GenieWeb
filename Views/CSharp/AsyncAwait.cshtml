@@ -1,0 +1,156 @@
+@{
+    ViewData["Title"] = "Understanding Async and Await in C#";
+}
+
+<!-- Section: Definition and Theory -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is Async and Await in C#?</h2>
+    <p class="lead">
+        Async and Await are essential components of asynchronous programming in C#. They allow applications to execute tasks without blocking the main thread, enabling better responsiveness and efficient execution.
+    </p>
+    <p>
+        The <code>async</code> keyword is used to declare an asynchronous method, while the <code>await</code> keyword pauses the method execution until the awaited task completes. This prevents blocking operations and allows other tasks to continue running.
+    </p>
+</section>
+
+<!-- Section: Async Workflow -->
+<section class="mb-5">
+    <h2 class="text-secondary">How Async and Await Work?</h2>
+    <p class="lead">
+        When an asynchronous method is called, it starts executing but returns control to the caller immediately while waiting for the awaited task to complete. This ensures non-blocking execution.
+    </p>
+    <img src="~/css/Images/CSharp/SyncAndAsync.webp" alt="Async Request Flow Diagram" class="img-fluid" />
+    <p class="text-muted">The diagram above illustrates how async methods handle tasks without blocking the main thread.</p>
+</section>
+
+<!-- Section: Benefits of Async and Await -->
+<section class="mb-5">
+    <h2 class="text-secondary">Benefits of Using Async and Await</h2>
+    <ul class="list-group">
+        <li class="list-group-item">
+            <strong>Improves Responsiveness:</strong> Async methods allow the main thread (UI thread in GUI apps) to remain free while waiting for operations to complete.
+        </li>
+        <li class="list-group-item">
+            <strong>Better Resource Utilization:</strong> Enables concurrent execution of tasks, improving efficiency in web services and applications.
+        </li>
+        <li class="list-group-item">
+            <strong>Code Readability and Maintainability:</strong> Compared to traditional threading models, async/await simplifies complex callback-based code.
+        </li>
+        <li class="list-group-item">
+            <strong>Automatic Context Switching:</strong> After an async task completes, execution resumes on the original thread, making UI updates easier.
+        </li>
+    </ul>
+</section>
+
+<!-- Section: Drawbacks of Async and Await -->
+<section class="mb-5">
+    <h2 class="text-secondary">Drawbacks of Using Async and Await</h2>
+    <ul class="list-group">
+        <li class="list-group-item">
+            <strong>Not Suitable for CPU-bound Operations:</strong> Async methods are ideal for I/O tasks but not for heavy computation; use <code>Task.Run</code> instead.
+        </li>
+        <li class="list-group-item">
+            <strong>Potential Deadlocks:</strong> Calling <code>.Result</code> or <code>.Wait()</code> on async methods can block the main thread and cause deadlocks.
+        </li>
+        <li class="list-group-item">
+            <strong>Overhead for Small Tasks:</strong> If an operation is quick (e.g., simple calculations), adding async introduces unnecessary overhead.
+        </li>
+        <li class="list-group-item">
+            <strong>Complex Debugging:</strong> Call stacks in asynchronous code may be incomplete, making debugging harder compared to synchronous methods.
+        </li>
+    </ul>
+</section>
+
+<!-- Section: Best Practices for Using Async and Await -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using Async and Await</h2>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Always use <code>await</code> instead of <code>.Result</code> or <code>.Wait()</code> to prevent deadlocks.
+        </li>
+        <li class="list-group-item">
+            Use <code>ConfigureAwait(false)</code> in library code to avoid unnecessary context switching.
+        </li>
+        <li class="list-group-item">
+            Avoid making async methods <code>void</code>; use <code>Task</code> or <code>Task&lt;T&gt;</code> for proper exception handling.
+        </li>
+        <li class="list-group-item">
+            Only use async where necessary—don't make everything async by default.
+        </li>
+    </ul>
+</section>
+
+<!-- Section: Async vs Sync Execution Comparison -->
+<section class="mb-5">
+    <h2 class="text-secondary">Async vs Sync Execution: Code Example</h2>
+    <div class="code-snippet bg-light p-3 rounded border">
+        <h3 class="text-info">Synchronous Execution:</h3>
+        <pre>
+<code>public void SyncMethod()
+{
+    Console.WriteLine("Task started");
+    Thread.Sleep(3000); // Blocks the main thread
+    Console.WriteLine("Task completed after 3 seconds");
+}
+
+// Usage
+SyncMethod();</code>
+        </pre>
+        <h3 class="text-info">Asynchronous Execution:</h3>
+        <pre>
+<code>public async Task AsyncMethod()
+{
+    Console.WriteLine("Task started");
+    await Task.Delay(3000); // Non-blocking delay
+    Console.WriteLine("Task completed after 3 seconds");
+}
+
+// Usage
+await AsyncMethod();</code>
+        </pre>
+    </div>
+    <p class="text-muted">With async execution, the main thread remains free to handle other tasks.</p>
+</section>
+
+<!-- Section: When to Use Async and Await -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Async and Await?</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Use Case</th>
+                <th>Recommended?</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Web API Calls</td>
+                <td>✅ Yes, prevents blocking requests</td>
+            </tr>
+            <tr>
+                <td>Database Queries</td>
+                <td>✅ Yes, improves efficiency</td>
+            </tr>
+            <tr>
+                <td>File I/O (Read/Write)</td>
+                <td>✅ Yes, avoids blocking disk operations</td>
+            </tr>
+            <tr>
+                <td>UI Event Handlers</td>
+                <td>✅ Yes, keeps UI responsive</td>
+            </tr>
+            <tr>
+                <td>CPU-Intensive Work (Calculations)</td>
+                <td>❌ No, use <code>Task.Run</code> instead</td>
+            </tr>
+            <tr>
+                <td>Small, Simple Methods</td>
+                <td>❌ No, avoid unnecessary async overhead</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<div class="d-flex justify-content-end mt-4"></div>
+    <a href="@Url.Action("AsyncAwaitExamples", "CSharp")" class="btn btn-outline-secondary">Next: Examples of Async & Await</a>
+</div>

@@ -4,351 +4,47 @@
 
 <h2>C# Practical Questions</h2>
 <p>Click on "Show Answer" to reveal the answer.</p>
+<p>Click on "Show Answer" to reveal the answer.</p>
 
-@{
-    var questions = new List<dynamic>
-    {
-        new { 
-            Question = "1. Create a base class `Employee` with a method `GetSalary()`. Derive `FullTimeEmployee` and `PartTimeEmployee` classes that override the method to calculate salaries differently.",
-            Explanation = "This demonstrates polymorphism by allowing different employee types to implement their own salary calculation logic.",
-            MaxTime = "10 minutes",
-            Answer = @"
-                using System;
-                class Employee {
-                    public virtual double GetSalary() {
-                        return 0;
-                    }
-                }
-                class FullTimeEmployee : Employee {
-                    public override double GetSalary() {
-                        return 50000;
-                    }
-                }
-                class PartTimeEmployee : Employee {
-                    public override double GetSalary() {
-                        return 20000;
-                    }
-                }
-                class Program {
-                    static void Main() {
-                        Employee emp1 = new FullTimeEmployee();
-                        Console.WriteLine($""Full-Time Employee Salary: {emp1.GetSalary()}"");
-
-                        Employee emp2 = new PartTimeEmployee();
-                        Console.WriteLine($""Part-Time Employee Salary: {emp2.GetSalary()}"");
-                    }
-                }
-            "
-        },
-        new { 
-            Question = "2. Create a `Vehicle` class with a method `Drive()`. Derive `Car` and `Truck` classes that override the method to provide specific driving behaviors.",
-            Explanation = "This demonstrates polymorphism by allowing different vehicle types to implement their own driving logic.",
-            MaxTime = "8 minutes",
-            Answer = @"
-                using System;
-                class Vehicle {
-                    public virtual void Drive() {
-                        Console.WriteLine(""Driving a vehicle"");
-                    }
-                }
-                class Car : Vehicle {
-                    public override void Drive() {
-                        Console.WriteLine(""Driving a car"");
-                    }
-                }
-                class Truck : Vehicle {
-                    public override void Drive() {
-                        Console.WriteLine(""Driving a truck"");
-                    }
-                }
-                class Program {
-                    static void Main() {
-                        Vehicle v1 = new Car();
-                        v1.Drive();
-
-                        Vehicle v2 = new Truck();
-                        v2.Drive();
-                    }
-                }
-            "
-        },
-
-        new { 
-            Question = "3. Create a `Shape` class with a method `CalculatePerimeter()`. Derive `Rectangle` and `Triangle` classes that override the method to calculate their respective perimeters.",
-            Explanation = "This demonstrates polymorphism by allowing different shapes to implement their own perimeter calculation logic.",
-            MaxTime = "12 minutes",
-            Answer = @"
-                using System;
-                class Shape {
-                    public virtual double CalculatePerimeter() {
-                        return 0;
-                    }
-                }
-                class Rectangle : Shape {
-                    private double length, width;
-                    public Rectangle(double l, double w) {
-                        length = l;
-                        width = w;
-                    }
-                    public override double CalculatePerimeter() {
-                        return 2 * (length + width);
-                    }
-                }
-                class Triangle : Shape {
-                    private double a, b, c;
-                    public Triangle(double side1, double side2, double side3) {
-                        a = side1;
-                        b = side2;
-                        c = side3;
-                    }
-                    public override double CalculatePerimeter() {
-                        return a + b + c;
-                    }
-                }
-                class Program {
-                    static void Main() {
-                        Shape rect = new Rectangle(5, 10);
-                        Console.WriteLine($""Rectangle Perimeter: {rect.CalculatePerimeter()}"");
-
-                        Shape tri = new Triangle(3, 4, 5);
-                        Console.WriteLine($""Triangle Perimeter: {tri.CalculatePerimeter()}"");
-                    }
-                }
-            "
-        },
-
-        new { 
-            Question = "4. Create a `Person` class with a method `GetDetails()`. Derive `Teacher` and `Student` classes that override the method to provide specific details.",
-            Explanation = "This demonstrates inheritance and polymorphism by allowing derived classes to provide their own implementation of a method.",
-            MaxTime = "10 minutes",
-            Answer = @"
-                using System;
-                class Person {
-                    public virtual void GetDetails() {
-                        Console.WriteLine(""This is a person."");
-                    }
-                }
-                class Teacher : Person {
-                    public override void GetDetails() {
-                        Console.WriteLine(""This is a teacher."");
-                    }
-                }
-                class Student : Person {
-                    public override void GetDetails() {
-                        Console.WriteLine(""This is a student."");
-                    }
-                }
-                class Program {
-                    static void Main() {
-                        Person p1 = new Teacher();
-                        p1.GetDetails();
-
-                        Person p2 = new Student();
-                        p2.GetDetails();
-                    }
-                }
-            "
-        },
-
-        new { 
-            Question = "5. Create a `BankAccount` class with methods `Deposit()` and `Withdraw()`. Derive `CheckingAccount` and `SavingsAccount` classes that override the methods to implement specific rules.",
-            Explanation = "This demonstrates polymorphism by allowing different account types to implement their own deposit and withdrawal rules.",
-            MaxTime = "15 minutes",
-            Answer = @"
-                using System;
-                class BankAccount {
-                    protected double balance;
-                    public virtual void Deposit(double amount) {
-                        balance += amount;
-                        Console.WriteLine($""Deposited: {amount}"");
-                    }
-                    public virtual void Withdraw(double amount) {
-                        balance -= amount;
-                        Console.WriteLine($""Withdrawn: {amount}"");
-                    }
-                }
-                class CheckingAccount : BankAccount {
-                    public override void Withdraw(double amount) {
-                        if (balance - amount < 0) {
-                            Console.WriteLine(""Insufficient funds"");
-                        } else {
-                            base.Withdraw(amount);
-                        }
-                    }
-                }
-                class SavingsAccount : BankAccount {
-                    private double interestRate = 0.05;
-                    public override void Deposit(double amount) {
-                        balance += amount + (amount * interestRate);
-                        Console.WriteLine($""Deposited with interest: {amount * interestRate}"");
-                    }
-                }
-                class Program {
-                    static void Main() {
-                        BankAccount acc1 = new CheckingAccount();
-                        acc1.Deposit(500);
-                        acc1.Withdraw(600);
-
-                        BankAccount acc2 = new SavingsAccount();
-                        acc2.Deposit(1000);
-                    }
-                }
-            "
-        },
-
-        new { 
-            Question = "6. Create a `Device` class with a method `TurnOn()`. Derive `Laptop` and `Smartphone` classes that override the method to provide specific behaviors.",
-            Explanation = "This demonstrates polymorphism by allowing different devices to implement their own start-up logic.",
-            MaxTime = "10 minutes",
-            Answer = @"
-                using System;
-                class Device {
-                    public virtual void TurnOn() {
-                        Console.WriteLine(""Device is turning on"");
-                    }
-                }
-                class Laptop : Device {
-                    public override void TurnOn() {
-                        Console.WriteLine(""Laptop is booting up"");
-                    }
-                }
-                class Smartphone : Device {
-                    public override void TurnOn() {
-                        Console.WriteLine(""Smartphone is starting"");
-                    }
-                }
-                class Program {
-                    static void Main() {
-                        Device d1 = new Laptop();
-                        d1.TurnOn();
-
-                        Device d2 = new Smartphone();
-                        d2.TurnOn();
-                    }
-                }
-            "
-        },
-
-        new { 
-            Question = "7. Create a `Game` class with a method `Start()`. Derive `Chess` and `Football` classes that override the method to provide specific game start logic.",
-            Explanation = "This demonstrates polymorphism by allowing different games to implement their own start logic.",
-            MaxTime = "8 minutes",
-            Answer = @"
-                using System;
-                class Game {
-                    public virtual void Start() {
-                        Console.WriteLine(""Starting a game"");
-                    }
-                }
-                class Chess : Game {
-                    public override void Start() {
-                        Console.WriteLine(""Starting a chess game"");
-                    }
-                }
-                class Football : Game {
-                    public override void Start() {
-                        Console.WriteLine(""Starting a football game"");
-                    }
-                }
-                class Program {
-                    static void Main() {
-                        Game g1 = new Chess();
-                        g1.Start();
-
-                        Game g2 = new Football();
-                        g2.Start();
-                    }
-                }
-            "
-        },
-
-        new { 
-            Question = "8. Create a `Tool` class with a method `Use()`. Derive `Hammer` and `Screwdriver` classes that override the method to provide specific usage logic.",
-            Explanation = "This demonstrates polymorphism by allowing different tools to implement their own usage logic.",
-            MaxTime = "6 minutes",
-            Answer = @"
-                using System;
-                class Tool {
-                    public virtual void Use() {
-                        Console.WriteLine(""Using a tool"");
-                    }
-                }
-                class Hammer : Tool {
-                    public override void Use() {
-                        Console.WriteLine(""Using a hammer"");
-                    }
-                }
-                class Screwdriver : Tool {
-                    public override void Use() {
-                        Console.WriteLine(""Using a screwdriver"");
-                    }
-                }
-                class Program {
-                    static void Main() {
-                        Tool t1 = new Hammer();
-                        t1.Use();
-
-                        Tool t2 = new Screwdriver();
-                        t2.Use();
-                    }
-                }
-            "
-        },
-
-        new { 
-            Question = "9. Create a `MusicalInstrument` class with a method `Play()`. Derive `Piano` and `Guitar` classes that override the method to provide specific playing behaviors.",
-            Explanation = "This demonstrates polymorphism by allowing different musical instruments to implement their own playing logic.",
-            MaxTime = "10 minutes",
-            Answer = @"
-                using System;
-                class MusicalInstrument {
-                    public virtual void Play() {
-                        Console.WriteLine(""Playing an instrument"");
-                    }
-                }
-                class Piano : MusicalInstrument {
-                    public override void Play() {
-                        Console.WriteLine(""Playing the piano"");
-                    }
-                }
-                class Guitar : MusicalInstrument {
-                    public override void Play() {
-                        Console.WriteLine(""Playing the guitar"");
-                    }
-                }
-                class Program {
-                    static void Main() {
-                        MusicalInstrument mi1 = new Piano();
-                        mi1.Play();
-
-                        MusicalInstrument mi2 = new Guitar();
-                        mi2.Play();
-                    }
-                }
-            "
-        }
-};
-        
- foreach (var q in questions)
-    {
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">@q.Question</h5>
-                <p><strong>Max Time:</strong> @q.MaxTime</p>
-                <p><strong>Explanation:</strong> @q.Explanation</p>
-                <button class="btn btn-primary show-answer">Show Answer</button>
-                <pre class="answer mt-3" style="display:none;"><code>@q.Answer</code></pre>
-            </div>
+@foreach (var question in ViewBag.Questions)
+{
+    <div class="card mb-3" id="question-@question.Id">
+        <div class="card-body">
+            <h5 class="card-title">@question.Question</h5>
+            <p><strong>Max Time:</strong> @question.MaxTime</p>
+            <p><strong>Explanation:</strong> @question.Explanation</p>
+            
+            <form method="post" asp-action="ToggleAnswer" asp-controller="PracticeQuestions" onsubmit="setScrollTarget(@question.Id)">
+                <input type="hidden" name="pageName" value="CSharpAdvancedQues" />
+                <input type="hidden" name="questionId" value="@question.Id" />
+                <input type="hidden" id="scrollTarget" name="scrollTarget" value="" />
+                <button type="submit" class="btn btn-primary">
+                    @(question.ShowAnswer ? "Hide Answer" : "Show Answer")
+                </button>
+            </form>
+            
+            @if (question.ShowAnswer)
+            {
+                <pre class="answer mt-3"><code>@question.Answer</code></pre>
+            }
         </div>
-    }
+    </div>
 }
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function(){
-        $(".show-answer").click(function(){
-            $(this).next(".answer").toggle();
-            $(this).text($(this).text() === "Show Answer" ? "Hide Answer" : "Show Answer");
-        });
+    function setScrollTarget(questionId) {
+        document.cookie = "scrollTarget=question-" + questionId + "; path=/";
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        let cookies = document.cookie.split('; ');
+        let scrollTarget = cookies.find(row => row.startsWith("scrollTarget="))?.split('=')[1];
+        if (scrollTarget) {
+            let element = document.getElementById(scrollTarget);
+            if (element) {
+                element.scrollIntoView({ behavior: "smooth" });
+            }
+            document.cookie = "scrollTarget=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
     });
 </script>
