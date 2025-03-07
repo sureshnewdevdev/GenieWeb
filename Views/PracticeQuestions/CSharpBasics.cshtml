@@ -17,9 +17,11 @@
                 class Program {
                     static void Main() {
                         string input = ""hello"";
-                        char[] arr = input.ToCharArray();
-                        Array.Reverse(arr);
-                        Console.WriteLine(new string(arr));
+                        char[] reversed = new char[input.Length];
+                        for (int i = 0; i < input.Length; i++) {
+                            reversed[i] = input[input.Length - 1 - i];
+                        }
+                        Console.WriteLine(new string(reversed));
                     }
                 }
             "
@@ -93,8 +95,14 @@
                 class Program {
                     static void Main() {
                         string input = ""racecar"";
-                        string reversed = new string(input.Reverse().ToArray());
-                        Console.WriteLine(input == reversed ? ""Palindrome"" : ""Not a palindrome"");
+                        bool isPalindrome = true;
+                        for (int i = 0; i < input.Length / 2; i++) {
+                            if (input[i] != input[input.Length - 1 - i]) {
+                                isPalindrome = false;
+                                break;
+                            }
+                        }
+                        Console.WriteLine(isPalindrome ? ""Palindrome"" : ""Not a palindrome"");
                     }
                 }
             "
@@ -128,7 +136,21 @@
                     static void Main() {
                         int[] arr1 = {1, 3, 5};
                         int[] arr2 = {2, 4, 6};
-                        int[] merged = arr1.Concat(arr2).OrderBy(x => x).ToArray();
+                        int[] merged = new int[arr1.Length + arr2.Length];
+                        int i = 0, j = 0, k = 0;
+                        while (i < arr1.Length && j < arr2.Length) {
+                            if (arr1[i] < arr2[j]) {
+                                merged[k++] = arr1[i++];
+                            } else {
+                                merged[k++] = arr2[j++];
+                            }
+                        }
+                        while (i < arr1.Length) {
+                            merged[k++] = arr1[i++];
+                        }
+                        while (j < arr2.Length) {
+                            merged[k++] = arr2[j++];
+                        }
                         Console.WriteLine(string.Join("", "", merged));
                     }
                 }
