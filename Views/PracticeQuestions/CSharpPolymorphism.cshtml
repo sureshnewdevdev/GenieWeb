@@ -1,5 +1,12 @@
+@using Newtonsoft.Json
+@using System.Web
+
 @{
     ViewData["ActiveMenu"] = "PracticeQuestions";
+    ViewData["ActivePage"] = "CSharpPolymorphism";
+
+    // Convert ViewBag.Questions to JSON and encode it properly
+    string questionsJson = System.Text.Encodings.Web.HtmlEncoder.Default.Encode(JsonConvert.SerializeObject(ViewBag.Questions, Formatting.None));
 }
 
 <h2>C# Polymorphism Practical Questions</h2>
@@ -13,15 +20,16 @@
             <p><strong>Max Time:</strong> @question.MaxTime</p>
             <p><strong>Explanation:</strong> @question.Explanation</p>
 
-            @* <form method="post" asp-action="ToggleAnswer" asp-controller="PracticeQuestions" onsubmit="setScrollTarget(@question.Id)">
+            <form method="post" asp-action="ToggleAnswer" asp-controller="PracticeQuestions"
+                onsubmit="setScrollTarget(@question.Id)">
                 <input type="hidden" name="pageName" value="CSharpPolymorphism" />
                 <input type="hidden" name="questionId" value="@question.Id" />
-                <input type="hidden" id="scrollTarget" name="scrollTarget" value="" />
+                <input type="hidden" id="questionsJson" name="questionsJson" value="@questionsJson" />
+
                 <button type="submit" class="btn btn-primary">
                     @(question.ShowAnswer ? "Hide Answer" : "Show Answer")
                 </button>
-            </form> *@
-            <p><strong>Answer:</strong></p>
+            </form>
 
             @if (question.ShowAnswer)
             {

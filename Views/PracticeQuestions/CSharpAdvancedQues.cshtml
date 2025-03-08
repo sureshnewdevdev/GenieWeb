@@ -1,8 +1,15 @@
+@using Newtonsoft.Json
+@using System.Web
+
 @{
     ViewData["ActiveMenu"] = "PracticeQuestions";
+    ViewData["ActivePage"] = "CSharpAdvancedQues";
+
+    // Convert ViewBag.Questions to JSON and encode it properly
+    string questionsJson = System.Text.Encodings.Web.HtmlEncoder.Default.Encode(JsonConvert.SerializeObject(ViewBag.Questions, Formatting.None));
 }
 
-<h2>C# Practical Questions</h2>
+<h2>C# Advanced Questions</h2>
 <p>Click on "Show Answer" to reveal the answer.</p>
 
 @foreach (var question in ViewBag.Questions)
@@ -12,16 +19,18 @@
             <h5 class="card-title">@question.Question</h5>
             <p><strong>Max Time:</strong> @question.MaxTime</p>
             <p><strong>Explanation:</strong> @question.Explanation</p>
-            
-            @* <form method="post" asp-action="ToggleAnswer" asp-controller="PracticeQuestions" onsubmit="setScrollTarget(@question.Id)">
+
+            <form method="post" asp-action="ToggleAnswer" asp-controller="PracticeQuestions"
+                onsubmit="setScrollTarget(@question.Id)">
                 <input type="hidden" name="pageName" value="CSharpAdvancedQues" />
                 <input type="hidden" name="questionId" value="@question.Id" />
-                <input type="hidden" id="scrollTarget" name="scrollTarget" value="" />
+                <input type="hidden" id="questionsJson" name="questionsJson" value="@questionsJson" />
+
                 <button type="submit" class="btn btn-primary">
                     @(question.ShowAnswer ? "Hide Answer" : "Show Answer")
                 </button>
-            </form> *@
-            <p><strong>Answer:</strong></p>
+            </form>
+
             @if (question.ShowAnswer)
             {
                 <pre class="answer mt-3"><code>@question.Answer</code></pre>
@@ -35,7 +44,7 @@
         document.cookie = "scrollTarget=question-" + questionId + "; path=/";
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         let cookies = document.cookie.split('; ');
         let scrollTarget = cookies.find(row => row.startsWith("scrollTarget="))?.split('=')[1];
         if (scrollTarget) {

@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using Newtonsoft.Json;
+using System.Web;
 
 namespace GenieWeb.Controllers
 {
@@ -27,7 +30,7 @@ class Program {
         await FetchDataAsync();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 2,
@@ -46,7 +49,7 @@ class Program {
         await ReadFileAsync(""sample.txt"");
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 3,
@@ -65,7 +68,7 @@ class Program {
         await SimulateLongTask();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 4,
@@ -87,7 +90,7 @@ class Program {
         await Task.WhenAll(Task1(), Task2());
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 5,
@@ -104,14 +107,14 @@ class Program {
             string result = await client.GetStringAsync(""https://invalid-url.com"");
             Console.WriteLine(result);
         } catch (HttpRequestException e) {
-            Console.WriteLine($""Request failed: {e.Message}"");
+            Console.WriteLine(""Request failed: {e.Message}"");
         }
     }
     static async Task Main() {
         await FetchDataWithHandlingAsync();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 6,
@@ -130,10 +133,10 @@ class Program {
     }
     static async Task Main() {
         int result = await ComputeAsync();
-        Console.WriteLine($""Computed sum: {result}"");
+        Console.WriteLine(""Computed sum: {result}"");
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 7,
@@ -149,7 +152,7 @@ class Program {
         await Task.WhenAny(task1, task2);
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
 new QuestionModel {
         Id = 8,
@@ -169,7 +172,7 @@ class Program {
         Console.WriteLine(data);
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 9,
@@ -185,9 +188,9 @@ class Program {
     static async Task ProcessTask(int id) {
         await semaphore.WaitAsync();
         try {
-            Console.WriteLine($""Task {id} started."");
+            Console.WriteLine(""Task {id} started."");
             await Task.Delay(3000);
-            Console.WriteLine($""Task {id} completed."");
+            Console.WriteLine(""Task {id} completed."");
         } finally {
             semaphore.Release();
         }
@@ -200,7 +203,7 @@ class Program {
         await Task.WhenAll(tasks);
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 10,
@@ -216,20 +219,21 @@ class Program {
     }
     static async Task Main() {
         int result = await GetDataAsync();
-        Console.WriteLine($""The answer is {result}"");
+        Console.WriteLine(""The answer is {result}"");
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     }
  }
         },
-            { "InheritancePracticeQues", new List<QuestionModel> {
+            { "InheritancePracticeQues",new List<QuestionModel> {
     new QuestionModel {
         Id = 1,
         Question = "1. Create a simple base class `Animal` with a method `Speak()`. Derive a `Dog` class that overrides it.",
         Explanation = "This introduces basic inheritance. The `Dog` class will override the `Speak()` method of the `Animal` class.",
         MaxTime = "5 minutes",
-        Answer = @"using System;
+        Answer = @"
+using System;
 class Animal {
     public virtual void Speak() {
         Console.WriteLine(""Animals make sounds"");
@@ -245,15 +249,16 @@ class Program {
         Animal a = new Dog();
         a.Speak();
     }
-}" ,
-        ShowAnswer = true
+}",
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 2,
         Question = "2. Create a `Person` class with a method `GetDetails()`. Derive a `Student` class that overrides it.",
         Explanation = "You'll learn how a derived class (`Student`) can provide a different implementation of a method inherited from the base class (`Person`).",
         MaxTime = "8 minutes",
-        Answer = @"using System;
+        Answer = @"
+using System;
 class Person {
     public virtual void GetDetails() {
         Console.WriteLine(""This is a person."");
@@ -269,15 +274,16 @@ class Program {
         Person p = new Student();
         p.GetDetails();
     }
-}" ,
-        ShowAnswer = true
+}",
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 3,
         Question = "3. Implement an `Employee` base class with a method `CalculateSalary()`. Create a `Manager` class that adds a bonus to salary.",
         Explanation = "This question introduces method overriding and the use of `base` to call the parent class method while adding additional logic.",
         MaxTime = "10 minutes",
-        Answer = @"using System;
+        Answer = @"
+using System;
 class Employee {
     public virtual double CalculateSalary() {
         return 40000;
@@ -293,15 +299,16 @@ class Program {
         Employee emp = new Manager();
         Console.WriteLine($""Salary: {emp.CalculateSalary()}"");
     }
-}" ,
-        ShowAnswer = true
+}",
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 4,
         Question = "4. Create a `Vehicle` class with `StartEngine()`. Extend it to `Car` and `Motorcycle` with different behaviors.",
         Explanation = "This demonstrates how multiple classes can inherit from the same parent and implement methods differently.",
         MaxTime = "12 minutes",
-        Answer = @"using System;
+        Answer = @"
+using System;
 class Vehicle {
     public virtual void StartEngine() {
         Console.WriteLine(""Vehicle engine starting"");
@@ -325,15 +332,16 @@ class Program {
         Vehicle v2 = new Motorcycle();
         v2.StartEngine();
     }
-}" ,
-        ShowAnswer = true
+}",
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 5,
         Question = "5. Implement a `BankAccount` class with `Deposit()` and `Withdraw()`. Extend it to `SavingsAccount` with interest calculation.",
         Explanation = "You'll implement a basic banking system where `SavingsAccount` adds extra functionality.",
         MaxTime = "15 minutes",
-        Answer = @"using System;
+        Answer = @"
+using System;
 class BankAccount {
     protected double balance;
     public virtual void Deposit(double amount) {
@@ -353,15 +361,16 @@ class Program {
         SavingsAccount acc = new SavingsAccount();
         acc.Deposit(1000);
     }
-}" ,
-        ShowAnswer = true
+}",
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 6,
         Question = "6. Implement `Shape` class with `CalculateArea()`. Extend to `Rectangle` and `Circle` with area calculations.",
         Explanation = "You'll learn how different classes can provide unique implementations for a common method.",
         MaxTime = "15 minutes",
-        Answer = @"using System;
+        Answer = @"
+using System;
 class Shape {
     public virtual double CalculateArea() {
         return 0;
@@ -394,10 +403,11 @@ class Program {
         Shape circle = new Circle(7);
         Console.WriteLine($""Circle Area: {circle.CalculateArea()}"");
     }
-}" ,
-        ShowAnswer = true
+}",
+        ShowAnswer = false
     }
-}   },
+}
+ },
             { "CSharpBasics", new List<QuestionModel> {
     new QuestionModel {
         Id = 1,
@@ -415,7 +425,7 @@ class Program {
         Console.WriteLine(new string(reversed));
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 2,
@@ -430,11 +440,11 @@ class Program {
         foreach(int num in numbers) {
             if (num > max) max = num;
         }
-        Console.WriteLine($\""Largest number: {max
-    }\"");
+        Console.WriteLine(""Largest number: {max
+    }"");
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel
     {
@@ -448,10 +458,10 @@ class Program {
     static void Main() {
         List<int> numbers = new List<int> {1, 2, 3, 2, 4, 1, 5};
         HashSet<int> uniqueNumbers = new HashSet<int>(numbers);
-        Console.WriteLine(string.Join(\"", \"", uniqueNumbers));
+        Console.WriteLine(string.Join("", "", uniqueNumbers));
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel
     {
@@ -470,12 +480,12 @@ class Program {
             else freq[num] = 1;
         }
         foreach (var item in freq) {
-            Console.WriteLine($\""{ item.Key }: {item.Value
-    }\"");
+            Console.WriteLine(""{ item.Key }: {item.Value
+    }"");
         }
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel
     {
@@ -497,7 +507,7 @@ class Program {
         Console.WriteLine(isPalindrome ? ""Palindrome"" : ""Not a palindrome"");
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel
     {
@@ -511,11 +521,11 @@ class Program {
         int[] arr = {1, 2, 3, 4, 5};
         int sum = 0;
         foreach(int num in arr) sum += num;
-        Console.WriteLine($\""Sum: {sum
-    }\"");
+        Console.WriteLine(""Sum: {sum
+    }"");
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel
     {
@@ -547,7 +557,7 @@ class Program {
         Console.WriteLine(string.Join("", "", merged));
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     }
 }
  },
@@ -578,13 +588,13 @@ class PartTimeEmployee : Employee {
 class Program {
     static void Main() {
         Employee emp1 = new FullTimeEmployee();
-        Console.WriteLine($""Full-Time Employee Salary: {emp1.GetSalary()}"");
+        Console.WriteLine(""Full-Time Employee Salary: {emp1.GetSalary()}"");
 
         Employee emp2 = new PartTimeEmployee();
-        Console.WriteLine($""Part-Time Employee Salary: {emp2.GetSalary()}"");
+        Console.WriteLine(""Part-Time Employee Salary: {emp2.GetSalary()}"");
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 2,
@@ -616,7 +626,7 @@ class Program {
         v2.Drive();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 3,
@@ -653,13 +663,13 @@ class Triangle : Shape {
 class Program {
     static void Main() {
         Shape rect = new Rectangle(5, 10);
-        Console.WriteLine($""Rectangle Perimeter: {rect.CalculatePerimeter()}"");
+        Console.WriteLine(""Rectangle Perimeter: {rect.CalculatePerimeter()}"");
 
         Shape tri = new Triangle(3, 4, 5);
-        Console.WriteLine($""Triangle Perimeter: {tri.CalculatePerimeter()}"");
+        Console.WriteLine(""Triangle Perimeter: {tri.CalculatePerimeter()}"");
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
      new QuestionModel {
         Id = 4,
@@ -691,7 +701,7 @@ class Program {
         p2.GetDetails();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 5,
@@ -703,11 +713,11 @@ class BankAccount {
     protected double balance;
     public virtual void Deposit(double amount) {
         balance += amount;
-        Console.WriteLine($""Deposited: {amount}"");
+        Console.WriteLine(""Deposited: {amount}"");
     }
     public virtual void Withdraw(double amount) {
         balance -= amount;
-        Console.WriteLine($""Withdrawn: {amount}"");
+        Console.WriteLine(""Withdrawn: {amount}"");
     }
 }
 class CheckingAccount : BankAccount {
@@ -723,7 +733,7 @@ class SavingsAccount : BankAccount {
     private double interestRate = 0.05;
     public override void Deposit(double amount) {
         balance += amount + (amount * interestRate);
-        Console.WriteLine($""Deposited with interest: {amount * interestRate}"");
+        Console.WriteLine(""Deposited with interest: {amount * interestRate}"");
     }
 }
 class Program {
@@ -736,7 +746,7 @@ class Program {
         acc2.Deposit(1000);
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 6,
@@ -768,7 +778,7 @@ class Program {
         d2.TurnOn();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 7,
@@ -800,7 +810,7 @@ class Program {
         g2.Start();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 8,
@@ -832,7 +842,7 @@ class Program {
         t2.Use();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 9,
@@ -864,7 +874,7 @@ class Program {
         mi2.Play();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 10,
@@ -896,7 +906,7 @@ class Program {
         f2.Cook();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     }
 }
 
@@ -933,7 +943,7 @@ class Program {
         s2.Draw();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 2,
@@ -965,7 +975,7 @@ class Program {
         p2.ProcessPayment();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 3,
@@ -997,7 +1007,7 @@ class Program {
         m2.Play();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 4,
@@ -1029,7 +1039,7 @@ class Program {
         n2.Send();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
      new QuestionModel {
         Id = 5,
@@ -1061,7 +1071,7 @@ class Program {
         d2.Print();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 6,
@@ -1093,7 +1103,7 @@ class Program {
         t2.Move();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 7,
@@ -1125,7 +1135,7 @@ class Program {
         c2.Attack();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     },
     new QuestionModel {
         Id = 8,
@@ -1157,7 +1167,7 @@ class Program {
         d2.Shutdown();
     }
 }" ,
-        ShowAnswer = true
+        ShowAnswer = false
     }
 }
     }
@@ -1198,19 +1208,44 @@ class Program {
         }
 
         [HttpPost]
-        public IActionResult ToggleAnswer(string pageName, int questionId)
+        public IActionResult ToggleAnswer(string pageName, string questionsJson, int questionId)
         {
-            if (_questionSets.ContainsKey(pageName))
+            // Ensure questionsJson is not null before deserializing
+            if (string.IsNullOrEmpty(questionsJson))
             {
-                var question = _questionSets[pageName].FirstOrDefault(q => q.Id == questionId);
-                if (question != null)
-                {
-                    question.ShowAnswer = !question.ShowAnswer;
-                }
+                return BadRequest("Invalid data received.");
             }
-            return RedirectToAction(pageName);
+
+            // Deserialize the questions from the form input
+            string decodedJson = HttpUtility.HtmlDecode(questionsJson);
+            var questions = JsonConvert.DeserializeObject<List<QuestionModel>>(decodedJson);
+
+            // Ensure questions list is not null before proceeding
+            if (questions == null)
+            {
+                return BadRequest("Failed to deserialize questions.");
+            }
+
+            // Find and toggle the selected question
+            var question = questions.FirstOrDefault(q => q.Id == questionId);
+            if (question != null)
+            {
+                question.ShowAnswer = !question.ShowAnswer;
+            }
+
+            // Store the updated questions back in ViewBag
+            ViewData["ActiveMenu"] = "PracticeQuestions";
+            ViewData["ActivePage"] = pageName;
+            ViewBag.Questions = questions;  // Assign the modified list back to ViewBag
+
+            return View(pageName);
         }
+
+
+
+
     }
+
 
     public class QuestionModel
     {
