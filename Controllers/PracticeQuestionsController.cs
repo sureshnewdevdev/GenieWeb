@@ -27,7 +27,7 @@ class Program {
         await FetchDataAsync();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 2,
@@ -46,7 +46,7 @@ class Program {
         await ReadFileAsync(""sample.txt"");
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 3,
@@ -65,7 +65,7 @@ class Program {
         await SimulateLongTask();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 4,
@@ -87,7 +87,7 @@ class Program {
         await Task.WhenAll(Task1(), Task2());
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 5,
@@ -111,7 +111,7 @@ class Program {
         await FetchDataWithHandlingAsync();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 6,
@@ -133,7 +133,7 @@ class Program {
         Console.WriteLine($""Computed sum: {result}"");
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 7,
@@ -149,7 +149,7 @@ class Program {
         await Task.WhenAny(task1, task2);
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
 new QuestionModel {
         Id = 8,
@@ -169,7 +169,7 @@ class Program {
         Console.WriteLine(data);
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 9,
@@ -200,7 +200,7 @@ class Program {
         await Task.WhenAll(tasks);
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 10,
@@ -219,7 +219,7 @@ class Program {
         Console.WriteLine($""The answer is {result}"");
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     }
  }
         },
@@ -246,7 +246,7 @@ class Program {
         a.Speak();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 2,
@@ -270,7 +270,7 @@ class Program {
         p.GetDetails();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 3,
@@ -294,7 +294,7 @@ class Program {
         Console.WriteLine($""Salary: {emp.CalculateSalary()}"");
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 4,
@@ -326,7 +326,7 @@ class Program {
         v2.StartEngine();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 5,
@@ -354,7 +354,7 @@ class Program {
         acc.Deposit(1000);
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 6,
@@ -395,7 +395,7 @@ class Program {
         Console.WriteLine($""Circle Area: {circle.CalculateArea()}"");
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     }
 }   },
             { "CSharpBasics", new List<QuestionModel> {
@@ -415,7 +415,7 @@ class Program {
         Console.WriteLine(new string(reversed));
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 2,
@@ -434,7 +434,7 @@ class Program {
     }\"");
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel
     {
@@ -451,7 +451,7 @@ class Program {
         Console.WriteLine(string.Join(\"", \"", uniqueNumbers));
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel
     {
@@ -475,7 +475,7 @@ class Program {
         }
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel
     {
@@ -497,7 +497,7 @@ class Program {
         Console.WriteLine(isPalindrome ? ""Palindrome"" : ""Not a palindrome"");
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel
     {
@@ -515,7 +515,7 @@ class Program {
     }\"");
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel
     {
@@ -547,7 +547,7 @@ class Program {
         Console.WriteLine(string.Join("", "", merged));
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     }
 }
  },
@@ -584,7 +584,7 @@ class Program {
         Console.WriteLine($""Part-Time Employee Salary: {emp2.GetSalary()}"");
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 2,
@@ -616,7 +616,7 @@ class Program {
         v2.Drive();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 3,
@@ -659,7 +659,7 @@ class Program {
         Console.WriteLine($""Triangle Perimeter: {tri.CalculatePerimeter()}"");
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
      new QuestionModel {
         Id = 4,
@@ -691,7 +691,7 @@ class Program {
         p2.GetDetails();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 5,
@@ -736,7 +736,7 @@ class Program {
         acc2.Deposit(1000);
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 6,
@@ -768,7 +768,7 @@ class Program {
         d2.TurnOn();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 7,
@@ -800,7 +800,7 @@ class Program {
         g2.Start();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 8,
@@ -832,7 +832,7 @@ class Program {
         t2.Use();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 9,
@@ -864,7 +864,7 @@ class Program {
         mi2.Play();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 10,
@@ -896,7 +896,7 @@ class Program {
         f2.Cook();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     }
 }
 
@@ -933,7 +933,7 @@ class Program {
         s2.Draw();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 2,
@@ -965,7 +965,7 @@ class Program {
         p2.ProcessPayment();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 3,
@@ -997,7 +997,7 @@ class Program {
         m2.Play();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 4,
@@ -1029,7 +1029,7 @@ class Program {
         n2.Send();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
      new QuestionModel {
         Id = 5,
@@ -1061,7 +1061,7 @@ class Program {
         d2.Print();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 6,
@@ -1093,7 +1093,7 @@ class Program {
         t2.Move();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 7,
@@ -1125,7 +1125,7 @@ class Program {
         c2.Attack();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     },
     new QuestionModel {
         Id = 8,
@@ -1157,7 +1157,7 @@ class Program {
         d2.Shutdown();
     }
 }" ,
-        ShowAnswer = false
+        ShowAnswer = true
     }
 }
     }
