@@ -6,6 +6,8 @@ namespace GenieWeb.Controllers
     {
         public IActionResult IntroductionToReact()
         {
+            ViewData["ActiveMenu"] = "React";
+            ViewData["ActivePage"] = "IntroductionToReact";
             return View("IntroductionToReact");
         }
     }
