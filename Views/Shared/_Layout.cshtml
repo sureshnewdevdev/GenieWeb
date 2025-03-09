@@ -179,11 +179,19 @@
 
             /* Responsive Design */
             @@media screen and (max-width: 426px) {
-                #sidebarMenu
-
+             #sidebarMenu
             {
                 width:100%;
                 height: 40vh;
+                overflow-y:auto;
+            }
+
+            main {
+                padding: 10px; /* Adds spacing around the main content */
+                margin: 5px; /* Ensures content isn't too close to the edges */
+                border-radius: 8px; /* Slight rounded corners for better UI */
+                background-color: #fff; /* Keeps contrast if background is light */
+                box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
             }
 
             }
@@ -1117,31 +1125,41 @@
 
     @* Scrolls the side bar to the activepage*@
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+            document.addEventListener("DOMContentLoaded", function () {
             let sidebar = document.getElementById("sidebarMenu");
             let activeElement = sidebar.querySelector(".nav-link.active");
 
             if (activeElement) {
-                // Scroll to the active element
+                // Scroll to the active element when the sidebar opens
+                function scrollToActivePage() {
+                    if (window.innerWidth <= 426) { // Only apply this on small screens
+                        activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                }
+
+                // Call this when the sidebar is toggled
+                document.getElementById("contentdropdownbtn").addEventListener("click", function () {
+                    setTimeout(scrollToActivePage, 300); // Small delay for smooth transition
+                });
+
                 activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         });
-        //toggles navbar
+
+        // Toggle navbar for mobile view
         function toggleNavbar() {
             var navbar = document.getElementById('navbarNav');
-            if (navbar.classList.contains('show')) {
-                navbar.classList.remove('show');
-            } else {
-                navbar.classList.add('show');
-            }
+            navbar.classList.toggle('show');
         }
-        //toggles sidebarmenu
+
+        // Toggle sidebar for mobile view
         function toggleSidebar() {
             var sidebar = document.getElementById('sidebarMenu');
             sidebar.classList.toggle('collapse'); // Toggle Bootstrap collapse class
         }
 
-                   function toggleDropdown(menuId, element) {
+        // Toggle dropdowns inside the sidebar menu
+        function toggleDropdown(menuId, element) {
             var menu = document.getElementById(menuId);
             var icon = element.querySelector(".dropdown-icon");
 
@@ -1150,9 +1168,12 @@
                 icon.classList.remove("rotate"); // Reset icon
             } else {
                 // Close all other dropdowns before opening the clicked one
-                document.querySelectorAll(".collapse.show").forEach(function(openMenu) {
+                document.querySelectorAll(".collapse.show").forEach(function (openMenu) {
                     openMenu.classList.remove("show");
-                    openMenu.previousElementSibling.querySelector(".dropdown-icon").classList.remove("rotate");
+                    if (openMenu.previousElementSibling) {
+                        let prevIcon = openMenu.previousElementSibling.querySelector(".dropdown-icon");
+                        if (prevIcon) prevIcon.classList.remove("rotate");
+                    }
                 });
 
                 menu.classList.add("show"); // Open dropdown
@@ -1161,7 +1182,9 @@
         }
 
     </script>
-    <style>
+    
+
+<style>
         .dropdown-icon {
             transition: transform 0.3s ease;
         }
