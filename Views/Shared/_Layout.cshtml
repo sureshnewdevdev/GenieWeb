@@ -32,7 +32,7 @@
 </head>
 
 <body>
-    <header class="navbar navbar-expand-lg navbar-dark bg-dark shadow fixed-top" style="z-index: 1000;">
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark shadow fixed-top" style="z-index: 1500;">
         <div class="container-fluid">
             <!-- Logo and Brand -->
             <a class="navbar-brand d-flex align-items-center" href="/">
@@ -71,7 +71,7 @@
                         <a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "Privacy" ? "active" : "")" href="@Url.Action("Privacy", "Home")">Privacy</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "PracticeQuestions" ? "active" : "")" href="@Url.Action("CSharpBasics", "PracticeQuestions")">Practice Questions CSharp</a>
+                        <a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "PracticeQuestions" ? "active" : "")" href="@Url.Action("CSharpBasics", "PracticeQuestions")">Practice Questions</a>
                     </li>
                 </ul>
             </div>
@@ -123,7 +123,8 @@
             <!--script to toggle the dropdown content active the bottom -->
             <!-- Left Menu with Scrollable Feature -->
             <!-- Sidebar Menu-->
-    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse position-fixed">
+
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse position-fixed" style="border: 1px solid rgba(0, 0, 0, 0.1)">
         <style>
             /* General Styling */
             #sidebarMenu {
@@ -186,13 +187,30 @@
                     }
 
             /* Responsive Design */
-            @@media screen and (max-width: 426px) {
+            @@media screen and (max-width: 768px) {
+                .navbar-nav .nav-link:hover {
+                    color: #ffc107;
+                }
              #sidebarMenu
             {
-                width:100%;
-                height: 40vh;
+                width:95%;
+                height:auto;
+                max-height:40vh;
                 overflow-y:auto;
-            }
+                z-index:1000;
+                margin: 10px;
+                margin-right:5px;
+                margin-top: 45px;
+                border: 5px rgba(0, 0, 0, 0.1);
+                border-radius:10px;
+             }
+
+                #contentdropdownbtn {
+                    position: sticky;
+                    top: 50px; /* Ensure it stays right below the navbar */
+                    width: 100%;
+                    z-index: 1050;  
+                }
 
             main {
                 padding: 10px; /* Adds spacing around the main content */
@@ -1179,10 +1197,24 @@
         }
 
         // Toggle sidebar for mobile view
-        function toggleSidebar() {
+                function toggleSidebar() {
             var sidebar = document.getElementById('sidebarMenu');
-            sidebar.classList.toggle('collapse'); // Toggle Bootstrap collapse class
+            var button = document.getElementById('contentdropdownbtn');
+
+            // Toggle the sidebar visibility
+            sidebar.classList.toggle('collapse');
+
+            if (!sidebar.classList.contains('collapse')) {
+                // If sidebar is OPEN, keep the button fixed below navbar
+                button.style.position = "fixed";
+                button.style.top = "60px"; // Adjusted to stay below navbar
+            } else {
+                // If sidebar is CLOSED, keep button fixed
+                button.style.position = "sticky";
+            }
         }
+
+
 
         // Toggle dropdowns inside the sidebar menu
         function toggleDropdown(menuId, element) {
