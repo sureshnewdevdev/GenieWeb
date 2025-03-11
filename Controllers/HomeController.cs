@@ -38,7 +38,7 @@ public class HomeController : Controller
     {
         ViewData["ActivePage"] = "AzureDevops";
         ViewData["ActiveMenu"] = "Azure";
-        return View("AzureDevOps");
+        return View("Azure");
     }
      public IActionResult Privacy()
     {
