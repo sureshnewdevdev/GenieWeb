@@ -1,0 +1,238 @@
+﻿@{
+    ViewData["Title"] = "Terraform Azure VM Deployment Guide";
+}
+
+<p>This guide provides a beginner-friendly, step-by-step approach to learning Terraform and deploying an Azure Virtual Machine (VM).</p>
+
+<div class="accordion" id="terraformGuide">
+
+    <!-- Step 1: What is Terraform? -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                Step 1: What is Terraform?
+            </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#terraformGuide">
+            <div class="accordion-body">
+                <p>Terraform is an Infrastructure as Code (IaC) tool developed by HashiCorp that allows you to define, provision, and manage cloud infrastructure using configuration files.</p>
+                <ul>
+                    <li>🚀 Automates cloud resource provisioning</li>
+                    <li>🎯 Supports multiple cloud providers (Azure, AWS, Google Cloud, etc.)</li>
+                    <li>📂 Uses a declarative language (HCL) to define infrastructure</li>
+                    <li>🔄 Manages the entire infrastructure lifecycle</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Why Do We Need Terraform? -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingTwo">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                Step 2: Why Do We Need Terraform?
+            </button>
+        </h2>
+        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#terraformGuide">
+            <div class="accordion-body">
+                <p>Manually setting up infrastructure using cloud portals is error-prone and time-consuming. Terraform helps by:</p>
+                <ul>
+                    <li>🚀 Automating deployments</li>
+                    <li>🎯 Ensuring consistency</li>
+                    <li>📂 Version-controlling infrastructure</li>
+                    <li>⏳ Scaling resources quickly</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3: Basic Syntax of Terraform -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingThree">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                Step 3: Basic Syntax of Terraform
+            </button>
+        </h2>
+        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#terraformGuide">
+            <div class="accordion-body">
+                <p>Terraform follows a structured declarative approach:</p>
+                <ul>
+                    <li><strong>Provider</strong> – Defines the cloud provider (Azure, AWS).</li>
+                    <li><strong>Resources</strong> – Declares what infrastructure will be created (VMs, storage, networks).</li>
+                    <li><strong>Variables</strong> – Stores reusable values.</li>
+                    <li><strong>Outputs</strong> – Displays important values after deployment.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 4: Install Terraform -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingFour">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                Step 4: Install Terraform
+            </button>
+        </h2>
+        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#terraformGuide">
+            <div class="accordion-body">
+                <p>Before deploying a VM, install Terraform on your machine.</p>
+                <p><strong>Install Terraform on Windows:</strong></p>
+                <ul>
+                    <li>Download Terraform from the official website: <a href="https://www.terraform.io/downloads.html">Terraform Downloads</a></li>
+                    <li>Extract the .zip file.</li>
+                    <li>Add Terraform to the system PATH.</li>
+                    <li>Verify installation by running: <code>terraform -version</code></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 5: Write a Full Terraform Script -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingFive">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                Step 5: Write a Full Terraform Script
+            </button>
+        </h2>
+        <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#terraformGuide">
+            <div class="accordion-body">
+                <p>Create a Terraform configuration file (<code>main.tf</code>) to deploy an Azure Virtual Machine (VM).</p>
+                <pre class="bg-dark text-light p-3 rounded">
+                <code>
+provider "azurerm" {
+  features {}
+}
+
+resource "azurerm_resource_group" "rg" {
+  name     = "MyTerraformResourceGroup"
+  location = "East US"
+}
+
+resource "azurerm_virtual_network" "vnet" {
+  name                = "MyVNet"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  address_space       = ["10.0.0.0/16"]
+}
+
+resource "azurerm_subnet" "subnet" {
+  name                 = "MySubnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.1.0/24"]
+}
+
+resource "azurerm_public_ip" "public_ip" {
+  name                = "MyPublicIP"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+}
+
+resource "azurerm_network_interface" "nic" {
+  name                = "MyNIC"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.subnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.public_ip.id
+  }
+}
+
+resource "azurerm_windows_virtual_machine" "vm" {
+  name                = "MyWindowsVM"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  size                = "Standard_B2s"
+  admin_username      = "adminuser"
+  admin_password      = "SecureP@ssw0rd123!"
+
+  network_interface_ids = [azurerm_network_interface.nic.id]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2022-Datacenter"
+    version   = "latest"
+  }
+
+  computer_name = "MyWindowsVM"
+}
+
+output "vm_public_ip" {
+  value = azurerm_public_ip.public_ip.ip_address
+}
+                    </code>
+                </pre>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Step 6: Deploy Resources to Azure -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingSix">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                Step 6: Deploy Resources to Azure
+            </button>
+        </h2>
+        <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingSix" data-bs-parent="#terraformGuide">
+            <div class="accordion-body">
+                <p>Execute the following commands to deploy resources:</p>
+                <ul>
+                    <li><code>az login</code> - Authenticate with Azure</li>
+                    <li><code>terraform init</code> - Initialize Terraform</li>
+                    <li><code>terraform plan</code> - Preview changes</li>
+                    <li><code>terraform apply -auto-approve</code> - Deploy the configuration</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 7: Access the Windows VM via RDP -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingSeven">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                Step 7: Access the Windows VM via RDP
+            </button>
+        </h2>
+        <div id="collapseSeven" class="accordion-collapse collapse" aria-labelledby="headingSeven" data-bs-parent="#terraformGuide">
+            <div class="accordion-body">
+                <p>To access the VM, follow these steps:</p>
+                <ul>
+                    <li>Find the Public IP: <code>terraform output vm_public_ip</code></li>
+                    <li>Open Remote Desktop Connection (RDP).</li>
+                    <li>Enter the Public IP Address.</li>
+                    <li>
+                        Login with:<br>
+                        - Username: <code>adminuser</code><br>
+                        - Password: <code>SecureP@ssw0rd123!</code>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 8: Destroy Resources (Cleanup) -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingEight">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEight" aria-expanded="false" aria-controls="collapseEight">
+                Step 8: Destroy Resources (Cleanup)
+            </button>
+        </h2>
+        <div id="collapseEight" class="accordion-collapse collapse" aria-labelledby="headingEight" data-bs-parent="#terraformGuide">
+            <div class="accordion-body">
+                <p>To delete all resources, run:</p>
+                <code>terraform destroy -auto-approve</code>
+            </div>
+        </div>
+    </div>
+</div>
