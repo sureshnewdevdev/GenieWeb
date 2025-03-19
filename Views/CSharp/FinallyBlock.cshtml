@@ -1,0 +1,195 @@
+﻿@{
+    ViewData["Title"] = "Finally Block in C#";
+}
+
+<!-- Section: Introduction to Finally Block -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is the Finally Block in C#?</h2>
+    <p class="lead">
+        The <b>finally block</b> in C# is used to execute code after a <code>try</code> and <code>catch</code> block, regardless of whether an exception occurs. It is commonly used for resource cleanup, such as closing file streams, database connections, or releasing memory.
+    </p>
+</section>
+
+<!-- Section: Key Features of Finally Block -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Finally Block</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Executes after the <code>try</code> and <code>catch</code> blocks, whether an exception occurs or not.</li>
+        <li class="list-group-item">Ensures resource cleanup like closing files, releasing memory, or disconnecting from databases.</li>
+        <li class="list-group-item">Cannot be skipped even if a return statement is used inside the <code>try</code> block.</li>
+        <li class="list-group-item">Used with <code>try</code> and <code>catch</code>, but not mandatory.</li>
+    </ul>
+</section>
+
+<!-- Section: Example of Finally Block -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Using the Finally Block</h2>
+    <p class="lead">
+        The following example demonstrates how a <code>finally</code> block executes regardless of whether an exception occurs.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Handling Exception with Finally Block</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            int num1 = 10, num2 = 0;
+            int result = num1 / num2; // This will cause a DivideByZeroException
+            Console.WriteLine($"Result: {result}");
+        }
+        catch (DivideByZeroException ex)
+        {
+            Console.WriteLine($"Exception Caught: {ex.Message}");
+        }
+        finally
+        {
+            Console.WriteLine("Execution completed, cleaning up resources.");
+        }
+    }
+}
+
+// Output:
+// Exception Caught: Attempted to divide by zero.
+// Execution completed, cleaning up resources.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>finally</code> block ensures that the cleanup message is always displayed, even if an exception occurs.
+    </p>
+</section>
+
+<!-- Section: Finally Block for Resource Cleanup -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Finally Block for Resource Cleanup</h2>
+    <p class="lead">
+        The <code>finally</code> block is often used to close files, release memory, or disconnect databases.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Closing a File Using Finally Block</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        StreamReader reader = null;
+        try
+        {
+            reader = new StreamReader("sample.txt");
+            Console.WriteLine(reader.ReadToEnd());
+        }
+        catch (FileNotFoundException ex)
+        {
+            Console.WriteLine($"File Not Found: {ex.Message}");
+        }
+        finally
+        {
+            if (reader != null)
+            {
+                reader.Close();
+                Console.WriteLine("File closed.");
+            }
+        }
+    }
+}
+
+// Output (if file not found):
+// File Not Found: Could not find file 'sample.txt'.
+// File closed.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>finally</code> block ensures that the file is closed, whether an exception occurs or not.
+    </p>
+</section>
+
+<!-- Section: Finally Block with Return Statement -->
+<section class="mb-5">
+    <h2 class="text-secondary">Finally Block Execution with Return Statement</h2>
+    <p class="lead">
+        The <code>finally</code> block executes even if the <code>try</code> block contains a return statement.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Finally Block Executing After Return</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine(MethodWithFinally());
+    }
+
+    static int MethodWithFinally()
+    {
+        try
+        {
+            Console.WriteLine("Inside Try Block");
+            return 10;
+        }
+        finally
+        {
+            Console.WriteLine("Finally Block Executed");
+        }
+    }
+}
+
+// Output:
+// Inside Try Block
+// Finally Block Executed
+// 10</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Even though the <code>try</code> block has a return statement, the <code>finally</code> block executes before the method returns.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Finally Block -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using Finally Block</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use the <code>finally</code> block to release resources like file handles and database connections.</li>
+        <li class="list-group-item">Avoid putting return statements inside a <code>finally</code> block, as it can override exceptions.</li>
+        <li class="list-group-item">Do not place critical business logic in the <code>finally</code> block, as it should be for cleanup only.</li>
+        <li class="list-group-item">Use <code>using</code> statements as an alternative for automatic resource management.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("MultipleCatchBlocks", "CSharp")" class="btn btn-outline-secondary">Previous: Multiple Catch Blocks</a>
+    <a href="@Url.Action("ThrowKeyword", "CSharp")" class="btn btn-outline-secondary">Next: Throw Keyword</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

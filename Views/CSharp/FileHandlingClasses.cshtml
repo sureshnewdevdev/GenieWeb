@@ -1,0 +1,252 @@
+﻿@{
+    ViewData["Title"] = "File Handling Classes in C#";
+}
+
+<!-- Section: Introduction to File Handling -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are File Handling Classes in C#?</h2>
+    <p class="lead">
+        **File handling** in C# allows reading from and writing to files using various classes available in the <code>System.IO</code> namespace. These classes help perform file operations such as **creating, reading, writing, copying, moving, and deleting files**.
+    </p>
+</section>
+
+<!-- Section: Key File Handling Classes -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key File Handling Classes in C#</h2>
+    <p class="lead">The following classes are commonly used for file handling in C#:</p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Class</th>
+                <th>Description</th>
+                <th>Example Use Case</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>File</code></td>
+                <td>Provides static methods for common file operations.</td>
+                <td>Checking file existence, copying, or deleting files.</td>
+            </tr>
+            <tr>
+                <td><code>FileInfo</code></td>
+                <td>Provides instance-based methods for file operations.</td>
+                <td>Getting file size, extension, or modifying attributes.</td>
+            </tr>
+            <tr>
+                <td><code>StreamReader</code></td>
+                <td>Reads text from a file line by line.</td>
+                <td>Reading log files.</td>
+            </tr>
+            <tr>
+                <td><code>StreamWriter</code></td>
+                <td>Writes text to a file.</td>
+                <td>Logging application activities.</td>
+            </tr>
+            <tr>
+                <td><code>FileStream</code></td>
+                <td>Reads and writes bytes from/to a file.</td>
+                <td>Working with binary data in files.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Creating a File -->
+<section class="mb-5">
+    <h2 class="text-secondary">Creating a File in C#</h2>
+    <p class="lead">
+        The <code>File.Create()</code> and <code>FileInfo.Create()</code> methods can be used to create a new file.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Creating a File</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        string filePath = "example.txt";
+
+        if (!File.Exists(filePath))
+        {
+            File.Create(filePath).Close();
+            Console.WriteLine("File created successfully.");
+        }
+        else
+        {
+            Console.WriteLine("File already exists.");
+        }
+    }
+}
+
+// Output:
+// File created successfully. (If file doesn't exist)</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>File.Create()</code> method creates a new file, and <code>Close()</code> ensures proper file closure.
+    </p>
+</section>
+
+<!-- Section: Writing to a File -->
+<section class="mb-5">
+    <h2 class="text-secondary">Writing to a File</h2>
+    <p class="lead">
+        You can write text to a file using the <code>StreamWriter</code> class.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Writing to a File</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        string filePath = "example.txt";
+
+        using (StreamWriter writer = new StreamWriter(filePath))
+        {
+            writer.WriteLine("Hello, File Handling in C#!");
+            writer.WriteLine("This is a test file.");
+        }
+
+        Console.WriteLine("Text written to file successfully.");
+    }
+}
+
+// Output:
+// Text written to file successfully.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **<code>using</code>** statement ensures the file is properly closed after writing.
+    </p>
+</section>
+
+<!-- Section: Reading from a File -->
+<section class="mb-5">
+    <h2 class="text-secondary">Reading from a File</h2>
+    <p class="lead">
+        You can read text from a file using the <code>StreamReader</code> class.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Reading from a File</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        string filePath = "example.txt";
+
+        using (StreamReader reader = new StreamReader(filePath))
+        {
+            string content = reader.ReadToEnd();
+            Console.WriteLine("File Content:");
+            Console.WriteLine(content);
+        }
+    }
+}
+
+// Output:
+// File Content:
+// Hello, File Handling in C#!
+// This is a test file.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **<code>ReadToEnd()</code>** method reads the entire content of the file.
+    </p>
+</section>
+
+<!-- Section: Copying and Deleting Files -->
+<section class="mb-5">
+    <h2 class="text-secondary">Copying and Deleting Files</h2>
+    <p class="lead">
+        You can copy or delete files using the <code>File</code> class.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Copying and Deleting Files</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        string sourceFile = "example.txt";
+        string destinationFile = "copy_example.txt";
+
+        // Copy File
+        File.Copy(sourceFile, destinationFile, true);
+        Console.WriteLine("File copied successfully.");
+
+        // Delete File
+        File.Delete(destinationFile);
+        Console.WriteLine("Copied file deleted successfully.");
+    }
+}
+
+// Output:
+// File copied successfully.
+// Copied file deleted successfully.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>File.Copy()</code> method duplicates a file, while <code>File.Delete()</code> removes it.
+    </p>
+</section>
+
+<!-- Section: Best Practices for File Handling -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for File Handling</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **<code>using</code> blocks** to ensure files are properly closed after use.</li>
+        <li class="list-group-item">Check **file existence** before performing read/write operations.</li>
+        <li class="list-group-item">Use **exception handling** to manage file access errors.</li>
+        <li class="list-group-item">Avoid **file locks** by properly closing files after use.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("PersistingObjectState", "CSharp")" class="btn btn-outline-secondary">Previous: Persisting Object State</a>
+    <a href="@Url.Action("StreamReaderWriter", "CSharp")" class="btn btn-outline-secondary">Next: StreamReader & StreamWriter</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

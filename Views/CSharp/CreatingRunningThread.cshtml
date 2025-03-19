@@ -1,0 +1,235 @@
+﻿@{
+    ViewData["Title"] = "Creating and Running Threads in C#";
+}
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <h2 class="text-secondary">Creating and Running Threads in C#</h2>
+    <p class="lead">
+        A **Thread** is the smallest unit of execution in a process. In C#, threads allow **parallel execution of tasks**, improving performance in multi-core systems. The **System.Threading** namespace provides classes for thread management.
+    </p>
+</section>
+
+<!-- Section: Key Features of Threads -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Threads</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Allows **parallel execution** of tasks.</li>
+        <li class="list-group-item">Shares **memory space** with other threads in the same process.</li>
+        <li class="list-group-item">Can be **created, started, paused, and stopped**.</li>
+        <li class="list-group-item">Supports **synchronization techniques** to prevent data inconsistency.</li>
+    </ul>
+</section>
+
+<!-- Section: Creating and Running a Thread -->
+<section class="mb-5">
+    <h2 class="text-secondary">Creating and Running a Thread</h2>
+    <p class="lead">
+        The **Thread** class in C# allows creating and running threads using the **Start()** method.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Creating and Running a Thread</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading;
+
+class Program
+{
+    static void PrintNumbers()
+    {
+        for (int i = 1; i <= 5; i++)
+        {
+            Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} prints {i}");
+            Thread.Sleep(500);
+        }
+    }
+
+    static void Main()
+    {
+        // Create a new thread
+        Thread thread1 = new Thread(PrintNumbers);
+        thread1.Start();
+
+        // Main thread execution
+        PrintNumbers();
+    }
+}
+
+// Output:
+// Thread 1 prints 1
+// Thread 2 prints 1
+// Thread 1 prints 2
+// Thread 2 prints 2
+// ...</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **Thread.Start()** method starts the execution of a new thread while the main thread continues running in parallel.
+    </p>
+</section>
+
+<!-- Section: Parameterized Threads -->
+<section class="mb-5">
+    <h2 class="text-secondary">Parameterized Threads</h2>
+    <p class="lead">
+        You can pass parameters to a thread method using **ParameterizedThreadStart**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Passing Parameters to a Thread</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading;
+
+class Program
+{
+    static void PrintMessage(object message)
+    {
+        Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} received: {message}");
+    }
+
+    static void Main()
+    {
+        Thread thread = new Thread(PrintMessage);
+        thread.Start("Hello from thread!");
+    }
+}
+
+// Output:
+// Thread 3 received: Hello from thread!</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **ParameterizedThreadStart** delegate allows passing an argument to the thread function.
+    </p>
+</section>
+
+<!-- Section: Using Lambda Expressions with Threads -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Lambda Expressions with Threads</h2>
+    <p class="lead">
+        Instead of defining a separate method, you can use **lambda expressions** to create threads.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Lambda Expression in Thread Creation</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading;
+
+class Program
+{
+    static void Main()
+    {
+        // Creating a thread using a lambda expression
+        Thread thread = new Thread(() =>
+        {
+            for (int i = 1; i <= 5; i++)
+            {
+                Console.WriteLine($"Lambda Thread prints {i}");
+                Thread.Sleep(500);
+            }
+        });
+
+        thread.Start();
+    }
+}
+
+// Output:
+// Lambda Thread prints 1
+// Lambda Thread prints 2
+// ...</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Lambda expressions simplify thread creation for short tasks.
+    </p>
+</section>
+
+<!-- Section: Thread Lifecycle Management -->
+<section class="mb-5">
+    <h2 class="text-secondary">Thread Lifecycle Management</h2>
+    <p class="lead">
+        A thread has different states: **Unstarted, Running, Suspended, Stopped, and Aborted**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Managing Thread Lifecycle</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading;
+
+class Program
+{
+    static void PrintNumbers()
+    {
+        for (int i = 1; i <= 3; i++)
+        {
+            Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} prints {i}");
+            Thread.Sleep(500);
+        }
+    }
+
+    static void Main()
+    {
+        Thread thread = new Thread(PrintNumbers);
+        thread.Start();
+
+        thread.Join();  // Waits for thread to complete
+        Console.WriteLine("Thread execution completed.");
+    }
+}
+
+// Output:
+// Thread 1 prints 1
+// Thread 1 prints 2
+// Thread 1 prints 3
+// Thread execution completed.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **Join()** method ensures that the main thread waits until the child thread completes.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Threading -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Threading</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **Thread.Join()** to wait for a thread to finish execution.</li>
+        <li class="list-group-item">Avoid **excessive thread creation** to prevent performance issues.</li>
+        <li class="list-group-item">Use **locks, mutexes, or semaphores** for thread synchronization.</li>
+        <li class="list-group-item">For **asynchronous programming**, consider using the **Task Parallel Library (TPL)** instead.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("ProcessVsThread", "CSharp")" class="btn btn-outline-secondary">Previous: Process vs Thread</a>
+    <a href="@Url.Action("ThreadSleep", "CSharp")" class="btn btn-outline-secondary">Next: Thread Sleep</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

@@ -1,0 +1,214 @@
+﻿@{
+    ViewData["Title"] = "Pattern Matching in C#";
+}
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <h2 class="text-secondary">Understanding Pattern Matching in C#</h2>
+    <p class="lead">
+        **Pattern Matching** in C# allows for more **concise, readable, and expressive** code by testing values against patterns. Introduced in **C# 7.0** and enhanced in later versions, pattern matching enables **type checking, conditional assignments, and deconstruction** in a more elegant way.
+    </p>
+</section>
+
+<!-- Section: Key Features of Pattern Matching -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Pattern Matching</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Allows **conditional type checking and assignment**.</li>
+        <li class="list-group-item">Eliminates the need for **explicit type casting**.</li>
+        <li class="list-group-item">Supports **switch expressions, `is` operator, and tuple patterns**.</li>
+        <li class="list-group-item">Simplifies **object deconstruction and property testing**.</li>
+    </ul>
+</section>
+
+<!-- Section: Using `is` Pattern Matching -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using `is` Pattern Matching</h2>
+    <p class="lead">
+        The `is` keyword allows checking the **type of an object** and casting it **simultaneously**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Checking and Casting with `is`</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        object value = "Hello, C#";
+
+        if (value is string text)
+        {
+            Console.WriteLine($"String Length: {text.Length}");
+        }
+    }
+}
+
+// Output:
+// String Length: 9</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Instead of **explicit casting (`(string)value`)**, `is` pattern matching automatically **checks and assigns** the variable.
+    </p>
+</section>
+
+<!-- Section: Switch Pattern Matching -->
+<section class="mb-5">
+    <h2 class="text-secondary">Switch Pattern Matching</h2>
+    <p class="lead">
+        **Pattern Matching with `switch`** enables more **concise and readable** conditional statements.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Switch Pattern Matching</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine(GetShapeArea(new Circle(5)));
+        Console.WriteLine(GetShapeArea(new Rectangle(4, 6)));
+    }
+
+    static double GetShapeArea(object shape) => shape switch
+    {
+        Circle c => Math.PI * c.Radius * c.Radius,
+        Rectangle r => r.Width * r.Height,
+        _ => throw new ArgumentException("Unknown shape")
+    };
+}
+
+record Circle(double Radius);
+record Rectangle(double Width, double Height);
+
+// Output:
+// 78.53981633974483
+// 24</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **switch expression** eliminates **boilerplate `case` blocks**, making the code **cleaner and more readable**.
+    </p>
+</section>
+
+<!-- Section: Property Pattern Matching -->
+<section class="mb-5">
+    <h2 class="text-secondary">Property Pattern Matching</h2>
+    <p class="lead">
+        **Property patterns** allow matching **specific properties** of an object instead of its entire type.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Property Patterns</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        Person person = new("Alice", 30);
+
+        if (person is { Age: >= 18 })
+        {
+            Console.WriteLine($"{person.Name} is an adult.");
+        }
+    }
+}
+
+record Person(string Name, int Age);
+
+// Output:
+// Alice is an adult.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **property pattern** `{ Age: >= 18 }` allows matching based on **specific property values**.
+    </p>
+</section>
+
+<!-- Section: Tuple Pattern Matching -->
+<section class="mb-5">
+    <h2 class="text-secondary">Tuple Pattern Matching</h2>
+    <p class="lead">
+        **Tuple patterns** allow matching multiple values inside a tuple, simplifying complex conditions.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Tuple Pattern Matching</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine(DescribeWeather(30, true));
+        Console.WriteLine(DescribeWeather(10, false));
+    }
+
+    static string DescribeWeather(int temperature, bool isRaining) => (temperature, isRaining) switch
+    {
+        (> 25, true) => "Hot and rainy",
+        (> 25, false) => "Hot and dry",
+        (< 15, _) => "Cold",
+        _ => "Moderate"
+    };
+}
+
+// Output:
+// Hot and rainy
+// Cold</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        **Tuple patterns** simplify multiple conditions into a **clean and readable** format.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Pattern Matching -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using Pattern Matching</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **`is` pattern matching** to avoid unnecessary **type casting**.</li>
+        <li class="list-group-item">Use **switch expressions** for **more readable conditionals**.</li>
+        <li class="list-group-item">Use **property patterns** when matching based on **specific object properties**.</li>
+        <li class="list-group-item">Use **tuple patterns** for **multiple value comparisons** in a concise way.</li>
+        <li class="list-group-item">Ensure **patterns are exhaustive** to handle all possible cases properly.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("ExceptionFilters", "CSharp")" class="btn btn-outline-secondary">Previous: Exception Filters</a>
+    <a href="@Url.Action("Tuples", "CSharp")" class="btn btn-outline-secondary">Next: Tuples</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

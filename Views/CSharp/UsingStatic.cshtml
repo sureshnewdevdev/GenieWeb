@@ -1,0 +1,169 @@
+﻿@{
+    ViewData["Title"] = "Using Static in C#";
+}
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <h2 class="text-secondary">Understanding `using static` in C#</h2>
+    <p class="lead">
+        The **`using static`** directive in C# allows direct access to **static members** of a class **without specifying the class name**. This improves code readability and reduces verbosity when frequently using static methods or properties.
+    </p>
+</section>
+
+<!-- Section: Key Features of Using Static -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of `using static`</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Allows direct access to **static methods and properties** of a class.</li>
+        <li class="list-group-item">Improves **code readability** by removing the need to prefix static members with the class name.</li>
+        <li class="list-group-item">Commonly used with **Math, Console, Enum, and custom utility classes**.</li>
+        <li class="list-group-item">Cannot be used for **instance members**—only static members are accessible.</li>
+    </ul>
+</section>
+
+<!-- Section: Basic Usage of `using static` -->
+<section class="mb-5">
+    <h2 class="text-secondary">Basic Usage of `using static`</h2>
+    <p class="lead">
+        By importing static members, you can **call them directly** without using the class name.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Static for Console and Math Methods</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using static System.Console;
+using static System.Math;
+
+class Program
+{
+    static void Main()
+    {
+        WriteLine("Using Static in C#"); // Instead of Console.WriteLine()
+        double result = Sqrt(25); // Instead of Math.Sqrt(25)
+        WriteLine($"Square root of 25 is {result}");
+    }
+}
+
+// Output:
+// Using Static in C#
+// Square root of 25 is 5</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The `using static System.Console;` directive allows calling **WriteLine()** without prefixing it with `Console.`.
+    </p>
+</section>
+
+<!-- Section: Using Static with Enums -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Static with Enums</h2>
+    <p class="lead">
+        `using static` simplifies working with enums by removing the need to specify the **enum type** before its values.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Static with Enum Values</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using static System.DayOfWeek;
+
+class Program
+{
+    static void Main()
+    {
+        DayOfWeek today = Friday;
+        Console.WriteLine($"Today is {today}");
+    }
+}
+
+// Output:
+// Today is Friday</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The `using static System.DayOfWeek;` directive allows **directly referencing** `Friday` without `DayOfWeek.Friday`.
+    </p>
+</section>
+
+<!-- Section: Using Static with Custom Utility Classes -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Static with Custom Utility Classes</h2>
+    <p class="lead">
+        You can use `using static` with **custom static classes** to improve code simplicity.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Static with a Custom Utility Class</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using static Utility;
+
+static class Utility
+{
+    public static void PrintMessage(string message) => Console.WriteLine(message);
+}
+
+class Program
+{
+    static void Main()
+    {
+        PrintMessage("Hello from Utility!"); // Instead of Utility.PrintMessage()
+    }
+}
+
+// Output:
+// Hello from Utility!</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        `using static Utility;` allows **directly calling** `PrintMessage()` without specifying `Utility.`.
+    </p>
+</section>
+
+<!-- Section: Limitations of Using Static -->
+<section class="mb-5">
+    <h2 class="text-secondary">Limitations of `using static`</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Cannot be used with **instance members**—only static methods and properties.</li>
+        <li class="list-group-item">May **reduce code readability** if used excessively in large projects.</li>
+        <li class="list-group-item">Cannot be applied to **entire namespaces**, only individual classes.</li>
+    </ul>
+</section>
+
+<!-- Section: Best Practices for Using Static -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using Static</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use `using static` for frequently used **static methods** like `Math`, `Console`, or custom utilities.</li>
+        <li class="list-group-item">Avoid overusing it to prevent **naming conflicts** in large projects.</li>
+        <li class="list-group-item">Use it **only when it improves code readability**.</li>
+        <li class="list-group-item">Ensure **clarity** by keeping **static imports limited to relevant sections**.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-end mt-4">
+    <a href="@Url.Action("StringInterpolation", "CSharp")" class="btn btn-outline-secondary">Next: String Interpolation</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

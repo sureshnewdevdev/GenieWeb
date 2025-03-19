@@ -1,0 +1,243 @@
+﻿@{
+    ViewData["Title"] = "Constraints in C# Generics";
+}
+
+<!-- Section: Introduction to Constraints -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Constraints in C# Generics?</h2>
+    <p class="lead">
+        **Constraints** in C# generics are used to specify the type requirements for generic parameters. Constraints restrict the types that can be used with a generic class, method, or interface, ensuring type safety and better performance.
+    </p>
+</section>
+
+<!-- Section: Key Features of Constraints -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Constraints</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Ensures **type safety** by restricting generic types.</li>
+        <li class="list-group-item">Improves **performance** by avoiding unnecessary boxing and unboxing.</li>
+        <li class="list-group-item">Supports multiple constraints on a single generic type.</li>
+        <li class="list-group-item">Used in **generic classes, methods, interfaces, and delegates**.</li>
+    </ul>
+</section>
+
+<!-- Section: Types of Constraints -->
+<section class="mb-5">
+    <h2 class="text-secondary">Types of Constraints in C#</h2>
+    <p class="lead">
+        Below are different types of constraints used in C# generics:
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Constraint Type</th>
+                <th>Syntax</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Reference Type Constraint</td>
+                <td><code>where T : class</code></td>
+                <td>Ensures that the generic type is a **reference type**.</td>
+            </tr>
+            <tr>
+                <td>Value Type Constraint</td>
+                <td><code>where T : struct</code></td>
+                <td>Ensures that the generic type is a **value type**.</td>
+            </tr>
+            <tr>
+                <td>Default Constructor Constraint</td>
+                <td><code>where T : new()</code></td>
+                <td>Ensures that the generic type has a **parameterless constructor**.</td>
+            </tr>
+            <tr>
+                <td>Base Class Constraint</td>
+                <td><code>where T : BaseClass</code></td>
+                <td>Ensures that the generic type **inherits from a specific base class**.</td>
+            </tr>
+            <tr>
+                <td>Interface Constraint</td>
+                <td><code>where T : IInterface</code></td>
+                <td>Ensures that the generic type **implements a specific interface**.</td>
+            </tr>
+            <tr>
+                <td>Multiple Constraints</td>
+                <td><code>where T : class, new()</code></td>
+                <td>Applies **multiple constraints** to a generic type.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Using Reference Type Constraints -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Reference Type Constraints (<code>where T : class</code>)</h2>
+    <p class="lead">
+        Ensures that the generic type is a **reference type** (e.g., string, object, custom classes).
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Reference Type Constraint</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class ReferenceTypeExample<T> where T : class
+{
+    public T Value { get; set; }
+
+    public ReferenceTypeExample(T value)
+    {
+        Value = value;
+    }
+
+    public void Display()
+    {
+        Console.WriteLine($"Value: {Value}");
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        ReferenceTypeExample<string> example = new ReferenceTypeExample<string>("Hello Generics");
+        example.Display();
+
+        // ReferenceTypeExample<int> errorExample = new ReferenceTypeExample<int>(100); // Error: 'int' is not a reference type
+    }
+}
+
+// Output:
+// Value: Hello Generics</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **class constraint** ensures that only reference types (like strings) can be used.
+    </p>
+</section>
+
+<!-- Section: Using Value Type Constraints -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Value Type Constraints (<code>where T : struct</code>)</h2>
+    <p class="lead">
+        Ensures that the generic type is a **value type** (e.g., int, double, bool).
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Value Type Constraint</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class ValueTypeExample<T> where T : struct
+{
+    public T Value { get; set; }
+
+    public ValueTypeExample(T value)
+    {
+        Value = value;
+    }
+
+    public void Display()
+    {
+        Console.WriteLine($"Value: {Value}");
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        ValueTypeExample<int> example = new ValueTypeExample<int>(42);
+        example.Display();
+
+        // ValueTypeExample<string> errorExample = new ValueTypeExample<string>("Hello"); // Error: 'string' is not a value type
+    }
+}
+
+// Output:
+// Value: 42</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **struct constraint** ensures that only value types (like integers) can be used.
+    </p>
+</section>
+
+<!-- Section: Using Multiple Constraints -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Multiple Constraints</h2>
+    <p class="lead">
+        Multiple constraints can be combined to enforce **stronger type restrictions**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Applying Multiple Constraints</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class MultiConstraintExample<T> where T : class, new()
+{
+    public T Instance { get; set; } = new T();
+}
+
+// Usage
+class SampleClass { }
+
+class Program
+{
+    static void Main()
+    {
+        MultiConstraintExample<SampleClass> example = new MultiConstraintExample<SampleClass>();
+        Console.WriteLine("Instance created successfully.");
+    }
+}
+
+// Output:
+// Instance created successfully.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        This example ensures that **T is a reference type** and **has a parameterless constructor**.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Using Constraints -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using Constraints</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use constraints to **ensure type safety** when working with generics.</li>
+        <li class="list-group-item">Apply **interface constraints** to enforce method contracts.</li>
+        <li class="list-group-item">Use the **<code>new()</code> constraint** when an instance needs to be created within the class.</li>
+        <li class="list-group-item">Limit **multiple constraints** to avoid unnecessary complexity.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-start mt-4">
+    <a href="@Url.Action("Iterators", "CSharp")" class="btn btn-outline-secondary">Previous: Iterators</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

@@ -1,0 +1,205 @@
+﻿@{
+    ViewData["Title"] = "Instance, Class & Reference Variables in C#";
+}
+
+<!-- Section: Introduction to Variables in C# -->
+<section class="mb-5">
+    <h2 class="text-secondary">Understanding Instance, Class & Reference Variables</h2>
+    <p class="lead">
+        Variables in C# are categorized into instance variables, class (static) variables, and reference variables based on their scope, behavior, and memory allocation.
+    </p>
+</section>
+
+<!-- Section: Instance Variables -->
+<section class="mb-5">
+    <h2 class="text-secondary">Instance Variables</h2>
+    <p class="lead">
+        An <b>instance variable</b> is a non-static field that belongs to an object (instance) of a class. Each object has its own copy of instance variables.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example of Instance Variables:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class Car
+{
+    // Instance variables (non-static fields)
+    public string brand;
+    public int speed;
+
+    // Constructor
+    public Car(string brand, int speed)
+    {
+        this.brand = brand;
+        this.speed = speed;
+    }
+
+    public void ShowDetails()
+    {
+        Console.WriteLine($"Brand: {brand}, Speed: {speed} km/h");
+    }
+}
+
+// Usage
+Car car1 = new Car("Toyota", 100);
+Car car2 = new Car("Honda", 120);
+
+car1.ShowDetails();  // Output: Brand: Toyota, Speed: 100 km/h
+car2.ShowDetails();  // Output: Brand: Honda, Speed: 120 km/h</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Each object has a unique copy of instance variables. Changes to one instance do not affect another.
+    </p>
+</section>
+
+<!-- Section: Class (Static) Variables -->
+<section class="mb-5">
+    <h2 class="text-secondary">Class (Static) Variables</h2>
+    <p class="lead">
+        A <b>class variable</b> (also known as a static variable) is shared across all instances of the class. It belongs to the class rather than a specific instance.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example of Static Variables:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class BankAccount
+{
+    // Static variable shared by all instances
+    public static double interestRate = 5.0;
+    public string accountHolder;
+
+    public BankAccount(string accountHolder)
+    {
+        this.accountHolder = accountHolder;
+    }
+
+    public void ShowInterestRate()
+    {
+        Console.WriteLine($"{accountHolder} - Interest Rate: {interestRate}%");
+    }
+}
+
+// Usage
+BankAccount acc1 = new BankAccount("Alice");
+BankAccount acc2 = new BankAccount("Bob");
+
+acc1.ShowInterestRate(); // Output: Alice - Interest Rate: 5%
+acc2.ShowInterestRate(); // Output: Bob - Interest Rate: 5%
+
+BankAccount.interestRate = 6.5; // Modifying static variable
+
+acc1.ShowInterestRate(); // Output: Alice - Interest Rate: 6.5%
+acc2.ShowInterestRate(); // Output: Bob - Interest Rate: 6.5%</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Static variables are shared among all instances. Changing it in one place affects all instances.
+    </p>
+</section>
+
+<!-- Section: Reference Variables -->
+<section class="mb-5">
+    <h2 class="text-secondary">Reference Variables</h2>
+    <p class="lead">
+        A <b>reference variable</b> holds the memory address of an object rather than the object itself. Assigning a reference variable to another variable makes both point to the same object.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example of Reference Variables:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class Person
+{
+    public string Name;
+
+    public Person(string name)
+    {
+        Name = name;
+    }
+}
+
+// Usage
+Person person1 = new Person("Alice");
+Person person2 = person1; // Both reference the same object
+
+person2.Name = "Bob";
+
+Console.WriteLine(person1.Name); // Output: Bob</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Since <code>person1</code> and <code>person2</code> reference the same object, modifying one affects the other.
+    </p>
+</section>
+
+<!-- Section: Differences Between Instance, Class & Reference Variables -->
+<section class="mb-5">
+    <h2 class="text-secondary">Differences Between Instance, Class & Reference Variables</h2>
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Feature</th>
+                <th>Instance Variable</th>
+                <th>Class (Static) Variable</th>
+                <th>Reference Variable</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Belongs To</td>
+                <td>Each object</td>
+                <td>The class</td>
+                <td>Memory address of an object</td>
+            </tr>
+            <tr>
+                <td>Storage</td>
+                <td>Heap</td>
+                <td>Class-level (Static memory)</td>
+                <td>Heap (Reference points to memory location)</td>
+            </tr>
+            <tr>
+                <td>Effect on Copy</td>
+                <td>Each instance has its own copy</td>
+                <td>Shared among all instances</td>
+                <td>Multiple references point to the same object</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Key Points to Remember -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Points to Remember</h2>
+    <ul class="list-group">
+        <li class="list-group-item"><b>Instance variables</b> belong to individual objects and are not shared.</li>
+        <li class="list-group-item"><b>Class (static) variables</b> belong to the class and are shared across all objects.</li>
+        <li class="list-group-item"><b>Reference variables</b> hold memory addresses and can point to the same object.</li>
+        <li class="list-group-item">Understanding these concepts is crucial for effective memory management in C#.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("ClassArchitecture", "CSharp")" class="btn btn-outline-secondary">Previous: Class Architecture</a>
+    <a href="@Url.Action("AccessModifier", "CSharp")" class="btn btn-outline-secondary">Next: Access Modifiers</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

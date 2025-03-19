@@ -1,0 +1,239 @@
+﻿@{
+    ViewData["Title"] = "Working with Generics in C#";
+}
+
+<!-- Section: Introduction to Generics -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Generics in C#?</h2>
+    <p class="lead">
+        <b>Generics</b> in C# allow developers to define classes, methods, and interfaces with a placeholder for data types. This enables type safety, code reusability, and better performance by avoiding unnecessary type casting.
+    </p>
+</section>
+
+<!-- Section: Key Features of Generics -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Generics</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Provides **type safety** by allowing specific data types.</li>
+        <li class="list-group-item">Improves **code reusability** by working with multiple data types.</li>
+        <li class="list-group-item">Enhances **performance** by reducing boxing and unboxing operations.</li>
+        <li class="list-group-item">Works with **generic collections** like <code>List&lt;T&gt;</code>, <code>Dictionary&lt;TKey, TValue&gt;</code>.</li>
+    </ul>
+</section>
+
+<!-- Section: Generic Classes -->
+<section class="mb-5">
+    <h2 class="text-secondary">Generic Classes in C#</h2>
+    <p class="lead">
+        A **generic class** allows the same class to work with different data types.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Defining and Using a Generic Class</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class GenericContainer<T>
+{
+    private T item;
+
+    public void Add(T value)
+    {
+        item = value;
+    }
+
+    public T Get()
+    {
+        return item;
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        GenericContainer<int> intContainer = new GenericContainer<int>();
+        intContainer.Add(10);
+        Console.WriteLine($"Integer Value: {intContainer.Get()}");
+
+        GenericContainer<string> stringContainer = new GenericContainer<string>();
+        stringContainer.Add("Hello Generics");
+        Console.WriteLine($"String Value: {stringContainer.Get()}");
+    }
+}
+
+// Output:
+// Integer Value: 10
+// String Value: Hello Generics</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>GenericContainer&lt;T&gt;</code> class allows storing different data types while maintaining type safety.
+    </p>
+</section>
+
+<!-- Section: Generic Methods -->
+<section class="mb-5">
+    <h2 class="text-secondary">Generic Methods in C#</h2>
+    <p class="lead">
+        A **generic method** allows a method to work with different data types without code duplication.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Implementing a Generic Method</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Print<T>(T value)
+    {
+        Console.WriteLine($"Value: {value}");
+    }
+
+    static void Main()
+    {
+        Print(100);
+        Print("Generics in C#");
+        Print(3.14);
+    }
+}
+
+// Output:
+// Value: 100
+// Value: Generics in C#
+// Value: 3.14</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>Print&lt;T&gt;</code> method can accept any data type, improving code flexibility.
+    </p>
+</section>
+
+<!-- Section: Generic Interfaces -->
+<section class="mb-5">
+    <h2 class="text-secondary">Generic Interfaces in C#</h2>
+    <p class="lead">
+        A **generic interface** defines common functionality that can be implemented for multiple data types.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Implementing a Generic Interface</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+interface IRepository<T>
+{
+    void Save(T item);
+}
+
+class UserRepository : IRepository<string>
+{
+    public void Save(string user)
+    {
+        Console.WriteLine($"User '{user}' saved to database.");
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        IRepository<string> userRepo = new UserRepository();
+        userRepo.Save("Alice");
+    }
+}
+
+// Output:
+// User 'Alice' saved to database.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>IRepository&lt;T&gt;</code> interface allows different classes to implement their own version while maintaining type flexibility.
+    </p>
+</section>
+
+<!-- Section: Generic Constraints -->
+<section class="mb-5">
+    <h2 class="text-secondary">Generic Constraints</h2>
+    <p class="lead">
+        **Constraints** in generics restrict the allowed data types that can be used with a generic class or method.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Generic Constraints</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class DataProcessor<T> where T : class
+{
+    public void Process(T data)
+    {
+        Console.WriteLine($"Processing: {data}");
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        DataProcessor<string> processor = new DataProcessor<string>();
+        processor.Process("Generic Constraints in C#");
+
+        // DataProcessor<int> invalid = new DataProcessor<int>(); // Error: 'int' is not a reference type
+    }
+}
+
+// Output:
+// Processing: Generic Constraints in C#</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The constraint <code>where T : class</code> ensures that only reference types can be used.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Generics -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using Generics</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use generics to **avoid type casting** and improve performance.</li>
+        <li class="list-group-item">Apply **generic constraints** to enforce type rules.</li>
+        <li class="list-group-item">Prefer **generic collections** (e.g., <code>List&lt;T&gt;</code>) over non-generic collections.</li>
+        <li class="list-group-item">Use generics in **interfaces and methods** for reusable, flexible code.</li>
+        <li class="list-group-item">Use **multiple type parameters** if needed (e.g., <code>Dictionary&lt;TKey, TValue&gt;</code>).</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("CollectionAPI", "CSharp")" class="btn btn-outline-secondary">Previous: Collection API</a>
+    <a href="@Url.Action("CollectionInitializers", "CSharp")" class="btn btn-outline-secondary">Next: Collection Initializers</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

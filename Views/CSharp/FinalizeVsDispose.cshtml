@@ -1,0 +1,258 @@
+﻿@{
+    ViewData["Title"] = "Finalize vs Dispose in C#";
+}
+
+<!-- Section: Introduction to Finalize vs Dispose -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is the Difference Between Finalize and Dispose in C#?</h2>
+    <p class="lead">
+        In C#, both <b>Finalize</b> and <b>Dispose</b> methods are used for garbage collection and resource cleanup, but they serve different purposes.
+    </p>
+</section>
+
+<!-- Section: Key Differences Between Finalize and Dispose -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Differences Between Finalize and Dispose</h2>
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Feature</th>
+                <th>Finalize</th>
+                <th>Dispose</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Definition</td>
+                <td>Called by the Garbage Collector to clean up unmanaged resources.</td>
+                <td>Called manually by the developer to release resources.</td>
+            </tr>
+            <tr>
+                <td>Explicit Call</td>
+                <td>Cannot be called explicitly.</td>
+                <td>Must be called explicitly via <code>Dispose()</code> or a <code>using</code> block.</td>
+            </tr>
+            <tr>
+                <td>Performance</td>
+                <td>Slower because it depends on Garbage Collection.</td>
+                <td>Faster since it is called immediately when needed.</td>
+            </tr>
+            <tr>
+                <td>Usage</td>
+                <td>Used when the object holds unmanaged resources.</td>
+                <td>Used for explicit cleanup of unmanaged resources like database connections, file handles.</td>
+            </tr>
+            <tr>
+                <td>Deterministic</td>
+                <td>No, runs at an uncertain time.</td>
+                <td>Yes, called explicitly when needed.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Example of Finalize -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Using Finalize in C#</h2>
+    <p class="lead">
+        The <code>Finalize</code> method is used to clean up unmanaged resources but is executed only when the Garbage Collector runs.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Implementing Finalize</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class ResourceHandler
+{
+    public ResourceHandler()
+    {
+        Console.WriteLine("Resource acquired.");
+    }
+
+    ~ResourceHandler() // Finalizer (destructor)
+    {
+        Console.WriteLine("Finalizer called, resource released.");
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        ResourceHandler handler = new ResourceHandler();
+        handler = null; // Mark object for garbage collection
+
+        GC.Collect();  // Force Garbage Collection
+        GC.WaitForPendingFinalizers();
+
+        Console.WriteLine("End of program.");
+    }
+}
+
+// Output:
+// Resource acquired.
+// Finalizer called, resource released.
+// End of program.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>~ResourceHandler()</code> (Finalizer) method is called by the Garbage Collector when the object is no longer needed.
+    </p>
+</section>
+
+<!-- Section: Example of Dispose -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Using Dispose in C#</h2>
+    <p class="lead">
+        The <code>IDisposable</code> interface provides the <code>Dispose</code> method for manually releasing resources.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Implementing IDisposable</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class ResourceHandler : IDisposable
+{
+    public ResourceHandler()
+    {
+        Console.WriteLine("Resource acquired.");
+    }
+
+    public void Dispose()
+    {
+        Console.WriteLine("Dispose method called, resource released.");
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        using (ResourceHandler handler = new ResourceHandler())
+        {
+            Console.WriteLine("Using resource...");
+        } // Dispose is automatically called
+
+        Console.WriteLine("End of program.");
+    }
+}
+
+// Output:
+// Resource acquired.
+// Using resource...
+// Dispose method called, resource released.
+// End of program.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>Dispose()</code> method ensures that the resource is released as soon as the <code>using</code> block exits.
+    </p>
+</section>
+
+<!-- Section: Combining Finalize and Dispose -->
+<section class="mb-5">
+    <h2 class="text-secondary">Combining Finalize and Dispose</h2>
+    <p class="lead">
+        You can implement both <code>Finalize</code> and <code>Dispose</code> in a class to handle resource cleanup efficiently.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Implementing Both Finalize and Dispose</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class ResourceHandler : IDisposable
+{
+    public ResourceHandler()
+    {
+        Console.WriteLine("Resource acquired.");
+    }
+
+    ~ResourceHandler() // Finalizer
+    {
+        Dispose(false);
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this); // Prevent Finalizer from running
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            Console.WriteLine("Dispose called, releasing managed resources.");
+        }
+        Console.WriteLine("Releasing unmanaged resources.");
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        using (ResourceHandler handler = new ResourceHandler())
+        {
+            Console.WriteLine("Using resource...");
+        } // Dispose is automatically called
+
+        Console.WriteLine("End of program.");
+    }
+}
+
+// Output:
+// Resource acquired.
+// Using resource...
+// Dispose called, releasing managed resources.
+// Releasing unmanaged resources.
+// End of program.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        This example ensures proper cleanup by using both <code>Dispose()</code> and a finalizer.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Finalize and Dispose -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Finalize and Dispose</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Prefer using <code>Dispose()</code> for explicit resource cleanup.</li>
+        <li class="list-group-item">Implement a finalizer only if dealing with unmanaged resources.</li>
+        <li class="list-group-item">Call <code>GC.SuppressFinalize(this)</code> in <code>Dispose()</code> to prevent redundant finalization.</li>
+        <li class="list-group-item">Use the <code>using</code> statement for objects implementing <code>IDisposable</code>.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-start mt-4">
+    <a href="@Url.Action("GarbageCollectionAlgorithm", "CSharp")" class="btn btn-outline-secondary">Previous: Garbage Collection Algorithm</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

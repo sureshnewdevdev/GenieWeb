@@ -1,0 +1,206 @@
+﻿@{
+    ViewData["Title"] = "Partial Types in C#";
+}
+
+<!-- Section: Introduction to Partial Types -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Partial Types in C#?</h2>
+    <p class="lead">
+        <b>Partial Types</b> in C# allow a single class, struct, or interface to be split across multiple files. This is useful for large projects where multiple developers work on the same class.
+    </p>
+</section>
+
+<!-- Section: Key Features of Partial Types -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Partial Types</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Allows a class, struct, or interface to be split across multiple files.</li>
+        <li class="list-group-item">Each part of the partial type must use the <code>partial</code> keyword.</li>
+        <li class="list-group-item">All parts must be in the same namespace.</li>
+        <li class="list-group-item">Commonly used in auto-generated code (e.g., Windows Forms, Entity Framework).</li>
+    </ul>
+</section>
+
+<!-- Section: Example of Partial Classes -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Using Partial Classes</h2>
+    <p class="lead">
+        The following example demonstrates how to define and use a partial class in two separate files.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Partial Class in Multiple Files</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>// File 1: Employee_Part1.cs
+public partial class Employee
+{
+    public string Name { get; set; }
+    public int ID { get; set; }
+}
+
+// File 2: Employee_Part2.cs
+public partial class Employee
+{
+    public void Display()
+    {
+        Console.WriteLine($"Employee Name: {Name}, ID: {ID}");
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        Employee emp = new Employee { Name = "Alice", ID = 101 };
+        emp.Display();
+    }
+}
+
+// Output:
+// Employee Name: Alice, ID: 101</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Here, the <code>Employee</code> class is split across two files but works as a single unit.
+    </p>
+</section>
+
+<!-- Section: Partial Methods -->
+<section class="mb-5">
+    <h2 class="text-secondary">Partial Methods in C#</h2>
+    <p class="lead">
+        Partial methods allow method declarations in one part of a partial class and their implementation in another.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Partial Method Implementation</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>// File 1: Car_Part1.cs
+public partial class Car
+{
+    public string Model { get; set; }
+
+    partial void ShowModel(); // Declaration
+}
+
+// File 2: Car_Part2.cs
+public partial class Car
+{
+    partial void ShowModel() // Implementation
+    {
+        Console.WriteLine($"Car Model: {Model}");
+    }
+
+    public void Display()
+    {
+        ShowModel();
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        Car car = new Car { Model = "Tesla" };
+        car.Display();
+    }
+}
+
+// Output:
+// Car Model: Tesla</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>ShowModel</code> method is declared in one part and implemented in another part of the <code>Car</code> class.
+    </p>
+</section>
+
+<!-- Section: Partial Interfaces and Structs -->
+<section class="mb-5">
+    <h2 class="text-secondary">Partial Interfaces and Structs</h2>
+    <p class="lead">
+        Similar to classes, interfaces and structs can also be defined using the <code>partial</code> keyword.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Partial Interface</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>// File 1: IAnimal_Part1.cs
+public partial interface IAnimal
+{
+    void MakeSound();
+}
+
+// File 2: IAnimal_Part2.cs
+public partial interface IAnimal
+{
+    void Move();
+}
+
+// Implementing the interface
+public class Dog : IAnimal
+{
+    public void MakeSound() => Console.WriteLine("Dog Barks!");
+    public void Move() => Console.WriteLine("Dog Runs!");
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        Dog dog = new Dog();
+        dog.MakeSound();
+        dog.Move();
+    }
+}
+
+// Output:
+// Dog Barks!
+// Dog Runs!</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>IAnimal</code> interface is split into two files but works as a single unit when implemented.
+    </p>
+</section>
+
+<!-- Section: When to Use Partial Types -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Partial Types?</h2>
+    <ul class="list-group">
+        <li class="list-group-item">When multiple developers work on the same class.</li>
+        <li class="list-group-item">To separate auto-generated and manually written code (e.g., Windows Forms, Entity Framework).</li>
+        <li class="list-group-item">For better organization of large classes.</li>
+        <li class="list-group-item">When defining interfaces across multiple files.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("PropertyAccessors", "CSharp")" class="btn btn-outline-secondary">Previous: Property Accessors</a>
+    <a href="@Url.Action("ExtensionMethods", "CSharp")" class="btn btn-outline-secondary">Next: Extension Methods</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

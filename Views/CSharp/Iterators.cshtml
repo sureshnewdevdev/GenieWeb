@@ -1,0 +1,214 @@
+﻿@{
+    ViewData["Title"] = "Iterators in C#";
+}
+
+<!-- Section: Introduction to Iterators -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Iterators in C#?</h2>
+    <p class="lead">
+        An **Iterator** in C# is a feature that enables looping over collections using **lazy evaluation**. Iterators simplify traversing custom collections by implementing the <code>yield return</code> and <code>yield break</code> statements.
+    </p>
+</section>
+
+<!-- Section: Key Features of Iterators -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Iterators</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Used to iterate over collections in a simple and efficient way.</li>
+        <li class="list-group-item">Utilizes **lazy evaluation**, generating values as they are requested.</li>
+        <li class="list-group-item">Supports <code>yield return</code> to return values one by one.</li>
+        <li class="list-group-item">Can be implemented in **methods, properties, or indexers**.</li>
+    </ul>
+</section>
+
+<!-- Section: Using Iterators with IEnumerable -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Iterators with IEnumerable</h2>
+    <p class="lead">
+        The most common way to use an iterator is to implement <code>IEnumerable</code> and <code>IEnumerable&lt;T&gt;</code>.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Implementing an Iterator with IEnumerable</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Collections;
+using System.Collections.Generic;
+
+class NumberCollection : IEnumerable<int>
+{
+    public IEnumerator<int> GetEnumerator()
+    {
+        for (int i = 1; i <= 5; i++)
+        {
+            yield return i;
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        NumberCollection numbers = new NumberCollection();
+
+        Console.WriteLine("Numbers:");
+        foreach (var num in numbers)
+        {
+            Console.WriteLine(num);
+        }
+    }
+}
+
+// Output:
+// Numbers:
+// 1
+// 2
+// 3
+// 4
+// 5</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>yield return</code> statement allows iterating through numbers **without storing all elements in memory**.
+    </p>
+</section>
+
+<!-- Section: Using yield return in Methods -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using <code>yield return</code> in Methods</h2>
+    <p class="lead">
+        The <code>yield return</code> statement allows methods to return values **one at a time** instead of returning all at once.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using yield return in a Method</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Collections.Generic;
+
+class Program
+{
+    static IEnumerable<int> GetEvenNumbers(int limit)
+    {
+        for (int i = 2; i <= limit; i += 2)
+        {
+            yield return i;
+        }
+    }
+
+    static void Main()
+    {
+        Console.WriteLine("Even Numbers:");
+        foreach (var num in GetEvenNumbers(10))
+        {
+            Console.WriteLine(num);
+        }
+    }
+}
+
+// Output:
+// Even Numbers:
+// 2
+// 4
+// 6
+// 8
+// 10</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The method <code>GetEvenNumbers()</code> generates even numbers **only when requested**, reducing memory usage.
+    </p>
+</section>
+
+<!-- Section: Using yield break -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using <code>yield break</code> to Stop Iteration</h2>
+    <p class="lead">
+        The <code>yield break</code> statement stops an iteration prematurely when a condition is met.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using yield break in an Iterator</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Collections.Generic;
+
+class Program
+{
+    static IEnumerable<int> GetNumbers(int limit)
+    {
+        for (int i = 1; i <= limit; i++)
+        {
+            if (i > 5)
+                yield break; // Stops iteration
+
+            yield return i;
+        }
+    }
+
+    static void Main()
+    {
+        Console.WriteLine("Numbers (up to 5):");
+        foreach (var num in GetNumbers(10))
+        {
+            Console.WriteLine(num);
+        }
+    }
+}
+
+// Output:
+// Numbers (up to 5):
+// 1
+// 2
+// 3
+// 4
+// 5</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **<code>yield break</code>** statement stops iteration **once a condition is met**.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Using Iterators -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using Iterators</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **<code>yield return</code>** when working with large datasets to avoid unnecessary memory allocation.</li>
+        <li class="list-group-item">Use **<code>yield break</code>** to stop iteration early based on a condition.</li>
+        <li class="list-group-item">Implement **<code>IEnumerable</code>** and **<code>IEnumerable&lt;T&gt;</code>** when creating custom iterators.</li>
+        <li class="list-group-item">Use iterators with **LINQ** for efficient data processing.</li>
+        <li class="list-group-item">Avoid modifying collections while iterating over them.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("CollectionInitializers", "CSharp")" class="btn btn-outline-secondary">Previous: Collection Initializers</a>
+    <a href="@Url.Action("Constraints", "CSharp")" class="btn btn-outline-secondary">Next: Constraints</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

@@ -1,0 +1,196 @@
+﻿@{
+    ViewData["Title"] = "Methods for Regular Expressions in C#";
+}
+
+<!-- Section: Introduction to Regular Expression Methods -->
+<section class="mb-5">
+    <h2 class="text-secondary">Methods for Regular Expressions in C#</h2>
+    <p class="lead">
+        The <b>Regex</b> class in C# provides various methods to work with regular expressions, enabling pattern matching, searching, replacing, and extracting specific data.
+    </p>
+</section>
+
+<!-- Section: Common Regex Methods in C# -->
+<section class="mb-5">
+    <h2 class="text-secondary">Commonly Used Regular Expression Methods</h2>
+    <p class="lead">
+        Below are some essential methods provided by the <code>Regex</code> class:
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Method</th>
+                <th>Description</th>
+                <th>Example Usage</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>IsMatch()</code></td>
+                <td>Checks if a string matches a given pattern.</td>
+                <td><code>Regex.IsMatch("abc123", @@"\d+")</code> → Returns <b>true</b></td>
+            </tr>
+            <tr>
+                <td><code>Match()</code></td>
+                <td>Finds the first match of a pattern in a string.</td>
+                <td><code>Regex.Match("abc123", @@"\d+")</code> → Returns <b>"123"</b></td>
+            </tr>
+            <tr>
+                <td><code>Matches()</code></td>
+                <td>Finds all matches of a pattern in a string.</td>
+                <td><code>Regex.Matches("a1b2c3", @@"\d")</code> → Returns <b>"1", "2", "3"</b></td>
+            </tr>
+            <tr>
+                <td><code>Replace()</code></td>
+                <td>Replaces matching text with a new value.</td>
+                <td><code>Regex.Replace("hello 123", @@"\d+", "***")</code> → Returns <b>"hello ***"</b></td>
+            </tr>
+            <tr>
+                <td><code>Split()</code></td>
+                <td>Splits a string based on a pattern.</td>
+                <td><code>Regex.Split("apple,banana,grape", @@",")</code> → Returns <b>"apple", "banana", "grape"</b></td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Example of IsMatch() Method -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Checking if a String Matches a Pattern</h2>
+    <p class="lead">
+        The following example demonstrates how to use <code>IsMatch()</code> to validate an email address.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Validating an Email with <code>IsMatch()</code></h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Text.RegularExpressions;
+
+class Program
+{
+    static void Main()
+    {
+        string email = "user@@example.com";
+        string pattern = @@"^[a-zA-Z0-9._%+-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+
+        bool isValid = Regex.IsMatch(email, pattern);
+        Console.WriteLine($"Is Valid Email: {isValid}");
+    }
+}
+
+// Output:
+// Is Valid Email: True</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>IsMatch()</code> method checks if the provided email matches the pattern.
+    </p>
+</section>
+
+<!-- Section: Example of Match() Method -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Extracting a Phone Number from Text</h2>
+    <p class="lead">
+        The following example demonstrates how to extract a phone number using <code>Match()</code>.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Extracting a Phone Number with <code>Match()</code></h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Text.RegularExpressions;
+
+class Program
+{
+    static void Main()
+    {
+        string text = "Contact: 9876543210";
+        string pattern = @@"\b\d{10}\b";
+
+        Match match = Regex.Match(text, pattern);
+        Console.WriteLine($"Extracted Phone Number: {match.Value}");
+    }
+}
+
+// Output:
+// Extracted Phone Number: 9876543210</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>Match()</code> method finds the first 10-digit number in the text.
+    </p>
+</section>
+
+<!-- Section: Example of Replace() Method -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Replacing Digits in a String</h2>
+    <p class="lead">
+        The following example demonstrates how to replace digits with asterisks using <code>Replace()</code>.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Masking Numbers with <code>Replace()</code></h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Text.RegularExpressions;
+
+class Program
+{
+    static void Main()
+    {
+        string text = "Order ID: 12345";
+        string pattern = @@"\d";
+
+        string result = Regex.Replace(text, pattern, "*");
+        Console.WriteLine(result);
+    }
+}
+
+// Output:
+// Order ID: *****</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>Replace()</code> method replaces all digits in the string with asterisks.
+    </p>
+</section>
+
+<!-- Section: When to Use Regular Expression Methods -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Regular Expression Methods?</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use <code>IsMatch()</code> for validation (e.g., email, phone number).</li>
+        <li class="list-group-item">Use <code>Match()</code> to extract the first occurrence of a pattern.</li>
+        <li class="list-group-item">Use <code>Matches()</code> to retrieve all occurrences of a pattern.</li>
+        <li class="list-group-item">Use <code>Replace()</code> to substitute matching text.</li>
+        <li class="list-group-item">Use <code>Split()</code> to break a string into an array based on a pattern.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-start mt-4">
+    <a href="@Url.Action("FormingRegularExpression", "CSharp")" class="btn btn-outline-secondary">Previous: Forming Regular Expressions</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

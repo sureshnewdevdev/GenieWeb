@@ -1,0 +1,203 @@
+﻿@{
+    ViewData["Title"] = "Collection Interfaces in C#";
+}
+
+<!-- Section: Introduction to Collection Interfaces -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Collection Interfaces in C#?</h2>
+    <p class="lead">
+        The <b>Collection Interfaces</b> in C# define standard behaviors for collections, such as adding, removing, and accessing elements. These interfaces are implemented by various collection classes in the <code>System.Collections</code> and <code>System.Collections.Generic</code> namespaces.
+    </p>
+</section>
+
+<!-- Section: Key Features of Collection Interfaces -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Collection Interfaces</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Provides a common contract for different collection types.</li>
+        <li class="list-group-item">Supports type safety and flexibility.</li>
+        <li class="list-group-item">Improves code reusability and maintainability.</li>
+        <li class="list-group-item">Includes generic (<code>ICollection&lt;T&gt;</code>) and non-generic (<code>ICollection</code>) versions.</li>
+    </ul>
+</section>
+
+<!-- Section: Common Collection Interfaces -->
+<section class="mb-5">
+    <h2 class="text-secondary">Common Collection Interfaces in C#</h2>
+    <p class="lead">
+        Below are some commonly used collection interfaces and their functionalities:
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Interface</th>
+                <th>Description</th>
+                <th>Implemented By</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>IEnumerable</code></td>
+                <td>Supports iteration over a collection.</td>
+                <td><code>List&lt;T&gt;</code>, <code>Array</code>, <code>Dictionary&lt;TKey, TValue&gt;</code></td>
+            </tr>
+            <tr>
+                <td><code>ICollection</code></td>
+                <td>Defines size, enumeration, and synchronization methods.</td>
+                <td><code>List&lt;T&gt;</code>, <code>Dictionary&lt;TKey, TValue&gt;</code></td>
+            </tr>
+            <tr>
+                <td><code>IList</code></td>
+                <td>Supports indexed access and element manipulation.</td>
+                <td><code>List&lt;T&gt;</code>, <code>ArrayList</code></td>
+            </tr>
+            <tr>
+                <td><code>IDictionary</code></td>
+                <td>Stores key-value pairs.</td>
+                <td><code>Dictionary&lt;TKey, TValue&gt;</code>, <code>SortedList&lt;TKey, TValue&gt;</code></td>
+            </tr>
+            <tr>
+                <td><code>ISet</code></td>
+                <td>Represents a collection of unique elements.</td>
+                <td><code>HashSet&lt;T&gt;</code>, <code>SortedSet&lt;T&gt;</code></td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Example of IEnumerable -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Implementing IEnumerable</h2>
+    <p class="lead">
+        The <code>IEnumerable</code> interface allows iteration over a collection.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Custom Collection Implementing IEnumerable</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Collections;
+using System.Collections.Generic;
+
+class MyCollection : IEnumerable<int>
+{
+    private int[] numbers = { 1, 2, 3, 4, 5 };
+
+    public IEnumerator<int> GetEnumerator()
+    {
+        foreach (int number in numbers)
+        {
+            yield return number;
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        MyCollection collection = new MyCollection();
+        foreach (var num in collection)
+        {
+            Console.WriteLine(num);
+        }
+    }
+}
+
+// Output:
+// 1
+// 2
+// 3
+// 4
+// 5</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>MyCollection</code> class implements <code>IEnumerable&lt;T&gt;</code>, allowing iteration using a <code>foreach</code> loop.
+    </p>
+</section>
+
+<!-- Section: Example of IDictionary -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Using IDictionary</h2>
+    <p class="lead">
+        The <code>IDictionary</code> interface represents a collection of key-value pairs.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Implementing IDictionary</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Collections.Generic;
+
+class Program
+{
+    static void Main()
+    {
+        IDictionary<int, string> students = new Dictionary<int, string>();
+        students.Add(1, "Alice");
+        students.Add(2, "Bob");
+        students.Add(3, "Charlie");
+
+        Console.WriteLine("Students List:");
+        foreach (var pair in students)
+        {
+            Console.WriteLine($"ID: {pair.Key}, Name: {pair.Value}");
+        }
+    }
+}
+
+// Output:
+// Students List:
+// ID: 1, Name: Alice
+// ID: 2, Name: Bob
+// ID: 3, Name: Charlie</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>Dictionary</code> class implements <code>IDictionary</code>, providing fast key-value pair lookups.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Using Collection Interfaces -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using Collection Interfaces</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use <code>IEnumerable</code> for read-only iteration over a collection.</li>
+        <li class="list-group-item">Use <code>ICollection</code> for adding, removing, and counting elements.</li>
+        <li class="list-group-item">Use <code>IList</code> when random access by index is required.</li>
+        <li class="list-group-item">Use <code>IDictionary</code> when working with key-value pairs.</li>
+        <li class="list-group-item">Use <code>ISet</code> to ensure unique elements in a collection.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("SystemCollectionsNamespace", "CSharp")" class="btn btn-outline-secondary">Previous: System.Collections Namespace</a>
+    <a href="@Url.Action("CollectionClasses", "CSharp")" class="btn btn-outline-secondary">Next: Collection Classes</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

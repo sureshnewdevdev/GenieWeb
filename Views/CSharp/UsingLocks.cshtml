@@ -1,0 +1,234 @@
+﻿@{
+    ViewData["Title"] = "Using Locks in C#";
+}
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <h2 class="text-secondary">Understanding Locks in C#</h2>
+    <p class="lead">
+        **Locks** in C# are used to prevent **race conditions** when multiple threads access shared resources simultaneously. The `lock` statement, `Monitor`, `Mutex`, `Semaphore`, and `ReaderWriterLock` are commonly used synchronization mechanisms.
+    </p>
+</section>
+
+<!-- Section: Key Features of Locks -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Locks</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Ensures **thread safety** when accessing shared data.</li>
+        <li class="list-group-item">Prevents **race conditions** by allowing only one thread at a time.</li>
+        <li class="list-group-item">Different types of locks are available based on requirements (`lock`, `Monitor`, `Mutex`, `Semaphore`).</li>
+        <li class="list-group-item">May cause **deadlocks** if not used properly.</li>
+    </ul>
+</section>
+
+<!-- Section: Using the Lock Statement -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using the Lock Statement</h2>
+    <p class="lead">
+        The `lock` statement provides a simple way to **synchronize access** to shared resources.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using `lock` for Thread Synchronization</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading;
+
+class Program
+{
+    static readonly object _lock = new object();
+    static int counter = 0;
+
+    static void IncrementCounter()
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            lock (_lock)
+            {
+                counter++;
+                Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId}: Counter = {counter}");
+            }
+            Thread.Sleep(500);
+        }
+    }
+
+    static void Main()
+    {
+        Thread thread1 = new Thread(IncrementCounter);
+        Thread thread2 = new Thread(IncrementCounter);
+
+        thread1.Start();
+        thread2.Start();
+
+        thread1.Join();
+        thread2.Join();
+
+        Console.WriteLine("Final Counter Value: " + counter);
+    }
+}
+
+// Output (Ensures safe counter increment):
+// Thread 1: Counter = 1
+// Thread 2: Counter = 2
+// Thread 1: Counter = 3
+// Thread 2: Counter = 4
+// Final Counter Value: 10</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **lock (_lock)** statement ensures that only **one thread** can modify `counter` at a time.
+    </p>
+</section>
+
+<!-- Section: Using Monitor Class -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using the Monitor Class</h2>
+    <p class="lead">
+        The `Monitor` class provides **more control** over locking than the `lock` statement.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Monitor for Thread Synchronization</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading;
+
+class Program
+{
+    static readonly object _lock = new object();
+    static int counter = 0;
+
+    static void IncrementCounter()
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            bool lockTaken = false;
+            try
+            {
+                Monitor.Enter(_lock, ref lockTaken);
+                counter++;
+                Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId}: Counter = {counter}");
+            }
+            finally
+            {
+                if (lockTaken) Monitor.Exit(_lock);
+            }
+            Thread.Sleep(500);
+        }
+    }
+
+    static void Main()
+    {
+        Thread thread1 = new Thread(IncrementCounter);
+        Thread thread2 = new Thread(IncrementCounter);
+
+        thread1.Start();
+        thread2.Start();
+
+        thread1.Join();
+        thread2.Join();
+
+        Console.WriteLine("Final Counter Value: " + counter);
+    }
+}
+
+// Output (Ensures safe counter increment):
+// Thread 1: Counter = 1
+// Thread 2: Counter = 2
+// Final Counter Value: 10</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        `Monitor.Enter` provides **fine-grained control** over locking, allowing explicit unlocking in a `finally` block.
+    </p>
+</section>
+
+<!-- Section: Using Mutex for Process Synchronization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Mutex for Process Synchronization</h2>
+    <p class="lead">
+        `Mutex` allows **cross-process synchronization**, ensuring only one process can access a resource at a time.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Mutex for Synchronization</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading;
+
+class Program
+{
+    static Mutex mutex = new Mutex();
+
+    static void AccessResource()
+    {
+        mutex.WaitOne(); // Acquire the lock
+        Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} is accessing the resource.");
+        Thread.Sleep(2000);
+        Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} released the resource.");
+        mutex.ReleaseMutex(); // Release the lock
+    }
+
+    static void Main()
+    {
+        Thread thread1 = new Thread(AccessResource);
+        Thread thread2 = new Thread(AccessResource);
+
+        thread1.Start();
+        thread2.Start();
+
+        thread1.Join();
+        thread2.Join();
+    }
+}
+
+// Output (Ensures only one thread accesses the resource at a time):
+// Thread 1 is accessing the resource.
+// (Waits for 2 seconds)
+// Thread 1 released the resource.
+// Thread 2 is accessing the resource.
+// Thread 2 released the resource.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        **Mutex.WaitOne()** blocks other threads until the lock is released using **Mutex.ReleaseMutex()**.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Using Locks -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using Locks</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **lock** for **simple, single-threaded synchronization**.</li>
+        <li class="list-group-item">Use **Monitor** for **fine-grained locking control** with `try-finally`.</li>
+        <li class="list-group-item">Use **Mutex** when **synchronizing across multiple processes**.</li>
+        <li class="list-group-item">Minimize **lock duration** to reduce **performance overhead**.</li>
+        <li class="list-group-item">Avoid **nested locks**, as they can lead to **deadlocks**.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-start mt-4">
+    <a href="@Url.Action("AsyncAwait", "CSharp")" class="btn btn-outline-secondary">Previous: Async & Await</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

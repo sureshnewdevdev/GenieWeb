@@ -1,0 +1,197 @@
+﻿@{
+    ViewData["Title"] = "Forming Regular Expressions in C#";
+}
+
+<!-- Section: Introduction to Forming Regular Expressions -->
+<section class="mb-5">
+    <h2 class="text-secondary">How to Form Regular Expressions in C#?</h2>
+    <p class="lead">
+        <b>Regular Expressions (RegEx)</b> are patterns used to match character combinations in strings. Understanding how to construct these patterns is essential for tasks such as validation, searching, and text extraction.
+    </p>
+</section>
+
+<!-- Section: Basic Components of Regular Expressions -->
+<section class="mb-5">
+    <h2 class="text-secondary">Basic Components of Regular Expressions</h2>
+    <p class="lead">
+        Regular expressions consist of different elements that help in pattern matching.
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Expression</th>
+                <th>Description</th>
+                <th>Example Match</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>.</code></td>
+                <td>Matches any single character except newline</td>
+                <td><code>a.b</code> → Matches <b>acb</b>, <b>axb</b></td>
+            </tr>
+            <tr>
+                <td><code>^</code></td>
+                <td>Indicates the start of a string</td>
+                <td><code>^hello</code> → Matches "hello world"</td>
+            </tr>
+            <tr>
+                <td><code>$</code></td>
+                <td>Indicates the end of a string</td>
+                <td><code>world$</code> → Matches "hello world"</td>
+            </tr>
+            <tr>
+                <td><code>\d</code></td>
+                <td>Matches any digit (0-9)</td>
+                <td><code>\d\d\d</code> → Matches "123"</td>
+            </tr>
+            <tr>
+                <td><code>\w</code></td>
+                <td>Matches any alphanumeric character (a-z, A-Z, 0-9, _)</td>
+                <td><code>\w+</code> → Matches "hello123"</td>
+            </tr>
+            <tr>
+                <td><code>\s</code></td>
+                <td>Matches any whitespace character</td>
+                <td><code>hello\sworld</code> → Matches "hello world"</td>
+            </tr>
+            <tr>
+                <td><code>[abc]</code></td>
+                <td>Matches any one of the specified characters</td>
+                <td><code>b[aeiou]t</code> → Matches "bat", "bit", "but"</td>
+            </tr>
+            <tr>
+                <td><code>[^abc]</code></td>
+                <td>Matches any character except those in brackets</td>
+                <td><code>[^0-9]</code> → Matches any non-digit</td>
+            </tr>
+            <tr>
+                <td><code>(abc)</code></td>
+                <td>Groups characters together</td>
+                <td><code>(hello){2}</code> → Matches "hellohello"</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Quantifiers in Regular Expressions -->
+<section class="mb-5">
+    <h2 class="text-secondary">Quantifiers in Regular Expressions</h2>
+    <p class="lead">
+        Quantifiers define how many times a character, group, or class must appear in the input.
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Quantifier</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>*</code></td>
+                <td>Matches 0 or more occurrences</td>
+                <td><code>a*</code> → Matches "", "a", "aaa"</td>
+            </tr>
+            <tr>
+                <td><code>+</code></td>
+                <td>Matches 1 or more occurrences</td>
+                <td><code>a+</code> → Matches "a", "aaa" but not ""</td>
+            </tr>
+            <tr>
+                <td><code>?</code></td>
+                <td>Matches 0 or 1 occurrence</td>
+                <td><code>a?</code> → Matches "", "a"</td>
+            </tr>
+            <tr>
+                <td><code>{n}</code></td>
+                <td>Matches exactly n occurrences</td>
+                <td><code>\d{3}</code> → Matches "123"</td>
+            </tr>
+            <tr>
+                <td><code>{n,}</code></td>
+                <td>Matches at least n occurrences</td>
+                <td><code>\d{3,}</code> → Matches "123", "12345"</td>
+            </tr>
+            <tr>
+                <td><code>{n,m}</code></td>
+                <td>Matches between n and m occurrences</td>
+                <td><code>\d{2,4}</code> → Matches "12", "123", "1234"</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Example of Using Regular Expressions -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Extracting Email Addresses</h2>
+    <p class="lead">
+        The following example demonstrates how to extract email addresses from a text.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Extracting Emails Using RegEx</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Text.RegularExpressions;
+
+class Program
+{
+    static void Main()
+    {
+        string text = "Contact me at example@@domain.com or support@@company.org.";
+        string pattern = @@"[a-zA-Z0-9._%+-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}";
+
+        MatchCollection matches = Regex.Matches(text, pattern);
+
+        foreach (Match match in matches)
+        {
+            Console.WriteLine($"Found Email: {match.Value}");
+        }
+    }
+}
+
+// Output:
+// Found Email: example@@domain.com
+// Found Email: support@@company.org</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>Regex.Matches()</code> method extracts all email addresses from the given text.
+    </p>
+</section>
+
+<!-- Section: When to Use Regular Expressions -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Regular Expressions?</h2>
+    <ul class="list-group">
+        <li class="list-group-item">For input validation (e.g., emails, phone numbers, passwords).</li>
+        <li class="list-group-item">To search and extract specific patterns from text.</li>
+        <li class="list-group-item">For replacing text dynamically in large data sets.</li>
+        <li class="list-group-item">To clean and format text efficiently.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("RegExClass", "CSharp")" class="btn btn-outline-secondary">Previous: Regular Expressions in C#</a>
+    <a href="@Url.Action("MethodsForRegularExpression", "CSharp")" class="btn btn-outline-secondary">Next: Methods for Regular Expressions</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

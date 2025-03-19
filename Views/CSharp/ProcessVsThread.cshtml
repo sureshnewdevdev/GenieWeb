@@ -1,0 +1,229 @@
+﻿@{
+    ViewData["Title"] = "Process vs Thread in C#";
+}
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <h2 class="text-secondary">Understanding Process vs Thread in C#</h2>
+    <p class="lead">
+        A **Process** is an instance of a running application, while a **Thread** is the smallest unit of execution within a process. In C#, understanding the difference between processes and threads is essential for designing efficient **multi-threaded and parallel applications**.
+    </p>
+</section>
+
+<!-- Section: Key Differences Table -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Differences Between Process and Thread</h2>
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Feature</th>
+                <th>Process</th>
+                <th>Thread</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><b>Definition</b></td>
+                <td>A running instance of an application.</td>
+                <td>A lightweight execution unit inside a process.</td>
+            </tr>
+            <tr>
+                <td><b>Memory</b></td>
+                <td>Each process has its **own memory space**.</td>
+                <td>Threads share **the same memory** within a process.</td>
+            </tr>
+            <tr>
+                <td><b>Communication</b></td>
+                <td>Processes communicate via **Inter-Process Communication (IPC)**.</td>
+                <td>Threads communicate via **shared memory**.</td>
+            </tr>
+            <tr>
+                <td><b>Execution</b></td>
+                <td>Slower due to **context switching** between processes.</td>
+                <td>Faster as **threads share the same memory**.</td>
+            </tr>
+            <tr>
+                <td><b>Use Case</b></td>
+                <td>Running **independent applications**.</td>
+                <td>Performing **parallel execution** in an application.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Working with Processes -->
+<section class="mb-5">
+    <h2 class="text-secondary">Working with Processes in C#</h2>
+    <p class="lead">
+        The **Process** class in C# is used to start, manage, and terminate processes.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Starting and Listing Processes</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Diagnostics;
+
+class Program
+{
+    static void Main()
+    {
+        // Start a new process
+        Process process = Process.Start("notepad.exe");
+
+        // List all running processes
+        foreach (Process p in Process.GetProcesses())
+        {
+            Console.WriteLine($"Process: {p.ProcessName} | ID: {p.Id}");
+        }
+    }
+}
+
+// Output:
+// Process: notepad | ID: 1234
+// Process: explorer | ID: 5678</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **Process** class helps in launching, managing, and retrieving information about system processes.
+    </p>
+</section>
+
+<!-- Section: Working with Threads -->
+<section class="mb-5">
+    <h2 class="text-secondary">Working with Threads in C#</h2>
+    <p class="lead">
+        **Threads** allow executing multiple tasks in parallel within the same process.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Creating and Running Threads</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading;
+
+class Program
+{
+    static void PrintNumbers()
+    {
+        for (int i = 1; i <= 5; i++)
+        {
+            Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} prints {i}");
+            Thread.Sleep(500);
+        }
+    }
+
+    static void Main()
+    {
+        // Create and start a new thread
+        Thread thread1 = new Thread(PrintNumbers);
+        thread1.Start();
+
+        // Run in the main thread
+        PrintNumbers();
+    }
+}
+
+// Output:
+// Thread 1 prints 1
+// Thread 2 prints 1
+// Thread 1 prints 2
+// Thread 2 prints 2
+// ...</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        **Threads** allow running multiple tasks concurrently, improving performance in multi-core environments.
+    </p>
+</section>
+
+<!-- Section: Multi-Threading vs Multi-Processing -->
+<section class="mb-5">
+    <h2 class="text-secondary">Multi-Threading vs Multi-Processing</h2>
+    <p class="lead">
+        **Multi-threading** runs multiple threads within a single process, while **multi-processing** runs multiple processes independently.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Multi-Threading vs Multi-Processing</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Diagnostics;
+using System.Threading;
+
+class Program
+{
+    static void PrintNumbers()
+    {
+        for (int i = 1; i <= 5; i++)
+        {
+            Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} prints {i}");
+            Thread.Sleep(500);
+        }
+    }
+
+    static void StartNewProcess()
+    {
+        Process.Start("notepad.exe");
+    }
+
+    static void Main()
+    {
+        // Multi-Threading Example
+        Thread thread1 = new Thread(PrintNumbers);
+        thread1.Start();
+        PrintNumbers();
+
+        // Multi-Processing Example
+        StartNewProcess();
+    }
+}
+
+// Output:
+// Multi-threading prints numbers in parallel.
+// Notepad.exe starts as a separate process.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Use **multi-threading** for shared-memory tasks and **multi-processing** for independent tasks.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Process and Threads -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Process and Threads</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **Processes** for independent applications requiring **separate memory spaces**.</li>
+        <li class="list-group-item">Use **Threads** for **parallel execution** within a program to improve performance.</li>
+        <li class="list-group-item">Ensure **thread synchronization** when sharing data across threads.</li>
+        <li class="list-group-item">Avoid **creating too many threads** to prevent resource contention.</li>
+        <li class="list-group-item">Use **Task Parallel Library (TPL)** instead of manually managing threads.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("AppdomainVsProcessVsThread", "CSharp")" class="btn btn-outline-secondary">Previous: AppDomain vs Process vs Thread</a>
+    <a href="@Url.Action("CreatingRunningThread", "CSharp")" class="btn btn-outline-secondary">Next: Creating and Running Threads</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

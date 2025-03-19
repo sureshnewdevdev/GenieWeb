@@ -1,0 +1,213 @@
+﻿@{
+    ViewData["Title"] = "Regular Expressions (RegEx) in C#";
+}
+
+<!-- Section: Introduction to Regular Expressions -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is Regular Expressions (RegEx) in C#?</h2>
+    <p class="lead">
+        <b>Regular Expressions (RegEx)</b> in C# provide a powerful way to perform pattern matching and text processing. It is commonly used for tasks like input validation, searching, and replacing text.
+    </p>
+</section>
+
+<!-- Section: Key Features of Regular Expressions -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Regular Expressions</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Provides a powerful pattern-matching mechanism.</li>
+        <li class="list-group-item">Useful for text validation, searching, and replacing.</li>
+        <li class="list-group-item">Implemented using the <code>System.Text.RegularExpressions</code> namespace.</li>
+        <li class="list-group-item">Supports predefined character classes and quantifiers.</li>
+    </ul>
+</section>
+
+<!-- Section: Basic Example of Using RegEx -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Basic RegEx Usage</h2>
+    <p class="lead">
+        The following example demonstrates how to check if a string contains a valid email format.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Validating an Email Address</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Text.RegularExpressions;
+
+class Program
+{
+    static void Main()
+    {
+        string email = "example@@domain.com";
+        string pattern = @@"^[a-zA-Z0-9._%+-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+
+        bool isValid = Regex.IsMatch(email, pattern);
+        Console.WriteLine($"Is Valid Email: {isValid}");
+    }
+}
+
+// Output:
+// Is Valid Email: True</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>Regex.IsMatch()</code> method checks if the email string matches the pattern.
+    </p>
+</section>
+
+<!-- Section: Common RegEx Patterns -->
+<section class="mb-5">
+    <h2 class="text-secondary">Common RegEx Patterns</h2>
+    <p class="lead">
+        Below are some commonly used regular expressions for validation:
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Pattern</th>
+                <th>Purpose</th>
+                <th>Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>^[0-9]+$</code></td>
+                <td>Only numbers</td>
+                <td>12345 (Valid), abc123 (Invalid)</td>
+            </tr>
+            <tr>
+                <td><code>^[a-zA-Z]+$</code></td>
+                <td>Only letters</td>
+                <td>Hello (Valid), Hello123 (Invalid)</td>
+            </tr>
+            <tr>
+                <td><code>^\d{10}$</code></td>
+                <td>Exactly 10 digits</td>
+                <td>9876543210 (Valid), 1234 (Invalid)</td>
+            </tr>
+            <tr>
+                <td><code>^[a-zA-Z0-9._%+-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$</code></td>
+                <td>Email validation</td>
+                <td>test@@domain.com (Valid), test@@
+                    .com (Invalid)</td>
+            </tr>
+            <tr>
+                <td><code>^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$</code></td>
+                <td>Password (At least 8 chars, 1 uppercase, 1 lowercase, 1 number)</td>
+                <td>Test1234 (Valid), test1234 (Invalid)</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Searching and Replacing with RegEx -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using RegEx for Searching and Replacing</h2>
+    <p class="lead">
+        Regular expressions can be used to search for patterns and replace text dynamically.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Replacing Text with RegEx</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Text.RegularExpressions;
+
+class Program
+{
+    static void Main()
+    {
+        string text = "The quick brown fox jumps over the lazy dog.";
+        string pattern = @@"\bfox\b";
+        string replacement = "cat";
+
+        string result = Regex.Replace(text, pattern, replacement);
+        Console.WriteLine(result);
+    }
+}
+
+// Output:
+// The quick brown cat jumps over the lazy dog.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>Regex.Replace()</code> method replaces occurrences of "fox" with "cat" in the given text.
+    </p>
+</section>
+
+<!-- Section: Extracting Data Using RegEx -->
+<section class="mb-5">
+    <h2 class="text-secondary">Extracting Data Using RegEx</h2>
+    <p class="lead">
+        The <code>Regex.Matches()</code> method can be used to extract specific data from a text.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Extracting Phone Numbers</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Text.RegularExpressions;
+
+class Program
+{
+    static void Main()
+    {
+        string text = "Contact us at 9876543210 or 1234567890.";
+        string pattern = @@"\b\d{10}\b";
+
+        MatchCollection matches = Regex.Matches(text, pattern);
+
+        foreach (Match match in matches)
+        {
+            Console.WriteLine($"Phone Number: {match.Value}");
+        }
+    }
+}
+
+// Output:
+// Phone Number: 9876543210
+// Phone Number: 1234567890</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>Regex.Matches()</code> method extracts all 10-digit phone numbers from the given text.
+    </p>
+</section>
+
+<!-- Section: When to Use Regular Expressions -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Regular Expressions?</h2>
+    <ul class="list-group">
+        <li class="list-group-item">For input validation (e.g., emails, phone numbers, passwords).</li>
+        <li class="list-group-item">To search and extract patterns from text.</li>
+        <li class="list-group-item">For replacing text dynamically in large data sets.</li>
+        <li class="list-group-item">To clean and format text efficiently.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-end mt-4">
+    <a href="@Url.Action("FormingRegularExpression", "CSharp")" class="btn btn-outline-secondary">Next: Forming Regular Expressions</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

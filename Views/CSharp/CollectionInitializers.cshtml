@@ -1,0 +1,201 @@
+﻿@{
+    ViewData["Title"] = "Collection Initializers in C#";
+}
+
+<!-- Section: Introduction to Collection Initializers -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Collection Initializers in C#?</h2>
+    <p class="lead">
+        **Collection Initializers** in C# provide a concise way to initialize collections at the time of declaration. They allow adding multiple elements to a collection without explicitly calling the <code>Add()</code> method.
+    </p>
+</section>
+
+<!-- Section: Key Features of Collection Initializers -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Collection Initializers</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Allows **inline initialization** of collections.</li>
+        <li class="list-group-item">Works with **any collection type** that implements <code>ICollection&lt;T&gt;</code>.</li>
+        <li class="list-group-item">Reduces boilerplate code by eliminating multiple <code>Add()</code> calls.</li>
+        <li class="list-group-item">Can be used with **custom collection classes** that provide an <code>Add</code> method.</li>
+    </ul>
+</section>
+
+<!-- Section: Using Collection Initializers -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Collection Initializers in C#</h2>
+    <p class="lead">
+        Collection initializers simplify the process of initializing collections, as shown below.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Initializing a List with Collection Initializers</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Collections.Generic;
+
+class Program
+{
+    static void Main()
+    {
+        // Initializing a List using Collection Initializers
+        List<string> names = new List<string> { "Alice", "Bob", "Charlie", "David" };
+
+        Console.WriteLine("Names in the List:");
+        foreach (var name in names)
+        {
+            Console.WriteLine(name);
+        }
+    }
+}
+
+// Output:
+// Names in the List:
+// Alice
+// Bob
+// Charlie
+// David</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>List&lt;T&gt;</code> is initialized with values using **collection initializers**, eliminating multiple <code>Add()</code> method calls.
+    </p>
+</section>
+
+<!-- Section: Initializing a Dictionary -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Collection Initializers with Dictionary</h2>
+    <p class="lead">
+        Collection initializers can also be used with **Dictionary** to initialize key-value pairs.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Initializing a Dictionary with Collection Initializers</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Collections.Generic;
+
+class Program
+{
+    static void Main()
+    {
+        // Initializing a Dictionary using Collection Initializers
+        Dictionary<int, string> employees = new Dictionary<int, string>
+        {
+            { 101, "Alice" },
+            { 102, "Bob" },
+            { 103, "Charlie" }
+        };
+
+        Console.WriteLine("Employee List:");
+        foreach (var emp in employees)
+        {
+            Console.WriteLine($"ID: {emp.Key}, Name: {emp.Value}");
+        }
+    }
+}
+
+// Output:
+// Employee List:
+// ID: 101, Name: Alice
+// ID: 102, Name: Bob
+// ID: 103, Name: Charlie</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **Dictionary** is initialized using key-value pairs in a compact and readable format.
+    </p>
+</section>
+
+<!-- Section: Custom Collections with Collection Initializers -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Collection Initializers with Custom Collections</h2>
+    <p class="lead">
+        A **custom collection** can also support collection initializers if it provides an <code>Add</code> method.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Collection Initializers in a Custom Collection</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Collections;
+using System.Collections.Generic;
+
+class StudentCollection : IEnumerable<string>
+{
+    private List<string> students = new List<string>();
+
+    public void Add(string name)
+    {
+        students.Add(name);
+    }
+
+    public IEnumerator<string> GetEnumerator() => students.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        // Initializing custom collection
+        StudentCollection students = new StudentCollection { "Alice", "Bob", "Charlie" };
+
+        Console.WriteLine("Students:");
+        foreach (var student in students)
+        {
+            Console.WriteLine(student);
+        }
+    }
+}
+
+// Output:
+// Students:
+// Alice
+// Bob
+// Charlie</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **custom collection** supports collection initializers by defining an <code>Add</code> method.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Using Collection Initializers -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using Collection Initializers</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use collection initializers for **concise and readable** code.</li>
+        <li class="list-group-item">Prefer collection initializers for **small and predefined** collections.</li>
+        <li class="list-group-item">Ensure **custom collections implement <code>Add</code> method** for initializer support.</li>
+        <li class="list-group-item">Use **Dictionary initializers** for better readability of key-value pairs.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("WorkingWithGenerics", "CSharp")" class="btn btn-outline-secondary">Previous: Working with Generics</a>
+    <a href="@Url.Action("Iterators", "CSharp")" class="btn btn-outline-secondary">Next: Iterators</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

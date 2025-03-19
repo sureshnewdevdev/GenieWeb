@@ -1,0 +1,247 @@
+﻿@{
+    ViewData["Title"] = "Exception Filters in C#";
+}
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <h2 class="text-secondary">Understanding Exception Filters in C#</h2>
+    <p class="lead">
+        **Exception Filters** allow handling exceptions **conditionally** before executing a `catch` block. Introduced in **C# 6.0**, they improve **code readability** and **exception handling efficiency**.
+    </p>
+</section>
+
+<!-- Section: Key Features of Exception Filters -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Exception Filters</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Allows filtering **specific exception scenarios** before entering a `catch` block.</li>
+        <li class="list-group-item">Improves **code readability** by avoiding nested `if` statements in `catch` blocks.</li>
+        <li class="list-group-item">Prevents **unnecessary exception handling** when a condition isn't met.</li>
+        <li class="list-group-item">Works well with **logging exceptions without catching them**.</li>
+    </ul>
+</section>
+
+<!-- Section: Basic Usage of Exception Filters -->
+<section class="mb-5">
+    <h2 class="text-secondary">Basic Usage of Exception Filters</h2>
+    <p class="lead">
+        Exception filters use the `when` keyword to specify **conditions** for handling exceptions.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Exception Filters to Handle Specific Cases</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            ThrowException(404);
+        }
+        catch (Exception ex) when (ex.Message.Contains("404"))
+        {
+            Console.WriteLine("Not Found Error Handled.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"General Exception: {ex.Message}");
+        }
+    }
+
+    static void ThrowException(int errorCode)
+    {
+        if (errorCode == 404)
+            throw new Exception("404 - Not Found");
+        else
+            throw new Exception("500 - Internal Server Error");
+    }
+}
+
+// Output:
+// Not Found Error Handled.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The `when (ex.Message.Contains("404"))` filter ensures that only `404` errors enter the first `catch` block.
+    </p>
+</section>
+
+<!-- Section: Using Exception Filters for Logging -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Exception Filters for Logging Without Handling</h2>
+    <p class="lead">
+        Exception filters allow logging an exception **without catching it**, ensuring normal exception propagation.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Logging Errors Using Exception Filters</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            ThrowError();
+        }
+        catch (Exception ex) when (LogError(ex))
+        {
+            // This block is not executed, but exception is logged.
+        }
+    }
+
+    static void ThrowError()
+    {
+        throw new Exception("An unexpected error occurred.");
+    }
+
+    static bool LogError(Exception ex)
+    {
+        File.WriteAllText("error.log", $"Logged Error: {ex.Message}");
+        Console.WriteLine("Error logged.");
+        return false; // Allows exception to propagate
+    }
+}
+
+// Output:
+// Error logged.
+// (Exception still propagates and crashes the program)</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **when (LogError(ex))** filter logs the exception **without handling it**, allowing normal exception propagation.
+    </p>
+</section>
+
+<!-- Section: Combining Multiple Exception Filters -->
+<section class="mb-5">
+    <h2 class="text-secondary">Combining Multiple Exception Filters</h2>
+    <p class="lead">
+        Exception filters can be **stacked** to handle different scenarios efficiently.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Multiple Filters for Different Error Types</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            ThrowCustomError(401);
+        }
+        catch (Exception ex) when (ex.Message.Contains("401"))
+        {
+            Console.WriteLine("Unauthorized Access Handled.");
+        }
+        catch (Exception ex) when (ex.Message.Contains("500"))
+        {
+            Console.WriteLine("Internal Server Error Handled.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Unhandled Exception: {ex.Message}");
+        }
+    }
+
+    static void ThrowCustomError(int code)
+    {
+        if (code == 401) throw new Exception("401 - Unauthorized");
+        if (code == 500) throw new Exception("500 - Server Error");
+        throw new Exception("Unknown Error");
+    }
+}
+
+// Output (for different codes):
+// Unauthorized Access Handled. (if code is 401)
+// Internal Server Error Handled. (if code is 500)
+// Unhandled Exception: Unknown Error (for others)</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Different `when` conditions handle **different error codes**, reducing the need for multiple `if` checks inside a single `catch` block.
+    </p>
+</section>
+
+<!-- Section: Exception Filters vs Traditional Catch -->
+<section class="mb-5">
+    <h2 class="text-secondary">Exception Filters vs Traditional `catch` Blocks</h2>
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Feature</th>
+                <th>Traditional `catch`</th>
+                <th>Exception Filters (`when`)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Handles exceptions conditionally</td>
+                <td>❌ No</td>
+                <td>✅ Yes</td>
+            </tr>
+            <tr>
+                <td>Prevents unnecessary handling</td>
+                <td>❌ No</td>
+                <td>✅ Yes</td>
+            </tr>
+            <tr>
+                <td>Can log errors without catching</td>
+                <td>❌ No</td>
+                <td>✅ Yes</td>
+            </tr>
+            <tr>
+                <td>Requires additional `if` checks</td>
+                <td>✅ Yes</td>
+                <td>❌ No</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Best Practices for Exception Filters -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using Exception Filters</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use exception filters **to handle specific cases before catching exceptions**.</li>
+        <li class="list-group-item">Use `when (LogError(ex))` to **log exceptions without handling them**.</li>
+        <li class="list-group-item">Avoid **complex logic inside `when` filters**—keep conditions simple.</li>
+        <li class="list-group-item">Use **multiple filters** instead of `if` checks inside `catch` blocks.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("AwaitInCatchFinally", "CSharp")" class="btn btn-outline-secondary">Previous: Await in Catch & Finally</a>
+    <a href="@Url.Action("PatternMatching", "CSharp")" class="btn btn-outline-secondary">Next: Pattern Matching</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

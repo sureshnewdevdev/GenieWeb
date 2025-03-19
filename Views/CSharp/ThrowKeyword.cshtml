@@ -1,0 +1,200 @@
+﻿@{
+    ViewData["Title"] = "Throw Keyword in C#";
+}
+
+<!-- Section: Introduction to the Throw Keyword -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is the Throw Keyword in C#?</h2>
+    <p class="lead">
+        The <b>throw</b> keyword in C# is used to generate an exception manually. It is commonly used in exception handling to signal an error condition and transfer control to a <code>catch</code> block.
+    </p>
+</section>
+
+<!-- Section: Key Features of the Throw Keyword -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of the Throw Keyword</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Explicitly raises an exception.</li>
+        <li class="list-group-item">Can be used inside a <code>catch</code> block to rethrow an exception.</li>
+        <li class="list-group-item">Allows custom exceptions to be thrown for better error handling.</li>
+        <li class="list-group-item">Stops the execution of the current method and jumps to the nearest exception handler.</li>
+    </ul>
+</section>
+
+<!-- Section: Example of Throwing an Exception -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Throwing a Built-in Exception</h2>
+    <p class="lead">
+        The following example demonstrates how to use <code>throw</code> to raise a <code>DivideByZeroException</code>.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Throwing a Built-in Exception</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            int num1 = 10, num2 = 0;
+            if (num2 == 0)
+            {
+                throw new DivideByZeroException("Cannot divide by zero.");
+            }
+
+            int result = num1 / num2;
+            Console.WriteLine($"Result: {result}");
+        }
+        catch (DivideByZeroException ex)
+        {
+            Console.WriteLine($"Exception Caught: {ex.Message}");
+        }
+    }
+}
+
+// Output:
+// Exception Caught: Cannot divide by zero.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>throw</code> statement manually raises a <code>DivideByZeroException</code> when the denominator is zero.
+    </p>
+</section>
+
+<!-- Section: Throwing Custom Exceptions -->
+<section class="mb-5">
+    <h2 class="text-secondary">Throwing Custom Exceptions</h2>
+    <p class="lead">
+        You can create and throw custom exceptions by inheriting from the <code>Exception</code> class.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Throwing a Custom Exception</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+public class InvalidAgeException : Exception
+{
+    public InvalidAgeException(string message) : base(message) { }
+}
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            int age = 15;
+            if (age < 18)
+            {
+                throw new InvalidAgeException("Age must be 18 or older.");
+            }
+
+            Console.WriteLine("Age is valid.");
+        }
+        catch (InvalidAgeException ex)
+        {
+            Console.WriteLine($"Custom Exception Caught: {ex.Message}");
+        }
+    }
+}
+
+// Output:
+// Custom Exception Caught: Age must be 18 or older.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        This example demonstrates how to create a <code>InvalidAgeException</code> and use the <code>throw</code> keyword to raise it.
+    </p>
+</section>
+
+<!-- Section: Rethrowing an Exception -->
+<section class="mb-5">
+    <h2 class="text-secondary">Rethrowing an Exception</h2>
+    <p class="lead">
+        The <code>throw</code> keyword can be used inside a <code>catch</code> block to rethrow an exception to a higher-level handler.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Rethrowing an Exception</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            ProcessData();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception Handled in Main: {ex.Message}");
+        }
+    }
+
+    static void ProcessData()
+    {
+        try
+        {
+            throw new InvalidOperationException("Invalid operation detected.");
+        }
+        catch (InvalidOperationException)
+        {
+            Console.WriteLine("Logging exception...");
+            throw; // Rethrow the exception
+        }
+    }
+}
+
+// Output:
+// Logging exception...
+// Exception Handled in Main: Invalid operation detected.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Here, the <code>throw</code> statement inside the <code>catch</code> block propagates the exception to the outer <code>try</code> block.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Using the Throw Keyword -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using the Throw Keyword</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use <code>throw</code> for custom validation and error handling.</li>
+        <li class="list-group-item">Avoid throwing exceptions for normal control flow; use return values or flags instead.</li>
+        <li class="list-group-item">Always include meaningful error messages in custom exceptions.</li>
+        <li class="list-group-item">Use <code>throw;</code> (without parameters) to preserve the original stack trace when rethrowing exceptions.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("FinallyBlock", "CSharp")" class="btn btn-outline-secondary">Previous: Finally Block</a>
+    <a href="@Url.Action("InnerException", "CSharp")" class="btn btn-outline-secondary">Next: Inner Exception</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

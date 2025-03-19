@@ -1,0 +1,229 @@
+﻿@{
+    ViewData["Title"] = "Threads vs Tasks in C#";
+}
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <h2 class="text-secondary">Threads vs Tasks in C#</h2>
+    <p class="lead">
+        In C#, both **Threads** and **Tasks** provide ways to execute code concurrently. However, **Tasks (Task Parallel Library - TPL)** offer higher-level abstractions, making them more efficient and easier to manage than traditional **Threads**.
+    </p>
+</section>
+
+<!-- Section: Key Differences Table -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Differences Between Threads and Tasks</h2>
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Feature</th>
+                <th>Thread</th>
+                <th>Task</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><b>Definition</b></td>
+                <td>Represents an **OS-level** thread.</td>
+                <td>Represents a **logical unit of work**, managed by the runtime.</td>
+            </tr>
+            <tr>
+                <td><b>Thread Management</b></td>
+                <td>Manually created and managed.</td>
+                <td>Managed automatically via the **Task Scheduler**.</td>
+            </tr>
+            <tr>
+                <td><b>Thread Pooling</b></td>
+                <td>No built-in support.</td>
+                <td>Uses **thread pooling** for better performance.</td>
+            </tr>
+            <tr>
+                <td><b>Exception Handling</b></td>
+                <td>Complex; requires manual handling.</td>
+                <td>Easier, supports **Exception Propagation**.</td>
+            </tr>
+            <tr>
+                <td><b>Performance</b></td>
+                <td>More **resource-intensive**.</td>
+                <td>More **efficient**, especially for **scalable** workloads.</td>
+            </tr>
+            <tr>
+                <td><b>Best for</b></td>
+                <td>Long-running **independent** tasks.</td>
+                <td>Concurrent **asynchronous** programming.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Creating and Running Threads -->
+<section class="mb-5">
+    <h2 class="text-secondary">Creating and Running a Thread</h2>
+    <p class="lead">
+        The **Thread** class allows direct control over a thread’s lifecycle.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Creating and Running a Thread</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading;
+
+class Program
+{
+    static void PrintNumbers()
+    {
+        for (int i = 1; i <= 5; i++)
+        {
+            Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} prints {i}");
+            Thread.Sleep(500);
+        }
+    }
+
+    static void Main()
+    {
+        Thread thread = new Thread(PrintNumbers);
+        thread.Start();
+        PrintNumbers();
+    }
+}
+
+// Output:
+// Thread 1 prints 1
+// Thread 2 prints 1
+// (Threads execute concurrently)...</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        **Threads** provide direct control but require **manual management**, increasing complexity.
+    </p>
+</section>
+
+<!-- Section: Creating and Running Tasks -->
+<section class="mb-5">
+    <h2 class="text-secondary">Creating and Running a Task</h2>
+    <p class="lead">
+        Tasks provide a **higher-level abstraction** for running concurrent operations.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Running a Task Using Task.Run()</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Main()
+    {
+        Task task = Task.Run(() =>
+        {
+            for (int i = 1; i <= 5; i++)
+            {
+                Console.WriteLine($"Task {Task.CurrentId} prints {i}");
+            }
+        });
+
+        task.Wait();
+        Console.WriteLine("Task completed.");
+    }
+}
+
+// Output:
+// Task 1 prints 1
+// Task 1 prints 2
+// Task 1 prints 3
+// Task 1 prints 4
+// Task 1 prints 5
+// Task completed.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        **Tasks** are managed by the **Task Scheduler**, making them more efficient than manually managing threads.
+    </p>
+</section>
+
+<!-- Section: Running Multiple Tasks in Parallel -->
+<section class="mb-5">
+    <h2 class="text-secondary">Running Multiple Tasks in Parallel</h2>
+    <p class="lead">
+        You can execute multiple tasks in parallel using **Task.WhenAll()**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Running Multiple Tasks in Parallel</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main()
+    {
+        Task task1 = Task.Run(() => Console.WriteLine("Task 1 running"));
+        Task task2 = Task.Run(() => Console.WriteLine("Task 2 running"));
+
+        await Task.WhenAll(task1, task2);
+        Console.WriteLine("All tasks completed.");
+    }
+}
+
+// Output:
+// Task 1 running
+// Task 2 running
+// All tasks completed.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        **Task.WhenAll()** allows waiting for multiple tasks to complete before proceeding.
+    </p>
+</section>
+
+<!-- Section: When to Use Threads vs Tasks -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Threads vs Tasks</h2>
+    <ul class="list-group">
+        <li class="list-group-item"><b>Use Threads:</b> When you need **low-level control** over execution and lifecycle.</li>
+        <li class="list-group-item"><b>Use Tasks:</b> For **asynchronous operations** that benefit from built-in scheduling and exception handling.</li>
+        <li class="list-group-item">For **short-lived operations**, **Tasks** are preferred due to automatic resource management.</li>
+        <li class="list-group-item">For **long-running operations**, **Threads** may be used to manage dedicated work efficiently.</li>
+    </ul>
+</section>
+
+<!-- Section: Best Practices -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **Task.Run()** instead of manually creating **Threads** for parallel execution.</li>
+        <li class="list-group-item">Use **async/await** with **Task** for **non-blocking execution**.</li>
+        <li class="list-group-item">Avoid **using Threads for simple parallel tasks**—use **Tasks** instead.</li>
+        <li class="list-group-item">Use **CancellationTokenSource** for **graceful cancellation of tasks**.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("TaskParallelLibrary", "CSharp")" class="btn btn-outline-secondary">Previous: Task Parallel Library</a>
+    <a href="@Url.Action("ParallelExtensions", "CSharp")" class="btn btn-outline-secondary">Next: Parallel Extensions</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

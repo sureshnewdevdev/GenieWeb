@@ -1,0 +1,185 @@
+﻿@{
+    ViewData["Title"] = "Await in Catch & Finally in C#";
+}
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <h2 class="text-secondary">Understanding `await` in `catch` and `finally` Blocks</h2>
+    <p class="lead">
+        In **C# 6.0 and later**, the `await` keyword can be used inside **catch** and **finally** blocks. This allows handling asynchronous exceptions gracefully and performing cleanup operations asynchronously.
+    </p>
+</section>
+
+<!-- Section: Key Features of Await in Catch & Finally -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of `await` in `catch` and `finally` Blocks</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Enables **asynchronous exception handling** inside `catch` blocks.</li>
+        <li class="list-group-item">Allows performing **asynchronous cleanup operations** inside `finally` blocks.</li>
+        <li class="list-group-item">Improves responsiveness in **I/O-bound operations** like logging and database cleanup.</li>
+        <li class="list-group-item">Ensures proper **exception propagation** when `await` is used inside `catch`.</li>
+    </ul>
+</section>
+
+<!-- Section: Using Await in Catch -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using `await` in `catch` Block</h2>
+    <p class="lead">
+        `await` inside `catch` allows logging exceptions asynchronously without blocking execution.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Await in Catch for Asynchronous Logging</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main()
+    {
+        try
+        {
+            throw new InvalidOperationException("An error occurred!");
+        }
+        catch (Exception ex)
+        {
+            await LogErrorAsync(ex);
+        }
+    }
+
+    static async Task LogErrorAsync(Exception ex)
+    {
+        await File.WriteAllTextAsync("error.log", $"Error: {ex.Message}");
+        Console.WriteLine("Error logged asynchronously.");
+    }
+}
+
+// Output:
+// Error logged asynchronously.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **await LogErrorAsync(ex)** inside `catch` ensures that error logging is done asynchronously without blocking execution.
+    </p>
+</section>
+
+<!-- Section: Using Await in Finally -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using `await` in `finally` Block</h2>
+    <p class="lead">
+        `await` inside `finally` allows performing **asynchronous cleanup operations** like closing files or releasing database connections.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Await in Finally for Asynchronous Cleanup</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main()
+    {
+        StreamWriter writer = new StreamWriter("log.txt");
+
+        try
+        {
+            await writer.WriteLineAsync("Processing started...");
+            throw new Exception("Something went wrong!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Caught exception: {ex.Message}");
+        }
+        finally
+        {
+            await writer.DisposeAsync(); // Asynchronous cleanup
+            Console.WriteLine("StreamWriter closed asynchronously.");
+        }
+    }
+}
+
+// Output:
+// Caught exception: Something went wrong!
+// StreamWriter closed asynchronously.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The `await writer.DisposeAsync()` inside `finally` ensures the **StreamWriter is closed asynchronously**, preventing resource leaks.
+    </p>
+</section>
+
+<!-- Section: Await in Catch vs Finally -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use `await` in `catch` vs `finally`</h2>
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Scenario</th>
+                <th>Use `await` in `catch`</th>
+                <th>Use `await` in `finally`</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Logging an error asynchronously</td>
+                <td>✅ Yes</td>
+                <td>❌ No</td>
+            </tr>
+            <tr>
+                <td>Releasing file/database connections</td>
+                <td>❌ No</td>
+                <td>✅ Yes</td>
+            </tr>
+            <tr>
+                <td>Retrying an operation</td>
+                <td>✅ Yes</td>
+                <td>❌ No</td>
+            </tr>
+            <tr>
+                <td>Flushing data to storage</td>
+                <td>❌ No</td>
+                <td>✅ Yes</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Best Practices for Await in Catch & Finally -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using `await` in `catch` and `finally`</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use `await` in `catch` for **logging errors** or **retrying operations asynchronously**.</li>
+        <li class="list-group-item">Use `await` in `finally` for **cleaning up resources asynchronously**.</li>
+        <li class="list-group-item">Avoid using `await` inside `catch` if an **immediate rethrow** is required.</li>
+        <li class="list-group-item">Ensure the `Main()` method is `async Task Main()` to **support awaiting in exception handling**.</li>
+        <li class="list-group-item">Use `.ConfigureAwait(false)` in libraries to prevent **UI thread deadlocks**.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("StringInterpolation", "CSharp")" class="btn btn-outline-secondary">Previous: String Interpolation</a>
+    <a href="@Url.Action("ExceptionFilters", "CSharp")" class="btn btn-outline-secondary">Next: Exception Filters</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

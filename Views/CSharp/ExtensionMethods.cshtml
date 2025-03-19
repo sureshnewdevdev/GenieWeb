@@ -1,0 +1,174 @@
+﻿@{
+    ViewData["Title"] = "Extension Methods in C#";
+}
+
+<!-- Section: Introduction to Extension Methods -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Extension Methods in C#?</h2>
+    <p class="lead">
+        <b>Extension Methods</b> in C# allow you to add new methods to an existing class without modifying its source code. This is useful when working with libraries or sealed classes.
+    </p>
+</section>
+
+<!-- Section: Key Features of Extension Methods -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Extension Methods</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Allows adding methods to existing classes without altering their definition.</li>
+        <li class="list-group-item">Defined as <b>static methods</b> in a <b>static class</b>.</li>
+        <li class="list-group-item">The first parameter must use <code>this</code> keyword followed by the type being extended.</li>
+        <li class="list-group-item">Can be used with built-in types (e.g., <code>string</code>, <code>int</code>, <code>List<T></code>).</li>
+    </ul>
+</section>
+
+<!-- Section: Example of an Extension Method -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Creating and Using an Extension Method</h2>
+    <p class="lead">
+        The following example demonstrates how to define and use an extension method.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Adding an Extension Method to String</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+public static class StringExtensions
+{
+    public static string ToProperCase(this string str)
+    {
+        if (string.IsNullOrEmpty(str)) return str;
+        return char.ToUpper(str[0]) + str.Substring(1).ToLower();
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        string message = "hello WORLD!";
+        Console.WriteLine(message.ToProperCase()); // Output: Hello world!
+    }
+}</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>ToProperCase</code> method extends the <code>string</code> class, capitalizing the first letter and making the rest lowercase.
+    </p>
+</section>
+
+<!-- Section: Extension Methods with Generic Types -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Extension Methods with Generic Types</h2>
+    <p class="lead">
+        Extension methods can work with generic types to add functionality to collections and other types.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Extension Method for Generic List</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Collections.Generic;
+using System.Linq;
+
+public static class ListExtensions
+{
+    public static void PrintAll<T>(this List<T> list)
+    {
+        list.ForEach(item => Console.WriteLine(item));
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        List<int> numbers = new List<int> { 1, 2, 3, 4, 5 };
+        numbers.PrintAll();
+    }
+}
+
+// Output:
+// 1
+// 2
+// 3
+// 4
+// 5</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Here, <code>PrintAll</code> is an extension method that prints each element in a <code>List<T></code>.
+    </p>
+</section>
+
+<!-- Section: Built-in Extension Methods in C# -->
+<section class="mb-5">
+    <h2 class="text-secondary">Built-in Extension Methods in C#</h2>
+    <p class="lead">
+        Many extension methods are built into the C# framework. Some common ones include:
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Extension Method</th>
+                <th>Namespace</th>
+                <th>Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>string.IsNullOrEmpty()</code></td>
+                <td><code>System</code></td>
+                <td><code>string.IsNullOrEmpty("hello")</code></td>
+            </tr>
+            <tr>
+                <td><code>IEnumerable<T>.Where()</code></td>
+                <td><code>System.Linq</code></td>
+                <td><code>numbers.Where(n => n > 2)</code></td>
+            </tr>
+            <tr>
+                <td><code>List<T>.ForEach()</code></td>
+                <td><code>System.Collections.Generic</code></td>
+                <td><code>numbers.ForEach(Console.WriteLine)</code></td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: When to Use Extension Methods -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Extension Methods?</h2>
+    <ul class="list-group">
+        <li class="list-group-item">When adding new functionality to existing classes without modifying them.</li>
+        <li class="list-group-item">For enhancing built-in .NET types (e.g., <code>string</code>, <code>List<T></code>).</li>
+        <li class="list-group-item">When working with libraries where modifying the source code is not possible.</li>
+        <li class="list-group-item">For improving code readability and reusability.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("PartialTypes", "CSharp")" class="btn btn-outline-secondary">Previous: Partial Types</a>
+    <a href="@Url.Action("ObjectInitializer", "CSharp")" class="btn btn-outline-secondary">Next: Object Initializer</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

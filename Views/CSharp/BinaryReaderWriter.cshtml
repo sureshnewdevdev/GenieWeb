@@ -1,0 +1,207 @@
+﻿@{
+    ViewData["Title"] = "BinaryReader and BinaryWriter in C#";
+}
+
+<!-- Section: Introduction to BinaryReader & BinaryWriter -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are BinaryReader and BinaryWriter in C#?</h2>
+    <p class="lead">
+        **BinaryReader** and **BinaryWriter** are classes in the <code>System.IO</code> namespace that allow reading and writing binary data to files. These classes provide an efficient way to store and retrieve structured binary data such as numbers, text, and custom objects.
+    </p>
+</section>
+
+<!-- Section: Key Features -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of BinaryReader & BinaryWriter</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Efficient for handling **binary data** like numbers and images.</li>
+        <li class="list-group-item">Stores **structured data** in a compact format.</li>
+        <li class="list-group-item">Supports **primitive data types** such as integers, floats, and strings.</li>
+        <li class="list-group-item">Avoids the overhead of **text encoding and parsing**.</li>
+    </ul>
+</section>
+
+<!-- Section: Writing Binary Data Using BinaryWriter -->
+<section class="mb-5">
+    <h2 class="text-secondary">Writing Binary Data Using BinaryWriter</h2>
+    <p class="lead">
+        The <code>BinaryWriter</code> class allows writing binary data to a file efficiently.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Writing Binary Data</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        string filePath = "data.bin";
+
+        using (BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.Create)))
+        {
+            writer.Write(42);             // Writing an integer
+            writer.Write(3.14);           // Writing a double
+            writer.Write("Hello C#");     // Writing a string
+        }
+
+        Console.WriteLine("Binary data written successfully.");
+    }
+}
+
+// Output:
+// Binary data written successfully.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>BinaryWriter</code> class writes data in **binary format**, making it more compact.
+    </p>
+</section>
+
+<!-- Section: Reading Binary Data Using BinaryReader -->
+<section class="mb-5">
+    <h2 class="text-secondary">Reading Binary Data Using BinaryReader</h2>
+    <p class="lead">
+        The <code>BinaryReader</code> class is used to **read structured binary data** from a file.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Reading Binary Data</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        string filePath = "data.bin";
+
+        using (BinaryReader reader = new BinaryReader(File.Open(filePath, FileMode.Open)))
+        {
+            int number = reader.ReadInt32();       // Reading an integer
+            double pi = reader.ReadDouble();       // Reading a double
+            string message = reader.ReadString();  // Reading a string
+
+            Console.WriteLine($"Number: {number}");
+            Console.WriteLine($"Double: {pi}");
+            Console.WriteLine($"Message: {message}");
+        }
+    }
+}
+
+// Output:
+// Number: 42
+// Double: 3.14
+// Message: Hello C#</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **order of reading should match the order of writing**, ensuring data integrity.
+    </p>
+</section>
+
+<!-- Section: Writing and Reading Custom Objects -->
+<section class="mb-5">
+    <h2 class="text-secondary">Writing and Reading Custom Objects Using BinaryWriter & BinaryReader</h2>
+    <p class="lead">
+        You can store structured objects in binary format using **BinaryWriter** and **BinaryReader**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Writing and Reading Custom Objects</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+
+class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+
+    public void WriteToBinary(BinaryWriter writer)
+    {
+        writer.Write(Name);
+        writer.Write(Age);
+    }
+
+    public static Person ReadFromBinary(BinaryReader reader)
+    {
+        return new Person
+        {
+            Name = reader.ReadString(),
+            Age = reader.ReadInt32()
+        };
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        string filePath = "person.bin";
+
+        // Writing object data
+        using (BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.Create)))
+        {
+            Person person = new Person { Name = "Alice", Age = 30 };
+            person.WriteToBinary(writer);
+        }
+
+        // Reading object data
+        using (BinaryReader reader = new BinaryReader(File.Open(filePath, FileMode.Open)))
+        {
+            Person person = Person.ReadFromBinary(reader);
+            Console.WriteLine($"Name: {person.Name}, Age: {person.Age}");
+        }
+    }
+}
+
+// Output:
+// Name: Alice, Age: 30</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **WriteToBinary()** and **ReadFromBinary()** methods ensure structured object persistence.
+    </p>
+</section>
+
+<!-- Section: Best Practices for BinaryReader & BinaryWriter -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using BinaryReader & BinaryWriter</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **BinaryWriter** when writing structured binary data to avoid unnecessary text overhead.</li>
+        <li class="list-group-item">Always **read data in the same order** as it was written.</li>
+        <li class="list-group-item">Ensure **file integrity** by handling exceptions with <code>try-catch</code>.</li>
+        <li class="list-group-item">Use **FileMode.Append** when appending binary data instead of overwriting.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("StreamReaderWriter", "CSharp")" class="btn btn-outline-secondary">Previous: StreamReader & StreamWriter</a>
+    <a href="@Url.Action("FileDirectoryClasses", "CSharp")" class="btn btn-outline-secondary">Next: File & Directory Classes</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

@@ -1,0 +1,209 @@
+﻿@{
+    ViewData["Title"] = "Marking Serializable in C#";
+}
+
+<!-- Section: Introduction to Marking Serializable -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is Marking Serializable in C#?</h2>
+    <p class="lead">
+        **Marking a class as Serializable** in C# allows it to be **converted into a format** that can be stored or transmitted. Serialization enables objects to be saved in files, sent over a network, or stored in a database.
+    </p>
+</section>
+
+<!-- Section: Key Features of Marking a Class as Serializable -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Marking a Class as Serializable</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Required for **Binary, XML, and JSON serialization**.</li>
+        <li class="list-group-item">Uses the **[Serializable]** attribute for automatic serialization.</li>
+        <li class="list-group-item">Can **exclude specific fields** using the **[NonSerialized]** attribute.</li>
+        <li class="list-group-item">Required when using **BinaryFormatter and SOAP serialization**.</li>
+    </ul>
+</section>
+
+<!-- Section: Marking a Class as Serializable -->
+<section class="mb-5">
+    <h2 class="text-secondary">Marking a Class as Serializable</h2>
+    <p class="lead">
+        To make a class **serializable**, use the **[Serializable]** attribute.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Marking a Class as Serializable</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+
+[Serializable]
+class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+// Writing Binary Data
+class Program
+{
+    static void Main()
+    {
+        Person person = new Person { Name = "Alice", Age = 30 };
+        BinaryFormatter formatter = new BinaryFormatter();
+
+        using (FileStream stream = new FileStream("person.dat", FileMode.Create))
+        {
+            formatter.Serialize(stream, person);
+        }
+
+        Console.WriteLine("Object serialized successfully.");
+    }
+}
+
+// Output:
+// Object serialized successfully.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **[Serializable]** attribute allows the class to be serialized automatically.
+    </p>
+</section>
+
+<!-- Section: Excluding Fields from Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Excluding Fields from Serialization</h2>
+    <p class="lead">
+        Some fields should not be serialized, such as **sensitive data, passwords, or derived values**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using [NonSerialized] to Exclude Fields</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+
+[Serializable]
+class User
+{
+    public string Username { get; set; }
+
+    [NonSerialized]
+    private string password;
+
+    public User(string username, string password)
+    {
+        Username = username;
+        this.password = password;
+    }
+}
+
+// Writing Binary Data
+class Program
+{
+    static void Main()
+    {
+        User user = new User("Alice", "SuperSecret123");
+        BinaryFormatter formatter = new BinaryFormatter();
+
+        using (FileStream stream = new FileStream("user.dat", FileMode.Create))
+        {
+            formatter.Serialize(stream, user);
+        }
+
+        Console.WriteLine("User object serialized, but password is excluded.");
+    }
+}
+
+// Output:
+// User object serialized, but password is excluded.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **[NonSerialized]** attribute ensures that sensitive data is not serialized.
+    </p>
+</section>
+
+<!-- Section: Marking Serializable with XML Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Marking Serializable for XML Serialization</h2>
+    <p class="lead">
+        XML serialization requires the **XmlSerializer** class but does not support private fields.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: XML Serialization with [Serializable]</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Xml.Serialization;
+
+[Serializable]
+public class Employee
+{
+    public string Name { get; set; }
+    public int ID { get; set; }
+}
+
+// Writing XML Data
+class Program
+{
+    static void Main()
+    {
+        Employee emp = new Employee { Name = "Bob", ID = 101 };
+        XmlSerializer serializer = new XmlSerializer(typeof(Employee));
+
+        using (FileStream stream = new FileStream("employee.xml", FileMode.Create))
+        {
+            serializer.Serialize(stream, emp);
+        }
+
+        Console.WriteLine("Object serialized to XML.");
+    }
+}
+
+// Output:
+// Object serialized to XML.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **XmlSerializer** does not support **private fields or [NonSerialized] attributes**.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Marking Serializable -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Marking Serializable</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **[Serializable]** for **BinaryFormatter and SOAP serialization**.</li>
+        <li class="list-group-item">Use **[NonSerialized]** to **prevent sensitive fields from being serialized**.</li>
+        <li class="list-group-item">For **XML or JSON serialization**, prefer **XmlSerializer or JsonSerializer** instead of [Serializable].</li>
+        <li class="list-group-item">Ensure **version control compatibility** when serializing objects.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("RuntimeSerialization", "CSharp")" class="btn btn-outline-secondary">Previous: Runtime Serialization</a>
+    <a href="@Url.Action("SerializationInherited", "CSharp")" class="btn btn-outline-secondary">Next: Serialization and Inheritance</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

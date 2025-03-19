@@ -1,0 +1,242 @@
+﻿@{
+    ViewData["Title"] = "Serialization and Inheritance in C#";
+}
+
+<!-- Section: Introduction to Serialization and Inheritance -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is Serialization in Inherited Classes?</h2>
+    <p class="lead">
+        Serialization in **inherited classes** allows a **derived class to be serialized**, including all properties and fields from its **base class**. Proper handling ensures that both **public and private members** of a base class are correctly serialized.
+    </p>
+</section>
+
+<!-- Section: Key Features of Serialization in Inheritance -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Serialization in Inherited Classes</h2>
+    <ul class="list-group">
+        <li class="list-group-item">The **[Serializable]** attribute must be applied to both **base and derived** classes.</li>
+        <li class="list-group-item">Base class **private fields are not serialized** unless explicitly handled.</li>
+        <li class="list-group-item">Use **ISerializable** for custom serialization of base class members.</li>
+        <li class="list-group-item">Supported in **Binary, XML, and JSON serialization**.</li>
+    </ul>
+</section>
+
+<!-- Section: Basic Serialization with Inheritance -->
+<section class="mb-5">
+    <h2 class="text-secondary">Basic Serialization with Inheritance</h2>
+    <p class="lead">
+        If a **base class is serializable**, all **public and protected members** are automatically serialized.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Binary Serialization with Inheritance</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+
+[Serializable]
+class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+[Serializable]
+class Employee : Person
+{
+    public int EmployeeID { get; set; }
+}
+
+// Writing Binary Data
+class Program
+{
+    static void Main()
+    {
+        Employee emp = new Employee { Name = "Alice", Age = 30, EmployeeID = 1001 };
+        BinaryFormatter formatter = new BinaryFormatter();
+
+        using (FileStream stream = new FileStream("employee.dat", FileMode.Create))
+        {
+            formatter.Serialize(stream, emp);
+        }
+
+        Console.WriteLine("Inherited class serialized successfully.");
+    }
+}
+
+// Output:
+// Inherited class serialized successfully.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **Employee** class inherits **Person**, and all **public and protected** fields are serialized.
+    </p>
+</section>
+
+<!-- Section: Handling Private Fields in Base Class -->
+<section class="mb-5">
+    <h2 class="text-secondary">Handling Private Fields in Base Class</h2>
+    <p class="lead">
+        Private members of a **base class** are **not automatically serialized** in derived classes.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Custom Serialization for Private Fields</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Runtime.Serialization;
+
+[Serializable]
+class Person
+{
+    private string _secretCode = "1234";
+    public string Name { get; set; }
+    public int Age { get; set; }
+
+    public string GetSecretCode() => _secretCode;
+}
+
+[Serializable]
+class Employee : Person
+{
+    public int EmployeeID { get; set; }
+}
+
+// Writing Binary Data
+class Program
+{
+    static void Main()
+    {
+        Employee emp = new Employee { Name = "Bob", Age = 40, EmployeeID = 2001 };
+        IFormatter formatter = new BinaryFormatter();
+
+        using (FileStream stream = new FileStream("employee_secret.dat", FileMode.Create))
+        {
+            formatter.Serialize(stream, emp);
+        }
+
+        Console.WriteLine("Private fields in base class are NOT serialized.");
+    }
+}
+
+// Output:
+// Private fields in base class are NOT serialized.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        **Private fields** are not serialized automatically, but can be included using **ISerializable**.
+    </p>
+</section>
+
+<!-- Section: Using ISerializable for Custom Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using ISerializable for Custom Serialization</h2>
+    <p class="lead">
+        Implementing **ISerializable** in the base class allows **full control over serialization**, including **private members**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Custom Serialization Using ISerializable</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+
+[Serializable]
+class Person : ISerializable
+{
+    private string _secretCode = "9876";
+    public string Name { get; set; }
+    public int Age { get; set; }
+
+    public Person() { }
+
+    protected Person(SerializationInfo info, StreamingContext context)
+    {
+        _secretCode = info.GetString("SecretCode");
+        Name = info.GetString("Name");
+        Age = info.GetInt32("Age");
+    }
+
+    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        info.AddValue("SecretCode", _secretCode);
+        info.AddValue("Name", Name);
+        info.AddValue("Age", Age);
+    }
+
+    public string GetSecretCode() => _secretCode;
+}
+
+[Serializable]
+class Employee : Person
+{
+    public int EmployeeID { get; set; }
+}
+
+// Writing Binary Data
+class Program
+{
+    static void Main()
+    {
+        Employee emp = new Employee { Name = "Charlie", Age = 35, EmployeeID = 3001 };
+        BinaryFormatter formatter = new BinaryFormatter();
+
+        using (FileStream stream = new FileStream("employee_custom.dat", FileMode.Create))
+        {
+            formatter.Serialize(stream, emp);
+        }
+
+        Console.WriteLine("Private fields in base class are serialized using ISerializable.");
+    }
+}
+
+// Output:
+// Private fields in base class are serialized using ISerializable.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Implementing **ISerializable** allows **custom serialization** of private fields.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Serialization in Inheritance -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Serialization in Inheritance</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **[Serializable]** for automatic serialization in both base and derived classes.</li>
+        <li class="list-group-item">Implement **ISerializable** in base classes to **serialize private fields**.</li>
+        <li class="list-group-item">For **XML and JSON serialization**, ensure **public properties** are properly defined.</li>
+        <li class="list-group-item">Handle **versioning carefully** when modifying serialized base class structures.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("MarkingSerializable", "CSharp")" class="btn btn-outline-secondary">Previous: Marking Serializable</a>
+    <a href="@Url.Action("CustomSerialization", "CSharp")" class="btn btn-outline-secondary">Next: Custom Serialization</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

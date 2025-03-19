@@ -1,0 +1,238 @@
+﻿@{
+    ViewData["Title"] = "ISerializable Interface in C#";
+}
+
+<!-- Section: Introduction to ISerializable Interface -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is the ISerializable Interface in C#?</h2>
+    <p class="lead">
+        The **ISerializable** interface in C# allows developers to **customize the serialization process** by defining how an object is serialized and deserialized. It is commonly used when working with **private fields, custom logic, or backward compatibility**.
+    </p>
+</section>
+
+<!-- Section: Key Features of ISerializable -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of ISerializable Interface</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Provides **full control** over serialization and deserialization.</li>
+        <li class="list-group-item">Used for **handling private fields, encryption, and versioning**.</li>
+        <li class="list-group-item">Works with **BinaryFormatter and other serialization methods**.</li>
+        <li class="list-group-item">Requires implementing the **GetObjectData()** method.</li>
+    </ul>
+</section>
+
+<!-- Section: Implementing ISerializable -->
+<section class="mb-5">
+    <h2 class="text-secondary">Implementing ISerializable for Custom Serialization</h2>
+    <p class="lead">
+        To implement **ISerializable**, a class must define the **GetObjectData()** method and a **special constructor** to handle deserialization.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Custom Serialization Using ISerializable</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+
+[Serializable]
+class User : ISerializable
+{
+    public string Username { get; set; }
+    private string Password { get; set; }
+
+    public User() { }
+
+    public User(string username, string password)
+    {
+        Username = username;
+        Password = password;
+    }
+
+    // Custom Serialization
+    protected User(SerializationInfo info, StreamingContext context)
+    {
+        Username = info.GetString("Username");
+        Password = Decrypt(info.GetString("Password"));
+    }
+
+    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        info.AddValue("Username", Username);
+        info.AddValue("Password", Encrypt(Password));
+    }
+
+    private string Encrypt(string data) => $"encrypted({data})";
+    private string Decrypt(string data) => data.Replace("encrypted(", "").Replace(")", "");
+
+    public string GetPassword() => Password;
+}
+
+// Writing Custom Serialized Object
+class Program
+{
+    static void Main()
+    {
+        User user = new User("Alice", "SuperSecret123");
+        BinaryFormatter formatter = new BinaryFormatter();
+
+        using (FileStream stream = new FileStream("user.dat", FileMode.Create))
+        {
+            formatter.Serialize(stream, user);
+        }
+
+        Console.WriteLine("User object serialized with encryption.");
+    }
+}
+
+// Output:
+// User object serialized with encryption.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **ISerializable** interface allows encrypting passwords during serialization.
+    </p>
+</section>
+
+<!-- Section: Deserializing ISerializable Objects -->
+<section class="mb-5">
+    <h2 class="text-secondary">Deserializing ISerializable Objects</h2>
+    <p class="lead">
+        The **ISerializable** interface requires a **custom constructor** to reconstruct objects during deserialization.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Deserializing a Custom ISerializable Object</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+
+class DeserializeExample
+{
+    static void Main()
+    {
+        BinaryFormatter formatter = new BinaryFormatter();
+        using (FileStream stream = new FileStream("user.dat", FileMode.Open))
+        {
+            User user = (User)formatter.Deserialize(stream);
+            Console.WriteLine($"Username: {user.Username}, Password: {user.GetPassword()}");
+        }
+    }
+}
+
+// Output:
+// Username: Alice, Password: SuperSecret123</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **custom constructor** ensures that sensitive data like passwords are properly handled during deserialization.
+    </p>
+</section>
+
+<!-- Section: Handling Versioning with ISerializable -->
+<section class="mb-5">
+    <h2 class="text-secondary">Handling Versioning with ISerializable</h2>
+    <p class="lead">
+        When adding **new fields** to a class, the **ISerializable** interface can help maintain backward compatibility.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Handling Versioning in ISerializable</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+
+[Serializable]
+class Employee : ISerializable
+{
+    public string Name { get; set; }
+    private int Salary { get; set; }
+
+    public Employee() { }
+
+    public Employee(string name, int salary)
+    {
+        Name = name;
+        Salary = salary;
+    }
+
+    protected Employee(SerializationInfo info, StreamingContext context)
+    {
+        Name = info.GetString("Name");
+        Salary = info.GetInt32("Salary", defaultValue: 50000); // Default value for older versions
+    }
+
+    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        info.AddValue("Name", Name);
+        info.AddValue("Salary", Salary);
+    }
+}
+
+// Writing Versioned Serialized Object
+class Program
+{
+    static void Main()
+    {
+        Employee emp = new Employee("Charlie", 70000);
+        BinaryFormatter formatter = new BinaryFormatter();
+
+        using (FileStream stream = new FileStream("employee.dat", FileMode.Create))
+        {
+            formatter.Serialize(stream, emp);
+        }
+
+        Console.WriteLine("Employee object serialized with version handling.");
+    }
+}
+
+// Output:
+// Employee object serialized with version handling.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        **Default values** can be provided for older versions of serialized objects to ensure compatibility.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Using ISerializable -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using ISerializable</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **ISerializable** when handling **private fields and encryption**.</li>
+        <li class="list-group-item">Implement a **custom deserialization constructor** to properly reconstruct objects.</li>
+        <li class="list-group-item">For **JSON serialization**, use **JsonConverter** instead of ISerializable.</li>
+        <li class="list-group-item">Ensure **version compatibility** by providing default values for new fields.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-start mt-4">
+    <a href="@Url.Action("CustomSerialization", "CSharp")" class="btn btn-outline-secondary">Previous: Custom Serialization</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

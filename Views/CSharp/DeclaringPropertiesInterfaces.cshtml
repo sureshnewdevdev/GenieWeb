@@ -1,0 +1,203 @@
+﻿@{
+    ViewData["Title"] = "Declaring Properties in Interfaces in C#";
+}
+
+<!-- Section: Introduction to Properties in Interfaces -->
+<section class="mb-5">
+    <h2 class="text-secondary">Declaring Properties in Interfaces</h2>
+    <p class="lead">
+        In C#, interfaces can define properties without implementation, requiring implementing classes to provide definitions. This ensures a standardized contract across multiple classes.
+    </p>
+</section>
+
+<!-- Section: Key Features of Interface Properties -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Properties in Interfaces</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Interfaces can define <b>read-only</b>, <b>write-only</b>, or <b>read-write</b> properties.</li>
+        <li class="list-group-item">Implementing classes must provide the property logic.</li>
+        <li class="list-group-item">C# 8.0+ allows default implementations for properties in interfaces.</li>
+        <li class="list-group-item">Encourages abstraction and code reusability.</li>
+    </ul>
+</section>
+
+<!-- Section: Example of Declaring Properties in Interfaces -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Declaring and Implementing Properties</h2>
+    <p class="lead">
+        The following example demonstrates how to declare and implement properties in interfaces.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Interface with Properties</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>interface IPerson
+{
+    string Name { get; set; }  // Read-write property
+    int Age { get; }           // Read-only property
+}
+
+// Implementing the interface
+public class Student : IPerson
+{
+    public string Name { get; set; }
+    public int Age { get; private set; }
+
+    public Student(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+}
+
+// Usage
+Student student = new Student("Alice", 22);
+Console.WriteLine($"Name: {student.Name}, Age: {student.Age}");
+
+// student.Age = 25; // Error: Read-only property</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, <code>IPerson</code> defines a read-write property <code>Name</code> and a read-only property <code>Age</code>. The <code>Student</code> class implements these properties.
+    </p>
+</section>
+
+<!-- Section: Read-Only and Write-Only Properties -->
+<section class="mb-5">
+    <h2 class="text-secondary">Read-Only and Write-Only Properties</h2>
+    <p class="lead">
+        Interfaces can declare properties with different accessibility levels.
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Type</th>
+                <th>Declaration</th>
+                <th>Implementation Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Read-Only</td>
+                <td><code>int Age { get; }</code></td>
+                <td>Value can be retrieved but not modified.</td>
+            </tr>
+            <tr>
+                <td>Write-Only</td>
+                <td><code>string Password { set; }</code></td>
+                <td>Value can be assigned but not read.</td>
+            </tr>
+            <tr>
+                <td>Read-Write</td>
+                <td><code>string Name { get; set; }</code></td>
+                <td>Value can be assigned and retrieved.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Interface Properties with Default Implementations (C# 8+) -->
+<section class="mb-5">
+    <h2 class="text-secondary">Default Implementations for Properties (C# 8+)</h2>
+    <p class="lead">
+        Starting from C# 8.0, interfaces can provide default property implementations.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Default Property Implementation in Interface</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>interface IDevice
+{
+    string Model { get; set; }
+
+    // Default property implementation (C# 8+)
+    int Warranty { get; set; } = 1;  
+}
+
+// Implementing interface
+class Laptop : IDevice
+{
+    public string Model { get; set; }
+}
+
+// Usage
+Laptop myLaptop = new Laptop { Model = "Dell XPS" };
+Console.WriteLine($"Model: {myLaptop.Model}, Warranty: {((IDevice)myLaptop).Warranty}");</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, <code>IDevice</code> provides a default implementation for the <code>Warranty</code> property, which can be accessed via an interface reference.
+    </p>
+</section>
+
+<!-- Section: Auto-Implemented vs Manually Implemented Properties -->
+<section class="mb-5">
+    <h2 class="text-secondary">Auto-Implemented vs. Manually Implemented Properties</h2>
+    <p class="lead">
+        Properties in interfaces can be implemented using auto-implemented or manually implemented logic.
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Implementation Type</th>
+                <th>Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Auto-Implemented</td>
+                <td><code>public string Name { get; set; }</code></td>
+            </tr>
+            <tr>
+                <td>Manually Implemented</td>
+                <td>
+                    <pre>
+private string _name;
+public string Name
+{
+    get { return _name; }
+    set { _name = value; }
+}
+                    </pre>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: When to Use Interface Properties? -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Interface Properties?</h2>
+    <ul class="list-group">
+        <li class="list-group-item">When defining a common structure across multiple classes.</li>
+        <li class="list-group-item">To enforce read-only or write-only property rules.</li>
+        <li class="list-group-item">To provide default implementations for specific scenarios.</li>
+        <li class="list-group-item">When creating loosely coupled architectures.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("ImplementingInterfaceInheritance", "CSharp")" class="btn btn-outline-secondary">Previous: Implementing Interface Inheritance</a>
+    <a href="@Url.Action("Namespaces", "CSharp")" class="btn btn-outline-secondary">Next: Namespaces</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

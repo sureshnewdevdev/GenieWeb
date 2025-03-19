@@ -1,0 +1,212 @@
+﻿@{
+    ViewData["Title"] = "Runtime Serialization in C#";
+}
+
+<!-- Section: Introduction to Runtime Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is Runtime Serialization in C#?</h2>
+    <p class="lead">
+        **Runtime Serialization** in C# refers to the ability to serialize and deserialize objects dynamically at runtime, often without requiring predefined attributes like **[Serializable]**. This is commonly used in **reflection-based serialization, dynamic object persistence, and distributed applications**.
+    </p>
+</section>
+
+<!-- Section: Key Features of Runtime Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Runtime Serialization</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Allows **dynamic object serialization** without modifying class definitions.</li>
+        <li class="list-group-item">Uses **reflection** to inspect object properties at runtime.</li>
+        <li class="list-group-item">Supports **custom serialization logic** using interfaces like <code>ISerializable</code>.</li>
+        <li class="list-group-item">Commonly used in **distributed systems and frameworks like gRPC**.</li>
+    </ul>
+</section>
+
+<!-- Section: Using ISerializable for Runtime Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using ISerializable for Runtime Serialization</h2>
+    <p class="lead">
+        The <code>ISerializable</code> interface allows objects to define **custom serialization logic** dynamically.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Custom Runtime Serialization Using ISerializable</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+
+[Serializable]
+class Person : ISerializable
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+
+    public Person() { }
+
+    protected Person(SerializationInfo info, StreamingContext context)
+    {
+        Name = info.GetString("PersonName");
+        Age = info.GetInt32("PersonAge");
+    }
+
+    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        info.AddValue("PersonName", Name);
+        info.AddValue("PersonAge", Age);
+    }
+}
+
+// Writing Runtime Serialized Object
+class Program
+{
+    static void Main()
+    {
+        Person person = new Person { Name = "Alice", Age = 30 };
+        BinaryFormatter formatter = new BinaryFormatter();
+
+        using (FileStream stream = new FileStream("person_runtime.dat", FileMode.Create))
+        {
+            formatter.Serialize(stream, person);
+        }
+
+        Console.WriteLine("Object serialized with runtime logic.");
+    }
+}
+
+// Output:
+// Object serialized with runtime logic.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **ISerializable** interface allows dynamic serialization logic at runtime.
+    </p>
+</section>
+
+<!-- Section: JSON Serialization at Runtime -->
+<section class="mb-5">
+    <h2 class="text-secondary">JSON Serialization at Runtime</h2>
+    <p class="lead">
+        You can dynamically serialize and deserialize objects at runtime using **System.Text.Json**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: JSON Serialization Using Reflection</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Text.Json;
+using System.Reflection;
+
+class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+// Writing JSON Data Dynamically
+class Program
+{
+    static void Main()
+    {
+        object person = new Person { Name = "Bob", Age = 35 };
+        string json = JsonSerializer.Serialize(person);
+
+        Console.WriteLine("Serialized JSON:");
+        Console.WriteLine(json);
+    }
+}
+
+// Output:
+// Serialized JSON:
+// {"Name":"Bob","Age":35}</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **JsonSerializer.Serialize()** method can serialize any object dynamically at runtime.
+    </p>
+</section>
+
+<!-- Section: Using Reflection for Runtime Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Reflection for Runtime Serialization</h2>
+    <p class="lead">
+        **Reflection** allows serialization without requiring a predefined schema.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Serializing an Object Dynamically Using Reflection</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Text.Json;
+using System.Reflection;
+
+class Program
+{
+    static void Main()
+    {
+        var person = new { Name = "Charlie", Age = 40 }; // Anonymous Type
+        PropertyInfo[] properties = person.GetType().GetProperties();
+
+        Console.WriteLine("Serialized Object:");
+        foreach (var prop in properties)
+        {
+            Console.WriteLine($"{prop.Name}: {prop.GetValue(person)}");
+        }
+
+        string json = JsonSerializer.Serialize(person);
+        Console.WriteLine("\nSerialized JSON:");
+        Console.WriteLine(json);
+    }
+}
+
+// Output:
+// Serialized Object:
+// Name: Charlie
+// Age: 40
+
+// Serialized JSON:
+// {"Name":"Charlie","Age":40}</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Reflection allows **dynamic serialization** of unknown object structures.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Runtime Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Runtime Serialization</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **ISerializable** when custom serialization is required.</li>
+        <li class="list-group-item">Use **reflection-based serialization** for **unknown or dynamic objects**.</li>
+        <li class="list-group-item">Always **handle exceptions** when deserializing unknown objects.</li>
+        <li class="list-group-item">Ensure **performance optimization** by caching reflection calls.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("VariousSerializations", "CSharp")" class="btn btn-outline-secondary">Previous: Various Serializations</a>
+    <a href="@Url.Action("MarkingSerializable", "CSharp")" class="btn btn-outline-secondary">Next: Marking Serializable</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

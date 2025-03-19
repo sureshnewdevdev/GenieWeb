@@ -1,0 +1,214 @@
+﻿@{
+    ViewData["Title"] = "Exception Class Hierarchy in C#";
+}
+
+<!-- Section: Introduction to Exception Class Hierarchy -->
+<section class="mb-5">
+    <h2 class="text-secondary">Understanding Exception Class Hierarchy in C#</h2>
+    <p class="lead">
+        In C#, all exceptions are derived from the <code>System.Exception</code> class. The hierarchy helps categorize exceptions into different types, making it easier to handle specific errors.
+    </p>
+</section>
+
+<!-- Section: Exception Class Hierarchy Diagram -->
+<section class="mb-5">
+    <h2 class="text-secondary">Exception Class Hierarchy</h2>
+    <p class="lead">
+        The exception hierarchy in C# follows this structure:
+    </p>
+
+    <div class="bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>System.Object
+ └── System.Exception
+      ├── System.SystemException
+      │    ├── System.IndexOutOfRangeException
+      │    ├── System.NullReferenceException
+      │    ├── System.InvalidOperationException
+      │    ├── System.StackOverflowException
+      │    ├── System.OutOfMemoryException
+      │    ├── System.DivideByZeroException
+      │    ├── System.FormatException
+      │    └── System.IO.IOException
+      ├── System.ApplicationException (Base for custom exceptions)
+      │    ├── CustomException1
+      │    └── CustomException2
+      └── Other Exception Classes</code>
+        </pre>
+    </div>
+
+    <p class="text-muted">
+        The <code>System.Exception</code> class serves as the base class for all exceptions, with <code>System.SystemException</code> handling runtime errors and <code>System.ApplicationException</code> allowing custom exceptions.
+    </p>
+</section>
+
+<!-- Section: Built-in Exception Types -->
+<section class="mb-5">
+    <h2 class="text-secondary">Common Built-in Exception Types</h2>
+    <p class="lead">
+        Here are some commonly used exceptions in C#:
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Exception Type</th>
+                <th>Derived From</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>IndexOutOfRangeException</code></td>
+                <td><code>SystemException</code></td>
+                <td>Thrown when accessing an invalid array index.</td>
+                <td><code>arr[10]</code> (when arr length is 5)</td>
+            </tr>
+            <tr>
+                <td><code>NullReferenceException</code></td>
+                <td><code>SystemException</code></td>
+                <td>Thrown when trying to access an object that is null.</td>
+                <td><code>string s = null; s.Length;</code></td>
+            </tr>
+            <tr>
+                <td><code>DivideByZeroException</code></td>
+                <td><code>SystemException</code></td>
+                <td>Thrown when dividing by zero.</td>
+                <td><code>int x = 5 / 0;</code></td>
+            </tr>
+            <tr>
+                <td><code>InvalidOperationException</code></td>
+                <td><code>SystemException</code></td>
+                <td>Thrown when an operation is not allowed.</td>
+                <td><code>var item = list.First();</code> (when list is empty)</td>
+            </tr>
+            <tr>
+                <td><code>IOException</code></td>
+                <td><code>SystemException</code></td>
+                <td>Thrown when an I/O operation fails.</td>
+                <td>File not found, disk full, etc.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Custom Exceptions -->
+<section class="mb-5">
+    <h2 class="text-secondary">Creating Custom Exceptions</h2>
+    <p class="lead">
+        You can define your own exception by deriving from <code>ApplicationException</code> or <code>Exception</code>.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Creating a Custom Exception</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+public class InvalidAgeException : ApplicationException
+{
+    public InvalidAgeException(string message) : base(message) { }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        int age = 15;
+        try
+        {
+            if (age < 18)
+                throw new InvalidAgeException("Age must be 18 or older.");
+        }
+        catch (InvalidAgeException ex)
+        {
+            Console.WriteLine($"Custom Exception Caught: {ex.Message}");
+        }
+    }
+}
+
+// Output:
+// Custom Exception Caught: Age must be 18 or older.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        This custom exception checks if an age is below 18 and throws an error accordingly.
+    </p>
+</section>
+
+<!-- Section: Handling Different Exception Types -->
+<section class="mb-5">
+    <h2 class="text-secondary">Handling Different Exception Types</h2>
+    <p class="lead">
+        You can handle multiple exception types using multiple <code>catch</code> blocks.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Handling Multiple Exception Types</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            int[] arr = new int[3];
+            Console.WriteLine(arr[5]); // Will throw IndexOutOfRangeException
+        }
+        catch (IndexOutOfRangeException ex)
+        {
+            Console.WriteLine($"Index Error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"General Error: {ex.Message}");
+        }
+    }
+}
+
+// Output:
+// Index Error: Index was outside the bounds of the array.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>catch</code> block for <code>IndexOutOfRangeException</code> executes first, as it is more specific.
+    </p>
+</section>
+
+<!-- Section: When to Use Custom Exceptions -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Custom Exceptions?</h2>
+    <ul class="list-group">
+        <li class="list-group-item">When built-in exceptions do not describe your error properly.</li>
+        <li class="list-group-item">To enforce business logic validation (e.g., "Age must be 18 or older").</li>
+        <li class="list-group-item">To improve debugging and maintainability.</li>
+        <li class="list-group-item">To categorize errors in large applications.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("ExceptionsInCSharp", "CSharp")" class="btn btn-outline-secondary">Previous: Exceptions in C#</a>
+    <a href="@Url.Action("TryBlock", "CSharp")" class="btn btn-outline-secondary">Next: Try Block</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

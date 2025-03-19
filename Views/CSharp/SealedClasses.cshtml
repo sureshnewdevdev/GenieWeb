@@ -1,0 +1,169 @@
+﻿@{
+    ViewData["Title"] = "Sealed Classes in C#";
+}
+
+<!-- Section: Introduction to Sealed Classes -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Sealed Classes in C#?</h2>
+    <p class="lead">
+        A <b>sealed class</b> in C# is a class that cannot be inherited. It is used to restrict further extension of the class to maintain security and prevent unintended modifications.
+    </p>
+</section>
+
+<!-- Section: Key Features of Sealed Classes -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Sealed Classes</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Prevents inheritance by derived classes.</li>
+        <li class="list-group-item">Improves performance by allowing compiler optimizations.</li>
+        <li class="list-group-item">Ensures security by preventing modification of behavior.</li>
+        <li class="list-group-item">Cannot act as a base class for other classes.</li>
+    </ul>
+</section>
+
+<!-- Section: Example of a Sealed Class -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example of a Sealed Class</h2>
+    <p class="lead">
+        The following example demonstrates how a sealed class is declared and used.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Declaring and Using a Sealed Class</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>sealed class Calculator
+{
+    public int Add(int a, int b)
+    {
+        return a + b;
+    }
+}
+
+// This will cause an error
+// class AdvancedCalculator : Calculator { } // Error: Cannot inherit from sealed class
+
+// Usage
+Calculator calc = new Calculator();
+Console.WriteLine(calc.Add(5, 10)); // Output: 15</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, the <code>Calculator</code> class is marked as <code>sealed</code>, preventing it from being inherited.
+    </p>
+</section>
+
+<!-- Section: Sealed Methods -->
+<section class="mb-5">
+    <h2 class="text-secondary">Sealed Methods</h2>
+    <p class="lead">
+        In C#, you can use the <code>sealed</code> keyword on methods inside a base class to prevent them from being overridden in derived classes.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Sealing a Method</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class BaseClass
+{
+    public virtual void Show()
+    {
+        Console.WriteLine("Base class method.");
+    }
+}
+
+public class DerivedClass : BaseClass
+{
+    public sealed override void Show()
+    {
+        Console.WriteLine("Sealed method in derived class.");
+    }
+}
+
+public class SubDerivedClass : DerivedClass
+{
+    // Cannot override Show() because it is sealed in DerivedClass
+    // public override void Show() { } // Error
+}
+
+// Usage
+DerivedClass obj = new DerivedClass();
+obj.Show(); // Output: Sealed method in derived class.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Here, the method <code>Show()</code> is sealed in <code>DerivedClass</code>, preventing further overrides in <code>SubDerivedClass</code>.
+    </p>
+</section>
+
+<!-- Section: When to Use Sealed Classes? -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Sealed Classes?</h2>
+    <ul class="list-group">
+        <li class="list-group-item">When you want to prevent inheritance to maintain class integrity.</li>
+        <li class="list-group-item">To improve performance by allowing compiler optimizations.</li>
+        <li class="list-group-item">When a class is designed to be self-contained without needing extension.</li>
+    </ul>
+</section>
+
+<!-- Section: Sealed Classes vs Abstract Classes -->
+<section class="mb-5">
+    <h2 class="text-secondary">Sealed Classes vs. Abstract Classes</h2>
+    <p class="lead">
+        Both sealed and abstract classes control inheritance, but they serve different purposes.
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Feature</th>
+                <th>Sealed Classes</th>
+                <th>Abstract Classes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Inheritance</td>
+                <td>Cannot be inherited.</td>
+                <td>Must be inherited; cannot be instantiated.</td>
+            </tr>
+            <tr>
+                <td>Purpose</td>
+                <td>Prevents modifications to class behavior.</td>
+                <td>Acts as a blueprint for derived classes.</td>
+            </tr>
+            <tr>
+                <td>Method Behavior</td>
+                <td>Can have regular methods but cannot be overridden.</td>
+                <td>Can have abstract and concrete methods.</td>
+            </tr>
+            <tr>
+                <td>Usage</td>
+                <td>When extension of the class is unnecessary.</td>
+                <td>When you need base functionality for derived classes.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("AnonymousTypes", "CSharp")" class="btn btn-outline-secondary">Previous: Anonymous Types</a>
+    <a href="@Url.Action("CreatingInterfaces", "CSharp")" class="btn btn-outline-secondary">Next: Creating Interfaces</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>
