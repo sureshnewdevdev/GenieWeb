@@ -2,46 +2,40 @@
     ViewData["Title"] = "Boxing and Unboxing in C#";
 }
 
-<!-- Top Links Section -->
-@* <div class="top-links d-flex justify-content-start mb-4">
-    <a href="/InterviewQA" class="btn btn-success me-2">Interview Q&A</a>
-    <a href="/FreeMCQ" class="btn btn-primary me-2">Free MCQ Question and Answer</a>
-    <a href="/VideoTutorial" class="btn btn-info">Free Video Tutorial</a>
-</div> *@
-
-<!-- Main Heading -->
-<h1 class="display-4 text-primary mb-4">Boxing and Unboxing in C#</h1>
-
 <!-- Section: Introduction to Boxing and Unboxing -->
 <section class="mb-5">
     <h2 class="text-secondary">What is Boxing and Unboxing?</h2>
     <p class="lead">
-        Boxing and unboxing are processes in C# that convert value types to reference types and vice versa.
-        Boxing occurs when a value type is implicitly converted to an object type, while unboxing extracts the value type from an object.
+        **Boxing and unboxing** are processes in C# that convert **value types** into **reference types** and vice versa.
+        This allows value types (like <code>int</code>, <code>double</code>) to be stored in **reference type variables** (like <code>object</code>).
     </p>
+
+    <ul class="list-group">
+        <li class="list-group-item"><b>Boxing:</b> Converting a **value type** to an **object type** (stored in heap memory).</li>
+        <li class="list-group-item"><b>Unboxing:</b> Extracting the **original value** from an **object type** (back to stack memory).</li>
+    </ul>
 </section>
 
 <!-- Section: Boxing in C# -->
 <section class="mb-5">
     <h2 class="text-secondary">Boxing in C#</h2>
     <p class="lead">
-        Boxing is the process of converting a value type (e.g., <code>int</code>, <code>float</code>) to a reference type (e.g., <code>object</code>).
-        When a value type is boxed, the runtime wraps it inside a reference type, allowing the value type to be treated as an object.
+        **Boxing** is the process of converting a **value type** (e.g., <code>int</code>, <code>char</code>) into an **object type**.
+        When boxing occurs, the **value is wrapped inside an object**, allowing it to be treated as a reference type.
     </p>
 
-    <!-- Example Code Block with Copy Option -->
     <h3 class="text-info">Example of Boxing:</h3>
     <div class="code-snippet position-relative bg-light p-3 rounded border">
         <pre class="mb-0">
 <code>int num = 10;
-object obj = num;  // Boxing: int to object
+object obj = num;  // Boxing: int is converted to object
 Console.WriteLine(obj);</code>
         </pre>
         <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
     </div>
 
     <p class="text-muted">
-        In this example, the value of the integer <code>num</code> is boxed into the object <code>obj</code>. The <code>obj</code> now holds a reference to the value of <code>num</code>.
+        In this example, the **value type** <code>num</code> (stored in stack memory) is **boxed into an object** <code>obj</code> (stored in heap memory).
     </p>
 </section>
 
@@ -49,10 +43,9 @@ Console.WriteLine(obj);</code>
 <section class="mb-5">
     <h2 class="text-secondary">Unboxing in C#</h2>
     <p class="lead">
-        Unboxing is the process of converting a reference type (e.g., <code>object</code>) back into a value type. When unboxing occurs, the runtime checks whether the object is compatible with the unboxed value type.
+        **Unboxing** is the reverse process of boxing. It **extracts** the **original value type** from an **object** and assigns it back to a value-type variable.
     </p>
 
-    <!-- Example Code Block with Copy Option -->
     <h3 class="text-info">Example of Unboxing:</h3>
     <div class="code-snippet position-relative bg-light p-3 rounded border">
         <pre class="mb-0">
@@ -64,77 +57,94 @@ Console.WriteLine(num);</code>
     </div>
 
     <p class="text-muted">
-        In this example, the object <code>obj</code> is unboxed back into the integer <code>num</code>. The type of the object must match the value type during unboxing, or an exception will be thrown.
+        Here, **the object <code>obj</code> is unboxed back into the integer <code>num</code>**.
+        If unboxing is performed incorrectly (e.g., casting to an incompatible type), it results in an **InvalidCastException**.
     </p>
 </section>
 
-<!-- Section: Different Types of Data Types -->
+<!-- Section: Performance Impact of Boxing and Unboxing -->
 <section class="mb-5">
-    <h2 class="text-secondary">Different Types of Data Types</h2>
+    <h2 class="text-secondary">Performance Impact of Boxing and Unboxing</h2>
     <p class="lead">
-        In C#, data types are broadly categorized into two types: <b>Value types</b> and <b>Reference types</b>.
+        Since **boxing and unboxing involve heap memory allocation**, they **affect performance**.
     </p>
 
+    <h3 class="text-info">Performance Considerations:</h3>
+    <ul class="list-group">
+        <li class="list-group-item"><b>Boxing:</b> Requires **extra memory allocation** in the **heap**, which is slower than stack memory.</li>
+        <li class="list-group-item"><b>Unboxing:</b> Requires **type checking and casting**, which can lead to performance overhead.</li>
+        <li class="list-group-item"><b>Excessive Boxing/Unboxing:</b> Can cause **unnecessary memory usage**, leading to **Garbage Collection (GC) overhead**.</li>
+    </ul>
+
+    <h3 class="text-info">Performance Comparison:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>int val = 100;
+object obj = val;  // Boxing
+
+int newVal = (int)obj;  // Unboxing
+
+Console.WriteLine(newVal);</code>
+        </pre>
+    </div>
+
+    <p class="text-muted">
+        Avoid **unnecessary boxing and unboxing** in performance-critical applications.
+    </p>
+</section>
+
+<!-- Section: Key Differences Between Boxing and Unboxing -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Differences Between Boxing and Unboxing</h2>
     <table class="table table-bordered">
-        <thead>
+        <thead class="table-dark">
             <tr>
-                <th>Category</th>
-                <th>Data Type</th>
-                <th>Description</th>
+                <th>Feature</th>
+                <th>Boxing</th>
+                <th>Unboxing</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td rowspan="4"><b>Value Types</b></td>
-                <td><code>int</code></td>
-                <td>Signed 32-bit integer</td>
+                <td>Definition</td>
+                <td>Converts a **value type** into an **object/reference type**.</td>
+                <td>Extracts a **value type** from an **object/reference type**.</td>
             </tr>
             <tr>
-                <td><code>double</code></td>
-                <td>64-bit double-precision floating point</td>
+                <td>Memory</td>
+                <td>Allocates memory in the **heap**.</td>
+                <td>Retrieves data from the **heap to the stack**.</td>
             </tr>
             <tr>
-                <td><code>char</code></td>
-                <td>Represents a Unicode character</td>
+                <td>Performance</td>
+                <td>**Slower** (Heap allocation needed).</td>
+                <td>**Slower** (Requires type checking and casting).</td>
             </tr>
             <tr>
-                <td><code>bool</code></td>
-                <td>Boolean value (<code>true</code> or <code>false</code>)</td>
-            </tr>
-            <tr>
-                <td rowspan="2"><b>Reference Types</b></td>
-                <td><code>object</code></td>
-                <td>Base type of all types in C#</td>
-            </tr>
-            <tr>
-                <td><code>string</code></td>
-                <td>Represents a sequence of characters</td>
+                <td>Example</td>
+                <td><code>object obj = val;</code></td>
+                <td><code>int num = (int)obj;</code></td>
             </tr>
         </tbody>
     </table>
 </section>
 
-<!-- Section: Key Points to Remember -->
+<!-- Section: Best Practices for Avoiding Boxing/Unboxing Overhead -->
 <section class="mb-5">
-    <h2 class="text-secondary">Key Points to Remember</h2>
+    <h2 class="text-secondary">Best Practices to Avoid Performance Overhead</h2>
     <ul class="list-group">
-        <li class="list-group-item">Boxing converts a value type to a reference type.</li>
-        <li class="list-group-item">Unboxing converts a reference type back to a value type.</li>
-        <li class="list-group-item">Unboxing requires an explicit cast and must match the original value type.</li>
-        <li class="list-group-item">Boxing and unboxing may involve performance overhead due to the memory allocation in heap and stack.</li>
+        <li class="list-group-item"><b>Use Generics:</b> Instead of **storing value types in objects**, use **generic collections** like `<code>List&lt;T&gt;</code>` to avoid boxing.</li>
+        <li class="list-group-item"><b>Use Value Types When Possible:</b> Avoid unnecessary boxing by working with **value types** directly.</li>
+        <li class="list-group-item"><b>Use `var` with Caution:</b> `var` doesn’t prevent boxing but helps with **type inference**.</li>
+        <li class="list-group-item"><b>Minimize Object Storage:</b> If storing numbers in collections, use **generic data structures** instead of non-generic ones.</li>
     </ul>
 </section>
 
-<!-- Previous Topic Link -->
-<div class="previous-topic mt-4">
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
     <a href="@Url.Action("ValueAndReferenceType", "CSharp")" class="btn btn-outline-secondary">Previous: Value Types and Reference Type</a>
-</div>
-
-<!-- Next Topic Link -->
-<div class="next-topic mt-4">
     <a href="@Url.Action("TypeOfArrays", "CSharp")" class="btn btn-outline-secondary">Next: Type of Arrays</a>
 </div>
-
 
 <!-- JavaScript for Copy Functionality -->
 <script>

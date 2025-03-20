@@ -2,33 +2,26 @@
     ViewData["Title"] = "Ref vs Out Keywords in C#";
 }
 
-<!-- Top Links Section -->
-@* <div class="top-links d-flex justify-content-start mb-4">
-    <a href="/InterviewQA" class="btn btn-success me-2">Interview Q&A</a>
-    <a href="/FreeMCQ" class="btn btn-primary me-2">Free MCQ Question and Answer</a>
-    <a href="/VideoTutorial" class="btn btn-info">Free Video Tutorial</a>
-</div> *@
-
-<!-- Main Heading -->
-<h1 class="display-4 text-primary mb-4">Ref vs Out Keywords in C#</h1>
-
 <!-- Section: Introduction to Ref and Out Keywords -->
 <section class="mb-5">
-    <h2 class="text-secondary">What are Ref and Out Keywords?</h2>
+    <h2 class="text-secondary">What are <code>ref</code> and <code>out</code> Keywords?</h2>
     <p class="lead">
-        In C#, the <code>ref</code> and <code>out</code> keywords are used to pass arguments by reference. This means that changes made to the parameter inside the method affect the argument used to call the method.
-        However, there are key differences between <code>ref</code> and <code>out</code>.
+        In C#, the **<code>ref</code>** and **<code>out</code>** keywords are used to **pass arguments by reference**.
+        This means that changes made inside the method **affect the original variable**.
+        However, there are important **differences** between them.
     </p>
 </section>
 
 <!-- Section: Ref Keyword -->
 <section class="mb-5">
-    <h2 class="text-secondary">Ref Keyword</h2>
+    <h2 class="text-secondary">Understanding the <code>ref</code> Keyword</h2>
     <p class="lead">
-        The <code>ref</code> keyword is used to pass a variable by reference. The variable passed with <code>ref</code> must be initialized before it is passed to the method.
+        The **<code>ref</code>** keyword **passes a variable by reference**,
+        meaning the method **modifies the original value**.
+        The variable **must be initialized before passing** it to the method.
     </p>
 
-    <h3 class="text-info">Example: Using the Ref Keyword</h3>
+    <h3 class="text-info">Example: Using <code>ref</code></h3>
     <div class="code-snippet position-relative bg-light p-3 rounded border">
         <pre class="mb-0">
 <code>void ModifyValue(ref int number)
@@ -44,18 +37,21 @@ Console.WriteLine(original);  // Output: 15</code>
     </div>
 
     <p class="text-muted">
-        In this example, the <code>ref</code> keyword is used to modify the original value of <code>original</code>. The value is updated inside the method and reflects the changes in the original variable.
+        Here, the **<code>ref</code> keyword allows the method to update the original variable**.
+        The value of **<code>original</code> is modified to 15** inside the method.
     </p>
 </section>
 
 <!-- Section: Out Keyword -->
 <section class="mb-5">
-    <h2 class="text-secondary">Out Keyword</h2>
+    <h2 class="text-secondary">Understanding the <code>out</code> Keyword</h2>
     <p class="lead">
-        The <code>out</code> keyword is also used to pass variables by reference. However, unlike <code>ref</code>, the variable passed with <code>out</code> does not need to be initialized before it is passed to the method. The method must assign a value to the <code>out</code> parameter before the method returns.
+        The **<code>out</code>** keyword is also used to pass variables by reference.
+        However, **the variable does not need to be initialized before passing** it to the method.
+        The method **must assign a value** before returning.
     </p>
 
-    <h3 class="text-info">Example: Using the Out Keyword</h3>
+    <h3 class="text-info">Example: Using <code>out</code></h3>
     <div class="code-snippet position-relative bg-light p-3 rounded border">
         <pre class="mb-0">
 <code>void GetValue(out int number)
@@ -71,21 +67,62 @@ Console.WriteLine(result);  // Output: 20</code>
     </div>
 
     <p class="text-muted">
-        In this example, the <code>out</code> keyword is used to pass the variable <code>result</code> by reference. The method assigns a value to the variable, and the new value is reflected after the method call.
+        The **<code>out</code> keyword allows passing an uninitialized variable**.
+        The method **must assign a value** to the parameter before returning.
     </p>
 </section>
 
-<!-- Section: Difference Between Ref and Out -->
+<!-- Section: Real-World Use Cases -->
 <section class="mb-5">
-    <h2 class="text-secondary">Difference Between Ref and Out</h2>
-    <p class="lead">
-        Although both <code>ref</code> and <code>out</code> are used to pass variables by reference, there are some important differences:
+    <h2 class="text-secondary">Real-World Use Cases</h2>
+
+    <h3 class="text-info">1. Using <code>ref</code> for Updating Existing Data</h3>
+    <p>
+        **Scenario:** You have a **banking system** where you need to update an existing account balance.
     </p>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>void UpdateBalance(ref double balance, double amount)
+{
+    balance += amount;
+}
+
+double myBalance = 1000;
+UpdateBalance(ref myBalance, 500);
+Console.WriteLine("New Balance: " + myBalance);  // Output: 1500</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">2. Using <code>out</code> for Returning Multiple Values</h3>
+    <p>
+        **Scenario:** A function needs to **return multiple values** but C# methods can only return one value.
+    </p>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>void GetEmployeeDetails(out string name, out int age)
+{
+    name = "Alice";
+    age = 30;
+}
+
+string empName;
+int empAge;
+GetEmployeeDetails(out empName, out empAge);
+Console.WriteLine($"Employee: {empName}, Age: {empAge}");</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: Key Differences Between Ref and Out -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Differences Between <code>ref</code> and <code>out</code></h2>
 
     <table class="table table-bordered">
-        <thead>
+        <thead class="table-dark">
             <tr>
-                <th>Aspect</th>
+                <th>Feature</th>
                 <th><code>ref</code> Keyword</th>
                 <th><code>out</code> Keyword</th>
             </tr>
@@ -93,41 +130,42 @@ Console.WriteLine(result);  // Output: 20</code>
         <tbody>
             <tr>
                 <td><b>Initialization Requirement</b></td>
-                <td>The variable must be initialized before being passed.</td>
-                <td>The variable does not need to be initialized before being passed.</td>
+                <td>Must be initialized before being passed</td>
+                <td>Does not need to be initialized before being passed</td>
             </tr>
             <tr>
                 <td><b>Assignment Requirement</b></td>
-                <td>The method is not required to assign a value to the <code>ref</code> parameter.</td>
-                <td>The method must assign a value to the <code>out</code> parameter before returning.</td>
+                <td>Method may or may not assign a value</td>
+                <td>Method must assign a value before returning</td>
             </tr>
             <tr>
                 <td><b>Use Case</b></td>
-                <td>When a method needs to modify the value of an existing variable.</td>
-                <td>When a method needs to return multiple values through parameters.</td>
+                <td>Modifying existing data</td>
+                <td>Returning multiple values from a method</td>
+            </tr>
+            <tr>
+                <td><b>Performance Impact</b></td>
+                <td>Minimal overhead</td>
+                <td>Slight overhead (must be assigned inside the method)</td>
             </tr>
         </tbody>
     </table>
 </section>
 
-<!-- Section: Key Points to Remember -->
+<!-- Section: Best Practices -->
 <section class="mb-5">
-    <h2 class="text-secondary">Key Points to Remember</h2>
+    <h2 class="text-secondary">Best Practices</h2>
     <ul class="list-group">
-        <li class="list-group-item">The <code>ref</code> keyword requires the variable to be initialized before passing it to a method.</li>
-        <li class="list-group-item">The <code>out</code> keyword allows passing uninitialized variables, but the method must assign a value before returning.</li>
-        <li class="list-group-item">Both <code>ref</code> and <code>out</code> pass arguments by reference, allowing the method to modify the original variable.</li>
+        <li class="list-group-item"><b>Use <code>ref</code>:</b> When modifying **existing values**.</li>
+        <li class="list-group-item"><b>Use <code>out</code>:</b> When **returning multiple values** from a method.</li>
+        <li class="list-group-item"><b>Avoid overusing <code>ref</code> and <code>out</code>:</b> Consider **returning tuples** or objects instead.</li>
     </ul>
 </section>
 
-<!-- Previous Topic Link -->
-<div class="previous-topic mt-4">
-    <a href="@Url.Action("IsAndAsOperator", "CSharp")" class="btn btn-outline-secondary">Previous: Is and as operator</a>
-</div>
-
-<!-- Next Topic Link -->
-<div class="next-topic mt-4">
-    <a href="@Url.Action("ObjectBaseClass", "CSharp")" class="btn btn-outline-secondary">Next:The ‘object’ base class in .net</a>
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("IsAndAsOperator", "CSharp")" class="btn btn-outline-secondary">Previous: Is and As Operators</a>
+    <a href="@Url.Action("ObjectBaseClass", "CSharp")" class="btn btn-outline-secondary">Next: The ‘object’ Base Class in .NET</a>
 </div>
 
 <!-- JavaScript for Copy Functionality -->

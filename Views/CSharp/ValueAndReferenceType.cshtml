@@ -2,22 +2,18 @@
     ViewData["Title"] = "Value Type and Reference Type in C#";
 }
 
-<!-- Top Links Section -->
-@* <div class="top-links d-flex justify-content-start mb-4">
-    <a href="/InterviewQA" class="btn btn-success me-2">Interview Q&A</a>
-    <a href="/FreeMCQ" class="btn btn-primary me-2">Free MCQ Question and Answer</a>
-    <a href="/VideoTutorial" class="btn btn-info">Free Video Tutorial</a>
-</div> *@
-
-<!-- Main Heading -->
-<h1 class="display-4 text-primary mb-4">Value Type and Reference Type in C#</h1>
-
 <!-- Section: Introduction to Value Types and Reference Types -->
 <section class="mb-5">
     <h2 class="text-secondary">What are Value Types and Reference Types?</h2>
     <p class="lead">
-        In C#, data types are divided into two main categories: <b>Value types</b> and <b>Reference types</b>.
-        Understanding the difference between these two is fundamental to working with variables, memory, and performance in C#.
+        In C#, **data types** are classified into two main categories:
+    </p>
+    <ul class="list-group">
+        <li class="list-group-item"><b>Value Types:</b> Store the actual data directly in memory.</li>
+        <li class="list-group-item"><b>Reference Types:</b> Store a reference (address) to the data in memory.</li>
+    </ul>
+    <p>
+        Understanding the difference between these types is crucial for **memory management, performance, and efficient coding** in C#.
     </p>
 </section>
 
@@ -25,24 +21,34 @@
 <section class="mb-5">
     <h2 class="text-secondary">Value Types</h2>
     <p class="lead">
-        Value types hold the actual data in memory. When a variable of value type is assigned to another, the data is copied, meaning changes made to one variable do not affect the other. All the primitive data types in C# are value types, and they are stored in the stack memory.
+        **Value types** store the actual value in memory. When assigned to another variable, **a copy** of the value is created.
+        Value types are stored in the **stack memory**, which provides **fast access** and **automatic cleanup**.
     </p>
 
-    <!-- Example Code Block with Copy Option -->
-    <h3 class="text-info">Example of Value Types:</h3>
+    <h3 class="text-info">Examples of Value Types:</h3>
+    <ul class="list-group">
+        <li class="list-group-item"><code>int</code> (Integer)</li>
+        <li class="list-group-item"><code>char</code> (Character)</li>
+        <li class="list-group-item"><code>float</code>, <code>double</code> (Floating Point Numbers)</li>
+        <li class="list-group-item"><code>bool</code> (Boolean - true/false)</li>
+        <li class="list-group-item"><code>struct</code> (User-defined value type)</li>
+    </ul>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Value Type Assignment</h3>
     <div class="code-snippet position-relative bg-light p-3 rounded border">
         <pre class="mb-0">
 <code>int a = 10;
-int b = a;  // b gets a copy of a
+int b = a;  // Copy of 'a' is assigned to 'b'
 
 a = 20;
-Console.WriteLine(b);  // Output: 10</code>
+Console.WriteLine(b);  // Output: 10 (b remains unchanged)</code>
         </pre>
         <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
     </div>
 
     <p class="text-muted">
-        In this example, changing the value of <code>a</code> does not affect <code>b</code> because <code>b</code> holds a copy of <code>a</code>'s original value.
+        Here, <code>b</code> receives a **copy** of <code>a</code>'s value. Changing <code>a</code> does not affect <code>b</code>.
     </p>
 </section>
 
@@ -50,11 +56,22 @@ Console.WriteLine(b);  // Output: 10</code>
 <section class="mb-5">
     <h2 class="text-secondary">Reference Types</h2>
     <p class="lead">
-        Reference types store the reference (or address) of the data in memory, not the actual data itself. When a reference type variable is assigned to another, both variables point to the same memory location. This means that changes to one variable affect the other. Reference types are stored in the heap memory.
+        **Reference types** store a **memory reference (address)** rather than the actual value.
+        When assigned to another variable, both variables **point to the same memory location**.
+        Reference types are stored in the **heap memory**, which requires **garbage collection**.
     </p>
 
-    <!-- Example Code Block with Copy Option -->
-    <h3 class="text-info">Example of Reference Types:</h3>
+    <h3 class="text-info">Examples of Reference Types:</h3>
+    <ul class="list-group">
+        <li class="list-group-item"><code>string</code> (Text Data)</li>
+        <li class="list-group-item"><code>class</code> (Object-Oriented Programming Classes)</li>
+        <li class="list-group-item"><code>interface</code> (Abstract Type Definition)</li>
+        <li class="list-group-item"><code>object</code> (Base Type of all Types)</li>
+        <li class="list-group-item"><code>array</code> (Collection of Elements)</li>
+    </ul>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Reference Type Assignment</h3>
     <div class="code-snippet position-relative bg-light p-3 rounded border">
         <pre class="mb-0">
 <code>class Person
@@ -65,7 +82,7 @@ Console.WriteLine(b);  // Output: 10</code>
 Person p1 = new Person();
 p1.Name = "John";
 
-Person p2 = p1;  // p2 refers to the same object as p1
+Person p2 = p1;  // p2 now refers to the same object as p1
 p2.Name = "Mike";
 
 Console.WriteLine(p1.Name);  // Output: Mike</code>
@@ -74,132 +91,67 @@ Console.WriteLine(p1.Name);  // Output: Mike</code>
     </div>
 
     <p class="text-muted">
-        In this example, changing the name through <code>p2</code> also changes it for <code>p1</code> because both variables reference the same memory location.
+        Since <code>p1</code> and <code>p2</code> refer to the **same memory location**, modifying <code>p2.Name</code> also affects <code>p1.Name</code>.
     </p>
 </section>
 
-<!-- Section: Minimum and Maximum Range of Value Types -->
+<!-- Section: Memory Management (Stack vs Heap) -->
 <section class="mb-5">
-    <h2 class="text-secondary">Minimum and Maximum Range of Value Types</h2>
+    <h2 class="text-secondary">Memory Management: Stack vs Heap</h2>
     <p class="lead">
-        The following table lists the minimum and maximum values of common value types in C#:
+        C# manages **value types and reference types** differently in memory:
     </p>
 
     <table class="table table-bordered">
-        <thead>
+        <thead class="table-dark">
             <tr>
-                <th>Data Type</th>
-                <th>Size (in bytes)</th>
-                <th>Minimum Value</th>
-                <th>Maximum Value</th>
+                <th>Memory Type</th>
+                <th>Value Types (Stack)</th>
+                <th>Reference Types (Heap)</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td><code>byte</code></td>
-                <td>1</td>
-                <td>0</td>
-                <td>255</td>
+                <td>Storage</td>
+                <td>Stores actual values directly.</td>
+                <td>Stores references (memory addresses).</td>
             </tr>
             <tr>
-                <td><code>int</code></td>
-                <td>4</td>
-                <td>-2,147,483,648</td>
-                <td>2,147,483,647</td>
+                <td>Access Speed</td>
+                <td>Faster</td>
+                <td>Slower</td>
             </tr>
             <tr>
-                <td><code>float</code></td>
-                <td>4</td>
-                <td>~1.5 × 10^-45</td>
-                <td>~3.4 × 10^38</td>
+                <td>Lifetime</td>
+                <td>Automatically removed when method exits.</td>
+                <td>Managed by **Garbage Collector**.</td>
             </tr>
             <tr>
-                <td><code>double</code></td>
-                <td>8</td>
-                <td>~5.0 × 10^-324</td>
-                <td>~1.7 × 10^308</td>
-            </tr>
-            <tr>
-                <td><code>char</code></td>
-                <td>2</td>
-                <td>U+0000</td>
-                <td>U+FFFF</td>
+                <td>Example</td>
+                <td><code>int, float, bool, struct</code></td>
+                <td><code>string, class, object, array</code></td>
             </tr>
         </tbody>
     </table>
 </section>
 
-<!-- Section: Different Types of Data Types -->
+<!-- Section: Best Practices -->
 <section class="mb-5">
-    <h2 class="text-secondary">Different Types of Data Types</h2>
-    <p class="lead">
-        The following table categorizes the different types of data types in C#:
-    </p>
-
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Category</th>
-                <th>Data Type</th>
-                <th>Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td rowspan="4"><b>Integral Types</b></td>
-                <td><code>int</code></td>
-                <td>Signed 32-bit integer</td>
-            </tr>
-            <tr>
-                <td><code>long</code></td>
-                <td>Signed 64-bit integer</td>
-            </tr>
-            <tr>
-                <td><code>short</code></td>
-                <td>Signed 16-bit integer</td>
-            </tr>
-            <tr>
-                <td><code>byte</code></td>
-                <td>Unsigned 8-bit integer</td>
-            </tr>
-            <tr>
-                <td rowspan="2"><b>Floating Point Types</b></td>
-                <td><code>float</code></td>
-                <td>32-bit single-precision floating point</td>
-            </tr>
-            <tr>
-                <td><code>double</code></td>
-                <td>64-bit double-precision floating point</td>
-            </tr>
-            <tr>
-                <td><b>Character Type</b></td>
-                <td><code>char</code></td>
-                <td>Single Unicode character</td>
-            </tr>
-            <tr>
-                <td><b>Boolean Type</b></td>
-                <td><code>bool</code></td>
-                <td>Boolean value (<code>true</code> or <code>false</code>)</td>
-            </tr>
-            <tr>
-                <td><b>String Type</b></td>
-                <td><code>string</code></td>
-                <td>Sequence of characters</td>
-            </tr>
-        </tbody>
-    </table>
+    <h2 class="text-secondary">Best Practices for Value and Reference Types</h2>
+    <ul class="list-group">
+        <li class="list-group-item"><b>Use Value Types for Small Data:</b> Prefer value types (e.g., <code>int</code>, <code>bool</code>) for small, **frequently used** variables.</li>
+        <li class="list-group-item"><b>Use Reference Types for Complex Data:</b> Use **reference types** (e.g., <code>class</code>, <code>string</code>) for **large data structures** or **shared objects**.</li>
+        <li class="list-group-item"><b>Minimize Heap Allocation:</b> Excessive heap allocation can lead to **Garbage Collection (GC) overhead**. Use **structs for small, immutable objects**.</li>
+        <li class="list-group-item"><b>Understand Default Values:</b> **Value types** default to <code>0</code> (or equivalent), while **reference types** default to <code>null</code>.</li>
+        <li class="list-group-item"><b>Be Cautious with Strings:</b> Strings are **immutable** reference types. Operations like concatenation create **new string instances** in memory.</li>
+    </ul>
 </section>
 
-<!-- Previous Topic Link -->
-<div class="previous-topic mt-4">    
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
     <a href="@Url.Action("DataTypesAndArrays", "CSharp")" class="btn btn-outline-secondary">Previous: Data Types and Arrays in C#</a>
+    <a href="@Url.Action("BoxingUnBoxing", "CSharp")" class="btn btn-outline-secondary">Next: Boxing and Unboxing</a>
 </div>
-
-<!-- Next Topic Link -->
-<div class="next-topic mt-4">
-    <a href="@Url.Action("BoxingUnBoxing", "CSharp")" class="btn btn-outline-secondary">Next: Boxing and UnBoxing</a>
-</div>
-
 
 <!-- JavaScript for Copy Functionality -->
 <script>

@@ -1,46 +1,39 @@
 ﻿@{
-    ViewData["Title"] = "Implicit Type Local Variables in C#";
+    ViewData["Title"] = "Implicitly Typed Local Variables in C#";
 }
 
-<!-- Top Links Section -->
-@* <div class="top-links d-flex justify-content-start mb-4">
-    <a href="/InterviewQA" class="btn btn-success me-2">Interview Q&A</a>
-    <a href="/FreeMCQ" class="btn btn-primary me-2">Free MCQ Question and Answer</a>
-    <a href="/VideoTutorial" class="btn btn-info">Free Video Tutorial</a>
-</div> *@
-
-<!-- Main Heading -->
-<h1 class="display-4 text-primary mb-4">Implicit Type Local Variables in C#</h1>
-
-<!-- Section: Introduction to Implicit Type Local Variables -->
+<!-- Section: Introduction to Implicitly Typed Variables -->
 <section class="mb-5">
-    <h2 class="text-secondary">What are Implicit Type Local Variables?</h2>
+    <h2 class="text-secondary">Introduction to Implicitly Typed Variables</h2>
     <p class="lead">
-        In C#, the <code>var</code> keyword allows for implicit typing of local variables. This means that the type of the variable is determined by the compiler based on the type of the expression used to initialize it.
-        Implicitly typed local variables are useful for simplifying code and reducing redundancy, while still preserving strong typing.
+        In C#, the **<code>var</code> keyword** allows for **implicit typing of local variables**.
+        The **compiler automatically determines the type** of the variable based on the **assigned value** at **initialization**.
     </p>
 
-    <p>
-        The <code>var</code> keyword must be used when the variable is declared and initialized at the same time. The variable’s type is then inferred from the assigned value.
-    </p>
-
+    <h3 class="text-info">Example: Using <code>var</code></h3>
     <div class="code-snippet position-relative bg-light p-3 rounded border">
         <pre class="mb-0">
-<code>var age = 25;  // Implicitly typed as int
-var name = "John";  // Implicitly typed as string</code>
+<code>var age = 25;  // Compiler infers 'int'
+var name = "John";  // Compiler infers 'string'
+var isActive = true; // Compiler infers 'bool'</code>
         </pre>
         <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
     </div>
+
+    <p class="text-muted">
+        Here, **<code>var</code> replaces explicit type declarations** while still maintaining **strong typing**.
+    </p>
 </section>
 
 <!-- Section: Benefits of Implicit Typing -->
 <section class="mb-5">
     <h2 class="text-secondary">Benefits of Implicit Typing</h2>
     <p class="lead">
-        Using implicit typing can make your code more concise and easier to read, especially when working with complex types such as collections or anonymous types.
+        Using **<code>var</code>** makes code **more concise** and improves readability,
+        especially when working with **complex data types**.
     </p>
 
-    <h3 class="text-info">Example: Implicit Typing with Collections</h3>
+    <h3 class="text-info">Example: Using <code>var</code> with Collections</h3>
     <div class="code-snippet position-relative bg-light p-3 rounded border">
         <pre class="mb-0">
 <code>var numbers = new List&lt;int&gt;() { 1, 2, 3, 4, 5 };
@@ -53,7 +46,8 @@ foreach (var number in numbers)
     </div>
 
     <p class="text-muted">
-        In this example, the <code>var</code> keyword is used to implicitly type the <code>numbers</code> list and the <code>number</code> variable in the <code>foreach</code> loop.
+        The **<code>var</code> keyword** makes it easier to work with **collections**
+        without repeating long **type declarations**.
     </p>
 </section>
 
@@ -61,10 +55,11 @@ foreach (var number in numbers)
 <section class="mb-5">
     <h2 class="text-secondary">Implicit Typing with Anonymous Types</h2>
     <p class="lead">
-        Implicit typing is also necessary when working with anonymous types, which are types created on the fly without an explicit class declaration.
+        **Anonymous types** allow defining properties **without explicitly creating a class**.
+        **<code>var</code> is required** when storing anonymous types because **they do not have a named type**.
     </p>
 
-    <h3 class="text-info">Example: Implicit Typing with Anonymous Types</h3>
+    <h3 class="text-info">Example: Anonymous Type with <code>var</code></h3>
     <div class="code-snippet position-relative bg-light p-3 rounded border">
         <pre class="mb-0">
 <code>var person = new { Name = "John", Age = 30 };
@@ -74,29 +69,88 @@ Console.WriteLine($"Name: {person.Name}, Age: {person.Age}");</code>
     </div>
 
     <p class="text-muted">
-        In this example, an anonymous type is created with properties <code>Name</code> and <code>Age</code>, and the <code>var</code> keyword is used to store the anonymous object.
+        Here, **<code>var</code> is necessary** because the **anonymous type has no explicit type name**.
     </p>
 </section>
 
-<!-- Section: Key Points to Remember -->
+<!-- Section: Limitations of Implicit Typing -->
 <section class="mb-5">
-    <h2 class="text-secondary">Key Points to Remember</h2>
+    <h2 class="text-secondary">Limitations of <code>var</code></h2>
+    <p class="lead">
+        While **<code>var</code>** simplifies code, there are **certain restrictions**:
+    </p>
+
     <ul class="list-group">
-        <li class="list-group-item">Implicitly typed variables are declared using the <code>var</code> keyword.</li>
-        <li class="list-group-item">The compiler infers the variable type based on the assigned value at initialization.</li>
-        <li class="list-group-item">Implicit typing cannot be used for uninitialized variables.</li>
-        <li class="list-group-item">The type inferred by <code>var</code> is still statically typed, ensuring type safety.</li>
+        <li class="list-group-item"><b>Cannot Be Used Without Initialization:</b> The compiler **must infer the type** at the time of assignment.</li>
+        <li class="list-group-item"><b>Cannot Change Type:</b> Once assigned, **<code>var</code> remains the same type** throughout.</li>
+        <li class="list-group-item"><b>Not Ideal for Readability:</b> Overuse of <code>var</code> may reduce code clarity, especially for **complex data types**.</li>
+    </ul>
+
+    <h3 class="text-info">Incorrect Usage (Compiler Error):</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>var x;  // Error: Must be initialized
+var y = 10;
+y = "Hello";  // Error: Cannot change type after assignment</code>
+        </pre>
+    </div>
+</section>
+
+<!-- Section: var vs Explicit Typing -->
+<section class="mb-5">
+    <h2 class="text-secondary"><code>var</code> vs Explicit Typing</h2>
+    <p class="lead">
+        Choosing between **<code>var</code>** and **explicit typing** depends on the **context**.
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Feature</th>
+                <th>Using <code>var</code></th>
+                <th>Using Explicit Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Readability</td>
+                <td>✅ Better for shorter, simpler types</td>
+                <td>✅ Preferred for complex or unclear types</td>
+            </tr>
+            <tr>
+                <td>Type Inference</td>
+                <td>✅ Compiler infers the type</td>
+                <td>✅ Explicitly declared by developer</td>
+            </tr>
+            <tr>
+                <td>Anonymous Types</td>
+                <td>✅ Required</td>
+                <td>❌ Not possible</td>
+            </tr>
+            <tr>
+                <td>Code Clarity</td>
+                <td>❌ Can reduce clarity in complex scenarios</td>
+                <td>✅ More explicit and clear</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Best Practices for Using var -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using <code>var</code></h2>
+    <ul class="list-group">
+        <li class="list-group-item"><b>Use <code>var</code> When Type is Clear:</b> Avoid unnecessary **repetition**.</li>
+        <li class="list-group-item"><b>Use Explicit Typing for Readability:</b> If the type **isn't obvious**, declare it explicitly.</li>
+        <li class="list-group-item"><b>Avoid Overusing <code>var</code>:</b> Excessive use can **reduce code clarity**.</li>
+        <li class="list-group-item"><b>Required for Anonymous Types:</b> **Use <code>var</code>** when working with **anonymous objects**.</li>
     </ul>
 </section>
 
-<!-- Previous Topic Link -->
-<div class="previous-topic mt-4">
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
     <a href="@Url.Action("NullableTypes", "CSharp")" class="btn btn-outline-secondary">Previous: Nullable Types</a>
-</div>
-
-<!-- Next Topic Link -->
-<div class="next-topic mt-4">
-    <a href="@Url.Action("VarvsDynamic", "CSharp")" class="btn btn-outline-secondary">Next:Var vs dynamic</a>
+    <a href="@Url.Action("VarvsDynamic", "CSharp")" class="btn btn-outline-secondary">Next: Var vs Dynamic</a>
 </div>
 
 <!-- JavaScript for Copy Functionality -->
