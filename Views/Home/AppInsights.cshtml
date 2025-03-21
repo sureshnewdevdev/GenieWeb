@@ -1,0 +1,154 @@
+﻿@{
+    ViewData["Title"] = "Connecting .NET with Azure Application Insights";
+}
+
+<!-- Section: Introduction to Application Insights -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is Azure Application Insights?</h2>
+    <p class="lead">
+        Azure Application Insights is a powerful monitoring tool that helps developers keep track of how their applications are performing.
+        It collects useful data such as:
+        <ul class="list-group mt-3">
+            <li class="list-group-item">✔️ How many users are using the app</li>
+            <li class="list-group-item">✔️ How fast the app is responding</li>
+            <li class="list-group-item">✔️ If there are any errors or failures</li>
+            <li class="list-group-item">✔️ External resources your app depends on</li>
+        </ul>
+        It is part of Azure Monitor and can be used with apps built in .NET, Java, Node.js, Python, and more.
+    </p>
+</section>
+
+<!-- Section: Benefits of Application Insights -->
+<section class="mb-5">
+    <h2 class="text-secondary">Why Should You Use Application Insights?</h2>
+    <ul class="list-group">
+        <li class="list-group-item"><b>Real-time Monitoring:</b> See live metrics and app activity instantly.</li>
+        <li class="list-group-item"><b>Error Tracking:</b> Automatically catch and log exceptions for easy debugging.</li>
+        <li class="list-group-item"><b>Performance Insights:</b> Understand how long your app takes to respond to users.</li>
+        <li class="list-group-item"><b>Seamless Azure Integration:</b> Works well with other Azure services like Azure App Service, Functions, and more.</li>
+    </ul>
+</section>
+
+<!-- Section: Installing Application Insights SDK -->
+<section class="mb-5">
+    <h2 class="text-secondary">Step 1: Install Application Insights SDK</h2>
+    <p class="lead">To begin using Application Insights, install the necessary SDK package using the terminal:</p>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>dotnet add package Microsoft.ApplicationInsights.AspNetCore</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+    <p class="mt-3">This command adds the SDK to your project so you can start using telemetry features.</p>
+</section>
+
+<!-- Section: Configuring Application Insights -->
+<section class="mb-5">
+    <h2 class="text-secondary">Step 2: Add Configuration</h2>
+    <p class="lead">Add your Application Insights <b>Connection String</b> to the <code>appsettings.json</code> file in your project:</p>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>{
+  "ApplicationInsights": {
+    "ConnectionString": "InstrumentationKey=your-instrumentation-key"
+  }
+}</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+    <p class="mt-3">You can find this connection string in the Azure Portal when you create an Application Insights resource.</p>
+</section>
+
+<!-- Section: Modifying Program.cs -->
+<section class="mb-5">
+    <h2 class="text-secondary">Step 3: Update <code>Program.cs</code> (for .NET 6 and later)</h2>
+    <p class="lead">In .NET 6+, the <code>Program.cs</code> file is where you configure your services and the app pipeline.</p>
+    <p>Here’s how you can add Application Insights:</p>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Enable Application Insights with your connection string
+builder.Services.AddApplicationInsightsTelemetry(
+    builder.Configuration["ApplicationInsights:ConnectionString"]);
+
+var app = builder.Build();
+app.MapGet("/", () => "Hello, World!");
+app.Run();</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: Modifying Startup.cs -->
+<section class="mb-5">
+    <h2 class="text-secondary">Step 4: Update <code>Startup.cs</code> (for .NET 5 and earlier)</h2>
+    <p class="lead">If you're using .NET 5 or earlier, Application Insights is configured in <code>Startup.cs</code> like this:</p>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>public void ConfigureServices(IServiceCollection services)
+{
+    services.AddApplicationInsightsTelemetry(
+        Configuration["ApplicationInsights:ConnectionString"]);
+}</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: Running the Application -->
+<section class="mb-5">
+    <h2 class="text-secondary">Step 5: Run Your Application</h2>
+    <p class="lead">Use the following command in the terminal to start your web application:</p>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>dotnet run</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+    <p class="mt-3">Once the app is running, it will begin sending telemetry data to Azure.</p>
+</section>
+
+<!-- Section: Analyzing Telemetry Data -->
+<section class="mb-5">
+    <h2 class="text-secondary">Step 6: View Telemetry in Azure Portal</h2>
+    <p class="lead">To check your app's performance and logs:</p>
+    <ul class="list-group">
+        <li class="list-group-item">Go to the <a href="https://portal.azure.com" target="_blank">Azure Portal</a>.</li>
+        <li class="list-group-item">Open your <b>Application Insights</b> resource.</li>
+        <li class="list-group-item">Explore tabs like <b>Live Metrics</b>, <b>Failures</b>, <b>Performance</b>, and <b>Logs</b>.</li>
+    </ul>
+</section>
+
+<!-- Section: Custom Telemetry -->
+<section class="mb-5">
+    <h2 class="text-secondary">Step 7: (Optional) Log Custom Events</h2>
+    <p class="lead">You can track your own custom events using <code>TelemetryClient</code>. This is useful when you want to track specific user actions or flows.</p>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>using Microsoft.ApplicationInsights;
+
+public class MyService
+{
+    private readonly TelemetryClient _telemetryClient;
+
+    public MyService(TelemetryClient telemetryClient)
+    {
+        _telemetryClient = telemetryClient;
+    }
+
+    public void TrackCustomEvent()
+    {
+        _telemetryClient.TrackEvent("UserSignedUp");
+    }
+}</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+    <p class="mt-3">You can add properties or metrics to these events for more detailed tracking.</p>
+</section>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>
