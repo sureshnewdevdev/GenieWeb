@@ -1,0 +1,129 @@
+﻿@{
+    ViewData["Title"] = "Understanding Log Files in .NET Applications";
+}
+
+<!-- Section: Introduction to Log Files -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Log Files?</h2>
+    <p class="lead">
+        Log files are essential for tracking application behavior, diagnosing issues, and maintaining system health.
+        In .NET applications, logs record important information such as errors, requests, and performance metrics.
+    </p>
+</section>
+
+<!-- Section: Log File Format -->
+<section class="mb-5">
+    <h2 class="text-secondary">Log File Format</h2>
+    <p class="lead">Log files typically store structured data in formats such as plain text, JSON, or XML.</p>
+    <h3 class="text-info">Example Log Entry (JSON Format):</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>{
+    "Timestamp": "2025-03-21T12:00:00Z",
+    "Level": "Error",
+    "Message": "Unhandled exception in OrderService",
+    "Exception": "System.NullReferenceException: Object reference not set to an instance of an object.",
+    "StackTrace": "at OrderService.ProcessOrder() in OrderService.cs:line 45"
+}</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: Creating Log Files in .NET -->
+<section class="mb-5">
+    <h2 class="text-secondary">Step 1: Implement Logging in .NET</h2>
+    <p class="lead">Use built-in logging services in ASP.NET Core:</p>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>using Microsoft.Extensions.Logging;
+
+public class OrderService
+{
+    private readonly ILogger<OrderService> _logger;
+
+    public OrderService(ILogger<OrderService> logger)
+    {
+        _logger = logger;
+    }
+
+    public void ProcessOrder()
+    {
+        try
+        {
+            // Order processing logic
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing order");
+        }
+    }
+}</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: Configuring Log File Storage -->
+<section class="mb-5">
+    <h2 class="text-secondary">Step 2: Configure Log File Storage</h2>
+    <p class="lead">Modify <code>appsettings.json</code> to store logs in a file:</p>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning"
+    },
+    "File": {
+      "Path": "logs/app-log.txt"
+    }
+  }
+}</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: Real-Time Example -->
+<section class="mb-5">
+    <h2 class="text-secondary">Real-Time Example: E-Commerce Order Processing</h2>
+    <p class="lead">Consider an e-commerce system where each order is logged:</p>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>using Microsoft.Extensions.Logging;
+using System;
+
+public class OrderController
+{
+    private readonly ILogger<OrderController> _logger;
+
+    public OrderController(ILogger<OrderController> logger)
+    {
+        _logger = logger;
+    }
+
+    public void PlaceOrder(int orderId)
+    {
+        _logger.LogInformation($"Order {orderId} placed at {DateTime.UtcNow}");
+    }
+}</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: Viewing Log Files -->
+<section class="mb-5">
+    <h2 class="text-secondary">Step 3: Viewing Log Files</h2>
+    <p class="lead">Logs are stored in <code>logs/app-log.txt</code>. You can view them using:</p>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>cat logs/app-log.txt</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>
