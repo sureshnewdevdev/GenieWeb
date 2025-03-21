@@ -1,125 +1,185 @@
 ﻿@{
-    ViewData["Title"] = "Understanding Log Files in .NET Applications";
+    ViewData["Title"] = "Application Insights Logging Examples with Sample Outputs";
 }
 
-<!-- Section: Introduction to Log Files -->
+<!-- Section: Controller Code with Logging Examples -->
 <section class="mb-5">
-    <h2 class="text-secondary">What are Log Files?</h2>
-    <p class="lead">
-        Log files are essential for tracking application behavior, diagnosing issues, and maintaining system health.
-        In .NET applications, logs record important information such as errors, requests, and performance metrics.
-    </p>
+    <h2 class="text-secondary">.NET Application Insights Logging Types with Sample Output</h2>
+    <p class="lead">Below are examples for different types of logs using <code>TelemetryClient</code>, along with sample log outputs as they may appear in a blob-exported JSON file.</p>
 </section>
 
-<!-- Section: Log File Format -->
+<!-- Section: Controller Code -->
 <section class="mb-5">
-    <h2 class="text-secondary">Log File Format</h2>
-    <p class="lead">Log files typically store structured data in formats such as plain text, JSON, or XML.</p>
-    <h3 class="text-info">Example Log Entry (JSON Format):</h3>
+    <h4 class="text-info">TelemetryDemoController.cs</h4>
     <div class="code-snippet position-relative bg-light p-3 rounded border">
-        <pre class="mb-0"><code>{
-    "Timestamp": "2025-03-21T12:00:00Z",
-    "Level": "Error",
-    "Message": "Unhandled exception in OrderService",
-    "Exception": "System.NullReferenceException: Object reference not set to an instance of an object.",
-    "StackTrace": "at OrderService.ProcessOrder() in OrderService.cs:line 45"
-}</code></pre>
-        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
-    </div>
-</section>
+<pre class="mb-0"><code>using Microsoft.AspNetCore.Mvc;
+using Microsoft.ApplicationInsights;
 
-<!-- Section: Creating Log Files in .NET -->
-<section class="mb-5">
-    <h2 class="text-secondary">Step 1: Implement Logging in .NET</h2>
-    <p class="lead">Use built-in logging services in ASP.NET Core:</p>
-    <div class="code-snippet position-relative bg-light p-3 rounded border">
-        <pre class="mb-0"><code>using Microsoft.Extensions.Logging;
-
-public class OrderService
+[ApiController]
+[Route("api/[controller]")]
+public class TelemetryDemoController : ControllerBase
 {
-    private readonly ILogger<OrderService> _logger;
+    private readonly TelemetryClient _telemetryClient;
 
-    public OrderService(ILogger<OrderService> logger)
+    public TelemetryDemoController(TelemetryClient telemetryClient)
     {
-        _logger = logger;
+        _telemetryClient = telemetryClient;
     }
 
-    public void ProcessOrder()
+    // VERBOSE TRACE
+    [HttpGet("trace-verbose")]
+    public IActionResult LogVerbose()
+    {
+        _telemetryClient.TrackTrace("This is a VERBOSE log", SeverityLevel.Verbose);
+        return Ok("Verbose log sent");
+    }
+
+// Sample Log Output (JSON blob-style)
+/*
+{
+  "message": "This is a VERBOSE log",
+  "severityLevel": "Verbose",
+  "timestamp": "2025-03-21T14:20:00Z",
+  "type": "Trace"
+}
+*/
+
+    // INFORMATION TRACE
+    [HttpGet("trace-info")]
+    public IActionResult LogInfo()
+    {
+        _telemetryClient.TrackTrace("This is an INFORMATION log", SeverityLevel.Information);
+        return Ok("Information log sent");
+    }
+
+/*
+{
+  "message": "This is an INFORMATION log",
+  "severityLevel": "Information",
+  "timestamp": "2025-03-21T14:21:00Z",
+  "type": "Trace"
+}
+*/
+
+    // WARNING TRACE
+    [HttpGet("trace-warning")]
+    public IActionResult LogWarning()
+    {
+        _telemetryClient.TrackTrace("This is a WARNING log", SeverityLevel.Warning);
+        return Ok("Warning log sent");
+    }
+
+/*
+{
+  "message": "This is a WARNING log",
+  "severityLevel": "Warning",
+  "timestamp": "2025-03-21T14:22:00Z",
+  "type": "Trace"
+}
+*/
+
+    // EXCEPTION
+    [HttpGet("log-exception")]
+    public IActionResult LogException()
     {
         try
         {
-            // Order processing logic
+            int fail = 0;
+            int result = 10 / fail;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error processing order");
+            _telemetryClient.TrackException(ex);
         }
+        return Ok("Exception logged");
     }
-}</code></pre>
-        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
-    </div>
-</section>
 
-<!-- Section: Configuring Log File Storage -->
-<section class="mb-5">
-    <h2 class="text-secondary">Step 2: Configure Log File Storage</h2>
-    <p class="lead">Modify <code>appsettings.json</code> to store logs in a file:</p>
-    <div class="code-snippet position-relative bg-light p-3 rounded border">
-        <pre class="mb-0"><code>{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft": "Warning"
-    },
-    "File": {
-      "Path": "logs/app-log.txt"
-    }
-  }
-}</code></pre>
-        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
-    </div>
-</section>
-
-<!-- Section: Real-Time Example -->
-<section class="mb-5">
-    <h2 class="text-secondary">Real-Time Example: E-Commerce Order Processing</h2>
-    <p class="lead">Consider an e-commerce system where each order is logged:</p>
-    <div class="code-snippet position-relative bg-light p-3 rounded border">
-        <pre class="mb-0"><code>using Microsoft.Extensions.Logging;
-using System;
-
-public class OrderController
+/*
 {
-    private readonly ILogger<OrderController> _logger;
+  "type": "Exception",
+  "exception": {
+    "message": "Attempted to divide by zero.",
+    "type": "System.DivideByZeroException",
+    "stackTrace": "at TelemetryDemoController.LogException()..."
+  },
+  "severityLevel": "Error",
+  "timestamp": "2025-03-21T14:23:00Z"
+}
+*/
 
-    public OrderController(ILogger<OrderController> logger)
+    // CUSTOM EVENT
+    [HttpGet("log-event")]
+    public IActionResult LogEvent()
     {
-        _logger = logger;
+        _telemetryClient.TrackEvent("UserSignedUp", new Dictionary<string, string>
+        {
+            { "Plan", "Premium" },
+            { "Region", "East US" }
+        });
+
+        return Ok("Custom event logged");
     }
 
-    public void PlaceOrder(int orderId)
+/*
+{
+  "type": "Event",
+  "name": "UserSignedUp",
+  "properties": {
+    "Plan": "Premium",
+    "Region": "East US"
+  },
+  "timestamp": "2025-03-21T14:24:00Z"
+}
+*/
+
+    // DEPENDENCY
+    [HttpGet("log-dependency")]
+    public IActionResult LogDependency()
     {
-        _logger.LogInformation($"Order {orderId} placed at {DateTime.UtcNow}");
+        _telemetryClient.TrackDependency("SQL", "GetUsers", "SELECT * FROM Users", DateTimeOffset.Now, TimeSpan.FromMilliseconds(200), true);
+        return Ok("Dependency logged");
     }
+
+/*
+{
+  "type": "Dependency",
+  "target": "SQL",
+  "name": "GetUsers",
+  "data": "SELECT * FROM Users",
+  "duration": "00:00:00.200",
+  "success": true,
+  "timestamp": "2025-03-21T14:25:00Z"
+}
+*/
+
+    // REQUEST
+    [HttpGet("log-request")]
+    public IActionResult LogRequest()
+    {
+        _telemetryClient.TrackRequest("HomePageRequest", DateTimeOffset.Now, TimeSpan.FromMilliseconds(150), "200", true);
+        return Ok("Request telemetry logged");
+    }
+
+/*
+{
+  "type": "Request",
+  "name": "HomePageRequest",
+  "duration": "00:00:00.150",
+  "responseCode": "200",
+  "success": true,
+  "timestamp": "2025-03-21T14:26:00Z"
+}
+*/
+
 }</code></pre>
         <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
     </div>
 </section>
 
-<!-- Section: Viewing Log Files -->
-<section class="mb-5">
-    <h2 class="text-secondary">Step 3: Viewing Log Files</h2>
-    <p class="lead">Logs are stored in <code>logs/app-log.txt</code>. You can view them using:</p>
-    <div class="code-snippet position-relative bg-light p-3 rounded border">
-        <pre class="mb-0"><code>cat logs/app-log.txt</code></pre>
-        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
-    </div>
-</section>
-
-<!-- JavaScript for Copy Functionality -->
+<!-- JavaScript: Copy Button -->
 <script>
     document.querySelectorAll('.copy-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const code = this.previousElementSibling.innerText;
             navigator.clipboard.writeText(code).then(() => {
                 alert('Code copied to clipboard!');
