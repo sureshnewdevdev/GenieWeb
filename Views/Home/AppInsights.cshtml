@@ -60,6 +60,9 @@ app.Run();</code></pre>
     <div class="code-snippet position-relative bg-light p-3 rounded border">
 <pre class="mb-0"><code>using Microsoft.AspNetCore.Mvc;
 using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
+using System;
+using System.Collections.Generic;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -76,58 +79,71 @@ public class TelemetryDemoController : ControllerBase
     [HttpGet("trace-verbose")]
     public IActionResult LogVerbose()
     {
-        _telemetryClient.TrackTrace("This is a VERBOSE log", SeverityLevel.Verbose);
-        return Ok("Verbose log sent");
-    }
+        var message = "This is a VERBOSE log";
+        var timestamp = DateTime.UtcNow;
 
-// Sample Log Output (JSON blob-style)
-/*
-{
-  "message": "This is a VERBOSE log",
-  "severityLevel": "Verbose",
-  "timestamp": "2025-03-21T14:20:00Z",
-  "type": "Trace"
-}
-*/
+        _telemetryClient.TrackTrace(message, SeverityLevel.Verbose);
+
+        var logObject = new
+        {
+            message = message,
+            severityLevel = "Verbose",
+            timestamp = timestamp.ToString("o"),
+            type = "Trace"
+        };
+
+        return Ok(logObject);
+    }
 
     // INFORMATION TRACE
     [HttpGet("trace-info")]
     public IActionResult LogInfo()
     {
-        _telemetryClient.TrackTrace("This is an INFORMATION log", SeverityLevel.Information);
-        return Ok("Information log sent");
-    }
+        var message = "This is an INFORMATION log";
+        var timestamp = DateTime.UtcNow;
 
-/*
-{
-  "message": "This is an INFORMATION log",
-  "severityLevel": "Information",
-  "timestamp": "2025-03-21T14:21:00Z",
-  "type": "Trace"
-}
-*/
+        _telemetryClient.TrackTrace(message, SeverityLevel.Information);
+
+        var logObject = new
+        {
+            message = message,
+            severityLevel = "Information",
+            timestamp = timestamp.ToString("o"),
+            type = "Trace"
+        };
+
+        return Ok(logObject);
+    }
 
     // WARNING TRACE
     [HttpGet("trace-warning")]
     public IActionResult LogWarning()
     {
-        _telemetryClient.TrackTrace("This is a WARNING log", SeverityLevel.Warning);
-        return Ok("Warning log sent");
-    }
+        var message = "This is a WARNING log";
+        var timestamp = DateTime.UtcNow;
 
-/*
-{
-  "message": "This is a WARNING log",
-  "severityLevel": "Warning",
-  "timestamp": "2025-03-21T14:22:00Z",
-  "type": "Trace"
-}
-*/
+        _telemetryClient.TrackTrace(message, SeverityLevel.Warning);
+
+        var logObject = new
+        {
+            message = message,
+            severityLevel = "Warning",
+            timestamp = timestamp.ToString("o"),
+            type = "Trace"
+        };
+
+        return Ok(logObject);
+    }
 
     // EXCEPTION
     [HttpGet("log-exception")]
     public IActionResult LogException()
     {
+        string message = null;
+        string type = null;
+        string stackTrace = null;
+        var timestamp = DateTime.UtcNow;
+
         try
         {
             int fail = 0;
@@ -135,89 +151,120 @@ public class TelemetryDemoController : ControllerBase
         }
         catch (Exception ex)
         {
+            message = ex.Message;
+            type = ex.GetType().Name;
+            stackTrace = ex.StackTrace;
+
             _telemetryClient.TrackException(ex);
         }
-        return Ok("Exception logged");
-    }
 
-/*
-{
-  "type": "Exception",
-  "exception": {
-    "message": "Attempted to divide by zero.",
-    "type": "System.DivideByZeroException",
-    "stackTrace": "at TelemetryDemoController.LogException()..."
-  },
-  "severityLevel": "Error",
-  "timestamp": "2025-03-21T14:23:00Z"
-}
-*/
+        var logObject = new
+        {
+            type = "Exception",
+            exception = new
+            {
+                message = message,
+                type = type,
+                stackTrace = stackTrace
+            },
+            severityLevel = "Error",
+            timestamp = timestamp.ToString("o")
+        };
+
+        return Ok(logObject);
+    }
 
     // CUSTOM EVENT
     [HttpGet("log-event")]
     public IActionResult LogEvent()
     {
-        _telemetryClient.TrackEvent("UserSignedUp", new Dictionary<string, string>
+        var eventName = "UserSignedUp";
+        var timestamp = DateTime.UtcNow;
+        var properties = new Dictionary<string, string>
         {
             { "Plan", "Premium" },
             { "Region", "East US" }
-        });
+        };
 
-        return Ok("Custom event logged");
+        _telemetryClient.TrackEvent(eventName, properties);
+
+        var logObject = new
+        {
+            type = "Event",
+            name = eventName,
+            properties = properties,
+            timestamp = timestamp.ToString("o")
+        };
+
+        return Ok(logObject);
     }
-
-/*
-{
-  "type": "Event",
-  "name": "UserSignedUp",
-  "properties": {
-    "Plan": "Premium",
-    "Region": "East US"
-  },
-  "timestamp": "2025-03-21T14:24:00Z"
-}
-*/
 
     // DEPENDENCY
     [HttpGet("log-dependency")]
     public IActionResult LogDependency()
     {
-        _telemetryClient.TrackDependency("SQL", "GetUsers", "SELECT * FROM Users", DateTimeOffset.Now, TimeSpan.FromMilliseconds(200), true);
-        return Ok("Dependency logged");
-    }
+        var dependencyType = "SQL";
+        var dependencyName = "GetUsers";
+        var dependencyData = "SELECT * FROM Users";
+        var timestamp = DateTimeOffset.UtcNow;
+        var duration = TimeSpan.FromMilliseconds(200);
+        var success = true;
 
-/*
-{
-  "type": "Dependency",
-  "target": "SQL",
-  "name": "GetUsers",
-  "data": "SELECT * FROM Users",
-  "duration": "00:00:00.200",
-  "success": true,
-  "timestamp": "2025-03-21T14:25:00Z"
-}
-*/
+        _telemetryClient.TrackDependency(
+            dependencyType,
+            dependencyName,
+            dependencyData,
+            timestamp,
+            duration,
+            success
+        );
+
+        var logObject = new
+        {
+            type = "Dependency",
+            target = dependencyType,
+            name = dependencyName,
+            data = dependencyData,
+            duration = duration.ToString(),
+            success = success,
+            timestamp = timestamp.ToString("o")
+        };
+
+        return Ok(logObject);
+    }
 
     // REQUEST
     [HttpGet("log-request")]
     public IActionResult LogRequest()
     {
-        _telemetryClient.TrackRequest("HomePageRequest", DateTimeOffset.Now, TimeSpan.FromMilliseconds(150), "200", true);
-        return Ok("Request telemetry logged");
+        var requestName = "HomePageRequest";
+        var timestamp = DateTimeOffset.UtcNow;
+        var duration = TimeSpan.FromMilliseconds(150);
+        var responseCode = "200";
+        var success = true;
+
+        _telemetryClient.TrackRequest(
+            requestName,
+            timestamp,
+            duration,
+            responseCode,
+            success
+        );
+
+        var logObject = new
+        {
+            type = "Request",
+            name = requestName,
+            duration = duration.ToString(),
+            responseCode = responseCode,
+            success = success,
+            timestamp = timestamp.ToString("o")
+        };
+
+        return Ok(logObject);
     }
-
-/*
-{
-  "type": "Request",
-  "name": "HomePageRequest",
-  "duration": "00:00:00.150",
-  "responseCode": "200",
-  "success": true,
-  "timestamp": "2025-03-21T14:26:00Z"
 }
-*/
-
-}</code></pre>
+</code></pre>
         <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
     </div>
 </section>
