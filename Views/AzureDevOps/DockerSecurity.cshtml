@@ -1,0 +1,108 @@
+﻿@{
+    ViewData["Title"] = "Docker Security";
+    ViewData["ActiveMenu"] = "AzureDevOps";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Securing your Docker environment is critical for protecting applications, infrastructure, and data.
+        This includes image scanning, access control, secure communication, and container isolation.
+    </p>
+    <hr />
+
+    <!-- Section: Container Security Best Practices -->
+    <div class="mt-5">
+        <h2>Container Security Best Practices</h2>
+        <ul>
+            <li>Use trusted base images from official repositories</li>
+            <li>Minimize images — only include necessary binaries and files</li>
+            <li>Run containers as non-root users</li>
+            <li>Keep images and dependencies up to date</li>
+            <li>Apply the principle of least privilege in all configurations</li>
+        </ul>
+    </div>
+
+    <!-- Section: Managing User Permissions -->
+    <div class="mt-5">
+        <h3>Managing User Permissions</h3>
+        <p>By default, containers run as root, which can be a security risk. To run as a non-root user:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>FROM node:18
+RUN useradd -m appuser
+USER appuser
+CMD ["node", "app.js"]</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Also, avoid adding users to the <code>docker</code> group unnecessarily on the host system.</p>
+    </div>
+
+    <!-- Section: Scanning Images for Vulnerabilities -->
+    <div class="mt-5">
+        <h3>Scanning Images for Vulnerabilities</h3>
+        <p>Use tools to scan your Docker images before deployment:</p>
+        <ul>
+            <li><strong>Docker Scout:</strong> Integrated into Docker Desktop and CLI</li>
+            <li><strong>Trivy (by Aqua):</strong> Lightweight, fast scanner</li>
+            <li><strong>Snyk:</strong> CLI and GitHub integration for CI scanning</li>
+        </ul>
+        <p>Example: Scan with Trivy</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>trivy image myapp:latest</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Securing Network Communication -->
+    <div class="mt-5">
+        <h3>Securing Network Communication</h3>
+        <ul>
+            <li>Use internal Docker networks for container communication</li>
+            <li>Limit open ports and expose only what's needed</li>
+            <li>Use TLS for communication with private registries</li>
+            <li>Encrypt sensitive environment variables or use Docker secrets</li>
+        </ul>
+    </div>
+
+    <!-- Section: Role-Based Access Control (RBAC) -->
+    <div class="mt-5">
+        <h3>Implementing Role-Based Access Control (RBAC)</h3>
+        <p>When using Docker with tools like Portainer, Kubernetes, or hosted registries, enable RBAC to limit actions:</p>
+        <ul>
+            <li>Define roles (admin, dev, ops) with scoped access</li>
+            <li>Limit registry access to specific teams or namespaces</li>
+            <li>Audit container usage and changes</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            A secure Docker workflow includes hardened images, proper access control, ongoing vulnerability scanning,
+            and least-privilege practices. Proactive security is essential for DevOps and production deployments.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("DockerRegistryHub", "AzureDevOps")" class="btn btn-outline-secondary">
+            &larr; Previous: Docker Registry & Hub
+        </a>
+        <a href="@Url.Action("DockerSwarm", "AzureDevOps")" class="btn btn-outline-secondary">
+            Next: Docker Swarm (Orchestration) &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

@@ -1,0 +1,113 @@
+﻿@{
+    ViewData["Title"] = "Real-World Docker Use Cases";
+    ViewData["ActiveMenu"] = "AzureDevOps";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Docker is used across industries to streamline development, testing, and deployment.
+        Here are some of the most common and impactful real-world use cases.
+    </p>
+    <hr />
+
+    <!-- Section: Deploying Web Applications -->
+    <div class="mt-5">
+        <h2>Deploying Web Applications</h2>
+        <p>
+            Containerize full-stack applications with web servers, APIs, and databases for easier scaling and deployment.
+        </p>
+        <p>Example: Running an NGINX server with your app:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker run -d -p 80:80 --name webserver nginx</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Combine frontend/backend with Docker Compose for multi-service applications.</p>
+    </div>
+
+    <!-- Section: Running Databases in Docker -->
+    <div class="mt-5">
+        <h3>Running Databases in Docker</h3>
+        <p>Launch SQL and NoSQL databases quickly in isolated containers for testing or small-scale production:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker run -d --name postgres-db -e POSTGRES_PASSWORD=secret -p 5432:5432 postgres</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Use named volumes to persist data between restarts:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker run -d -v pgdata:/var/lib/postgresql/data postgres</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Using Docker for Microservices -->
+    <div class="mt-5">
+        <h3>Using Docker for Microservices</h3>
+        <ul>
+            <li>Each microservice runs in its own container</li>
+            <li>Easy to scale independently</li>
+            <li>Docker Compose or Kubernetes for orchestration</li>
+        </ul>
+        <p>Example <code>docker-compose.yml</code> for microservice architecture:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>services:
+  users:
+    image: user-service
+    ports:
+      - "5001:5001"
+
+  products:
+    image: product-service
+    ports:
+      - "5002:5002"</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Docker in Data Science & Machine Learning -->
+    <div class="mt-5">
+        <h3>Docker in Data Science & Machine Learning</h3>
+        <p>Use Docker to standardize ML environments and speed up experimentation:</p>
+        <ul>
+            <li>Package Python environments with TensorFlow, PyTorch, etc.</li>
+            <li>Ensure GPU access with <code>--gpus all</code> flag</li>
+            <li>Share models and notebooks using Docker images</li>
+        </ul>
+        <p>Example Docker command for JupyterLab:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker run -p 8888:8888 jupyter/datascience-notebook</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Docker enables consistent, scalable, and secure deployments across all stages of development.
+            Whether you're building a microservice platform or training ML models, Docker helps ship faster and smarter.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("DockerMigration", "AzureDevOps")" class="btn btn-outline-secondary">
+            &larr; Previous: Docker Container Migration
+        </a>
+        <a href="@Url.Action("DockerTroubleshooting", "AzureDevOps")" class="btn btn-outline-secondary">
+            Next: Docker Troubleshooting & FAQs &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

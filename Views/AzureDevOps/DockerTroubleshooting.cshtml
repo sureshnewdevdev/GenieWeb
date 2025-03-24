@@ -1,0 +1,127 @@
+﻿@{
+    ViewData["Title"] = "Docker Troubleshooting & FAQs";
+    ViewData["ActiveMenu"] = "AzureDevOps";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Even seasoned developers face Docker hiccups. This page lists common problems, debugging tips, and optimization strategies to help you resolve issues and streamline container workflows.
+    </p>
+    <hr />
+
+    <!-- Section: Common Docker Errors and Fixes -->
+    <div class="mt-5">
+        <h2>Common Docker Errors and Fixes</h2>
+        <ul>
+            <li>
+                <strong>Port already allocated:</strong> A container is already using the port.
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>docker ps -a
+docker rm -f container_id</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+            <li>
+                <strong>Cannot connect to Docker daemon:</strong> Docker isn't running or permission is denied.
+                <ul>
+                    <li>Start the Docker service</li>
+                    <li>
+                        Add user to Docker group:
+                        <div class="code-snippet bg-light p-3 rounded position-relative">
+                            <pre class="mb-0"><code>sudo usermod -aG docker $USER</code></pre>
+                            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                        </div>
+                    </li>
+                </ul>
+            </li>
+            <li><strong>Image pull failed:</strong> Check internet connection, Docker Hub login, or proxy/firewall issues.</li>
+        </ul>
+    </div>
+
+    <!-- Section: Debugging Containers -->
+    <div class="mt-5">
+        <h3>Debugging Containers</h3>
+        <ul>
+            <li>
+                Access container shell:
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>docker exec -it container_name /bin/bash</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+            <li>
+                View logs:
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>docker logs container_name</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+            <li>
+                Inspect container or network:
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>docker inspect container_or_network</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Section: Performance Optimization Tips -->
+    <div class="mt-5">
+        <h3>Performance Optimization Tips</h3>
+        <ul>
+            <li>Use Alpine or slim images</li>
+            <li>Combine RUN instructions to reduce layers</li>
+            <li>Limit running processes to only what's needed</li>
+            <li>
+                Prune unused images, containers, volumes:
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>docker system prune -a</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Section: Helpful Resources -->
+    <div class="mt-5">
+        <h3>Helpful Resources</h3>
+        <ul>
+            <li><a href="https://docs.docker.com/" target="_blank">Docker Official Documentation</a></li>
+            <li><a href="https://forums.docker.com/" target="_blank">Docker Community Forums</a></li>
+            <li><a href="https://github.com/docker/cli/issues" target="_blank">GitHub Issues</a></li>
+            <li><a href="https://stackoverflow.com/questions/tagged/docker" target="_blank">Docker on Stack Overflow</a></li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Whether you're debugging a failing container or tuning performance, these tips and tools will keep your Docker workflow productive and efficient.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("DockerUseCases", "AzureDevOps")" class="btn btn-outline-secondary">
+            &larr; Previous: Real-World Docker Use Cases
+        </a>
+        <a href="@Url.Action("DockerInstallation", "AzureDevOps")" class="btn btn-outline-secondary">
+            Back to Start &uarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

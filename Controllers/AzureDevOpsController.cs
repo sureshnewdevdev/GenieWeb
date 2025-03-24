@@ -352,5 +352,103 @@ namespace GenieWeb.Controllers
             ViewData["ActiveMenu"] = "AzureDevOps";
             return View("ContainerizingWebAppWithDocker");
         }
+
+        public IActionResult DockerImagesAndContainers()
+        {
+            ViewData["ActiveMenu"] = "AzureDevOps";
+            ViewData["ActivePage"] = "DockerImagesAndContainers";
+            return View("DockerImagesAndContainers");
+        }
+
+        public IActionResult DockerCompose()
+        {
+            ViewData["ActiveMenu"] = "AzureDevOps";
+            ViewData["ActivePage"] = "DockerCompose";
+            return View("DockerCompose");
+        }
+
+        public IActionResult DockerNetworking()
+        {
+            ViewData["ActiveMenu"] = "AzureDevOps";
+            ViewData["ActivePage"] = "DockerNetworking";
+            return View("DockerNetworking");
+        }
+
+        public IActionResult DockerVolumesStorage()
+        {
+            ViewData["ActiveMenu"] = "AzureDevOps";
+            ViewData["ActivePage"] = "DockerVolumesStorage";
+            return View("DockerVolumesStorage");
+        }
+
+        public IActionResult DockerfileOptimization()
+        {
+            ViewData["ActiveMenu"] = "AzureDevOps";
+            ViewData["ActivePage"] = "DockerfileOptimization";
+            return View("DockerfileOptimization");
+        }
+
+        public IActionResult DockerRegistryHub()
+        {
+            ViewData["ActiveMenu"] = "AzureDevOps";
+            ViewData["ActivePage"] = "DockerRegistryHub";
+            return View("DockerRegistryHub");
+        }
+
+        public IActionResult DockerSecurity()
+        {
+            ViewData["ActiveMenu"] = "AzureDevOps";
+            ViewData["ActivePage"] = "DockerSecurity";
+            return View("DockerSecurity");
+        }
+
+        public IActionResult DockerSwarm()
+        {
+            ViewData["ActiveMenu"] = "AzureDevOps";
+            ViewData["ActivePage"] = "DockerSwarm";
+            return View("DockerSwarm");
+        }
+
+        public IActionResult KubernetesVsDockerSwarm()
+        {
+            ViewData["ActiveMenu"] = "AzureDevOps";
+            ViewData["ActivePage"] = "KubernetesVsDockerSwarm";
+            return View("KubernetesVsDockerSwarm");
+        }
+
+        public IActionResult CICDWithDocker()
+        {
+            ViewData["ActiveMenu"] = "AzureDevOps";
+            ViewData["ActivePage"] = "CICDWithDocker";
+            return View("CICDWithDocker");
+        }
+
+        public IActionResult AdvancedDockerTopics()
+        {
+            ViewData["ActiveMenu"] = "AzureDevOps";
+            ViewData["ActivePage"] = "AdvancedDockerTopics";
+            return View("AdvancedDockerTopics");
+        }
+
+        public IActionResult DockerMigration()
+        {
+            ViewData["ActiveMenu"] = "AzureDevOps";
+            ViewData["ActivePage"] = "DockerMigration";
+            return View("DockerMigration");
+        }
+
+        public IActionResult DockerUseCases()
+        {
+            ViewData["ActiveMenu"] = "AzureDevOps";
+            ViewData["ActivePage"] = "DockerUseCases";
+            return View("DockerUseCases");
+        }
+
+        public IActionResult DockerTroubleshooting()
+        {
+            ViewData["ActiveMenu"] = "AzureDevOps";
+            ViewData["ActivePage"] = "DockerTroubleshooting";
+            return View("DockerTroubleshooting");
+        }
     }
 }
