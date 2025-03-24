@@ -1,0 +1,122 @@
+﻿@{
+    ViewData["Title"] = "Managing Microservices with Docker Compose";
+    ViewData["ActiveMenu"] = "Docker";
+    ViewData["ActivePage"] = "ComposeMicroservices";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Docker Compose makes it easy to manage multiple containers for a microservices application.
+        With a single configuration file, you can define services, networks, and volumes, and spin them up in one command.
+    </p>
+    <hr />
+
+    <!-- Section: What is Docker Compose -->
+    <div class="mt-5">
+        <h2>What is Docker Compose?</h2>
+        <p>
+            Docker Compose is a tool for defining and running multi-container Docker applications using a YAML file.
+            It helps orchestrate containers for different microservices, databases, and external dependencies.
+        </p>
+    </div>
+
+    <!-- Section: Writing docker-compose.yml -->
+    <div class="mt-5">
+        <h3>Writing a docker-compose.yml File</h3>
+        <p>Here's an example <code>docker-compose.yml</code> for two microservices:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>version: '3.8'
+
+services:
+  user-service:
+    build: ./user-service
+    ports:
+      - "5000:5000"
+
+  order-service:
+    build: ./order-service
+    ports:
+      - "5001:5001"</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p class="mt-3">Each service has its own Dockerfile inside its directory. Docker Compose will build and run them together.</p>
+    </div>
+
+    <!-- Section: Running Docker Compose -->
+    <div class="mt-5">
+        <h3>Running Multiple Containers</h3>
+        <p>To build and run all services defined in <code>docker-compose.yml</code>:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker-compose up -d</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>View running services:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker-compose ps</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Docker Compose Tips -->
+    <div class="mt-5">
+        <h3>Tips & Best Practices</h3>
+        <ul>
+            <li>Use relative paths for local Dockerfile contexts</li>
+            <li>Define environment variables in a <code>.env</code> file</li>
+            <li>Use named volumes to persist database or cache data</li>
+            <li>Define networks explicitly for better control over communication</li>
+        </ul>
+    </div>
+
+    <!-- Section: Example Folder Structure -->
+    <div class="mt-5">
+        <h3>Example Folder Structure</h3>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>microservices-app/
+├── docker-compose.yml
+├── user-service/
+│   ├── Dockerfile
+│   └── server.js
+├── order-service/
+│   ├── Dockerfile
+│   └── server.js</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Docker Compose simplifies the orchestration of microservices by allowing developers to define and manage services in a single file.
+            In the next section, we’ll explore how these services communicate with one another.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("DockerizedMicroservices", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Creating Dockerized Microservices
+        </a>
+        <a href="@Url.Action("MicroservicesCommunication", "Docker")" class="btn btn-outline-secondary">
+            Next: Microservices Communication in Docker &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

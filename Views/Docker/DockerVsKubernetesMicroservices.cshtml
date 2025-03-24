@@ -1,0 +1,138 @@
+@{
+    ViewData["Title"] = "Docker vs Kubernetes for Microservices";
+    ViewData["ActiveMenu"] = "Docker";
+    ViewData["ActivePage"] = "DockerVsKubernetesMicroservices";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Docker and Kubernetes are two popular container orchestration technologies. While Docker is great for local development and small-scale deployment, Kubernetes offers advanced orchestration and scalability.
+    </p>
+    <hr />
+
+    <!-- Section: Understanding Kubernetes -->
+    <div class="mt-5">
+        <h2>Understanding Kubernetes</h2>
+        <p>
+            Kubernetes (K8s) is an open-source container orchestration platform that automates deployment, scaling, and management of containerized applications.
+        </p>
+        <ul>
+            <li>Manages container scheduling and health</li>
+            <li>Supports service discovery, load balancing, and auto-scaling</li>
+            <li>Built-in support for configuration management and secrets</li>
+        </ul>
+    </div>
+
+    <!-- Section: Key Differences -->
+    <div class="mt-5">
+        <h3>Key Differences: Docker Compose vs Kubernetes</h3>
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>Feature</th>
+                    <th>Docker Compose</th>
+                    <th>Kubernetes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Purpose</td>
+                    <td>Multi-container local apps</td>
+                    <td>Production-grade orchestration</td>
+                </tr>
+                <tr>
+                    <td>Scaling</td>
+                    <td>Manual</td>
+                    <td>Auto-scaling supported</td>
+                </tr>
+                <tr>
+                    <td>Service Discovery</td>
+                    <td>By container name</td>
+                    <td>DNS-based + built-in load balancer</td>
+                </tr>
+                <tr>
+                    <td>Monitoring</td>
+                    <td>Manual or external</td>
+                    <td>Built-in metrics + ecosystem tools</td>
+                </tr>
+                <tr>
+                    <td>Best for</td>
+                    <td>Development, small projects</td>
+                    <td>Enterprise, cloud-native apps</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Section: Running Docker in Kubernetes -->
+    <div class="mt-5">
+        <h3>Running Docker Containers in Kubernetes</h3>
+        <p>Use a Kubernetes Deployment to manage your services:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+      - name: user-service
+        image: username/user-service:latest
+        ports:
+        - containerPort: 5000</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: When to Choose Kubernetes -->
+    <div class="mt-5">
+        <h3>When to Choose Kubernetes?</h3>
+        <ul>
+            <li>You need auto-scaling and self-healing</li>
+            <li>You deploy across multiple environments/clouds</li>
+            <li>You manage complex service dependencies</li>
+            <li>You want a mature CI/CD ecosystem</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Kubernetes is the go-to platform for large-scale, production-ready microservices.
+            But Docker remains the preferred option for prototyping and simpler systems.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("MonitoringMicroservices", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Monitoring & Logging in Dockerized Microservices
+        </a>
+        <a href="@Url.Action("MicroservicesUseCases", "Docker")" class="btn btn-outline-secondary">
+            Next: Real-World Docker Use Cases &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

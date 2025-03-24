@@ -1,0 +1,131 @@
+﻿@{
+    ViewData["Title"] = "Docker Networking";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Docker provides powerful built-in networking capabilities to enable secure communication between containers and services.
+        Understanding the different network types and how to configure them is essential for scalable architecture.
+    </p>
+    <hr />
+
+    <!-- Section: Introduction to Docker Networking -->
+    <div class="mt-5">
+        <h2>Introduction to Docker Networking</h2>
+        <p>
+            Docker creates virtual networks that allow containers to communicate with each other and with the outside world.
+            By default, Docker sets up a bridge network for all containers, but other network types can be used depending on your use case.
+        </p>
+    </div>
+
+    <!-- Section: Types of Docker Networks -->
+    <div class="mt-5">
+        <h3>Types of Docker Networks</h3>
+        <ul>
+            <li><strong>Bridge:</strong> Default network; allows communication between containers on the same host.</li>
+            <li><strong>Host:</strong> Shares the host’s network stack; best for performance-sensitive workloads.</li>
+            <li><strong>Overlay:</strong> Enables container communication across multiple Docker hosts (used in Swarm).</li>
+            <li><strong>Macvlan:</strong> Assigns a MAC address to a container, making it appear as a physical device on the network.</li>
+            <li><strong>None:</strong> Disables all networking; used for security isolation.</li>
+        </ul>
+    </div>
+
+    <!-- Section: Creating and Inspecting Networks -->
+    <div class="mt-5">
+        <h3>Creating and Inspecting Networks</h3>
+        <p>Create a user-defined bridge network for better control:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker network create my_network</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Inspect details of a network:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker network inspect my_network</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>List all Docker networks:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker network ls</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Connecting Containers -->
+    <div class="mt-5">
+        <h3>Connecting Multiple Containers</h3>
+        <p>When containers share the same network, they can communicate using container names as hostnames:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker run -d --name db --network my_network postgres
+docker run -d --name app --network my_network myapp</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>In this setup, <code>app</code> can access the <code>db</code> container using the hostname <code>db</code>.</p>
+    </div>
+
+    <!-- Section: Networking in Compose -->
+    <div class="mt-5">
+        <h3>Networking in Docker Compose</h3>
+        <p>By default, Docker Compose creates a single network for all defined services:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>services:
+  web:
+    build: .
+    networks:
+      - mynet
+
+  db:
+    image: postgres
+    networks:
+      - mynet
+
+networks:
+  mynet:</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>This allows services to discover each other using service names like <code>db</code> or <code>web</code>.</p>
+    </div>
+
+    <!-- Section: Troubleshooting Tips -->
+    <div class="mt-5">
+        <h3>Troubleshooting Network Issues</h3>
+        <ul>
+            <li>Use <code>docker network inspect</code> to verify connected containers.</li>
+            <li>Ping container names to test DNS resolution within the Docker network.</li>
+            <li>Use <code>docker exec -it &lt;container&gt; sh</code> or <code>bash</code> to manually test connections.</li>
+            <li>Check firewall rules that may block communication between containers.</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Docker networking enables seamless communication between containers across environments.
+            Mastering it unlocks the full potential of microservices, distributed applications, and CI/CD systems.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("DockerCompose", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Docker Compose
+        </a>
+        <a href="@Url.Action("DockerVolumesStorage", "Docker")" class="btn btn-outline-secondary">
+            Next: Docker Volumes & Storage &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Button Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>
+

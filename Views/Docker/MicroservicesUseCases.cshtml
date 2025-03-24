@@ -1,0 +1,108 @@
+@{
+    ViewData["Title"] = "Real-World Microservices Use Cases";
+    ViewData["ActiveMenu"] = "Docker";
+    ViewData["ActivePage"] = "MicroservicesUseCases";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Dockerized microservices power some of the world’s most scalable applications. Here are practical use cases across industries, showing how microservices solve real-world problems.
+    </p>
+    <hr />
+
+    <!-- Section: Web Application Use Case -->
+    <div class="mt-5">
+        <h2>Deploying a Web Application with Microservices</h2>
+        <p>
+            A typical web application (like an e-commerce store) can be split into services such as:
+        </p>
+        <ul>
+            <li>User Service (authentication & profiles)</li>
+            <li>Product Service (catalog & inventory)</li>
+            <li>Order Service (checkout & payment)</li>
+            <li>Notification Service (emails & SMS)</li>
+        </ul>
+
+        <p>Each service runs in its own container and communicates through REST or gRPC.</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>services:
+  user-service:
+    image: company/user-service
+
+  order-service:
+    image: company/order-service
+    depends_on:
+      - user-service
+
+  product-service:
+    image: company/product-service
+    depends_on:
+      - order-service</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Event-Driven Microservices -->
+    <div class="mt-5">
+        <h3>Event-Driven Microservices</h3>
+        <p>
+            Many systems use an event bus like Kafka or RabbitMQ to decouple services. For example:
+        </p>
+        <ul>
+            <li>Order service publishes an event after an order is placed</li>
+            <li>Inventory service listens to decrease stock</li>
+            <li>Notification service sends confirmation email</li>
+        </ul>
+        <p>This architecture improves scalability and resilience.</p>
+    </div>
+
+    <!-- Section: Use Cases by Industry -->
+    <div class="mt-5">
+        <h3>Docker Microservices Across Industries</h3>
+
+        <h5>FinTech</h5>
+        <p>Banking systems use microservices for modularity — e.g., separate services for accounts, transfers, fraud detection, and notifications.</p>
+
+        <h5>Healthcare</h5>
+        <p>Electronic Health Record (EHR) systems manage services for patients, doctors, appointments, and prescriptions, deployed independently for compliance and updates.</p>
+
+        <h5>IoT</h5>
+        <p>Sensor data from devices is processed by microservices that handle real-time data ingestion, analysis, and alerting.</p>
+
+        <h5>Data Science & ML</h5>
+        <p>Models are deployed as isolated microservices with REST endpoints for prediction, version control, and CI/CD integration.</p>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Microservices architecture using Docker offers flexibility, scalability, and maintainability.
+            It’s the architecture of choice for modern, cloud-native applications.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("DockerVsKubernetesMicroservices", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Docker vs Kubernetes for Microservices
+        </a>
+        <a href="@Url.Action("TroubleshootingMicroservices", "Docker")" class="btn btn-outline-secondary">
+            Next: Docker Troubleshooting & FAQs &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

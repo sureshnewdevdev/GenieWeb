@@ -1,0 +1,109 @@
+@{
+    ViewData["Title"] = "Setting Up Docker for Microservices";
+    ViewData["ActiveMenu"] = "Docker";
+    ViewData["ActivePage"] = "DockerSetupMicroservices";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Before developing microservices, it's crucial to set up Docker properly and understand basic commands.
+        This ensures a smooth experience managing multiple services in isolated containers.
+    </p>
+    <hr />
+
+    <!-- Section: Installing Docker -->
+    <div class="mt-5">
+        <h2>Installing Docker</h2>
+        <p>
+            If Docker isn't already installed on your system:
+        </p>
+        <ul>
+            <li>Visit <a href="https://docs.docker.com/get-docker/" target="_blank">https://docs.docker.com/get-docker/</a></li>
+            <li>Follow installation instructions for your OS (Windows, macOS, Linux)</li>
+            <li>
+                Verify the installation:
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>docker --version</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Section: Basic Docker Commands -->
+    <div class="mt-5">
+        <h3>Basic Docker Commands</h3>
+        <ul>
+            <li>
+                List containers:
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>docker ps -a</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+            <li>
+                Build image:
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>docker build -t myservice .</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+            <li>
+                Run container:
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>docker run -d -p 3000:3000 myservice</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Section: Running Multiple Services -->
+    <div class="mt-5">
+        <h3>Running Multiple Services in Containers</h3>
+        <p>Let’s run two services — <code>user-service</code> and <code>order-service</code> — each in its own container:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>// Run user-service on port 5000
+docker run -d -p 5000:5000 user-service
+
+// Run order-service on port 5001
+docker run -d -p 5001:5001 order-service</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p class="text-muted mt-2"><small>You can now access each service independently using localhost ports.</small></p>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            With Docker installed and the basics covered, you're now ready to begin designing microservices architecture.
+            In the next section, we’ll discuss identifying and structuring microservices in your applications.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("IntroToMicroservices", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Introduction to Microservices & Docker
+        </a>
+        <a href="@Url.Action("DesigningMicroservices", "Docker")" class="btn btn-outline-secondary">
+            Next: Designing Microservices with Docker &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

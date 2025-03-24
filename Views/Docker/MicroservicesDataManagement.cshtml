@@ -1,0 +1,126 @@
+@{
+    ViewData["Title"] = "Data Management in Microservices";
+    ViewData["ActiveMenu"] = "Docker";
+    ViewData["ActivePage"] = "MicroservicesDataManagement";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Each microservice should manage its own data. Docker allows you to run separate database containers and persist data using volumes — following the database-per-service pattern.
+    </p>
+    <hr />
+
+    <!-- Section: Using Databases in Docker -->
+    <div class="mt-5">
+        <h2>Using Databases in Dockerized Microservices</h2>
+        <p>
+            It’s a best practice to give each microservice its own database. This prevents tight coupling and allows services to evolve independently.
+        </p>
+        <ul>
+            <li><strong>PostgreSQL</strong> or <strong>MySQL</strong> for relational data</li>
+            <li><strong>MongoDB</strong> or <strong>Redis</strong> for NoSQL or caching</li>
+        </ul>
+    </div>
+
+    <!-- Section: Docker Volumes -->
+    <div class="mt-5">
+        <h3>Persistent Data Storage with Docker Volumes</h3>
+        <p>
+            Use named volumes to persist database data across container restarts:
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>volumes:
+  user-db-data:
+  order-db-data:</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>Then mount volumes in your service definitions:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>services:
+  user-db:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: users
+    volumes:
+      - user-db-data:/var/lib/postgresql/data</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Database Per Service Pattern -->
+    <div class="mt-5">
+        <h3>Database Per Service Pattern</h3>
+        <p>
+            This architecture ensures:
+        </p>
+        <ul>
+            <li>Loose coupling between services</li>
+            <li>Improved scalability and fault isolation</li>
+            <li>Freedom to choose the best database for each service</li>
+        </ul>
+
+        <p class="mt-3">Example structure:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>services:
+  user-service:
+    build: ./user-service
+    depends_on:
+      - user-db
+
+  order-service:
+    build: ./order-service
+    depends_on:
+      - order-db
+
+  user-db:
+    image: postgres
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+
+  order-db:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - order-db-data:/var/lib/mysql</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Using isolated databases and persistent volumes improves reliability and makes microservices more scalable and maintainable.
+            Up next: how to handle service discovery and load balancing in your microservices setup.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("MicroservicesCommunication", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Microservices Communication in Docker
+        </a>
+        <a href="@Url.Action("ServiceDiscoveryLoadBalancing", "Docker")" class="btn btn-outline-secondary">
+            Next: Service Discovery & Load Balancing &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

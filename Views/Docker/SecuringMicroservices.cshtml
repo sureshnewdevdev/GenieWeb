@@ -1,0 +1,113 @@
+@{
+    ViewData["Title"] = "Securing Dockerized Microservices";
+    ViewData["ActiveMenu"] = "Docker";
+    ViewData["ActivePage"] = "SecuringMicroservices";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Security is critical when deploying microservices in production. From managing secrets to scanning images for vulnerabilities, Docker offers tools and practices to enhance your container security.
+    </p>
+    <hr />
+
+    <!-- Section: Security Best Practices -->
+    <div class="mt-5">
+        <h2>Security Best Practices</h2>
+        <ul>
+            <li>Use official base images and minimize layers</li>
+            <li>Run containers as non-root users</li>
+            <li>Scan images regularly for vulnerabilities</li>
+            <li>Keep secrets and environment variables secure</li>
+            <li>Use firewalls and control container network access</li>
+        </ul>
+    </div>
+
+    <!-- Section: Managing Secrets -->
+    <div class="mt-5">
+        <h3>Managing Environment Variables and Secrets</h3>
+        <p>Never hardcode secrets like API keys in code or Dockerfiles. Use environment variables and secrets management tools.</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>services:
+  order-service:
+    image: my/order-service
+    environment:
+      - PAYMENT_API_KEY=${PAYMENT_API_KEY}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>Store the secret in a <code>.env</code> file or CI/CD environment variable store.</p>
+    </div>
+
+    <!-- Section: Using Docker Secrets (Swarm) -->
+    <div class="mt-5">
+        <h4>Docker Secrets (for Swarm)</h4>
+        <p>For Docker Swarm, use <code>docker secret</code> to securely pass secrets to containers:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>echo "supersecret" | docker secret create payment_api_key -</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Scanning Images -->
+    <div class="mt-5">
+        <h3>Scanning Docker Images for Vulnerabilities</h3>
+        <p>Use tools like <code>docker scan</code> (powered by Snyk), Trivy, or Clair to check for known vulnerabilities.</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker scan my-service:latest</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>Integrate these tools in CI pipelines for continuous monitoring.</p>
+    </div>
+
+    <!-- Section: Securing Network Communication -->
+    <div class="mt-5">
+        <h3>Securing Network Communication</h3>
+        <p>
+            Use HTTPS for external APIs, encrypted internal traffic (mTLS), and limit container-to-container communication via network segmentation.
+        </p>
+    </div>
+
+    <!-- Section: Role-Based Access Control -->
+    <div class="mt-5">
+        <h3>Implementing Role-Based Access Control (RBAC)</h3>
+        <p>
+            Limit who can access or deploy containers by integrating Docker with RBAC systems in Kubernetes, Docker Enterprise, or your CI/CD tool.
+        </p>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Securing Dockerized microservices involves many layers: from container images to network traffic to deployment credentials.
+            Next, we’ll learn how to monitor and debug these services in real-time.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("DeployingMicroservices", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Deploying Microservices with Docker
+        </a>
+        <a href="@Url.Action("MonitoringMicroservices", "Docker")" class="btn btn-outline-secondary">
+            Next: Monitoring & Logging in Dockerized Microservices &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

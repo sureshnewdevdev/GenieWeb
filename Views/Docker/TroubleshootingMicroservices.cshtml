@@ -1,0 +1,109 @@
+@{
+    ViewData["Title"] = "Troubleshooting Dockerized Microservices";
+    ViewData["ActiveMenu"] = "Docker";
+    ViewData["ActivePage"] = "TroubleshootingMicroservices";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Even well-designed microservices can run into issues. Effective troubleshooting helps identify root causes across logs, containers, services, and network layers in Docker environments.
+    </p>
+    <hr />
+
+    <!-- Section: Common Issues -->
+    <div class="mt-5">
+        <h2>Common Microservices Issues</h2>
+        <ul>
+            <li>Container not starting (missing environment/configs)</li>
+            <li>Service unreachable (network misconfiguration)</li>
+            <li>High latency or timeouts between services</li>
+            <li>Database connection failures</li>
+            <li>Log noise or missing logs</li>
+        </ul>
+    </div>
+
+    <!-- Section: Debugging Tools -->
+    <div class="mt-5">
+        <h3>Useful Docker Debugging Commands</h3>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker ps               # List running containers
+docker logs myservice   # View logs
+docker exec -it myservice /bin/sh   # Enter running container
+docker inspect myservice            # See container config/details
+docker network ls / inspect         # Check network health</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Debugging Service-to-Service Communication -->
+    <div class="mt-5">
+        <h3>Fixing Service Communication Issues</h3>
+        <p>Checklist for when services can’t connect:</p>
+        <ul>
+            <li>Ensure both services are on the same Docker network</li>
+            <li>Ping using container names (not localhost)</li>
+            <li>Verify exposed ports and <code>EXPOSE</code> in Dockerfile</li>
+            <li>Test with curl or Postman inside container</li>
+        </ul>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker exec -it user-service curl http://order-service:5001/health</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Performance Troubleshooting -->
+    <div class="mt-5">
+        <h3>Performance Optimization Tips</h3>
+        <ul>
+            <li>Use lighter base images (e.g., alpine)</li>
+            <li>Enable caching for builds and dependencies</li>
+            <li>Use multi-stage builds to reduce image size</li>
+            <li>Profile resource usage with <code>docker stats</code></li>
+            <li>Ensure services aren’t blocking I/O or holding long DB connections</li>
+        </ul>
+    </div>
+
+    <!-- Section: Real-World Fixes -->
+    <div class="mt-5">
+        <h3>Real-World Fixes</h3>
+        <p><strong>Issue:</strong> Microservice hangs on startup</p>
+        <p><strong>Fix:</strong> Check for DB availability or missing env variables.</p>
+
+        <p><strong>Issue:</strong> Service crashes after deployment</p>
+        <p><strong>Fix:</strong> Review logs with <code>docker logs</code> and verify config secrets.</p>
+
+        <p><strong>Issue:</strong> Containers restart repeatedly</p>
+        <p><strong>Fix:</strong> Set proper <code>restart_policy</code> and validate runtime scripts.</p>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Troubleshooting microservices requires a systematic approach — leveraging logs, container tools, and network checks.
+            By identifying patterns, you can eliminate bottlenecks and ensure reliable deployments.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-start mt-4">
+        <a href="@Url.Action("MicroservicesUseCases", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Real-World Microservices Use Cases
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

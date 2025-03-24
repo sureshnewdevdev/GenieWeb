@@ -1,0 +1,103 @@
+@{
+    ViewData["Title"] = "Monitoring & Logging in Dockerized Microservices";
+    ViewData["ActiveMenu"] = "Docker";
+    ViewData["ActivePage"] = "MonitoringMicroservices";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Observability is key in microservices. Docker makes it possible to integrate powerful monitoring and logging tools like ELK, Prometheus, and Grafana to gain insights into your services.
+    </p>
+    <hr />
+
+    <!-- Section: ELK Stack Logging -->
+    <div class="mt-5">
+        <h2>Logging with the ELK Stack</h2>
+        <p>
+            ELK stands for Elasticsearch, Logstash, and Kibana. It's widely used to collect, index, and visualize logs from multiple services.
+        </p>
+
+        <p>Logstash reads logs, Elasticsearch stores them, and Kibana visualizes them:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker-compose up -d elasticsearch logstash kibana</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>Then configure your microservices to output logs in JSON format for parsing.</p>
+    </div>
+
+    <!-- Section: Prometheus & Grafana Monitoring -->
+    <div class="mt-5">
+        <h3>Monitoring with Prometheus & Grafana</h3>
+        <p>
+            Prometheus scrapes metrics from microservices and Grafana displays them through dashboards.
+        </p>
+
+        <p>Sample Prometheus config:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>scrape_configs:
+  - job_name: 'user-service'
+    static_configs:
+      - targets: ['user-service:9100']</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>Microservices should expose metrics on endpoints like <code>/metrics</code>.</p>
+    </div>
+
+    <!-- Section: Debugging Containers -->
+    <div class="mt-5">
+        <h3>Debugging Running Containers</h3>
+        <p>Use these commands to inspect or attach to running containers:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker logs user-service
+docker exec -it user-service /bin/sh</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>Useful for live debugging, inspecting environment, or troubleshooting failures.</p>
+    </div>
+
+    <!-- Section: Visualizing Inter-Service Calls -->
+    <div class="mt-5">
+        <h3>Visualizing API Calls Between Services</h3>
+        <p>
+            Use tools like Grafana Tempo, Jaeger, or Zipkin to track distributed traces across microservices.
+            These tools show the full path of a request as it travels through services.
+        </p>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            With centralized logging and real-time monitoring, you can proactively detect issues, understand system health,
+            and debug microservices efficiently. Let’s now compare Docker with Kubernetes for advanced orchestration.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("SecuringMicroservices", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Securing Dockerized Microservices
+        </a>
+        <a href="@Url.Action("DockerVsKubernetesMicroservices", "Docker")" class="btn btn-outline-secondary">
+            Next: Docker vs Kubernetes for Microservices &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>
