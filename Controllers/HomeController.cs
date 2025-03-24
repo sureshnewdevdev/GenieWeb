@@ -55,19 +55,7 @@ public class HomeController : Controller
         return View("UnderstandingLogFiles");
     }
 
-    public IActionResult DockerInstallation()
-    {
-        ViewData["ActivePage"] = "DockerInstallation";
-        ViewData["ActiveMenu"] = "Azure";
-        return View("DockerInstallation");
-    }
 
-    public IActionResult ContainerizingWebAppWithDocker()
-    {
-        ViewData["ActivePage"] = "ContainerizingWebAppWithDocker";
-        ViewData["ActiveMenu"] = "Azure";
-        return View("ContainerizingWebAppWithDocker");
-    }
      public IActionResult Privacy()
     {
         ViewData["ActivePage"] = "Privacy";

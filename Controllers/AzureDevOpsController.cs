@@ -339,5 +339,18 @@ namespace GenieWeb.Controllers
             ViewData["ActivePage"] = "TroubleshootDebug";
             return View("TroubleshootDebug");
         }
+        public IActionResult DockerInstallation()
+        {
+            ViewData["ActivePage"] = "DockerInstallation";
+            ViewData["ActiveMenu"] = "AzureDevOps";
+            return View("DockerInstallation");
+        }
+
+        public IActionResult ContainerizingWebAppWithDocker()
+        {
+            ViewData["ActivePage"] = "ContainerizingWebAppWithDocker";
+            ViewData["ActiveMenu"] = "AzureDevOps";
+            return View("ContainerizingWebAppWithDocker");
+        }
     }
 }
