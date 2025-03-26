@@ -1,0 +1,126 @@
+@{
+    ViewData["Title"] = "Introduction to Entity Framework Core";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "EFIntro";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Entity Framework Core (EF Core) is a modern object-database mapper for .NET. It allows you to work with a database using C# objects instead of writing SQL queries manually.
+    </p>
+    <hr />
+
+    <!-- Section: What is EF Core? -->
+    <div class="mt-5">
+        <h2>What is Entity Framework Core?</h2>
+        <p>
+            EF Core is an open-source, lightweight, and extensible ORM (Object-Relational Mapper) from Microsoft. It supports LINQ queries, change tracking, updates, schema migrations, and more.
+        </p>
+
+        <p>EF Core works with various databases:</p>
+        <ul>
+            <li>SQL Server</li>
+            <li>SQLite</li>
+            <li>PostgreSQL</li>
+            <li>MySQL</li>
+            <li>In-memory (for testing)</li>
+        </ul>
+    </div>
+
+    <!-- Section: Installing EF Core -->
+    <div class="mt-5">
+        <h3>Installing EF Core</h3>
+        <p>Use NuGet to install the required packages. Example for SQL Server:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add package Microsoft.EntityFrameworkCore.Tools</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Code-First Approach -->
+    <div class="mt-5">
+        <h3>Code-First Development</h3>
+        <p>
+            You define your data models using classes, and EF Core generates the database schema.
+        </p>
+
+        <h5>Define a model:</h5>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>public class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <h5 class="mt-4">Create a DbContext:</h5>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>using Microsoft.EntityFrameworkCore;
+
+public class AppDbContext : DbContext
+{
+    public DbSet&lt;Product&gt; Products { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder options)
+        => options.UseSqlServer("your-connection-string");
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Create and Migrate Database -->
+    <div class="mt-5">
+        <h3>Creating the Database</h3>
+        <p>Use the EF Core CLI tools:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>dotnet ef migrations add InitialCreate
+dotnet ef database update</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>This will create the database schema based on your model.</p>
+    </div>
+
+    <!-- Section: Advantages of EF Core -->
+    <div class="mt-5">
+        <h3>Why Use EF Core?</h3>
+        <ul>
+            <li>Reduces boilerplate SQL code</li>
+            <li>Provides strongly-typed access to data</li>
+            <li>Supports cross-platform development</li>
+            <li>Easy to maintain and test</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            EF Core simplifies database development in .NET. Next, we’ll dive into the heart of EF Core — the <code>DbContext</code> and <code>DbSet</code> — to see how they manage your data.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("Mvc", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: ASP.NET MVC
+        </a>
+        <a href="@Url.Action("DbContextDbSet", "DotNet")" class="btn btn-outline-secondary">
+            Next: DbContext and DbSet in EF Core &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

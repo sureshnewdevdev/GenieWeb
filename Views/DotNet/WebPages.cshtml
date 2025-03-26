@@ -1,0 +1,128 @@
+@{
+    ViewData["Title"] = "ASP.NET Web Pages (Razor)";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "WebPages";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        ASP.NET Web Pages with Razor syntax provide a lightweight way to build dynamic, data-driven websites using C#. It’s beginner-friendly and great for rapid development.
+    </p>
+    <hr />
+
+    <!-- Section: What Are Web Pages and Razor? -->
+    <div class="mt-5">
+        <h2>What Are ASP.NET Web Pages and Razor?</h2>
+        <p>
+            ASP.NET Web Pages is a simplified web framework built around Razor syntax — a clean, HTML-friendly way to embed C# logic in your markup.
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>&lt;h1&gt;Welcome&lt;/h1&gt;
+&lt;p&gt;The time is: @DateTime.Now&lt;/p&gt;</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Layout and Reusability -->
+    <div class="mt-5">
+        <h3>Using Layout Pages</h3>
+        <p>
+            You can define a shared layout for consistent structure across pages:
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>// _Layout.cshtml
+&lt;html&gt;
+&lt;body&gt;
+    &lt;header&gt;My Site&lt;/header&gt;
+    @@RenderBody()
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Forms and Input -->
+    <div class="mt-5">
+        <h3>Working with Forms</h3>
+        <p>Razor makes handling form submissions easy:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>&lt;form method="post"&gt;
+    &lt;input name="username" /&gt;
+    &lt;button&gt;Submit&lt;/button&gt;
+&lt;/form&gt;
+
+@@{
+    var user = Request["username"];
+    if (!string.IsNullOrEmpty(user))
+    {
+        &lt;p&gt;Hello, @@user!&lt;/p&gt;
+    }
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Data Access -->
+    <div class="mt-5">
+        <h3>Connecting to a Database</h3>
+        <p>Use <code>Database.Open</code> for simple queries:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var db = Database.Open("MyDB");
+var rows = db.Query("SELECT * FROM Users");</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Web Helpers -->
+    <div class="mt-5">
+        <h3>Using Helpers and WebGrid</h3>
+        <p>
+            Razor provides helpers to simplify common tasks like sending email, rendering images, or creating a data grid:
+        </p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>@@WebGrid.GetHtml(source: Model.Users)</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Authentication and Deployment -->
+    <div class="mt-5">
+        <h3>Security and Publishing</h3>
+        <ul>
+            <li>Use <code>WebSecurity</code> for simple login and registration</li>
+            <li>Deploy using FTP, Visual Studio publish wizard, or Azure App Service</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            ASP.NET Web Pages is a great way to start web development with .NET. Next, we’ll dive into ASP.NET MVC and explore a more structured and scalable web application architecture.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("WebApi", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: ASP.NET Core Web API
+        </a>
+        <a href="@Url.Action("Mvc", "DotNet")" class="btn btn-outline-secondary">
+            Next: ASP.NET MVC &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

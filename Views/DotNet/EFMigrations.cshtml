@@ -1,0 +1,121 @@
+@{
+    ViewData["Title"] = "EF Core Migrations";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "EFMigrations";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Migrations in Entity Framework Core allow you to apply and track changes in your data model over time. This lets you evolve your database schema alongside your code.
+    </p>
+    <hr />
+
+    <!-- Section: What Are Migrations? -->
+    <div class="mt-5">
+        <h2>What Are EF Core Migrations?</h2>
+        <p>
+            Migrations provide a way to incrementally apply schema changes (like adding tables or columns) without dropping the database or losing data.
+        </p>
+        <ul>
+            <li>Tracks model changes via code</li>
+            <li>Generates SQL scripts for changes</li>
+            <li>Supports versioning and rollback</li>
+        </ul>
+    </div>
+
+    <!-- Section: Setup -->
+    <div class="mt-5">
+        <h3>Initial Setup</h3>
+        <p>If you haven't already, add the EF tools package:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>dotnet add package Microsoft.EntityFrameworkCore.Tools</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>Register the DbContext in your program:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>builder.Services.AddDbContext&lt;AppDbContext&gt;();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Creating and Applying Migrations -->
+    <div class="mt-5">
+        <h3>Create and Apply a Migration</h3>
+        <p>Use the CLI to generate and apply migrations:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>dotnet ef migrations add InitialCreate
+dotnet ef database update</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>
+            This creates a new folder called <code>Migrations</code> with auto-generated C# code to represent schema changes.
+        </p>
+    </div>
+
+    <!-- Section: Making Changes -->
+    <div class="mt-5">
+        <h3>Updating the Schema</h3>
+        <p>
+            Add or modify properties in your model, then create a new migration:
+        </p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>dotnet ef migrations add AddStockColumn
+dotnet ef database update</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Reverting Changes -->
+    <div class="mt-5">
+        <h3>Rollback to a Previous Migration</h3>
+        <p>
+            You can revert to an earlier migration version:
+        </p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>dotnet ef database update InitialCreate</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Use <code>dotnet ef migrations remove</code> to undo a pending migration.</p>
+    </div>
+
+    <!-- Section: Generating SQL Scripts -->
+    <div class="mt-5">
+        <h3>Generating SQL Scripts</h3>
+        <p>Useful for deploying changes to staging/production environments:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>dotnet ef migrations script -o migration.sql</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Migrations allow you to safely and versionably evolve your database. Next, we’ll explore defining relationships between models using one-to-one, one-to-many, and many-to-many configurations.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("EFCRUD", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: CRUD Operations
+        </a>
+        <a href="@Url.Action("EFRelationships", "DotNet")" class="btn btn-outline-secondary">
+            Next: EF Core Relationships &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

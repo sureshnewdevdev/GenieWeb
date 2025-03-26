@@ -1,0 +1,124 @@
+@{
+    ViewData["Title"] = "Accessing Device Capabilities in .NET MAUI";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "MAUIDeviceAccess";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        .NET MAUI gives you access to native device features like GPS, camera, battery status, accelerometer, and more using a unified API across platforms.
+    </p>
+    <hr />
+
+    <!-- Section: Device APIs Overview -->
+    <div class="mt-5">
+        <h2>MAUI Essentials: Unified Device APIs</h2>
+        <p>
+            MAUI integrates <strong>.NET MAUI Essentials</strong>, a library that provides cross-platform APIs for native device functionality such as:
+        </p>
+        <ul>
+            <li>📍 Device Info & Battery</li>
+            <li>📷 Camera & Media Picker</li>
+            <li>📡 Connectivity & Network Access</li>
+            <li>📦 Secure Storage</li>
+            <li>🧭 Geolocation & Sensors</li>
+        </ul>
+    </div>
+
+    <!-- Section: Example - Getting Device Info -->
+    <div class="mt-5">
+        <h3>Getting Device Info</h3>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>using Microsoft.Maui.Devices;
+
+string model = DeviceInfo.Model;
+string manufacturer = DeviceInfo.Manufacturer;
+string version = DeviceInfo.VersionString;</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Geolocation Example -->
+    <div class="mt-5">
+        <h3>Accessing Geolocation</h3>
+        <p>Get the current GPS coordinates using <code>Geolocation</code>:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>using Microsoft.Maui.Essentials;
+
+var location = await Geolocation.GetLastKnownLocationAsync();
+if (location != null)
+{
+    Console.WriteLine($"Latitude: {location.Latitude}, Longitude: {location.Longitude}");
+}</code></pre>
+        </div>
+    </div>
+
+    <!-- Section: Camera & Photos -->
+    <div class="mt-5">
+        <h3>Picking Photos from Gallery</h3>
+        <p>Use <code>MediaPicker</code> to pick or take a photo:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var file = await MediaPicker.PickPhotoAsync();
+if (file != null)
+{
+    var stream = await file.OpenReadAsync();
+    image.Source = ImageSource.FromStream(() => stream);
+}</code></pre>
+        </div>
+    </div>
+
+    <!-- Section: Secure Storage -->
+    <div class="mt-5">
+        <h3>Secure Storage Example</h3>
+        <p>Safely store key-value pairs using <code>SecureStorage</code>:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>await SecureStorage.SetAsync("user_token", "123456");
+
+string token = await SecureStorage.GetAsync("user_token");</code></pre>
+        </div>
+    </div>
+
+    <!-- Section: Permissions -->
+    <div class="mt-5">
+        <h3>Handling Permissions</h3>
+        <p>Always check for permissions before accessing sensitive features:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var status = await Permissions.CheckStatusAsync&lt;Permissions.LocationWhenInUse&gt;();
+if (status != PermissionStatus.Granted)
+{
+    status = await Permissions.RequestAsync&lt;Permissions.LocationWhenInUse&gt;();
+}</code></pre>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            With .NET MAUI Essentials, you can create powerful, device-aware applications using a unified C# codebase. This concludes our beginner journey through the .NET ecosystem!
+        </p>
+        <p>You're now ready to build, test, and deploy cross-platform .NET apps — from web APIs to mobile and desktop UIs!</p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("MAUIInputNav", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: Input and Navigation
+        </a>
+        <a href="#" class="btn btn-success disabled">
+            🎉 You’ve reached the end of the series!
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

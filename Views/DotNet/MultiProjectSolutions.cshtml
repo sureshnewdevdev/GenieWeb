@@ -1,0 +1,125 @@
+@{
+    ViewData["Title"] = "Managing Multi-Project Solutions";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "MultiProjectSolutions";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Multi-project solutions allow you to split large applications into modular parts like services, libraries, and UI layers. Visual Studio makes it easy to organize, reference, and manage these projects within a single solution.
+    </p>
+    <hr />
+
+    <!-- Section: What is a Solution? -->
+    <div class="mt-5">
+        <h2>What is a Solution?</h2>
+        <p>
+            A <strong>solution</strong> in Visual Studio is a container for one or more related projects. Each project can represent a different component of your application (UI, API, data layer, etc.).
+        </p>
+        <ul>
+            <li>File extension: <code>.sln</code></li>
+            <li>Supports cross-platform and mixed language projects</li>
+            <li>Useful for microservices or layered architecture</li>
+        </ul>
+    </div>
+
+    <!-- Section: Creating Multiple Projects -->
+    <div class="mt-5">
+        <h3>Adding Multiple Projects</h3>
+        <ol>
+            <li>Right-click on the solution → <strong>Add → New Project</strong></li>
+            <li>Select a project type (e.g., Class Library, Console App, ASP.NET API)</li>
+            <li>Repeat to add more as needed</li>
+        </ol>
+    </div>
+
+    <!-- Section: Adding Project References -->
+    <div class="mt-5">
+        <h3>Referencing Projects</h3>
+        <p>
+            You can share code between projects by adding references:
+        </p>
+        <ul>
+            <li>Right-click on project → <strong>Add → Project Reference</strong></li>
+            <li>Select the other project to link</li>
+            <li>Use <code>using</code> directive in code to access its classes</li>
+        </ul>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>// In Project A (Library)
+public class MathUtil
+{
+    public static int Multiply(int x, int y) => x * y;
+}
+
+// In Project B (Console)
+using ProjectA;
+
+Console.WriteLine(MathUtil.Multiply(3, 4));</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Build Order and Dependencies -->
+    <div class="mt-5">
+        <h3>Managing Build Order and Dependencies</h3>
+        <p>
+            Visual Studio automatically builds projects in the correct order based on references. You can check and manage build order:
+        </p>
+        <ul>
+            <li>Right-click on solution → <strong>Project Dependencies</strong></li>
+            <li>Ensure foundational libraries are built before dependent projects</li>
+        </ul>
+    </div>
+
+    <!-- Section: Solution Explorer Tips -->
+    <div class="mt-5">
+        <h3>Solution Explorer Tips</h3>
+        <ul>
+            <li>Right-click → <strong>Set as Startup Project</strong> to change the launch project</li>
+            <li>Group projects using folders for better organization</li>
+            <li>Use filters to quickly find files, classes, or members</li>
+        </ul>
+    </div>
+
+    <!-- Section: Example Use Case -->
+    <div class="mt-5">
+        <h3>Example: 3-Tier Architecture</h3>
+        <ul>
+            <li><strong>Project.Core</strong> – Shared business logic</li>
+            <li><strong>Project.Data</strong> – Data access (e.g., EF Core)</li>
+            <li><strong>Project.Web</strong> – ASP.NET Core frontend or API</li>
+        </ul>
+        <p>Each layer depends only on the lower ones, promoting separation of concerns.</p>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Multi-project solutions improve code organization, modularity, and reusability. Next, we’ll see how to extend Visual Studio with plugins and manage dependencies using NuGet Package Manager.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("DebugTools", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: Debugging Tools
+        </a>
+        <a href="@Url.Action("ExtensionsNuGet", "DotNet")" class="btn btn-outline-secondary">
+            Next: Using Extensions and NuGet Package Manager &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

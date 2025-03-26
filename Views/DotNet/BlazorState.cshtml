@@ -1,0 +1,134 @@
+@{
+    ViewData["Title"] = "State Management in Blazor";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "BlazorState";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        State management is crucial for building interactive and data-driven web applications. In Blazor, state refers to the data that drives your UI components.
+    </p>
+    <hr />
+
+    <!-- Section: Why State Management Matters -->
+    <div class="mt-5">
+        <h2>Why Manage State?</h2>
+        <ul>
+            <li>Preserve user input between interactions</li>
+            <li>Share data across components or pages</li>
+            <li>Respond to user actions and update the UI</li>
+        </ul>
+    </div>
+
+    <!-- Section: Local Component State -->
+    <div class="mt-5">
+        <h3>Local State in a Component</h3>
+        <p>Each Blazor component can manage its own state:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>@@code {
+    int count = 0;
+
+    void Increment() =&gt; count++;
+}
+&lt;p&gt;Count: @@count&lt;/p&gt;
+&lt;button @@onclick="Increment"&gt;+1&lt;/button&gt;</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Sharing State via Cascading Parameters -->
+    <div class="mt-5">
+        <h3>Sharing State: Cascading Values</h3>
+        <p>Use <code>CascadingParameter</code> to share data across components:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>// App.razor
+&lt;CascadingValue Value="User"&gt;
+    &lt;MainLayout /&gt;
+&lt;/CascadingValue&gt;
+
+@@code {
+    string User = "Admin";
+}</code></pre>
+        </div>
+
+        <div class="code-snippet bg-light p-3 rounded mt-2 position-relative">
+            <pre class="mb-0"><code>// In child component
+[CascadingParameter]
+public string User { get; set; }</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: App-Wide State with Services -->
+    <div class="mt-5">
+        <h3>App-Wide State Using Services</h3>
+        <p>Create a singleton service to store shared data:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>public class AppState
+{
+    public string Theme { get; set; } = "light";
+}</code></pre>
+        </div>
+
+        <p>Register it in <code>Program.cs</code>:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>builder.Services.AddSingleton&lt;AppState&gt;();</code></pre>
+        </div>
+
+        <p>Inject it into components:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>@@inject AppState State
+
+&lt;p&gt;Theme: @@State.Theme&lt;/p&gt;</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Persisting State -->
+    <div class="mt-5">
+        <h3>Persisting State (LocalStorage)</h3>
+        <p>Use JavaScript Interop or libraries like <code>Blazored.LocalStorage</code> to persist state:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>@@inject ILocalStorageService localStorage
+
+await localStorage.SetItemAsync("theme", "dark");
+
+var theme = await localStorage.GetItemAsync&lt;string&gt;("theme");</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Blazor provides multiple ways to manage state, from simple component variables to shared services and local storage. In the next section, we’ll start building cross-platform applications using .NET MAUI.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("BlazorJSInterop", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: JavaScript Interop
+        </a>
+        <a href="@Url.Action("MAUIIntro", "DotNet")" class="btn btn-outline-secondary">
+            Next: Introduction to .NET MAUI &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

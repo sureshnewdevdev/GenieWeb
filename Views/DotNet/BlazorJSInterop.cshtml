@@ -1,0 +1,124 @@
+@{
+    ViewData["Title"] = "JavaScript Interop in Blazor";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "BlazorJSInterop";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        While Blazor enables building apps in pure C#, sometimes you need to interact with existing JavaScript libraries or browser APIs. Blazor's JavaScript Interop (JS Interop) provides seamless integration between C# and JavaScript.
+    </p>
+    <hr />
+
+    <!-- Section: Why Use JS Interop -->
+    <div class="mt-5">
+        <h2>When to Use JS Interop</h2>
+        <ul>
+            <li>Access browser APIs (e.g., clipboard, localStorage)</li>
+            <li>Use third-party JS libraries (e.g., Chart.js, jQuery)</li>
+            <li>Perform DOM manipulations not available in Blazor</li>
+        </ul>
+    </div>
+
+    <!-- Section: Calling JS from C# -->
+    <div class="mt-5">
+        <h3>Calling JavaScript from C#</h3>
+        <p>Inject the <code>IJSRuntime</code> service and use <code>InvokeVoidAsync</code> or <code>InvokeAsync</code> to call JS functions.</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>// wwwroot/js/site.js
+function showAlert(message) {
+    alert(message);
+}</code></pre>
+        </div>
+
+        <div class="code-snippet bg-light p-3 rounded mt-2 position-relative">
+            <pre class="mb-0"><code>// In a .razor file
+@@inject IJSRuntime JS
+
+&lt;button @@onclick="CallJs"&gt;Show Alert&lt;/button&gt;
+
+@@code {
+    async Task CallJs()
+    {
+        await JS.InvokeVoidAsync("showAlert", "Hello from Blazor!");
+    }
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Calling C# from JS -->
+    <div class="mt-5">
+        <h3>Calling C# Methods from JavaScript</h3>
+        <p>Register a .NET instance and invoke C# methods from JS:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>// wwwroot/js/site.js
+function callDotNet(dotNetRef) {
+    dotNetRef.invokeMethodAsync("ShowMessage");
+}</code></pre>
+        </div>
+
+        <div class="code-snippet bg-light p-3 rounded mt-2 position-relative">
+            <pre class="mb-0"><code>// In Blazor .razor or .cs file
+[JSInvokable]
+public static Task ShowMessage()
+{
+    Console.WriteLine("JS called C#!");
+    return Task.CompletedTask;
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: JS Isolation -->
+    <div class="mt-5">
+        <h3>JS Module Isolation</h3>
+        <p>Use ES6 modules with <code>IJSRuntime.InvokeAsync</code> for scoped scripts:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>// script.js
+export function sayHi() {
+    alert("Hello from module!");
+}</code></pre>
+        </div>
+
+        <div class="code-snippet bg-light p-3 rounded mt-2 position-relative">
+            <pre class="mb-0"><code>// Component.razor.cs
+var module = await JS.InvokeAsync&lt;IJSObjectReference&gt;("import", "./js/script.js");
+await module.InvokeVoidAsync("sayHi");</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            JS Interop bridges the gap between C# and JavaScript, enabling Blazor apps to leverage the full power of the web. Next, we'll explore how Blazor manages state across components and pages.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("BlazorBinding", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: Data Binding and Events
+        </a>
+        <a href="@Url.Action("BlazorState", "DotNet")" class="btn btn-outline-secondary">
+            Next: State Management in Blazor &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

@@ -1,0 +1,143 @@
+@{
+    ViewData["Title"] = "ASP.NET MVC";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "Mvc";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        ASP.NET MVC (Model-View-Controller) is a structured and scalable framework for building web applications. It separates the application into distinct components, promoting clean architecture and maintainability.
+    </p>
+    <hr />
+
+    <!-- Section: MVC Overview -->
+    <div class="mt-5">
+        <h2>What is the MVC Pattern?</h2>
+        <p>
+            MVC stands for:
+        </p>
+        <ul>
+            <li><strong>Model:</strong> Represents the data and business logic</li>
+            <li><strong>View:</strong> Handles UI and rendering</li>
+            <li><strong>Controller:</strong> Processes user input and coordinates the model and view</li>
+        </ul>
+
+        <p>
+            This separation of concerns helps keep code organized, especially as applications grow.
+        </p>
+    </div>
+
+    <!-- Section: Project Setup -->
+    <div class="mt-5">
+        <h3>Creating an ASP.NET MVC App</h3>
+        <p>Use the Visual Studio template:</p>
+        <ol>
+            <li>Open Visual Studio → New Project → ASP.NET Core Web App (Model-View-Controller)</li>
+            <li>Choose target framework (.NET 6 or later)</li>
+            <li>Click Create</li>
+        </ol>
+
+        <p>The project will have folders for:</p>
+        <ul>
+            <li><code>Controllers/</code> – C# classes to handle requests</li>
+            <li><code>Views/</code> – Razor templates for UI</li>
+            <li><code>Models/</code> – Classes for data and logic</li>
+        </ul>
+    </div>
+
+    <!-- Section: Example Controller -->
+    <div class="mt-5">
+        <h3>Example: Controller</h3>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>using Microsoft.AspNetCore.Mvc;
+
+public class HomeController : Controller
+{
+    public IActionResult Index()
+    {
+        return View(); // Returns Views/Home/Index.cshtml
+    }
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Razor Views -->
+    <div class="mt-5">
+        <h3>Example: View (Razor)</h3>
+        <p>Create <code>Views/Home/Index.cshtml</code>:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>&lt;h1&gt;Welcome to MVC&lt;/h1&gt;
+&lt;p&gt;The current time is @DateTime.Now&lt;/p&gt;</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Passing Data to Views -->
+    <div class="mt-5">
+        <h3>Passing Data from Controller to View</h3>
+        <p>Use ViewBag, ViewData, or strongly-typed models:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>// Controller
+public IActionResult About()
+{
+    ViewBag.Message = "This is a sample message.";
+    return View();
+}
+
+// View
+&lt;p&gt;@ViewBag.Message&lt;/p&gt;</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Forms and Routing -->
+    <div class="mt-5">
+        <h3>Handling Forms and Routing</h3>
+        <p>Use model binding to handle form data and route it to controller actions:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>&lt;form asp-action="Submit"&gt;
+    &lt;input name="username" /&gt;
+    &lt;button&gt;Go&lt;/button&gt;
+&lt;/form&gt;
+
+// Controller
+[HttpPost]
+public IActionResult Submit(string username)
+{
+    return Content("Hello, " + username);
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            ASP.NET MVC is ideal for structured, testable, and scalable web apps. Next, we’ll dive into Entity Framework Core to learn how to connect your application to a database.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("WebPages", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: ASP.NET Web Pages
+        </a>
+        <a href="@Url.Action("EFIntro", "DotNet")" class="btn btn-outline-secondary">
+            Next: Introduction to Entity Framework Core &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

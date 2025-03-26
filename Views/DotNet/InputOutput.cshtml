@@ -1,0 +1,114 @@
+@{
+    ViewData["Title"] = "Handling Input/Output";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "InputOutput";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Input/Output (I/O) operations let you interact with users and external files. In this lesson, you’ll learn how to read user input from the console, display output, and handle file operations in .NET.
+    </p>
+    <hr />
+
+    <!-- Section: Console Input -->
+    <div class="mt-5">
+        <h2>Reading Input from the Console</h2>
+        <p>Use <code>Console.ReadLine()</code> to accept input from the user:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>Console.Write("Enter your name: ");
+string name = Console.ReadLine();
+Console.WriteLine($"Hello, {name}!");</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>
+            Convert input to other types using parsing:
+        </p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>Console.Write("Enter your age: ");
+int age = int.Parse(Console.ReadLine());</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Console Output -->
+    <div class="mt-5">
+        <h3>Writing Output to the Console</h3>
+        <p>Use <code>Console.WriteLine()</code> and <code>Console.Write()</code> to display text:</p>
+        <ul>
+            <li><code>WriteLine</code> – moves to the next line after printing</li>
+            <li><code>Write</code> – stays on the same line</li>
+        </ul>
+    </div>
+
+    <!-- Section: Reading and Writing Files -->
+    <div class="mt-5">
+        <h3>Reading and Writing Text Files</h3>
+        <p>
+            Use <code>System.IO</code> namespace for file operations. Always handle exceptions for I/O safety.
+        </p>
+
+        <h5>Writing to a file:</h5>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>using System.IO;
+
+File.WriteAllText("message.txt", "This is a test message.");</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <h5 class="mt-4">Reading from a file:</h5>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>string content = File.ReadAllText("message.txt");
+Console.WriteLine(content);</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <h5 class="mt-4">Appending to a file:</h5>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>File.AppendAllText("message.txt", "\nAppended line.");</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Best Practices -->
+    <div class="mt-5">
+        <h3>Best Practices</h3>
+        <ul>
+            <li>Always validate and sanitize user input</li>
+            <li>Use <code>TryParse</code> instead of <code>Parse</code> to avoid exceptions</li>
+            <li>Wrap file operations in try-catch blocks</li>
+            <li>Use <code>using</code> blocks for streams and writers</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Mastering input and output is essential for building interactive and file-based applications. In the next lesson, we’ll introduce Dependency Injection (IoC) and demonstrate how to use it in console apps for clean, testable code.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("UsingClasses", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: Creating and Using Classes
+        </a>
+        <a href="@Url.Action("IoCBasics", "DotNet")" class="btn btn-outline-secondary">
+            Next: Implementing Dependency Injection (IoC Basics) &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

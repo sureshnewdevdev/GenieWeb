@@ -1,0 +1,113 @@
+@{
+    ViewData["Title"] = "User Input & Navigation in .NET MAUI";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "MAUIInputNav";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Handling user input and navigating between pages are essential for building interactive, multi-screen apps in .NET MAUI. This guide covers input controls and navigation patterns.
+    </p>
+    <hr />
+
+    <!-- Section: Handling Input -->
+    <div class="mt-5">
+        <h2>Handling User Input</h2>
+        <p>.NET MAUI provides a range of input controls:</p>
+        <ul>
+            <li><code>Entry</code> – for single-line text</li>
+            <li><code>Editor</code> – for multi-line text</li>
+            <li><code>CheckBox</code>, <code>Switch</code> – for Boolean values</li>
+            <li><code>Picker</code>, <code>DatePicker</code>, <code>TimePicker</code> – for selection</li>
+        </ul>
+
+        <h5>Example: Entry Input</h5>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>&lt;Entry x:Name="nameEntry" Placeholder="Enter your name" /&gt;
+&lt;Button Text="Say Hi" Clicked="OnButtonClick" /&gt;
+&lt;Label x:Name="greetingLabel" /&gt;
+
+@@code {
+    private void OnButtonClick(object sender, EventArgs e)
+    {
+        greetingLabel.Text = $"Hello, {nameEntry.Text}!";
+    }
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Basic Navigation -->
+    <div class="mt-5">
+        <h3>Page Navigation</h3>
+        <p>Navigate between pages using <code>Navigation.PushAsync()</code>:</p>
+
+        <h5>Step 1: Enable Navigation</h5>
+        <p>Wrap your <code>MainPage</code> in a <code>NavigationPage</code> (in <code>MauiProgram.cs</code>):</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>builder.Services.AddSingleton&lt;MainPage&gt;();
+...
+return new App(new NavigationPage(new MainPage()));</code></pre>
+        </div>
+
+        <h5 class="mt-4">Step 2: Navigate to Another Page</h5>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>await Navigation.PushAsync(new SecondPage());</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <h5 class="mt-4">Step 3: Back Navigation</h5>
+        <p>To go back:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>await Navigation.PopAsync();</code></pre>
+        </div>
+    </div>
+
+    <!-- Section: Passing Data Between Pages -->
+    <div class="mt-5">
+        <h3>Passing Data Between Pages</h3>
+        <p>You can pass values via constructor parameters:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>// In MainPage.xaml.cs
+await Navigation.PushAsync(new SecondPage(userName));
+
+// In SecondPage.xaml.cs
+public SecondPage(string userName)
+{
+    InitializeComponent();
+    greetingLabel.Text = $"Hello again, {userName}!";
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            MAUI makes it simple to gather user input and move between screens. In the next lesson, we’ll explore how to access device-specific features like GPS, camera, and sensors.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("MAUIXAML", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: UI Design with XAML
+        </a>
+        <a href="@Url.Action("MAUIDeviceAccess", "DotNet")" class="btn btn-outline-secondary">
+            Next: Accessing Device Capabilities &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

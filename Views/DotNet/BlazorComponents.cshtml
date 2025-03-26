@@ -1,0 +1,116 @@
+@{
+    ViewData["Title"] = "Creating Components in Blazor";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "BlazorComponents";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Blazor components are the building blocks of a Blazor application. They help you encapsulate UI logic and reuse it throughout your app, just like functions or classes in traditional programming.
+    </p>
+    <hr />
+
+    <!-- Section: What is a Component? -->
+    <div class="mt-5">
+        <h2>What is a Component?</h2>
+        <p>
+            A Blazor component is a reusable piece of UI written in a <code>.razor</code> file. Each component contains:
+        </p>
+        <ul>
+            <li>HTML markup</li>
+            <li>Razor syntax (for C# logic)</li>
+            <li><code>@@code</code> block for data and behavior</li>
+        </ul>
+    </div>
+
+    <!-- Section: Basic Component Example -->
+    <div class="mt-5">
+        <h3>Basic Component Example</h3>
+        <p>Here’s a simple counter component:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>&lt;h3&gt;Counter&lt;/h3&gt;
+&lt;p&gt;Current count: @@count&lt;/p&gt;
+
+&lt;button class="btn btn-primary" @@onclick="Increment"&gt;Click Me&lt;/button&gt;
+
+@@code {
+    int count = 0;
+
+    void Increment()
+    {
+        count++;
+    }
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Reusing Components -->
+    <div class="mt-5">
+        <h3>Using a Component in Another Component</h3>
+        <p>Assuming you saved the above as <code>Counter.razor</code>, you can use it in other components like this:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>&lt;Counter /&gt;</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Passing Parameters -->
+    <div class="mt-5">
+        <h3>Component Parameters</h3>
+        <p>Use the <code>[Parameter]</code> attribute to pass data into a component:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>&lt;Greeting Name="Alice" /&gt;
+
+// Greeting.razor
+&lt;p&gt;Hello, @@Name!&lt;/p&gt;
+
+@@code {
+    [Parameter]
+    public string Name { get; set; }
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Lifecycle Methods -->
+    <div class="mt-5">
+        <h3>Component Lifecycle</h3>
+        <p>Override these methods for logic tied to the component lifecycle:</p>
+        <ul>
+            <li><code>OnInitialized()</code> – runs when the component is initialized</li>
+            <li><code>OnParametersSet()</code> – runs when parameters are set</li>
+            <li><code>OnAfterRender()</code> – runs after the component has rendered</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Components make Blazor apps modular and maintainable. In the next lesson, you’ll learn how to bind data to your components and handle user events dynamically.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("BlazorTypes", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: Blazor Server vs WebAssembly
+        </a>
+        <a href="@Url.Action("BlazorBinding", "DotNet")" class="btn btn-outline-secondary">
+            Next: Data Binding and Event Handling &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

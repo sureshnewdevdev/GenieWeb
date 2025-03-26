@@ -1,0 +1,139 @@
+@{
+    ViewData["Title"] = "ASP.NET Core Web API";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "WebApi";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        ASP.NET Core Web API is a powerful framework for building RESTful services in .NET. Let’s get started by setting up your first API project and understanding the core concepts like controllers, routing, and HTTP verbs.
+    </p>
+    <hr />
+
+    <!-- Section: What is a Web API? -->
+    <div class="mt-5">
+        <h2>What is a Web API?</h2>
+        <p>
+            A Web API allows external clients (like web apps, mobile apps, or other services) to interact with your application via HTTP. Common use cases include:
+        </p>
+        <ul>
+            <li>CRUD operations (Create, Read, Update, Delete)</li>
+            <li>Returning data in JSON or XML formats</li>
+            <li>Handling client-server communication in a decoupled manner</li>
+        </ul>
+    </div>
+
+    <!-- Section: Create a Web API Project -->
+    <div class="mt-5">
+        <h3>Creating a Web API Project</h3>
+        <p>Use the CLI or Visual Studio template:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>// CLI
+dotnet new webapi -n MyApiApp</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>By default, it includes:</p>
+        <ul>
+            <li><code>Program.cs</code> and <code>Startup.cs</code> (in older versions)</li>
+            <li><code>Controllers/WeatherForecastController.cs</code></li>
+            <li>Support for Swagger UI</li>
+        </ul>
+    </div>
+
+    <!-- Section: Anatomy of a Controller -->
+    <div class="mt-5">
+        <h3>Understanding Controllers</h3>
+        <p>Controllers are C# classes that handle incoming HTTP requests.</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>using Microsoft.AspNetCore.Mvc;
+
+[ApiController]
+[Route("api/[controller]")]
+public class HelloController : ControllerBase
+{
+    [HttpGet]
+    public string Get() => "Hello from API!";
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>
+            This responds to <code>GET /api/hello</code> with a message.
+        </p>
+    </div>
+
+    <!-- Section: Routing and Verbs -->
+    <div class="mt-5">
+        <h3>Routing and HTTP Verbs</h3>
+        <ul>
+            <li><code>[HttpGet]</code> – retrieve data</li>
+            <li><code>[HttpPost]</code> – submit new data</li>
+            <li><code>[HttpPut]</code> – update data</li>
+            <li><code>[HttpDelete]</code> – delete data</li>
+        </ul>
+        <p>Routing is based on attributes and conventions.</p>
+    </div>
+
+    <!-- Section: Returning Data -->
+    <div class="mt-5">
+        <h3>Returning JSON Responses</h3>
+        <p>ASP.NET Core automatically serializes objects to JSON by default:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>public class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+}
+
+[HttpGet]
+public IActionResult GetProduct()
+{
+    var product = new Product { Id = 1, Name = "Laptop" };
+    return Ok(product); // Returns JSON
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Running and Testing -->
+    <div class="mt-5">
+        <h3>Running and Testing the API</h3>
+        <ul>
+            <li>Run using <code>dotnet run</code> or <strong>F5</strong> in Visual Studio</li>
+            <li>Visit Swagger UI at <code>https://localhost:5001/swagger</code></li>
+            <li>Use tools like <strong>Postman</strong> or <strong>curl</strong> for manual testing</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            ASP.NET Core Web API offers a clean and scalable way to expose services over HTTP. In the next module, you’ll learn how to handle parameter binding, action return types, and content negotiation in your APIs.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("IoCBasics", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: Dependency Injection in Console Apps
+        </a>
+        <a href="@Url.Action("WebPages", "DotNet")" class="btn btn-outline-secondary">
+            Next: ASP.NET Web Pages (Razor) &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>
+

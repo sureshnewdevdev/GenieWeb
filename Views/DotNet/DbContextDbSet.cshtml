@@ -1,0 +1,121 @@
+@{
+    ViewData["Title"] = "DbContext and DbSet";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "DbContextDbSet";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        In Entity Framework Core, <code>DbContext</code> and <code>DbSet</code> are the main entry points for interacting with the database. Together, they help manage data models, perform queries, and track changes.
+    </p>
+    <hr />
+
+    <!-- Section: What is DbContext? -->
+    <div class="mt-5">
+        <h2>What is DbContext?</h2>
+        <p>
+            <code>DbContext</code> represents a session with the database. It’s responsible for:
+        </p>
+        <ul>
+            <li>Querying data</li>
+            <li>Saving changes</li>
+            <li>Configuring the model</li>
+            <li>Managing relationships and tracking entities</li>
+        </ul>
+    </div>
+
+    <!-- Section: Creating a DbContext -->
+    <div class="mt-5">
+        <h3>Defining a Custom DbContext</h3>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>using Microsoft.EntityFrameworkCore;
+
+public class AppDbContext : DbContext
+{
+    public DbSet&lt;Product&gt; Products { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder options)
+        => options.UseSqlServer("your-connection-string");
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: What is DbSet? -->
+    <div class="mt-5">
+        <h3>What is DbSet?</h3>
+        <p>
+            A <code>DbSet&lt;T&gt;</code> corresponds to a table in the database and provides access to all operations for that entity — querying, inserting, updating, and deleting.
+        </p>
+        <p>Each <code>DbSet</code> should match one model (class).</p>
+    </div>
+
+    <!-- Section: Querying with DbSet -->
+    <div class="mt-5">
+        <h3>Querying Data with DbSet</h3>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>using var context = new AppDbContext();
+
+var products = context.Products.ToList();
+
+foreach (var product in products)
+{
+    Console.WriteLine(product.Name);
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Adding and Saving -->
+    <div class="mt-5">
+        <h3>Adding a New Record</h3>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var newProduct = new Product { Name = "Mouse" };
+context.Products.Add(newProduct);
+context.SaveChanges();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Tracking and Change Detection -->
+    <div class="mt-5">
+        <h3>Change Tracking</h3>
+        <p>
+            EF Core tracks changes made to entities so it knows what needs to be saved. You can view tracking info via:
+        </p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var state = context.Entry(newProduct).State; // Added, Modified, etc.</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            <code>DbContext</code> and <code>DbSet</code> form the foundation of EF Core. They manage how your models interact with the database. In the next lesson, we’ll perform full CRUD operations and practice creating, reading, updating, and deleting records.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("EFIntro", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: EF Core Introduction
+        </a>
+        <a href="@Url.Action("EFCRUD", "DotNet")" class="btn btn-outline-secondary">
+            Next: CRUD Operations with EF Core &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

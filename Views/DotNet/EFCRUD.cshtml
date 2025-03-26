@@ -1,0 +1,124 @@
+@{
+    ViewData["Title"] = "CRUD Operations with EF Core";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "EFCRUD";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        CRUD stands for Create, Read, Update, and Delete — the four basic operations used in persistent storage. In this lesson, you’ll implement these operations using Entity Framework Core.
+    </p>
+    <hr />
+
+    <!-- Section: Setting Up the Model -->
+    <div class="mt-5">
+        <h2>Example Model: Product</h2>
+        <p>We’ll use a simple <code>Product</code> class for our examples:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>public class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Create -->
+    <div class="mt-5">
+        <h3>Create – Insert a New Record</h3>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>using var context = new AppDbContext();
+
+var product = new Product { Name = "Keyboard", Price = 29.99m };
+context.Products.Add(product);
+context.SaveChanges();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Read -->
+    <div class="mt-5">
+        <h3>Read – Fetch Records</h3>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>// Get all products
+var products = context.Products.ToList();
+
+// Get by ID
+var product = context.Products.Find(1);
+
+// Filtered query
+var cheapItems = context.Products.Where(p => p.Price &lt; 50).ToList();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Update -->
+    <div class="mt-5">
+        <h3>Update – Modify an Existing Record</h3>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var product = context.Products.Find(1);
+if (product != null)
+{
+    product.Price = 24.99m;
+    context.SaveChanges();
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Delete -->
+    <div class="mt-5">
+        <h3>Delete – Remove a Record</h3>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var product = context.Products.Find(1);
+if (product != null)
+{
+    context.Products.Remove(product);
+    context.SaveChanges();
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Best Practices -->
+    <div class="mt-5">
+        <h3>Best Practices for CRUD</h3>
+        <ul>
+            <li>Use <code>async</code> methods (<code>ToListAsync</code>, <code>FindAsync</code>) in production</li>
+            <li>Handle exceptions with try-catch blocks</li>
+            <li>Use DTOs (Data Transfer Objects) to protect internal models</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            CRUD operations are the building blocks of any data-driven application. Now that you're comfortable with data access, we’ll explore how to apply schema changes using EF Core Migrations.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("DbContextDbSet", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: DbContext and DbSet
+        </a>
+        <a href="@Url.Action("EFMigrations", "DotNet")" class="btn btn-outline-secondary">
+            Next: EF Core Migrations &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

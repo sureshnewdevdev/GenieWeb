@@ -1,0 +1,122 @@
+@{
+    ViewData["Title"] = "UI Design with XAML in .NET MAUI";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "MAUIXAML";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        XAML (eXtensible Application Markup Language) is a powerful UI markup language used in .NET MAUI to define user interfaces declaratively. It separates the design from logic, making your code cleaner and more maintainable.
+    </p>
+    <hr />
+
+    <!-- Section: What is XAML? -->
+    <div class="mt-5">
+        <h2>What is XAML?</h2>
+        <p>
+            XAML allows you to create complex UIs using a hierarchical tag-based structure, much like HTML. It's tightly integrated with .NET MAUI’s control and layout system.
+        </p>
+    </div>
+
+    <!-- Section: Basic Layouts -->
+    <div class="mt-5">
+        <h3>Common Layout Containers</h3>
+        <ul>
+            <li><strong>StackLayout</strong> – Stacks child elements vertically or horizontally</li>
+            <li><strong>Grid</strong> – Defines rows and columns</li>
+            <li><strong>AbsoluteLayout</strong> – Allows absolute positioning</li>
+            <li><strong>FlexLayout</strong> – Flexible layout similar to CSS Flexbox</li>
+        </ul>
+
+        <h5>Example: Vertical Stack</h5>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>&lt;VerticalStackLayout Padding="20"&gt;
+    &lt;Label Text="Welcome" FontSize="24" /&gt;
+    &lt;Entry Placeholder="Type here..." /&gt;
+    &lt;Button Text="Submit" /&gt;
+&lt;/VerticalStackLayout&gt;</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Styling Controls -->
+    <div class="mt-5">
+        <h3>Styling and Theming</h3>
+        <p>Use styles to apply consistent appearance across controls:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>&lt;ContentPage.Resources&gt;
+    &lt;Style TargetType="Label"&gt;
+        &lt;Setter Property="TextColor" Value="DarkBlue" /&gt;
+        &lt;Setter Property="FontSize" Value="20" /&gt;
+    &lt;/Style&gt;
+&lt;/ContentPage.Resources&gt;</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Data Binding -->
+    <div class="mt-5">
+        <h3>Simple Data Binding</h3>
+        <p>XAML supports two-way binding using <code>{Binding}</code> syntax:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>&lt;Entry Text="{Binding Username}" /&gt;
+&lt;Label Text="{Binding Username}" /&gt;</code></pre>
+        </div>
+
+        <p>You must set the <code>BindingContext</code> in the code-behind:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>public partial class MainPage : ContentPage
+{
+    public string Username { get; set; } = "Guest";
+
+    public MainPage()
+    {
+        InitializeComponent();
+        BindingContext = this;
+    }
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Responsive Design -->
+    <div class="mt-5">
+        <h3>Responsive Layout Tips</h3>
+        <ul>
+            <li>Use <code>*</code> and <code>Auto</code> in Grid for dynamic sizing</li>
+            <li>Combine layout containers (e.g., Stack + Grid)</li>
+            <li>Apply padding/margins for spacing consistency</li>
+            <li>Use device-specific styles or <code>DeviceInfo</code> if needed</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            XAML enables powerful, reusable, and elegant UI design across platforms. Up next: we’ll learn how to handle user input and navigate between screens in your MAUI app.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("MAUIFirstApp", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: Your First MAUI App
+        </a>
+        <a href="@Url.Action("MAUIInputNav", "DotNet")" class="btn btn-outline-secondary">
+            Next: Handling Input and Navigation &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>
