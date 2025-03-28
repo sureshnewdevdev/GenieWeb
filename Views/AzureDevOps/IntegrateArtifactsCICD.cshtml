@@ -1,46 +1,45 @@
-@{
+﻿@{
     ViewData["Title"] = "Integrating Artifacts with CI/CD";
     ViewData["ActiveMenu"] = "AzureDevOps";
 }
 
 <div class="container py-4">
-    <p class="text-center lead">Integrating Azure Artifacts with CI/CD pipelines enhances software development by automating dependency management and ensuring consistent builds across environments.</p>
+    <p class="text-center lead">
+        Integrating Azure Artifacts into your CI/CD pipelines ensures that dependency management becomes seamless, secure, and consistent. With just a few steps, you can automate how your builds restore, use, and publish packages — all from trusted internal feeds.
+    </p>
     <hr />
 
+    <!-- Why Integrate -->
     <div class="mt-5">
-        <h2>Why Integrate Artifacts with CI/CD?</h2>
-        <p>Azure Artifacts integration with CI/CD enables teams to manage dependencies efficiently, automate builds, and deploy securely. Key benefits include:</p>
+        <h2>Why Integrate Azure Artifacts with CI/CD?</h2>
+        <p>When building modern applications, dependency management plays a critical role. By integrating Azure Artifacts with your pipeline, you can:</p>
         <ul>
-            <li><strong>Automated Dependency Management:</strong> Ensures builds always use the correct package versions.</li>
-            <li><strong>Consistent Builds:</strong> Avoids version mismatches across environments.</li>
-            <li><strong>Improved Security:</strong> Prevents the use of unauthorized or vulnerable packages.</li>
-            <li><strong>Faster Deployments:</strong> Reduces manual intervention and streamlines delivery.</li>
+            <li><strong>Automate Dependency Handling:</strong> Restore packages as part of the build — no manual setup needed.</li>
+            <li><strong>Ensure Reproducibility:</strong> Use the exact same versions across environments for predictable builds.</li>
+            <li><strong>Improve Security:</strong> Prevent use of unverified packages by relying on internal feeds.</li>
+            <li><strong>Accelerate Delivery:</strong> Reduce pipeline errors and delays related to package versions.</li>
         </ul>
     </div>
 
-    <div class="text-center mt-4">
-        <img src="https://learn.microsoft.com/en-us/azure/devops/artifacts/media/ci-cd-artifacts.png" alt="CI/CD with Azure Artifacts" class="img-fluid rounded shadow-lg">
-        <p class="text-muted mt-2"><small>CI/CD pipeline integration with Azure Artifacts</small></p>
-    </div>
-
+    <!-- How to Set Up -->
     <div class="mt-5">
-        <h3>Setting Up CI/CD with Azure Artifacts</h3>
-        <p>Follow these steps to integrate Azure Artifacts with an Azure DevOps pipeline.</p>
+        <h2>How to Integrate Azure Artifacts with Your Pipeline</h2>
+        <p>Here’s a quick guide to wiring Azure Artifacts into your build and release pipelines:</p>
         <ol>
-            <li><strong>Create an Azure Artifacts Feed:</strong> Navigate to Azure DevOps > Artifacts > Create a new feed.</li>
-            <li><strong>Configure the Pipeline:</strong> Add tasks to restore and publish packages within Azure Pipelines.</li>
-            <li><strong>Use Feeds in Builds:</strong> Reference the artifact feed in the pipeline YAML file.</li>
-            <li><strong>Deploy the Application:</strong> Ensure package dependencies are correctly resolved before deployment.</li>
+            <li><strong>Create an Artifacts Feed:</strong> In Azure DevOps, navigate to <em>Artifacts → New Feed</em> and give it a name.</li>
+            <li><strong>Link the Feed to Your Pipeline:</strong> Add the relevant authentication and restore tasks.</li>
+            <li><strong>Reference the Feed in YAML:</strong> Specify the feed name and versioning in your pipeline definition.</li>
+            <li><strong>Publish & Deploy:</strong> Package and publish your outputs back to Azure Artifacts for reuse.</li>
         </ol>
     </div>
 
+    <!-- YAML Samples -->
     <div class="mt-5">
-        <h3>Pipeline Configuration Examples</h3>
-        <p>Below are YAML configurations for integrating NuGet, npm, and Maven packages into Azure Pipelines.</p>
+        <h2>Sample YAML Configurations</h2>
+        <p>Below are examples for integrating common package types directly into Azure Pipelines.</p>
 
-        <h4>NuGet Integration</h4>
-        <pre class="bg-light p-3 rounded">
-trigger:
+        <h4>NuGet (.NET) Integration</h4>
+        <pre class="bg-light p-3 rounded"><code>trigger:
 - main
 
 pool:
@@ -52,46 +51,55 @@ steps:
     command: 'restore'
     feedsToUse: 'select'
     vstsFeed: 'MyAzureArtifactsFeed'
-- script: dotnet build --configuration Release
-        </pre>
 
-        <h4>npm Integration</h4>
-        <pre class="bg-light p-3 rounded">
-steps:
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    projects: '**/*.csproj'</code></pre>
+
+        <h4>npm (Node.js) Integration</h4>
+        <pre class="bg-light p-3 rounded"><code>steps:
 - task: npmAuthenticate@0
   inputs:
-    workingFile: ".npmrc"
-- script: npm install
-- script: npm run build
-        </pre>
+    workingFile: '.npmrc'
 
-        <h4>Maven Integration</h4>
-        <pre class="bg-light p-3 rounded">
-steps:
+- script: npm install
+- script: npm run build</code></pre>
+
+        <h4>Maven (Java) Integration</h4>
+        <pre class="bg-light p-3 rounded"><code>steps:
 - task: Maven@3
   inputs:
     mavenPomFile: 'pom.xml'
     goals: 'clean install'
     options: '-s settings.xml'
     publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-        </pre>
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'</code></pre>
     </div>
 
+    <!-- Best Practices -->
     <div class="mt-5">
-        <h3>Best Practices for CI/CD Integration</h3>
+        <h2>Best Practices for Artifact Integration</h2>
         <ul>
-            <li><strong>Use Version Locking:</strong> Avoid unexpected package updates by specifying exact versions.</li>
-            <li><strong>Enable Security Scans:</strong> Identify vulnerabilities in dependencies before deployment.</li>
-            <li><strong>Automate Artifact Publishing:</strong> Push updated packages to feeds during the build process.</li>
-            <li><strong>Implement Approval Gates:</strong> Require approvals before deploying to production environments.</li>
+            <li><strong>Use Version Locking:</strong> Pin package versions to prevent accidental upgrades.</li>
+            <li><strong>Publish Automatically:</strong> Push your builds to feeds for easy reuse across projects.</li>
+            <li><strong>Enable Vulnerability Scanning:</strong> Integrate tools like WhiteSource Bolt or Snyk to scan dependencies.</li>
+            <li><strong>Gate Access to Feeds:</strong> Add approval processes for critical or production package promotion.</li>
         </ul>
     </div>
 
+    <!-- Summary -->
     <div class="mt-5">
-        <p>By integrating Azure Artifacts with CI/CD pipelines, teams can streamline package management, enhance security, and improve deployment efficiency. Ensuring proper dependency resolution in automated builds contributes to a more stable and scalable development workflow.</p>
+        <h2>Summary</h2>
+        <p>
+            When integrated correctly, Azure Artifacts becomes a powerful part of your DevOps toolkit — enabling smoother builds, safer deployments, and more reliable releases. Whether you're managing NuGet, npm, or Maven packages, this approach ensures your dependencies are always secure, approved, and consistent.
+        </p>
+        <p>
+            Up next, we’ll look at how to <strong>publish and consume custom packages</strong> using Azure Artifacts across multiple projects.
+        </p>
     </div>
 
+    <!-- Navigation -->
     <div class="d-flex justify-content-start mt-4">
         <a href="@Url.Action("ManagePackages", "AzureDevOps")" class="btn btn-outline-secondary">&larr; Previous: Managing Packages</a>
     </div>

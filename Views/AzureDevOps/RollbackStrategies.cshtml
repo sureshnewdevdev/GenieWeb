@@ -4,52 +4,53 @@
 }
 
 <div class="container py-4">
-    <p class="text-center lead">Rollback strategies in Azure DevOps help organizations **mitigate deployment failures** and ensure application stability by reverting to a previous working state.</p>
+    <p class="text-center lead">
+        Rollback strategies in Azure DevOps help you respond quickly to deployment failures, ensuring your application remains stable by restoring a previous working version.
+    </p>
     <hr />
 
+    <!-- What Are Rollback Strategies -->
     <div class="mt-5">
         <h2>What Are Rollback Strategies?</h2>
-        <p>Rollback strategies provide a way to **undo faulty deployments** and restore a previous stable version of an application.</p>
+        <p>
+            Rollback strategies allow teams to recover from bad deployments. Whether it's a broken feature or a failed release, rollbacks give you a safety net to restore a previous version without significant downtime.
+        </p>
         <ul>
-            <li>Helps **minimize downtime** and ensure application reliability.</li>
-            <li>Supports **automated and manual rollbacks**.</li>
-            <li>Prevents failed deployments from affecting end users.</li>
-            <li>Can be configured with **Azure DevOps Pipelines**.</li>
+            <li>Minimize disruption to users by reverting changes quickly</li>
+            <li>Support both manual and automated rollback mechanisms</li>
+            <li>Ensure production stability during risky deployments</li>
+            <li>Integrate directly into your CI/CD pipelines</li>
         </ul>
     </div>
 
-    <div class="row align-items-center">
-        <div class="col-md-6 text-center">
-            <img src="https://learn.microsoft.com/en-us/azure/devops/media/rollback-strategy.png" alt="Rollback Strategies in Azure DevOps" class="img-fluid rounded shadow-lg">
-            <p class="text-muted mt-2"><small>Rollback Strategies in Azure DevOps Pipelines</small></p>
-        </div>
-        <div class="col-md-6">
-            <h4>Types of Rollback Strategies</h4>
-            <ul>
-                <li>**Manual Rollback** – Manually redeploy a previous stable build if issues occur.</li>
-                <li>**Automated Rollback** – Configure pipeline triggers to detect failures and revert automatically.</li>
-                <li>**Blue-Green Deployment** – Run two environments (one live, one idle) and switch traffic if a failure occurs.</li>
-                <li>**Canary Deployment** – Gradually roll out changes to a small set of users before full deployment.</li>
-            </ul>
-        </div>
+    <!-- Types of Rollback Strategies -->
+    <div class="mt-5">
+        <h2>Types of Rollback Strategies</h2>
+        <ul>
+            <li><strong>Manual Rollback:</strong> Redeploy a known good version from artifact history when needed</li>
+            <li><strong>Automated Rollback:</strong> Configure pipelines to detect failures and revert automatically</li>
+            <li><strong>Blue-Green Deployment:</strong> Maintain two environments (live and idle) and switch traffic upon failure</li>
+            <li><strong>Canary Deployment:</strong> Release to a small group first, then roll out gradually if no issues arise</li>
+        </ul>
     </div>
 
+    <!-- Configuring Rollbacks -->
     <div class="mt-5">
-        <h2>Configuring Rollbacks in Azure DevOps</h2>
-        <p>Follow these steps to configure rollback mechanisms:</p>
+        <h2>How to Configure Rollbacks in Azure DevOps</h2>
+        <p>To enable effective rollbacks, follow these best practices:</p>
         <ol>
-            <li>Enable **versioned artifact storage** to keep previous releases.</li>
-            <li>Define a **manual rollback process** for critical releases.</li>
-            <li>Use **deployment slots** to test updates before production release.</li>
-            <li>Configure automated rollback triggers in Azure Pipelines.</li>
-            <li>Monitor deployment logs to identify rollback conditions.</li>
+            <li><strong>Keep versioned build artifacts:</strong> Ensure every deployment package is archived and retrievable</li>
+            <li><strong>Use deployment slots:</strong> Deploy to staging slots and swap only when verified</li>
+            <li><strong>Define rollback conditions:</strong> Use pipeline logic to detect failed deployments and take action</li>
+            <li><strong>Document rollback steps:</strong> Especially for critical systems that require manual intervention</li>
+            <li><strong>Test rollback regularly:</strong> Validate rollback steps during QA or staging phases</li>
         </ol>
     </div>
 
-    <div class="row align-items-center">
-        <div class="col-md-6">
-            <h4>Example YAML for Automated Rollback</h4>
-            <pre>
+    <!-- Example YAML -->
+    <div class="mt-5">
+        <h4>Sample YAML for an Automated Rollback</h4>
+        <pre><code>
 stages:
 - stage: Deploy
   displayName: 'Deploy to Production'
@@ -73,36 +74,39 @@ stages:
                     Write-Host "Deployment failed! Rolling back..."
                     az webapp deployment slot swap --resource-group myResourceGroup --name my-web-app --slot staging
                 }
-            </pre>
-        </div>
-        <div class="col-md-6 text-center">
-            <img src="https://learn.microsoft.com/en-us/azure/devops/media/blue-green-deployment.png" alt="Blue-Green Deployment Strategy" class="img-fluid rounded shadow-lg">
-            <p class="text-muted mt-2"><small>Example of Blue-Green Deployment</small></p>
-        </div>
+        </code></pre>
+        <p class="mt-2">
+            This example assumes you're using deployment slots and triggers a rollback if the deployment fails.
+        </p>
     </div>
 
+    <!-- Best Practices -->
     <div class="mt-5">
         <h2>Best Practices for Rollbacks</h2>
         <ul>
-            <li>Use **deployment slots** for zero-downtime rollbacks.</li>
-            <li>Automate rollback conditions to **detect and revert failed deployments**.</li>
-            <li>Enable **real-time monitoring** to identify issues quickly.</li>
-            <li>Implement **feature flags** to disable faulty features without redeployment.</li>
-            <li>Test rollback processes before production deployment.</li>
+            <li>Use <strong>deployment slots</strong> to swap back instantly if needed</li>
+            <li>Set up <strong>alerts and monitoring</strong> to detect deployment issues</li>
+            <li>Maintain <strong>artifact history</strong> for all successful builds</li>
+            <li>Test rollback scenarios before going live with new features</li>
+            <li>Leverage <strong>feature flags</strong> to toggle features without code changes</li>
         </ul>
     </div>
 
+    <!-- Conclusion -->
     <div class="mt-5">
         <h2>Conclusion</h2>
         <p>
-            Rollback strategies in Azure DevOps provide a **safety net** for deployments, ensuring that teams can **quickly recover from failures**. By implementing **automated and manual rollback mechanisms**, organizations can maintain high availability and reduce downtime.
+            Rollback strategies are a vital part of any mature DevOps process. Whether you're deploying to test environments or production, having a rollback plan ensures confidence and resilience when something goes wrong.
         </p>
         <p>
-            The next step is to explore **Infrastructure as Code (IaC) with Azure DevOps** for automated provisioning and management.
+            Coming up next: you'll explore how to use <strong>Infrastructure as Code (IaC)</strong> with Azure DevOps to automate provisioning and improve environment consistency.
         </p>
     </div>
 
+    <!-- Navigation -->
     <div class="d-flex justify-content-start mt-4">
-        <a href="@Url.Action("ApprovalsGates", "AzureDevOps")" class="btn btn-outline-secondary">&larr; Previous: Approvals & Gates</a>
+        <a href="@Url.Action("ApprovalsGates", "AzureDevOps")" class="btn btn-outline-secondary">
+            &larr; Previous: Approvals & Gates
+        </a>
     </div>
 </div>
