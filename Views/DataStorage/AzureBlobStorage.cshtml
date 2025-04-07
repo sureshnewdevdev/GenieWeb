@@ -195,114 +195,113 @@ namespace blob_access.Controllers
 
     
     <h4 class="text-success mt-4">Step 5: CSHTML View (Index.cshtml)</h4>
-    <pre><code class="language-html">
-    @@model blob_access.Models.Student
+<pre><code class="language-html">
+@@model blob_access.Models.Student
 
             @@{
                 ViewBag.Title = "Student Entry";
             }
 
-<h2>Enter Student Details</h2>
+&lt;h2&gt;Enter Student Details&lt;/h2&gt;
 
-<form asp-controller="Student" asp-action="Save" method="post">
-    <div>
-    <label>Name:</label>
-    <input type="text" name="Name" required />
-    </div>
-    <div>
-    <label>Roll Number:</label>
-    <input type="number" name="RollNumber" required />
-    </div>
-    <div>
-    <label>Total Marks:</label>
-    <input type="number" name="TotalMarks" required />
-    </div>
-    <button type="submit">Save</button>
-</form>
+&lt;form asp-controller="Student" asp-action="Save" method="post"&gt;
+    &lt;div&gt;
+        &lt;label&gt;Name:&lt;/label&gt;
+        &lt;input type="text" name="Name" required /&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+        &lt;label&gt;Roll Number:&lt;/label&gt;
+        &lt;input type="number" name="RollNumber" required /&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+        &lt;label&gt;Total Marks:&lt;/label&gt;
+        &lt;input type="number" name="TotalMarks" required /&gt;
+    &lt;/div&gt;
+    &lt;button type="submit"&gt;Save&lt;/button&gt;
+&lt;/form&gt;
 
             @@if (ViewBag.Message != null)
             {
-        <p style="color:green">@ViewBag.Message</p>
+                &lt; p style = "color:green" & gt;
+                @@ViewBag.Message
+                &lt;/ p & gt;
             }
 
-<a href="/Student/ViewStudents">View Stored Students</a>
-
-    </code></pre>
+&lt;a href="/Student/ViewStudents"&gt;View Stored Students&lt;/a&gt;
+</code></pre>
 
     <h4 class=" text-success mt-4"> Step 6: CSHTML View (Edit.html)</h4>
-    <pre><code class="language-html">
-        @@model blob_access.Models.Student
+<pre><code class="language-html">
+@@model blob_access.Models.Student
 
             @@{
                 ViewBag.Title = "Edit Student";
             }
 
-<h2>Edit Student</h2>
+&lt;h2&gt;Edit Student&lt;/h2&gt;
 
-<form asp-controller="Student" asp-action="Edit" method="post">
-    <div>
-    <label>Name:</label>
-    <input type="text" name="Name" value="@@Model.Name" required />
-    </div>
-    <div>
-    <label>Roll Number:</label>
-    <input type="number" name="RollNumber" value="@@Model.RollNumber" readonly />
-    </div>
-    <div>
-    <label>Total Marks:</label>
-    <input type="number" name="TotalMarks" value="@@Model.TotalMarks" required />
-    </div>
-    <button type="submit">Update</button>
-</form>
+&lt;form asp-controller="Student" asp-action="Edit" method="post"&gt;
+    &lt;div&gt;
+        &lt;label&gt;Name:&lt;/label&gt;
+        &lt;input type="text" name="Name" value="@@Model.Name" required /&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+        &lt;label&gt;Roll Number:&lt;/label&gt;
+        &lt;input type="number" name="RollNumber" value="@@Model.RollNumber" readonly /&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+        &lt;label&gt;Total Marks:&lt;/label&gt;
+        &lt;input type="number" name="TotalMarks" value="@@Model.TotalMarks" required /&gt;
+    &lt;/div&gt;
+    &lt;button type="submit"&gt;Update&lt;/button&gt;
+&lt;/form&gt;
 
-<a href="/Student/ViewStudents">Back to List</a>
-
-    </code></pre>
+&lt;a href="/Student/ViewStudents"&gt;Back to List&lt;/a&gt;
+</code></pre>
 
     <h4 class=" text-success mt-4"> Step 7: CSHTML View (ViewStudents.cshtml)</h4>
-    <pre><code class="language-htmml">
-        @@model List<blob_access.Models.Student>
+<pre><code class="language-html">
+@@model List&lt;blob_access.Models.Student&gt;
 
-            @@{
-                ViewBag.Title = "Student List";
-            }
+@@{
+    ViewBag.Title = "Student List";
+}
 
-<h2>Stored Student Records</h2>
+&lt;h2&gt;Stored Student Records&lt;/h2&gt;
 
-            @@if (Model.Count > 0)
+@@if (Model.Count &gt; 0)
+{
+    &lt;table border="1" cellpadding="5"&gt;
+        &lt;thead&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Name&lt;/th&gt;
+                &lt;th&gt;Roll Number&lt;/th&gt;
+                &lt;th&gt;Total Marks&lt;/th&gt;
+                &lt;th&gt;Actions&lt;/th&gt;
+            &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+            @@foreach (var student in Model)
             {
-        <table border="1" cellpadding="5">
-        <thead>
-        <tr>
-        <th>Name</th>
-        <th>Roll Number</th>
-        <th>Total Marks</th>
-                </tr>
-            </thead>
-        <tbody>
-                        @@foreach (var student in Model)
-                        {
-            <tr>
-            <td>@@student.Name</td>
-            <td>@@student.RollNumber</td>
-            <td>@@student.TotalMarks</td>
-                        </tr>
-            <td>
-            <a href="@@Url.Action("Edit", "Student", new { id = student.RollNumber })">Edit</a>
-                    </td>
-
-                        }
-            </tbody>
-        </table>
+                &lt;tr&gt;
+                    &lt;td&gt;@@student.Name&lt;/td&gt;
+                    &lt;td&gt;@@student.RollNumber&lt;/td&gt;
+                    &lt;td&gt;@@student.TotalMarks&lt;/td&gt;
+                    &lt;td&gt;
+                        &lt;a href=&quot;@@Url.Action(&quot;Edit&quot;, &quot;Student&quot;, new { id = student.RollNumber })&quot;&gt;Edit&lt;/a&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
             }
-            else
-            {
-        <p>No student data found.</p>
-            }
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+}
+else
+{
+    &lt;p&gt;No student data found.&lt;/p&gt;
+}
 
-<a href="/Student/Index">Back to Entry Form</a>
-
-    </code></pre>
+&lt;a href=&quot;/Student/Index&quot;&gt;Back to Entry Form&lt;/a&gt;
+</code></pre>
 
     <h4 class="text-success mt-4">Step 8: Model-> Students.cs</h4>
     <pre><code class="language-html">
@@ -324,8 +323,8 @@ namespace blob_access.Controllers
 builder.Services.AddSingleton&lt;AzureBlobService&gt;();
     </code></pre>
     <div class="d-flex justify-content-end mt-4">
-        <a href="@Url.Action("IntroductiomToLogicApps", "DataStorage")" class="btn btn-outline-secondary">
-            Next: Managing Microservices with Docker Compose &rarr;
+        <a href="@Url.Action("IntroductionToLogicApps", "DataStorage")" class="btn btn-outline-secondary">
+            Next: Introduction to Logic Apps &rarr;
         </a>
     </div>
 </div>
