@@ -18,5 +18,15 @@ namespace GenieWeb.Controllers
         {
             return View();
         }
+
+        public IActionResult DataFactoryCopyActivity()
+        {
+            return View();
+        }
+
+        public IActionResult CreatingDataFactory()
+        {
+            return View();
+        }
     }
 }
