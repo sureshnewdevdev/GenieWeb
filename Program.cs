@@ -1,3 +1,5 @@
+using GenieWeb.Services;
+
 namespace GenieWeb
 {
     public class Program
@@ -8,6 +10,14 @@ namespace GenieWeb
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddSingleton<QuizService>(); // Or AddScoped<QuizService>() if you prefer
+
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // adjust as needed
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
 
             var app = builder.Build();
 
@@ -23,6 +33,8 @@ namespace GenieWeb
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseSession();
 
             app.UseAuthorization();
 

@@ -1,0 +1,99 @@
+﻿@model QuizQuestion
+@{
+    var current = (int)ViewData["QuestionNumber"];
+    var total = (int)ViewData["TotalQuestions"];
+    var topic = ViewData["Topic"] as string;
+    var selectedAnswer = ViewData["SelectedAnswer"] as string;
+    ViewData["ActiveTopic"] = "Azure";
+}
+
+<div class="container py-4">
+    <div class="card shadow-sm rounded-4 border-0">
+        <div class="card-body">
+
+            <!-- Progress Bar -->
+            <div class="progress mb-4 rounded-pill" style="height: 12px;">
+                <div class="progress-bar bg-gradient-info" role="progressbar" style="width: @(100 * current / total)%;">
+                </div>
+            </div>
+
+            <!-- Sticky Question Header -->
+            <div class="sticky-top bg-white py-2 mb-3 border-bottom z-2">
+                <h4 class="mb-0 text-primary">Question @current of @total</h4>
+            </div>
+
+            <!-- Question Text -->
+            <p class="fw-semibold fs-5">@Model.QuestionText</p>
+
+            <!-- Quiz Form -->
+            <form method="post" asp-controller="ChoiceQuestions" asp-action="SubmitAnswer">
+                <div class="row">
+                    @for (int i = 0; i < Model.Options.Count; i++)
+                    {
+                        var label = (char)('A' + i);
+                        var isChecked = selectedAnswer == label.ToString() ? "checked" : "";
+                        var radioId = $"q{current}-opt{label}";
+
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check border rounded-3 px-3 py-2 shadow-sm transition-all">
+                                <input class="form-check-input" type="radio" id="@radioId" name="selectedAnswer" value="@label" @Html.Raw(isChecked) />
+                                <label class="form-check-label w-100 fs-6" for="@radioId">
+                                    @label. @Model.Options[i]
+                                </label>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <input type="hidden" name="topic" value="@topic" />
+                <input type="hidden" name="questionNumber" value="@current" />
+
+                <!-- Navigation Buttons -->
+                <div class="mt-4 d-flex justify-content-between gap-3">
+                    @if (current > 1)
+                    {
+                        <a class="btn btn-outline-secondary btn-lg rounded-pill px-4 shadow-sm transition-all" href="/ChoiceQuestions/@topic/@(current - 1)">
+                            ⬅ Previous
+                        </a>
+                    }
+
+                    @if (current < total)
+                    {
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm transition-all ms-auto">
+                            Next ➡
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn btn-success btn-lg rounded-pill px-4 shadow-sm transition-all ms-auto">
+                            ✅ Finish Quiz
+                        </button>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Highlight & Animation Styling -->
+<style>
+    .form-check-input:checked + .form-check-label {
+        background-color: #d4edda;
+        border-radius: 6px;
+        padding: 4px 8px;
+        transition: background-color 0.3s ease;
+    }
+
+    .transition-all {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .bg-gradient-info {
+        background: linear-gradient(to right, #0dcaf0, #0d6efd);
+    }
+</style>
