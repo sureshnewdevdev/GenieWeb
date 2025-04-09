@@ -2,49 +2,42 @@
     ViewData["Title"] = "Operator Overloading in C#";
 }
 
-<!-- Top Links Section -->
-@* <div class="top-links d-flex justify-content-start mb-4">
-    <a href="/InterviewQA" class="btn btn-success me-2">Interview Q&A</a>
-    <a href="/FreeMCQ" class="btn btn-primary me-2">Free MCQ Question and Answer</a>
-    <a href="/VideoTutorial" class="btn btn-info">Free Video Tutorial</a>
-</div> *@
-
-<!-- Main Heading -->
-<h1 class="display-4 text-primary mb-4">Operator Overloading in C#</h1>
-
 <!-- Section: Introduction to Operator Overloading -->
 <section class="mb-5">
-    <h2 class="text-secondary">What is Operator Overloading?</h2>
+    <h2 class="text-secondary">What is Operator Overloading in C#?</h2>
     <p class="lead">
-        Operator overloading in C# allows developers to redefine or "overload" how operators work with user-defined types. It enhances code readability and enables custom behaviors for operations such as addition, subtraction, equality checks, and more when applied to objects.
+        <b>Operator Overloading</b> allows developers to define custom behavior for operators when applied to user-defined data types. It enhances code readability and usability by enabling intuitive operations on objects.
     </p>
 </section>
 
-<!-- Section: Why Use Operator Overloading? -->
+<!-- Section: Key Features of Operator Overloading -->
 <section class="mb-5">
-    <h2 class="text-secondary">Why Use Operator Overloading?</h2>
-    <p class="lead">
-        Operator overloading improves code clarity by allowing custom objects to be used with standard operators. This makes the interaction between objects more intuitive and expressive, like using arithmetic operators for a <code>ComplexNumber</code> class.
-    </p>
+    <h2 class="text-secondary">Key Features of Operator Overloading</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Allows user-defined types to have operator-like behavior.</li>
+        <li class="list-group-item">Enhances code readability by using standard arithmetic or logical symbols.</li>
+        <li class="list-group-item">Requires the <code>operator</code> keyword in a class or struct.</li>
+        <li class="list-group-item">Only predefined operators can be overloaded (new operators cannot be created).</li>
+    </ul>
 </section>
 
-<!-- Section: Example of Operator Overloading in C# -->
+<!-- Section: Example of Operator Overloading -->
 <section class="mb-5">
-    <h2 class="text-secondary">Example: Operator Overloading in C#</h2>
+    <h2 class="text-secondary">Example of Operator Overloading</h2>
     <p class="lead">
-        Here is an example where the addition operator (<code>+</code>) is overloaded for a custom class <code>ComplexNumber</code>, allowing two complex numbers to be added using the <code>+</code> operator.
+        The following example demonstrates how to overload the <code>+</code> operator for a custom class.
     </p>
 
-    <!-- Example Code Block with Copy Option -->
-    <h3 class="text-info">Example Code:</h3>
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example of Overloading the + Operator:</h3>
     <div class="code-snippet position-relative bg-light p-3 rounded border">
         <pre class="mb-0">
 <code>public class ComplexNumber
 {
-    public double Real { get; set; }
-    public double Imaginary { get; set; }
+    public int Real { get; }
+    public int Imaginary { get; }
 
-    public ComplexNumber(double real, double imaginary)
+    public ComplexNumber(int real, int imaginary)
     {
         Real = real;
         Imaginary = imaginary;
@@ -56,89 +49,134 @@
         return new ComplexNumber(c1.Real + c2.Real, c1.Imaginary + c2.Imaginary);
     }
 
-    public override string ToString()
+    public void Display()
     {
-        return $"{Real} + {Imaginary}i";
+        Console.WriteLine($"{Real} + {Imaginary}i");
     }
 }
 
 // Usage
-ComplexNumber c1 = new ComplexNumber(2, 3);
-ComplexNumber c2 = new ComplexNumber(4, 5);
-ComplexNumber result = c1 + c2;  // Calls the overloaded + operator
+ComplexNumber num1 = new ComplexNumber(2, 3);
+ComplexNumber num2 = new ComplexNumber(4, 5);
+ComplexNumber result = num1 + num2; // Uses overloaded + operator
 
-Console.WriteLine($"Result: {result}");  // Output: Result: 6 + 8i</code>
+result.Display(); // Output: 6 + 8i</code>
         </pre>
         <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
     </div>
 
     <p class="text-muted">
-        In this example, the addition operator (<code>+</code>) is overloaded to allow adding two instances of <code>ComplexNumber</code> objects. The <code>ToString()</code> method is also overridden to provide a user-friendly output format.
+        In this example, the <code>+</code> operator is overloaded to add two complex numbers.
     </p>
 </section>
 
-<!-- Section: Which Operators Can Be Overloaded? -->
+<!-- Section: Overloading Comparison Operators -->
 <section class="mb-5">
-    <h2 class="text-secondary">Which Operators Can Be Overloaded?</h2>
-    <ul class="list-group">
-        <li class="list-group-item">Arithmetic operators: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code></li>
-        <li class="list-group-item">Comparison operators: <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, etc.</li>
-        <li class="list-group-item">Logical operators: <code>&amp;&amp;</code>, <code>||</code>, etc.</li>
-        <li class="list-group-item">Unary operators: <code>++</code>, <code>--</code>, etc.</li>
-        <li class="list-group-item">Relational operators: <code>&lt;=</code>, <code>&gt;=</code></li>
-    </ul>
+    <h2 class="text-secondary">Overloading Comparison Operators</h2>
+    <p class="lead">
+        Operators like <code>==</code> and <code>!=</code> can be overloaded to compare objects.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example of Overloading == and != Operators:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class Point
+{
+    public int X { get; }
+    public int Y { get; }
+
+    public Point(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    // Overloading == operator
+    public static bool operator ==(Point p1, Point p2)
+    {
+        return p1.X == p2.X && p1.Y == p2.Y;
+    }
+
+    // Overloading != operator
+    public static bool operator !=(Point p1, Point p2)
+    {
+        return !(p1 == p2);
+    }
+}
+
+// Usage
+Point p1 = new Point(3, 4);
+Point p2 = new Point(3, 4);
+Point p3 = new Point(5, 6);
+
+Console.WriteLine(p1 == p2); // Output: True
+Console.WriteLine(p1 != p3); // Output: True</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, the <code>==</code> and <code>!=</code> operators are overloaded to compare <code>Point</code> objects.
+    </p>
 </section>
 
 <!-- Section: Rules for Operator Overloading -->
 <section class="mb-5">
     <h2 class="text-secondary">Rules for Operator Overloading</h2>
     <ul class="list-group">
-        <li class="list-group-item">Only predefined operators can be overloaded.</li>
-        <li class="list-group-item">Operator overloading must be done within a class or struct.</li>
-        <li class="list-group-item">The overloaded operator must have at least one operand of the type that defines the operator.</li>
-        <li class="list-group-item">You cannot overload certain operators, like <code>=</code>, <code>.</code>, <code>?:</code>, etc.</li>
-    </ul>
-</section>
-
-<!-- Section: Key Characteristics of Operator Overloading -->
-<section class="mb-5">
-    <h2 class="text-secondary">Key Characteristics of Operator Overloading</h2>
-    <ul class="list-group">
-        <li class="list-group-item">Improves code readability by allowing natural operations on objects.</li>
-        <li class="list-group-item">Must adhere to the same syntax and rules as built-in operators.</li>
-        <li class="list-group-item">Operator overloading allows custom types to behave like primitive types when performing certain operations.</li>
+        <li class="list-group-item">Only existing operators can be overloaded; new operators cannot be created.</li>
+        <li class="list-group-item">Operator overloading must be done inside a class or struct.</li>
+        <li class="list-group-item">Overloaded operators must be <code>static</code>.</li>
+        <li class="list-group-item">Certain operators must be overloaded together (e.g., <code>==</code> and <code>!=</code>).</li>
     </ul>
 </section>
 
 <!-- Section: Operator Overloading vs Method Overloading -->
 <section class="mb-5">
     <h2 class="text-secondary">Operator Overloading vs. Method Overloading</h2>
-    <p class="lead">
-        While operator overloading and method overloading allow customization of operations in C#, they have distinct purposes:
-    </p>
-    <ul class="list-group">
-        <li class="list-group-item"><b>Operator Overloading:</b> Provides custom behavior for predefined operators when applied to user-defined types.</li>
-        <li class="list-group-item"><b>Method Overloading:</b> Allows multiple methods with the same name but different parameter lists within the same class.</li>
-    </ul>
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Feature</th>
+                <th>Operator Overloading</th>
+                <th>Method Overloading</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Definition</td>
+                <td>Allows operators to be redefined for custom types.</td>
+                <td>Allows multiple methods with the same name but different parameters.</td>
+            </tr>
+            <tr>
+                <td>Usage</td>
+                <td>Enhances object usability by allowing intuitive operations.</td>
+                <td>Provides multiple versions of a method for different inputs.</td>
+            </tr>
+            <tr>
+                <td>Implementation</td>
+                <td>Requires the <code>operator</code> keyword and must be <code>static</code>.</td>
+                <td>Defined as instance methods with different signatures.</td>
+            </tr>
+        </tbody>
+    </table>
 </section>
 
-<!-- Section: Key Points to Remember -->
+<!-- Section: Benefits of Operator Overloading -->
 <section class="mb-5">
-    <h2 class="text-secondary">Key Points to Remember</h2>
+    <h2 class="text-secondary">Benefits of Operator Overloading</h2>
     <ul class="list-group">
-        <li class="list-group-item">Operator overloading allows custom types to interact with operators like <code>+</code>, <code>-</code>, <code>==</code>, etc.</li>
-        <li class="list-group-item">You must define operator overloading within a class or struct.</li>
-        <li class="list-group-item">Not all operators can be overloaded (e.g., <code>=</code>, <code>.</code>).</li>
+        <li class="list-group-item">Enhances code readability by allowing natural arithmetic or logical expressions.</li>
+        <li class="list-group-item">Improves usability by enabling objects to behave like built-in types.</li>
+        <li class="list-group-item">Reduces complexity by simplifying operations on objects.</li>
+        <li class="list-group-item">Makes code more intuitive and easier to maintain.</li>
     </ul>
 </section>
 
-<!-- Previous Topic Link -->
-<div class="previous-topic mt-4">
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
     <a href="@Url.Action("MethodOverriding", "CSharp")" class="btn btn-outline-secondary">Previous: Method Overriding</a>
-</div>
-
-<!-- Next Topic Link -->
-<div class="next-topic mt-4">
     <a href="@Url.Action("MethodHiding", "CSharp")" class="btn btn-outline-secondary">Next: Method Hiding</a>
 </div>
 

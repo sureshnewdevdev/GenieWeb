@@ -1,0 +1,266 @@
+﻿@{
+    ViewData["Title"] = "Custom Serialization in C#";
+}
+
+<!-- Section: Introduction to Custom Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is Custom Serialization in C#?</h2>
+    <p class="lead">
+        **Custom Serialization** allows developers to **control how an object is serialized and deserialized** instead of relying on the default behavior. This is useful when working with **private fields, complex objects, or version compatibility**.
+    </p>
+</section>
+
+<!-- Section: Key Features of Custom Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Custom Serialization</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Gives **full control** over the serialization process.</li>
+        <li class="list-group-item">Allows **excluding specific fields** dynamically.</li>
+        <li class="list-group-item">Useful for **handling private fields and encrypting data**.</li>
+        <li class="list-group-item">Supports **Binary, XML, and JSON serialization**.</li>
+    </ul>
+</section>
+
+<!-- Section: Implementing Custom Serialization Using ISerializable -->
+<section class="mb-5">
+    <h2 class="text-secondary">Implementing Custom Serialization Using ISerializable</h2>
+    <p class="lead">
+        The **ISerializable** interface allows defining **custom serialization logic**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Custom Serialization Using ISerializable</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+
+[Serializable]
+class User : ISerializable
+{
+    public string Username { get; set; }
+    private string Password { get; set; }
+
+    public User() { }
+
+    public User(string username, string password)
+    {
+        Username = username;
+        Password = password;
+    }
+
+    // Custom Serialization
+    protected User(SerializationInfo info, StreamingContext context)
+    {
+        Username = info.GetString("Username");
+        Password = Decrypt(info.GetString("Password"));
+    }
+
+    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        info.AddValue("Username", Username);
+        info.AddValue("Password", Encrypt(Password));
+    }
+
+    private string Encrypt(string data) => $"encrypted({data})";
+    private string Decrypt(string data) => data.Replace("encrypted(", "").Replace(")", "");
+
+    public string GetPassword() => Password;
+}
+
+// Writing Custom Serialized Object
+class Program
+{
+    static void Main()
+    {
+        User user = new User("Alice", "SuperSecret123");
+        BinaryFormatter formatter = new BinaryFormatter();
+
+        using (FileStream stream = new FileStream("user.dat", FileMode.Create))
+        {
+            formatter.Serialize(stream, user);
+        }
+
+        Console.WriteLine("User object serialized with encryption.");
+    }
+}
+
+// Output:
+// User object serialized with encryption.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **ISerializable** interface allows **encrypting passwords** during serialization.
+    </p>
+</section>
+
+<!-- Section: Custom JSON Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Custom JSON Serialization</h2>
+    <p class="lead">
+        The **System.Text.Json** library allows defining custom serialization using **JsonConverter**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Custom JSON Serialization Using JsonConverter</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+class User
+{
+    public string Username { get; set; }
+
+    [JsonConverter(typeof(PasswordConverter))]
+    public string Password { get; set; }
+}
+
+// Custom Password Converter
+class PasswordConverter : JsonConverter&lt;string&gt;
+{
+    public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        return $"decrypted({reader.GetString()})";
+    }
+
+    public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue($"encrypted({value})");
+    }
+}
+
+// Writing Custom JSON Data
+class Program
+{
+    static void Main()
+    {
+        User user = new User { Username = "Bob", Password = "MySecret123" };
+        string json = JsonSerializer.Serialize(user);
+
+        Console.WriteLine("Serialized JSON:");
+        Console.WriteLine(json);
+    }
+}
+
+// Output:
+// Serialized JSON:
+// {"Username":"Bob","Password":"encrypted(MySecret123)"} </code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **JsonConverter** class allows **encrypting and decrypting JSON fields**.
+    </p>
+</section>
+
+<!-- Section: Custom XML Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Custom XML Serialization</h2>
+    <p class="lead">
+        The **IXmlSerializable** interface allows defining **custom XML serialization** logic.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Custom XML Serialization Using IXmlSerializable</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
+
+public class User : IXmlSerializable
+{
+    public string Username { get; set; }
+    private string Password { get; set; }
+
+    public User() { }
+    public User(string username, string password)
+    {
+        Username = username;
+        Password = password;
+    }
+
+    public XmlSchema GetSchema() => null;
+
+    public void ReadXml(XmlReader reader)
+    {
+        reader.MoveToContent();
+        Username = reader.GetAttribute("Username");
+        Password = Decrypt(reader.GetAttribute("Password"));
+    }
+
+    public void WriteXml(XmlWriter writer)
+    {
+        writer.WriteAttributeString("Username", Username);
+        writer.WriteAttributeString("Password", Encrypt(Password));
+    }
+
+    private string Encrypt(string data) => $"encrypted({data})";
+    private string Decrypt(string data) => data.Replace("encrypted(", "").Replace(")", "");
+}
+
+// Writing XML Data
+class Program
+{
+    static void Main()
+    {
+        User user = new User("Charlie", "Secret789");
+        XmlSerializer serializer = new XmlSerializer(typeof(User));
+
+        using (FileStream stream = new FileStream("user.xml", FileMode.Create))
+        {
+            serializer.Serialize(stream, user);
+        }
+
+        Console.WriteLine("User object serialized to XML.");
+    }
+}
+
+// Output:
+// User object serialized to XML.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **IXmlSerializable** interface allows **encrypting fields in XML serialization**.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Custom Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Custom Serialization</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **ISerializable** for **BinaryFormatter** when private fields need serialization.</li>
+        <li class="list-group-item">For **JSON serialization**, use **JsonConverter** to **modify data** before storage.</li>
+        <li class="list-group-item">Use **IXmlSerializable** for **custom XML serialization logic**.</li>
+        <li class="list-group-item">Ensure **encryption or hashing** when dealing with **sensitive data**.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("SerializationInherited", "CSharp")" class="btn btn-outline-secondary">Previous: Serialization and Inheritance</a>
+    <a href="@Url.Action("ISerializableInterface", "CSharp")" class="btn btn-outline-secondary">Next: ISerializable Interface</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

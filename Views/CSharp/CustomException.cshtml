@@ -1,0 +1,210 @@
+﻿@{
+    ViewData["Title"] = "Custom Exceptions in C#";
+}
+
+<!-- Section: Introduction to Custom Exceptions -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Custom Exceptions in C#?</h2>
+    <p class="lead">
+        A <b>Custom Exception</b> in C# is a user-defined exception class that extends the built-in <code>Exception</code> class. It allows developers to create meaningful error messages specific to their application’s needs.
+    </p>
+</section>
+
+<!-- Section: Key Features of Custom Exceptions -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Custom Exceptions</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Extends the <code>Exception</code> class to define application-specific errors.</li>
+        <li class="list-group-item">Allows meaningful error messages that improve debugging.</li>
+        <li class="list-group-item">Can include additional properties and methods for error handling.</li>
+        <li class="list-group-item">Supports <code>InnerException</code> for preserving original exceptions.</li>
+    </ul>
+</section>
+
+<!-- Section: Creating a Custom Exception -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Defining and Throwing a Custom Exception</h2>
+    <p class="lead">
+        The following example demonstrates how to define and throw a custom exception.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Creating a Custom Exception for Invalid Age</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+public class InvalidAgeException : Exception
+{
+    public InvalidAgeException(string message) : base(message) { }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            int age = 15;
+            if (age < 18)
+            {
+                throw new InvalidAgeException("Age must be 18 or older.");
+            }
+
+            Console.WriteLine("Age is valid.");
+        }
+        catch (InvalidAgeException ex)
+        {
+            Console.WriteLine($"Custom Exception Caught: {ex.Message}");
+        }
+    }
+}
+
+// Output:
+// Custom Exception Caught: Age must be 18 or older.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        This example defines an <code>InvalidAgeException</code> class and throws it when an invalid age is encountered.
+    </p>
+</section>
+
+<!-- Section: Adding Properties to Custom Exceptions -->
+<section class="mb-5">
+    <h2 class="text-secondary">Adding Properties to a Custom Exception</h2>
+    <p class="lead">
+        Custom exceptions can include additional properties to provide more details about the error.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Adding a Custom Property to an Exception</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+public class ProductNotFoundException : Exception
+{
+    public int ProductId { get; }
+
+    public ProductNotFoundException(int productId, string message) : base(message)
+    {
+        ProductId = productId;
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            int productId = 101;
+            throw new ProductNotFoundException(productId, $"Product ID {productId} not found.");
+        }
+        catch (ProductNotFoundException ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Console.WriteLine($"Product ID: {ex.ProductId}");
+        }
+    }
+}
+
+// Output:
+// Error: Product ID 101 not found.
+// Product ID: 101</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>ProductNotFoundException</code> class includes a <code>ProductId</code> property to store additional error details.
+    </p>
+</section>
+
+<!-- Section: Using InnerException in Custom Exceptions -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using InnerException in Custom Exceptions</h2>
+    <p class="lead">
+        Custom exceptions can include an <code>InnerException</code> to preserve the original cause of an error.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Wrapping an Inner Exception</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+public class FileProcessingException : Exception
+{
+    public FileProcessingException(string message, Exception innerException)
+        : base(message, innerException) { }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            try
+            {
+                throw new System.IO.FileNotFoundException("File not found.");
+            }
+            catch (System.IO.FileNotFoundException ex)
+            {
+                throw new FileProcessingException("Error processing the file.", ex);
+            }
+        }
+        catch (FileProcessingException ex)
+        {
+            Console.WriteLine($"Custom Exception: {ex.Message}");
+            Console.WriteLine($"Inner Exception: {ex.InnerException?.Message}");
+        }
+    }
+}
+
+// Output:
+// Custom Exception: Error processing the file.
+// Inner Exception: File not found.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>FileProcessingException</code> class wraps the original <code>FileNotFoundException</code>, keeping the original error details intact.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Using Custom Exceptions -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using Custom Exceptions</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Only create custom exceptions when built-in exceptions are not sufficient.</li>
+        <li class="list-group-item">Always inherit from the <code>Exception</code> class and provide meaningful error messages.</li>
+        <li class="list-group-item">Include relevant properties to store additional error details.</li>
+        <li class="list-group-item">Use <code>InnerException</code> when wrapping another exception.</li>
+        <li class="list-group-item">Log both the custom and inner exceptions to maintain full error details.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-start mt-4">
+    <a href="@Url.Action("InnerException", "CSharp")" class="btn btn-outline-secondary">Previous: Inner Exception</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

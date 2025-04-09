@@ -1,0 +1,231 @@
+﻿@{
+    ViewData["Title"] = "Task-Based Asynchronous Model (TAP) in C#";
+}
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <h2 class="text-secondary">Task-Based Asynchronous Model (TAP) in C#</h2>
+    <p class="lead">
+        The **Task-Based Asynchronous Model (TAP)** is the standard approach for handling **asynchronous programming** in C#. It uses the **Task and Task<TResult>** types along with **async and await** keywords to enable efficient, non-blocking execution of tasks.
+    </p>
+</section>
+
+<!-- Section: Key Features of TAP -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Task-Based Asynchronous Model</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Uses **Task and Task<TResult>** for asynchronous operations.</li>
+        <li class="list-group-item">Supports **async/await** for cleaner and more readable code.</li>
+        <li class="list-group-item">Allows **non-blocking execution**, improving responsiveness.</li>
+        <li class="list-group-item">Handles **exceptions using try-catch** in an asynchronous context.</li>
+    </ul>
+</section>
+
+<!-- Section: Basic Asynchronous Programming -->
+<section class="mb-5">
+    <h2 class="text-secondary">Basic Asynchronous Programming with TAP</h2>
+    <p class="lead">
+        The **async/await** pattern simplifies asynchronous programming by enabling **non-blocking execution**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Basic Asynchronous Method Using async/await</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main()
+    {
+        Console.WriteLine("Task started...");
+        await PerformTaskAsync();
+        Console.WriteLine("Task completed.");
+    }
+
+    static async Task PerformTaskAsync()
+    {
+        await Task.Delay(2000); // Simulates an asynchronous delay
+        Console.WriteLine("Async Task Finished.");
+    }
+}
+
+// Output:
+// Task started...
+// (Waits for 2 seconds)
+// Async Task Finished.
+// Task completed.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **await Task.Delay(2000)** simulates an **asynchronous delay** without blocking the main thread.
+    </p>
+</section>
+
+<!-- Section: Using Task<TResult> -->
+<section class="mb-5">
+    <h2 class="text-secondary">Returning Data with Task&lt;TResult&gt;</h2>
+    <p class="lead">
+        The **Task<TResult>** type allows returning values asynchronously.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Returning Data from an Asynchronous Method</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main()
+    {
+        int result = await ComputeSumAsync(10, 20);
+        Console.WriteLine($"Computed Sum: {result}");
+    }
+
+    static async Task&lt;int&gt; ComputeSumAsync(int a, int b)
+    {
+        await Task.Delay(1000); // Simulates async work
+        return a + b;
+    }
+}
+
+// Output:
+// (Waits for 1 second)
+// Computed Sum: 30</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **Task&lt;TResult&gt;** type allows returning values **asynchronously** without blocking execution.
+    </p>
+</section>
+
+<!-- Section: Handling Exceptions in Async Methods -->
+<section class="mb-5">
+    <h2 class="text-secondary">Handling Exceptions in Asynchronous Methods</h2>
+    <p class="lead">
+        Use **try-catch** to handle exceptions inside an asynchronous method.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Exception Handling in Async Methods</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main()
+    {
+        try
+        {
+            await PerformAsyncTask();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception Caught: {ex.Message}");
+        }
+    }
+
+    static async Task PerformAsyncTask()
+    {
+        await Task.Delay(1000);
+        throw new InvalidOperationException("Something went wrong!");
+    }
+}
+
+// Output:
+// (Waits for 1 second)
+// Exception Caught: Something went wrong!</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        **Try-catch blocks** allow handling exceptions in **asynchronous methods** effectively.
+    </p>
+</section>
+
+<!-- Section: Running Multiple Tasks in Parallel -->
+<section class="mb-5">
+    <h2 class="text-secondary">Running Multiple Asynchronous Tasks in Parallel</h2>
+    <p class="lead">
+        The **Task.WhenAll()** method allows running multiple asynchronous tasks concurrently.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Running Multiple Async Methods in Parallel</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main()
+    {
+        Task task1 = PerformTaskAsync("Task 1");
+        Task task2 = PerformTaskAsync("Task 2");
+
+        await Task.WhenAll(task1, task2);
+
+        Console.WriteLine("All tasks completed.");
+    }
+
+    static async Task PerformTaskAsync(string taskName)
+    {
+        await Task.Delay(2000);
+        Console.WriteLine($"{taskName} finished.");
+    }
+}
+
+// Output:
+// (Waits for 2 seconds)
+// Task 1 finished.
+// Task 2 finished.
+// All tasks completed.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **Task.WhenAll()** method ensures all tasks complete **before proceeding further**.
+    </p>
+</section>
+
+<!-- Section: Best Practices for TAP -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using TAP</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **async/await** for **I/O-bound** operations (e.g., database calls, file I/O).</li>
+        <li class="list-group-item">Avoid using **Task.Result or Task.Wait()**, as they can cause **deadlocks**.</li>
+        <li class="list-group-item">Use **ConfigureAwait(false)** when you don’t need to resume execution on the original thread.</li>
+        <li class="list-group-item">Prefer **Task.WhenAll()** for running multiple asynchronous tasks concurrently.</li>
+        <li class="list-group-item">Always use **try-catch** blocks to handle **exceptions in async methods**.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("ParallelExtensions", "CSharp")" class="btn btn-outline-secondary">Previous: Parallel Extensions</a>
+    <a href="@Url.Action("AsyncAwait", "CSharp")" class="btn btn-outline-secondary">Next: Async & Await</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

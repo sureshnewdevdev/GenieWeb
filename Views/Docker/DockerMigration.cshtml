@@ -1,0 +1,123 @@
+﻿@{
+    ViewData["Title"] = "Docker Container Migration";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Migrating Docker containers between environments is essential for backup, scaling, and disaster recovery.
+        Whether you’re moving images, data volumes, or full containers — Docker offers several methods to migrate containers efficiently.
+    </p>
+    <hr />
+
+    <!-- Section: What is Container Migration? -->
+    <div class="mt-5">
+        <h2>What is Container Migration?</h2>
+        <p>
+            Container migration involves transferring running container data, configuration, and file systems across hosts.
+            It ensures seamless portability and minimizes downtime during application reallocation or scaling.
+        </p>
+    </div>
+
+    <!-- Section: Migrating Using Docker Images -->
+    <div class="mt-5">
+        <h3>Migrating Using Docker Images</h3>
+        <p>Save a container image as a tar file:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker commit mycontainer myimage
+docker save -o myimage.tar myimage</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Transfer the tar file to the new host and load it:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker load -i myimage.tar</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Migrating Volumes and Persistent Data -->
+    <div class="mt-5">
+        <h3>Migrating Volumes & Persistent Data</h3>
+        <p>Use tar and rsync to copy Docker volumes:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker volume inspect myvolume
+sudo tar czf myvolume.tar.gz /var/lib/docker/volumes/myvolume</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Transfer the archive and extract it on the new host:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>sudo tar xzf myvolume.tar.gz -C /var/lib/docker/volumes</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Ensure volume names match or use bind mounts for portability.</p>
+    </div>
+
+    <!-- Section: Moving Containers with Docker Compose -->
+    <div class="mt-5">
+        <h3>Moving Containers with Docker Compose</h3>
+        <p>Copy your <code>docker-compose.yml</code> to the new host and run:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker-compose up -d</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Ensure you copy associated volumes or use external databases and caches.</p>
+    </div>
+
+    <!-- Section: Live Migration with CRIU (Experimental) -->
+    <div class="mt-5">
+        <h3>Live Migration with CRIU (Experimental)</h3>
+        <p>Checkpoint and restore containers using CRIU (on Linux only):</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker checkpoint create mycontainer checkpoint1</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Copy the checkpoint folder and restore:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker start --checkpoint checkpoint1 mycontainer</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p><small>Note: CRIU must be installed and configured on both hosts.</small></p>
+    </div>
+
+    <!-- Section: Best Strategies for Different Use Cases -->
+    <div class="mt-5">
+        <h3>Best Strategies for Different Use Cases</h3>
+        <ul>
+            <li><strong>Dev to staging:</strong> Push to Docker registry or use <code>save/load</code></li>
+            <li><strong>Live system migration:</strong> Use <code>commit</code> and volume sync</li>
+            <li><strong>Stateful applications:</strong> Use Docker volumes and persistent storage migration</li>
+            <li><strong>Rolling updates:</strong> Use CI/CD and Docker Swarm/Kubernetes for smooth transitions</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Docker container migration is flexible, supporting image export, volume backups, and advanced live migration tools.
+            Choose the right strategy based on your environment, performance needs, and downtime tolerance.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("AdvancedDockerTopics", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Advanced Docker Topics
+        </a>
+        <a href="@Url.Action("DockerUseCases", "Docker")" class="btn btn-outline-secondary">
+            Next: Real-World Docker Use Cases &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

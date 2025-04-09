@@ -1,0 +1,224 @@
+﻿@{
+    ViewData["Title"] = "Creating Interfaces in C#";
+}
+
+<!-- Section: Introduction to Interfaces -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Interfaces in C#?</h2>
+    <p class="lead">
+        An <b>interface</b> in C# is a contract that defines a set of methods, properties, or events that a class must implement. It provides a way to achieve abstraction and multiple inheritance.
+    </p>
+</section>
+
+<!-- Section: Key Features of Interfaces -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Interfaces</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Defines a contract without implementation.</li>
+        <li class="list-group-item">A class can implement multiple interfaces, supporting multiple inheritance.</li>
+        <li class="list-group-item">Cannot contain fields or constructors.</li>
+        <li class="list-group-item">All methods in an interface are implicitly public and abstract.</li>
+    </ul>
+</section>
+
+<!-- Section: Creating and Implementing an Interface -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Defining and Implementing an Interface</h2>
+    <p class="lead">
+        The following example demonstrates how to define an interface and implement it in a class.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Creating and Implementing an Interface</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+interface IAnimal
+{
+    void MakeSound(); // Method declaration
+}
+
+// Implementing the interface in a class
+public class Dog : IAnimal
+{
+    public void MakeSound()
+    {
+        Console.WriteLine("Dog barks!");
+    }
+}
+
+// Usage
+IAnimal myDog = new Dog();
+myDog.MakeSound(); // Output: Dog barks!</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, the <code>IAnimal</code> interface defines a method <code>MakeSound()</code>, which is implemented in the <code>Dog</code> class.
+    </p>
+</section>
+
+<!-- Section: Multiple Interface Implementation -->
+<section class="mb-5">
+    <h2 class="text-secondary">Implementing Multiple Interfaces</h2>
+    <p class="lead">
+        A class can implement multiple interfaces, allowing multiple inheritance.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Multiple Interface Implementation</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>interface IAnimal
+{
+    void MakeSound();
+}
+
+interface IPet
+{
+    void ShowAffection();
+}
+
+// Implementing both interfaces in a class
+public class Dog : IAnimal, IPet
+{
+    public void MakeSound()
+    {
+        Console.WriteLine("Dog barks!");
+    }
+
+    public void ShowAffection()
+    {
+        Console.WriteLine("Dog wags its tail.");
+    }
+}
+
+// Usage
+Dog myDog = new Dog();
+myDog.MakeSound();     // Output: Dog barks!
+myDog.ShowAffection(); // Output: Dog wags its tail.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Here, the <code>Dog</code> class implements both <code>IAnimal</code> and <code>IPet</code> interfaces, demonstrating multiple inheritance.
+    </p>
+</section>
+
+<!-- Section: Interface vs Abstract Class -->
+<section class="mb-5">
+    <h2 class="text-secondary">Interfaces vs Abstract Classes</h2>
+    <p class="lead">
+        While both interfaces and abstract classes enable abstraction, they have key differences.
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Feature</th>
+                <th>Interfaces</th>
+                <th>Abstract Classes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Definition</td>
+                <td>Defines only method signatures; no implementation (until C# 8.0).</td>
+                <td>Can have method implementations and abstract methods.</td>
+            </tr>
+            <tr>
+                <td>Inheritance</td>
+                <td>A class can implement multiple interfaces.</td>
+                <td>A class can inherit only one abstract class.</td>
+            </tr>
+            <tr>
+                <td>Fields and Constructors</td>
+                <td>Cannot have fields or constructors.</td>
+                <td>Can have fields, properties, and constructors.</td>
+            </tr>
+            <tr>
+                <td>Use Case</td>
+                <td>For defining behavior contracts.</td>
+                <td>For creating base functionality with default implementations.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Default Methods in Interfaces (C# 8+) -->
+<section class="mb-5">
+    <h2 class="text-secondary">Default Methods in Interfaces (C# 8+)</h2>
+    <p class="lead">
+        Starting from C# 8.0, interfaces can have default implementations using the <code>default</code> keyword.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Default Method in Interface</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>interface IAnimal
+{
+    void MakeSound();
+
+    // Default implementation
+    void Sleep()
+    {
+        Console.WriteLine("Sleeping...");
+    }
+}
+
+public class Dog : IAnimal
+{
+    public void MakeSound()
+    {
+        Console.WriteLine("Dog barks!");
+    }
+}
+
+// Usage
+Dog myDog = new Dog();
+myDog.MakeSound(); // Output: Dog barks!
+// myDog.Sleep(); // Error: Default methods require explicit interface implementation
+
+IAnimal animal = new Dog();
+animal.Sleep(); // Output: Sleeping...</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Here, the <code>Sleep()</code> method has a default implementation and must be accessed via an interface reference.
+    </p>
+</section>
+
+<!-- Section: When to Use Interfaces? -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Interfaces?</h2>
+    <ul class="list-group">
+        <li class="list-group-item">When multiple classes share common behavior but not implementation.</li>
+        <li class="list-group-item">To achieve multiple inheritance.</li>
+        <li class="list-group-item">To improve code maintainability and flexibility.</li>
+        <li class="list-group-item">For dependency injection and loose coupling in applications.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("SealedClasses", "CSharp")" class="btn btn-outline-secondary">Previous: Sealed Classes</a>
+    <a href="@Url.Action("ImplementingInterfaceInheritance", "CSharp")" class="btn btn-outline-secondary">Next: Implementing Interface Inheritance</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

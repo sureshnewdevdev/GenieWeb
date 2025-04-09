@@ -1,0 +1,220 @@
+﻿@{
+    ViewData["Title"] = "Role of Garbage Collector in C#";
+}
+
+<!-- Section: Introduction to Garbage Collector -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is the Role of Garbage Collector in C#?</h2>
+    <p class="lead">
+        The <b>Garbage Collector (GC)</b> in C# is responsible for automatic memory management. It reclaims memory occupied by objects that are no longer accessible, ensuring efficient use of system resources and preventing memory leaks.
+    </p>
+</section>
+
+<!-- Section: Key Features of Garbage Collector -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Garbage Collector</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Automatically deallocates memory occupied by unreachable objects.</li>
+        <li class="list-group-item">Prevents memory leaks and fragmentation.</li>
+        <li class="list-group-item">Manages memory in three generations: <b>Gen 0</b>, <b>Gen 1</b>, and <b>Gen 2</b>.</li>
+        <li class="list-group-item">Optimizes performance by running in the background.</li>
+    </ul>
+</section>
+
+<!-- Section: How Garbage Collection Works -->
+<section class="mb-5">
+    <h2 class="text-secondary">How Does Garbage Collection Work?</h2>
+    <p class="lead">
+        The Garbage Collector follows these steps to manage memory efficiently:
+    </p>
+
+    <ol class="list-group list-group-numbered">
+        <li class="list-group-item">Identifies objects that are no longer reachable.</li>
+        <li class="list-group-item">Releases memory occupied by these objects.</li>
+        <li class="list-group-item">Compacts memory to optimize space allocation.</li>
+    </ol>
+</section>
+
+<!-- Section: Generations in Garbage Collection -->
+<section class="mb-5">
+    <h2 class="text-secondary">Generations in Garbage Collection</h2>
+    <p class="lead">
+        The .NET Garbage Collector organizes objects into three generations to optimize performance:
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Generation</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><b>Gen 0</b></td>
+                <td>Stores short-lived objects. Frequent collections occur here.</td>
+                <td>Local variables in a method.</td>
+            </tr>
+            <tr>
+                <td><b>Gen 1</b></td>
+                <td>Serves as a buffer between short-lived and long-lived objects.</td>
+                <td>Objects surviving Gen 0 but still needed.</td>
+            </tr>
+            <tr>
+                <td><b>Gen 2</b></td>
+                <td>Contains long-lived objects that are rarely garbage collected.</td>
+                <td>Static objects, database connections.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Example of Garbage Collection -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Forcing Garbage Collection</h2>
+    <p class="lead">
+        The following example demonstrates how to manually trigger garbage collection using <code>GC.Collect()</code>.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Forcing Garbage Collection</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine("Creating objects...");
+        for (int i = 0; i < 5; i++)
+        {
+            MyClass obj = new MyClass();
+        }
+
+        Console.WriteLine("Forcing garbage collection...");
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        Console.WriteLine("Garbage collection completed.");
+    }
+}
+
+class MyClass
+{
+    ~MyClass()
+    {
+        Console.WriteLine("Finalizer called, object collected.");
+    }
+}
+
+// Output (Finalizer messages may appear later):
+// Creating objects...
+// Forcing garbage collection...
+// Finalizer called, object collected.
+// Garbage collection completed.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>GC.Collect()</code> method forces garbage collection, and the destructor (<code>~MyClass()</code>) confirms when an object is collected.
+    </p>
+</section>
+
+<!-- Section: When to Use Garbage Collection Manually -->
+<section class="mb-5">
+    <h2 class="text-secondary">When Should You Use Garbage Collection Manually?</h2>
+    <p class="lead">
+        Although garbage collection is automatic, in certain cases, manually triggering it can be useful:
+    </p>
+
+    <ul class="list-group">
+        <li class="list-group-item">When dealing with large temporary objects that consume a lot of memory.</li>
+        <li class="list-group-item">Before entering a performance-critical section of code.</li>
+        <li class="list-group-item">When ensuring memory cleanup before an application exits.</li>
+    </ul>
+</section>
+
+<!-- Section: Using IDisposable with Garbage Collector -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using <code>IDisposable</code> to Manage Resources</h2>
+    <p class="lead">
+        The <code>IDisposable</code> interface allows explicit resource cleanup instead of relying on the garbage collector.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Implementing IDisposable</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class ResourceHandler : IDisposable
+{
+    public ResourceHandler()
+    {
+        Console.WriteLine("Resource acquired.");
+    }
+
+    public void Dispose()
+    {
+        Console.WriteLine("Resource released.");
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        using (ResourceHandler handler = new ResourceHandler())
+        {
+            Console.WriteLine("Using resource...");
+        } // Automatically calls Dispose() here
+
+        Console.WriteLine("End of program.");
+    }
+}
+
+// Output:
+// Resource acquired.
+// Using resource...
+// Resource released.
+// End of program.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>using</code> statement ensures <code>Dispose()</code> is called automatically, cleaning up resources.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Garbage Collection -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Garbage Collection</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Allow the GC to manage memory automatically in most cases.</li>
+        <li class="list-group-item">Use <code>IDisposable</code> for unmanaged resources like file streams and database connections.</li>
+        <li class="list-group-item">Avoid excessive use of <code>GC.Collect()</code> as it can impact performance.</li>
+        <li class="list-group-item">Use <code>using</code> blocks to ensure resource cleanup.</li>
+        <li class="list-group-item">Monitor memory usage with profiling tools when optimizing performance.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-end mt-4">
+    <a href="@Url.Action("GarbageCollectionAlgorithm", "CSharp")" class="btn btn-outline-secondary">Next: Garbage Collection Algorithm</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

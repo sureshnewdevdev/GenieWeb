@@ -1,0 +1,184 @@
+﻿@{
+    ViewData["Title"] = "Static Classes in C#";
+}
+
+<!-- Section: Introduction to Static Classes -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Static Classes in C#?</h2>
+    <p class="lead">
+        A <b>Static Class</b> in C# is a class that cannot be instantiated. It contains only static members and is used to group related utility functions, constants, and helper methods.
+    </p>
+</section>
+
+<!-- Section: Key Features of Static Classes -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Static Classes</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Cannot be instantiated (no objects can be created).</li>
+        <li class="list-group-item">Contains only <b>static members</b> (methods, properties, and fields).</li>
+        <li class="list-group-item">Cannot have constructors (except a private static constructor).</li>
+        <li class="list-group-item">Provides efficient, globally accessible methods without object instantiation.</li>
+    </ul>
+</section>
+
+<!-- Section: Example of a Static Class -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Creating and Using a Static Class</h2>
+    <p class="lead">
+        The following example demonstrates how to declare and use a static class.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Static Class in C#</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public static class MathUtilities
+{
+    public static double Square(double number)
+    {
+        return number * number;
+    }
+
+    public static double Cube(double number)
+    {
+        return number * number * number;
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine(MathUtilities.Square(5)); // Output: 25
+        Console.WriteLine(MathUtilities.Cube(3));   // Output: 27
+    }
+}</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>MathUtilities</code> static class provides utility methods <code>Square()</code> and <code>Cube()</code> without requiring instantiation.
+    </p>
+</section>
+
+<!-- Section: Static Constructors -->
+<section class="mb-5">
+    <h2 class="text-secondary">Static Constructors in Static Classes</h2>
+    <p class="lead">
+        A static class can have a <b>static constructor</b> that initializes static fields when the class is first accessed.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Static Constructor in a Static Class</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public static class Logger
+{
+    public static string LogFilePath { get; }
+
+    // Static Constructor
+    static Logger()
+    {
+        LogFilePath = "C:\\Logs\\logfile.txt";
+        Console.WriteLine("Static constructor executed.");
+    }
+
+    public static void Log(string message)
+    {
+        Console.WriteLine($"Logging: {message}");
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine(Logger.LogFilePath);
+        Logger.Log("Application started.");
+    }
+}
+
+// Output:
+// Static constructor executed.
+// C:\Logs\logfile.txt
+// Logging: Application started.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>Logger</code> class has a static constructor that initializes the log file path when accessed for the first time.
+    </p>
+</section>
+
+<!-- Section: Static Class vs Non-Static Class -->
+<section class="mb-5">
+    <h2 class="text-secondary">Static Class vs. Non-Static Class</h2>
+    <p class="lead">
+        The table below compares static and non-static classes in C#.
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Feature</th>
+                <th>Static Class</th>
+                <th>Non-Static Class</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Instantiation</td>
+                <td>Cannot be instantiated.</td>
+                <td>Can create multiple instances (objects).</td>
+            </tr>
+            <tr>
+                <td>Members</td>
+                <td>Contains only static members.</td>
+                <td>Can contain static and instance members.</td>
+            </tr>
+            <tr>
+                <td>Constructors</td>
+                <td>Can only have a static constructor.</td>
+                <td>Can have multiple instance constructors.</td>
+            </tr>
+            <tr>
+                <td>Usage</td>
+                <td>For utility/helper functions, configuration, constants.</td>
+                <td>For objects with stateful data.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: When to Use Static Classes -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Static Classes?</h2>
+    <ul class="list-group">
+        <li class="list-group-item">For <b>utility methods</b> that do not require object instantiation (e.g., <code>Math</code> class).</li>
+        <li class="list-group-item">To store <b>constants and configuration settings</b>.</li>
+        <li class="list-group-item">For <b>logging and debugging utilities</b>.</li>
+        <li class="list-group-item">When all methods should be globally accessible without instantiation.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("AutoImplementedProperties", "CSharp")" class="btn btn-outline-secondary">Previous: Auto-Implemented Properties</a>
+    <a href="@Url.Action("PropertyAccessors", "CSharp")" class="btn btn-outline-secondary">Next: Property Accessors</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

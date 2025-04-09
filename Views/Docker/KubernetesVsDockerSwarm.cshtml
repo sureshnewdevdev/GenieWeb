@@ -1,0 +1,140 @@
+﻿@{
+    ViewData["Title"] = "Kubernetes vs. Docker Swarm";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Kubernetes and Docker Swarm are both container orchestration platforms.
+        While they share some functionality, they differ significantly in architecture, scalability, and complexity.
+    </p>
+    <hr />
+
+    <!-- Section: Understanding Kubernetes -->
+    <div class="mt-5">
+        <h2>Understanding Kubernetes</h2>
+        <p>
+            Kubernetes (K8s) is a production-grade, open-source platform for automating deployment, scaling, and management of containerized applications.
+        </p>
+        <ul>
+            <li>Backed by Google and CNCF (Cloud Native Computing Foundation)</li>
+            <li>Extensive ecosystem with Helm, Istio, Prometheus</li>
+            <li>Declarative configuration and strong state management</li>
+            <li>Widely adopted in enterprise environments</li>
+        </ul>
+    </div>
+
+    <!-- Section: Key Differences Between Docker Swarm and Kubernetes -->
+    <div class="mt-5">
+        <h3>Key Differences</h3>
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Feature</th>
+                    <th>Docker Swarm</th>
+                    <th>Kubernetes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Setup Complexity</td>
+                    <td>Simple & quick to initialize</td>
+                    <td>More complex, requires kubeadm or third-party tools</td>
+                </tr>
+                <tr>
+                    <td>Learning Curve</td>
+                    <td>Beginner-friendly</td>
+                    <td>Steeper due to broad functionality</td>
+                </tr>
+                <tr>
+                    <td>Scalability</td>
+                    <td>Good for small/medium projects</td>
+                    <td>Excellent at massive scale</td>
+                </tr>
+                <tr>
+                    <td>Community & Ecosystem</td>
+                    <td>Limited</td>
+                    <td>Vast and mature</td>
+                </tr>
+                <tr>
+                    <td>Networking</td>
+                    <td>Built-in overlay network</td>
+                    <td>Highly customizable via CNI</td>
+                </tr>
+                <tr>
+                    <td>Health Checks</td>
+                    <td>Basic</td>
+                    <td>Advanced liveness & readiness probes</td>
+                </tr>
+                <tr>
+                    <td>Rolling Updates</td>
+                    <td>Built-in</td>
+                    <td>Granular & configurable</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Section: When to Choose Kubernetes -->
+    <div class="mt-5">
+        <h3>When to Choose Kubernetes?</h3>
+        <ul>
+            <li>You require advanced scheduling, auto-scaling, and custom resource definitions</li>
+            <li>You’re operating at large scale with multi-cloud or hybrid environments</li>
+            <li>You plan to integrate observability, CI/CD, and service meshes (e.g., Istio)</li>
+        </ul>
+    </div>
+
+    <!-- Section: Running Docker Containers on Kubernetes -->
+    <div class="mt-5">
+        <h3>Running Docker Containers on Kubernetes</h3>
+        <p>
+            Kubernetes can run containers built with Docker (or any OCI-compliant runtime).
+            Example pod definition:
+        </p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp
+spec:
+  containers:
+  - name: myapp
+    image: myapp:latest
+    ports:
+    - containerPort: 80</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Summary -->
+    <div class="mt-5">
+        <p>
+            Docker Swarm is excellent for small-scale, quick-to-launch setups with minimal complexity.
+            Kubernetes is best suited for robust, enterprise-grade environments where scale, extensibility, and control are priorities.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("DockerSwarm", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Docker Swarm (Orchestration)
+        </a>
+        <a href="@Url.Action("CICDWithDocker", "Docker")" class="btn btn-outline-secondary">
+            Next: CI/CD with Docker &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

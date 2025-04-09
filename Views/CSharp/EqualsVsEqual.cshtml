@@ -2,56 +2,64 @@
     ViewData["Title"] = "Equals() vs == in C#";
 }
 
-<!-- Top Links Section -->
-@* <div class="top-links d-flex justify-content-start mb-4">
-    <a href="/InterviewQA" class="btn btn-success me-2">Interview Q&A</a>
-    <a href="/FreeMCQ" class="btn btn-primary me-2">Free MCQ Question and Answer</a>
-    <a href="/VideoTutorial" class="btn btn-info">Free Video Tutorial</a>
-</div> *@
-
-<!-- Main Heading -->
-<h1 class="display-4 text-primary mb-4">Equals() vs == in C#</h1>
-
 <!-- Section: Introduction to Equals() vs == -->
 <section class="mb-5">
-    <h2 class="text-secondary">What is the difference between Equals() and ==?</h2>
+    <h2 class="text-secondary">Equals() vs == in C#</h2>
     <p class="lead">
-        In C#, both the <code>equals()</code> method and the <code>==</code> operator are used to compare objects, but they have different purposes and behavior.
-        Understanding the difference between the two is crucial when comparing objects or primitive types.
+        In C#, both the <code>equals()</code> method and the <code>==</code> operator are used for **comparison**,
+        but they behave differently based on whether the comparison is performed on **value types or reference types**.
     </p>
 </section>
 
 <!-- Section: == Operator -->
 <section class="mb-5">
-    <h2 class="text-secondary">== Operator</h2>
+    <h2 class="text-secondary">Understanding the <code>==</code> Operator</h2>
     <p class="lead">
-        The <code>==</code> operator is used to compare the values of primitive types (e.g., <code>int</code>, <code>bool</code>, <code>char</code>). When applied to reference types, it checks whether both operands refer to the same object in memory (i.e., reference equality).
+        The <code>==</code> operator compares **values** for primitive types (like <code>int</code>, <code>char</code>),
+        but for reference types (like <code>object</code>, <code>class</code>), it checks **reference equality**.
     </p>
 
-    <h3 class="text-info">Example: Using == Operator</h3>
+    <h3 class="text-info">Example 1: == with Primitive Types</h3>
     <div class="code-snippet position-relative bg-light p-3 rounded border">
         <pre class="mb-0">
-<code>string a = "Hello";
-string b = "Hello";
-string c = new string("Hello".ToCharArray());
+<code>int a = 10;
+int b = 10;
 
-Console.WriteLine(a == b);  // Output: True (value comparison)
-Console.WriteLine(a == c);  // Output: True (value comparison)
-Console.WriteLine((object)a == (object)c);  // Output: False (reference comparison)</code>
+Console.WriteLine(a == b);  // Output: True (compares values)</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">Example 2: == with Reference Types</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>string str1 = "Hello";
+string str2 = "Hello";
+string str3 = new string("Hello".ToCharArray());
+
+Console.WriteLine(str1 == str2);  // Output: True (string interning applies)
+Console.WriteLine(str1 == str3);  // Output: True (string content comparison)
+Console.WriteLine((object)str1 == (object)str3);  // Output: False (different references)</code>
         </pre>
         <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
     </div>
 
     <p class="text-muted">
-        In this example, <code>a == b</code> returns <code>true</code> because the <code>==</code> operator performs value comparison for strings. However, <code>(object)a == (object)c</code> returns <code>false</code> because it compares references, and <code>a</code> and <code>c</code> refer to different objects in memory.
+        In this example:
     </p>
+    <ul class="list-group">
+        <li class="list-group-item">For **string literals**, <code>==</code> compares values (interning applies).</li>
+        <li class="list-group-item">For **string objects**, <code>==</code> still compares content.</li>
+        <li class="list-group-item">When casting to **object**, <code>==</code> checks reference equality, which may differ.</li>
+    </ul>
 </section>
 
 <!-- Section: Equals() Method -->
 <section class="mb-5">
-    <h2 class="text-secondary">Equals() Method</h2>
+    <h2 class="text-secondary">Understanding the <code>equals()</code> Method</h2>
     <p class="lead">
-        The <code>equals()</code> method is used to determine whether two object instances are equal based on their content (value comparison). For value types, it compares the values of the objects, and for reference types, it can be overridden to compare object content instead of reference equality.
+        The <code>equals()</code> method compares **object content** rather than references.
+        It is **overridable** and can be customized in user-defined classes.
     </p>
 
     <h3 class="text-info">Example: Using Equals() Method</h3>
@@ -61,71 +69,98 @@ Console.WriteLine((object)a == (object)c);  // Output: False (reference comparis
 string b = "Hello";
 string c = new string("Hello".ToCharArray());
 
-Console.WriteLine(a.Equals(b));  // Output: True (value comparison)
-Console.WriteLine(a.Equals(c));  // Output: True (value comparison)
-Console.WriteLine((object)a.Equals((object)c));  // Output: True (value comparison)</code>
+Console.WriteLine(a.Equals(b));  // Output: True (content comparison)
+Console.WriteLine(a.Equals(c));  // Output: True (content comparison)</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">Example: Overriding Equals() in Custom Class</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>class Person
+{
+    public string Name { get; set; }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is Person other)
+        {
+            return this.Name == other.Name;
+        }
+        return false;
+    }
+}
+
+Person p1 = new Person { Name = "Alice" };
+Person p2 = new Person { Name = "Alice" };
+
+Console.WriteLine(p1 == p2);        // Output: False (reference comparison)
+Console.WriteLine(p1.Equals(p2));   // Output: True (customized content comparison)</code>
         </pre>
         <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
     </div>
 
     <p class="text-muted">
-        In this example, <code>a.Equals(b)</code> returns <code>true</code> because <code>equals()</code> compares the content of the strings. Similarly, <code>(object)a.Equals((object)c)</code> still performs value comparison, as the <code>equals()</code> method is overridden for the <code>string</code> class.
+        In this example:
     </p>
+    <ul class="list-group">
+        <li class="list-group-item"><code>==</code> compares references (which are different).</li>
+        <li class="list-group-item"><code>equals()</code> compares **object content**.</li>
+        <li class="list-group-item">By overriding <code>equals()</code>, we allow content-based comparison.</li>
+    </ul>
 </section>
 
 <!-- Section: Difference Between Equals() and == -->
 <section class="mb-5">
-    <h2 class="text-secondary">Difference Between Equals() and ==</h2>
+    <h2 class="text-secondary">Equals() vs ==: Key Differences</h2>
     <p class="lead">
-        Although both <code>equals()</code> and <code>==</code> are used to compare objects, there are significant differences between them:
+        The following table highlights the **key differences** between <code>equals()</code> and <code>==</code>:
     </p>
 
     <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Aspect</th>
-                <th><code>equals()</code></th>
-                <th><code>==</code></th>
+                <th><code>equals()</code> Method</th>
+                <th><code>==</code> Operator</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td><b>Purpose</b></td>
-                <td>Compares object content (value comparison).</td>
-                <td>For value types, compares values. For reference types, compares object references (reference equality).</td>
+                <td>Compares **object content**.</td>
+                <td>For value types, compares values. For reference types, compares **object references**.</td>
             </tr>
             <tr>
                 <td><b>Overridable</b></td>
-                <td>Can be overridden in custom classes to compare object content.</td>
-                <td>Cannot be overridden for reference types (except for built-in types like <code>string</code>).</td>
+                <td>Yes, can be overridden in custom classes.</td>
+                <td>No, except for certain types like <code>string</code>.</td>
             </tr>
             <tr>
-                <td><b>Usage</b></td>
-                <td>Used for value and content comparison.</td>
-                <td>Used for both value comparison (primitive types) and reference comparison (reference types).</td>
+                <td><b>Comparison Type</b></td>
+                <td>Compares **values/content**.</td>
+                <td>Compares **references (for objects) or values (for primitives)**.</td>
             </tr>
         </tbody>
     </table>
 </section>
 
-<!-- Section: Key Points to Remember -->
+<!-- Section: Best Practices -->
 <section class="mb-5">
-    <h2 class="text-secondary">Key Points to Remember</h2>
+    <h2 class="text-secondary">Best Practices</h2>
     <ul class="list-group">
-        <li class="list-group-item">The <code>equals()</code> method compares object content (value comparison) and can be overridden in custom classes.</li>
-        <li class="list-group-item">The <code>==</code> operator compares values for primitive types and object references for reference types.</li>
-        <li class="list-group-item">For built-in types like <code>string</code>, <code>==</code> is overridden to perform value comparison.</li>
+        <li class="list-group-item"><b>Use <code>==</code> for primitive types</b> like <code>int</code>, <code>bool</code>, <code>char</code>, etc.</li>
+        <li class="list-group-item"><b>Use <code>equals()</code> for reference types</b> when comparing **object content**.</li>
+        <li class="list-group-item">Always **override <code>equals()</code>** in custom classes when content-based comparison is required.</li>
+        <li class="list-group-item">For collections like **Dictionary, HashSet**, ensure <code>Equals()</code> and <code>GetHashCode()</code> are properly implemented.</li>
     </ul>
 </section>
 
-<!-- Previous Topic Link -->
-<div class="previous-topic mt-4">
-    <a href="@Url.Action("ObjectBaseClass", "CSharp")" class="btn btn-outline-secondary">Previous: The ‘object’ base class in .net</a>
-</div>
-
-<!-- Next Topic Link -->
-<div class="next-topic mt-4">
-    <a href="@Url.Action("StringVsStringBuilder", "CSharp")" class="btn btn-outline-secondary">Next:String vs StringBuilder</a>
+<!-- Previous and Next Navigation -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("ObjectBaseClass", "CSharp")" class="btn btn-outline-secondary">Previous: The ‘object’ base class in .NET</a>
+    <a href="@Url.Action("StringVsStringBuilder", "CSharp")" class="btn btn-outline-secondary">Next: String vs StringBuilder</a>
 </div>
 
 <!-- JavaScript for Copy Functionality -->

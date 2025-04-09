@@ -1,0 +1,109 @@
+@{
+    ViewData["Title"] = "Service Discovery & Load Balancing";
+    ViewData["ActiveMenu"] = "Docker";
+    ViewData["ActivePage"] = "ServiceDiscoveryLoadBalancing";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        In a microservices architecture, services need to find and talk to each other. Docker enables internal service discovery via container names, and you can implement load balancing with tools like Nginx.
+    </p>
+    <hr />
+
+    <!-- Section: What is Service Discovery -->
+    <div class="mt-5">
+        <h2>What is Service Discovery?</h2>
+        <p>
+            Service discovery is the process where a service automatically detects the location (IP/port) of another service.
+            In Docker Compose, this is done using DNS — services can use container names as hostnames.
+        </p>
+    </div>
+
+    <!-- Section: Docker's Built-in Service Discovery -->
+    <div class="mt-5">
+        <h3>Docker DNS-Based Service Discovery</h3>
+        <p>
+            Docker Compose creates a default network and assigns DNS names to containers. You can call one service from another like this:
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>fetch('http://auth-service:4000/login')</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>The DNS name <code>auth-service</code> resolves to the container’s internal IP address.</p>
+    </div>
+
+    <!-- Section: Load Balancing Microservices with Nginx -->
+    <div class="mt-5">
+        <h3>Load Balancing with Nginx</h3>
+        <p>
+            If you run multiple instances of a service, use Nginx to balance the load between them. Example:
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>http {
+  upstream user_service {
+    server user-service-1:5000;
+    server user-service-2:5000;
+  }
+
+  server {
+    listen 80;
+    location / {
+      proxy_pass http://user_service;
+    }
+  }
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>This setup distributes incoming requests evenly between two user-service containers.</p>
+    </div>
+
+    <!-- Section: Docker Compose with Multiple Instances -->
+    <div class="mt-5">
+        <h3>Running Multiple Service Instances</h3>
+        <p>
+            In Docker Compose, scale services like this:
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker-compose up --scale user-service=3</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>Then configure Nginx or another reverse proxy to distribute requests to all instances.</p>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Docker's networking and DNS make service discovery seamless. Combined with a load balancer like Nginx, you can distribute traffic across multiple replicas to improve reliability and performance.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("MicroservicesDataManagement", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Data Management in Microservices
+        </a>
+        <a href="@Url.Action("ScalingMicroservices", "Docker")" class="btn btn-outline-secondary">
+            Next: Scaling Microservices in Docker &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

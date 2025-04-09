@@ -1,0 +1,132 @@
+﻿@{
+    ViewData["Title"] = "Docker Images & Containers";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        At the heart of Docker are <strong>images</strong> and <strong>containers</strong>.
+        Images define what your containerized application should look like, while containers are the running instances of these images.
+        Mastering these concepts is essential for successful container-based development and deployment.
+    </p>
+    <hr />
+
+    <!-- Section: What are Docker Images? -->
+    <div class="mt-5">
+        <h2>What are Docker Images?</h2>
+        <p>
+            A Docker image is a lightweight, standalone, and executable software package that includes everything needed to run a piece of software:
+        </p>
+        <ul>
+            <li><strong>Application code</strong> and binaries</li>
+            <li><strong>Runtime environment</strong> (e.g., .NET, Node.js, Java)</li>
+            <li><strong>Dependencies and libraries</strong></li>
+            <li><strong>Configuration files</strong></li>
+        </ul>
+        <p>
+            Docker images are created by reading instructions from a <code>Dockerfile</code>. Each instruction forms a layer in the image, allowing efficient caching and reuse.
+        </p>
+    </div>
+
+    <!-- Section: Building Docker Images -->
+    <div class="mt-5">
+        <h3>Building Docker Images</h3>
+        <p>To create an image, use the <code>docker build</code> command. Ensure your project contains a valid <code>Dockerfile</code> in the root directory.</p>
+        <pre class="bg-light p-3 rounded position-relative"><code>docker build -t myapp:latest .</code></pre>
+        <p>
+            This command will:
+            <ul>
+                <li>Read the Dockerfile</li>
+                <li>Execute each instruction to build the image layers</li>
+                <li>Tag the resulting image as <code>myapp:latest</code></li>
+            </ul>
+        </p>
+        <p>You can view all local images with:</p>
+        <pre class="bg-light p-3 rounded position-relative"><code>docker images</code></pre>
+    </div>
+
+    <!-- Section: What are Containers? -->
+    <div class="mt-5">
+        <h2>What are Docker Containers?</h2>
+        <p>
+            A container is a runtime instance of a Docker image. Containers are isolated, portable, and lightweight environments that run your software as defined in the image.
+        </p>
+        <p>
+            They share the host system's kernel but run in isolated user spaces. This makes them much faster and lighter than traditional virtual machines.
+        </p>
+    </div>
+
+    <!-- Section: Running Containers -->
+    <div class="mt-5">
+        <h3>Running Containers</h3>
+        <p>You can start a container using the following command:</p>
+        <pre class="bg-light p-3 rounded position-relative"><code>docker run -d -p 8080:80 --name mycontainer myapp</code></pre>
+        <ul>
+            <li><strong>-d</strong>: Detached mode – runs in the background</li>
+            <li><strong>-p 8080:80</strong>: Maps host port 8080 to container port 80</li>
+            <li><strong>--name</strong>: Assigns a name to the container</li>
+            <li><strong>myapp</strong>: The name (or ID) of the image to run</li>
+        </ul>
+        <p>Test the container by visiting <code>http://localhost:8080</code> in your browser.</p>
+    </div>
+
+    <!-- Section: Managing Containers -->
+    <div class="mt-5">
+        <h3>Managing Containers</h3>
+        <p>Once running, you can interact with containers using various Docker commands:</p>
+        <pre class="bg-light p-3 rounded position-relative"><code>docker ps -a                 # List all containers
+docker exec -it mycontainer bash  # Open an interactive shell inside a container
+docker logs mycontainer      # View container logs
+docker stop mycontainer      # Stop a container
+docker start mycontainer     # Restart a stopped container
+docker rm mycontainer        # Delete a container
+docker rmi myapp             # Remove the image</code></pre>
+        <p>Use <code>docker inspect</code> to get detailed configuration and state info:</p>
+        <pre class="bg-light p-3 rounded position-relative"><code>docker inspect mycontainer</code></pre>
+    </div>
+
+    <!-- Section: Lifecycle of Image to Container -->
+    <div class="mt-5">
+        <h3>Image to Container: Lifecycle Overview</h3>
+        <ol>
+            <li>Create a Dockerfile with application instructions</li>
+            <li>Build the Docker image using <code>docker build</code></li>
+            <li>Run the image as a container using <code>docker run</code></li>
+            <li>Manage container lifecycle (start, stop, delete)</li>
+            <li>Tag and push image to Docker Hub or a private registry (optional)</li>
+        </ol>
+    </div>
+
+    <!-- Section: Best Practices -->
+    <div class="mt-5">
+        <h3>Best Practices for Working with Images & Containers</h3>
+        <ul>
+            <li>Use specific version tags (e.g., <code>myapp:v1.0</code>) instead of <code>:latest</code> to avoid unexpected upgrades.</li>
+            <li>Keep images as small as possible – remove build tools and temp files during build.</li>
+            <li>Utilize multi-stage builds to separate dependencies from runtime.</li>
+            <li>
+                Clean up unused images and containers regularly using:
+                <pre class="bg-light p-2 rounded position-relative"><code>docker system prune</code></pre>
+            </li>
+            <li>Use health checks in the Dockerfile for better container monitoring.</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Docker images define the environment and containers bring them to life.
+            With proper understanding and management, you can build resilient and scalable applications
+            that work consistently from development to production.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("ContainerizingWebAppWithDocker", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Containerizing .NET WebApp With Docker
+        </a>
+        <a href="@Url.Action("DockerCompose", "Docker")" class="btn btn-outline-secondary">
+            Next: Docker Compose &rarr;
+        </a>
+    </div>
+</div>

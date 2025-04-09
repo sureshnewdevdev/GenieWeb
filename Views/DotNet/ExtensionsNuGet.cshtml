@@ -1,0 +1,126 @@
+@{
+    ViewData["Title"] = "Using Extensions and NuGet Package Manager";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "ExtensionsNuGet";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Visual Studio provides powerful extensibility through plugins and the NuGet Package Manager. You can enhance your development experience and manage third-party libraries seamlessly.
+    </p>
+    <hr />
+
+    <!-- Section: Visual Studio Extensions -->
+    <div class="mt-5">
+        <h2>Installing Visual Studio Extensions</h2>
+        <p>
+            Extensions add new features to your IDE — like theming, Git tools, Docker support, or additional languages.
+        </p>
+        <ol>
+            <li>Go to <strong>Extensions → Manage Extensions</strong></li>
+            <li>Browse or search for tools like:</li>
+            <ul>
+                <li><strong>ReSharper</strong> – Code analysis and productivity</li>
+                <li><strong>Visual Studio IntelliCode</strong> – AI-assisted code completion</li>
+                <li><strong>NuGet Package Manager UI</strong></li>
+            </ul>
+            <li>Click <strong>Download</strong> and restart Visual Studio</li>
+        </ol>
+    </div>
+
+    <!-- Section: NuGet Package Manager -->
+    <div class="mt-5">
+        <h3>What is NuGet?</h3>
+        <p>
+            NuGet is the package manager for .NET. It lets you install, update, and remove third-party libraries from a central repository.
+        </p>
+
+        <h4>Ways to Use NuGet:</h4>
+        <ul>
+            <li><strong>GUI:</strong> Right-click project → <strong>Manage NuGet Packages</strong></li>
+            <li><strong>CLI:</strong> Use <code>dotnet add package</code></li>
+        </ul>
+    </div>
+
+    <!-- Section: Installing a NuGet Package -->
+    <div class="mt-5">
+        <h3>Installing a NuGet Package via CLI</h3>
+        <p>Install Newtonsoft.Json (popular JSON library):</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>dotnet add package Newtonsoft.Json</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p class="mt-3">Then, use it in your code:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>using Newtonsoft.Json;
+
+var json = JsonConvert.SerializeObject(new { Name = "Alice", Age = 30 });
+Console.WriteLine(json);</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Updating & Removing Packages -->
+    <div class="mt-5">
+        <h3>Updating or Removing Packages</h3>
+        <ul>
+            <li>From UI: Go to <strong>Manage NuGet Packages</strong> → <strong>Updates</strong> tab</li>
+            <li>From CLI:</li>
+        </ul>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>dotnet remove package Newtonsoft.Json
+dotnet list package --outdated</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Private NuGet Sources -->
+    <div class="mt-5">
+        <h3>Using Private NuGet Feeds</h3>
+        <p>
+            Enterprises can host private NuGet servers for internal libraries. Add them via <code>nuget.config</code> or UI:
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>&lt;configuration&gt;
+  &lt;packageSources&gt;
+    &lt;add key="MyPrivateFeed" value="https://mycompany.com/nuget" /&gt;
+  &lt;/packageSources&gt;
+&lt;/configuration&gt;</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            NuGet and Visual Studio extensions supercharge your development workflow. Next, we’ll look at customizing your Visual Studio environment to fit your workflow and preferences.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("MultiProjectSolutions", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: Multi-Project Solutions
+        </a>
+        <a href="@Url.Action("CustomVSSettings", "DotNet")" class="btn btn-outline-secondary">
+            Next: Customizing Visual Studio Settings &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

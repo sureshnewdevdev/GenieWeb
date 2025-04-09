@@ -1,0 +1,330 @@
+﻿@{
+    ViewData["Title"] = "Azure Blob Storage & Logic App Integration";
+    ViewData["ActiveMenu"] = "DataStorage";
+    ViewData["ActivePage"] = "AzureBlobStorage";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Step-by-Step: Controller to Azure Blob to Logic App</h2>
+
+    <h4 class="text-success">Step 1: Setup Azure Blob Storage</h4>
+    <ol>
+        <li>Go to Azure Portal & search for <b>Storage Accounts</b>.</li>
+        <li>Create a new storage account (or use existing).</li>
+        <li>Under "Containers", create a container (e.g., <code>datafiles</code>).</li>
+        <li>Upload a sample file (e.g., JSON or CSV).</li>
+    </ol>
+
+    <h4 class="text-success mt-4">Step 2: Create Logic App Trigger</h4>
+    <ol>
+        <li>Create a new <b>Logic App (Consumption)</b> from Azure Portal.</li>
+        <li>Choose the trigger: <code>When a blob is added or modified (properties only)</code>.</li>
+        <li>Select your storage account and the container (e.g., <code>datafiles</code>).</li>
+        <li>Add a step: <b>Get blob content</b>.</li>
+        <li>Filter content with a <b>Condition</b> step.</li>
+        <li>On "true", insert into SQL DB using "SQL Server – Insert row" connector.</li>
+    </ol>
+
+    <h4 class="text-success mt-4">Step 3: Add Connection String in <code>appsettings.json</code></h4>
+    <pre><code class="language-json">
+"AzureBlobStorage": {
+  "ConnectionString": "DefaultEndpointsProtocol=https;AccountName=youraccount;AccountKey=yourkey;EndpointSuffix=core.windows.net",
+  "ContainerName": "datafiles"
+}
+    </code></pre>
+
+    <h4 class="text-success mt-4">Step 4: Create Blob Service in .NET</h4>
+    <pre><code class="language-csharp">
+    using System.Text.Json;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using blob_access.Models;
+using Microsoft.AspNetCore.Mvc;
+using System.IO;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace blob_access.Controllers
+{
+    public class StudentController : Controller
+    {
+        private readonly string connectionString;
+        private readonly string containerName;
+        private readonly string blobFileName;
+
+        public StudentController(IConfiguration configuration)
+        {
+            connectionString = configuration["AzureStorage:ConnectionString"];
+            containerName = configuration["AzureStorage:ContainerName"];
+            blobFileName = configuration["AzureStorage:BlobFileName"];
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Save(Student student)
+        {
+            BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+
+            await containerClient.CreateIfNotExistsAsync(PublicAccessType.None);
+
+            BlobClient blobClient = containerClient.GetBlobClient(blobFileName);
+
+            List<Student> students;
+
+            if (await blobClient.ExistsAsync())
+            {
+                var download = await blobClient.DownloadAsync();
+                using (var reader = new StreamReader(download.Value.Content))
+                {
+                    string content = await reader.ReadToEndAsync();
+                    students = JsonSerializer.Deserialize<List<Student>>(content) ?? new List<Student>();
+                }
+            }
+            else
+            {
+                students = new List<Student>();
+            }
+
+            students.Add(student);
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                await JsonSerializer.SerializeAsync(ms, students);
+                ms.Position = 0;
+                await blobClient.UploadAsync(ms, overwrite: true);
+            }
+
+            ViewBag.Message = "Student data saved successfully!";
+            return View("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ViewStudents()
+        {
+            BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+            BlobClient blobClient = containerClient.GetBlobClient(blobFileName);
+
+            List<Student> students = new List<Student>();
+
+            if (await blobClient.ExistsAsync())
+            {
+                var download = await blobClient.DownloadAsync();
+                using (var reader = new StreamReader(download.Value.Content))
+                {
+                    string content = await reader.ReadToEndAsync();
+                    students = JsonSerializer.Deserialize<List<Student>>(content) ?? new List<Student>();
+                }
+            }
+
+            return View(students);
+        }
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var student = await GetStudentById(id);
+            if (student == null)
+            {
+                return NotFound();
+            }
+            return View(student);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(Student updatedStudent)
+        {
+            BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+            BlobClient blobClient = containerClient.GetBlobClient(blobFileName);
+
+            List<Student> students = new List<Student>();
+
+            if (await blobClient.ExistsAsync())
+            {
+                var download = await blobClient.DownloadAsync();
+                using (var reader = new StreamReader(download.Value.Content))
+                {
+                    string content = await reader.ReadToEndAsync();
+                    students = JsonSerializer.Deserialize<List<Student>>(content) ?? new List<Student>();
+                }
+            }
+
+            var studentIndex = students.FindIndex(s => s.RollNumber == updatedStudent.RollNumber);
+            if (studentIndex != -1)
+            {
+                students[studentIndex] = updatedStudent;
+            }
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                await JsonSerializer.SerializeAsync(ms, students);
+                ms.Position = 0;
+                await blobClient.UploadAsync(ms, overwrite: true);
+            }
+
+            return RedirectToAction("ViewStudents");
+        }
+
+        private async Task<Student?> GetStudentById(int id)
+        {
+            BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+            BlobClient blobClient = containerClient.GetBlobClient(blobFileName);
+
+            if (await blobClient.ExistsAsync())
+            {
+                var download = await blobClient.DownloadAsync();
+                using (var reader = new StreamReader(download.Value.Content))
+                {
+                    string content = await reader.ReadToEndAsync();
+                    var students = JsonSerializer.Deserialize<List<Student>>(content) ?? new List<Student>();
+                    return students.FirstOrDefault(s => s.RollNumber == id);
+                }
+            }
+            return null;
+        }
+    }
+}
+
+    </code></pre>
+
+    
+    <h4 class="text-success mt-4">Step 5: CSHTML View (Index.cshtml)</h4>
+<pre><code class="language-html">
+@@model blob_access.Models.Student
+
+            @@{
+                ViewBag.Title = "Student Entry";
+            }
+
+&lt;h2&gt;Enter Student Details&lt;/h2&gt;
+
+&lt;form asp-controller="Student" asp-action="Save" method="post"&gt;
+    &lt;div&gt;
+        &lt;label&gt;Name:&lt;/label&gt;
+        &lt;input type="text" name="Name" required /&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+        &lt;label&gt;Roll Number:&lt;/label&gt;
+        &lt;input type="number" name="RollNumber" required /&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+        &lt;label&gt;Total Marks:&lt;/label&gt;
+        &lt;input type="number" name="TotalMarks" required /&gt;
+    &lt;/div&gt;
+    &lt;button type="submit"&gt;Save&lt;/button&gt;
+&lt;/form&gt;
+
+            @@if (ViewBag.Message != null)
+            {
+                &lt; p style = "color:green" & gt;
+                @@ViewBag.Message
+                &lt;/ p & gt;
+            }
+
+&lt;a href="/Student/ViewStudents"&gt;View Stored Students&lt;/a&gt;
+</code></pre>
+
+    <h4 class=" text-success mt-4"> Step 6: CSHTML View (Edit.html)</h4>
+<pre><code class="language-html">
+@@model blob_access.Models.Student
+
+            @@{
+                ViewBag.Title = "Edit Student";
+            }
+
+&lt;h2&gt;Edit Student&lt;/h2&gt;
+
+&lt;form asp-controller="Student" asp-action="Edit" method="post"&gt;
+    &lt;div&gt;
+        &lt;label&gt;Name:&lt;/label&gt;
+        &lt;input type="text" name="Name" value="@@Model.Name" required /&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+        &lt;label&gt;Roll Number:&lt;/label&gt;
+        &lt;input type="number" name="RollNumber" value="@@Model.RollNumber" readonly /&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+        &lt;label&gt;Total Marks:&lt;/label&gt;
+        &lt;input type="number" name="TotalMarks" value="@@Model.TotalMarks" required /&gt;
+    &lt;/div&gt;
+    &lt;button type="submit"&gt;Update&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;a href="/Student/ViewStudents"&gt;Back to List&lt;/a&gt;
+</code></pre>
+
+    <h4 class=" text-success mt-4"> Step 7: CSHTML View (ViewStudents.cshtml)</h4>
+<pre><code class="language-html">
+@@model List&lt;blob_access.Models.Student&gt;
+
+@@{
+    ViewBag.Title = "Student List";
+}
+
+&lt;h2&gt;Stored Student Records&lt;/h2&gt;
+
+@@if (Model.Count &gt; 0)
+{
+    &lt;table border="1" cellpadding="5"&gt;
+        &lt;thead&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Name&lt;/th&gt;
+                &lt;th&gt;Roll Number&lt;/th&gt;
+                &lt;th&gt;Total Marks&lt;/th&gt;
+                &lt;th&gt;Actions&lt;/th&gt;
+            &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+            @@foreach (var student in Model)
+            {
+                &lt;tr&gt;
+                    &lt;td&gt;@@student.Name&lt;/td&gt;
+                    &lt;td&gt;@@student.RollNumber&lt;/td&gt;
+                    &lt;td&gt;@@student.TotalMarks&lt;/td&gt;
+                    &lt;td&gt;
+                        &lt;a href=&quot;@@Url.Action(&quot;Edit&quot;, &quot;Student&quot;, new { id = student.RollNumber })&quot;&gt;Edit&lt;/a&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            }
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+}
+else
+{
+    &lt;p&gt;No student data found.&lt;/p&gt;
+}
+
+&lt;a href=&quot;/Student/Index&quot;&gt;Back to Entry Form&lt;/a&gt;
+</code></pre>
+
+    <h4 class="text-success mt-4">Step 8: Model-> Students.cs</h4>
+    <pre><code class="language-html">
+        namespace blob_access.Models
+{
+    public class Student
+    {
+        public string Name { get; set; }
+        public int RollNumber { get; set; }
+        public int TotalMarks { get; set; }
+    }
+
+}
+
+    </code></pre>
+    <h4 class="text-success mt-4">Step 9: Add Dependency in Startup.cs or Program.cs</h4>
+    <pre><code class="language-csharp">
+// For .NET 6+
+builder.Services.AddSingleton&lt;AzureBlobService&gt;();
+    </code></pre>
+    <div class="d-flex justify-content-end mt-4">
+        <a href="@Url.Action("IntroductionToLogicApps", "DataStorage")" class="btn btn-outline-secondary">
+            Next: Introduction to Logic Apps &rarr;
+        </a>
+    </div>
+</div>

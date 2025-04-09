@@ -1,0 +1,124 @@
+﻿@{
+    ViewData["Title"] = "Docker Swarm (Orchestration)";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Docker Swarm is Docker's built-in container orchestration tool. It enables clustering of Docker engines,
+        allowing containers to be deployed and managed across multiple nodes seamlessly.
+    </p>
+    <hr />
+
+    <!-- Section: Introduction to Docker Swarm -->
+    <div class="mt-5">
+        <h2>Introduction to Docker Swarm</h2>
+        <p>
+            A Swarm is a group of Docker hosts (nodes) running in cluster mode.
+            One or more manager nodes handle orchestration, while worker nodes execute containers.
+        </p>
+        <ul>
+            <li>Built directly into Docker Engine</li>
+            <li>Supports service discovery and load balancing</li>
+            <li>Enables high availability and failover</li>
+        </ul>
+    </div>
+
+    <!-- Section: Setting Up a Swarm Cluster -->
+    <div class="mt-5">
+        <h3>Setting Up a Swarm Cluster</h3>
+        <p>Initialize the Swarm on the manager node:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker swarm init</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Add worker nodes using the generated token:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker swarm join --token &lt;worker-token&gt; &lt;manager-ip&gt;:2377</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>List all nodes in the Swarm:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker node ls</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Deploying Services -->
+    <div class="mt-5">
+        <h3>Deploying Services in Swarm</h3>
+        <p>Use the <code>docker service</code> command to deploy containers as Swarm services:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker service create --name web --replicas 3 -p 80:80 nginx</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>This runs 3 replicas of an NGINX container load-balanced across the cluster.</p>
+        <p>Check running services:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker service ls</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Inspect a specific service:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker service ps web</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Scaling Services -->
+    <div class="mt-5">
+        <h3>Scaling Containers</h3>
+        <p>Change the number of replicas dynamically:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker service scale web=5</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>This command increases the number of running containers from 3 to 5.</p>
+    </div>
+
+    <!-- Section: Rolling Updates and Rollbacks -->
+    <div class="mt-5">
+        <h3>Rolling Updates & Rollbacks</h3>
+        <p>Update the image version with zero downtime:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker service update --image nginx:1.25 web</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>To rollback in case of a failure:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker service rollback web</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Docker Swarm makes it easy to orchestrate container workloads with built-in clustering, load balancing, scaling, and self-healing.
+            It’s a great choice for simpler, lightweight orchestration needs before moving to Kubernetes.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("DockerSecurity", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Docker Security
+        </a>
+        <a href="@Url.Action("KubernetesVsDockerSwarm", "Docker")" class="btn btn-outline-secondary">
+            Next: Kubernetes vs. Docker Swarm &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Button Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

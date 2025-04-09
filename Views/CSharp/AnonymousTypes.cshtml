@@ -1,0 +1,183 @@
+﻿@{
+    ViewData["Title"] = "Anonymous Types in C#";
+}
+
+<!-- Section: Introduction to Anonymous Types -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Anonymous Types in C#?</h2>
+    <p class="lead">
+        <b>Anonymous types</b> in C# allow you to create objects without explicitly defining a class. They are useful for scenarios where you need a temporary object with read-only properties.
+    </p>
+</section>
+
+<!-- Section: Key Features of Anonymous Types -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Anonymous Types</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Used to create objects without defining an explicit class.</li>
+        <li class="list-group-item">Properties are read-only (immutable).</li>
+        <li class="list-group-item">Uses the <code>var</code> keyword for type inference.</li>
+        <li class="list-group-item">Commonly used with LINQ queries for projection.</li>
+    </ul>
+</section>
+
+<!-- Section: Example of Anonymous Type -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example of Anonymous Type</h2>
+    <p class="lead">
+        The following example demonstrates how to create and use an anonymous type.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Creating an Anonymous Type</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        var person = new { Name = "John", Age = 30 };
+
+        Console.WriteLine($"Name: {person.Name}, Age: {person.Age}");
+    }
+}
+
+// Output:
+// Name: John, Age: 30</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Here, the <code>person</code> object has properties <code>Name</code> and <code>Age</code>, but no explicit class is defined.
+    </p>
+</section>
+
+<!-- Section: Anonymous Types in LINQ -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Anonymous Types in LINQ</h2>
+    <p class="lead">
+        Anonymous types are widely used in <b>LINQ</b> queries to project only required properties.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: LINQ with Anonymous Types</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Linq;
+
+class Program
+{
+    static void Main()
+    {
+        var students = new[]
+        {
+            new { Name = "Alice", Score = 85 },
+            new { Name = "Bob", Score = 92 },
+            new { Name = "Charlie", Score = 78 }
+        };
+
+        var topStudents = from s in students
+                          where s.Score > 80
+                          select new { s.Name, s.Score };
+
+        foreach (var student in topStudents)
+        {
+            Console.WriteLine($"Name: {student.Name}, Score: {student.Score}");
+        }
+    }
+}
+
+// Output:
+// Name: Alice, Score: 85
+// Name: Bob, Score: 92</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, LINQ filters students with scores above 80 and projects only <code>Name</code> and <code>Score</code> using an anonymous type.
+    </p>
+</section>
+
+<!-- Section: Limitations of Anonymous Types -->
+<section class="mb-5">
+    <h2 class="text-secondary">Limitations of Anonymous Types</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Anonymous types are immutable (cannot modify properties).</li>
+        <li class="list-group-item">They are only accessible within the same method or scope.</li>
+        <li class="list-group-item">Cannot define methods inside anonymous types.</li>
+        <li class="list-group-item">Cannot be explicitly declared (must use <code>var</code> keyword).</li>
+    </ul>
+</section>
+
+<!-- Section: When to Use Anonymous Types -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Anonymous Types?</h2>
+    <ul class="list-group">
+        <li class="list-group-item">When you need a temporary object with read-only properties.</li>
+        <li class="list-group-item">For grouping or projecting specific properties in LINQ queries.</li>
+        <li class="list-group-item">When defining a separate class would be unnecessary.</li>
+    </ul>
+</section>
+
+<!-- Section: Anonymous Types vs Tuples -->
+<section class="mb-5">
+    <h2 class="text-secondary">Anonymous Types vs. Tuples</h2>
+    <p class="lead">
+        Both anonymous types and tuples allow temporary object creation, but they have differences.
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Feature</th>
+                <th>Anonymous Types</th>
+                <th>Tuples</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Mutability</td>
+                <td>Immutable (read-only)</td>
+                <td>Mutable (modifiable properties)</td>
+            </tr>
+            <tr>
+                <td>Field Names</td>
+                <td>Has named properties</td>
+                <td>Uses default names (Item1, Item2, etc.) unless defined</td>
+            </tr>
+            <tr>
+                <td>Scope</td>
+                <td>Limited to the method where declared</td>
+                <td>Can be passed between methods</td>
+            </tr>
+            <tr>
+                <td>Best Use Case</td>
+                <td>For LINQ projections and short-lived objects</td>
+                <td>For returning multiple values from a method</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("MethodHiding", "CSharp")" class="btn btn-outline-secondary">Previous: Method Hiding</a>
+    <a href="@Url.Action("SealedClasses", "CSharp")" class="btn btn-outline-secondary">Next: Sealed Classes</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

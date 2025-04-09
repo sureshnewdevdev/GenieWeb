@@ -1,0 +1,265 @@
+﻿@{
+    ViewData["Title"] = "Persisting Object State in C#";
+}
+
+<!-- Section: Introduction to Persisting Object State -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is Persisting Object State in C#?</h2>
+    <p class="lead">
+        **Persisting object state** refers to the process of saving an object's data so it can be retrieved and used later, even after the application is closed. This can be done using **files, databases, serialization, or external storage**.
+    </p>
+</section>
+
+<!-- Section: Methods for Persisting Object State -->
+<section class="mb-5">
+    <h2 class="text-secondary">Methods for Persisting Object State</h2>
+    <p class="lead">There are several ways to persist object state in C#:</p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Method</th>
+                <th>Description</th>
+                <th>Example Use Case</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Serialization (Binary, XML, JSON)</td>
+                <td>Converts an object into a format that can be stored and retrieved.</td>
+                <td>Saving user settings or application data.</td>
+            </tr>
+            <tr>
+                <td>Databases</td>
+                <td>Stores object data in a relational or NoSQL database.</td>
+                <td>Storing customer details in a database.</td>
+            </tr>
+            <tr>
+                <td>File System</td>
+                <td>Saves object state in a text or binary file.</td>
+                <td>Logging application activities.</td>
+            </tr>
+            <tr>
+                <td>Application Settings</td>
+                <td>Stores object properties in configuration files.</td>
+                <td>Saving UI preferences in an app settings file.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Using Binary Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Binary Serialization</h2>
+    <p class="lead">
+        Binary serialization allows saving an object’s state in **binary format** for later retrieval.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Binary Serialization</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+
+[Serializable]
+class User
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        User user = new User { Name = "Alice", Age = 25 };
+        BinaryFormatter formatter = new BinaryFormatter();
+
+        using (FileStream stream = new FileStream("user.dat", FileMode.Create))
+        {
+            formatter.Serialize(stream, user);
+        }
+
+        Console.WriteLine("Object serialized successfully.");
+    }
+}
+
+// Deserialization
+class DeserializeExample
+{
+    static void Main()
+    {
+        BinaryFormatter formatter = new BinaryFormatter();
+        using (FileStream stream = new FileStream("user.dat", FileMode.Open))
+        {
+            User user = (User)formatter.Deserialize(stream);
+            Console.WriteLine($"Name: {user.Name}, Age: {user.Age}");
+        }
+    }
+}
+
+// Output:
+// Object serialized successfully.
+// Name: Alice, Age: 25</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **[Serializable]** attribute is required to allow an object to be serialized.
+    </p>
+</section>
+
+<!-- Section: Using JSON Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using JSON Serialization</h2>
+    <p class="lead">
+        JSON serialization is widely used for **storing data in a human-readable format**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: JSON Serialization</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Text.Json;
+
+class User
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        User user = new User { Name = "Bob", Age = 30 };
+        string json = JsonSerializer.Serialize(user);
+
+        File.WriteAllText("user.json", json);
+        Console.WriteLine("Object serialized to JSON.");
+    }
+}
+
+// Deserialization
+class DeserializeExample
+{
+    static void Main()
+    {
+        string json = File.ReadAllText("user.json");
+        User user = JsonSerializer.Deserialize<User>(json);
+        Console.WriteLine($"Name: {user.Name}, Age: {user.Age}");
+    }
+}
+
+// Output:
+// Object serialized to JSON.
+// Name: Bob, Age: 30</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **JsonSerializer** class simplifies JSON serialization and deserialization.
+    </p>
+</section>
+
+<!-- Section: Using XML Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using XML Serialization</h2>
+    <p class="lead">
+        XML serialization stores an object in **structured XML format**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: XML Serialization</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Xml.Serialization;
+
+[Serializable]
+public class User
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        User user = new User { Name = "Charlie", Age = 28 };
+        XmlSerializer serializer = new XmlSerializer(typeof(User));
+
+        using (FileStream stream = new FileStream("user.xml", FileMode.Create))
+        {
+            serializer.Serialize(stream, user);
+        }
+
+        Console.WriteLine("Object serialized to XML.");
+    }
+}
+
+// Deserialization
+class DeserializeExample
+{
+    static void Main()
+    {
+        XmlSerializer serializer = new XmlSerializer(typeof(User));
+        using (FileStream stream = new FileStream("user.xml", FileMode.Open))
+        {
+            User user = (User)serializer.Deserialize(stream);
+            Console.WriteLine($"Name: {user.Name}, Age: {user.Age}");
+        }
+    }
+}
+
+// Output:
+// Object serialized to XML.
+// Name: Charlie, Age: 28</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        XML serialization is useful when **interacting with external systems** requiring XML data.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Persisting Object State -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Persisting Object State</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **JSON serialization** for lightweight, readable data storage.</li>
+        <li class="list-group-item">Prefer **binary serialization** for performance but avoid for human-readable storage.</li>
+        <li class="list-group-item">Use **databases** for structured and large-scale data persistence.</li>
+        <li class="list-group-item">Ensure **security** when storing sensitive data by encrypting or hashing stored values.</li>
+        <li class="list-group-item">Use **configuration files** for storing app settings instead of hardcoding values.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-end mt-4">
+    <a href="@Url.Action("FileHandlingClasses", "CSharp")" class="btn btn-outline-secondary">Next: File Handling Classes</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

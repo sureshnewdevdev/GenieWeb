@@ -1,0 +1,207 @@
+﻿@{
+    ViewData["Title"] = "Constructors, Destructors & Garbage Collection in C#";
+}
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <h2 class="text-secondary">Constructors, Destructors & Garbage Collection in C#</h2>
+    <p class="lead">
+        In C#, constructors and destructors manage object lifecycle, while garbage collection (GC) automatically frees memory when objects are no longer needed.
+    </p>
+</section>
+
+<!-- Section: Constructors in C# -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is a Constructor?</h2>
+    <p class="lead">
+        A <b>constructor</b> is a special method that is automatically called when an object of a class is created. It initializes the object and can have parameters.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example of a Constructor:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class Car
+{
+    public string Model;
+    public int Speed;
+
+    // Constructor
+    public Car(string model, int speed)
+    {
+        Model = model;
+        Speed = speed;
+    }
+
+    public void ShowDetails()
+    {
+        Console.WriteLine($"Model: {Model}, Speed: {Speed} km/h");
+    }
+}
+
+// Usage
+Car car = new Car("Toyota", 120);
+car.ShowDetails();  // Output: Model: Toyota, Speed: 120 km/h</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, the constructor initializes the <code>Car</code> object when it's created.
+    </p>
+</section>
+
+<!-- Section: Types of Constructors -->
+<section class="mb-5">
+    <h2 class="text-secondary">Types of Constructors</h2>
+    <ul class="list-group">
+        <li class="list-group-item"><b>Default Constructor:</b> A constructor with no parameters.</li>
+        <li class="list-group-item"><b>Parameterized Constructor:</b> A constructor with parameters to initialize fields.</li>
+        <li class="list-group-item"><b>Copy Constructor:</b> A constructor that copies values from another object.</li>
+        <li class="list-group-item"><b>Static Constructor:</b> Initializes static members of a class.</li>
+        <li class="list-group-item"><b>Private Constructor:</b> Used in singleton patterns to restrict object creation.</li>
+    </ul>
+</section>
+
+<!-- Section: Destructors in C# -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is a Destructor?</h2>
+    <p class="lead">
+        A <b>destructor</b> is a special method that is automatically called when an object is destroyed to free resources. Destructors have the same name as the class but are prefixed with a tilde (<code>~</code>).
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example of a Destructor:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class Car
+{
+    public string Model;
+
+    public Car(string model)
+    {
+        Model = model;
+    }
+
+    public void Display()
+    {
+        Console.WriteLine($"Car Model: {Model}");
+    }
+
+    // Destructor
+    ~Car()
+    {
+        Console.WriteLine("Destructor called for " + Model);
+    }
+}
+
+// Usage
+Car myCar = new Car("Honda");
+myCar.Display();  // Output: Car Model: Honda
+// Destructor will be called automatically when object is destroyed</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Destructors are automatically called when an object is no longer in use, typically when the program exits.
+    </p>
+</section>
+
+<!-- Section: Garbage Collection in C# -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is Garbage Collection?</h2>
+    <p class="lead">
+        The <b>Garbage Collector (GC)</b> in C# automatically frees memory occupied by objects that are no longer in use. It helps manage memory efficiently.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example of Garbage Collection:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class Program
+{
+    public static void Main()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            Car car = new Car($"Car {i}");
+        }
+
+        // Force garbage collection
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+    }
+}</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, multiple objects are created inside a loop, and garbage collection is forced using <code>GC.Collect()</code> to free memory.
+    </p>
+</section>
+
+<!-- Section: Key Features of Garbage Collection -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Garbage Collection</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Runs automatically but can be triggered manually using <code>GC.Collect()</code>.</li>
+        <li class="list-group-item">Uses three generations (Gen 0, Gen 1, Gen 2) to optimize memory management.</li>
+        <li class="list-group-item">Reclaims memory occupied by unreachable objects.</li>
+        <li class="list-group-item">Does not guarantee immediate destructor execution.</li>
+    </ul>
+</section>
+
+<!-- Section: Comparison Table -->
+<section class="mb-5">
+    <h2 class="text-secondary">Comparison: Constructors, Destructors & Garbage Collection</h2>
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Feature</th>
+                <th>Constructor</th>
+                <th>Destructor</th>
+                <th>Garbage Collector</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Purpose</td>
+                <td>Initializes objects</td>
+                <td>Cleans up resources before object destruction</td>
+                <td>Automatically frees memory</td>
+            </tr>
+            <tr>
+                <td>Invocation</td>
+                <td>Called when an object is created</td>
+                <td>Called when an object is destroyed</td>
+                <td>Runs in the background automatically</td>
+            </tr>
+            <tr>
+                <td>Explicit Call</td>
+                <td>Yes, via object creation</td>
+                <td>No, called automatically</td>
+                <td>Yes, using <code>GC.Collect()</code></td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("AbstractClasses", "CSharp")" class="btn btn-outline-secondary">Previous: Abstract Classes</a>
+    <a href="@Url.Action("NetBaseClassLibrary", "CSharp")" class="btn btn-outline-secondary">Next: .NET Base Class Library</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

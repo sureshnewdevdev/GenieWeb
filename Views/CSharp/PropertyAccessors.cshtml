@@ -1,0 +1,212 @@
+﻿@{
+    ViewData["Title"] = "Property Accessors in C#";
+}
+
+<!-- Section: Introduction to Property Accessors -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Property Accessors in C#?</h2>
+    <p class="lead">
+        <b>Property Accessors</b> in C# define how properties interact with fields. They include <code>get</code> and <code>set</code> accessors to control data access and modification.
+    </p>
+</section>
+
+<!-- Section: Key Features of Property Accessors -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Property Accessors</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Encapsulate fields within properties for controlled access.</li>
+        <li class="list-group-item"><code>get</code> accessor retrieves the value of a property.</li>
+        <li class="list-group-item"><code>set</code> accessor assigns a value to a property.</li>
+        <li class="list-group-item">Supports <b>read-only</b>, <b>write-only</b>, and <b>read-write</b> properties.</li>
+    </ul>
+</section>
+
+<!-- Section: Example of Property Accessors -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Using Get and Set Accessors</h2>
+    <p class="lead">
+        The following example demonstrates how to define and use property accessors.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Get and Set Accessors in C#</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class Person
+{
+    private string name;
+    private int age;
+
+    public string Name
+    {
+        get { return name; }
+        set { name = value; }
+    }
+
+    public int Age
+    {
+        get { return age; }
+        set
+        {
+            if (value > 0)
+                age = value;
+            else
+                Console.WriteLine("Age must be positive.");
+        }
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        Person person = new Person();
+        person.Name = "Alice";
+        person.Age = 25;
+
+        Console.WriteLine($"Name: {person.Name}, Age: {person.Age}");
+    }
+}
+
+// Output:
+// Name: Alice, Age: 25</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>Name</code> and <code>Age</code> properties allow controlled access to the private fields with validation in the <code>set</code> accessor.
+    </p>
+</section>
+
+<!-- Section: Read-Only and Write-Only Properties -->
+<section class="mb-5">
+    <h2 class="text-secondary">Read-Only and Write-Only Properties</h2>
+    <p class="lead">
+        Properties can be restricted to <b>read-only</b> or <b>write-only</b> based on accessor definitions.
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Property Type</th>
+                <th>Declaration</th>
+                <th>Usage</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Read-Only</td>
+                <td><code>public int ID { get; }</code></td>
+                <td>Can be assigned only in the constructor.</td>
+            </tr>
+            <tr>
+                <td>Write-Only</td>
+                <td><code>public string Password { set; }</code></td>
+                <td>Value can be set but not retrieved.</td>
+            </tr>
+            <tr>
+                <td>Read-Write</td>
+                <td><code>public string Name { get; set; }</code></td>
+                <td>Value can be assigned and retrieved.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Example of Read-Only Property -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Read-Only Property</h2>
+    <p class="lead">
+        A read-only property can be set only in the constructor.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Read-Only Property</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class Product
+{
+    public string Name { get; }
+    public double Price { get; set; }
+
+    public Product(string name, double price)
+    {
+        Name = name;
+        Price = price;
+    }
+}
+
+// Usage
+Product prod = new Product("Laptop", 1200.50);
+Console.WriteLine($"Product: {prod.Name}, Price: {prod.Price}");
+
+// prod.Name = "Tablet"; // Error: Cannot assign to read-only property</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>Name</code> property is set only in the constructor, making it immutable after object creation.
+    </p>
+</section>
+
+<!-- Section: Expression-Bodied Properties (C# 6+) -->
+<section class="mb-5">
+    <h2 class="text-secondary">Expression-Bodied Properties (C# 6+)</h2>
+    <p class="lead">
+        C# 6+ allows expression-bodied property definitions for simplicity.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Expression-Bodied Property</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class Circle
+{
+    public double Radius { get; set; }
+
+    public double Area => Math.PI * Radius * Radius;
+}
+
+// Usage
+Circle c = new Circle { Radius = 5 };
+Console.WriteLine($"Area: {c.Area}"); // Output: Area: 78.54</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>Area</code> property uses an expression-bodied member for cleaner syntax.
+    </p>
+</section>
+
+<!-- Section: Benefits of Property Accessors -->
+<section class="mb-5">
+    <h2 class="text-secondary">Benefits of Property Accessors</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Encapsulates fields while allowing controlled access.</li>
+        <li class="list-group-item">Enhances data validation using the <code>set</code> accessor.</li>
+        <li class="list-group-item">Supports immutability with read-only properties.</li>
+        <li class="list-group-item">Reduces boilerplate code with auto-implemented and expression-bodied properties.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("StaticClasses", "CSharp")" class="btn btn-outline-secondary">Previous: Static Classes</a>
+    <a href="@Url.Action("PartialTypes", "CSharp")" class="btn btn-outline-secondary">Next: Partial Types</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

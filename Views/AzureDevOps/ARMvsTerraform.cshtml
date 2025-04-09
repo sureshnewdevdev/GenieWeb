@@ -4,20 +4,26 @@
 }
 
 <div class="container py-4">
-    <p class="text-center lead">When implementing Infrastructure as Code (IaC) in Azure, two popular tools are **Azure Resource Manager (ARM) Templates** and **Terraform**. Understanding their differences helps teams choose the best solution for infrastructure automation.</p>
+    <p class="text-center lead">
+        When adopting Infrastructure as Code (IaC) in Azure, two popular tools often come into play: <strong>Azure Resource Manager (ARM) Templates</strong> and <strong>Terraform</strong>.
+        Both are powerful—but knowing their differences can help you decide which is right for your project.
+    </p>
     <hr />
 
+    <!-- ARM Templates -->
     <div class="mt-5">
         <h2>What Are ARM Templates?</h2>
-        <p>ARM Templates are **declarative JSON files** used to define and deploy Azure infrastructure in a **repeatable and consistent** manner.</p>
+        <p>
+            ARM Templates are JSON-based declarative files used to define and deploy Azure infrastructure in a repeatable, reliable way. They’re built and maintained by Microsoft and deeply integrated with Azure.
+        </p>
         <ul>
-            <li>Built specifically for **Azure**.</li>
-            <li>Provides **idempotent deployments** (ensures the same result every time).</li>
-            <li>Supports **parameters, variables, and linked templates**.</li>
-            <li>Integration with **Azure Policy** and **RBAC** for compliance.</li>
+            <li><strong>Azure-native:</strong> Designed specifically for Azure environments.</li>
+            <li><strong>Idempotent:</strong> Running the same template multiple times yields the same result.</li>
+            <li>Support for parameters, variables, and linked templates for dynamic deployments.</li>
+            <li>Seamless integration with Azure features like RBAC, Policy, and Blueprints.</li>
         </ul>
-        <pre>
-{
+        <p><strong>Example ARM Template (JSON):</strong></p>
+        <pre><code>{
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "resources": [
@@ -29,21 +35,23 @@
       "properties": {}
     }
   ]
-}
-        </pre>
+}</code></pre>
     </div>
 
+    <!-- Terraform -->
     <div class="mt-5">
         <h2>What Is Terraform?</h2>
-        <p>Terraform is an **open-source, multi-cloud** IaC tool that allows users to define infrastructure in a **declarative language (HCL - HashiCorp Configuration Language)**.</p>
+        <p>
+            Terraform is an open-source IaC tool by HashiCorp that uses its own declarative syntax (HCL) to define infrastructure. It supports multiple cloud providers—making it ideal for teams managing diverse environments.
+        </p>
         <ul>
-            <li>Supports **multi-cloud deployments** (Azure, AWS, GCP).</li>
-            <li>Uses **state files** to track infrastructure changes.</li>
-            <li>Provides **modularity and reusability** through Terraform modules.</li>
-            <li>Facilitates **drift detection and updates** using `terraform plan` and `terraform apply`.</li>
+            <li><strong>Multi-cloud support:</strong> Works with Azure, AWS, GCP, and more.</li>
+            <li><strong>Stateful:</strong> Tracks changes through state files.</li>
+            <li>Highly modular with reusable <code>modules</code>.</li>
+            <li>Offers <code>terraform plan</code> and <code>apply</code> to preview and apply changes.</li>
         </ul>
-        <pre>
-provider "azurerm" {
+        <p><strong>Example Terraform Code (HCL):</strong></p>
+        <pre><code>provider "azurerm" {
   features {}
 }
 
@@ -53,10 +61,10 @@ resource "azurerm_storage_account" "mystorage" {
   resource_group_name      = "myResourceGroup"
   account_tier             = "Standard"
   account_replication_type = "LRS"
-}
-        </pre>
+}</code></pre>
     </div>
 
+    <!-- Comparison Table -->
     <div class="mt-5">
         <h2>Key Differences: ARM Templates vs Terraform</h2>
         <table class="table table-bordered text-center">
@@ -80,59 +88,63 @@ resource "azurerm_storage_account" "mystorage" {
                 </tr>
                 <tr>
                     <td><strong>State Management</strong></td>
-                    <td>Azure-managed</td>
-                    <td>Uses **state files** for tracking changes</td>
+                    <td>Managed by Azure</td>
+                    <td>Uses local or remote <code>.tfstate</code> files</td>
                 </tr>
                 <tr>
                     <td><strong>Modularity</strong></td>
-                    <td>Complex and requires linked templates</td>
-                    <td>Supports reusable **Terraform modules**</td>
+                    <td>Linked templates (less intuitive)</td>
+                    <td>Built-in <code>modules</code> for reusability</td>
                 </tr>
                 <tr>
                     <td><strong>Execution Plan</strong></td>
-                    <td>Deploys without a built-in preview</td>
-                    <td>Provides `terraform plan` for previewing changes</td>
+                    <td>No preview (deploys immediately)</td>
+                    <td>Provides a preview with <code>terraform plan</code></td>
                 </tr>
                 <tr>
                     <td><strong>Integration</strong></td>
-                    <td>Deeply integrated with Azure security & compliance</td>
-                    <td>Requires external authentication mechanisms</td>
+                    <td>Deep Azure integration (RBAC, Policy)</td>
+                    <td>Requires external service connections</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
+    <!-- When to Use -->
     <div class="mt-5">
-        <h2>When to Choose ARM Templates vs Terraform</h2>
+        <h2>When to Choose Which</h2>
         <ul>
-            <li><strong>Use ARM Templates if:</strong>
+            <li>
+                <strong>Use ARM Templates if:</strong>
                 <ul>
-                    <li>You work **exclusively in Azure**.</li>
-                    <li>You require **tight integration with Azure security & policy**.</li>
-                    <li>Your team is comfortable with **JSON-based templates**.</li>
+                    <li>You work entirely in the Azure ecosystem.</li>
+                    <li>You need native support for Azure security, governance, and compliance tools.</li>
+                    <li>Your team is comfortable working with JSON files.</li>
                 </ul>
             </li>
-            <li><strong>Use Terraform if:</strong>
+            <li>
+                <strong>Use Terraform if:</strong>
                 <ul>
-                    <li>You need **multi-cloud support**.</li>
-                    <li>You want **modular infrastructure code with reusability**.</li>
-                    <li>You require **state management & drift detection**.</li>
+                    <li>You want to support multiple cloud platforms (AWS, GCP, etc.).</li>
+                    <li>You need modular, reusable infrastructure code with cleaner syntax.</li>
+                    <li>You require previewing changes and handling state explicitly.</li>
                 </ul>
             </li>
         </ul>
     </div>
 
+    <!-- Conclusion -->
     <div class="mt-5">
         <h2>Conclusion</h2>
         <p>
-            Both **ARM Templates** and **Terraform** offer powerful ways to define and manage Azure infrastructure as code.
-            While ARM Templates are **Azure-native and tightly integrated**, Terraform provides **multi-cloud flexibility and better modularization**.
+            Both <strong>ARM Templates</strong> and <strong>Terraform</strong> are valuable tools in the IaC toolkit. If you need deep Azure integration and compliance, ARM is a strong choice. For flexibility, modularity, and multi-cloud automation, Terraform often comes out on top.
         </p>
         <p>
-            The next step is to explore **Creating Resources with Azure DevOps** for automating IaC deployments.
+            Coming up next: how to use Azure DevOps to <strong>automate infrastructure deployments</strong> using these tools.
         </p>
     </div>
 
+    <!-- Navigation -->
     <div class="d-flex justify-content-between mt-4">
         <a href="@Url.Action("IntroInfrastructureCode", "AzureDevOps")" class="btn btn-outline-secondary">&larr; Previous: Introduction to Infrastructure as Code</a>
         <a href="@Url.Action("CreateResourcesAzureDevOps", "AzureDevOps")" class="btn btn-outline-secondary">Next: Creating Resources with Azure DevOps &rarr;</a>

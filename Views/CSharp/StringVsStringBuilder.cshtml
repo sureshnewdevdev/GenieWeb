@@ -2,36 +2,29 @@
     ViewData["Title"] = "String vs StringBuilder in C#";
 }
 
-<!-- Top Links Section -->
-@* <div class="top-links d-flex justify-content-start mb-4">
-    <a href="/InterviewQA" class="btn btn-success me-2">Interview Q&A</a>
-    <a href="/FreeMCQ" class="btn btn-primary me-2">Free MCQ Question and Answer</a>
-    <a href="/VideoTutorial" class="btn btn-info">Free Video Tutorial</a>
-</div> *@
-
-<!-- Main Heading -->
-<h1 class="display-4 text-primary mb-4">String vs StringBuilder in C#</h1>
-
 <!-- Section: Introduction to String and StringBuilder -->
 <section class="mb-5">
-    <h2 class="text-secondary">What is the Difference Between String and StringBuilder?</h2>
+    <h2 class="text-secondary">String vs StringBuilder in C#</h2>
     <p class="lead">
-        In C#, both <code>string</code> and <code>StringBuilder</code> are used to work with text, but they behave differently. The <code>string</code> type is immutable, meaning once it is created, it cannot be changed. On the other hand, <code>StringBuilder</code> is mutable, allowing modifications to the string without creating new instances.
+        In C#, both <code>string</code> and <code>StringBuilder</code> are used to work with text.
+        However, they have different performance characteristics and use cases.
+        Understanding the difference is essential for writing **efficient and optimized code**.
     </p>
 </section>
 
 <!-- Section: String in C# -->
 <section class="mb-5">
-    <h2 class="text-secondary">String in C#</h2>
+    <h2 class="text-secondary">String in C# (Immutable)</h2>
     <p class="lead">
-        A <code>string</code> in C# is immutable, which means any operation that seems to modify the string actually creates a new string instance. This can lead to performance issues if the string is modified frequently in loops or large operations.
+        A <code>string</code> in C# is **immutable**, meaning any modification creates a **new string instance**.
+        This behavior is fine for small modifications but can be inefficient for repeated changes.
     </p>
 
-    <h3 class="text-info">Example: Using String</h3>
+    <h3 class="text-info">Example: String Modification</h3>
     <div class="code-snippet position-relative bg-light p-3 rounded border">
         <pre class="mb-0">
 <code>string str = "Hello";
-str += " World";  // A new string instance is created
+str += " World";  // Creates a new string instance
 
 Console.WriteLine(str);  // Output: Hello World</code>
         </pre>
@@ -39,15 +32,18 @@ Console.WriteLine(str);  // Output: Hello World</code>
     </div>
 
     <p class="text-muted">
-        In this example, each time the string is concatenated, a new instance of the string is created, which can be inefficient in large loops or frequent modifications.
+        Here, every time we modify <code>str</code>, a **new memory allocation** occurs,
+        making **string operations inefficient in loops or large-scale modifications**.
     </p>
 </section>
 
 <!-- Section: StringBuilder in C# -->
 <section class="mb-5">
-    <h2 class="text-secondary">StringBuilder in C#</h2>
+    <h2 class="text-secondary">StringBuilder in C# (Mutable)</h2>
     <p class="lead">
-        The <code>StringBuilder</code> class in C# is designed for scenarios where you need to frequently modify a string. It allows modifications without creating new instances, improving performance in cases of repeated changes to the string.
+        The <code>StringBuilder</code> class is designed for **modifying strings efficiently**.
+        Unlike <code>string</code>, it is **mutable**, meaning modifications occur in the same instance,
+        avoiding unnecessary memory allocations.
     </p>
 
     <h3 class="text-info">Example: Using StringBuilder</h3>
@@ -62,70 +58,120 @@ Console.WriteLine(sb.ToString());  // Output: Hello World</code>
     </div>
 
     <p class="text-muted">
-        In this example, the <code>Append</code> method modifies the existing <code>StringBuilder</code> object, avoiding the creation of new instances.
+        In this example, <code>Append()</code> modifies the same **StringBuilder** instance
+        without creating **multiple copies** in memory, leading to better performance.
     </p>
 </section>
 
-<!-- Section: Comparison Between String and StringBuilder -->
+<!-- Section: Performance Benchmark -->
 <section class="mb-5">
-    <h2 class="text-secondary">Comparison Between String and StringBuilder</h2>
+    <h2 class="text-secondary">Performance Benchmark: String vs StringBuilder</h2>
     <p class="lead">
-        Here’s a comparison between <code>string</code> and <code>StringBuilder</code> to help you decide which one to use in different scenarios:
+        Let’s compare **execution time** for repeated string modifications using **string** vs **StringBuilder**:
     </p>
 
+    <h3 class="text-info">Benchmark Code:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Diagnostics;
+using System.Text;
+
+class Program
+{
+    static void Main()
+    {
+        int iterations = 10000;
+        Stopwatch stopwatch = new Stopwatch();
+
+        // Using String
+        stopwatch.Start();
+        string str = "";
+        for (int i = 0; i < iterations; i++)
+        {
+            str += "a";  // Creates a new string each time
+        }
+        stopwatch.Stop();
+        Console.WriteLine("String Time: " + stopwatch.ElapsedMilliseconds + "ms");
+
+        // Using StringBuilder
+        stopwatch.Restart();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < iterations; i++)
+        {
+            sb.Append("a");  // Modifies the same instance
+        }
+        stopwatch.Stop();
+        Console.WriteLine("StringBuilder Time: " + stopwatch.ElapsedMilliseconds + "ms");
+    }
+}</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this **benchmark**, StringBuilder is significantly **faster** because it **modifies the same instance**
+        rather than creating multiple **new instances** like <code>string</code>.
+    </p>
+</section>
+
+<!-- Section: When to Use String vs StringBuilder -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use String vs StringBuilder?</h2>
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>Aspect</th>
-                <th><code>string</code></th>
-                <th><code>StringBuilder</code></th>
+                <th>Scenario</th>
+                <th>Use <code>string</code></th>
+                <th>Use <code>StringBuilder</code></th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td><b>Mutability</b></td>
-                <td>Immutable (new instance created with each modification)</td>
-                <td>Mutable (modifications do not create new instances)</td>
+                <td><b>Fixed or small text</b></td>
+                <td>✅ Recommended (easier to use)</td>
+                <td>❌ Not necessary</td>
             </tr>
             <tr>
-                <td><b>Performance</b></td>
-                <td>Slower for frequent modifications due to immutability</td>
-                <td>Faster for frequent modifications</td>
+                <td><b>Frequent modifications in loops</b></td>
+                <td>❌ Avoid (memory overhead)</td>
+                <td>✅ Preferred (efficient modifications)</td>
             </tr>
             <tr>
-                <td><b>Use Case</b></td>
-                <td>Use when string content is not modified frequently</td>
-                <td>Use when string content is modified frequently</td>
+                <td><b>Concatenating user input or logs</b></td>
+                <td>❌ Inefficient</td>
+                <td>✅ Best choice</td>
+            </tr>
+            <tr>
+                <td><b>Immutable values needed (security)</b></td>
+                <td>✅ Best choice</td>
+                <td>❌ Avoid</td>
             </tr>
         </tbody>
     </table>
 </section>
 
-<!-- Section: Key Points to Remember -->
+<!-- Section: Best Practices -->
 <section class="mb-5">
-    <h2 class="text-secondary">Key Points to Remember</h2>
+    <h2 class="text-secondary">Best Practices</h2>
     <ul class="list-group">
-        <li class="list-group-item">The <code>string</code> type is immutable, meaning any changes result in the creation of a new instance.</li>
-        <li class="list-group-item">The <code>StringBuilder</code> type is mutable, allowing in-place modifications to the string.</li>
-        <li class="list-group-item">For small and infrequent modifications, <code>string</code> is generally more readable and easier to use.</li>
-        <li class="list-group-item">For frequent modifications or string operations within loops, <code>StringBuilder</code> is preferred due to its performance benefits.</li>
+        <li class="list-group-item"><b>Use <code>string</code> for short, fixed text</b> (e.g., small concatenations, assignments).</li>
+        <li class="list-group-item"><b>Use <code>StringBuilder</code> for frequent modifications</b> (e.g., building long text dynamically).</li>
+        <li class="list-group-item">**Avoid <code>string</code> in loops** where repeated concatenations happen.</li>
+        <li class="list-group-item">Use **<code>StringBuilder.Append()</code> instead of <code>+</code> concatenation** inside loops.</li>
     </ul>
 </section>
 
-<!-- Previous Topic Link -->
-<div class="previous-topic mt-4">
+<!-- Navigation Links -->
+<div class="d-flex justify-content-between mt-4">
     <a href="@Url.Action("EqualsVsEqual", "CSharp")" class="btn btn-outline-secondary">Previous: Equals() vs ==</a>
-</div>
-
-<!-- Next Topic Link -->
-<div class="next-topic mt-4">
-    <a href="@Url.Action("VariousStringMethods", "CSharp")" class="btn btn-outline-secondary">Next:Various String class methods</a>
+    <a href="@Url.Action("VariousStringMethods", "CSharp")" class="btn btn-outline-secondary">Next: Various String Class Methods</a>
 </div>
 
 <!-- JavaScript for Copy Functionality -->
 <script>
     document.querySelectorAll('.copy-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
+        btn.addEventListener('click', function() {
             const code = this.previousElementSibling.innerText;
             navigator.clipboard.writeText(code).then(() => {
                 alert('Code copied to clipboard!');

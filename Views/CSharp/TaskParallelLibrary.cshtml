@@ -1,0 +1,221 @@
+﻿@{
+    ViewData["Title"] = "Task Parallel Library (TPL) in C#";
+}
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <h2 class="text-secondary">Understanding Task Parallel Library (TPL) in C#</h2>
+    <p class="lead">
+        The **Task Parallel Library (TPL)** in C# provides a **higher-level abstraction** for managing parallel execution. It is more efficient and flexible than manually creating **threads**, allowing tasks to be scheduled and executed efficiently using the **Task class**.
+    </p>
+</section>
+
+<!-- Section: Key Features of TPL -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Task Parallel Library</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Automatically manages **thread pooling**.</li>
+        <li class="list-group-item">Supports **cancellation and continuation**.</li>
+        <li class="list-group-item">Scales efficiently using **multi-core processors**.</li>
+        <li class="list-group-item">Provides **async and await** integration for non-blocking execution.</li>
+    </ul>
+</section>
+
+<!-- Section: Creating and Running Tasks -->
+<section class="mb-5">
+    <h2 class="text-secondary">Creating and Running Tasks</h2>
+    <p class="lead">
+        The **Task.Run()** method is used to create and execute a task asynchronously.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Creating and Running a Task</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Main()
+    {
+        Task task = Task.Run(() =>
+        {
+            Console.WriteLine($"Task {Task.CurrentId} is running.");
+        });
+
+        task.Wait(); // Wait for task to complete
+        Console.WriteLine("Task completed.");
+    }
+}
+
+// Output:
+// Task 1 is running.
+// Task completed.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **Task.Run()** method schedules a task to run asynchronously on a **thread pool thread**.
+    </p>
+</section>
+
+<!-- Section: Running Multiple Tasks -->
+<section class="mb-5">
+    <h2 class="text-secondary">Running Multiple Tasks in Parallel</h2>
+    <p class="lead">
+        The **Task.WhenAll()** method waits for multiple tasks to complete before proceeding.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Running Multiple Tasks Using Task.WhenAll()</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main()
+    {
+        Task task1 = Task.Run(() => Console.WriteLine("Task 1 running"));
+        Task task2 = Task.Run(() => Console.WriteLine("Task 2 running"));
+
+        await Task.WhenAll(task1, task2);
+        Console.WriteLine("All tasks completed.");
+    }
+}
+
+// Output:
+// Task 1 running
+// Task 2 running
+// All tasks completed.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        **Task.WhenAll()** ensures that all tasks complete before executing the next statement.
+    </p>
+</section>
+
+<!-- Section: Task Continuations -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Task Continuations</h2>
+    <p class="lead">
+        The **ContinueWith()** method allows chaining tasks, ensuring that a follow-up task executes after the first one completes.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Task Continuation Using ContinueWith()</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Main()
+    {
+        Task task = Task.Run(() => Console.WriteLine("Task 1 running"))
+                        .ContinueWith(t => Console.WriteLine("Task 2 running"));
+
+        task.Wait();
+    }
+}
+
+// Output:
+// Task 1 running
+// Task 2 running</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **ContinueWith()** method ensures that **Task 2 runs only after Task 1 completes**.
+    </p>
+</section>
+
+<!-- Section: Task Cancellation -->
+<section class="mb-5">
+    <h2 class="text-secondary">Cancelling a Running Task</h2>
+    <p class="lead">
+        You can use a **CancellationToken** to cancel a running task.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Cancelling a Task Using CancellationToken</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Main()
+    {
+        CancellationTokenSource cts = new CancellationTokenSource();
+
+        Task task = Task.Run(() =>
+        {
+            for (int i = 1; i <= 5; i++)
+            {
+                if (cts.Token.IsCancellationRequested)
+                {
+                    Console.WriteLine("Task cancelled.");
+                    return;
+                }
+                Console.WriteLine($"Task running {i}");
+                Thread.Sleep(1000);
+            }
+        }, cts.Token);
+
+        Thread.Sleep(2000);
+        cts.Cancel(); // Cancel the task
+        task.Wait();
+    }
+}
+
+// Output:
+// Task running 1
+// Task running 2
+// Task cancelled.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **CancellationTokenSource** allows gracefully stopping a task before it completes execution.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Task Parallel Library -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using Task Parallel Library</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **Task.Run()** for CPU-bound operations, avoiding manual thread creation.</li>
+        <li class="list-group-item">Use **Task.WhenAll()** to efficiently execute multiple tasks concurrently.</li>
+        <li class="list-group-item">Use **CancellationTokenSource** to stop long-running tasks gracefully.</li>
+        <li class="list-group-item">Avoid using **Task.Wait() or Task.Result** in UI applications, as it can block the UI.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("ParallelizationOverview", "CSharp")" class="btn btn-outline-secondary">Previous: Parallelization Overview</a>
+    <a href="@Url.Action("ThreadsVsTasks", "CSharp")" class="btn btn-outline-secondary">Next: Threads vs Tasks</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

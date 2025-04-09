@@ -1,0 +1,160 @@
+﻿@{
+    ViewData["Title"] = "Docker Compose";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Docker Compose simplifies the management of multi-container applications.
+        Instead of running multiple <code>docker run</code> commands, Compose uses a single configuration file to define and manage services.
+    </p>
+    <hr />
+
+    <!-- Section: What is Docker Compose? -->
+    <div class="mt-5">
+        <h2>What is Docker Compose?</h2>
+        <p>
+            Docker Compose is a tool for defining and running multi-container Docker applications.
+            You use a YAML file to configure your application’s services, networks, and volumes — then launch them all with a single command.
+        </p>
+        <ul>
+            <li>Defined using a <code>docker-compose.yml</code> file</li>
+            <li>Supports isolated services and networking between containers</li>
+            <li>Perfect for microservices, full-stack development, and testing pipelines</li>
+        </ul>
+    </div>
+
+    <!-- Section: Installing Docker Compose -->
+    <div class="mt-5">
+        <h3>Installing Docker Compose</h3>
+        <p>Docker Compose is included in Docker Desktop for Windows and macOS. For Linux:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>sudo apt update
+sudo apt install docker-compose</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Verify installation:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker-compose --version</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Writing a docker-compose.yml File -->
+    <div class="mt-5">
+        <h3>Writing a <code>docker-compose.yml</code> File</h3>
+        <p>Below is an example configuration for a .NET Web API with a PostgreSQL database:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>version: '3.8'
+
+services:
+  webapp:
+    build: .
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: mydb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>This file defines two services — <code>webapp</code> and <code>db</code> — and creates a named volume to persist data.</p>
+    </div>
+
+    <!-- Section: Running and Managing Compose -->
+    <div class="mt-5">
+        <h3>Running and Managing Docker Compose</h3>
+        <ul>
+            <li>
+                <strong>Start services:</strong>
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>docker-compose up -d</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+            <li>
+                <strong>Stop services:</strong>
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>docker-compose down</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+            <li>
+                <strong>View logs:</strong>
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>docker-compose logs</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+            <li>
+                <strong>Rebuild after changes:</strong>
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>docker-compose up --build</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Section: Networking in Compose -->
+    <div class="mt-5">
+        <h3>Networking in Docker Compose</h3>
+        <p>
+            By default, all services in a Docker Compose file are connected to the same network,
+            allowing them to communicate using their service names. For example, <code>webapp</code> can connect to
+            <code>db</code> using just the hostname <code>db</code>.
+        </p>
+    </div>
+
+    <!-- Section: Best Practices -->
+    <div class="mt-5">
+        <h3>Best Practices for Docker Compose</h3>
+        <ul>
+            <li>Use environment variables and <code>.env</code> files to keep secrets out of your YAML.</li>
+            <li>Use named volumes for data persistence.</li>
+            <li>Use <code>depends_on</code> to define service dependencies.</li>
+            <li>Use <code>docker-compose.override.yml</code> for local overrides without changing the base config.</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Docker Compose is a powerful tool for orchestrating multi-service applications with ease.
+            It is ideal for development, testing, and CI environments where simplicity and reproducibility matter.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("DockerImagesAndContainers", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Docker Images & Containers
+        </a>
+        <a href="@Url.Action("DockerNetworking", "Docker")" class="btn btn-outline-secondary">
+            Next: Docker Networking &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Button Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

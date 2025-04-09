@@ -1,0 +1,206 @@
+﻿@{
+    ViewData["Title"] = "Indexers and Properties in C#";
+}
+
+<!-- Section: Introduction to Properties -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Properties in C#?</h2>
+    <p class="lead">
+        <b>Properties</b> in C# are special members of a class that provide a flexible mechanism to read, write, or compute the values of private fields. They encapsulate data and help in data validation.
+    </p>
+</section>
+
+<!-- Section: Key Features of Properties -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Properties</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Encapsulates fields with controlled access.</li>
+        <li class="list-group-item">Provides <b>get</b> and <b>set</b> accessors.</li>
+        <li class="list-group-item">Supports auto-implemented properties for cleaner code.</li>
+        <li class="list-group-item">Allows property validation inside <code>set</code> accessor.</li>
+    </ul>
+</section>
+
+<!-- Section: Example of Properties -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Defining and Using Properties</h2>
+    <p class="lead">
+        The following example demonstrates how to declare and use properties in C#.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Properties in C#</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class Person
+{
+    private string name;
+    private int age;
+
+    public string Name
+    {
+        get { return name; }
+        set { name = value; }
+    }
+
+    public int Age
+    {
+        get { return age; }
+        set
+        {
+            if (value > 0)
+                age = value;
+            else
+                Console.WriteLine("Age must be positive.");
+        }
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        Person person = new Person();
+        person.Name = "Alice";
+        person.Age = 25;
+
+        Console.WriteLine($"Name: {person.Name}, Age: {person.Age}");
+    }
+}
+
+// Output:
+// Name: Alice, Age: 25</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>Name</code> and <code>Age</code> properties control access to private fields, enforcing data validation.
+    </p>
+</section>
+
+<!-- Section: Auto-Implemented Properties -->
+<section class="mb-5">
+    <h2 class="text-secondary">Auto-Implemented Properties</h2>
+    <p class="lead">
+        C# provides <b>auto-implemented properties</b> for simpler code when no additional logic is needed.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Auto-Implemented Properties</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class Employee
+{
+    public string Name { get; set; }
+    public int Salary { get; set; }
+}
+
+// Usage
+Employee emp = new Employee { Name = "John", Salary = 50000 };
+Console.WriteLine($"Employee: {emp.Name}, Salary: {emp.Salary}");
+
+// Output:
+// Employee: John, Salary: 50000</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>Name</code> and <code>Salary</code> properties are automatically managed by C# without explicit fields.
+    </p>
+</section>
+
+<!-- Section: Introduction to Indexers -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Indexers in C#?</h2>
+    <p class="lead">
+        <b>Indexers</b> allow instances of a class to be accessed like an array. They provide a way to create classes that behave like collections.
+    </p>
+</section>
+
+<!-- Section: Key Features of Indexers -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Indexers</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Allows objects to be accessed like an array.</li>
+        <li class="list-group-item">Uses the <code>this</code> keyword.</li>
+        <li class="list-group-item">Supports multiple parameters for multi-dimensional indexing.</li>
+        <li class="list-group-item">Useful for implementing collections.</li>
+    </ul>
+</section>
+
+<!-- Section: Example of Indexers -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Defining and Using Indexers</h2>
+    <p class="lead">
+        The following example demonstrates how to define and use an indexer in C#.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Indexers in C#</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+public class StudentCollection
+{
+    private string[] students = new string[3];
+
+    public string this[int index]
+    {
+        get { return students[index]; }
+        set { students[index] = value; }
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        StudentCollection studentList = new StudentCollection();
+        studentList[0] = "Alice";
+        studentList[1] = "Bob";
+        studentList[2] = "Charlie";
+
+        Console.WriteLine(studentList[1]); // Output: Bob
+    }
+}</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Here, <code>StudentCollection</code> allows access to student names using array-like indexing.
+    </p>
+</section>
+
+<!-- Section: When to Use Properties and Indexers -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Properties and Indexers?</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use <b>properties</b> for encapsulating fields with controlled access.</li>
+        <li class="list-group-item">Use <b>auto-implemented properties</b> when no additional logic is needed.</li>
+        <li class="list-group-item">Use <b>indexers</b> when creating classes that behave like collections.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("GenericClasses", "CSharp")" class="btn btn-outline-secondary">Previous: Generic Classes</a>
+    <a href="@Url.Action("AutoImplementedProperties", "CSharp")" class="btn btn-outline-secondary">Next: Auto-Implemented Properties</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

@@ -1,0 +1,208 @@
+﻿@{
+    ViewData["Title"] = "Containerizing a .NET Web Application with Docker";
+}
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <p class="lead">
+        This is a step-by-step beginner-friendly guide to containerize a .NET web application using Docker.
+        It includes detailed explanations of Docker commands, Dockerfile, and running the container.
+    </p>
+</section>
+
+<!-- Section: Prerequisites -->
+<section class="mb-5">
+    <h2 class="text-secondary">✅ Prerequisites</h2>
+    <ul class="list-group">
+        <li class="list-group-item">.NET SDK (v6.0 or later)</li>
+        <li class="list-group-item">Docker Desktop</li>
+        <li class="list-group-item">Code editor (like VS Code)</li>
+    </ul>
+</section>
+
+<!-- Step-by-step Instructions -->
+<section class="mb-5">
+    <h2 class="text-secondary">👣 Step-by-Step Instructions</h2>
+
+    <!-- Step 1 -->
+    <h3 class="text-info">Step 1: Create a New .NET Web Application</h3>
+    <div class="code-snippet bg-light p-3 rounded border position-relative">
+        <pre><code>dotnet new webapp -n MyWebApp
+cd MyWebApp</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <!-- Step 2 -->
+    <h3 class="text-info">Step 2: Run the App Locally</h3>
+    <div class="code-snippet bg-light p-3 rounded border position-relative">
+        <pre><code>dotnet run</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+    <p class="text-muted">Visit <code>https://localhost:5001</code> in your browser to verify it's working.</p>
+
+    <!-- Step 3 -->
+    <h3 class="text-info">Step 3: Create a Dockerfile</h3>
+    <p>Create a file named <code>Dockerfile</code> in the root directory and paste the following content:</p>
+    <div class="code-snippet bg-light p-3 rounded border position-relative">
+        <pre><code># STEP 1: Build the app
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY . .
+RUN dotnet publish -c Release -o /app/publish
+
+# STEP 2: Run the app
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "MyWebApp.dll"]</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+    <p><strong>Explanation:</strong></p>
+    <ul>
+        <li><b>FROM</b>: Specifies the base image.</li>
+        <li><b>WORKDIR</b>: Sets working directory inside the container.</li>
+        <li><b>COPY</b>: Copies files into the container.</li>
+        <li><b>RUN</b>: Executes a command in the container during image build.</li>
+        <li><b>ENTRYPOINT</b>: Command to run when the container starts.</li>
+    </ul>
+
+    <!-- Step 4 -->
+    <h3 class="text-info">Step 4: Create .dockerignore (Optional)</h3>
+    <div class="code-snippet bg-light p-3 rounded border position-relative">
+        <pre><code>bin/
+obj/
+.vscode/
+*.md
+*.user</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <!-- Step 5 -->
+    <h3 class="text-info">Step 5: Build the Docker Image</h3>
+    <div class="code-snippet bg-light p-3 rounded border position-relative">
+        <pre><code>docker build -t mywebapp .</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+    <ul>
+        <li><b>build</b>: Tells Docker to build an image.</li>
+        <li><b>-t mywebapp</b>: Tags the image name.</li>
+        <li><b>.</b>: Uses current directory (where Dockerfile is).</li>
+    </ul>
+
+    <!-- Step 6 -->
+    <h3 class="text-info">Step 6: Run the Docker Container</h3>
+    <div class="code-snippet bg-light p-3 rounded border position-relative">
+        <pre><code>docker run -d -p 8080:80 --name mywebappcontainer mywebapp</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+    <ul>
+        <li><b>-d</b>: Runs in detached mode.</li>
+        <li><b>-p 8080:80</b>: Maps local port 8080 to container's port 80.</li>
+        <li><b>--name</b>: Names the container.</li>
+    </ul>
+
+    <!-- Step 7 -->
+    <h3 class="text-info">Step 7: Manage the Container</h3>
+    <p>Stop the container:</p>
+    <div class="code-snippet bg-light p-3 rounded border position-relative">
+        <pre><code>docker stop mywebappcontainer</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p>Remove the container:</p>
+    <div class="code-snippet bg-light p-3 rounded border position-relative">
+        <pre><code>docker rm mywebappcontainer</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p>Remove the image:</p>
+    <div class="code-snippet bg-light p-3 rounded border position-relative">
+        <pre><code>docker rmi mywebapp</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: Docker Command Summary -->
+<section class="mb-5">
+    <h2 class="text-secondary">📦 Summary of Docker Commands</h2>
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Task</th>
+                <th>Command</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Build Docker image</td>
+                <td>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <code class="me-2">docker build -t mywebapp .</code>
+                        <button class="btn btn-sm btn-outline-secondary copy-btn">Copy</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>Run container</td>
+                <td>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <code class="me-2">docker run -d -p 8080:80 --name mywebappcontainer mywebapp</code>
+                        <button class="btn btn-sm btn-outline-secondary copy-btn">Copy</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>Stop container</td>
+                <td>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <code class="me-2">docker stop mywebappcontainer</code>
+                        <button class="btn btn-sm btn-outline-secondary copy-btn">Copy</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>Remove container</td>
+                <td>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <code class="me-2">docker rm mywebappcontainer</code>
+                        <button class="btn btn-sm btn-outline-secondary copy-btn">Copy</button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>Remove image</td>
+                <td>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <code class="me-2">docker rmi mywebapp</code>
+                        <button class="btn btn-sm btn-outline-secondary copy-btn">Copy</button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("DockerInstallation", "AzureDevOps")" class="btn btn-outline-secondary">
+        &larr; Previous: Docker Installation
+    </a>
+    <a href="@Url.Action("DockerImagesAndContainers", "AzureDevOps")" class="btn btn-outline-secondary">
+        Next: Docker Images & Containers &rarr;
+    </a>
+</div>
+
+<!-- Copy Button Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText ||
+                             this.previousElementSibling?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

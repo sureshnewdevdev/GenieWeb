@@ -1,0 +1,192 @@
+﻿@{
+    ViewData["Title"] = "Parallel Extensions in C#";
+}
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <h2 class="text-secondary">Parallel Extensions in C#</h2>
+    <p class="lead">
+        **Parallel Extensions** in C# provide a high-level abstraction for **parallel programming**, improving performance by distributing workloads across **multiple CPU cores**. The **System.Threading.Tasks.Parallel** class offers methods like **Parallel.For, Parallel.ForEach, and Parallel.Invoke** to execute tasks in parallel efficiently.
+    </p>
+</section>
+
+<!-- Section: Key Features of Parallel Extensions -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Parallel Extensions</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Allows **automatic workload distribution** across multiple cores.</li>
+        <li class="list-group-item">Supports **parallel loops (Parallel.For, Parallel.ForEach)**.</li>
+        <li class="list-group-item">Efficiently runs **independent tasks** using **Parallel.Invoke**.</li>
+        <li class="list-group-item">Utilizes **task scheduling and thread pooling** for better performance.</li>
+    </ul>
+</section>
+
+<!-- Section: Parallel.Invoke -->
+<section class="mb-5">
+    <h2 class="text-secondary">Executing Multiple Actions with Parallel.Invoke</h2>
+    <p class="lead">
+        The **Parallel.Invoke()** method allows running multiple independent actions in parallel.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Parallel.Invoke() for Parallel Execution</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Task1() => Console.WriteLine($"Task 1 executed by {Task.CurrentId}");
+    static void Task2() => Console.WriteLine($"Task 2 executed by {Task.CurrentId}");
+
+    static void Main()
+    {
+        Parallel.Invoke(Task1, Task2);
+        Console.WriteLine("Parallel tasks executed.");
+    }
+}
+
+// Output:
+// Task 1 executed by 1
+// Task 2 executed by 2
+// Parallel tasks executed.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **Parallel.Invoke()** method executes multiple **independent tasks** in parallel.
+    </p>
+</section>
+
+<!-- Section: Using Parallel.For -->
+<section class="mb-5">
+    <h2 class="text-secondary">Executing Loops in Parallel Using Parallel.For</h2>
+    <p class="lead">
+        The **Parallel.For()** method executes loop iterations in parallel across multiple CPU cores.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Parallel.For() for Faster Iteration</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Main()
+    {
+        Parallel.For(1, 6, i =>
+        {
+            Console.WriteLine($"Iteration {i} executed by Task {Task.CurrentId}");
+        });
+
+        Console.WriteLine("Parallel loop completed.");
+    }
+}
+
+// Output (order may vary):
+// Iteration 1 executed by Task 1
+// Iteration 2 executed by Task 2
+// Iteration 3 executed by Task 3
+// Iteration 4 executed by Task 4
+// Iteration 5 executed by Task 5
+// Parallel loop completed.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        **Parallel.For()** automatically distributes iterations **across available CPU cores**.
+    </p>
+</section>
+
+<!-- Section: Using Parallel.ForEach -->
+<section class="mb-5">
+    <h2 class="text-secondary">Processing Collections in Parallel Using Parallel.ForEach</h2>
+    <p class="lead">
+        The **Parallel.ForEach()** method processes collection elements **in parallel**, improving performance for large data sets.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Processing a List Using Parallel.ForEach()</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Main()
+    {
+        List&lt;string&gt; names = new List&lt;string&gt; { "Alice", "Bob", "Charlie", "David" };
+
+        Parallel.ForEach(names, name =>
+        {
+            Console.WriteLine($"Processing {name} on Task {Task.CurrentId}");
+        });
+
+        Console.WriteLine("Parallel ForEach completed.");
+    }
+}
+
+// Output (order may vary):
+// Processing Alice on Task 1
+// Processing Bob on Task 2
+// Processing Charlie on Task 3
+// Processing David on Task 4
+// Parallel ForEach completed.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        **Parallel.ForEach()** speeds up processing of **large collections** by utilizing multiple CPU cores.
+    </p>
+</section>
+
+<!-- Section: Performance Considerations -->
+<section class="mb-5">
+    <h2 class="text-secondary">Performance Considerations When Using Parallel Extensions</h2>
+    <p class="lead">
+        While parallel extensions improve performance, consider these best practices:
+    </p>
+    <ul class="list-group">
+        <li class="list-group-item">Use **Parallel.For()** and **Parallel.ForEach()** for **CPU-bound tasks**.</li>
+        <li class="list-group-item">Avoid parallelism for **small tasks**, as the overhead may reduce performance.</li>
+        <li class="list-group-item">Ensure **thread safety** when modifying shared resources in **parallel loops**.</li>
+        <li class="list-group-item">Use **CancellationToken** to allow stopping parallel execution if necessary.</li>
+    </ul>
+</section>
+
+<!-- Section: When to Use Parallel Extensions -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Parallel Extensions</h2>
+    <ul class="list-group">
+        <li class="list-group-item"><b>Use Parallel Extensions</b> for **CPU-intensive** operations that can be divided into **independent tasks**.</li>
+        <li class="list-group-item"><b>Avoid Parallel Extensions</b> when working with **I/O-bound operations** (use **async/await** instead).</li>
+        <li class="list-group-item">Use **Parallel.ForEach()** for **batch processing** of large datasets.</li>
+        <li class="list-group-item">Ensure **workload is evenly distributed** to avoid **load imbalance across CPU cores**.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("ThreadsVsTasks", "CSharp")" class="btn btn-outline-secondary">Previous: Threads vs Tasks</a>
+    <a href="@Url.Action("TaskBasedAsyncModel", "CSharp")" class="btn btn-outline-secondary">Next: Task-Based Asynchronous Model</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

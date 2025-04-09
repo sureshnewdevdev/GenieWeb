@@ -1,0 +1,164 @@
+﻿@{
+    ViewData["Title"] = "Creating Dockerized Microservices";
+    ViewData["ActiveMenu"] = "Docker";
+    ViewData["ActivePage"] = "DockerizedMicroservices";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Dockerizing each microservice allows you to build, run, and deploy them independently.
+        This step ensures consistency across environments and makes microservices scalable and portable.
+    </p>
+    <hr />
+
+    <!-- Section: What is Dockerizing a Microservice -->
+    <div class="mt-5">
+        <h2>What Does It Mean to Dockerize a Microservice?</h2>
+        <p>
+            Dockerizing a service involves creating a Docker image that contains everything the service needs to run:
+        </p>
+        <ul>
+            <li>Source code</li>
+            <li>Dependencies</li>
+            <li>Runtime environment</li>
+            <li>Configuration files</li>
+        </ul>
+        <p>
+            This image can then be used to create isolated, reproducible containers across development, testing, and production.
+        </p>
+    </div>
+
+    <!-- Section: Writing Dockerfiles -->
+    <div class="mt-5">
+        <h3>Writing Dockerfiles for Microservices</h3>
+        <p>Let’s take a Node.js-based <code>user-service</code> as an example:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code># Use a lightweight Node.js image
+FROM node:18-alpine
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy dependency files first (for better layer caching)
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm install --only=production
+
+# Copy application source code
+COPY . .
+
+# Expose the service's port
+EXPOSE 5000
+
+# Run the service
+CMD ["node", "server.js"]</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p class="mt-3">
+            This Dockerfile ensures small image size and fast builds by using caching effectively and limiting unnecessary files.
+        </p>
+    </div>
+
+    <!-- Section: Building & Running Services -->
+    <div class="mt-5">
+        <h3>Building & Running the Service in a Container</h3>
+        <p>To build the Docker image and run it as a container:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>// Build the image and name it user-service
+docker build -t user-service .
+
+// Run the container in detached mode on port 5000
+docker run -d -p 5000:5000 user-service</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p class="mt-3">
+            The <code>-p</code> flag maps the container's internal port to your host system so you can access the service via <code>http://localhost:5000</code>.
+        </p>
+    </div>
+
+    <!-- Section: Dockerizing Multiple Microservices -->
+    <div class="mt-5">
+        <h3>Dockerizing Multiple Microservices</h3>
+        <p>Here’s an example setup for a small e-commerce system:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>microservices-app/
+├── user-service/
+│   ├── Dockerfile
+│   ├── server.js
+│   └── package.json
+├── order-service/
+│   ├── Dockerfile
+│   ├── server.js
+│   └── package.json
+├── product-service/
+│   ├── Dockerfile
+│   ├── server.js
+│   └── package.json</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>Each service lives in its own directory with its own configuration and dependencies.</p>
+    </div>
+
+    <!-- Section: Tips & Best Practices -->
+    <div class="mt-5">
+        <h3>Best Practices</h3>
+        <ul>
+            <li>Keep Dockerfiles minimal and clean</li>
+            <li>Use multi-stage builds if needed (e.g., for Go or Java apps)</li>
+            <li>Use .dockerignore to prevent unnecessary files from being copied</li>
+            <li>Use environment variables for configuration, not hardcoded values</li>
+        </ul>
+    </div>
+
+    <!-- Section: .dockerignore Example -->
+    <div class="mt-5">
+        <h4>Example: .dockerignore</h4>
+        <p>Helps reduce image size and build time:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>node_modules
+npm-debug.log
+Dockerfile
+.dockerignore</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            With each microservice Dockerized, you're ready to run them together using Docker Compose, manage shared resources, and prepare for inter-service communication.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("DesigningMicroservices", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Designing Microservices with Docker
+        </a>
+        <a href="@Url.Action("ComposeMicroservices", "Docker")" class="btn btn-outline-secondary">
+            Next: Managing Microservices with Docker Compose &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

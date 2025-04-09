@@ -1,0 +1,204 @@
+﻿@{
+    ViewData["Title"] = "Multiple Catch Blocks in C#";
+}
+
+<!-- Section: Introduction to Multiple Catch Blocks -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Multiple Catch Blocks in C#?</h2>
+    <p class="lead">
+        C# allows handling different types of exceptions separately using <b>multiple catch blocks</b>. This helps catch specific errors and execute different actions based on the exception type.
+    </p>
+</section>
+
+<!-- Section: Key Features of Multiple Catch Blocks -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Multiple Catch Blocks</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Handles different exception types separately.</li>
+        <li class="list-group-item">Prevents one exception type from incorrectly handling another.</li>
+        <li class="list-group-item">Allows executing specific recovery actions based on the exception.</li>
+        <li class="list-group-item">The most specific exception should be caught first before generic ones.</li>
+    </ul>
+</section>
+
+<!-- Section: Example of Multiple Catch Blocks -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Handling Multiple Exceptions</h2>
+    <p class="lead">
+        The following example demonstrates how multiple catch blocks handle different exceptions separately.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Handling FormatException and DivideByZeroException</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            Console.Write("Enter a number: ");
+            int number = int.Parse(Console.ReadLine());
+
+            int result = 100 / number; // May cause DivideByZeroException
+            Console.WriteLine($"Result: {result}");
+        }
+        catch (FormatException ex)
+        {
+            Console.WriteLine($"Input Error: {ex.Message}");
+        }
+        catch (DivideByZeroException ex)
+        {
+            Console.WriteLine($"Math Error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"General Error: {ex.Message}");
+        }
+    }
+}
+
+// Possible Outputs:
+// 1. Enter a number: abc
+//    Input Error: Input string was not in a correct format.
+// 2. Enter a number: 0
+//    Math Error: Attempted to divide by zero.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Here, <code>FormatException</code> handles incorrect input, <code>DivideByZeroException</code> handles division by zero, and a general <code>Exception</code> block catches any other errors.
+    </p>
+</section>
+
+<!-- Section: Catching Specific vs. General Exceptions -->
+<section class="mb-5">
+    <h2 class="text-secondary">Catching Specific vs. General Exceptions</h2>
+    <p class="lead">
+        It is recommended to catch <b>specific exceptions first</b> before catching general exceptions to ensure proper handling.
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Approach</th>
+                <th>Example</th>
+                <th>Recommendation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Catching specific exceptions first</td>
+                <td>
+                    <pre class="mb-0">
+<code>try { /* Code */ }
+catch (FormatException ex) { /* Handle input error */ }
+catch (DivideByZeroException ex) { /* Handle math error */ }
+catch (Exception ex) { /* Handle general errors */ }</code>
+                    </pre>
+                </td>
+                <td>✅ Recommended (Handles specific cases first)</td>
+            </tr>
+            <tr>
+                <td>Catching general exceptions first</td>
+                <td>
+                    <pre class="mb-0">
+<code>try { /* Code */ }
+catch (Exception ex) { /* Handle all errors */ }
+catch (FormatException ex) { /* Unreachable code */ }</code>
+                    </pre>
+                </td>
+                <td>❌ Not Recommended (General exception will catch everything)</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Using Multiple Catch Blocks with Finally -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Multiple Catch Blocks with Finally</h2>
+    <p class="lead">
+        The <code>finally</code> block is useful for executing cleanup operations, regardless of whether an exception occurs.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Finally with Multiple Catch Blocks</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        StreamReader reader = null;
+        try
+        {
+            reader = new StreamReader("nonexistentfile.txt");
+            Console.WriteLine(reader.ReadToEnd());
+        }
+        catch (FileNotFoundException ex)
+        {
+            Console.WriteLine($"File Not Found: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"General Error: {ex.Message}");
+        }
+        finally
+        {
+            if (reader != null)
+            {
+                reader.Close();
+                Console.WriteLine("File closed.");
+            }
+        }
+    }
+}
+
+// Output:
+// File Not Found: Could not find file 'nonexistentfile.txt'.
+// File closed.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>finally</code> block ensures that resources are released even if an exception occurs.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Multiple Catch Blocks -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Multiple Catch Blocks</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Catch specific exceptions first before a general <code>Exception</code> block.</li>
+        <li class="list-group-item">Avoid catching <code>Exception</code> unless necessary.</li>
+        <li class="list-group-item">Use a <code>finally</code> block to clean up resources.</li>
+        <li class="list-group-item">Log exceptions instead of suppressing them silently.</li>
+        <li class="list-group-item">Use exception filters in C# 6+ for better handling (e.g., <code>catch (Exception ex) when (ex is FormatException)</code>).</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("TryBlock", "CSharp")" class="btn btn-outline-secondary">Previous: Try Block</a>
+    <a href="@Url.Action("FinallyBlock", "CSharp")" class="btn btn-outline-secondary">Next: Finally Block</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

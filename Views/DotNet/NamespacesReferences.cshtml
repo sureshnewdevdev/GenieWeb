@@ -1,0 +1,114 @@
+@{
+    ViewData["Title"] = "Using Namespaces and References";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "NamespacesReferences";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Namespaces and references help you organize code and reuse functionality across projects. They are foundational to writing clean, maintainable .NET applications.
+    </p>
+    <hr />
+
+    <!-- Section: What is a Namespace? -->
+    <div class="mt-5">
+        <h2>What is a Namespace?</h2>
+        <p>
+            A <strong>namespace</strong> is a container that organizes classes and other types, preventing naming conflicts. It's similar to a folder structure in code.
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>namespace MyApp.Utilities
+{
+    public class MathHelper
+    {
+        public static int Square(int x) => x * x;
+    }
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p class="mt-3">To use it in another file:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>using MyApp.Utilities;
+
+Console.WriteLine(MathHelper.Square(5));</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Built-in Namespaces -->
+    <div class="mt-5">
+        <h3>Common .NET Namespaces</h3>
+        <ul>
+            <li><code>System</code> – Base types (string, int, Console)</li>
+            <li><code>System.IO</code> – File and stream operations</li>
+            <li><code>System.Collections.Generic</code> – Lists, dictionaries</li>
+            <li><code>System.Linq</code> – LINQ extensions</li>
+            <li><code>System.Threading.Tasks</code> – Asynchronous programming</li>
+        </ul>
+    </div>
+
+    <!-- Section: References Between Projects -->
+    <div class="mt-5">
+        <h3>Adding Project References</h3>
+        <p>
+            If you split your app into multiple projects, you can reference one from another:
+        </p>
+        <ol>
+            <li>Right-click on the consuming project → <strong>Add → Project Reference</strong></li>
+            <li>Select the target project (e.g., a class library)</li>
+            <li>Use <code>using NamespaceName;</code> to access its types</li>
+        </ol>
+
+        <p><strong>CLI Alternative:</strong></p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>dotnet add MyApp.ConsoleApp reference ../MyApp.Library/MyApp.Library.csproj</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Organizing Your Code -->
+    <div class="mt-5">
+        <h3>Organizing with Namespaces</h3>
+        <p>
+            Use meaningful, hierarchical namespace names based on project and folder structure:
+        </p>
+        <ul>
+            <li><code>MyApp.Models</code></li>
+            <li><code>MyApp.Services</code></li>
+            <li><code>MyApp.Data</code></li>
+        </ul>
+        <p>Visual Studio automatically aligns namespaces with folder names (unless manually overridden).</p>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Namespaces and references keep your code modular and scalable. Next, we'll explore how to define and use custom classes within console applications for better structure and reusability.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("ConsoleStructure", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: Console App Structure
+        </a>
+        <a href="@Url.Action("UsingClasses", "DotNet")" class="btn btn-outline-secondary">
+            Next: Creating and Using Classes &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

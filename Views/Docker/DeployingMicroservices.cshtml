@@ -1,0 +1,124 @@
+@{
+    ViewData["Title"] = "Deploying Microservices with Docker";
+    ViewData["ActiveMenu"] = "Docker";
+    ViewData["ActivePage"] = "DeployingMicroservices";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Once microservices are built and tested, the next step is deploying them. Docker simplifies deployment to any environment that supports containers — from local servers to major cloud platforms.
+    </p>
+    <hr />
+
+    <!-- Section: Pushing to Docker Hub -->
+    <div class="mt-5">
+        <h2>Pushing Microservices to Docker Hub</h2>
+        <p>
+            Docker Hub is a cloud-based registry for sharing container images.
+        </p>
+        <ol>
+            <li>
+                Tag your image:
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>docker tag user-service username/user-service:latest</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+            <li>
+                Log in to Docker Hub:
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>docker login</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+            <li>
+                Push the image:
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>docker push username/user-service:latest</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+        </ol>
+    </div>
+
+    <!-- Section: Deploying to the Cloud -->
+    <div class="mt-5">
+        <h3>Deploying to a Cloud Provider</h3>
+        <p>
+            Most cloud providers support Docker images natively. For example, deploying to AWS ECS or Azure Container Apps:
+        </p>
+        <ul>
+            <li><strong>AWS:</strong> Push to Amazon ECR and deploy with ECS or Fargate</li>
+            <li><strong>Azure:</strong> Push to Azure Container Registry (ACR) and deploy using Azure App Services or Azure Kubernetes Service</li>
+        </ul>
+        <p>Example for running a container on Azure:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>az webapp create --name user-api --resource-group myRG --plan myPlan \
+--deployment-container-image-name username/user-service:latest</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Automating with CI/CD -->
+    <div class="mt-5">
+        <h3>Automating Deployments with CI/CD</h3>
+        <p>Integrate Docker into CI/CD pipelines using GitHub Actions, GitLab CI, Jenkins, or Azure DevOps:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code># GitHub Actions: .github/workflows/docker-deploy.yml
+name: Build & Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build Docker image
+        run: docker build -t username/user-service .
+      - name: Push to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker push username/user-service</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p class="mt-2">This pipeline builds and pushes your Docker image every time you push to <code>main</code>.</p>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Deployment with Docker is streamlined and portable across cloud providers.
+            Combine Docker with CI/CD to automate and accelerate your release pipeline.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("ScalingMicroservices", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Scaling Microservices in Docker
+        </a>
+        <a href="@Url.Action("SecuringMicroservices", "Docker")" class="btn btn-outline-secondary">
+            Next: Securing Dockerized Microservices &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

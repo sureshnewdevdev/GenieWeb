@@ -38,8 +38,24 @@ public class HomeController : Controller
     {
         ViewData["ActivePage"] = "AzureDevops";
         ViewData["ActiveMenu"] = "Azure";
-        return View("AzureDevOps");
+        return View("Azure");
     }
+
+    public IActionResult AppInsights()
+    {
+        ViewData["ActivePage"] = "AppInsights";
+        ViewData["ActiveMenu"] = "Azure";
+        return View("AppInsights");
+    }
+
+    public IActionResult UnderstandingLogFiles()
+    {
+        ViewData["ActivePage"] = "UnderstandingLogFiles";
+        ViewData["ActiveMenu"] = "Azure";
+        return View("UnderstandingLogFiles");
+    }
+
+
      public IActionResult Privacy()
     {
         ViewData["ActivePage"] = "Privacy";

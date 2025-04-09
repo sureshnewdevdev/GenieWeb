@@ -1,0 +1,239 @@
+﻿@{
+    ViewData["Title"] = "Generic Classes in C#";
+}
+
+<!-- Section: Introduction to Generic Classes -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Generic Classes in C#?</h2>
+    <p class="lead">
+        A <b>Generic Class</b> in C# allows defining a class with a placeholder for a data type. It enables code reusability, type safety, and better performance by avoiding unnecessary type casting.
+    </p>
+</section>
+
+<!-- Section: Key Features of Generic Classes -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Generic Classes</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Allows defining a class with a type parameter (<code>T</code>).</li>
+        <li class="list-group-item">Ensures type safety at compile-time.</li>
+        <li class="list-group-item">Prevents boxing and unboxing, improving performance.</li>
+        <li class="list-group-item">Supports code reusability by working with different data types.</li>
+    </ul>
+</section>
+
+<!-- Section: Example of a Generic Class -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Creating and Using a Generic Class</h2>
+    <p class="lead">
+        The following example demonstrates how to create and use a generic class.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Generic Class Implementation</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+public class GenericContainer<T>
+{
+    private T data;
+
+    public void SetData(T value)
+    {
+        data = value;
+    }
+
+    public T GetData()
+    {
+        return data;
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        GenericContainer<int> intContainer = new GenericContainer<int>();
+        intContainer.SetData(10);
+        Console.WriteLine(intContainer.GetData()); // Output: 10
+
+        GenericContainer<string> stringContainer = new GenericContainer<string>();
+        stringContainer.SetData("Hello, Generics!");
+        Console.WriteLine(stringContainer.GetData()); // Output: Hello, Generics!
+    }
+}</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        In this example, <code>GenericContainer&lt;T&gt;</code> is a generic class that can store any data type.
+    </p>
+</section>
+
+<!-- Section: Generic Classes with Multiple Type Parameters -->
+<section class="mb-5">
+    <h2 class="text-secondary">Generic Classes with Multiple Type Parameters</h2>
+    <p class="lead">
+        A generic class can have multiple type parameters to store different types of data.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Multiple Type Parameters</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class Pair<T1, T2>
+{
+    public T1 First { get; set; }
+    public T2 Second { get; set; }
+
+    public Pair(T1 first, T2 second)
+    {
+        First = first;
+        Second = second;
+    }
+
+    public void Display()
+    {
+        Console.WriteLine($"First: {First}, Second: {Second}");
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        Pair<string, int> student = new Pair<string, int>("Alice", 25);
+        student.Display(); // Output: First: Alice, Second: 25
+    }
+}</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Here, the <code>Pair&lt;T1, T2&gt;</code> class can store two different types of values.
+    </p>
+</section>
+
+<!-- Section: Constraints in Generic Classes -->
+<section class="mb-5">
+    <h2 class="text-secondary">Constraints in Generic Classes</h2>
+    <p class="lead">
+        Constraints restrict the types that can be used as generic parameters, ensuring compatibility with specific functionalities.
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Constraint</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>where T : struct</code></td>
+                <td>Only value types are allowed.</td>
+                <td><code>public class Test<T> where T : struct</code></td>
+            </tr>
+            <tr>
+                <td><code>where T : class</code></td>
+                <td>Only reference types are allowed.</td>
+                <td><code>public class Test<T> where T : class</code></td>
+            </tr>
+            <tr>
+                <td><code>where T : new()</code></td>
+                <td>Type must have a parameterless constructor.</td>
+                <td><code>public class Test<T> where T : new()</code></td>
+            </tr>
+            <tr>
+                <td><code>where T : BaseClass</code></td>
+                <td>Type must inherit from a specific class.</td>
+                <td><code>public class Test<T> where T : BaseClass</code></td>
+            </tr>
+            <tr>
+                <td><code>where T : IInterface</code></td>
+                <td>Type must implement a specific interface.</td>
+                <td><code>public class Test<T> where T : IInterface</code></td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Example of Generic Constraints -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Generic Constraint with Interface</h2>
+    <p class="lead">
+        The following example enforces that only objects implementing an interface can be used.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Constraints</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>interface IDisplayable
+{
+    void Display();
+}
+
+public class Product : IDisplayable
+{
+    public string Name { get; set; }
+    public void Display()
+    {
+        Console.WriteLine($"Product: {Name}");
+    }
+}
+
+public class GenericDisplay<T> where T : IDisplayable
+{
+    private T item;
+    public GenericDisplay(T item)
+    {
+        this.item = item;
+    }
+    public void Show()
+    {
+        item.Display();
+    }
+}
+
+// Usage
+class Program
+{
+    static void Main()
+    {
+        Product product = new Product { Name = "Laptop" };
+        GenericDisplay<Product> display = new GenericDisplay<Product>(product);
+        display.Show(); // Output: Product: Laptop
+    }
+}</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Here, the <code>GenericDisplay&lt;T&gt;</code> class only accepts types that implement <code>IDisplayable</code>.
+    </p>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("Namespaces", "CSharp")" class="btn btn-outline-secondary">Previous: Namespaces</a>
+    <a href="@Url.Action("IndexersProperties", "CSharp")" class="btn btn-outline-secondary">Next: Indexers & Properties</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

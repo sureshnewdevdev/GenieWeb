@@ -1,0 +1,680 @@
+@{
+    ViewData["Title"] = "Azure Storage Account Quiz";
+    ViewData["ActiveTopic"] = "Azure";
+    ViewData["CurrentPage"] = "AzureStorage";
+}
+<div class="container-fluid px-3">
+    <div id="quiz-timer-box"
+     class="position-fixed px-3 py-2 rounded-3 shadow text-white fw-bold"
+     style="top: 80px; z-index: 1050;">
+    <span>⏱</span> <span id="timerDisplay">05:00</span>
+</div>
+<style>
+    #quiz-timer-box {
+        right: 4%;
+    }
+
+    @@media (min-width: 992px) {
+        #quiz-timer-box {
+            right: 24%; /* Push it away from right sidebar */
+        }
+    }
+
+    input[type="radio"]:disabled + label {
+        opacity: 0.9;
+    }
+
+        .explanation {
+            display: none;
+            background-color: #f5f5f5;
+            border-left: 4px solid #0d6efd;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-style: italic;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @@keyframes fadeIn {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        #result h3 {
+            color: #0d6efd;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        #score {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #198754; /* Bootstrap success green */
+            animation: fadeIn 1s ease-in-out;
+        }
+    </style>
+
+
+
+
+
+    <form id="quizForm">
+        <div id="questions">
+            <!-- Question 1 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 1:</strong> What is the primary purpose of an Azure Storage Account?</p>
+                <div>
+                    <input type="radio" id="q1-a" name="q1" value="A">
+                    <label for="q1-a">To store virtual machines</label>
+                </div>
+                <div>
+                    <input type="radio" id="q1-b" name="q1" value="B">
+                    <label for="q1-b">To store data objects like blobs, files, and queues</label>
+                </div>
+                <div>
+                    <input type="radio" id="q1-c" name="q1" value="C">
+                    <label for="q1-c">To manage Azure subscriptions</label>
+                </div>
+                <div>
+                    <input type="radio" id="q1-d" name="q1" value="D">
+                    <label for="q1-d">To monitor Azure resources</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Azure Storage Accounts are used to store data objects like blobs, files, queues, and tables.
+                </div>
+
+            </div>
+
+            <!-- Question 2 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 2:</strong> Which of the following is NOT a type of Azure Storage?</p>
+                <div>
+                    <input type="radio" id="q2-a" name="q2" value="A">
+                    <label for="q2-a">Blob Storage</label>
+                </div>
+                <div>
+                    <input type="radio" id="q2-b" name="q2" value="B">
+                    <label for="q2-b">File Storage</label>
+                </div>
+                <div>
+                    <input type="radio" id="q2-c" name="q2" value="C">
+                    <label for="q2-c">Queue Storage</label>
+                </div>
+                <div>
+                    <input type="radio" id="q2-d" name="q2" value="D">
+                    <label for="q2-d">Database Storage</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Database Storage is not a native Azure Storage type. Azure offers Blob, File, Queue, and Table Storage for various data needs.
+                </div>
+
+            </div>
+
+            <!-- Question 3 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 3:</strong> What is the maximum size of a single blob in Azure Blob Storage?</p>
+                <div>
+                    <input type="radio" id="q3-a" name="q3" value="A">
+                    <label for="q3-a">1 TB</label>
+                </div>
+                <div>
+                    <input type="radio" id="q3-b" name="q3" value="B">
+                    <label for="q3-b">4.75 TB</label>
+                </div>
+                <div>
+                    <input type="radio" id="q3-c" name="q3" value="C">
+                    <label for="q3-c">200 GB</label>
+                </div>
+                <div>
+                    <input type="radio" id="q3-d" name="q3" value="D">
+                    <label for="q3-d">500 GB</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Azure Blob Storage supports different blob types including block blobs, which are ideal for large files. The maximum size of a single block blob is 4.75 TB when using chunked uploads. This makes it suitable for scenarios like storing backups, media files, and data lakes.
+                </div>
+
+            </div>
+
+            <!-- Question 4 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 4:</strong> Which of the following is used to store unstructured data in Azure?</p>
+                <div>
+                    <input type="radio" id="q4-a" name="q4" value="A">
+                    <label for="q4-a">Azure Blob Storage</label>
+                </div>
+                <div>
+                    <input type="radio" id="q4-b" name="q4" value="B">
+                    <label for="q4-b">Azure Table Storage</label>
+                </div>
+                <div>
+                    <input type="radio" id="q4-c" name="q4" value="C">
+                    <label for="q4-c">Azure Queue Storage</label>
+                </div>
+                <div>
+                    <input type="radio" id="q4-d" name="q4" value="D">
+                    <label for="q4-d">Azure File Storage</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Azure Blob Storage is optimized for storing massive amounts of unstructured data, such as text or binary content. It's commonly used for serving images, videos, documents, and backups. Unlike File or Table storage, Blob is ideal for non-relational, large-scale storage.
+                </div>
+
+            </div>
+
+            <!-- Question 5 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 5:</strong> What is the default replication strategy for an Azure Storage Account?
+                </p>
+                <div>
+                    <input type="radio" id="q5-a" name="q5" value="A">
+                    <label for="q5-a">Locally Redundant Storage (LRS)</label>
+                </div>
+                <div>
+                    <input type="radio" id="q5-b" name="q5" value="B">
+                    <label for="q5-b">Geo-Redundant Storage (GRS)</label>
+                </div>
+                <div>
+                    <input type="radio" id="q5-c" name="q5" value="C">
+                    <label for="q5-c">Zone-Redundant Storage (ZRS)</label>
+                </div>
+                <div>
+                    <input type="radio" id="q5-d" name="q5" value="D">
+                    <label for="q5-d">Read-Access Geo-Redundant Storage (RA-GRS)</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    By default, Azure Storage accounts use Locally Redundant Storage (LRS), which replicates data three times within a single data center. LRS provides high availability and durability within that region but not across regions. You can upgrade to other redundancy options if needed.
+                </div>
+            </div>
+
+            <!-- Question 6 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 6:</strong> Which Azure Storage type is best suited for storing large amounts of
+                    text or binary data?</p>
+                <div>
+                    <input type="radio" id="q6-a" name="q6" value="A">
+                    <label for="q6-a">Table Storage</label>
+                </div>
+                <div>
+                    <input type="radio" id="q6-b" name="q6" value="B">
+                    <label for="q6-b">Blob Storage</label>
+                </div>
+                <div>
+                    <input type="radio" id="q6-c" name="q6" value="C">
+                    <label for="q6-c">Queue Storage</label>
+                </div>
+                <div>
+                    <input type="radio" id="q6-d" name="q6" value="D">
+                    <label for="q6-d">File Storage</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Blob Storage is the most suitable option for storing large volumes of unstructured text or binary data like logs, images, videos, or backups. It supports scalability and access tiers for optimizing cost. Table and Queue Storage are used for structured and message data respectively.
+                </div>
+
+            </div>
+
+            <!-- Question 7 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 7:</strong> What is the purpose of Azure Table Storage?</p>
+                <div>
+                    <input type="radio" id="q7-a" name="q7" value="A">
+                    <label for="q7-a">To store structured NoSQL data</label>
+                </div>
+                <div>
+                    <input type="radio" id="q7-b" name="q7" value="B">
+                    <label for="q7-b">To store unstructured binary data</label>
+                </div>
+                <div>
+                    <input type="radio" id="q7-c" name="q7" value="C">
+                    <label for="q7-c">To store messages for asynchronous processing</label>
+                </div>
+                <div>
+                    <input type="radio" id="q7-d" name="q7" value="D">
+                    <label for="q7-d">To store virtual machine disks</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Azure Table Storage is a NoSQL key-value store designed to store large amounts of structured, non-relational data. It's useful for storing data like user information, logs, or IoT sensor data with flexible schema. It offers fast and cost-effective access.
+                </div>
+
+            </div>
+
+            <!-- Question 8 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 8:</strong> Which of the following is a valid use case for Azure Queue Storage?</p>
+                <div>
+                    <input type="radio" id="q8-a" name="q8" value="A">
+                    <label for="q8-a">Storing large files</label>
+                </div>
+                <div>
+                    <input type="radio" id="q8-b" name="q8" value="B">
+                    <label for="q8-b">Storing metadata</label>
+                </div>
+                <div>
+                    <input type="radio" id="q8-c" name="q8" value="C">
+                    <label for="q8-c">Decoupling application components</label>
+                </div>
+                <div>
+                    <input type="radio" id="q8-d" name="q8" value="D">
+                    <label for="q8-d">Hosting a website</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Azure Queue Storage allows asynchronous message queuing between components of distributed applications. This helps decouple systems to improve scalability and reliability. It’s ideal for background task processing or workload distribution.
+                </div>
+
+            </div>
+
+            <!-- Question 9 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 9:</strong> What is the maximum size of a message in Azure Queue Storage?</p>
+                <div>
+                    <input type="radio" id="q9-a" name="q9" value="A">
+                    <label for="q9-a">64 KB</label>
+                </div>
+                <div>
+                    <input type="radio" id="q9-b" name="q9" value="B">
+                    <label for="q9-b">128 KB</label>
+                </div>
+                <div>
+                    <input type="radio" id="q9-c" name="q9" value="C">
+                    <label for="q9-c">256 KB</label>
+                </div>
+                <div>
+                    <input type="radio" id="q9-d" name="q9" value="D">
+                    <label for="q9-d">512 KB</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Each message in Azure Queue Storage can be up to 64 KB in size. Messages are stored and retrieved in a FIFO (first-in-first-out) manner. For larger payloads, you typically store data in Blob Storage and reference it in the queue message.
+                </div>
+
+            </div>
+
+            <!-- Question 10 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 10:</strong> Which of the following is true about Azure File Storage?</p>
+                <div>
+                    <input type="radio" id="q10-a" name="q10" value="A">
+                    <label for="q10-a">It supports SMB protocol</label>
+                </div>
+                <div>
+                    <input type="radio" id="q10-b" name="q10" value="B">
+                    <label for="q10-b">It is used for storing NoSQL data</label>
+                </div>
+                <div>
+                    <input type="radio" id="q10-c" name="q10" value="C">
+                    <label for="q10-c">It is used for storing messages</label>
+                </div>
+                <div>
+                    <input type="radio" id="q10-d" name="q10" value="D">
+                    <label for="q10-d">It does not support mounting on Windows systems</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Azure File Storage supports the Server Message Block (SMB) protocol, allowing it to be mounted like a traditional network drive. It is commonly used for shared drives in lift-and-shift scenarios and supports access from Windows, macOS, and Linux.
+                </div>
+
+            </div>
+            <!-- Question 11 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 11:</strong> What is the purpose of Azure Data Lake Storage?</p>
+                <div>
+                    <input type="radio" id="q11-a" name="q11" value="A">
+                    <label for="q11-a">To store relational data</label>
+                </div>
+                <div>
+                    <input type="radio" id="q11-b" name="q11" value="B">
+                    <label for="q11-b">To store large-scale analytics data</label>
+                </div>
+                <div>
+                    <input type="radio" id="q11-c" name="q11" value="C">
+                    <label for="q11-c">To store virtual machine images</label>
+                </div>
+                <div>
+                    <input type="radio" id="q11-d" name="q11" value="D">
+                    <label for="q11-d">To store application logs</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Azure Data Lake Storage is optimized for analytics workloads that require handling vast volumes of structured and unstructured data. It supports hierarchical namespaces and integrates seamlessly with tools like Azure Synapse and HDInsight.
+                </div>
+
+            </div>
+
+            <!-- Question 12 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 12:</strong> Which of the following is NOT a feature of Azure Blob Storage?</p>
+                <div>
+                    <input type="radio" id="q12-a" name="q12" value="A">
+                    <label for="q12-a">Append blobs for logging</label>
+                </div>
+                <div>
+                    <input type="radio" id="q12-b" name="q12" value="B">
+                    <label for="q12-b">Block blobs for large files</label>
+                </div>
+                <div>
+                    <input type="radio" id="q12-c" name="q12" value="C">
+                    <label for="q12-c">Page blobs for virtual machine disks</label>
+                </div>
+                <div>
+                    <input type="radio" id="q12-d" name="q12" value="D">
+                    <label for="q12-d">Relational database storage</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Azure Blob Storage supports block blobs for large files, append blobs for logs, and page blobs for virtual machine disks. It does not support relational database features like indexing, querying, or transactions — those are handled by services like Azure SQL.
+                </div>
+
+            </div>
+
+            <!-- Question 13 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 13:</strong> What is the purpose of Azure Storage Explorer?</p>
+                <div>
+                    <input type="radio" id="q13-a" name="q13" value="A">
+                    <label for="q13-a">To monitor Azure resources</label>
+                </div>
+                <div>
+                    <input type="radio" id="q13-b" name="q13" value="B">
+                    <label for="q13-b">To manage and access Azure Storage data</label>
+                </div>
+                <div>
+                    <input type="radio" id="q13-c" name="q13" value="C">
+                    <label for="q13-c">To deploy Azure virtual machines</label>
+                </div>
+                <div>
+                    <input type="radio" id="q13-d" name="q13" value="D">
+                    <label for="q13-d">To configure Azure subscriptions</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Azure Storage Explorer is a free desktop tool that allows you to easily manage your storage accounts and resources like blobs, tables, queues, and files. It's especially useful for developers and administrators for testing and monitoring.
+                </div>
+
+            </div>
+
+            <!-- Question 14 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 14:</strong> Which of the following is a benefit of Geo-Redundant Storage (GRS)?</p>
+                <div>
+                    <input type="radio" id="q14-a" name="q14" value="A">
+                    <label for="q14-a">Data is replicated within a single data center</label>
+                </div>
+                <div>
+                    <input type="radio" id="q14-b" name="q14" value="B">
+                    <label for="q14-b">Data is replicated across multiple regions</label>
+                </div>
+                <div>
+                    <input type="radio" id="q14-c" name="q14" value="C">
+                    <label for="q14-c">Data is only accessible from the primary region</label>
+                </div>
+                <div>
+                    <input type="radio" id="q14-d" name="q14" value="D">
+                    <label for="q14-d">Data is not replicated</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Geo-Redundant Storage (GRS) replicates your data asynchronously to a secondary region hundreds of miles away from the primary one. This provides higher durability and ensures disaster recovery in case of region-wide failures.
+                </div>
+
+            </div>
+
+            <!-- Question 15 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 15:</strong> What is the maximum retention period for Azure Blob Storage soft
+                    delete?</p>
+                <div>
+                    <input type="radio" id="q15-a" name="q15" value="A">
+                    <label for="q15-a">7 days</label>
+                </div>
+                <div>
+                    <input type="radio" id="q15-b" name="q15" value="B">
+                    <label for="q15-b">30 days</label>
+                </div>
+                <div>
+                    <input type="radio" id="q15-c" name="q15" value="C">
+                    <label for="q15-c">365 days</label>
+                </div>
+                <div>
+                    <input type="radio" id="q15-d" name="q15" value="D">
+                    <label for="q15-d">Unlimited</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Azure Blob Storage soft delete allows you to recover accidentally deleted blobs within a defined retention period. The maximum retention period you can set is 365 days, providing a safeguard against data loss in production environments.
+                </div>
+
+            </div>
+
+            <!-- Question 16 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 16:</strong> Which of the following is true about Azure Managed Disks?</p>
+                <div>
+                    <input type="radio" id="q16-a" name="q16" value="A">
+                    <label for="q16-a">They are stored in Azure Blob Storage</label>
+                </div>
+                <div>
+                    <input type="radio" id="q16-b" name="q16" value="B">
+                    <label for="q16-b">They require manual scaling</label>
+                </div>
+                <div>
+                    <input type="radio" id="q16-c" name="q16" value="C">
+                    <label for="q16-c">They are not encrypted by default</label>
+                </div>
+                <div>
+                    <input type="radio" id="q16-d" name="q16" value="D">
+                    <label for="q16-d">They cannot be used with virtual machines</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Azure Managed Disks are backed by page blobs in Azure Blob Storage. They simplify disk management by abstracting storage accounts, offering scalability, encryption, snapshots, and easy integration with Azure VMs.
+                </div>
+
+            </div>
+
+            <!-- Question 17 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 17:</strong> What is the purpose of Azure Storage Access Keys?</p>
+                <div>
+                    <input type="radio" id="q17-a" name="q17" value="A">
+                    <label for="q17-a">To encrypt data in storage</label>
+                </div>
+                <div>
+                    <input type="radio" id="q17-b" name="q17" value="B">
+                    <label for="q17-b">To provide access to storage account resources</label>
+                </div>
+                <div>
+                    <input type="radio" id="q17-c" name="q17" value="C">
+                    <label for="q17-c">To monitor storage account usage</label>
+                </div>
+                <div>
+                    <input type="radio" id="q17-d" name="q17" value="D">
+                    <label for="q17-d">To configure storage account replication</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Azure Storage Access Keys are used to authenticate and authorize access to your storage account’s data. These keys are sensitive and should be stored securely or rotated periodically. They grant full access to all data and services in the account.
+                </div>
+
+            </div>
+
+            <!-- Question 18 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 18:</strong> Which of the following is a valid Azure Blob Storage tier?</p>
+                <div>
+                    <input type="radio" id="q18-a" name="q18" value="A">
+                    <label for="q18-a">Hot, Cold, Archive</label>
+                </div>
+                <div>
+                    <input type="radio" id="q18-b" name="q18" value="B">
+                    <label for="q18-b">Basic, Standard, Premium</label>
+                </div>
+                <div>
+                    <input type="radio" id="q18-c" name="q18" value="C">
+                    <label for="q18-c">Free, Paid, Enterprise</label>
+                </div>
+                <div>
+                    <input type="radio" id="q18-d" name="q18" value="D">
+                    <label for="q18-d">Local, Regional, Global</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Azure Blob Storage supports access tiers: Hot (frequent access), Cool (infrequent access), and Archive (rare access). These tiers help optimize cost based on access frequency and data retention needs, without sacrificing durability.
+                </div>
+
+            </div>
+
+            <!-- Question 19 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 19:</strong> What is the purpose of Azure Blob Lifecycle Management?</p>
+                <div>
+                    <input type="radio" id="q19-a" name="q19" value="A">
+                    <label for="q19-a">To manage virtual machine lifecycles</label>
+                </div>
+                <div>
+                    <input type="radio" id="q19-b" name="q19" value="B">
+                    <label for="q19-b">To automate blob data movement between tiers</label>
+                </div>
+                <div>
+                    <input type="radio" id="q19-c" name="q19" value="C">
+                    <label for="q19-c">To monitor storage account performance</label>
+                </div>
+                <div>
+                    <input type="radio" id="q19-d" name="q19" value="D">
+                    <label for="q19-d">To configure storage account security</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Azure Blob Lifecycle Management enables automatic transition of blobs between access tiers (e.g., hot to cool or archive) based on rules. It helps manage storage costs efficiently by applying policies over blob metadata and age.
+                </div>
+
+            </div>
+
+            <!-- Question 20 -->
+            <div class="question border-bottom mb-3">
+                <p><strong>Question 20:</strong> Which of the following is true about Azure Storage Account encryption?
+                </p>
+                <div>
+                    <input type="radio" id="q20-a" name="q20" value="A">
+                    <label for="q20-a">It is enabled by default</label>
+                </div>
+                <div>
+                    <input type="radio" id="q20-b" name="q20" value="B">
+                    <label for="q20-b">It must be manually enabled</label>
+                </div>
+                <div>
+                    <input type="radio" id="q20-c" name="q20" value="C">
+                    <label for="q20-c">It only applies to Blob Storage</label>
+                </div>
+                <div>
+                    <input type="radio" id="q20-d" name="q20" value="D">
+                    <label for="q20-d">It does not support customer-managed keys</label>
+                </div>
+                <div class="explanation text-muted small" style="display:none;">
+                    Azure Storage Account encryption is enabled by default using Microsoft-managed keys. You can also configure customer-managed keys for enhanced security and compliance. All data is encrypted at rest and in transit.
+                </div>
+
+            </div>
+        </div>
+
+        <button id="submitBtn" type="button" class="btn btn-primary" onclick="calculateScore()">Submit</button>
+    </form>
+
+    <div id="result" class="mt-4" style="display:none;">
+        <div class="card shadow-sm border-success">
+            <div class="card-body">
+                <h3 class="card-title">Your Results</h3>
+                <p id="score" class="card-text"></p>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script>
+        let totalTime = 5 * 60;
+    let timerInterval;
+
+    function startTimer() {
+        const display = document.getElementById("timerDisplay");
+        const box = document.getElementById("quiz-timer-box");
+
+        timerInterval = setInterval(() => {
+            const minutes = Math.floor(totalTime / 60);
+            const seconds = totalTime % 60;
+            display.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+            // Color transitions
+            if (totalTime <= 60) {
+                box.classList.remove("timer-orange");
+                box.classList.add("timer-red");
+            } else if (totalTime <= 180) {
+                box.classList.remove("timer-red");
+                box.classList.add("timer-orange");
+            } else {
+                box.classList.remove("timer-orange", "timer-red");
+            }
+
+            if (totalTime <= 0) {
+                clearInterval(timerInterval);
+                alert("Time is up! Submitting your quiz...");
+                calculateScore();
+            }
+
+            totalTime--;
+        }, 1000);
+    }
+
+    window.onload = startTimer;
+
+    const correctAnswers = [
+        "B", "D", "B", "A", "A", "B", "A", "C", "A", "A",
+        "B", "D", "B", "B", "C", "A", "B", "A", "B", "A"
+    ];
+
+            function calculateScore() {
+        clearInterval(timerInterval);
+        let score = 0;
+        let totalQuestions = correctAnswers.length;
+
+        for (let i = 1; i <= totalQuestions; i++) {
+            const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+            const correctAnswer = correctAnswers[i - 1];
+            const options = document.querySelectorAll(`input[name="q${i}"]`);
+            const explanation = document.querySelector(`#questions .question:nth-child(${i}) .explanation`);
+
+            if (explanation) {
+                explanation.style.display = "block";
+            }
+
+            let correctOptionEl = null;
+            options.forEach(opt => {
+                if (opt.value === correctAnswer) {
+                    correctOptionEl = opt;
+                }
+            });
+
+            if (selectedOption) {
+                if (selectedOption.value === correctAnswer) {
+                    score += 5;
+                    selectedOption.parentElement.style.backgroundColor = "#d4edda"; // green
+                } else {
+                    selectedOption.parentElement.style.backgroundColor = "#f8d7da"; // red
+                    if (correctOptionEl) {
+                        correctOptionEl.parentElement.style.backgroundColor = "#d4edda"; // green
+                    }
+                }
+            } else {
+                if (correctOptionEl) {
+                    correctOptionEl.parentElement.style.backgroundColor = "#d4edda"; // green
+                }
+            }
+
+            options.forEach(opt => opt.disabled = true);
+        }
+
+        document.getElementById("score").innerText = `You scored ${score} out of ${totalQuestions * 5}`;
+        document.getElementById("result").style.display = "block";
+        const submitBtn = document.getElementById("submitBtn");
+        submitBtn.innerText = "Retake Quiz";
+        submitBtn.classList.remove("btn-primary");
+        submitBtn.classList.add("btn-outline-secondary");
+        submitBtn.onclick = function () {
+                window.location.href = '/ChoiceQuestions/@ViewData["CurrentPage"]';
+            };        }
+</script>

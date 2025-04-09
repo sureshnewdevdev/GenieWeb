@@ -1,0 +1,198 @@
+﻿@{
+    ViewData["Title"] = "Implementing Interface Inheritance in C#";
+}
+
+<!-- Section: Introduction to Interface Inheritance -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is Interface Inheritance in C#?</h2>
+    <p class="lead">
+        <b>Interface Inheritance</b> in C# allows an interface to inherit from one or more other interfaces. This helps in designing modular and scalable applications by promoting reusability and flexibility.
+    </p>
+</section>
+
+<!-- Section: Key Features of Interface Inheritance -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Interface Inheritance</h2>
+    <ul class="list-group">
+        <li class="list-group-item">An interface can inherit from multiple interfaces.</li>
+        <li class="list-group-item">Derived interfaces inherit all methods of base interfaces.</li>
+        <li class="list-group-item">Interfaces cannot inherit from classes.</li>
+        <li class="list-group-item">All methods remain abstract, with no implementation.</li>
+    </ul>
+</section>
+
+<!-- Section: Example of Interface Inheritance -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Inheriting Multiple Interfaces</h2>
+    <p class="lead">
+        The following example demonstrates how an interface can inherit from multiple interfaces.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Interface Inheritance</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>interface IAnimal
+{
+    void Eat();
+}
+
+interface IPet
+{
+    void Play();
+}
+
+// Interface inheriting multiple interfaces
+interface IDog : IAnimal, IPet
+{
+    void Bark();
+}
+
+// Implementing the interface
+public class Dog : IDog
+{
+    public void Eat()
+    {
+        Console.WriteLine("Dog is eating.");
+    }
+
+    public void Play()
+    {
+        Console.WriteLine("Dog is playing.");
+    }
+
+    public void Bark()
+    {
+        Console.WriteLine("Dog barks!");
+    }
+}
+
+// Usage
+Dog myDog = new Dog();
+myDog.Eat();  // Output: Dog is eating.
+myDog.Play(); // Output: Dog is playing.
+myDog.Bark(); // Output: Dog barks!</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Here, <code>IDog</code> inherits from both <code>IAnimal</code> and <code>IPet</code>, and <code>Dog</code> provides implementations for all methods.
+    </p>
+</section>
+
+<!-- Section: Interface Inheritance vs Class Inheritance -->
+<section class="mb-5">
+    <h2 class="text-secondary">Interface Inheritance vs. Class Inheritance</h2>
+    <p class="lead">
+        While both interface and class inheritance allow reusability, they have key differences.
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Feature</th>
+                <th>Interface Inheritance</th>
+                <th>Class Inheritance</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Base Type</td>
+                <td>Can inherit from multiple interfaces.</td>
+                <td>Can inherit from only one base class.</td>
+            </tr>
+            <tr>
+                <td>Implementation</td>
+                <td>Defines only method signatures; implementation is provided by classes.</td>
+                <td>Base class can provide default implementations.</td>
+            </tr>
+            <tr>
+                <td>Fields & Constructors</td>
+                <td>Cannot contain fields or constructors.</td>
+                <td>Can contain fields, constructors, and methods.</td>
+            </tr>
+            <tr>
+                <td>Best Use Case</td>
+                <td>When defining behavior contracts for multiple classes.</td>
+                <td>When extending and reusing functionality in a class hierarchy.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Default Methods in Interface Inheritance (C# 8+) -->
+<section class="mb-5">
+    <h2 class="text-secondary">Default Methods in Interface Inheritance (C# 8+)</h2>
+    <p class="lead">
+        Starting from C# 8.0, interfaces can contain default implementations.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Default Method in Interface</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>interface IAnimal
+{
+    void Eat();
+
+    // Default implementation
+    void Sleep()
+    {
+        Console.WriteLine("Sleeping...");
+    }
+}
+
+public class Cat : IAnimal
+{
+    public void Eat()
+    {
+        Console.WriteLine("Cat is eating.");
+    }
+}
+
+// Usage
+Cat myCat = new Cat();
+myCat.Eat(); // Output: Cat is eating.
+
+// myCat.Sleep(); // Error: Default methods require explicit interface reference
+
+IAnimal animal = new Cat();
+animal.Sleep(); // Output: Sleeping...</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Here, the method <code>Sleep()</code> has a default implementation and must be accessed via an interface reference.
+    </p>
+</section>
+
+<!-- Section: When to Use Interface Inheritance? -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Interface Inheritance?</h2>
+    <ul class="list-group">
+        <li class="list-group-item">When multiple interfaces share common behaviors.</li>
+        <li class="list-group-item">To allow classes to implement multiple behaviors while keeping code modular.</li>
+        <li class="list-group-item">For designing reusable and loosely coupled components.</li>
+        <li class="list-group-item">To enforce consistent behavior across multiple implementations.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("CreatingInterfaces", "CSharp")" class="btn btn-outline-secondary">Previous: Creating Interfaces</a>
+    <a href="@Url.Action("DeclaringPropertiesInterfaces", "CSharp")" class="btn btn-outline-secondary">Next: Declaring Properties in Interfaces</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

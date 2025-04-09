@@ -1,0 +1,185 @@
+﻿@{
+    ViewData["Title"] = "Garbage Collection Algorithm in C#";
+}
+
+<!-- Section: Introduction to Garbage Collection Algorithm -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is the Garbage Collection Algorithm in C#?</h2>
+    <p class="lead">
+        The <b>Garbage Collection (GC) Algorithm</b> in C# is an automatic memory management process that reclaims unused memory by identifying and removing objects that are no longer accessible. It improves application performance and prevents memory leaks.
+    </p>
+</section>
+
+<!-- Section: Key Features of Garbage Collection Algorithm -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of the Garbage Collection Algorithm</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Automatically frees up memory occupied by unreachable objects.</li>
+        <li class="list-group-item">Works in **three generations (Gen 0, Gen 1, Gen 2)** for optimization.</li>
+        <li class="list-group-item">Prevents memory fragmentation and improves performance.</li>
+        <li class="list-group-item">Runs in the background without interrupting application execution.</li>
+    </ul>
+</section>
+
+<!-- Section: How the Garbage Collector Works -->
+<section class="mb-5">
+    <h2 class="text-secondary">How Does the Garbage Collection Algorithm Work?</h2>
+    <p class="lead">
+        The GC algorithm follows a three-step process:
+    </p>
+
+    <ol class="list-group list-group-numbered">
+        <li class="list-group-item">**Mark** - Identifies objects that are still in use.</li>
+        <li class="list-group-item">**Sweep** - Removes objects that are no longer accessible.</li>
+        <li class="list-group-item">**Compact** - Rearranges memory to optimize space.</li>
+    </ol>
+</section>
+
+<!-- Section: Generations in Garbage Collection -->
+<section class="mb-5">
+    <h2 class="text-secondary">Generational Garbage Collection</h2>
+    <p class="lead">
+        The garbage collector categorizes objects into three generations:
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Generation</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><b>Gen 0</b></td>
+                <td>Contains newly allocated objects; frequent collections.</td>
+                <td>Local variables in a method.</td>
+            </tr>
+            <tr>
+                <td><b>Gen 1</b></td>
+                <td>Objects that survive Gen 0 but are still needed.</td>
+                <td>Short-lived objects retained for optimization.</td>
+            </tr>
+            <tr>
+                <td><b>Gen 2</b></td>
+                <td>Long-lived objects; rarely collected.</td>
+                <td>Static objects, database connections.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Example of Garbage Collection Algorithm -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Garbage Collection in Action</h2>
+    <p class="lead">
+        The following example demonstrates how the garbage collection algorithm works in C#.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Demonstrating Generational Garbage Collection</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine($"Total Memory Before GC: {GC.GetTotalMemory(false)} bytes");
+
+        for (int i = 0; i < 10000; i++)
+        {
+            object obj = new object(); // Allocated in Gen 0
+        }
+
+        Console.WriteLine($"Total Memory After Object Creation: {GC.GetTotalMemory(false)} bytes");
+
+        GC.Collect(); // Force Garbage Collection
+        GC.WaitForPendingFinalizers();
+
+        Console.WriteLine($"Total Memory After GC: {GC.GetTotalMemory(false)} bytes");
+        Console.WriteLine($"Current Generation of a new object: {GC.GetGeneration(new object())}");
+    }
+}
+
+// Output (Example):
+// Total Memory Before GC: 100000 bytes
+// Total Memory After Object Creation: 200000 bytes
+// Total Memory After GC: 100000 bytes
+// Current Generation of a new object: 0</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>GC.Collect()</code> method triggers garbage collection, reclaiming unused memory.
+    </p>
+</section>
+
+<!-- Section: Weak References and GC -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Weak References with Garbage Collection</h2>
+    <p class="lead">
+        Weak references allow objects to be garbage-collected while still accessible in memory.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using WeakReference to Allow GC</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        WeakReference weakRef = new WeakReference(new object());
+
+        Console.WriteLine($"Is Object Alive: {weakRef.IsAlive}");
+        GC.Collect();
+        Console.WriteLine($"Is Object Alive After GC: {weakRef.IsAlive}");
+    }
+}
+
+// Output:
+// Is Object Alive: True
+// Is Object Alive After GC: False</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>WeakReference</code> allows the object to be collected while still accessible.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Garbage Collection -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Garbage Collection</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Avoid excessive use of <code>GC.Collect()</code> as it may impact performance.</li>
+        <li class="list-group-item">Use <code>IDisposable</code> for releasing unmanaged resources like file handles.</li>
+        <li class="list-group-item">Monitor memory usage with profiling tools to detect memory leaks.</li>
+        <li class="list-group-item">Use weak references to allow objects to be garbage-collected when necessary.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("RoleOfGarbageCollector", "CSharp")" class="btn btn-outline-secondary">Previous: Role of Garbage Collector</a>
+    <a href="@Url.Action("FinalizeVsDispose", "CSharp")" class="btn btn-outline-secondary">Next: Finalize vs Dispose</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

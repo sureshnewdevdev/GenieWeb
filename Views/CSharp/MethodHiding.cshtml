@@ -2,129 +2,168 @@
     ViewData["Title"] = "Method Hiding in C#";
 }
 
-<!-- Top Links Section -->
-@* <div class="top-links d-flex justify-content-start mb-4">
-    <a href="/InterviewQA" class="btn btn-success me-2">Interview Q&A</a>
-    <a href="/FreeMCQ" class="btn btn-primary me-2">Free MCQ Question and Answer</a>
-    <a href="/VideoTutorial" class="btn btn-info">Free Video Tutorial</a>
-</div> *@
-
-<!-- Main Heading -->
-<h1 class="display-4 text-primary mb-4">Method Hiding in C#</h1>
-
 <!-- Section: Introduction to Method Hiding -->
 <section class="mb-5">
-    <h2 class="text-secondary">What is Method Hiding?</h2>
+    <h2 class="text-secondary">What is Method Hiding in C#?</h2>
     <p class="lead">
-        Method hiding in C# occurs when a derived class declares a method that hides an inherited method from the base class. Method hiding is achieved using the <code>new</code> keyword. It allows the derived class to provide its own implementation while "hiding" the base class version.
+        <b>Method Hiding</b> in C# allows a derived class to define a method with the same name as a method in its base class, effectively hiding the base class method. Unlike <b>Method Overriding</b>, method hiding does not involve polymorphism.
     </p>
 </section>
 
-<!-- Section: Why Use Method Hiding? -->
+<!-- Section: Key Features of Method Hiding -->
 <section class="mb-5">
-    <h2 class="text-secondary">Why Use Method Hiding?</h2>
-    <p class="lead">
-        Method hiding allows developers to redefine base class methods in the derived class. Unlike method overriding, method hiding does not replace the base class method but hides it when accessed via a derived class instance.
-    </p>
+    <h2 class="text-secondary">Key Features of Method Hiding</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Uses the <code>new</code> keyword to hide the base class method.</li>
+        <li class="list-group-item">The base class method is still accessible through base class references.</li>
+        <li class="list-group-item">Does not support runtime polymorphism.</li>
+        <li class="list-group-item">Can be useful when a derived class needs a completely different implementation.</li>
+    </ul>
 </section>
 
-<!-- Section: Example of Method Hiding in C# -->
+<!-- Section: Example of Method Hiding -->
 <section class="mb-5">
-    <h2 class="text-secondary">Example: Method Hiding in C#</h2>
+    <h2 class="text-secondary">Example of Method Hiding</h2>
     <p class="lead">
-        Below is an example demonstrating method hiding. The <code>Vehicle</code> class has a <code>DisplayInfo</code> method, and the <code>Car</code> class hides this method using the <code>new</code> keyword.
+        The following example demonstrates how method hiding works using the <code>new</code> keyword.
     </p>
 
-    <!-- Example Code Block with Copy Option -->
-    <h3 class="text-info">Example Code:</h3>
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example of Method Hiding:</h3>
     <div class="code-snippet position-relative bg-light p-3 rounded border">
         <pre class="mb-0">
-<code>public class Vehicle
+<code>public class BaseClass
 {
-    public void DisplayInfo()
+    public void Show()
     {
-        Console.WriteLine("This is a vehicle.");
+        Console.WriteLine("Base class Show method.");
     }
 }
 
-public class Car : Vehicle
+public class DerivedClass : BaseClass
 {
-    // Method hiding using the 'new' keyword
-    public new void DisplayInfo()
+    public new void Show()
     {
-        Console.WriteLine("This is a car.");
+        Console.WriteLine("Derived class Show method.");
     }
 }
 
 // Usage
-Vehicle vehicle = new Vehicle();
-vehicle.DisplayInfo();  // Output: This is a vehicle.
+BaseClass baseObj = new BaseClass();
+baseObj.Show();  // Output: Base class Show method.
 
-Car car = new Car();
-car.DisplayInfo();  // Output: This is a car.
+DerivedClass derivedObj = new DerivedClass();
+derivedObj.Show();  // Output: Derived class Show method.
 
-Vehicle vehicleAsCar = new Car();
-vehicleAsCar.DisplayInfo();  // Output: This is a vehicle (base class method is called)
-</code>
+BaseClass refObj = new DerivedClass();
+refObj.Show();  // Output: Base class Show method.</code>
         </pre>
         <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
     </div>
 
     <p class="text-muted">
-        In this example, the <code>DisplayInfo</code> method is hidden in the derived class <code>Car</code> using the <code>new</code> keyword. When the <code>DisplayInfo</code> method is called via the base class reference, the base class version of the method is invoked.
+        In this example, the <code>Show()</code> method in the derived class hides the base class method. However, when accessed via a base class reference, the base method is called.
     </p>
-</section>
-
-<!-- Section: Key Characteristics of Method Hiding -->
-<section class="mb-5">
-    <h2 class="text-secondary">Key Characteristics of Method Hiding</h2>
-    <ul class="list-group">
-        <li class="list-group-item">Method hiding uses the <code>new</code> keyword to hide the base class method in the derived class.</li>
-        <li class="list-group-item">If a method is hidden in a derived class, the base class version is still accessible through a base class reference.</li>
-        <li class="list-group-item">Unlike method overriding, method hiding does not require the base class method to be marked as <code>virtual</code>.</li>
-    </ul>
 </section>
 
 <!-- Section: Method Hiding vs Method Overriding -->
 <section class="mb-5">
     <h2 class="text-secondary">Method Hiding vs. Method Overriding</h2>
     <p class="lead">
-        Method hiding and method overriding allow derived classes to modify behavior from base classes, but they differ in their execution:
+        While both techniques allow a derived class to redefine methods from a base class, they have key differences.
     </p>
-    <ul class="list-group">
-        <li class="list-group-item"><b>Method Hiding:</b> Uses the <code>new</code> keyword to hide the base class method. The base class method can still be accessed using a base class reference.</li>
-        <li class="list-group-item"><b>Method Overriding:</b> Uses the <code>override</code> keyword to replace the base class method. The base class method cannot be accessed from a derived class instance.</li>
-    </ul>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Feature</th>
+                <th>Method Hiding</th>
+                <th>Method Overriding</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Keyword Used</td>
+                <td><code>new</code></td>
+                <td><code>override</code></td>
+            </tr>
+            <tr>
+                <td>Base Method Requirement</td>
+                <td>Can be any method (not necessarily virtual or abstract).</td>
+                <td>Must be marked as <code>virtual</code>, <code>abstract</code>, or <code>override</code> in the base class.</td>
+            </tr>
+            <tr>
+                <td>Polymorphism</td>
+                <td>Does not support runtime polymorphism.</td>
+                <td>Supports runtime polymorphism.</td>
+            </tr>
+            <tr>
+                <td>Base Method Accessibility</td>
+                <td>Base method can still be accessed through base class reference.</td>
+                <td>Derived class method completely replaces the base method.</td>
+            </tr>
+        </tbody>
+    </table>
 </section>
 
-<!-- Section: Rules for Method Hiding -->
+<!-- Section: Accessing Hidden Methods -->
 <section class="mb-5">
-    <h2 class="text-secondary">Rules for Method Hiding</h2>
-    <ul class="list-group">
-        <li class="list-group-item">The <code>new</code> keyword must be used to hide a base class method in the derived class.</li>
-        <li class="list-group-item">The method signature in the derived class must match the base class method.</li>
-        <li class="list-group-item">The base class method is still accessible when using a base class reference, even if it’s hidden in the derived class.</li>
-    </ul>
+    <h2 class="text-secondary">Accessing Hidden Methods Using Base Keyword</h2>
+    <p class="lead">
+        Even if a method is hidden in the derived class, it can still be accessed using the <code>base</code> keyword.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example of Accessing Hidden Methods:</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>public class Parent
+{
+    public void Display()
+    {
+        Console.WriteLine("Parent class Display method.");
+    }
+}
+
+public class Child : Parent
+{
+    public new void Display()
+    {
+        base.Display();  // Calls base class method
+        Console.WriteLine("Child class Display method.");
+    }
+}
+
+// Usage
+Child obj = new Child();
+obj.Display();
+
+// Output:
+// Parent class Display method.
+// Child class Display method.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Here, <code>base.Display()</code> allows the derived class to call the hidden method from the base class.
+    </p>
 </section>
 
-<!-- Section: Key Points to Remember -->
+<!-- Section: When to Use Method Hiding -->
 <section class="mb-5">
-    <h2 class="text-secondary">Key Points to Remember</h2>
+    <h2 class="text-secondary">When to Use Method Hiding?</h2>
     <ul class="list-group">
-        <li class="list-group-item">Method hiding allows a derived class to hide an inherited method from the base class using the <code>new</code> keyword.</li>
-        <li class="list-group-item">The hidden method in the base class can still be accessed via a base class reference.</li>
-        <li class="list-group-item">Method hiding is different from method overriding, where the base class method is replaced.</li>
+        <li class="list-group-item">When a derived class needs a completely different implementation.</li>
+        <li class="list-group-item">When base class functionality should still be accessible.</li>
+        <li class="list-group-item">When the base method is not <code>virtual</code> or <code>abstract</code>, preventing overriding.</li>
     </ul>
 </section>
 
-<!-- Previous Topic Link -->
-<div class="previous-topic mt-4">
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
     <a href="@Url.Action("OperatorOverloading", "CSharp")" class="btn btn-outline-secondary">Previous: Operator Overloading</a>
-</div>
-
-<!-- Next Topic Link -->
-<div class="next-topic mt-4">
-    <a href="@Url.Action("AccessModifiers", "CSharp")" class="btn btn-outline-secondary">Next: Access modifiers: private, pubic, protected, internal, protected internal, new</a>
+    <a href="@Url.Action("AnonymousTypes", "CSharp")" class="btn btn-outline-secondary">Next: Anonymous Types</a>
 </div>
 
 <!-- JavaScript for Copy Functionality -->

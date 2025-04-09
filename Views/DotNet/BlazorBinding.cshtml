@@ -1,0 +1,137 @@
+@{
+    ViewData["Title"] = "Blazor Data Binding and Event Handling";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "BlazorBinding";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Data binding in Blazor connects your UI and data models seamlessly. Combined with event handling, it enables responsive and interactive web applications written entirely in C#.
+    </p>
+    <hr />
+
+    <!-- Section: One-Way Binding -->
+    <div class="mt-5">
+        <h2>One-Way Binding</h2>
+        <p>
+            One-way binding displays data in the UI. It updates the UI when the data changes, but not the other way around.
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>&lt;p&gt;Product Name: @@ProductName&lt;/p&gt;
+
+@@code {
+    string ProductName = "Blazor Book";
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Two-Way Binding -->
+    <div class="mt-5">
+        <h3>Two-Way Binding with @@bind</h3>
+        <p>
+            Use <code>@@bind</code> to synchronize input fields with variables:
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>&lt;input @@bind="UserName" /&gt;
+&lt;p&gt;Hello, @@UserName!&lt;/p&gt;
+
+@@code {
+    string UserName = "";
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Event Handling -->
+    <div class="mt-5">
+        <h3>Handling Events</h3>
+        <p>Blazor supports C# methods for events like <code>onclick</code>, <code>oninput</code>, <code>onsubmit</code> etc.</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>&lt;button @@onclick="ShowAlert"&gt;Click Me&lt;/button&gt;
+
+@@code {
+    void ShowAlert()
+    {
+        Console.WriteLine("Button clicked!");
+    }
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Binding to Object Properties -->
+    <div class="mt-5">
+        <h3>Binding to Complex Objects</h3>
+        <p>Use <code>@@bind</code> to bind form fields to object properties:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>@@code {
+    class Person
+    {
+        public string Name { get; set; }
+    }
+
+    Person person = new();
+}
+&lt;input @@bind="person.Name" /&gt;
+&lt;p&gt;Name: @@person.Name&lt;/p&gt;</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Form Handling -->
+    <div class="mt-5">
+        <h3>Form Submit Handling</h3>
+        <p>Use <code>EditForm</code> with a model and event callbacks:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>@@code {
+    Person person = new();
+
+    void HandleSubmit()
+    {
+        Console.WriteLine("Submitted: " + person.Name);
+    }
+}
+&lt;EditForm Model="person" OnValidSubmit="HandleSubmit"&gt;
+    &lt;InputText @@bind-Value="person.Name" /&gt;
+    &lt;button&gt;Submit&lt;/button&gt;
+&lt;/EditForm&gt;</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Blazor’s powerful data binding and event handling features help you create rich, interactive UIs quickly. In the next lesson, we’ll explore how to call JavaScript functions from Blazor using JS Interop.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("BlazorComponents", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: Creating Components
+        </a>
+        <a href="@Url.Action("BlazorJSInterop", "DotNet")" class="btn btn-outline-secondary">
+            Next: JavaScript Interop in Blazor &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

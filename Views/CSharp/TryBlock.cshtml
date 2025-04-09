@@ -1,0 +1,187 @@
+﻿@{
+    ViewData["Title"] = "Try Block in C#";
+}
+
+<!-- Section: Introduction to Try Block -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is the Try Block in C#?</h2>
+    <p class="lead">
+        The <b>try block</b> in C# is used to wrap code that might cause an exception. If an error occurs within the try block, it is handled using <code>catch</code> blocks, preventing abrupt program termination.
+    </p>
+</section>
+
+<!-- Section: Key Features of Try Block -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Try Block</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Encapsulates code that might throw exceptions.</li>
+        <li class="list-group-item">Works in conjunction with <code>catch</code> blocks to handle exceptions.</li>
+        <li class="list-group-item">Can include a <code>finally</code> block for cleanup tasks.</li>
+        <li class="list-group-item">Supports multiple catch blocks for different exception types.</li>
+    </ul>
+</section>
+
+<!-- Section: Example of Try Block -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Handling Division by Zero Exception</h2>
+    <p class="lead">
+        The following example demonstrates how a try block handles an exception when attempting to divide by zero.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Try and Catch</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            int num1 = 10, num2 = 0;
+            int result = num1 / num2; // This will cause a DivideByZeroException
+            Console.WriteLine($"Result: {result}");
+        }
+        catch (DivideByZeroException ex)
+        {
+            Console.WriteLine($"Exception Caught: {ex.Message}");
+        }
+    }
+}
+
+// Output:
+// Exception Caught: Attempted to divide by zero.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Here, the <code>try</code> block contains code that may cause an exception. When a division by zero occurs, the <code>catch</code> block handles the error gracefully.
+    </p>
+</section>
+
+<!-- Section: Using Multiple Catch Blocks -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Multiple Catch Blocks</h2>
+    <p class="lead">
+        C# allows multiple <code>catch</code> blocks to handle different types of exceptions separately.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Handling Multiple Exception Types</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            string input = "abc";
+            int num = int.Parse(input); // Will throw FormatException
+        }
+        catch (FormatException ex)
+        {
+            Console.WriteLine($"Format Error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"General Error: {ex.Message}");
+        }
+    }
+}
+
+// Output:
+// Format Error: Input string was not in a correct format.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The program first catches a <code>FormatException</code>. If another type of exception occurs, the general <code>Exception</code> block will handle it.
+    </p>
+</section>
+
+<!-- Section: Using Finally Block with Try Block -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Finally Block</h2>
+    <p class="lead">
+        The <code>finally</code> block executes code regardless of whether an exception occurs, making it useful for resource cleanup.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Finally Block</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        StreamReader reader = null;
+        try
+        {
+            reader = new StreamReader("nonexistentfile.txt");
+            Console.WriteLine(reader.ReadToEnd());
+        }
+        catch (FileNotFoundException ex)
+        {
+            Console.WriteLine($"File Not Found: {ex.Message}");
+        }
+        finally
+        {
+            if (reader != null)
+            {
+                reader.Close();
+                Console.WriteLine("File closed.");
+            }
+        }
+    }
+}
+
+// Output:
+// File Not Found: Could not find file 'nonexistentfile.txt'.
+// File closed.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>finally</code> block ensures that the file is closed, even if an exception occurs.
+    </p>
+</section>
+
+<!-- Section: Try-Catch-Finally Best Practices -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using Try Blocks</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Only wrap code that is likely to throw exceptions inside the <code>try</code> block.</li>
+        <li class="list-group-item">Use specific <code>catch</code> blocks before a general <code>Exception</code> block.</li>
+        <li class="list-group-item">Ensure the <code>finally</code> block releases resources (e.g., closing files, database connections).</li>
+        <li class="list-group-item">Avoid catching exceptions without handling them properly.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("ExceptionClassHierarchy", "CSharp")" class="btn btn-outline-secondary">Previous: Exception Class Hierarchy</a>
+    <a href="@Url.Action("MultipleCatchBlocks", "CSharp")" class="btn btn-outline-secondary">Next: Multiple Catch Blocks</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

@@ -1,0 +1,136 @@
+﻿@{
+    ViewData["Title"] = "Azure Logic Apps – Blob Trigger to SQL Integration";
+    ViewData["ActiveMenu"] = "DataStorage";
+    ViewData["ActivePage"] = "IntroductionToLogicApps";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Azure Logic Apps: Trigger on Blob Event, Filter Content & Insert into SQL</h2>
+
+    <h4 class="text-success">🔹 Step 1: Create a Logic App</h4>
+    <ol>
+        <li>Go to Azure Portal & search for <b>Logic Apps</b>.</li>
+        <li>Click <b>“Create”</b> → Choose <b>“Logic App (Consumption)”</b>.</li>
+        <li>Set the resource group, name, and region.</li>
+        <li>Click <b>“Review + Create”</b> and then <b>“Create”</b>.</li>
+    </ol>
+
+    <h4 class="text-success mt-4">🔹 Step 2: Start with Blob Trigger</h4>
+    <ol>
+        <li>Open the Logic App Designer.</li>
+        <li>Choose the trigger: <b>“When a blob is added or modified (properties only)”</b>.</li>
+        <li>Sign in to connect your storage account.</li>
+        <li>
+            Select:
+            <ul>
+                <li>Storage account</li>
+                <li>Container (e.g., <code>studentdata</code>)</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h4 class="text-success mt-4">🔹 Step 3: Get Blob Content</h4>
+    <ol>
+        <li>Click <b>“+ New Step”</b>.</li>
+        <li>Add action: <b>“Get blob content using path”</b>.</li>
+        <li>
+            Set:
+            <ul>
+                <li>Blob path = dynamic value: <code>Path</code></li>
+                <li>Storage account connection = same as before</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h4 class="text-success mt-4">🔹 Step 4: Parse Blob Content (Assume JSON)</h4>
+    <ol>
+        <li>Add action: <b>“Parse JSON”</b>.</li>
+        <li>Content = <code>Blob content</code> from previous step.</li>
+        <li>Generate schema by uploading or pasting a sample. For example:</li>
+    </ol>
+
+    <pre><code class="language-json">
+[
+  {
+    "Name": "John",
+    "RollNumber": 101,
+    "TotalMarks": 85
+  },
+  {
+    "Name": "Jane",
+    "RollNumber": 102,
+    "TotalMarks": 40
+  }
+]
+    </code></pre>
+
+    <h4 class="text-success mt-4">🔹 Step 5: Add Condition to Filter Records</h4>
+    <ol>
+        <li>Add action: <b>“For Each”</b> loop → <code>Parse JSON - Body</code>.</li>
+        <li>Inside the loop, add <b>“Condition”</b>:</li>
+        <li>
+            Set condition:
+            <ul>
+                <li><code>item()?['TotalMarks']</code> <b>is greater than</b> 50</li>
+            </ul>
+        </li>
+        <li>Inside the "If yes" branch, continue to next step.</li>
+    </ol>
+
+    <h4 class="text-success mt-4">🔹 Step 6: Insert into SQL Server</h4>
+    <ol>
+        <li>Add action: <b>“SQL Server – Insert row (V2)”</b>.</li>
+        <li>Sign in to connect to your Azure SQL or on-prem SQL with gateway.</li>
+        <li>
+            Select:
+            <ul>
+                <li>Server & Database</li>
+                <li>Table (e.g., <code>Students</code>)</li>
+            </ul>
+        </li>
+        <li>
+            Map fields from parsed JSON:
+            <ul>
+                <li><code>Name</code> → item()?['Name']</li>
+                <li><code>RollNumber</code> → item()?['RollNumber']</li>
+                <li><code>TotalMarks</code> → item()?['TotalMarks']</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h4 class="text-success mt-4">🔹 Step 7: Finalize & Save</h4>
+    <ul>
+        <li>Save your Logic App and run a test by uploading a blob JSON file into the container.</li>
+        <li>Only records with <b>TotalMarks > 50</b> will be inserted into SQL Server.</li>
+    </ul>
+
+    <h4 class="text-info mt-5">📦 Blob Upload Sample (in .NET)</h4>
+    <pre><code class="language-csharp">
+public async Task UploadStudentBlobAsync(Student student)
+{
+    var json = JsonConvert.SerializeObject(student);
+    var client = new BlobContainerClient(connectionString, "studentdata");
+    var blob = client.GetBlobClient($"{student.RollNumber}.json");
+
+    using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+    await blob.UploadAsync(stream, overwrite: true);
+}
+    </code></pre>
+
+    <h4 class="text-info mt-5">📊 Sample SQL Table Schema</h4>
+    <pre><code class="language-sql">
+CREATE TABLE Students (
+    Id INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(100),
+    RollNumber INT,
+    TotalMarks INT
+);
+    </code></pre>
+
+    <h4 class="text-success mt-5">🎯 What You Achieved</h4>
+    <ul>
+        <li>Created a Logic App to listen for blob uploads</li>
+        <li>Parsed JSON content and filtered based on Total Marks</li>
+        <li>Inserted filtered records into a SQL table</li>
+    </ul>
+</div>

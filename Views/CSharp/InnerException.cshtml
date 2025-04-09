@@ -1,0 +1,190 @@
+﻿@{
+    ViewData["Title"] = "Inner Exception in C#";
+}
+
+<!-- Section: Introduction to InnerException -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is an Inner Exception in C#?</h2>
+    <p class="lead">
+        An <b>Inner Exception</b> in C# helps preserve the original cause of an exception when another exception is thrown. It provides detailed debugging information by encapsulating one exception inside another.
+    </p>
+</section>
+
+<!-- Section: Key Features of InnerException -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Inner Exceptions</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Preserves the original exception when a new exception is thrown.</li>
+        <li class="list-group-item">Allows better debugging by maintaining the original stack trace.</li>
+        <li class="list-group-item">Useful in layered applications where errors are wrapped before rethrowing.</li>
+        <li class="list-group-item">Can be accessed using the <code>InnerException</code> property of an exception.</li>
+    </ul>
+</section>
+
+<!-- Section: Example of InnerException -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Handling Inner Exception</h2>
+    <p class="lead">
+        The following example demonstrates how an inner exception preserves the original error when a new exception is thrown.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Inner Exception for Debugging</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            try
+            {
+                int[] numbers = new int[3];
+                Console.WriteLine(numbers[5]); // This will cause IndexOutOfRangeException
+            }
+            catch (IndexOutOfRangeException ex)
+            {
+                throw new Exception("An error occurred while accessing an array.", ex);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception: {ex.Message}");
+            Console.WriteLine($"Inner Exception: {ex.InnerException?.Message}");
+        }
+    }
+}
+
+// Output:
+// Exception: An error occurred while accessing an array.
+// Inner Exception: Index was outside the bounds of the array.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The outer <code>Exception</code> wraps the original <code>IndexOutOfRangeException</code>, allowing the program to maintain debugging information.
+    </p>
+</section>
+
+<!-- Section: When to Use InnerException -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Inner Exceptions?</h2>
+    <p class="lead">
+        Inner exceptions are useful in scenarios where you need to preserve the original error while providing additional context.
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Scenario</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Database Operations</td>
+                <td>Wrapping a database-related error inside a custom exception.</td>
+                <td>Throwing <code>DatabaseException</code> with an inner <code>SqlException</code>.</td>
+            </tr>
+            <tr>
+                <td>File Handling</td>
+                <td>Handling file read errors and wrapping them for logging.</td>
+                <td>Throwing <code>FileProcessingException</code> with an inner <code>IOException</code>.</td>
+            </tr>
+            <tr>
+                <td>API Calls</td>
+                <td>Encapsulating API failure responses inside a higher-level exception.</td>
+                <td>Throwing <code>ApiException</code> with an inner <code>HttpRequestException</code>.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Creating Custom Exceptions with InnerException -->
+<section class="mb-5">
+    <h2 class="text-secondary">Creating a Custom Exception with InnerException</h2>
+    <p class="lead">
+        You can create your own custom exception that stores an inner exception.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Custom Exception with InnerException</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+public class DataProcessingException : Exception
+{
+    public DataProcessingException(string message, Exception innerException) 
+        : base(message, innerException) { }
+}
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            try
+            {
+                int[] arr = new int[3];
+                Console.WriteLine(arr[10]); // Will cause IndexOutOfRangeException
+            }
+            catch (IndexOutOfRangeException ex)
+            {
+                throw new DataProcessingException("Error processing data.", ex);
+            }
+        }
+        catch (DataProcessingException ex)
+        {
+            Console.WriteLine($"Custom Exception: {ex.Message}");
+            Console.WriteLine($"Inner Exception: {ex.InnerException?.Message}");
+        }
+    }
+}
+
+// Output:
+// Custom Exception: Error processing data.
+// Inner Exception: Index was outside the bounds of the array.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>DataProcessingException</code> class allows wrapping another exception, keeping track of the original error.
+    </p>
+</section>
+
+<!-- Section: Best Practices for Using InnerException -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using InnerException</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use <code>InnerException</code> to preserve original errors when rethrowing exceptions.</li>
+        <li class="list-group-item">Ensure meaningful messages when wrapping exceptions for better debugging.</li>
+        <li class="list-group-item">Use custom exceptions to provide context for underlying exceptions.</li>
+        <li class="list-group-item">Log both outer and inner exceptions to maintain full error details.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("ThrowKeyword", "CSharp")" class="btn btn-outline-secondary">Previous: Throw Keyword</a>
+    <a href="@Url.Action("CustomException", "CSharp")" class="btn btn-outline-secondary">Next: Custom Exception</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

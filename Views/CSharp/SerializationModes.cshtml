@@ -1,0 +1,256 @@
+﻿@{
+    ViewData["Title"] = "Serialization Modes in C#";
+}
+
+<!-- Section: Introduction to Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is Serialization in C#?</h2>
+    <p class="lead">
+        **Serialization** is the process of converting an object into a format that can be stored or transmitted and later reconstructed. C# supports different **serialization modes**, each suited for specific use cases, such as storing data, transferring objects, or persisting object states.
+    </p>
+</section>
+
+<!-- Section: Types of Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Types of Serialization in C#</h2>
+    <p class="lead">
+        The following are the different modes of serialization supported in C#:
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Serialization Mode</th>
+                <th>Description</th>
+                <th>Use Case</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><b>Binary Serialization</b></td>
+                <td>Converts an object into a **binary format**.</td>
+                <td>Used for **performance-efficient** storage and communication.</td>
+            </tr>
+            <tr>
+                <td><b>XML Serialization</b></td>
+                <td>Converts an object into a **human-readable XML format**.</td>
+                <td>Used for **data sharing** and **configuration files**.</td>
+            </tr>
+            <tr>
+                <td><b>JSON Serialization</b></td>
+                <td>Converts an object into a **lightweight JSON format**.</td>
+                <td>Used for **REST APIs** and **web services**.</td>
+            </tr>
+            <tr>
+                <td><b>Custom Serialization</b></td>
+                <td>Allows **manual control** over serialization.</td>
+                <td>Used when **custom serialization logic** is required.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Binary Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Binary Serialization</h2>
+    <p class="lead">
+        Binary serialization stores objects in a **compact and fast** format but is **not human-readable**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Binary Serialization</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+
+[Serializable]
+class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+// Writing Binary Data
+class Program
+{
+    static void Main()
+    {
+        Person person = new Person { Name = "Alice", Age = 28 };
+        BinaryFormatter formatter = new BinaryFormatter();
+
+        using (FileStream stream = new FileStream("person.dat", FileMode.Create))
+        {
+            formatter.Serialize(stream, person);
+        }
+
+        Console.WriteLine("Object serialized successfully.");
+    }
+}
+
+// Reading Binary Data
+class DeserializeExample
+{
+    static void Main()
+    {
+        BinaryFormatter formatter = new BinaryFormatter();
+        using (FileStream stream = new FileStream("person.dat", FileMode.Open))
+        {
+            Person person = (Person)formatter.Deserialize(stream);
+            Console.WriteLine($"Name: {person.Name}, Age: {person.Age}");
+        }
+    }
+}
+
+// Output:
+// Object serialized successfully.
+// Name: Alice, Age: 28</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **[Serializable]** attribute is required to serialize an object.
+    </p>
+</section>
+
+<!-- Section: XML Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">XML Serialization</h2>
+    <p class="lead">
+        XML serialization converts an object into a **structured XML format** that is human-readable.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: XML Serialization</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Xml.Serialization;
+
+[Serializable]
+public class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+// Writing XML Data
+class Program
+{
+    static void Main()
+    {
+        Person person = new Person { Name = "Bob", Age = 35 };
+        XmlSerializer serializer = new XmlSerializer(typeof(Person));
+
+        using (FileStream stream = new FileStream("person.xml", FileMode.Create))
+        {
+            serializer.Serialize(stream, person);
+        }
+
+        Console.WriteLine("Object serialized to XML.");
+    }
+}
+
+// Reading XML Data
+class DeserializeExample
+{
+    static void Main()
+    {
+        XmlSerializer serializer = new XmlSerializer(typeof(Person));
+        using (FileStream stream = new FileStream("person.xml", FileMode.Open))
+        {
+            Person person = (Person)serializer.Deserialize(stream);
+            Console.WriteLine($"Name: {person.Name}, Age: {person.Age}");
+        }
+    }
+}
+
+// Output:
+// Object serialized to XML.
+// Name: Bob, Age: 35</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        XML serialization is useful for **data sharing between systems**.
+    </p>
+</section>
+
+<!-- Section: JSON Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">JSON Serialization</h2>
+    <p class="lead">
+        JSON serialization is widely used for **REST APIs and web applications**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: JSON Serialization</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+using System.Text.Json;
+
+class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+// Writing JSON Data
+class Program
+{
+    static void Main()
+    {
+        Person person = new Person { Name = "Charlie", Age = 40 };
+        string json = JsonSerializer.Serialize(person);
+
+        File.WriteAllText("person.json", json);
+        Console.WriteLine("Object serialized to JSON.");
+    }
+}
+
+// Reading JSON Data
+class DeserializeExample
+{
+    static void Main()
+    {
+        string json = File.ReadAllText("person.json");
+        Person person = JsonSerializer.Deserialize<Person>(json);
+        Console.WriteLine($"Name: {person.Name}, Age: {person.Age}");
+    }
+}
+
+// Output:
+// Object serialized to JSON.
+// Name: Charlie, Age: 40</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        JSON is lightweight and easy to use for **web and mobile applications**.
+    </p>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("FileDirectoryClasses", "CSharp")" class="btn btn-outline-secondary">Previous: File & Directory Classes</a>
+    <a href="@Url.Action("JsonSerialization", "CSharp")" class="btn btn-outline-secondary">Next: JSON Serialization</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

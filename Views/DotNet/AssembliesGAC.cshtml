@@ -1,0 +1,149 @@
+@{
+    ViewData["Title"] = "Understanding Assemblies and the GAC";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "AssembliesGAC";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Assemblies are the compiled output of your .NET applications and libraries. They are essential for deploying and sharing functionality across projects. The Global Assembly Cache (GAC) is a central store for sharing strong-named assemblies across applications on the same machine.
+    </p>
+    <hr />
+
+    <!-- Section: What is an Assembly? -->
+    <div class="mt-5">
+        <h2>What is an Assembly?</h2>
+        <p>
+            An <strong>assembly</strong> is a compiled code library used for deployment, versioning, and security in .NET. It can be an executable (<code>.exe</code>) or a library (<code>.dll</code>).
+        </p>
+
+        <p>Every assembly contains:</p>
+        <ul>
+            <li><strong>MSIL Code</strong>: Intermediate Language compiled from C# or other .NET languages</li>
+            <li><strong>Metadata</strong>: Information about the types, methods, references, and versioning</li>
+            <li><strong>Manifest</strong>: The identity of the assembly (name, version, culture, public key token)</li>
+            <li><strong>Optional resources</strong>: Images, localization data, embedded files</li>
+        </ul>
+
+        <p>
+            .NET uses assemblies to isolate code, promote reuse, and simplify version control.
+        </p>
+    </div>
+
+    <!-- Section: Creating and Referencing Assemblies -->
+    <div class="mt-5">
+        <h3>Creating and Referencing Assemblies</h3>
+        <p>
+            In Visual Studio:
+        </p>
+        <ol>
+            <li>Create a <strong>Class Library</strong> project (generates a <code>.dll</code>)</li>
+            <li>Create a <strong>Console App</strong> project</li>
+            <li>Right-click the Console App → Add Reference → Choose your Class Library</li>
+        </ol>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>// In Library Project
+public class Calculator
+{
+    public static int Multiply(int a, int b) => a * b;
+}
+
+// In Console Project
+using MyLibrary;
+
+Console.WriteLine(Calculator.Multiply(3, 4)); // Output: 12</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Types of Assemblies -->
+    <div class="mt-5">
+        <h3>Types of Assemblies</h3>
+        <ul>
+            <li><strong>Private Assemblies</strong> – Stored in the application folder, used only by that app</li>
+            <li><strong>Shared Assemblies</strong> – Installed in the GAC for global reuse</li>
+            <li><strong>Satellite Assemblies</strong> – Contain localized resources for different cultures/languages</li>
+        </ul>
+    </div>
+
+    <!-- Section: What is the GAC? -->
+    <div class="mt-5">
+        <h3>Global Assembly Cache (GAC)</h3>
+        <p>
+            The GAC is a central repository for shared assemblies that can be used by multiple .NET applications on a single system. It ensures:
+        </p>
+        <ul>
+            <li><strong>Assembly sharing:</strong> Avoid code duplication</li>
+            <li><strong>Versioning:</strong> Support side-by-side versions</li>
+            <li><strong>Security:</strong> Strong-named assemblies only</li>
+        </ul>
+        <p><strong>Location:</strong> <code>C:\Windows\Microsoft.NET\assembly</code></p>
+    </div>
+
+    <!-- Section: Installing into GAC -->
+    <div class="mt-5">
+        <h4>Adding an Assembly to the GAC</h4>
+        <p>Use the <code>gacutil</code> command (from Developer Command Prompt):</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>gacutil -i MyLibrary.dll</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p class="mt-3">You can also check installed assemblies using:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>gacutil -l</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p class="mt-3"><strong>Note:</strong> Assemblies in the GAC must have a strong name (signed using <code>sn.exe</code>).</p>
+    </div>
+
+    <!-- Section: Signing Assemblies -->
+    <div class="mt-5">
+        <h4>Strong Naming an Assembly</h4>
+        <p>
+            Before placing an assembly in the GAC, it must be strongly named. Use the <code>sn</code> tool to create a key pair and sign your assembly:
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>// Create a key file
+sn -k MyKey.snk
+
+// Add to AssemblyInfo.cs
+[assembly: AssemblyKeyFile("MyKey.snk")]</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Assemblies are the foundation of deployment and modularity in .NET. The GAC makes it easy to share libraries securely and consistently across apps. Next, we’ll dive into the .NET Base Class Library (BCL) to explore built-in functionality.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("CoreComponents", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: Core Components
+        </a>
+        <a href="@Url.Action("BCL", "DotNet")" class="btn btn-outline-secondary">
+            Next: Base Class Library (BCL) &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

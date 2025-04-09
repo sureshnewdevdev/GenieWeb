@@ -1,0 +1,139 @@
+@{
+    ViewData["Title"] = "Implementing Dependency Injection (IoC Basics)";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "IoCBasics";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Dependency Injection (DI) is a core concept in modern .NET applications. It promotes loose coupling, easier testing, and better code organization. Let’s understand the basics and implement DI in a simple console app.
+    </p>
+    <hr />
+
+    <!-- Section: What is Dependency Injection? -->
+    <div class="mt-5">
+        <h2>What is Dependency Injection?</h2>
+        <p>
+            Dependency Injection is a design pattern where an object’s dependencies (services it uses) are provided externally rather than created inside the object.
+        </p>
+
+        <p>Benefits of DI:</p>
+        <ul>
+            <li>Improves testability (e.g., mocking services)</li>
+            <li>Reduces coupling between components</li>
+            <li>Follows SOLID principles (especially the "D")</li>
+        </ul>
+    </div>
+
+    <!-- Section: Basic Example Without DI -->
+    <div class="mt-5">
+        <h3>Without Dependency Injection</h3>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>public class MessageService
+{
+    public void Send() => Console.WriteLine("Sending message...");
+}
+
+public class App
+{
+    private MessageService _service = new MessageService(); // tightly coupled
+    public void Run() => _service.Send();
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Using DI -->
+    <div class="mt-5">
+        <h3>With Dependency Injection</h3>
+        <p>We pass the dependency through the constructor (constructor injection):</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>public interface IMessageService
+{
+    void Send();
+}
+
+public class MessageService : IMessageService
+{
+    public void Send() => Console.WriteLine("Sending message via DI...");
+}
+
+public class App
+{
+    private readonly IMessageService _service;
+
+    public App(IMessageService service)
+    {
+        _service = service;
+    }
+
+    public void Run() => _service.Send();
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Wiring Up with Microsoft.Extensions.DependencyInjection -->
+    <div class="mt-5">
+        <h3>Using .NET’s Built-in DI Container</h3>
+        <p>Install the package:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>dotnet add package Microsoft.Extensions.DependencyInjection</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>Register and resolve services:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>using Microsoft.Extensions.DependencyInjection;
+
+var services = new ServiceCollection();
+services.AddTransient&lt;IMessageService, MessageService&gt;();
+services.AddTransient&lt;App&gt;();
+
+var provider = services.BuildServiceProvider();
+var app = provider.GetRequiredService&lt;App&gt;();
+app.Run();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Lifetime Options -->
+    <div class="mt-5">
+        <h3>Service Lifetimes</h3>
+        <ul>
+            <li><code>AddSingleton&lt;T&gt;</code> – One instance for the app lifetime</li>
+            <li><code>AddScoped&lt;T&gt;</code> – One per scope (useful in ASP.NET Core)</li>
+            <li><code>AddTransient&lt;T&gt;</code> – A new instance every time it’s requested</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            With Dependency Injection, you gain flexibility, modularity, and cleaner code — even in simple console apps. In the next module, we’ll shift into ASP.NET Core and begin building web APIs.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("InputOutput", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: Input and Output
+        </a>
+        <a href="@Url.Action("WebApi", "DotNet")" class="btn btn-outline-secondary">
+            Next: ASP.NET Core Web API &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

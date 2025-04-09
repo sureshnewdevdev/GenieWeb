@@ -1,0 +1,150 @@
+@{
+    ViewData["Title"] = "EF Core Relationships";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "EFRelationships";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        In EF Core, you can define relationships between entities to reflect real-world associations. These include one-to-one, one-to-many, and many-to-many relationships.
+    </p>
+    <hr />
+
+    <!-- Section: One-to-Many -->
+    <div class="mt-5">
+        <h2>One-to-Many Relationship</h2>
+        <p>Example: One <strong>Category</strong> can have many <strong>Products</strong></p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>public class Category
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+
+    public List&lt;Product&gt; Products { get; set; } // Navigation property
+}
+
+public class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+
+    public int CategoryId { get; set; } // Foreign key
+    public Category Category { get; set; } // Navigation property
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: One-to-One -->
+    <div class="mt-5">
+        <h3>One-to-One Relationship</h3>
+        <p>Example: Each <strong>User</strong> has one <strong>Profile</strong></p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>public class User
+{
+    public int Id { get; set; }
+    public string Username { get; set; }
+    public Profile Profile { get; set; }
+}
+
+public class Profile
+{
+    public int Id { get; set; }
+    public string Bio { get; set; }
+
+    public int UserId { get; set; }
+    public User User { get; set; }
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Many-to-Many -->
+    <div class="mt-5">
+        <h3>Many-to-Many Relationship</h3>
+        <p>Example: Students and Courses — a student can enroll in many courses and a course can have many students.</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>public class Student
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+
+    public List&lt;Course&gt; Courses { get; set; }
+}
+
+public class Course
+{
+    public int Id { get; set; }
+    public string Title { get; set; }
+
+    public List&lt;Student&gt; Students { get; set; }
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p class="mt-3">EF Core 5+ automatically creates a join table for many-to-many relationships.</p>
+    </div>
+
+    <!-- Section: Fluent API Configuration -->
+    <div class="mt-5">
+        <h3>Fluent API Configuration (Optional)</h3>
+        <p>Use <code>OnModelCreating</code> to configure relationships explicitly:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    modelBuilder.Entity&lt;User&gt;()
+        .HasOne(u =&gt; u.Profile)
+        .WithOne(p =&gt; p.User)
+        .HasForeignKey&lt;Profile&gt;(p =&gt; p.UserId);
+}</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Navigating Relationships -->
+    <div class="mt-5">
+        <h3>Querying with Navigation Properties</h3>
+        <p>Use <code>Include()</code> to load related entities:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var category = context.Categories
+    .Include(c =&gt; c.Products)
+    .FirstOrDefault(c =&gt; c.Id == 1);</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            EF Core makes it easy to model real-world relationships between entities. In the next lesson, we’ll learn how to query these relationships efficiently using LINQ and projection.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("EFMigrations", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: EF Core Migrations
+        </a>
+        <a href="@Url.Action("EFQuerying", "DotNet")" class="btn btn-outline-secondary">
+            Next: Querying Data with LINQ &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

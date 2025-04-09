@@ -1,0 +1,119 @@
+﻿@{
+    ViewData["Title"] = "Dockerfile & Image Optimization";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        A well-crafted Dockerfile ensures efficient image builds, faster deployments, and smaller image sizes.
+        Optimizing your Dockerfile improves performance, security, and resource usage across environments.
+    </p>
+    <hr />
+
+    <!-- Section: Writing a Dockerfile -->
+    <div class="mt-5">
+        <h2>Writing a Dockerfile</h2>
+        <p>
+            A Dockerfile is a text file containing instructions to build a Docker image. Here's a simple example for a .NET web app:
+        </p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code># Use SDK image to build the app
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY . .
+RUN dotnet publish -c Release -o /app/publish
+
+# Use runtime image to run the app
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "MyWebApp.dll"]</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>This is an example of a multi-stage build, which is great for keeping images small and clean.</p>
+    </div>
+
+    <!-- Section: Understanding Image Layers -->
+    <div class="mt-5">
+        <h3>Understanding Image Layers</h3>
+        <p>
+            Each instruction in a Dockerfile creates a new layer. Docker caches these layers to speed up rebuilds.
+        </p>
+        <ul>
+            <li>Changing an early layer (e.g., <code>COPY</code>) will invalidate all subsequent layers.</li>
+            <li>Group related instructions (e.g., RUN commands) to reduce layers.</li>
+        </ul>
+    </div>
+
+    <!-- Section: Multi-Stage Builds -->
+    <div class="mt-5">
+        <h3>Multi-Stage Builds</h3>
+        <p>
+            Multi-stage builds allow you to separate the build environment from the runtime image, resulting in smaller images:
+        </p>
+        <ul>
+            <li>Use one stage to compile/build the app.</li>
+            <li>Use a second (smaller) stage to run the final app.</li>
+        </ul>
+        <p>This ensures only the compiled code and required binaries go into production images.</p>
+    </div>
+
+    <!-- Section: Reducing Image Size -->
+    <div class="mt-5">
+        <h3>Reducing Image Size</h3>
+        <ul>
+            <li>Use <strong>official minimal base images</strong> like <code>alpine</code> where possible.</li>
+            <li>
+                Combine <code>RUN</code> instructions to reduce layers and intermediate cache:
+                <div class="code-snippet bg-light p-3 rounded position-relative">
+                    <pre class="mb-0"><code>RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*</code></pre>
+                    <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+                </div>
+            </li>
+            <li>Use <code>.dockerignore</code> to exclude unnecessary files from being copied into the image.</li>
+        </ul>
+    </div>
+
+    <!-- Section: Best Practices -->
+    <div class="mt-5">
+        <h3>Best Practices for Dockerfile Optimization</h3>
+        <ul>
+            <li>Specify exact base image versions (avoid <code>latest</code>) for stability.</li>
+            <li>Minimize the number of layers and keep instructions concise.</li>
+            <li>Use <code>ENV</code> to set environment variables consistently.</li>
+            <li>Scan images for vulnerabilities using tools like <code>docker scan</code> or Snyk.</li>
+            <li>Clean up temp files and package caches during image build.</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Writing optimized Dockerfiles ensures leaner, faster, and more secure container images.
+            Multi-stage builds, cache management, and smart layering are essential techniques in professional Docker development.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("DockerVolumesStorage", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Docker Volumes & Storage
+        </a>
+        <a href="@Url.Action("DockerRegistryHub", "Docker")" class="btn btn-outline-secondary">
+            Next: Docker Registry & Hub &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

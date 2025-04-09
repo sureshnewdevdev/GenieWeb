@@ -1,0 +1,134 @@
+﻿@{
+    ViewData["Title"] = "Docker Registry & Hub";
+    ViewData["ActiveMenu"] = "AzureDevOps";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Docker registries like Docker Hub allow you to store, share, and manage Docker images.
+        You can use public or private repositories to distribute container images across environments or teams.
+    </p>
+    <hr />
+
+    <!-- Section: What is Docker Hub? -->
+    <div class="mt-5">
+        <h2>What is Docker Hub?</h2>
+        <p>
+            Docker Hub is Docker's official cloud-based registry service. It provides:
+        </p>
+        <ul>
+            <li>Public repositories for open-source sharing</li>
+            <li>Private repositories for enterprise use</li>
+            <li>Image versioning and tagging</li>
+            <li>Webhooks and integrations with CI/CD pipelines</li>
+        </ul>
+        <p>
+            You can also use self-hosted registries like Harbor or Nexus for internal image storage.
+        </p>
+    </div>
+
+    <!-- Section: Logging into Docker Hub -->
+    <div class="mt-5">
+        <h3>Logging into Docker Hub</h3>
+        <p>Before pushing images to Docker Hub, authenticate using:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker login</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>You'll be prompted for your Docker Hub username and password (or access token).</p>
+    </div>
+
+    <!-- Section: Tagging and Pushing Images -->
+    <div class="mt-5">
+        <h3>Tagging and Pushing Docker Images</h3>
+        <p>Tag your local image with your Docker Hub username and repository:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker tag myapp username/myapp:latest</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Then push it to Docker Hub:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker push username/myapp:latest</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Pulling Images from Hub -->
+    <div class="mt-5">
+        <h3>Pulling Images from Docker Hub</h3>
+        <p>To download an image to your local machine:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker pull nginx</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>This pulls the official <code>nginx</code> image from Docker Hub.</p>
+    </div>
+
+    <!-- Section: Using a Private Docker Registry -->
+    <div class="mt-5">
+        <h3>Using a Private Docker Registry</h3>
+        <p>You can also set up and push to a private registry using:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker run -d -p 5000:5000 --name registry registry:2</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Tag and push your image to the local registry:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker tag myapp localhost:5000/myapp
+docker push localhost:5000/myapp</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Managing Image Versions -->
+    <div class="mt-5">
+        <h3>Managing Image Versions</h3>
+        <ul>
+            <li>Tag each release using semantic versioning (e.g., <code>v1.0.0</code>, <code>v1.1.0</code>)</li>
+            <li>Avoid using <code>:latest</code> in production deployments</li>
+            <li>Use automation tools to handle tagging and release pipelines</li>
+        </ul>
+    </div>
+
+    <!-- Section: Security Considerations -->
+    <div class="mt-5">
+        <h3>Security Considerations</h3>
+        <ul>
+            <li>Use private repositories for sensitive or proprietary images</li>
+            <li>Enable two-factor authentication on your Docker Hub account</li>
+            <li>Scan images regularly for vulnerabilities using tools like Snyk, Trivy, or Docker Scout</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Docker registries allow for centralized image distribution, version control, and security management.
+            Using Docker Hub or a private registry ensures your CI/CD pipeline runs smoothly across environments.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("DockerfileOptimization", "AzureDevOps")" class="btn btn-outline-secondary">
+            &larr; Previous: Dockerfile & Image Optimization
+        </a>
+        <a href="@Url.Action("DockerSecurity", "AzureDevOps")" class="btn btn-outline-secondary">
+            Next: Docker Security &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Button Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

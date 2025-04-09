@@ -1,0 +1,123 @@
+@{
+    ViewData["Title"] = "Microservices Communication in Docker";
+    ViewData["ActiveMenu"] = "Docker";
+    ViewData["ActivePage"] = "MicroservicesCommunication";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Once microservices are up and running, they need to communicate reliably. Docker provides built-in networking to enable seamless interaction between services across containers.
+    </p>
+    <hr />
+
+    <!-- Section: REST APIs vs gRPC -->
+    <div class="mt-5">
+        <h2>REST APIs vs. gRPC for Microservices Communication</h2>
+        <p>
+            Services communicate over HTTP using either REST or gRPC:
+        </p>
+        <ul>
+            <li><strong>REST</strong> is widely adopted and easy to implement using HTTP and JSON.</li>
+            <li><strong>gRPC</strong> is faster and more efficient, using HTTP/2 and Protocol Buffers — great for internal microservices.</li>
+        </ul>
+        <p class="text-muted"><small>For simplicity, this guide uses REST in examples.</small></p>
+    </div>
+
+    <!-- Section: Docker Networking Basics -->
+    <div class="mt-5">
+        <h3>Using Docker Networking</h3>
+        <p>
+            Docker Compose automatically creates a default network where services can discover each other by name.
+            For example, <code>user-service</code> can call <code>order-service</code> using its container name as the hostname.
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>const axios = require('axios');
+
+axios.get('http://order-service:5001/api/orders')
+  .then(res => console.log(res.data))
+  .catch(err => console.error(err));</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p class="mt-2">No IP address is needed — just the service name from <code>docker-compose.yml</code>.</p>
+    </div>
+
+    <!-- Section: Configuring Internal & External Networking -->
+    <div class="mt-5">
+        <h3>Configuring Internal & External Networking</h3>
+        <p>
+            Docker Compose allows defining custom networks for better control. Example:
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>networks:
+  backend:
+    driver: bridge
+
+services:
+  user-service:
+    build: ./user-service
+    networks:
+      - backend
+  order-service:
+    build: ./order-service
+    networks:
+      - backend</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p class="mt-2">This allows isolation of backend services from frontend or external networks.</p>
+    </div>
+
+    <!-- Section: Example - Connecting Services via REST -->
+    <div class="mt-5">
+        <h3>Example: Connecting user-service to order-service</h3>
+        <p>
+            Imagine <code>user-service</code> needs to retrieve all orders for a user from <code>order-service</code>:
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>// In user-service
+GET /api/users/:id/orders
+
+// user-service makes internal call:
+axios.get(`http://order-service:5001/api/orders/user/${userId}`)</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>Internally, the services use Docker’s DNS to resolve container names automatically.</p>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Docker Compose makes service communication easy using built-in DNS-based discovery.
+            In the next section, we’ll look at managing data with Docker volumes and databases for each service.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("ComposeMicroservices", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Managing Microservices with Docker Compose
+        </a>
+        <a href="@Url.Action("MicroservicesDataManagement", "Docker")" class="btn btn-outline-secondary">
+            Next: Data Management in Microservices &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

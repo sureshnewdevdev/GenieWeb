@@ -1,0 +1,218 @@
+﻿@{
+    ViewData["Title"] = "Thread.Sleep in C#";
+}
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <h2 class="text-secondary">Understanding Thread.Sleep in C#</h2>
+    <p class="lead">
+        The **Thread.Sleep()** method pauses the execution of the current thread for a specified period. It is useful for **delaying execution, simulating wait times, and reducing CPU usage** in multi-threaded applications.
+    </p>
+</section>
+
+<!-- Section: Key Features of Thread.Sleep -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Thread.Sleep</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Pauses the **current thread** for a specified duration.</li>
+        <li class="list-group-item">Reduces **CPU usage** by preventing unnecessary execution.</li>
+        <li class="list-group-item">Supports **milliseconds or TimeSpan** for sleep duration.</li>
+        <li class="list-group-item">Does **not release locks** when called within synchronized blocks.</li>
+    </ul>
+</section>
+
+<!-- Section: Using Thread.Sleep -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Thread.Sleep in C#</h2>
+    <p class="lead">
+        The **Thread.Sleep()** method takes an integer value representing the number of **milliseconds** to pause execution.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Thread.Sleep() to Pause Execution</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading;
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine("Task started...");
+
+        // Pause execution for 3 seconds (3000 milliseconds)
+        Thread.Sleep(3000);
+
+        Console.WriteLine("Task resumed after 3 seconds.");
+    }
+}
+
+// Output:
+// Task started...
+// (Waits for 3 seconds)
+// Task resumed after 3 seconds.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **Thread.Sleep(3000)** method suspends execution for **3 seconds** before continuing.
+    </p>
+</section>
+
+<!-- Section: Using Thread.Sleep in Multi-Threading -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using Thread.Sleep in Multi-Threading</h2>
+    <p class="lead">
+        The **Thread.Sleep()** method can be used to pause execution within multi-threaded applications.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Pausing a Thread in Multi-Threading</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading;
+
+class Program
+{
+    static void PrintNumbers()
+    {
+        for (int i = 1; i <= 5; i++)
+        {
+            Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} prints {i}");
+            Thread.Sleep(1000); // Pause for 1 second
+        }
+    }
+
+    static void Main()
+    {
+        Thread thread = new Thread(PrintNumbers);
+        thread.Start();
+
+        PrintNumbers();
+    }
+}
+
+// Output:
+// Thread 1 prints 1
+// Thread 2 prints 1
+// (Each thread prints with 1-second delay)...</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        Each thread sleeps for **1 second** before printing the next number, allowing controlled execution.
+    </p>
+</section>
+
+<!-- Section: Using TimeSpan with Thread.Sleep -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using TimeSpan with Thread.Sleep</h2>
+    <p class="lead">
+        Instead of milliseconds, you can use **TimeSpan** to specify sleep duration.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using TimeSpan for Sleep Duration</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading;
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine("Pausing execution for 2 seconds...");
+
+        Thread.Sleep(TimeSpan.FromSeconds(2));
+
+        Console.WriteLine("Resumed execution.");
+    }
+}
+
+// Output:
+// Pausing execution for 2 seconds...
+// (Waits for 2 seconds)
+// Resumed execution.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        **Thread.Sleep(TimeSpan.FromSeconds(2))** is a more readable alternative to **milliseconds**.
+    </p>
+</section>
+
+<!-- Section: When to Avoid Thread.Sleep -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Avoid Thread.Sleep</h2>
+    <p class="lead">
+        Although **Thread.Sleep()** is useful, it should be **avoided in certain scenarios**:
+    </p>
+    <ul class="list-group">
+        <li class="list-group-item">Avoid using **Thread.Sleep()** in **UI threads** as it freezes the interface.</li>
+        <li class="list-group-item">Do not use it as a **replacement for proper synchronization mechanisms**.</li>
+        <li class="list-group-item">Prefer **Task.Delay()** in asynchronous applications instead of **Thread.Sleep()**.</li>
+    </ul>
+</section>
+
+<!-- Section: Alternative to Thread.Sleep -->
+<section class="mb-5">
+    <h2 class="text-secondary">Alternative to Thread.Sleep: Using Task.Delay()</h2>
+    <p class="lead">
+        In **asynchronous programming**, use **Task.Delay()** instead of Thread.Sleep().
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Task.Delay() Instead of Thread.Sleep()</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main()
+    {
+        Console.WriteLine("Waiting asynchronously for 2 seconds...");
+
+        await Task.Delay(2000);
+
+        Console.WriteLine("Task resumed asynchronously.");
+    }
+}
+
+// Output:
+// Waiting asynchronously for 2 seconds...
+// (Waits for 2 seconds)
+// Task resumed asynchronously.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        **Task.Delay()** is **non-blocking** and preferred in asynchronous applications.
+    </p>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("CreatingRunningThread", "CSharp")" class="btn btn-outline-secondary">Previous: Creating and Running Threads</a>
+    <a href="@Url.Action("ParallelizationOverview", "CSharp")" class="btn btn-outline-secondary">Next: Parallelization Overview</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

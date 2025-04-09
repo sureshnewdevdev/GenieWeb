@@ -4,53 +4,57 @@
 }
 
 <div class="container py-4">
-    <p class="text-center lead">Azure DevOps provides a seamless way to create and manage cloud infrastructure using Infrastructure as Code (IaC). This ensures automated, consistent, and scalable deployments.</p>
+    <p class="text-center lead">
+        Azure DevOps empowers you to create and manage cloud infrastructure using <strong>Infrastructure as Code (IaC)</strong>. This means you can manage your infrastructure the same way you manage your code — <strong>version-controlled, automated, and reliable</strong>.
+    </p>
     <hr />
 
+    <!-- Why Automate -->
     <div class="mt-5">
         <h2>Why Automate Resource Creation?</h2>
-        <p>Manually creating Azure resources can lead to **configuration drift, inefficiencies, and human errors**. Using Azure DevOps, we can:</p>
+        <p>
+            Manually spinning up infrastructure might work for a one-off setup — but it doesn't scale. Mistakes happen, environments drift, and recreating the setup takes time. Azure DevOps helps teams automate this process with ease, bringing benefits like:
+        </p>
         <ul>
-            <li>Automate resource provisioning.</li>
-            <li>Ensure **consistency and reproducibility**.</li>
-            <li>Enable **version control** for infrastructure.</li>
-            <li>Integrate with **CI/CD pipelines** for seamless deployments.</li>
+            <li><strong>Consistency:</strong> Ensure every environment looks the same with reusable templates.</li>
+            <li><strong>Speed:</strong> Quickly provision infrastructure with the push of a button or a commit to Git.</li>
+            <li><strong>Traceability:</strong> Track who changed what, when, and why using version control.</li>
+            <li><strong>Scalability:</strong> Easily scale environments across dev, test, and production.</li>
+            <li><strong>CI/CD Ready:</strong> Automate infrastructure creation alongside your application deployments.</li>
         </ul>
     </div>
 
-    <div class="row align-items-center">
-        <div class="col-md-6 text-center">
-            <img src="https://learn.microsoft.com/en-us/azure/devops/media/create-resources.png" alt="Creating Resources in Azure DevOps" class="img-fluid rounded shadow-lg">
-            <p class="text-muted mt-2"><small>Automating resource creation using Azure DevOps</small></p>
-        </div>
-        <div class="col-md-6">
-            <h4>Commonly Automated Resources</h4>
-            <ul>
-                <li>Virtual Machines (VMs)</li>
-                <li>Storage Accounts</li>
-                <li>App Services</li>
-                <li>Databases (SQL, CosmosDB)</li>
-                <li>Networking (VNETs, Load Balancers)</li>
-            </ul>
-        </div>
+    <!-- Common Resources -->
+    <div class="mt-5">
+        <h2>What Can You Automate?</h2>
+        <p>Azure DevOps works seamlessly with tools like Terraform, ARM templates, and Bicep to automate the creation of a wide range of resources, including:</p>
+        <ul>
+            <li>Virtual Machines (VMs)</li>
+            <li>App Services (e.g., Web Apps, APIs)</li>
+            <li>Azure SQL or Cosmos DB instances</li>
+            <li>Storage accounts and blob containers</li>
+            <li>Networking components like VNets and Load Balancers</li>
+        </ul>
     </div>
 
+    <!-- Step-by-step -->
     <div class="mt-5">
-        <h2>Step-by-Step: Creating Resources with Azure DevOps</h2>
+        <h2>Step-by-Step Guide to Automating Resources</h2>
+        <p>Here’s a simple workflow to get you started with automating infrastructure deployment using Azure DevOps:</p>
         <ol>
-            <li><strong>Set up a Repository:</strong> Store your ARM/Terraform files in Azure Repos or GitHub.</li>
-            <li><strong>Create a Build Pipeline:</strong> Validate infrastructure code (optional).</li>
-            <li><strong>Define a Release Pipeline:</strong> Deploy the infrastructure to Azure.</li>
-            <li><strong>Use Service Connections:</strong> Authenticate Azure DevOps with Azure.</li>
-            <li><strong>Monitor & Validate:</strong> Use logs, alerts, and monitoring tools.</li>
+            <li><strong>Set Up Your Repository:</strong> Store your infrastructure code (Terraform, Bicep, or ARM templates) in Azure Repos or GitHub.</li>
+            <li><strong>Create a Build Pipeline (Optional):</strong> Use it to lint, validate, or package your templates.</li>
+            <li><strong>Define a Release Pipeline:</strong> Set up stages for environments like Dev, QA, and Prod, and deploy the infrastructure accordingly.</li>
+            <li><strong>Configure a Service Connection:</strong> Link Azure DevOps to your Azure subscription securely using service principals or managed identity.</li>
+            <li><strong>Trigger and Monitor:</strong> Run your pipeline and keep an eye on logs and results in real-time through the DevOps portal.</li>
         </ol>
     </div>
 
-    <div class="row align-items-center">
-        <div class="col-md-6">
-            <h4>Example YAML for Deploying Resources</h4>
-            <pre>
-stages:
+    <!-- YAML Example -->
+    <div class="mt-5">
+        <h2>Sample YAML for Terraform Deployment</h2>
+        <p>If you're using Terraform, here's a snippet to help structure your pipeline:</p>
+        <pre class="bg-light p-3 rounded"><code>stages:
 - stage: DeployResources
   displayName: 'Deploy Resources to Azure'
   jobs:
@@ -60,36 +64,34 @@ stages:
       inputs:
         provider: 'azurerm'
         command: 'apply'
-        workingDirectory: '$(Build.SourcesDirectory)/infra'
-            </pre>
-        </div>
-        <div class="col-md-6 text-center">
-            <img src="https://learn.microsoft.com/en-us/azure/devops/media/iac-deployment.png" alt="IaC Deployment in Azure DevOps" class="img-fluid rounded shadow-lg">
-            <p class="text-muted mt-2"><small>Infrastructure Deployment in Azure DevOps</small></p>
-        </div>
+        workingDirectory: '$(Build.SourcesDirectory)/infra'</code></pre>
+        <p class="mt-2">This pipeline stage runs <code>terraform apply</code> using the defined scripts in your repository’s <code>/infra</code> folder.</p>
     </div>
 
+    <!-- Best Practices -->
     <div class="mt-5">
-        <h2>Best Practices</h2>
+        <h2>Best Practices for Infrastructure Automation</h2>
         <ul>
-            <li>Use **parameterized templates** for flexibility.</li>
-            <li>Implement **role-based access control (RBAC)**.</li>
-            <li>Leverage **deployment approvals** to prevent unauthorized changes.</li>
-            <li>Monitor deployments using **Azure Monitor & Log Analytics**.</li>
-            <li>Test changes in **staging environments** before deploying to production.</li>
+            <li><strong>Use Parameterized Templates:</strong> Make your infrastructure code reusable across different environments.</li>
+            <li><strong>Enforce RBAC:</strong> Grant only necessary permissions to reduce security risks.</li>
+            <li><strong>Add Manual Approvals:</strong> Use gates for staging or production deployments to avoid accidental changes.</li>
+            <li><strong>Monitor Everything:</strong> Connect your pipeline with Azure Monitor and Log Analytics for full visibility.</li>
+            <li><strong>Test Before Production:</strong> Validate all infrastructure changes in a staging environment first.</li>
         </ul>
     </div>
 
+    <!-- Conclusion -->
     <div class="mt-5">
         <h2>Conclusion</h2>
         <p>
-            Automating resource creation with Azure DevOps simplifies infrastructure management, reduces errors, and enhances scalability. Integrating IaC with pipelines enables fast, repeatable, and secure deployments.
+            Automating cloud resource creation with Azure DevOps not only saves time but also increases reliability and reduces the risk of human error. It’s the modern way to manage infrastructure — with code, control, and confidence.
         </p>
         <p>
-            The next step is to explore **Managing Environments with Azure DevOps** for handling multiple deployment environments efficiently.
+            Up next, we’ll take this a step further and learn how to <strong>manage environments</strong> in Azure DevOps for better structure, security, and visibility across your deployment pipeline.
         </p>
     </div>
 
+    <!-- Navigation -->
     <div class="d-flex justify-content-between mt-4">
         <a href="@Url.Action("ARMvsTerraform", "AzureDevOps")" class="btn btn-outline-secondary">&larr; Previous: ARM Templates vs Terraform</a>
         <a href="@Url.Action("ManageEnvironments", "AzureDevOps")" class="btn btn-outline-secondary">Next: Managing Environments with Azure DevOps &rarr;</a>

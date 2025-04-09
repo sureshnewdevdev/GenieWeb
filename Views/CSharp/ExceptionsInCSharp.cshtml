@@ -1,0 +1,225 @@
+﻿@{
+    ViewData["Title"] = "Exceptions in C#";
+}
+
+<!-- Section: Introduction to Exceptions -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are Exceptions in C#?</h2>
+    <p class="lead">
+        An <b>Exception</b> in C# is an error that occurs during program execution, disrupting the normal flow of the application. C# provides a structured way to handle exceptions using <code>try</code>, <code>catch</code>, <code>finally</code>, and <code>throw</code> statements.
+    </p>
+</section>
+
+<!-- Section: Key Features of Exception Handling -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of Exception Handling</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Prevents abrupt program termination by handling runtime errors.</li>
+        <li class="list-group-item">Uses <code>try</code> and <code>catch</code> blocks to catch exceptions.</li>
+        <li class="list-group-item">The <code>finally</code> block executes cleanup code regardless of an exception.</li>
+        <li class="list-group-item">Custom exceptions can be created using the <code>Exception</code> class.</li>
+    </ul>
+</section>
+
+<!-- Section: Example of Exception Handling -->
+<section class="mb-5">
+    <h2 class="text-secondary">Example: Basic Exception Handling</h2>
+    <p class="lead">
+        The following example demonstrates how to handle an exception using <code>try</code> and <code>catch</code>.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Handling Division by Zero Exception</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            int num1 = 10, num2 = 0;
+            int result = num1 / num2; // This will cause a divide by zero exception
+            Console.WriteLine($"Result: {result}");
+        }
+        catch (DivideByZeroException ex)
+        {
+            Console.WriteLine($"Exception Caught: {ex.Message}");
+        }
+    }
+}
+
+// Output:
+// Exception Caught: Attempted to divide by zero.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>try</code> block contains the code that might throw an exception, and the <code>catch</code> block handles it gracefully.
+    </p>
+</section>
+
+<!-- Section: Types of Exceptions -->
+<section class="mb-5">
+    <h2 class="text-secondary">Common Exception Types in C#</h2>
+    <p class="lead">
+        C# provides several built-in exceptions for handling different types of runtime errors.
+    </p>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Exception Type</th>
+                <th>Description</th>
+                <th>Example Scenario</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>DivideByZeroException</code></td>
+                <td>Thrown when dividing by zero.</td>
+                <td><code>int x = 5 / 0;</code></td>
+            </tr>
+            <tr>
+                <td><code>NullReferenceException</code></td>
+                <td>Thrown when accessing a member of a null object.</td>
+                <td><code>string str = null; str.Length;</code></td>
+            </tr>
+            <tr>
+                <td><code>IndexOutOfRangeException</code></td>
+                <td>Thrown when accessing an array with an invalid index.</td>
+                <td><code>int[] arr = new int[5]; arr[10] = 100;</code></td>
+            </tr>
+            <tr>
+                <td><code>InvalidOperationException</code></td>
+                <td>Thrown when an operation is invalid in the current state.</td>
+                <td><code>var obj = new List<int>().First();</code></td>
+            </tr>
+            <tr>
+                <td><code>FormatException</code></td>
+                <td>Thrown when data is in an incorrect format.</td>
+                <td><code>int.Parse("abc");</code></td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Section: Using Multiple Catch Blocks -->
+<section class="mb-5">
+    <h2 class="text-secondary">Handling Multiple Exceptions</h2>
+    <p class="lead">
+        C# allows multiple <code>catch</code> blocks to handle different types of exceptions.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Handling Multiple Exception Types</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            string input = "abc";
+            int num = int.Parse(input); // This will throw FormatException
+        }
+        catch (FormatException ex)
+        {
+            Console.WriteLine($"Format Error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"General Error: {ex.Message}");
+        }
+    }
+}
+
+// Output:
+// Format Error: Input string was not in a correct format.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The program first catches a <code>FormatException</code>. If another type of exception occurs, the general <code>Exception</code> block will handle it.
+    </p>
+</section>
+
+<!-- Section: Using Finally Block -->
+<section class="mb-5">
+    <h2 class="text-secondary">Using the Finally Block</h2>
+    <p class="lead">
+        The <code>finally</code> block executes regardless of whether an exception occurs, making it ideal for cleanup tasks.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Using Finally Block</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+
+class Program
+{
+    static void Main()
+    {
+        try
+        {
+            int[] numbers = { 1, 2, 3 };
+            Console.WriteLine(numbers[5]); // Will throw IndexOutOfRangeException
+        }
+        catch (IndexOutOfRangeException ex)
+        {
+            Console.WriteLine($"Exception: {ex.Message}");
+        }
+        finally
+        {
+            Console.WriteLine("This block always executes.");
+        }
+    }
+}
+
+// Output:
+// Exception: Index was outside the bounds of the array.
+// This block always executes.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The <code>finally</code> block ensures the cleanup code always runs, even if an exception occurs.
+    </p>
+</section>
+
+<!-- Section: When to Use Exception Handling -->
+<section class="mb-5">
+    <h2 class="text-secondary">When to Use Exception Handling?</h2>
+    <ul class="list-group">
+        <li class="list-group-item">To gracefully handle unexpected errors.</li>
+        <li class="list-group-item">For validating input and preventing crashes.</li>
+        <li class="list-group-item">To ensure resource cleanup (e.g., closing files, releasing memory).</li>
+        <li class="list-group-item">To maintain application stability in production environments.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-end mt-4">
+    <a href="@Url.Action("ExceptionClassHierarchy", "CSharp")" class="btn btn-outline-secondary">Next: Exception Class Hierarchy</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

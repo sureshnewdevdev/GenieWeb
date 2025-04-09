@@ -1,0 +1,126 @@
+@{
+    ViewData["Title"] = "Querying Data with LINQ";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "EFQuerying";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        LINQ (Language Integrated Query) allows you to write expressive, readable queries directly in C# to interact with your database using EF Core.
+    </p>
+    <hr />
+
+    <!-- Section: What is LINQ? -->
+    <div class="mt-5">
+        <h2>What is LINQ?</h2>
+        <p>
+            LINQ integrates query capabilities into C# and .NET languages. EF Core translates LINQ queries into SQL at runtime, enabling you to work with strongly-typed objects.
+        </p>
+
+        <p>There are two common LINQ syntaxes:</p>
+        <ul>
+            <li><strong>Method syntax:</strong> <code>products.Where(p => p.Price &lt; 50)</code></li>
+            <li><strong>Query syntax:</strong> <code>from p in products where p.Price &lt; 50 select p</code></li>
+        </ul>
+    </div>
+
+    <!-- Section: Common LINQ Queries -->
+    <div class="mt-5">
+        <h3>Basic LINQ Examples</h3>
+
+        <h5>1. Get All Products:</h5>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var all = context.Products.ToList();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <h5 class="mt-4">2. Filter by Price:</h5>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var cheap = context.Products.Where(p => p.Price &lt; 50).ToList();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <h5 class="mt-4">3. Sort Products:</h5>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var sorted = context.Products.OrderByDescending(p => p.Price).ToList();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <h5 class="mt-4">4. Select Specific Fields:</h5>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var names = context.Products.Select(p => p.Name).ToList();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Including Relationships -->
+    <div class="mt-5">
+        <h3>Include Related Data</h3>
+        <p>Use <code>Include()</code> to load navigation properties (e.g., one-to-many):</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var categories = context.Categories
+    .Include(c => c.Products)
+    .ToList();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Grouping and Aggregates -->
+    <div class="mt-5">
+        <h3>Grouping and Aggregate Functions</h3>
+        <p>Use <code>group by</code>, <code>Count()</code>, <code>Average()</code>, and more:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var group = context.Products
+    .GroupBy(p => p.CategoryId)
+    .Select(g => new {
+        CategoryId = g.Key,
+        Count = g.Count(),
+        AvgPrice = g.Average(p => p.Price)
+    })
+    .ToList();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Paging -->
+    <div class="mt-5">
+        <h3>Pagination with Skip and Take</h3>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var page = context.Products
+    .Skip(10)
+    .Take(10)
+    .ToList();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            LINQ provides a clean and efficient way to query databases in C#. Up next, we’ll focus on optimizing EF Core performance by managing tracking behavior, batching queries, and caching strategies.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("EFRelationships", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: EF Core Relationships
+        </a>
+        <a href="@Url.Action("EFPerformance", "DotNet")" class="btn btn-outline-secondary">
+            Next: EF Core Performance Tips &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

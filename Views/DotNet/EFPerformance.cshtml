@@ -1,0 +1,125 @@
+@{
+    ViewData["Title"] = "EF Core Performance Tips";
+    ViewData["ActiveMenu"] = "DotNetCore";
+    ViewData["ActivePage"] = "EFPerformance";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Performance matters when working with large datasets or high-load applications. EF Core provides several tools and best practices to optimize your queries and overall data access.
+    </p>
+    <hr />
+
+    <!-- Section: Disable Change Tracking When Not Needed -->
+    <div class="mt-5">
+        <h2>1. Disable Tracking for Read-Only Queries</h2>
+        <p>
+            EF Core tracks all changes by default. If you’re only reading data, use <code>AsNoTracking()</code> to reduce memory and CPU usage.
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var products = context.Products
+    .AsNoTracking()
+    .ToList();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Limit Data with Select -->
+    <div class="mt-5">
+        <h3>2. Select Only Needed Fields</h3>
+        <p>
+            Avoid loading entire entities if you only need specific fields.
+        </p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var names = context.Products
+    .Select(p => new { p.Id, p.Name })
+    .ToList();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Avoid N+1 Queries -->
+    <div class="mt-5">
+        <h3>3. Use Include Wisely</h3>
+        <p>
+            Use <code>Include()</code> to eagerly load related data and prevent the N+1 problem, but avoid over-including:
+        </p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var categories = context.Categories
+    .Include(c => c.Products)
+    .ToList();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Batch Saves -->
+    <div class="mt-5">
+        <h3>4. Batch Multiple Changes</h3>
+        <p>
+            Perform all insert, update, or delete operations first, then call <code>SaveChanges()</code> once to minimize database roundtrips.
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>context.Add(new Product { Name = "Tablet" });
+context.Add(new Product { Name = "Monitor" });
+context.SaveChanges();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Use Indexes -->
+    <div class="mt-5">
+        <h3>5. Use Database Indexes</h3>
+        <p>
+            Ensure indexes are created on frequently queried columns using the Fluent API:
+        </p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>modelBuilder.Entity&lt;Product&gt;()
+    .HasIndex(p => p.Name);</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Use Async Methods -->
+    <div class="mt-5">
+        <h3>6. Use Async for I/O-Bound Operations</h3>
+        <p>
+            Always prefer asynchronous methods in production apps for better scalability:
+        </p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>var products = await context.Products.ToListAsync();</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            With these performance tips, your EF Core application can scale and respond efficiently under load. Up next: we’ll explore Blazor — a modern way to build interactive UIs using C# instead of JavaScript.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("EFQuerying", "DotNet")" class="btn btn-outline-secondary">
+            &larr; Previous: Querying with LINQ
+        </a>
+        <a href="@Url.Action("WhatIsBlazor", "DotNet")" class="btn btn-outline-secondary">
+            Next: Introduction to Blazor &rarr;
+        </a>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

@@ -1,0 +1,105 @@
+﻿@{
+    ViewData["Title"] = "Advanced Docker Topics";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Beyond the basics, Docker supports advanced use cases such as GUI applications, multi-architecture builds, GPU acceleration, and system-level debugging.
+        Mastering these topics enhances your ability to use Docker in complex, real-world environments.
+    </p>
+    <hr />
+
+    <!-- Section: Running GUI Applications in Docker -->
+    <div class="mt-5">
+        <h2>Running GUI Applications in Docker</h2>
+        <p>Linux GUI apps can be run in containers using X11 forwarding:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker run -e DISPLAY=$DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    gui-app-image</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>For Windows or macOS, tools like VNC or XQuartz are used to view GUI apps from containers.</p>
+    </div>
+
+    <!-- Section: Debugging Containers -->
+    <div class="mt-5">
+        <h3>Debugging Containers</h3>
+        <p>Use interactive shell access to inspect containers:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker exec -it container_name /bin/bash</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Use logging tools and inspect commands to trace issues:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker logs container_name
+docker inspect container_name</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Multi-Arch Builds -->
+    <div class="mt-5">
+        <h3>Multi-Arch Builds (ARM & x86)</h3>
+        <p>Use Docker Buildx to build for multiple architectures:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker buildx create --use
+docker buildx build --platform linux/amd64,linux/arm64 -t myapp:multiarch --push .</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>This allows you to support both desktop and ARM devices like Raspberry Pi.</p>
+    </div>
+
+    <!-- Section: Using Docker with GPU -->
+    <div class="mt-5">
+        <h3>Using Docker with GPU (for AI/ML)</h3>
+        <p>Enable NVIDIA GPU support with Docker using the <code>nvidia-container-toolkit</code>:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker run --gpus all nvidia/cuda:11.8.0-base nvidia-smi</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Great for machine learning, deep learning, or GPU-intensive applications.</p>
+    </div>
+
+    <!-- Section: Windows vs Linux Containers -->
+    <div class="mt-5">
+        <h3>Windows Containers vs. Linux Containers</h3>
+        <ul>
+            <li>Windows containers can only run on Windows hosts (or Windows Server Core base images)</li>
+            <li>Linux containers are portable across environments and more widely supported</li>
+            <li>Use Docker Desktop to switch between Linux and Windows container modes</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            These advanced features unlock Docker’s full potential for enterprise systems, development pipelines,
+            and high-performance computing. Explore these capabilities to scale your infrastructure intelligently.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("CICDWithDocker", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: CI/CD with Docker
+        </a>
+        <a href="@Url.Action("DockerMigration", "Docker")" class="btn btn-outline-secondary">
+            Next: Docker Container Migration &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

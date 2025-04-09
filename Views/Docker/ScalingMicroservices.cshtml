@@ -1,0 +1,102 @@
+@{
+    ViewData["Title"] = "Scaling Microservices in Docker";
+    ViewData["ActiveMenu"] = "Docker";
+    ViewData["ActivePage"] = "ScalingMicroservices";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        As demand grows, microservices need to handle more load. Scaling ensures your services remain responsive and reliable. Docker makes it easy to horizontally scale microservices using replicas.
+    </p>
+    <hr />
+
+    <!-- Section: Horizontal vs. Vertical Scaling -->
+    <div class="mt-5">
+        <h2>Horizontal vs. Vertical Scaling</h2>
+        <ul>
+            <li><strong>Vertical Scaling:</strong> Adding more resources (CPU/RAM) to the same container.</li>
+            <li><strong>Horizontal Scaling:</strong> Running multiple instances (replicas) of a service across containers.</li>
+        </ul>
+        <p class="text-muted"><small>Horizontal scaling is preferred for microservices as it offers better fault tolerance and load balancing.</small></p>
+    </div>
+
+    <!-- Section: Scaling with Docker Compose -->
+    <div class="mt-5">
+        <h3>Scaling Services with Docker Compose</h3>
+        <p>To scale a service like <code>user-service</code> to 3 replicas:</p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker-compose up --scale user-service=3 -d</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>This launches three containers of the same image under a shared network. Combine with a load balancer like Nginx to route traffic.</p>
+    </div>
+
+    <!-- Section: Example docker-compose.yml with Scaling -->
+    <div class="mt-5">
+        <h4>docker-compose.yml Example</h4>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>version: "3.8"
+services:
+  user-service:
+    build: ./user-service
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p><code>deploy</code> settings are supported in Docker Swarm and Kubernetes environments.</p>
+    </div>
+
+    <!-- Section: Auto-Scaling with Kubernetes -->
+    <div class="mt-5">
+        <h3>Auto-Scaling with Kubernetes</h3>
+        <p>
+            Kubernetes supports dynamic scaling using the Horizontal Pod Autoscaler (HPA).
+            Based on CPU or memory usage, it can automatically increase or decrease pods.
+        </p>
+
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>kubectl autoscale deployment user-service --cpu-percent=50 --min=2 --max=10</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+
+        <p>This ensures services remain performant without manual intervention.</p>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Scaling is crucial for performance and reliability. Docker supports easy horizontal scaling,
+            and tools like Kubernetes enable advanced auto-scaling for production workloads.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("ServiceDiscoveryLoadBalancing", "Docker")" class="btn btn-outline-secondary">
+            &larr; Previous: Service Discovery & Load Balancing
+        </a>
+        <a href="@Url.Action("DeployingMicroservices", "Docker")" class="btn btn-outline-secondary">
+            Next: Deploying Microservices with Docker &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>

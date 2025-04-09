@@ -4,60 +4,67 @@
 }
 
 <div class="container py-4">
-    <p class="text-center lead">Approvals and Gates in Azure DevOps Pipelines provide **controlled deployment workflows**, ensuring that changes are reviewed and meet required conditions before proceeding to the next stage.</p>
+    <p class="text-center lead">
+        Approvals and Gates in Azure DevOps Pipelines add control and security to your deployment process. These features help ensure that changes are properly reviewed and validated before moving into production or critical environments.
+    </p>
     <hr />
 
+    <!-- What Are Approvals & Gates -->
     <div class="mt-5">
         <h2>What Are Approvals & Gates?</h2>
-        <p>Approvals and Gates allow organizations to enforce **deployment control** by adding validation steps in the pipeline.</p>
+        <p>
+            Approvals and Gates are features used to enforce **checks and balances** during the software delivery lifecycle:
+        </p>
         <ul>
-            <li>**Approvals** – Require manual intervention before a deployment proceeds.</li>
-            <li>**Gates** – Perform automated checks (e.g., security scans, monitoring) before approving a release.</li>
-            <li>**Ensures compliance** and reduces risk in production deployments.</li>
-            <li>Prevents deployments from proceeding until conditions are met.</li>
+            <li><strong>Approvals:</strong> Manual interventions required before (or after) deployment to a specific stage</li>
+            <li><strong>Gates:</strong> Automated checks that ensure your system or environment meets predefined conditions</li>
+            <li>Prevent accidental or unauthorized deployments</li>
+            <li>Support compliance and governance requirements in regulated industries</li>
         </ul>
     </div>
 
-    <div class="row align-items-center">
-        <div class="col-md-6 text-center">
-            <img src="https://learn.microsoft.com/en-us/azure/devops/media/approvals-gates.png" alt="Approvals & Gates in Azure DevOps" class="img-fluid rounded shadow-lg">
-            <p class="text-muted mt-2"><small>Approvals & Gates in a Release Pipeline</small></p>
-        </div>
-        <div class="col-md-6">
-            <h4>Types of Approvals</h4>
-            <ul>
-                <li>**Pre-Deployment Approvals** – Approvers must manually approve before moving to the next stage.</li>
-                <li>**Post-Deployment Approvals** – Approval is required after deployment to ensure system stability.</li>
-                <li>**Multi-User Approvals** – Multiple users or teams must review before proceeding.</li>
-            </ul>
-        </div>
+    <!-- Types of Approvals -->
+    <div class="mt-5">
+        <h2>Types of Approvals</h2>
+        <p>Azure DevOps supports different types of approval configurations to match your release workflow:</p>
+        <ul>
+            <li><strong>Pre-Deployment Approvals:</strong> Required before a stage begins deployment</li>
+            <li><strong>Post-Deployment Approvals:</strong> Ensures stability before moving forward</li>
+            <li><strong>Multi-User Approvals:</strong> Allows multiple approvers or teams to review before continuing</li>
+        </ul>
     </div>
 
+    <!-- How to Configure Approvals -->
     <div class="mt-5">
-        <h2>Configuring Approvals in Azure DevOps</h2>
-        <p>Follow these steps to set up Approvals in a Release Pipeline:</p>
+        <h2>How to Configure Approvals in a Release Pipeline</h2>
+        <p>To set up manual approvals in a release pipeline:</p>
         <ol>
-            <li>Go to **Azure DevOps > Pipelines > Releases**.</li>
-            <li>Select a stage and click **Pre-deployment conditions**.</li>
-            <li>Enable **Pre-deployment approvals** and specify approvers.</li>
-            <li>Save and deploy the pipeline.</li>
+            <li>Navigate to <strong>Azure DevOps &gt; Pipelines &gt; Releases</strong></li>
+            <li>Click the stage where you want to add an approval</li>
+            <li>Choose <strong>Pre-deployment conditions</strong></li>
+            <li>Enable <strong>Approvals</strong> and select the required users or groups</li>
+            <li>Save your changes and test the pipeline</li>
         </ol>
     </div>
 
+    <!-- What Are Gates -->
     <div class="mt-5">
         <h2>What Are Gates in Azure Pipelines?</h2>
-        <p>Gates are **automated checks** that must be satisfied before a deployment continues.</p>
+        <p>
+            Gates are **automated validations** that must pass before a stage continues. They're useful when you want to include health checks, quality gates, or policy validations in your release workflow.
+        </p>
         <ul>
-            <li>Checks **system health, security policies, and compliance**.</li>
-            <li>Can be configured with **Azure Monitor alerts, REST API calls, and security scans**.</li>
-            <li>Ensures **data-driven decision-making** before deployments.</li>
+            <li>Run a script to validate deployment readiness</li>
+            <li>Check alerts from Azure Monitor or ServiceNow</li>
+            <li>Call a REST API to verify external system conditions</li>
+            <li>Enforce security or compliance checks automatically</li>
         </ul>
     </div>
 
-    <div class="row align-items-center">
-        <div class="col-md-6">
-            <h4>Example YAML for Approval & Gates</h4>
-            <pre>
+    <!-- YAML Snippet -->
+    <div class="mt-5">
+        <h4>Sample YAML Snippet with Approvals Concept</h4>
+        <pre><code>
 stages:
 - stage: Deploy
   displayName: 'Deploy with Approval'
@@ -73,37 +80,42 @@ stages:
               azureSubscription: 'AzureServiceConnection'
               appName: 'my-web-app'
               package: '$(Pipeline.Workspace)/drop/*.zip'
-            </pre>
-        </div>
-        <div class="col-md-6 text-center">
-            <img src="https://learn.microsoft.com/en-us/azure/devops/media/gates-example.png" alt="Example of Gates in Azure DevOps" class="img-fluid rounded shadow-lg">
-            <p class="text-muted mt-2"><small>Example of Gates in a Pipeline</small></p>
-        </div>
+        </code></pre>
+        <p class="mt-2">
+            Approvals and gates are configured in the environment settings, not within the YAML file itself, but this shows where deployment happens within the pipeline.
+        </p>
     </div>
 
+    <!-- Best Practices -->
     <div class="mt-5">
-        <h2>Best Practices for Approvals & Gates</h2>
+        <h2>Best Practices</h2>
         <ul>
-            <li>Use **pre-deployment approvals** for controlled rollouts.</li>
-            <li>Automate security and compliance checks with **Gates**.</li>
-            <li>Enable **multi-stage approvals** for high-risk deployments.</li>
-            <li>Monitor deployment **logs and alerts** to track approval decisions.</li>
-            <li>Use **role-based access control (RBAC)** to define approvers.</li>
+            <li>Use approvals in **production and critical stages** to prevent accidental changes</li>
+            <li>Combine manual approvals with **automated gates** for added confidence</li>
+            <li>Use **RBAC (Role-Based Access Control)** to manage who can approve what</li>
+            <li>Integrate gates with **monitoring or security tools** for real-time insights</li>
+            <li>Always keep your approvers informed of the changes they’re reviewing</li>
         </ul>
     </div>
 
+    <!-- Conclusion -->
     <div class="mt-5">
         <h2>Conclusion</h2>
         <p>
-            Approvals & Gates in Azure DevOps Pipelines enforce **deployment control, compliance, and automated checks**. By integrating approvals and gates, organizations can ensure **secure, stable, and reliable software releases**.
+            By integrating Approvals and Gates, Azure DevOps ensures that your deployments are not only fast but also safe, auditable, and compliant. These features are especially valuable for enterprises or projects with strict release governance.
         </p>
         <p>
-            The next step is to explore **Rollback Strategies in Azure DevOps** for handling failed deployments effectively.
+            Coming up next: you’ll learn how to create **Rollback Strategies** in Azure DevOps in case something goes wrong during deployment.
         </p>
     </div>
 
+    <!-- Navigation -->
     <div class="d-flex justify-content-between mt-4">
-        <a href="@Url.Action("DeployAzureAppServices", "AzureDevOps")" class="btn btn-outline-secondary">&larr; Previous: Deploying to Azure App Services</a>
-        <a href="@Url.Action("RollbackStrategies", "AzureDevOps")" class="btn btn-outline-secondary">Next: Rollback Strategies &rarr;</a>
+        <a href="@Url.Action("DeployAzureAppServices", "AzureDevOps")" class="btn btn-outline-secondary">
+            &larr; Previous: Deploying to Azure App Services
+        </a>
+        <a href="@Url.Action("RollbackStrategies", "AzureDevOps")" class="btn btn-outline-secondary">
+            Next: Rollback Strategies &rarr;
+        </a>
     </div>
 </div>

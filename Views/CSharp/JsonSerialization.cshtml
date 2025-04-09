@@ -1,0 +1,257 @@
+﻿@{
+    ViewData["Title"] = "JSON Serialization in C#";
+}
+
+<!-- Section: Introduction to JSON Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is JSON Serialization in C#?</h2>
+    <p class="lead">
+        **JSON (JavaScript Object Notation) Serialization** is the process of converting C# objects into **JSON format** for easy storage, communication, and data exchange. It is commonly used in **REST APIs, web services, and configuration files**.
+    </p>
+</section>
+
+<!-- Section: Key Features of JSON Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of JSON Serialization</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Lightweight and **human-readable** format.</li>
+        <li class="list-group-item">Used in **REST APIs, web applications, and NoSQL databases**.</li>
+        <li class="list-group-item">Supports **objects, lists, and complex data structures**.</li>
+        <li class="list-group-item">Fast serialization and deserialization compared to XML.</li>
+    </ul>
+</section>
+
+<!-- Section: Serializing Objects to JSON -->
+<section class="mb-5">
+    <h2 class="text-secondary">Serializing Objects to JSON</h2>
+    <p class="lead">
+        In C#, **JSON serialization** is performed using the **System.Text.Json.JsonSerializer** class.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Serializing an Object to JSON</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Text.Json;
+using System.IO;
+
+class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+// Writing JSON Data
+class Program
+{
+    static void Main()
+    {
+        Person person = new Person { Name = "Alice", Age = 28 };
+        string json = JsonSerializer.Serialize(person);
+
+        File.WriteAllText("person.json", json);
+        Console.WriteLine("Object serialized to JSON.");
+    }
+}
+
+// Output:
+// Object serialized to JSON.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **JsonSerializer.Serialize()** method converts an object into a JSON string and saves it to a file.
+    </p>
+</section>
+
+<!-- Section: Deserializing JSON to Objects -->
+<section class="mb-5">
+    <h2 class="text-secondary">Deserializing JSON to Objects</h2>
+    <p class="lead">
+        JSON data can be **converted back into C# objects** using the **JsonSerializer.Deserialize()** method.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Deserializing JSON Data to an Object</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Text.Json;
+using System.IO;
+
+class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+// Reading JSON Data
+class DeserializeExample
+{
+    static void Main()
+    {
+        string json = File.ReadAllText("person.json");
+        Person person = JsonSerializer.Deserialize<Person>(json);
+
+        Console.WriteLine($"Name: {person.Name}, Age: {person.Age}");
+    }
+}
+
+// Output:
+// Name: Alice, Age: 28</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **JsonSerializer.Deserialize()** method reads a JSON string and converts it back into a C# object.
+    </p>
+</section>
+
+<!-- Section: Serializing and Deserializing Lists -->
+<section class="mb-5">
+    <h2 class="text-secondary">Serializing and Deserializing Lists</h2>
+    <p class="lead">
+        JSON serialization also works with **lists of objects**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Serializing and Deserializing a List</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.IO;
+
+class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+// Writing JSON List Data
+class Program
+{
+    static void Main()
+    {
+        List<Person> people = new List<Person>
+        {
+            new Person { Name = "Alice", Age = 28 },
+            new Person { Name = "Bob", Age = 35 }
+        };
+
+        string json = JsonSerializer.Serialize(people);
+        File.WriteAllText("people.json", json);
+        Console.WriteLine("List serialized to JSON.");
+    }
+}
+
+// Reading JSON List Data
+class DeserializeExample
+{
+    static void Main()
+    {
+        string json = File.ReadAllText("people.json");
+        List<Person> people = JsonSerializer.Deserialize<List<Person>>(json);
+
+        foreach (var person in people)
+        {
+            Console.WriteLine($"Name: {person.Name}, Age: {person.Age}");
+        }
+    }
+}
+
+// Output:
+// List serialized to JSON.
+// Name: Alice, Age: 28
+// Name: Bob, Age: 35</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        JSON serialization allows storing and retrieving **lists of objects** efficiently.
+    </p>
+</section>
+
+<!-- Section: Customizing JSON Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Customizing JSON Serialization</h2>
+    <p class="lead">
+        JSON serialization can be customized using **JsonSerializerOptions** to format output.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Customizing JSON Output</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+class Person
+{
+    public string Name { get; set; }
+
+    [JsonIgnore]
+    public int Age { get; set; } // This property will be ignored
+}
+
+// Writing JSON with Custom Options
+class Program
+{
+    static void Main()
+    {
+        Person person = new Person { Name = "Charlie", Age = 40 };
+
+        var options = new JsonSerializerOptions { WriteIndented = true };
+        string json = JsonSerializer.Serialize(person, options);
+
+        Console.WriteLine(json);
+    }
+}
+
+// Output (formatted JSON):
+// {
+//    "Name": "Charlie"
+// }</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **[JsonIgnore]** attribute hides properties during serialization.
+    </p>
+</section>
+
+<!-- Section: Best Practices for JSON Serialization -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for JSON Serialization</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **JsonSerializerOptions** for formatting and readability.</li>
+        <li class="list-group-item">Mark sensitive properties with **[JsonIgnore]** to prevent exposure.</li>
+        <li class="list-group-item">Use **list serialization** for handling multiple objects efficiently.</li>
+        <li class="list-group-item">Avoid unnecessary **nested objects** to keep JSON lightweight.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("SerializationModes", "CSharp")" class="btn btn-outline-secondary">Previous: Serialization Modes</a>
+    <a href="@Url.Action("VariousSerializations", "CSharp")" class="btn btn-outline-secondary">Next: Various Serializations</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

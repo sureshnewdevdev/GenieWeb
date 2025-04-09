@@ -1,0 +1,310 @@
+﻿@{
+    ViewData["Title"] = "Connecting .NET with Azure Application Insights (All Logging Types)";
+}
+
+<!-- Section: Introduction to Application Insights -->
+<section class="mb-5">
+    <h2 class="text-secondary">What is Azure Application Insights?</h2>
+    <p class="lead">
+        Azure Application Insights is a powerful tool that helps you understand how your application is running in real-time.
+        It provides visibility into application performance, errors, usage, and more—so you can identify and fix issues faster.
+    </p>
+</section>
+
+<!-- Section: Installing SDK -->
+<section class="mb-5">
+    <h2 class="text-secondary">Step 1: Install Application Insights SDK</h2>
+    <p class="lead">Run this command in your terminal to add the Application Insights package:</p>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>dotnet add package Microsoft.ApplicationInsights.AspNetCore</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: Configuration -->
+<section class="mb-5">
+    <h2 class="text-secondary">Step 2: Configure in <code>appsettings.json</code></h2>
+    <p class="lead">Add your Application Insights connection string:</p>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+<pre class="mb-0"><code>{
+  "ApplicationInsights": {
+    "ConnectionString": "InstrumentationKey=your-instrumentation-key"
+  }
+}</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: Modify Program.cs -->
+<section class="mb-5">
+    <h2 class="text-secondary">Step 3: Modify <code>Program.cs</code> (for .NET 6+)</h2>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+<pre class="mb-0"><code>var builder = WebApplication.CreateBuilder(args);
+
+// Add Application Insights
+builder.Services.AddApplicationInsightsTelemetry(
+    builder.Configuration["ApplicationInsights:ConnectionString"]);
+
+var app = builder.Build();
+app.MapControllers(); // Ensure controllers are mapped
+app.Run();</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: Logging Controller -->
+<section class="mb-5">
+    <h2 class="text-secondary">Step 4: Create Logging Controller</h2>
+    <p class="lead">Below is a sample controller demonstrating different types of telemetry logging using <code>TelemetryClient</code>.</p>
+
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+<pre class="mb-0"><code>using Microsoft.AspNetCore.Mvc;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
+using System;
+using System.Collections.Generic;
+
+[ApiController]
+[Route("api/[controller]")]
+public class TelemetryDemoController : ControllerBase
+{
+    private readonly TelemetryClient _telemetryClient;
+
+    public TelemetryDemoController(TelemetryClient telemetryClient)
+    {
+        _telemetryClient = telemetryClient;
+    }
+
+    // VERBOSE TRACE
+    [HttpGet("trace-verbose")]
+    public IActionResult LogVerbose()
+    {
+        var message = "This is a VERBOSE log";
+        var timestamp = DateTime.UtcNow;
+
+        _telemetryClient.TrackTrace(message, SeverityLevel.Verbose);
+
+        var logObject = new
+        {
+            message = message,
+            severityLevel = "Verbose",
+            timestamp = timestamp.ToString("o"),
+            type = "Trace"
+        };
+
+        return Ok(logObject);
+    }
+
+    // INFORMATION TRACE
+    [HttpGet("trace-info")]
+    public IActionResult LogInfo()
+    {
+        var message = "This is an INFORMATION log";
+        var timestamp = DateTime.UtcNow;
+
+        _telemetryClient.TrackTrace(message, SeverityLevel.Information);
+
+        var logObject = new
+        {
+            message = message,
+            severityLevel = "Information",
+            timestamp = timestamp.ToString("o"),
+            type = "Trace"
+        };
+
+        return Ok(logObject);
+    }
+
+    // WARNING TRACE
+    [HttpGet("trace-warning")]
+    public IActionResult LogWarning()
+    {
+        var message = "This is a WARNING log";
+        var timestamp = DateTime.UtcNow;
+
+        _telemetryClient.TrackTrace(message, SeverityLevel.Warning);
+
+        var logObject = new
+        {
+            message = message,
+            severityLevel = "Warning",
+            timestamp = timestamp.ToString("o"),
+            type = "Trace"
+        };
+
+        return Ok(logObject);
+    }
+
+    // EXCEPTION
+    [HttpGet("log-exception")]
+    public IActionResult LogException()
+    {
+        string message = null;
+        string type = null;
+        string stackTrace = null;
+        var timestamp = DateTime.UtcNow;
+
+        try
+        {
+            int fail = 0;
+            int result = 10 / fail;
+        }
+        catch (Exception ex)
+        {
+            message = ex.Message;
+            type = ex.GetType().Name;
+            stackTrace = ex.StackTrace;
+
+            _telemetryClient.TrackException(ex);
+        }
+
+        var logObject = new
+        {
+            type = "Exception",
+            exception = new
+            {
+                message = message,
+                type = type,
+                stackTrace = stackTrace
+            },
+            severityLevel = "Error",
+            timestamp = timestamp.ToString("o")
+        };
+
+        return Ok(logObject);
+    }
+
+    // CUSTOM EVENT
+    [HttpGet("log-event")]
+    public IActionResult LogEvent()
+    {
+        var eventName = "UserSignedUp";
+        var timestamp = DateTime.UtcNow;
+        var properties = new Dictionary<string, string>
+        {
+            { "Plan", "Premium" },
+            { "Region", "East US" }
+        };
+
+        _telemetryClient.TrackEvent(eventName, properties);
+
+        var logObject = new
+        {
+            type = "Event",
+            name = eventName,
+            properties = properties,
+            timestamp = timestamp.ToString("o")
+        };
+
+        return Ok(logObject);
+    }
+
+    // DEPENDENCY
+    [HttpGet("log-dependency")]
+    public IActionResult LogDependency()
+    {
+        var dependencyType = "SQL";
+        var dependencyName = "GetUsers";
+        var dependencyData = "SELECT * FROM Users";
+        var timestamp = DateTimeOffset.UtcNow;
+        var duration = TimeSpan.FromMilliseconds(200);
+        var success = true;
+
+        _telemetryClient.TrackDependency(
+            dependencyType,
+            dependencyName,
+            dependencyData,
+            timestamp,
+            duration,
+            success
+        );
+
+        var logObject = new
+        {
+            type = "Dependency",
+            target = dependencyType,
+            name = dependencyName,
+            data = dependencyData,
+            duration = duration.ToString(),
+            success = success,
+            timestamp = timestamp.ToString("o")
+        };
+
+        return Ok(logObject);
+    }
+
+    // REQUEST
+    [HttpGet("log-request")]
+    public IActionResult LogRequest()
+    {
+        var requestName = "HomePageRequest";
+        var timestamp = DateTimeOffset.UtcNow;
+        var duration = TimeSpan.FromMilliseconds(150);
+        var responseCode = "200";
+        var success = true;
+
+        _telemetryClient.TrackRequest(
+            requestName,
+            timestamp,
+            duration,
+            responseCode,
+            success
+        );
+
+        var logObject = new
+        {
+            type = "Request",
+            name = requestName,
+            duration = duration.ToString(),
+            responseCode = responseCode,
+            success = success,
+            timestamp = timestamp.ToString("o")
+        };
+
+        return Ok(logObject);
+    }
+}
+</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: Test Your Logs -->
+<section class="mb-5">
+    <h2 class="text-secondary">Step 5: Test Logging via Browser or Postman</h2>
+    <p class="lead">Once your app is running, open a browser or use Postman and navigate to:</p>
+    <ul class="list-group">
+        <li class="list-group-item">GET <code>/api/TelemetryDemo/trace-verbose</code></li>
+        <li class="list-group-item">GET <code>/api/TelemetryDemo/trace-info</code></li>
+        <li class="list-group-item">GET <code>/api/TelemetryDemo/trace-warning</code></li>
+        <li class="list-group-item">GET <code>/api/TelemetryDemo/log-exception</code></li>
+        <li class="list-group-item">GET <code>/api/TelemetryDemo/log-event</code></li>
+        <li class="list-group-item">GET <code>/api/TelemetryDemo/log-request</code></li>
+        <li class="list-group-item">GET <code>/api/TelemetryDemo/log-dependency</code></li>
+    </ul>
+</section>
+
+<!-- Section: Viewing Telemetry -->
+<section class="mb-5">
+    <h2 class="text-secondary">Step 6: View Telemetry in Azure</h2>
+    <p class="lead">Go to the Azure Portal and open your Application Insights resource to view:</p>
+    <ul class="list-group">
+        <li class="list-group-item">✔️ <b>Logs:</b> Search and filter all telemetry</li>
+        <li class="list-group-item">✔️ <b>Live Metrics:</b> Watch events in real-time</li>
+        <li class="list-group-item">✔️ <b>Failures:</b> View and diagnose exceptions</li>
+        <li class="list-group-item">✔️ <b>Performance:</b> Monitor response times</li>
+        <li class="list-group-item">✔️ <b>Custom Events:</b> Track user behavior</li>
+    </ul>
+</section>
+
+<!-- JavaScript for Copy Buttons -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

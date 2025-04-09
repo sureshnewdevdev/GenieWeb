@@ -4,82 +4,104 @@
 }
 
 <div class="container py-4">
-    <p class="text-center lead">Managing packages effectively ensures secure and efficient dependency management for software development. Azure Artifacts allows teams to store, share, and manage packages using NuGet, npm, and Maven.</p>
+    <p class="text-center lead">
+        Managing packages is a core part of building reliable and maintainable applications. Azure Artifacts allows you to store, share, and consume your own NuGet, npm, and Maven packages — all securely within your DevOps environment.
+    </p>
     <hr />
 
     <div class="mt-5">
-        <h2>Why Manage Packages?</h2>
-        <p>Software projects rely on external libraries and dependencies. Proper package management helps in:</p>
+        <h2>Why Is Package Management Important?</h2>
+        <p>Modern applications often depend on third-party libraries and internal shared components. A proper package management strategy helps you:</p>
         <ul>
-            <li><strong>Version Control:</strong> Ensuring applications use the correct library versions.</li>
-            <li><strong>Security:</strong> Protecting against vulnerabilities in outdated dependencies.</li>
-            <li><strong>Consistency:</strong> Avoiding dependency conflicts across development environments.</li>
-            <li><strong>Efficiency:</strong> Reducing build times by caching frequently used packages.</li>
+            <li><strong>Maintain version control</strong> across teams and projects.</li>
+            <li><strong>Improve security</strong> by scanning and auditing dependencies.</li>
+            <li><strong>Ensure consistency</strong> across environments.</li>
+            <li><strong>Speed up builds</strong> by caching and reusing packages.</li>
         </ul>
     </div>
 
     <div class="text-center mt-4">
-        <img src="https://learn.microsoft.com/en-us/azure/devops/artifacts/media/artifacts-overview.png" alt="Package Management in Azure DevOps" class="img-fluid rounded shadow-lg">
-        <p class="text-muted mt-2"><small>Azure Artifacts package feeds</small></p>
+        <img src="~/css/Images/AzureDevOps/AzureArtifacts.png" alt="Azure Artifacts" class="img-fluid rounded shadow-lg">
+        <p class="text-muted mt-2"><small>Azure Artifacts package feeds support multiple package types</small></p>
     </div>
 
+    <!-- NuGet -->
     <div class="mt-5">
-        <h3>Managing NuGet Packages</h3>
+        <h3>Working with NuGet Packages</h3>
+        <p>NuGet is the package manager for .NET. You can host private NuGet feeds in Azure Artifacts and configure your projects to publish and consume them.</p>
         <ol>
-            <li>Open Azure DevOps and navigate to <strong>Artifacts</strong>.</li>
-            <li>Create a new feed and select <strong>NuGet</strong> as the package type.</li>
-            <li>Use the following command to add the package source:
+            <li>Go to <strong>Azure DevOps > Artifacts</strong>, then create a new feed with <strong>NuGet</strong> as the format.</li>
+            <li>
+                Configure your development machine:
                 <pre class="bg-light p-3 rounded">nuget sources Add -Name "AzureArtifacts" -Source "https://pkgs.dev.azure.com/{organization}/_packaging/{feed}/nuget/v3/index.json"</pre>
             </li>
-            <li>Push packages using:
+            <li>
+                To publish a package:
                 <pre class="bg-light p-3 rounded">nuget push package.nupkg -Source "AzureArtifacts" -ApiKey az</pre>
             </li>
         </ol>
     </div>
 
+    <!-- npm -->
     <div class="mt-5">
-        <h3>Managing npm Packages</h3>
+        <h3>Working with npm Packages</h3>
+        <p>If you're building JavaScript or Node.js applications, Azure Artifacts supports npm package feeds for secure dependency management.</p>
         <ol>
             <li>Create an npm feed in Azure Artifacts.</li>
-            <li>Authenticate with:
+            <li>
+                Authenticate your CLI session:
                 <pre class="bg-light p-3 rounded">npm login --registry=https://pkgs.dev.azure.com/{organization}/_packaging/{feed}/npm/registry/</pre>
             </li>
-            <li>Publish a package:
+            <li>
+                Publish your npm package:
                 <pre class="bg-light p-3 rounded">npm publish --registry=https://pkgs.dev.azure.com/{organization}/_packaging/{feed}/npm/registry/</pre>
             </li>
         </ol>
     </div>
 
+    <!-- Maven -->
     <div class="mt-5">
-        <h3>Managing Maven Packages</h3>
+        <h3>Working with Maven Packages</h3>
+        <p>Maven is widely used in Java ecosystems. Azure Artifacts allows you to push and pull Maven packages in a secure and version-controlled way.</p>
         <ol>
-            <li>Create a Maven feed in Azure Artifacts.</li>
-            <li>Add the repository to the Maven settings.xml:
-                <pre class="bg-light p-3 rounded">&lt;repository&gt;
+            <li>Create a Maven feed in Azure DevOps.</li>
+            <li>
+                Add the feed to your <code>settings.xml</code>:
+                <pre class="bg-light p-3 rounded">
+&lt;repository&gt;
     &lt;id&gt;azure-artifacts&lt;/id&gt;
     &lt;url&gt;https://pkgs.dev.azure.com/{organization}/_packaging/{feed}/maven/v1&lt;/url&gt;
-&lt;/repository&gt;</pre>
+&lt;/repository&gt;
+                </pre>
             </li>
-            <li>Deploy a package using:
+            <li>
+                Deploy your package using:
                 <pre class="bg-light p-3 rounded">mvn deploy</pre>
             </li>
         </ol>
     </div>
 
+    <!-- Best Practices -->
     <div class="mt-5">
         <h3>Best Practices for Package Management</h3>
         <ul>
-            <li><strong>Use separate feeds</strong> for development, testing, and production.</li>
-            <li><strong>Automate package updates</strong> through CI/CD pipelines.</li>
-            <li><strong>Apply retention policies</strong> to clean up old versions.</li>
-            <li><strong>Enable security scanning</strong> to detect vulnerabilities in dependencies.</li>
+            <li><strong>Separate feeds</strong> by environment (e.g., dev, test, prod) to reduce risk.</li>
+            <li><strong>Automate</strong> package publishing as part of your CI/CD pipeline.</li>
+            <li><strong>Use retention policies</strong> to clean up unused package versions.</li>
+            <li><strong>Enable vulnerability scanning</strong> to catch insecure dependencies early.</li>
+            <li><strong>Use semantic versioning</strong> to communicate compatibility and changes.</li>
         </ul>
     </div>
 
+    <!-- Conclusion -->
     <div class="mt-5">
-        <p>Effective package management with Azure Artifacts ensures stability, security, and scalability for software projects. By integrating package management with CI/CD pipelines, teams can streamline development workflows.</p>
+        <p>
+            Azure Artifacts makes it easy to manage your project's dependencies at scale — all while keeping security, consistency, and traceability in mind.
+            Whether you’re working in .NET, Node.js, or Java, integrating package management into your pipelines ensures faster and safer software delivery.
+        </p>
     </div>
 
+    <!-- Navigation -->
     <div class="d-flex justify-content-between mt-4">
         <a href="@Url.Action("IntroAzureArtifacts", "AzureDevOps")" class="btn btn-outline-secondary">&larr; Previous: Introduction to Azure Artifacts</a>
         <a href="@Url.Action("IntegrateArtifactsCICD", "AzureDevOps")" class="btn btn-outline-secondary">Next: Integrating Artifacts CI/CD &rarr;</a>

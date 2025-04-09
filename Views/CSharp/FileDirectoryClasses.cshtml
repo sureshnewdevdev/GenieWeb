@@ -1,0 +1,254 @@
+﻿@{
+    ViewData["Title"] = "File and Directory Classes in C#";
+}
+
+<!-- Section: Introduction to File and Directory Classes -->
+<section class="mb-5">
+    <h2 class="text-secondary">What are File and Directory Classes in C#?</h2>
+    <p class="lead">
+        The **File** and **Directory** classes in C# provide methods for performing operations on files and directories, such as **creating, deleting, copying, moving, and checking existence**. These classes are part of the **System.IO** namespace.
+    </p>
+</section>
+
+<!-- Section: Key Features -->
+<section class="mb-5">
+    <h2 class="text-secondary">Key Features of File & Directory Classes</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Provide static methods for handling **files and folders**.</li>
+        <li class="list-group-item">Support operations like **creating, deleting, moving, and checking existence**.</li>
+        <li class="list-group-item">Can retrieve **file attributes, sizes, and timestamps**.</li>
+        <li class="list-group-item">Work seamlessly with **file paths and directories**.</li>
+    </ul>
+</section>
+
+<!-- Section: Working with the File Class -->
+<section class="mb-5">
+    <h2 class="text-secondary">Working with the File Class</h2>
+    <p class="lead">
+        The **File** class provides static methods for handling file operations.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Creating, Writing, and Reading a File</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        string filePath = "testfile.txt";
+
+        // Creating and writing to the file
+        File.WriteAllText(filePath, "Hello, File Class!");
+
+        // Checking if file exists
+        if (File.Exists(filePath))
+        {
+            Console.WriteLine("File created successfully.");
+
+            // Reading file content
+            string content = File.ReadAllText(filePath);
+            Console.WriteLine($"File Content: {content}");
+        }
+    }
+}
+
+// Output:
+// File created successfully.
+// File Content: Hello, File Class!</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **File.WriteAllText()** and **File.ReadAllText()** methods make file operations easy.
+    </p>
+</section>
+
+<!-- Section: Copying, Moving, and Deleting Files -->
+<section class="mb-5">
+    <h2 class="text-secondary">Copying, Moving, and Deleting Files</h2>
+    <p class="lead">
+        The **File** class allows copying, moving, and deleting files.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Copying, Moving, and Deleting a File</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        string sourceFile = "testfile.txt";
+        string copyFile = "copyfile.txt";
+        string movedFile = "movedfile.txt";
+
+        // Copy File
+        File.Copy(sourceFile, copyFile, true);
+        Console.WriteLine("File copied successfully.");
+
+        // Move File
+        File.Move(copyFile, movedFile);
+        Console.WriteLine("File moved successfully.");
+
+        // Delete File
+        File.Delete(movedFile);
+        Console.WriteLine("File deleted successfully.");
+    }
+}
+
+// Output:
+// File copied successfully.
+// File moved successfully.
+// File deleted successfully.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **File.Copy()**, **File.Move()**, and **File.Delete()** methods simplify file management.
+    </p>
+</section>
+
+<!-- Section: Working with the Directory Class -->
+<section class="mb-5">
+    <h2 class="text-secondary">Working with the Directory Class</h2>
+    <p class="lead">
+        The **Directory** class provides static methods to manage directories.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Creating, Checking, and Deleting a Directory</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        string directoryPath = "MyDirectory";
+
+        // Create Directory
+        if (!Directory.Exists(directoryPath))
+        {
+            Directory.CreateDirectory(directoryPath);
+            Console.WriteLine("Directory created successfully.");
+        }
+
+        // Check if Directory Exists
+        if (Directory.Exists(directoryPath))
+        {
+            Console.WriteLine("Directory exists.");
+        }
+
+        // Delete Directory
+        Directory.Delete(directoryPath);
+        Console.WriteLine("Directory deleted successfully.");
+    }
+}
+
+// Output:
+// Directory created successfully.
+// Directory exists.
+// Directory deleted successfully.</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **Directory.CreateDirectory()**, **Directory.Exists()**, and **Directory.Delete()** methods handle directory operations.
+    </p>
+</section>
+
+<!-- Section: Listing Files and Directories -->
+<section class="mb-5">
+    <h2 class="text-secondary">Listing Files and Directories</h2>
+    <p class="lead">
+        You can retrieve files and directories inside a folder using **Directory.GetFiles()** and **Directory.GetDirectories()**.
+    </p>
+
+    <!-- Example Code Block -->
+    <h3 class="text-info">Example: Listing Files and Directories</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0">
+<code>using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        string directoryPath = "."; // Current directory
+
+        // Get all files in the directory
+        string[] files = Directory.GetFiles(directoryPath);
+        Console.WriteLine("Files in Directory:");
+        foreach (var file in files)
+        {
+            Console.WriteLine(file);
+        }
+
+        // Get all subdirectories
+        string[] directories = Directory.GetDirectories(directoryPath);
+        Console.WriteLine("\nSubdirectories:");
+        foreach (var dir in directories)
+        {
+            Console.WriteLine(dir);
+        }
+    }
+}
+
+// Output (depends on system files):
+// Files in Directory:
+// testfile.txt
+// movedfile.txt
+
+// Subdirectories:
+// MyDirectory
+// AnotherFolder</code>
+        </pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <p class="text-muted">
+        The **Directory.GetFiles()** method lists all files, while **Directory.GetDirectories()** lists subdirectories.
+    </p>
+</section>
+
+<!-- Section: Best Practices -->
+<section class="mb-5">
+    <h2 class="text-secondary">Best Practices for Using File & Directory Classes</h2>
+    <ul class="list-group">
+        <li class="list-group-item">Use **File.Exists()** and **Directory.Exists()** before performing operations.</li>
+        <li class="list-group-item">Always **handle exceptions** when dealing with files and directories.</li>
+        <li class="list-group-item">Use **relative paths** instead of absolute paths when possible.</li>
+        <li class="list-group-item">Clean up **unused files and directories** to prevent clutter.</li>
+    </ul>
+</section>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="@Url.Action("BinaryReaderWriter", "CSharp")" class="btn btn-outline-secondary">Previous: BinaryReader & BinaryWriter</a>
+    <a href="@Url.Action("SerializationModes", "CSharp")" class="btn btn-outline-secondary">Next: Serialization Modes</a>
+</div>
+
+<!-- JavaScript for Copy Functionality -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

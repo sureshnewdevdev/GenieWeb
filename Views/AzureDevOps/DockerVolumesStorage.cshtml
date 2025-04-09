@@ -1,0 +1,134 @@
+﻿@{
+    ViewData["Title"] = "Docker Volumes & Storage";
+    ViewData["ActiveMenu"] = "AzureDevOps";
+}
+
+<div class="container py-4">
+    <p class="text-center lead">
+        Persistent storage is crucial for stateful applications. Docker provides volumes and bind mounts to store data outside containers,
+        ensuring data survives restarts and container rebuilds.
+    </p>
+    <hr />
+
+    <!-- Section: Introduction to Docker Volumes -->
+    <div class="mt-5">
+        <h2>Introduction to Docker Volumes</h2>
+        <p>
+            By default, Docker containers are ephemeral — meaning any data stored inside the container is lost once it stops.
+            To persist data, Docker offers:
+        </p>
+        <ul>
+            <li><strong>Volumes:</strong> Managed by Docker, stored in <code>/var/lib/docker/volumes</code>.</li>
+            <li><strong>Bind Mounts:</strong> Direct mapping between host paths and container paths.</li>
+        </ul>
+    </div>
+
+    <!-- Section: Creating and Managing Volumes -->
+    <div class="mt-5">
+        <h3>Creating and Managing Volumes</h3>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker volume create my_volume</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>To list volumes:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker volume ls</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Inspect volume details:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker volume inspect my_volume</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>Remove a volume:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker volume rm my_volume</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+    </div>
+
+    <!-- Section: Using Volumes in Containers -->
+    <div class="mt-5">
+        <h3>Using Volumes in Containers</h3>
+        <p>Mount a volume into a container using the <code>-v</code> flag:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker run -d -v my_volume:/app/data myapp</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>This mounts <code>my_volume</code> to <code>/app/data</code> inside the container.</p>
+    </div>
+
+    <!-- Section: Bind Mounts -->
+    <div class="mt-5">
+        <h3>Bind Mounts</h3>
+        <p>Bind mounts map a specific path on the host to a container path:</p>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>docker run -d -v /home/user/app:/app myapp</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <ul>
+            <li>Great for development environments where you want live updates in the container.</li>
+            <li>Risky in production due to tight host coupling.</li>
+        </ul>
+    </div>
+
+    <!-- Section: Volumes in Docker Compose -->
+    <div class="mt-5">
+        <h3>Volumes in Docker Compose</h3>
+        <div class="code-snippet bg-light p-3 rounded position-relative">
+            <pre class="mb-0"><code>services:
+  web:
+    image: myapp
+    volumes:
+      - app_data:/app/data
+
+volumes:
+  app_data:</code></pre>
+            <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+        </div>
+        <p>This ensures volume persistence across service restarts and rebuilds.</p>
+    </div>
+
+    <!-- Section: Best Practices -->
+    <div class="mt-5">
+        <h3>Best Practices for Storage</h3>
+        <ul>
+            <li>Use named volumes for persistence over anonymous volumes.</li>
+            <li>Never hardcode host paths unless required.</li>
+            <li>Use <code>docker volume prune</code> periodically to clean up unused volumes.</li>
+            <li>Ensure secure permissions on host folders if using bind mounts.</li>
+        </ul>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-5">
+        <p>
+            Managing data properly with Docker volumes and mounts is essential for stateful applications.
+            Volumes provide a safe, flexible, and scalable way to ensure data persistence in containerized systems.
+        </p>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mt-4">
+        <a href="@Url.Action("DockerNetworking", "AzureDevOps")" class="btn btn-outline-secondary">
+            &larr; Previous: Docker Networking
+        </a>
+        <a href="@Url.Action("DockerfileOptimization", "AzureDevOps")" class="btn btn-outline-secondary">
+            Next: Dockerfile & Image Optimization &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Copy Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const codeText = this.parentElement.querySelector('code')?.innerText;
+            if (codeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Code copied to clipboard!');
+                });
+            }
+        });
+    });
+</script>
