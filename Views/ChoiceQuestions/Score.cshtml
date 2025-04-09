@@ -1,0 +1,77 @@
+﻿@model (int Score, int Max, string Topic, List<QuizQuestion> Questions, Dictionary<int, string> Answers)
+
+@{
+    var (score, max, topic, questions, answers) = Model;
+}
+
+<div class="container py-4">
+    <div class="text-center mb-4">
+        <h2 class="text-success fw-bold">🎉 You scored @score out of @max</h2>
+        <span class="badge bg-info fs-6">Topic: @topic</span>
+        <div class="mt-4">
+            <a href="/ChoiceQuestions/@topic" class="btn btn-outline-primary btn-lg rounded-pill px-4">
+                🔁 Retake Quiz
+            </a>
+        </div>
+    </div>
+
+    <hr />
+
+    @for (int i = 0; i < questions.Count; i++)
+    {
+        var q = questions[i];
+        var qNum = i + 1;
+        var userAns = answers.ContainsKey(qNum) ? answers[qNum] : null;
+        var correctLabel = q.CorrectAnswer[0];
+        var userCorrect = userAns == q.CorrectAnswer;
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0 text-primary">Question @qNum</h5>
+            </div>
+            <div class="card-body">
+                <p class="fw-semibold">@q.QuestionText</p>
+
+                <div class="row">
+                    @for (int j = 0; j < q.Options.Count; j++)
+                    {
+                        var label = (char)('A' + j);
+                        var option = q.Options[j];
+                        string cssClass = "border rounded p-2 mb-2";
+
+                        if (label == correctLabel)
+                        {
+                            cssClass += " bg-success bg-opacity-25 border-success";
+                        }
+
+                        if (userAns != null && label.ToString() == userAns && label != correctLabel)
+                        {
+                            cssClass += " bg-danger bg-opacity-25 border-danger";
+                        }
+
+                        <div class="col-md-6">
+                            <div class="@cssClass">
+                                <strong>@label.</strong> @option
+                                @if (userAns == label.ToString())
+                                {
+                                    <span class="badge bg-secondary ms-2">Your Answer</span>
+                                }
+                                @if (label == correctLabel)
+                                {
+                                    <span class="badge bg-success ms-2">Correct</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(q.Explanation))
+                {
+                    <div class="mt-3 alert alert-info">
+                        <strong>Explanation:</strong> @q.Explanation
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
