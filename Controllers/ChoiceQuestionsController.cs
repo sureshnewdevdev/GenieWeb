@@ -1,4 +1,3 @@
-// ChoiceQuestionsController.cs
 using GenieWeb.Helpers;
 using GenieWeb.Services;
 using Microsoft.AspNetCore.Http;
@@ -9,12 +8,14 @@ namespace GenieWeb.Controllers
     public class ChoiceQuestionsController : Controller
     {
         private readonly QuizService _quizService;
-        private const string QuizSessionKey = "QuizAnswers";
 
         public ChoiceQuestionsController(QuizService quizService)
         {
             _quizService = quizService;
         }
+
+        // Helper method to use topic-specific session key
+        private string GetSessionKey(string topic) => $"QuizAnswers_{topic}";
 
         // GET: Show question by topic and number
         [Route("ChoiceQuestions/{topic}/{qNum?}")]
@@ -28,7 +29,8 @@ namespace GenieWeb.Controllers
             ViewData["QuestionNumber"] = qNum;
             ViewData["TotalQuestions"] = questions.Count;
 
-            var answers = HttpContext.Session.Get<Dictionary<int, string>>(QuizSessionKey) ?? new();
+            var sessionKey = GetSessionKey(topic);
+            var answers = HttpContext.Session.Get<Dictionary<int, string>>(sessionKey) ?? new();
             ViewData["SelectedAnswer"] = answers.ContainsKey(qNum) ? answers[qNum] : null;
 
             return View("QuestionView", questions[qNum - 1]);
@@ -38,9 +40,10 @@ namespace GenieWeb.Controllers
         [HttpPost("ChoiceQuestions/SubmitAnswer")]
         public IActionResult SubmitAnswer(string topic, int questionNumber, string selectedAnswer)
         {
-            var answers = HttpContext.Session.Get<Dictionary<int, string>>(QuizSessionKey) ?? new();
+            var sessionKey = GetSessionKey(topic);
+            var answers = HttpContext.Session.Get<Dictionary<int, string>>(sessionKey) ?? new();
             answers[questionNumber] = selectedAnswer;
-            HttpContext.Session.Set(QuizSessionKey, answers);
+            HttpContext.Session.Set(sessionKey, answers);
 
             var questions = _quizService.LoadQuestions(topic);
             if (questionNumber >= questions.Count)
@@ -49,14 +52,27 @@ namespace GenieWeb.Controllers
             return RedirectToAction("Index", new { topic, qNum = questionNumber + 1 });
         }
 
+        [HttpPost]
+        [Route("ChoiceQuestions/ClearSession")]
+        public IActionResult ClearSession([FromQuery] string topic)
+        {
+            var sessionKey = $"QuizAnswers_{topic}";
+            HttpContext.Session.Remove(sessionKey);
+            return Ok();
+        }
+
+
+
         // Final score view
         [Route("ChoiceQuestions/{topic}/Score")]
         public IActionResult Score(string topic)
         {
             var questions = _quizService.LoadQuestions(topic);
-            var answers = HttpContext.Session.Get<Dictionary<int, string>>(QuizSessionKey) ?? new();
+            var sessionKey = GetSessionKey(topic);
+            var answers = HttpContext.Session.Get<Dictionary<int, string>>(sessionKey) ?? new();
 
             int score = 0;
+
             for (int i = 0; i < questions.Count; i++)
             {
                 if (answers.ContainsKey(i + 1) && !string.IsNullOrEmpty(answers[i + 1]))
@@ -73,10 +89,9 @@ namespace GenieWeb.Controllers
                 }
             }
 
-            HttpContext.Session.Remove(QuizSessionKey);
+            HttpContext.Session.Remove(sessionKey);
 
             return View("Score", (score, questions.Count * 5, topic, questions, answers));
         }
-
     }
 }

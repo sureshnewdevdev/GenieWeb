@@ -19,7 +19,7 @@
             </div>
 
             <!-- Sticky Question Header -->
-            <div class="sticky-top bg-white py-2 mb-3 border-bottom z-2">
+            <div class="sticky-top bg-white py-2 mb-3 border-bottom " style="z-index:100">
                 <h4 class="mb-0 text-primary">Question @current of @total</h4>
             </div>
 
@@ -27,7 +27,7 @@
             <p class="fw-semibold fs-5">@Model.QuestionText</p>
 
             <!-- Quiz Form -->
-            <form method="post" asp-controller="ChoiceQuestions" asp-action="SubmitAnswer">
+            <form method="post" asp-controller="ChoiceQuestions" asp-action="SubmitAnswer" onsubmit="isNavigating = true;">
                 <div class="row">
                     @for (int i = 0; i < Model.Options.Count; i++)
                     {
@@ -96,5 +96,77 @@
 
     .bg-gradient-info {
         background: linear-gradient(to right, #0dcaf0, #0d6efd);
+    }
+</style>
+
+<script>
+    let isNavigating = false;
+
+    document.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href') || '';
+            const currentTopic = '@topic';
+
+            if (!href.includes('/ChoiceQuestions') || !href.includes(currentTopic)) {
+                e.preventDefault();
+
+                const modal = document.createElement('div');
+                modal.innerHTML = `
+                    <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background-color: rgba(0, 0, 0, 0.5); z-index: 9999; animation: fadeIn 0.3s ease-out;">
+                        <div class="bg-white p-4 rounded shadow-lg text-center">
+                            <p class="mb-3">You're about to leave this quiz. Your answers will be cleared. Do you want to continue?</p>
+                            <button class="btn btn-danger me-2" id="exitConfirm">Yes, Exit</button>
+                            <button class="btn btn-secondary" id="exitCancel">No, Stay</button>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+
+                modal.querySelector('#exitConfirm').addEventListener('click', () => {
+                        fetch(`/ChoiceQuestions/ClearSession?topic=${currentTopic}`, { method: 'POST' })
+                            .then(response => {
+                            if (response.ok) {
+                                window.removeEventListener('beforeunload', beforeUnloadHandler);
+                                window.location.href = href;
+                            } else {
+                                alert("Failed to clear session. Please try again.");
+                                document.body.removeChild(modal);
+                            }
+                        });
+                });
+
+                modal.querySelector('#exitCancel').addEventListener('click', () => {
+                    document.body.removeChild(modal);
+                });
+
+                return;
+            }
+            isNavigating = true;
+        });
+    });
+
+    function beforeUnloadHandler(e) {
+        if (!isNavigating) {
+            e.preventDefault();
+            e.returnValue = 'Are you sure you want to leave the quiz? Your progress may be lost.';
+        }
+    }
+
+    window.addEventListener('beforeunload', beforeUnloadHandler);
+</script>
+
+<style>
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+
     }
 </style>
