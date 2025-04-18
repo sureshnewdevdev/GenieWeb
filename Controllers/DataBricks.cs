@@ -8,5 +8,10 @@ namespace GenieWeb.Controllers
         {
             return View();
         }
+
+        public IActionResult DataBricksSetup()
+        {
+            return View();
+        }
     }
 }
