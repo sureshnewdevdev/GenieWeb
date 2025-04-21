@@ -23,10 +23,34 @@ namespace GenieWeb.Controllers
         {
             return View("DotNetSubtopics");
         }
-
-        public IActionResult UnderDevelopment()
+        public IActionResult ReactSubtopics()
         {
-            return View();
+            return View("ReactSubtopics");
+        }
+
+        public IActionResult AzureDevOpsSubtopics()
+        {
+            return View("AzureDevOpsSubtopics");
+        }
+
+        public IActionResult DockerSubtopics()
+        {
+            return View("DockerSubtopics");
+        }
+
+        public IActionResult TerraformSubtopics()
+        {
+            return View("TerraformSubtopics");
+        }
+
+        public IActionResult DatabricksSubtopics()
+        {
+            return View("DatabricksSubtopics");
+        }
+
+        public IActionResult GitSubtopics()
+        {
+            return View("GitSubtopics");
         }
     }
 }
