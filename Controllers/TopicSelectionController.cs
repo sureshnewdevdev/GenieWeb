@@ -19,6 +19,10 @@ namespace GenieWeb.Controllers
             return View("CSharpSubtopics");
         }
 
+        public IActionResult PythonSubtopics()
+        {
+            return View("PythonSubtopics");
+        }
         public IActionResult DotNetSubtopics()
         {
             return View("DotNetSubtopics");
