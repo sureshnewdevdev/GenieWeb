@@ -1616,39 +1616,42 @@
                 };
  
         document.addEventListener("DOMContentLoaded", function () {
+            const adContainer = document.getElementById("rightAdSection");
 
-            //dynamic ads inititalization
-        const adContainer = document.getElementById("rightAdSection");
-               const pageHeight = document.body.scrollHeight;
+        // All your unique ad slot IDs
+        const adSlots = [
+            "1283766278", // sidebar top ad
+            "9007244980",
+            "6381081648",
+            "4193067856",
+            "1566904514",
+            "8815673298",
+            "4421132719"
+        ];
 
-               const adSlots = [
-                   "1283766278", // original sidebar ad
-                   "9007244980", // rightsiderail1
-                   "6381081648", // rightsiderail2
-                   "4193067856", // rightsiderail3
-                   "1566904514", // rightsiderail4
-                   "8815673298", // rightsiderail5
-                   "4421132719"  // rightsiderail6
-               ];
+        // Use 600px per ad unit as confirmed
+        const avgAdHeight = 600;
+        const pageHeight = document.body.scrollHeight;
 
-               const maxAds = Math.min(adSlots.length, Math.floor(pageHeight / 700));
+        // Determine how many ads to show
+        const maxAds = Math.min(adSlots.length, Math.floor(pageHeight / avgAdHeight));
 
-               for (let i = 0; i < maxAds; i++) {
-                   const wrapper = document.createElement("div");
-                   wrapper.className = "mb-4";
+        for (let i = 0; i < maxAds; i++) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "mb-4";
 
-                   wrapper.innerHTML = `
-                       <ins class="adsbygoogle"
-                            style="display:block"
-                            data-ad-client="ca-pub-2270827713894017"
-                            data-ad-slot="${adSlots[i]}"
-                            data-ad-format="auto"
-                            data-full-width-responsive="true"></ins>
-                   `;
-                   adContainer.appendChild(wrapper);
-                   (adsbygoogle = window.adsbygoogle || []).push({});
-               }
-           });
+            wrapper.innerHTML = `
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-2270827713894017"
+                     data-ad-slot="${adSlots[i]}"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+            `;
+
+            adContainer.appendChild(wrapper);
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        }
             
             let sidebar = document.getElementById("sidebarMenu");
             let mainBtn = document.getElementById("contentdropdownbtn");
