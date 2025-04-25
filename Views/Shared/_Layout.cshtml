@@ -1616,41 +1616,37 @@
                 };
  
         document.addEventListener("DOMContentLoaded", function () {
-            const adContainer = document.getElementById("rightAdSection");
+        const adContainer = document.getElementById("rightAdSection");
 
-        // All your unique ad slot IDs
         const adSlots = [
-            "1283766278", // sidebar top ad
-            "9007244980",
-            "6381081648",
-            "4193067856",
-            "1566904514",
-            "8815673298",
-            "4421132719"
+            "1283766278", "9007244980", "6381081648",
+            "4193067856", "1566904514", "8815673298", "4421132719"
         ];
 
-        // Use 600px per ad unit as confirmed
-        const avgAdHeight = 700;
+        const avgAdHeight = 600;
         const pageHeight = document.body.scrollHeight;
-
-        // Determine how many ads to show
         const maxAds = Math.min(adSlots.length, Math.floor(pageHeight / avgAdHeight));
 
+        // Load one ad at a time with slight delay
+        let delay = 0;
         for (let i = 0; i < maxAds; i++) {
-            const wrapper = document.createElement("div");
-            wrapper.className = "mb-4";
+            setTimeout(() => {
+                const wrapper = document.createElement("div");
+                wrapper.className = "mb-4";
 
-            wrapper.innerHTML = `
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-2270827713894017"
-                     data-ad-slot="${adSlots[i]}"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-            `;
+                wrapper.innerHTML = `
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-2270827713894017"
+                         data-ad-slot="${adSlots[i]}"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                `;
 
-            adContainer.appendChild(wrapper);
-            (adsbygoogle = window.adsbygoogle || []).push({});
+                adContainer.appendChild(wrapper);
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            }, delay);
+            delay += 500; // 0.5 second between each ad
         }
             
             let sidebar = document.getElementById("sidebarMenu");
