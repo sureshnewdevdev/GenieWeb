@@ -1,0 +1,130 @@
+﻿@{
+    ViewData["Title"] = "Managing Node and Application Health in Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "ManagingNodeHealth";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Managing Node and Application Health in Service Fabric</h2>
+
+    <p class="text-muted">
+        In large Service Fabric clusters, continuous <b>health monitoring</b> is critical.
+        Whether you are operating hundreds of services or thousands of nodes, knowing their health state helps you maintain reliability and uptime.
+    </p>
+
+    <h4 class="text-success mt-4">🩺 What is "Health" in Service Fabric?</h4>
+    <ul>
+        <li>Each <b>Node</b> (physical/VM) and <b>Application</b> (deployed service) has a health state.</li>
+        <li>Health states can be: <b>OK</b>, <b>Warning</b>, or <b>Error</b>.</li>
+        <li>Service Fabric aggregates health reports across multiple services and nodes.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Real-World Analogy:</h5>
+    <p>
+        Think of Service Fabric as a hospital managing patients (nodes and apps).
+        Nurses (your monitoring tools) constantly check temperature, blood pressure (metrics) — if anything goes wrong, alarms are raised!
+    </p>
+
+    <h4 class="text-success mt-4">🚀 How Service Fabric Monitors Health</h4>
+    <ul>
+        <li><b>Built-in Health Monitors</b>: Automatically checks node, application, partition, and replica health.</li>
+        <li><b>Custom Health Reports</b>: Your services can send additional health information if needed.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Service Fabric Health Hierarchy:</h5>
+    <pre class="bg-light p-3">
+Cluster Health
+ ├── Node Health
+ │     ├── Application Health
+ │         ├── Service Health
+ │             ├── Partition Health
+ │                 ├── Replica/Instance Health
+    </pre>
+
+    <h4 class="text-success mt-4">🛠️ How to View Node and Application Health</h4>
+
+    <h5 class="text-info mt-3">Method 1: Using Service Fabric Explorer (SFX)</h5>
+    <ol>
+        <li>
+            Open your browser and navigate to:
+            <code>http://localhost:19080/Explorer</code> (local) or your Azure cluster URL.
+        </li>
+        <li>Expand the <b>Cluster Map</b>.</li>
+        <li>Click on <b>Nodes</b> → See health status: OK, Warning, or Error.</li>
+        <li>Expand <b>Applications</b> → View per-service health reports.</li>
+    </ol>
+
+    <h5 class="text-info mt-3">Method 2: Using PowerShell</h5>
+    <p>
+        Connect to your cluster:
+    </p>
+    <pre class="bg-light p-3">
+Connect-ServiceFabricCluster
+Get-ServiceFabricClusterHealth
+    </pre>
+
+    <h5 class="text-info mt-3">Method 3: Using CLI (sfctl)</h5>
+    <p>
+        Install and use sfctl commands:
+    </p>
+    <pre class="bg-light p-3">
+sfctl cluster health
+sfctl node health --node-name NodeName
+    </pre>
+
+    <h4 class="text-success mt-4">🛠️ How to Send a Custom Health Report</h4>
+
+    <p>
+        In your service code, you can manually report an error or warning:
+    </p>
+    <pre class="bg-light p-3">
+var healthInformation = new HealthInformation("MyApp", "DatabaseLatency", HealthState.Warning)
+{
+    Description = "Database response time high."
+};
+
+await this.Partition.ReportPartitionHealthAsync(healthInformation);
+    </pre>
+
+    <p>Custom health reports improve observability dramatically!</p>
+
+    <h4 class="text-success mt-4">💡 Did You Know?</h4>
+    <div class="alert alert-info">
+        If a service keeps reporting Warning or Error health for a long time without fixing, Service Fabric can trigger auto-scaling or auto-restart actions!
+    </div>
+
+    <h4 class="text-success mt-4">⚡ Common Monitoring Problems and Solutions</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> Health report is not visible.<br>
+            <b>Solution:</b> Check your service code is properly calling <code>ReportHealthAsync</code>.
+        </li>
+        <li>
+            <b>Problem:</b> Node suddenly goes to "Error".<br>
+            <b>Solution:</b> Review node capacity usage: memory, disk, CPU — sometimes overloads cause health transitions.
+        </li>
+        <li>
+            <b>Problem:</b> Frequent Warnings clutter dashboard.<br>
+            <b>Solution:</b> Implement smarter thresholds before raising health warnings.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚨 Best Practices</h4>
+    <ul>
+        <li>Use both built-in and custom health reporting together for full coverage.</li>
+        <li>Keep your health report descriptions meaningful and actionable.</li>
+        <li>Set up alerts in Azure Monitor based on Service Fabric health events.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>What are the three possible health states?</li>
+        <li>Where do you view health status inside Service Fabric Explorer?</li>
+        <li>What method is used in .NET to report service health?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("MonitoringLogging", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Cluster Architecture</a>
+        <a href="@Url.Action("ApplicationUpgrade", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Application Upgrade Strategies ➡️</a>
+    </div>
+</div>

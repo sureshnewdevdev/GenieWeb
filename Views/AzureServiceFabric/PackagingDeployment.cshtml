@@ -1,0 +1,154 @@
+﻿@{
+    ViewData["Title"] = "Packaging and Deployment in Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "PackagingDeployment";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Packaging and Deployment in Service Fabric</h2>
+
+    <p class="text-muted">
+        Once your services are developed, the next step is to <b>package</b> them correctly and <b>deploy</b> them to a running cluster (local or Azure).
+        Packaging and deployment are critical for ensuring that your applications are managed, upgraded, and scaled reliably.
+    </p>
+
+    <h4 class="text-success mt-4">🎁 What is Packaging?</h4>
+    <p>
+        Packaging in Service Fabric means bundling all your service code, configuration files, and metadata into a specific folder structure.
+        Service Fabric reads these files to understand how to deploy and run your app.
+    </p>
+
+    <h5 class="text-info mt-3">Folder Structure After Packaging:</h5>
+    <pre class="bg-light p-3">
+ApplicationPackageRoot
+ ├── ApplicationManifest.xml
+ ├── Service1Package
+ │    ├── Code
+ │    ├── Config
+ │    └── Data
+ ├── Service2Package
+      ├── Code
+      ├── Config
+      └── Data
+    </pre>
+    <p>
+        - <b>ApplicationManifest.xml</b>: Defines all services inside the application.<br />
+        - <b>ServiceManifest.xml</b>: Defines details about each individual service (resources, endpoints).
+    </p>
+
+    <h4 class="text-success mt-4">🚀 Step-by-Step: Packaging the Application</h4>
+
+    <h5 class="text-info mt-3">Method 1: Automatic Packaging (Recommended for Beginners)</h5>
+    <ul>
+        <li>Open Visual Studio.</li>
+        <li>Right-click your Service Fabric Application project (.sfproj).</li>
+        <li>Select <b>Publish</b>.</li>
+        <li>Choose "Create Package Only".</li>
+        <li>
+            Visual Studio will create the package under:
+            <br /><code>\bin\Debug\netcoreappX.X\publishprofiles\cloud.xml</code>
+        </li>
+    </ul>
+
+    <h5 class="text-info mt-3">Method 2: Manual Packaging (Advanced)</h5>
+    <ul>
+        <li>Use <b>Service Fabric CLI (sfctl)</b> or <b>PowerShell Scripts</b> to create a package manually.</li>
+        <li>Ensure folder structure matches Service Fabric standards.</li>
+        <li>
+            Example PowerShell command:
+            <pre class="bg-light p-3">
+New-ServiceFabricApplicationPackage -ApplicationPackagePath 'C:\MyApp\pkg'
+            </pre>
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🛫 Step-by-Step: Deploying the Application</h4>
+
+    <h5 class="text-info mt-3">Step 1: Deploy via Visual Studio (Simplest Method)</h5>
+    <ul>
+        <li>Right-click Application Project (.sfproj).</li>
+        <li>Click <b>Publish</b>.</li>
+        <li>
+            Select:
+            <ul>
+                <li><b>Local Cluster</b> if testing locally.</li>
+                <li><b>Azure Cluster</b> if publishing to the cloud.</li>
+            </ul>
+        </li>
+        <li>Click <b>Publish</b>.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 2: Deploy via Service Fabric Explorer</h5>
+    <ul>
+        <li>Open <b>Service Fabric Explorer</b>.</li>
+        <li>Click <b>Applications → Actions → Upload Application Package</b>.</li>
+        <li>Browse to your package folder and upload it.</li>
+        <li>Register and provision the application type manually.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 3: Deploy via CLI (sfctl)</h5>
+    <ul>
+        <li>Install sfctl tool.</li>
+        <li>
+            Connect to the cluster:
+            <pre class="bg-light p-3">
+sfctl cluster select --endpoint http://localhost:19080
+            </pre>
+        </li>
+        <li>
+            Upload application package:
+            <pre class="bg-light p-3">
+sfctl application upload --path MyApp --show-progress
+            </pre>
+        </li>
+        <li>Provision and create the application.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">📈 Visual Deployment Flow</h4>
+    <pre class="bg-light p-3">
+[Package App] 
+    → [Choose Deployment Method (VS / Explorer / CLI)] 
+        → [Deploy App] 
+            → [Monitor Health]
+    </pre>
+
+    <h4 class="text-success mt-4">💡 Did You Know?</h4>
+    <div class="alert alert-info">
+        Visual Studio can automatically "upgrade" your application version in Service Fabric when you re-publish — no manual update required!
+    </div>
+
+    <h4 class="text-success mt-4">⚡ Common Beginner Mistakes and Solutions</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> Package validation errors.<br>
+            <b>Solution:</b> Ensure ApplicationManifest.xml and ServiceManifest.xml match your service folders correctly.
+        </li>
+        <li>
+            <b>Problem:</b> Upload timeout errors.<br>
+            <b>Solution:</b> Compress large files and deploy smaller apps first during learning phase.
+        </li>
+        <li>
+            <b>Problem:</b> Service version mismatch.<br>
+            <b>Solution:</b> Update application version in ApplicationManifest.xml manually if needed.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚨 Best Practices</h4>
+    <ul>
+        <li>Always validate package structure before uploading.</li>
+        <li>Use semantic versioning (v1.0.0, v1.1.0) for application upgrades.</li>
+        <li>For production, automate packaging and deployment via Azure DevOps Pipelines.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>Where does Visual Studio store the auto-created package?</li>
+        <li>What file defines the entire Service Fabric application?</li>
+        <li>List one way to deploy a Service Fabric package manually.</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("CreateStatefulService", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Creating a Stateful Service</a>
+        <a href="@Url.Action("ServiceCommunicationRemoting", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Service Communication (Remoting) ➡️</a>
+    </div>
+</div>

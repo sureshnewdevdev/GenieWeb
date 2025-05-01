@@ -1,0 +1,122 @@
+﻿@{
+    ViewData["Title"] = "Setting Up Local Development Cluster in Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "SetupLocalCluster";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Setting Up Local Development Cluster</h2>
+
+    <p class="text-muted">
+        Once you have installed the Service Fabric SDK, the next important step is setting up a <b>local development cluster</b>.
+        This lets you develop, deploy, and test your applications in an environment that closely mimics a real Service Fabric cluster, right on your machine.
+    </p>
+
+    <h4 class="text-success mt-4">🏗️ What is a Local Cluster?</h4>
+    <p>
+        A <b>Local Development Cluster</b> simulates a real Azure Service Fabric cluster on your computer.
+        It allows you to:
+    </p>
+    <ul>
+        <li>Deploy and manage microservices locally.</li>
+        <li>Test application behavior (failover, partitioning, scaling) without deploying to Azure.</li>
+        <li>Debug services easily within Visual Studio.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Real-World Analogy:</h5>
+    <p>
+        Think of it like creating a "mini Azure cloud" on your own laptop, where you are the admin of all the nodes and services.
+    </p>
+
+    <h4 class="text-success mt-4">🛠️ Prerequisites</h4>
+    <ul>
+        <li>Service Fabric SDK and Runtime installed successfully (previous step completed).</li>
+        <li>Local admin rights on your machine.</li>
+        <li>At least 4 GB free RAM recommended (Cluster services consume memory).</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚀 Step-by-Step Setup Guide</h4>
+
+    <h5 class="text-info mt-3">Step 1: Launch Local Cluster Manager</h5>
+    <ol>
+        <li>Press <b>Windows Key</b> and search for "<b>Service Fabric Local Cluster Manager</b>".</li>
+        <li>Right-click and select <b>Run as Administrator</b>.</li>
+    </ol>
+    <p><b>Screenshot Tip:</b> You should see a cluster icon appear in the system tray (bottom-right corner).</p>
+
+    <h5 class="text-info mt-3">Step 2: Set Up the Cluster</h5>
+    <ol>
+        <li>Right-click the cluster icon in the system tray.</li>
+        <li>Choose <b>Setup Local Cluster → 1 Node Cluster (Default)</b>.</li>
+    </ol>
+    <p><b>Expected Behavior:</b> It will take 1–2 minutes for the cluster to initialize. Status should become <b>Running</b>.</p>
+
+    <h5 class="text-info mt-3">Step 3: Validate the Cluster Health</h5>
+    <ol>
+        <li>Right-click again and choose <b>Manage Local Cluster</b> → It will open the <b>Service Fabric Explorer</b> in a web browser.</li>
+        <li>You should see your local cluster dashboard — cluster status should be <b>Healthy</b>.</li>
+    </ol>
+
+    <h5 class="text-info mt-3">Step 4: (Optional) Connect via PowerShell</h5>
+    <pre class="bg-light p-3">
+Connect-ServiceFabricCluster
+    </pre>
+    <p>
+        If successful, it means your local node is registered and ready for deployments!
+    </p>
+
+    <h4 class="text-success mt-4">📈 Visual Flow</h4>
+    <pre class="bg-light p-3">
+[Open Cluster Manager] 
+    --> [Setup 1 Node Cluster] 
+        --> [Cluster Status: Running] 
+            --> [Manage via Service Fabric Explorer]
+    </pre>
+
+    <h4 class="text-success mt-4">💡 Did You Know?</h4>
+    <div class="alert alert-info">
+        You can also simulate <b>5-node clusters</b> for advanced testing (such as real replica failovers) using the same Local Cluster Manager by choosing "Setup Local 5-Node Cluster" option!
+    </div>
+
+    <h4 class="text-success mt-4">⚡ Common Beginner Issues and Solutions</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> Cluster setup stuck at "Initializing".<br>
+            <b>Solution:</b> Restart the "Service Fabric Host Service" manually from Windows Services and retry.
+        </li>
+        <li>
+            <b>Problem:</b> "Cluster not reachable" error.<br>
+            <b>Solution:</b> Ensure no antivirus or firewall is blocking ports 19000, 19080 locally.
+        </li>
+        <li>
+            <b>Problem:</b> LocalClusterManager.exe missing.<br>
+            <b>Solution:</b> SDK might be incomplete — reinstall Service Fabric SDK or repair Visual Studio workload.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚨 Important Notes</h4>
+    <ul>
+        <li><b>Memory Usage:</b> Even a simple 1-node cluster can consume 2–3 GB RAM. Close when not in use!</li>
+        <li><b>Reset Cluster:</b> If the cluster is unhealthy, right-click and select <b>Reset Cluster</b> to start fresh.</li>
+        <li><b>Local Testing:</b> Always test deployments here first before moving to Azure Cloud clusters.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Final Setup Checklist</h4>
+    <ul>
+        <li>Local Cluster Manager launches successfully ✔️</li>
+        <li>1-node local cluster setup and healthy ✔️</li>
+        <li>Service Fabric Explorer shows all system services healthy ✔️</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>What is the role of the Local Development Cluster?</li>
+        <li>How can you verify that your cluster is healthy?</li>
+        <li>What should you do if your cluster setup gets stuck at initializing?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("InstallSDK", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Installing Service Fabric SDK</a>
+        <a href="@Url.Action("CreateAzureCluster", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Creating Cluster on Azure Portal ➡️</a>
+    </div>
+</div>

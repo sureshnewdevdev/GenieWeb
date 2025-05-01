@@ -1,0 +1,135 @@
+﻿@{
+    ViewData["Title"] = "Troubleshooting and Diagnostics in Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "TroubleshootingDiagnostics";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Troubleshooting and Diagnostics in Service Fabric</h2>
+
+    <p class="text-muted">
+        Even well-designed systems face issues.
+        In production, being able to quickly <b>troubleshoot</b> and <b>diagnose</b> problems in Service Fabric is essential to maintaining reliability and performance.
+    </p>
+
+    <h4 class="text-success mt-4">🔍 Common Issues You May Encounter</h4>
+    <ul>
+        <li>Application services fail to start or crash.</li>
+        <li>Nodes become unhealthy or down.</li>
+        <li>Cluster upgrade failures.</li>
+        <li>Partition movement delays or replica build failures.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Real-World Analogy:</h5>
+    <p>
+        Think of Service Fabric like a complex transportation system — if a train is delayed (service failure) or track is broken (node down),
+        you need live dashboards, logs, and alerts to fix issues quickly!
+    </p>
+
+    <h4 class="text-success mt-4">🚑 Key Troubleshooting Techniques</h4>
+
+    <h5 class="text-info mt-3">1. Service Fabric Explorer (SFX)</h5>
+    <ul>
+        <li>Open the Cluster Dashboard (<code>http://localhost:19080/Explorer</code> or Azure cluster URL).</li>
+        <li>Look for Red (Error) or Yellow (Warning) markers.</li>
+        <li>
+            Click into:
+            <ul>
+                <li><b>Nodes</b> → see node health.</li>
+                <li><b>Applications</b> → view replica status.</li>
+                <li><b>System Services</b> → ensure platform health.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h5 class="text-info mt-3">2. Events and Logs</h5>
+    <ul>
+        <li>Use Windows Event Viewer for local clusters.</li>
+        <li>Use Azure Diagnostics Logs for cloud clusters (enabled via portal).</li>
+        <li>Look under <b>Operational</b> or <b>Admin</b> logs for critical errors.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">3. ETW (Event Tracing for Windows)</h5>
+    <ul>
+        <li>Advanced logging method capturing detailed trace events.</li>
+        <li>Use PerfView or Azure Monitor to read ETW logs.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">4. Health Reports</h5>
+    <ul>
+        <li>Services can proactively report degraded conditions.</li>
+        <li>View health events inside SFX → Health Events tab.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚀 Step-by-Step: Diagnosing Common Problems</h4>
+
+    <h5 class="text-info mt-3">Problem 1: A Node Shows "Down" Status</h5>
+    <ul>
+        <li>Check VM status on Azure Portal.</li>
+        <li>Verify if VM agent is running.</li>
+        <li>Restart Service Fabric services on the VM if needed.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Problem 2: Application Fails to Deploy</h5>
+    <ul>
+        <li>Check <b>ApplicationManifest.xml</b> and <b>ServiceManifest.xml</b> for version mismatch.</li>
+        <li>Check logs for deployment errors.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Problem 3: High CPU or Memory Usage</h5>
+    <ul>
+        <li>Use Service Fabric Explorer metrics dashboard.</li>
+        <li>Review the load report for specific services.</li>
+        <li>Scale out nodes or partition services if needed.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🛠️ Helpful PowerShell Commands</h4>
+
+    <p>Useful for faster troubleshooting:</p>
+    <pre class="bg-light p-3">
+Get-ServiceFabricClusterHealth
+Get-ServiceFabricNodeHealth
+Get-ServiceFabricApplicationHealth -ApplicationName fabric:/MyApp
+Get-ServiceFabricServiceHealth -ServiceName fabric:/MyApp/MyService
+    </pre>
+
+    <h4 class="text-success mt-4">💡 Did You Know?</h4>
+    <div class="alert alert-info">
+        In Azure, Service Fabric Auto-Healing can automatically replace failed nodes based on health status!
+    </div>
+
+    <h4 class="text-success mt-4">⚡ Common Diagnostic Mistakes and Solutions</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> No logs available.<br>
+            <b>Solution:</b> Ensure logging is enabled in ServiceManifest.xml and proper diagnostics extensions are configured in Azure.
+        </li>
+        <li>
+            <b>Problem:</b> Hard to pinpoint which service failed.<br>
+            <b>Solution:</b> Use ServiceFabric Explorer tree structure to isolate failing services easily.
+        </li>
+        <li>
+            <b>Problem:</b> ETW files too big.<br>
+            <b>Solution:</b> Use filters and targeted collection during production troubleshooting.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚨 Best Practices for Troubleshooting</h4>
+    <ul>
+        <li>Always enable basic telemetry even for local clusters.</li>
+        <li>Use SFX for quick root cause analysis first before digging into ETW or deep logs.</li>
+        <li>Set up Azure Monitor Alerts based on key health metrics.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>What dashboard tool allows you to see live cluster health?</li>
+        <li>What method allows fine-grained tracing in Service Fabric?</li>
+        <li>Name two PowerShell commands useful for troubleshooting service health.</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("ScalingCluster", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Scaling the Cluster</a>
+        <a href="@Url.Action("SecurityInClusters", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Security in Service Fabric Clusters ➡️</a>
+    </div>
+</div>

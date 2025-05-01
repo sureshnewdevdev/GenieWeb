@@ -1,0 +1,144 @@
+﻿@{
+    ViewData["Title"] = "Deploying a Sample Application to Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "DeploySampleApp";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Deploying a Sample Application to Service Fabric</h2>
+
+    <p class="text-muted">
+        Now that your cluster is running and you understand how to monitor it,
+        it’s time to <b>deploy a real application</b> to Service Fabric!
+        In this tutorial, we'll deploy a simple sample app to your local or Azure-hosted cluster.
+    </p>
+
+    <h4 class="text-success mt-4">🛠️ What We'll Cover</h4>
+    <ul>
+        <li>Create a sample Service Fabric application in Visual Studio.</li>
+        <li>Package and deploy it to a local or Azure cluster.</li>
+        <li>Monitor the app through Service Fabric Explorer.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚀 Step-by-Step Deployment Guide</h4>
+
+    <h5 class="text-info mt-3">Step 1: Create a New Service Fabric Application</h5>
+    <ol>
+        <li>Open <b>Visual Studio</b> (as Administrator is preferred).</li>
+        <li>Go to <b>File → New → Project</b>.</li>
+        <li>Search for "<b>Service Fabric Application</b>" and select it.</li>
+        <li>Click <b>Next</b>.</li>
+        <li>Name your project (e.g., <code>SampleAppFabric</code>).</li>
+        <li>Choose the location and solution name.</li>
+        <li>Click <b>Create</b>.</li>
+    </ol>
+
+    <h5 class="text-info mt-3">Step 2: Choose Application Template</h5>
+    <p>Visual Studio will now prompt you to choose a service type:</p>
+    <ul>
+        <li>Select <b>Stateless ASP.NET Core Web API</b> for this example.</li>
+        <li>Click <b>OK</b>.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 3: Review Solution Structure</h5>
+    <p>
+        Visual Studio will generate:
+    </p>
+    <ul>
+        <li><b>Application Project</b> (.sfproj)</li>
+        <li><b>Service Project</b> (ASP.NET Core Web API project)</li>
+        <li>ApplicationManifest.xml and ServiceManifest.xml for packaging and deployment.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 4: Package the Application</h5>
+    <p>
+        Visual Studio handles packaging automatically when you build the application.
+        If you want to manually package, right-click the application project and select:
+        <br /><code>Publish → Create Package Only</code>
+    </p>
+
+    <h5 class="text-info mt-3">Step 5: Deploy to Cluster</h5>
+    <ul>
+        <li>Right-click the Application project (the one with .sfproj).</li>
+        <li>Click <b>Publish</b>.</li>
+        <li>
+            In the Publish wizard:
+            <ul>
+                <li>Select <b>Local Cluster</b> or <b>Azure Cluster</b>.</li>
+                <li>If targeting Azure, make sure cluster certificate and credentials are handled properly.</li>
+            </ul>
+        </li>
+        <li>Click <b>Publish</b>.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 6: Monitor Deployment</h5>
+    <p>
+        Once published, open <b>Service Fabric Explorer</b>:
+    </p>
+    <ul>
+        <li>You will see the application under the <b>Applications</b> section.</li>
+        <li>Expand it to see deployed services, partitions, and instances.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 7: Test Your Web API</h5>
+    <p>
+        If you deployed a Web API service:
+    </p>
+    <ul>
+        <li>Right-click the running service instance → Get HTTP endpoint details.</li>
+        <li>Open the URL in a browser — you should see your API live!</li>
+    </ul>
+
+    <h4 class="text-success mt-4">📈 Visual Flow</h4>
+    <pre class="bg-light p-3">
+[Create Project] → [Choose Template] → [Package App] → [Publish to Cluster] → [Monitor via Explorer] → [Test App Endpoint]
+    </pre>
+
+    <h4 class="text-success mt-4">💡 Did You Know?</h4>
+    <div class="alert alert-info">
+        You can deploy multiple versions of the same application simultaneously by using <b>different Application Names</b> during publish!
+    </div>
+
+    <h4 class="text-success mt-4">⚡ Common Beginner Issues and Solutions</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> Deployment failed due to certificate errors.<br>
+            <b>Solution:</b> For local cluster, ensure no certificates needed. For Azure, configure security settings properly.
+        </li>
+        <li>
+            <b>Problem:</b> Service stuck in 'Upgrading'.<br>
+            <b>Solution:</b> Reset the application upgrade from Service Fabric Explorer or PowerShell.
+        </li>
+        <li>
+            <b>Problem:</b> Service keeps restarting.<br>
+            <b>Solution:</b> Check logs and exceptions inside the deployed service — use Event Viewer or Application Insights integration.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚨 Important Best Practices</h4>
+    <ul>
+        <li>Always build and test your application locally first before publishing to Azure.</li>
+        <li>Use meaningful names for services and applications for easy identification.</li>
+        <li>Monitor deployed applications regularly to catch failures early.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Final Deployment Checklist</h4>
+    <ul>
+        <li>Sample application created ✔️</li>
+        <li>Successfully deployed to local or Azure cluster ✔️</li>
+        <li>Service visible and healthy in Service Fabric Explorer ✔️</li>
+        <li>Web API endpoint working ✔️</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>Which project type should you select to create a Stateless Web API?</li>
+        <li>What must you verify before publishing to an Azure cluster?</li>
+        <li>Where can you find service instances and partitions after deployment?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("UseServiceFabricExplorer", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Using Service Fabric Explorer</a>
+        <a href="@Url.Action("CreateStatelessService", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Cluster Architecture ➡️</a>
+    </div>
+</div>

@@ -1,0 +1,130 @@
+﻿@{
+    ViewData["Title"] = "Scaling the Cluster in Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "ScalingCluster";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Scaling the Cluster in Service Fabric</h2>
+
+    <p class="text-muted">
+        As your application usage grows, your cluster must grow too!
+        Service Fabric makes <b>scaling out (adding nodes)</b> and <b>scaling services</b> a smooth experience.
+    </p>
+
+    <h4 class="text-success mt-4">📈 What is Scaling?</h4>
+    <ul>
+        <li><b>Scale Out:</b> Add more nodes to the cluster to handle more load.</li>
+        <li><b>Scale In:</b> Remove unused nodes to save costs.</li>
+        <li><b>Horizontal Scaling:</b> Add more service instances or partitions across multiple nodes.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Real-World Analogy:</h5>
+    <p>
+        Think of your application as a restaurant.
+        If more customers come, you hire more waiters (scale out).
+        If the restaurant is empty, you send extra waiters home (scale in)!
+    </p>
+
+    <h4 class="text-success mt-4">🚀 Step-by-Step: Scaling the Cluster Nodes</h4>
+
+    <h5 class="text-info mt-3">Step 1: Add Nodes to Azure Cluster</h5>
+    <ol>
+        <li>Open Azure Portal → Resource Group → Service Fabric Cluster.</li>
+        <li>Click on <b>Node Types</b>.</li>
+        <li>For the node type (e.g., <code>nt1vm</code>), increase the <b>Instance Count</b>.</li>
+        <li>Save the configuration.</li>
+        <li>Service Fabric will automatically add new VMs and integrate them!</li>
+    </ol>
+
+    <h5 class="text-info mt-3">Step 2: Add Nodes to Local Development Cluster</h5>
+    <ul>
+        <li>By default, local clusters simulate 1–5 nodes.</li>
+        <li>You can modify cluster size using PowerShell or Visual Studio settings (for local testing only).</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚀 Step-by-Step: Scaling the Services (Partitioning)</h4>
+
+    <h5 class="text-info mt-3">Partitioning Options:</h5>
+    <ul>
+        <li><b>Uniform Int64 Partition:</b> Distributes requests evenly across partitions.</li>
+        <li><b>Named Partition:</b> Useful when you know logical partitions (e.g., Region: East, West).</li>
+        <li><b>Singleton Partition:</b> Only one partition — simpler (good for smaller apps).</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Modify Partition Count (Example)</h5>
+    <pre class="bg-light p-3">
+<UniformInt64PartitionScheme PartitionCount="5" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
+    </pre>
+
+    <p>
+        More partitions mean better parallelism and scalability,
+        but also more complexity to manage!
+    </p>
+
+    <h4 class="text-success mt-4">🔄 Auto-Scaling with Metrics (Advanced)</h4>
+
+    <p>You can configure Service Fabric to auto-scale services based on metrics like CPU, memory, or custom metrics!</p>
+
+    <h5 class="text-info mt-3">Example: Setup Auto-Scaling Rules</h5>
+    <pre class="bg-light p-3">
+<Service>
+    <ScalingPolicy>
+    <ScalingTrigger MetricName="cpuUsage" LowerLoadThreshold="30" UpperLoadThreshold="80" ScaleIncrement="1" />
+  </ScalingPolicy>
+</Service>
+    </pre>
+
+    <ul>
+        <li>When CPU exceeds 80%, add instances.</li>
+        <li>When CPU drops below 30%, remove instances.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">📈 Visual Scaling Flow</h4>
+    <pre class="bg-light p-3">
+[Monitor Load]
+  → [Decide Scaling Action]
+    → [Add/Remove Nodes or Partitions]
+      → [Auto-Load Balance by Service Fabric]
+    </pre>
+
+    <h4 class="text-success mt-4">💡 Did You Know?</h4>
+    <div class="alert alert-info">
+        Service Fabric automatically redistributes services after new nodes are added — no manual redeployment needed!
+    </div>
+
+    <h4 class="text-success mt-4">⚡ Common Scaling Problems and Solutions</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> Services not balanced after scaling.<br>
+            <b>Solution:</b> Trigger a rebalancing manually via Service Fabric Explorer or PowerShell.
+        </li>
+        <li>
+            <b>Problem:</b> Scaling takes too long.<br>
+            <b>Solution:</b> Use faster VM SKUs or pre-warm nodes if possible.
+        </li>
+        <li>
+            <b>Problem:</b> Services not distributing properly.<br>
+            <b>Solution:</b> Revisit your partition strategy or resource governance policies.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚨 Best Practices for Scaling</h4>
+    <ul>
+        <li>Always monitor application load metrics continuously.</li>
+        <li>Over-partition rather than under-partition for future growth.</li>
+        <li>Enable auto-scaling triggers for dynamic apps (especially web-facing apps).</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>What is the difference between scaling nodes vs scaling services?</li>
+        <li>What partition scheme distributes requests evenly?</li>
+        <li>What happens after new nodes are added to a cluster?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("ApplicationUpgrade", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Application Upgrade Strategies</a>
+        <a href="@Url.Action("TroubleshootingDiagnostics", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Troubleshooting and Diagnostics ➡️</a>
+    </div>
+</div>

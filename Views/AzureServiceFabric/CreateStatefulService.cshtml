@@ -1,0 +1,150 @@
+﻿@{
+    ViewData["Title"] = "Creating a Stateful Service in Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "CreateStatefulService";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Creating a Stateful Service in Service Fabric</h2>
+
+    <p class="text-muted">
+        After learning about Stateless services, it’s time to understand and create a <b>Stateful Service</b> in Service Fabric.
+        Stateful services are powerful because they maintain data consistency across replicas without needing an external database!
+    </p>
+
+    <h4 class="text-success mt-4">🌟 What is a Stateful Service?</h4>
+    <p>
+        A <b>Stateful Service</b> maintains internal state across client requests.
+        Service Fabric itself ensures the data is replicated, consistent, and available even during node failures.
+    </p>
+    <ul>
+        <li>Examples: Shopping cart data, Game session state, IoT device telemetry processors.</li>
+        <li>Provides automatic high availability via replicas.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Real-World Analogy:</h5>
+    <p>
+        Think of a library system — every time you borrow or return a book,
+        your data (borrow history) is stored carefully and replicated to avoid loss.
+    </p>
+
+    <h4 class="text-success mt-4">🛠️ Prerequisites</h4>
+    <ul>
+        <li>Service Fabric SDK installed.</li>
+        <li>Cluster running (local or Azure).</li>
+        <li>Visual Studio installed.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚀 Step-by-Step Guide: Create and Deploy a Stateful Service</h4>
+
+    <h5 class="text-info mt-3">Step 1: Create a New Service Fabric Application</h5>
+    <ol>
+        <li>Open <b>Visual Studio</b>.</li>
+        <li>File → New → Project → Search <b>Service Fabric Application</b>.</li>
+        <li>Name it <code>StatefulAppDemo</code> (or your choice).</li>
+        <li>Click <b>Create</b>.</li>
+    </ol>
+
+    <h5 class="text-info mt-3">Step 2: Add a Stateful Service</h5>
+    <ol>
+        <li>
+            In the service selection window, choose:
+            <b>Stateful Service</b> (C# Worker).
+        </li>
+        <li>Click <b>OK</b>.</li>
+    </ol>
+
+    <h5 class="text-info mt-3">Step 3: Understand the Generated Code</h5>
+    <ul>
+        <li>
+            The service class inherits from:
+            <pre class="bg-light p-3">
+public class YourServiceName : StatefulService
+            </pre>
+        </li>
+        <li>
+            Important Overridden Methods:
+            <ul>
+                <li><b>CreateServiceReplicaListeners</b>: Setup listeners for client communication.</li>
+                <li><b>RunAsync</b>: Main execution loop for background tasks.</li>
+            </ul>
+        </li>
+        <li><b>StateManager:</b> Built-in object for handling reliable dictionaries and queues (auto-replicated).</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 4: Working with StateManager</h5>
+    <p>
+        Example of using a reliable dictionary to store key-value pairs:
+    </p>
+    <pre class="bg-light p-3">
+var myDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<string, int>>("myDictionary");
+
+using (var tx = StateManager.CreateTransaction())
+{
+    await myDictionary.AddOrUpdateAsync(tx, "counter", 0, (key, value) => value + 1);
+    await tx.CommitAsync();
+}
+    </pre>
+
+    <h5 class="text-info mt-3">Step 5: Build and Deploy the Application</h5>
+    <ul>
+        <li>Build the solution.</li>
+        <li>Publish to Local or Azure Cluster (Right-click → Publish).</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 6: Monitor the Service</h5>
+    <ul>
+        <li>Open Service Fabric Explorer.</li>
+        <li>Check your Application → Service → Partitions → Replicas.</li>
+        <li>Healthy replicas indicate successful deployment and state replication.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">📈 Visual Flow Summary</h4>
+    <pre class="bg-light p-3">
+[Create New SF App] 
+    → [Add Stateful Service] 
+        → [Work with StateManager]
+            → [Build and Publish]
+                → [Monitor Replicas]
+    </pre>
+
+    <h4 class="text-success mt-4">💡 Did You Know?</h4>
+    <div class="alert alert-info">
+        Even if 2 nodes crash simultaneously, Service Fabric can heal and restore state from remaining replicas automatically!
+    </div>
+
+    <h4 class="text-success mt-4">⚡ Common Beginner Issues and Solutions</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> Replica drop or 'Not Ready' status.<br>
+            <b>Solution:</b> Check if VM resources are sufficient. Add more nodes if needed.
+        </li>
+        <li>
+            <b>Problem:</b> State not persisted.<br>
+            <b>Solution:</b> Ensure you call <code>CommitAsync()</code> after modifying state inside transactions.
+        </li>
+        <li>
+            <b>Problem:</b> Slow service start.<br>
+            <b>Solution:</b> Avoid expensive blocking operations inside <code>RunAsync()</code>.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚨 Best Practices</h4>
+    <ul>
+        <li>Use batching when writing a lot of data to StateManager (commit multiple operations together).</li>
+        <li>Design idempotent operations to survive service restarts and retries.</li>
+        <li>Keep service instances lightweight — move heavy processing to external queues if needed.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>What is the purpose of the StateManager?</li>
+        <li>Why do we need <code>CommitAsync()</code> inside transactions?</li>
+        <li>What happens if a primary replica fails?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("CreateStatelessService", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Creating a Stateless Service</a>
+        <a href="@Url.Action("PackagingDeployment", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Packaging and Deployment ➡️</a>
+    </div>
+</div>

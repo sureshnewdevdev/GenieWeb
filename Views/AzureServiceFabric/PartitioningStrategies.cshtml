@@ -1,0 +1,123 @@
+﻿@{
+    ViewData["Title"] = "Partitioning Strategies in Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "PartitioningStrategies";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Partitioning Strategies in Azure Service Fabric</h2>
+
+    <p class="text-muted">
+        In a distributed application, handling large volumes of data or traffic efficiently is crucial.
+        Partitioning helps by splitting your workload or data across multiple nodes, enabling your application to scale and stay responsive.
+        Azure Service Fabric supports several <b>partitioning strategies</b> to distribute and balance load automatically.
+    </p>
+
+    <h4 class="text-success mt-4">📦 What is Partitioning?</h4>
+    <p>
+        <b>Partitioning</b> is the process of breaking a service’s workload or state into smaller, manageable pieces called partitions.
+        Each partition is handled separately and independently on the cluster.
+    </p>
+
+    <h5 class="text-info mt-3">Real-World Analogy:</h5>
+    <p>
+        Think of a bank managing customer accounts:
+        - Instead of having all accounts handled by one branch (one server),
+        - Customers are divided across branches by regions or customer ID ranges.
+
+        This makes the system faster, safer, and scalable.
+    </p>
+
+    <h4 class="text-success mt-4">🔍 Why Partition Services?</h4>
+    <ul>
+        <li><b>Scalability:</b> Distribute load among multiple partitions to handle more users/data.</li>
+        <li><b>Fault Tolerance:</b> Failure in one partition doesn’t affect others.</li>
+        <li><b>Manageability:</b> Easier to operate and recover smaller partitions individually.</li>
+        <li><b>Performance:</b> Smaller datasets per partition means faster operations.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🛠️ Supported Partitioning Strategies</h4>
+
+    <h5 class="text-info mt-3">1. Singleton Partition</h5>
+    <p>
+        - The simplest strategy.
+        - There is only one partition, and all traffic/data goes into it.
+        - Best suited for low-volume workloads.
+    </p>
+
+    <p><b>Example:</b> A configuration service accessed by all applications that rarely changes.</p>
+
+    <h5 class="text-info mt-3">2. Uniform Int64 Range Partition</h5>
+    <p>
+        - Data is divided based on 64-bit integer keys.
+        - The entire range is split into multiple numeric intervals (partitions).
+    </p>
+
+    <p><b>Example:</b> User IDs 1–10,000 in partition 1, 10,001–20,000 in partition 2, etc.</p>
+
+    <h5 class="text-info mt-3">3. Named Partition</h5>
+    <p>
+        - Each partition has a friendly, human-readable name.
+        - Ideal when you can logically group data without relying on numerical ranges.
+    </p>
+
+    <p><b>Example:</b> Partition by region: "Asia", "Europe", "NorthAmerica".</p>
+
+    <h4 class="text-success mt-4">📈 Visual Representation</h4>
+
+    <pre class="bg-light p-3">
+    Without Partitioning:
+    [Service] (Handles 1 million users)
+
+    With Partitioning:
+    [Partition 1] (Users 1-100,000)
+    [Partition 2] (Users 100,001-200,000)
+    [Partition 3] (Users 200,001-300,000)
+    ...
+    (Handled separately across multiple nodes)
+    </pre>
+
+    <h4 class="text-success mt-4">🎯 How Does Partitioning Help in Service Fabric?</h4>
+    <ul>
+        <li>Each partition can have its own set of replicas for fault tolerance.</li>
+        <li>Service Fabric automatically manages partition placement and failover.</li>
+        <li>Partitions can grow independently — scale-out is easier.</li>
+        <li>Requests are routed to the correct partition automatically.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">⚡ Common Mistakes in Partitioning</h4>
+    <ul>
+        <li>Choosing Singleton Partition for large-scale apps — leads to bottlenecks.</li>
+        <li>Wrong partition key selection — causes uneven data distribution ("hot partitions").</li>
+        <li>Using too many partitions — increases management overhead unnecessarily.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🧠 FAQs</h4>
+    <p><b>Q:</b> Can a stateless service be partitioned?</p>
+    <p><b>A:</b> Yes. Partitioning is useful for both stateful and stateless services.</p>
+
+    <p><b>Q:</b> Can I dynamically change partition count after deployment?</p>
+    <p><b>A:</b> No. The partition count is fixed at service creation time (unless you design elastic partitions separately).</p>
+
+    <p><b>Q:</b> What happens if a partition fails?</p>
+    <p><b>A:</b> Service Fabric detects failure and moves replicas to healthy nodes automatically.</p>
+
+    <h4 class="text-success mt-4">🧠 Quick Summary</h4>
+    <p>
+        Partitioning is an essential design strategy for building scalable and resilient services.
+        Azure Service Fabric provides flexible partitioning models — Singleton, Uniform Range, and Named partitions — to suit different application needs.
+        Choosing the right partitioning strategy based on your workload is key to building efficient distributed systems.
+    </p>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>Which partitioning strategy would you use for customer IDs?</li>
+        <li>Can you partition a stateless service?</li>
+        <li>Why is choosing a good partition key important?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("StatefulVsStateless", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Stateful vs Stateless Services</a>
+        <a href="@Url.Action("ReliableServicesActors", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Reliable Services and Actors ➡️</a>
+    </div>
+</div>

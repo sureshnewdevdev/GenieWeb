@@ -1,0 +1,145 @@
+﻿@{
+    ViewData["Title"] = "Backup and Disaster Recovery in Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "BackupRecovery";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Backup and Disaster Recovery in Service Fabric</h2>
+
+    <p class="text-muted">
+        No system is immune to failures. A solid <b>Backup and Disaster Recovery (DR)</b> plan ensures that even in case of catastrophic events,
+        your critical data and services can be restored quickly and safely.
+    </p>
+
+    <h4 class="text-success mt-4">💾 What Needs Backup in Service Fabric?</h4>
+    <ul>
+        <li>Stateful service data (important user or business information).</li>
+        <li>Application configurations (manifests, secrets, certificates).</li>
+        <li>Cluster configuration (especially for Standalone or Production clusters).</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Real-World Analogy:</h5>
+    <p>
+        Think of a Backup as making photocopies of important documents and
+        keeping them in a fireproof safe — just in case something happens to the originals!
+    </p>
+
+    <h4 class="text-success mt-4">🛡️ Built-in Backup Features in Service Fabric</h4>
+
+    <h5 class="text-info mt-3">1. Reliable Collections Backup</h5>
+    <ul>
+        <li>Service Fabric automatically provides <b>Stateful Services</b> with APIs to backup their reliable collections (key-value stores).</li>
+        <li>You can perform <b>Full</b> or <b>Incremental</b> backups.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">2. Backup/Restore Service</h5>
+    <ul>
+        <li>Service Fabric provides an optional <b>Backup and Restore Service (BRS)</b> that automates backups for stateful services.</li>
+        <li>Configure policies for periodic backups (hourly, daily, etc.).</li>
+        <li>Stores backups on Azure Blob Storage or File Share.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚀 Step-by-Step: How to Enable Backups</h4>
+
+    <h5 class="text-info mt-3">Step 1: Implement Backup APIs in Your Service</h5>
+
+    <p>Override the following methods inside your Stateful Service:</p>
+    <pre class="bg-light p-3">
+protected override Task BackupAsync(BackupAsyncCallbackArgs backupArgs)
+{
+    // Code to save backup to external storage
+}
+    </pre>
+
+    <p>Service Fabric will call this automatically during backup!</p>
+
+    <h5 class="text-info mt-3">Step 2: Deploy Backup Restore Service (BRS)</h5>
+    <ul>
+        <li>Deploy BackupRestoreService application from Azure Marketplace or ARM templates.</li>
+        <li>Configure the BackupPolicy through Service Fabric Explorer.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 3: Configure Backup Policy</h5>
+    <ul>
+        <li>Set Frequency: e.g., Every 1 Hour.</li>
+        <li>Retention Policy: e.g., Keep last 10 backups.</li>
+        <li>Backup Storage: Azure Blob or File Share.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🛠️ Example Backup Policy</h4>
+
+    <pre class="bg-light p-3">
+{
+  "Name": "OrderServiceBackup",
+  "Schedule": {
+    "Frequency": "Hour",
+    "Interval": "1"
+  },
+  "Storage": {
+    "StorageKind": "AzureBlobStore",
+    "ConnectionString": "DefaultEndpointsProtocol=https;AccountName=...;",
+    "ContainerName": "orderbackups"
+  },
+  "RetentionPolicy": {
+    "RetentionType": "NumberOfBackups",
+    "RetentionCount": "10"
+  }
+}
+    </pre>
+
+    <h4 class="text-success mt-4">🔄 Disaster Recovery Process (Restore)</h4>
+
+    <h5 class="text-info mt-3">Step 1: Select Backup</h5>
+    <p>In Service Fabric Explorer, find the partition → choose backup → click Restore.</p>
+
+    <h5 class="text-info mt-3">Step 2: Restore to Same or New Service</h5>
+    <p>
+        You can restore backups:
+        <ul>
+            <li>To the same application (rollback).</li>
+            <li>To a different cluster (migration or disaster recovery).</li>
+        </ul>
+    </p>
+
+    <h4 class="text-success mt-4">💡 Did You Know?</h4>
+    <div class="alert alert-info">
+        You can trigger on-demand backups manually at any time using the Service Fabric Explorer UI!
+    </div>
+
+    <h4 class="text-success mt-4">⚡ Common Backup and Restore Problems and Solutions</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> Backup failed due to storage permissions.<br>
+            <b>Solution:</b> Ensure correct access rights on Azure Blob or File Share.
+        </li>
+        <li>
+            <b>Problem:</b> Restore not showing backup files.<br>
+            <b>Solution:</b> Verify correct backup paths and retention policies.
+        </li>
+        <li>
+            <b>Problem:</b> Service version mismatch after restore.<br>
+            <b>Solution:</b> Ensure application manifests match during recovery.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚨 Best Practices for Backup and Disaster Recovery</h4>
+    <ul>
+        <li>Schedule automatic periodic backups.</li>
+        <li>Test restoring backups in a test cluster periodically.</li>
+        <li>Encrypt backup data for extra protection (especially in financial/healthcare sectors).</li>
+        <li>Document your DR plan and recovery steps clearly.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>What are two types of backups supported?</li>
+        <li>Where can Service Fabric store backup data?</li>
+        <li>What are the key steps in restoring a service backup?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("SecurityInClusters", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Security in Service Fabric Clusters</a>
+        <a href="@Url.Action("RunningContainers", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Running Containers inside Service Fabric ➡️</a>
+    </div>
+</div>

@@ -56,5 +56,14 @@ namespace GenieWeb.Controllers
         {
             return View("GitSubtopics");
         }
+        public IActionResult DataPlatformSubtopics()
+        {
+            return View("DataPlatformSubtopics");
+        }
+
+        public IActionResult CloudPlatformSubtopics()
+        {
+            return View("CloudPlatformSubtopics");
+        }
     }
 }

@@ -1,0 +1,141 @@
+﻿@{
+    ViewData["Title"] = "Security in Azure Service Fabric Clusters";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "SecurityInClusters";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Security in Service Fabric Clusters</h2>
+
+    <p class="text-muted">
+        In any production environment, <b>securing your cluster</b> is absolutely critical.
+        Azure Service Fabric provides multiple layers of security to protect both internal and external communication.
+    </p>
+
+    <h4 class="text-success mt-4">🔐 Why Cluster Security Matters?</h4>
+    <ul>
+        <li>Prevent unauthorized access to your applications or infrastructure.</li>
+        <li>Protect sensitive data flowing between services or users.</li>
+        <li>Maintain compliance with enterprise and industry regulations.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Real-World Analogy:</h5>
+    <p>
+        Think of your cluster like a secured office building —
+        🔒 Entry checkpoints (authentication)
+        📋 Visitor lists (authorization)
+        🛡️ Security cameras (monitoring)
+    </p>
+
+    <h4 class="text-success mt-4">🛡️ Layers of Security in Service Fabric</h4>
+
+    <h5 class="text-info mt-3">1. Cluster-Level Security</h5>
+    <ul>
+        <li>Secures cluster management operations (who can upgrade, scale, delete, etc.).</li>
+        <li>Usually enforced with certificates or Azure Active Directory (AAD).</li>
+    </ul>
+
+    <h5 class="text-info mt-3">2. Application-Level Security</h5>
+    <ul>
+        <li>Control communication between microservices using certificates or claims.</li>
+        <li>Encrypt traffic inside your cluster (service-to-service encryption).</li>
+    </ul>
+
+    <h5 class="text-info mt-3">3. Node-Level Security</h5>
+    <ul>
+        <li>VMs running nodes should be secured (firewalls, patching, network security groups).</li>
+        <li>Use managed identities for VM authentication wherever possible.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚀 How to Implement Cluster Security</h4>
+
+    <h5 class="text-info mt-3">Step 1: Use X.509 Certificates</h5>
+    <ul>
+        <li>Cluster Certificate: Authenticate nodes and clients.</li>
+        <li>Server Certificate: Enable HTTPS endpoints for services.</li>
+        <li>Client Certificate: Restrict who can manage the cluster.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 2: Setup Azure Active Directory Authentication (Optional)</h5>
+    <ul>
+        <li>Secure Service Fabric Explorer (SFX) access.</li>
+        <li>Grant permissions to Azure AD users/groups instead of relying only on certificates.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 3: Secure Communication</h5>
+    <ul>
+        <li>Configure transport-level security (TLS/SSL) for service remoting and HTTP endpoints.</li>
+        <li>Use HTTPS only — avoid exposing plain HTTP traffic in production.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🛠️ Example: Securing Cluster Using Certificates</h4>
+
+    <p>In your <b>ClusterManifest.xml</b> or during Azure creation wizard:</p>
+
+    <pre class="bg-light p-3">
+"certificateCommonNames": {
+    "clusterCertificateCommonNames": [
+      {
+        "certificateCommonName": "mycluster.example.com",
+        "certificateIssuerThumbprint": "THUMBPRINT"
+      }
+    ],
+    "serverCertificateCommonNames": [
+      {
+        "certificateCommonName": "myserver.example.com",
+        "certificateIssuerThumbprint": "THUMBPRINT"
+      }
+    ]
+}
+    </pre>
+
+    <p>This ensures that all cluster and server communications are protected using certificates!</p>
+
+    <h4 class="text-success mt-4">🔒 Enforcing Network Security</h4>
+    <ul>
+        <li>Use Azure Network Security Groups (NSGs) to restrict access to only necessary ports (like 19080 for SFX).</li>
+        <li>Place clusters inside Virtual Networks (VNets) and use private IP addresses wherever possible.</li>
+        <li>Use Azure Firewall or Application Gateway in front of public endpoints.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">💡 Did You Know?</h4>
+    <div class="alert alert-info">
+        Azure Service Fabric automatically rotates certificates if you use Azure Key Vault certificates with automatic renewal enabled!
+    </div>
+
+    <h4 class="text-success mt-4">⚡ Common Security Problems and Solutions</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> "403 Forbidden" when accessing SFX.<br>
+            <b>Solution:</b> Ensure client certificate or Azure AD authentication is properly configured.
+        </li>
+        <li>
+            <b>Problem:</b> Certificate expired.<br>
+            <b>Solution:</b> Monitor expiration dates carefully or use Key Vault-backed certificates.
+        </li>
+        <li>
+            <b>Problem:</b> Unauthorized node joining cluster.<br>
+            <b>Solution:</b> Use strong cluster certificates and enable client authentication.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚨 Best Practices for Cluster Security</h4>
+    <ul>
+        <li>Enable certificate-based or AAD-based authentication.</li>
+        <li>Restrict inbound/outbound traffic using NSGs and firewalls.</li>
+        <li>Use HTTPS for all service endpoints inside the cluster.</li>
+        <li>Regularly audit and rotate secrets/certificates.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>What are the three layers of security in Service Fabric?</li>
+        <li>Which type of certificate protects service-to-service communication?</li>
+        <li>What is the benefit of using Azure Active Directory authentication?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("TroubleshootingDiagnostics", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Troubleshooting and Diagnostics</a>
+        <a href="@Url.Action("BackupRecovery", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Backup and Disaster Recovery ➡️</a>
+    </div>
+</div>

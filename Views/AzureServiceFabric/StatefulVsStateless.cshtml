@@ -1,0 +1,129 @@
+﻿@{
+    ViewData["Title"] = "Stateless vs Stateful Services in Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "StatelessVsStateful";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Stateless vs Stateful Services in Azure Service Fabric</h2>
+
+    <p class="text-muted">
+        In Azure Service Fabric, services are the core building blocks of your application.
+        Understanding the difference between <b>stateless</b> and <b>stateful</b> services is crucial to designing your architecture correctly and efficiently.
+    </p>
+
+    <h4 class="text-success mt-4">📦 What is a Service?</h4>
+    <p>
+        A <b>service</b> is a process that runs code inside the Service Fabric cluster and performs a task.
+        It could be an API, a database cache, a data processor, or even a backend for a mobile app.
+    </p>
+
+    <h4 class="text-success mt-4">🔵 What is a Stateless Service?</h4>
+    <p>
+        A <b>stateless service</b> does not keep any client-specific data or memory across different requests.
+        Every request is processed independently, and once it’s completed, the service forgets about it.
+    </p>
+
+    <h5 class="text-info mt-3">Example:</h5>
+    <p>
+        - A weather forecast API that simply returns the current temperature.
+        - A stock ticker app that gives live stock prices without storing user history.
+    </p>
+
+    <h5 class="text-info mt-3">Key Characteristics:</h5>
+    <ul>
+        <li>Simple to build and maintain.</li>
+        <li>Easily scaled horizontally (add more instances to handle more load).</li>
+        <li>Failure recovery is simple — just restart the service on another node.</li>
+        <li>State is typically stored externally (e.g., database, cache).</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🟣 What is a Stateful Service?</h4>
+    <p>
+        A <b>stateful service</b> remembers data across requests and maintains it locally within the cluster.
+        Even if you shut down and restart the service, it retains its state (thanks to replication).
+    </p>
+
+    <h5 class="text-info mt-3">Example:</h5>
+    <p>
+        - A shopping cart service that stores the list of items for each user until checkout.
+        - A session manager that tracks user login sessions.
+        - A game server that keeps player scores and game progress live.
+    </p>
+
+    <h5 class="text-info mt-3">Key Characteristics:</h5>
+    <ul>
+        <li>Manages its own data durability.</li>
+        <li>Data is automatically replicated to ensure fault tolerance.</li>
+        <li>Scaling needs careful planning (partitioning the state across nodes).</li>
+        <li>Recovery from node failure is faster because the state is available on replicas.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">📈 Visual Understanding</h4>
+
+    <pre class="bg-light p-3">
+    Stateless Service:
+    [Request] ---> [Service] ---> [Response]
+                  (No memory of request after reply)
+
+    Stateful Service:
+    [Request 1] ---> [Service: stores info]
+    [Request 2] ---> [Service: remembers previous info]
+    </pre>
+
+    <h4 class="text-success mt-4">🎯 When to Use Which?</h4>
+
+    <h5 class="text-info mt-3">Use Stateless Services When:</h5>
+    <ul>
+        <li>You don’t need to track client interactions.</li>
+        <li>All important data is stored in external databases.</li>
+        <li>You want quick, easy-to-scale services like APIs or public endpoints.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Use Stateful Services When:</h5>
+    <ul>
+        <li>You want fast access to data without depending on external databases.</li>
+        <li>You need real-time sessions, caches, or processing states.</li>
+        <li>Low latency and high availability of data is critical.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🛡️ How Service Fabric Ensures Reliability?</h4>
+    <ul>
+        <li>For stateful services, Service Fabric replicates the state data across multiple nodes.</li>
+        <li>If one node crashes, a replica is promoted and continues seamlessly!</li>
+        <li>Stateless services are restarted elsewhere easily if a failure occurs.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">⚡ Common Mistakes Beginners Make</h4>
+    <ul>
+        <li>Choosing stateful services without understanding the complexity of partitioning and replication.</li>
+        <li>Storing critical user data only in stateless services without proper database backing.</li>
+        <li>Trying to manually manage session state across stateless services instead of designing stateless APIs properly.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🧠 FAQs</h4>
+    <p><b>Q:</b> Can a service be partially stateful?</p>
+    <p><b>A:</b> No. In Service Fabric, services are clearly categorized as either stateful or stateless. But your application can mix both types.</p>
+
+    <p><b>Q:</b> Which type of service is easier to scale?</p>
+    <p><b>A:</b> Stateless services are much easier to scale because there is no state to replicate or partition.</p>
+
+    <h4 class="text-success mt-4">🧠 Quick Summary</h4>
+    <p>
+        Stateless services forget everything after each request — simple, scalable, but dependent on external storage.
+        Stateful services remember information across requests — powerful for real-time scenarios but require more careful architecture.
+        Choosing the right type of service is critical to your application’s success in Service Fabric!
+    </p>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>Give one real-world example of a stateless service.</li>
+        <li>When would you prefer a stateful service?</li>
+        <li>What happens to state data if a node hosting a stateful service fails?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("ApplicationServiceModel", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Application and Service Model</a>
+        <a href="@Url.Action("PartitioningStrategies", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Partitioning Strategies ➡️</a>
+    </div>
+</div>

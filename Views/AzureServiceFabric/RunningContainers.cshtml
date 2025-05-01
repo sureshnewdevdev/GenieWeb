@@ -1,0 +1,139 @@
+﻿@{
+    ViewData["Title"] = "Running Containers inside Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "RunningContainers";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Running Containers Inside Service Fabric</h2>
+
+    <p class="text-muted">
+        Azure Service Fabric is not limited to just .NET or stateful services —
+        it can also orchestrate and manage <b>Docker Containers</b> at scale!
+    </p>
+
+    <h4 class="text-success mt-4">🚢 Why Run Containers Inside Service Fabric?</h4>
+    <ul>
+        <li>Reuse existing containerized applications (e.g., Node.js, Python, Java apps).</li>
+        <li>Mix stateless services and containers within the same cluster.</li>
+        <li>Get auto-scaling, auto-failover, and rolling upgrades for containers.</li>
+        <li>Deploy multi-container applications (using Compose or YAML).</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Real-World Analogy:</h5>
+    <p>
+        Think of Service Fabric as a smart port that manages ships (containers) —
+        ensuring smooth docking, loading, movement, and security!
+    </p>
+
+    <h4 class="text-success mt-4">🛠️ What You Need</h4>
+    <ul>
+        <li>Cluster with Docker engine installed on nodes (automatically available on Azure clusters).</li>
+        <li>
+            A Docker image stored either in:
+            <ul>
+                <li>Docker Hub (public)</li>
+                <li>Azure Container Registry (ACR)</li>
+                <li>Private repository (authenticated)</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚀 Step-by-Step: Deploy a Containerized Application</h4>
+
+    <h5 class="text-info mt-3">Step 1: Create Application Manifest</h5>
+    <p>Specify container details in the <code>ApplicationManifest.xml</code> and <code>ServiceManifest.xml</code>.</p>
+
+    <pre class="bg-light p-3">
+<ContainerHostPolicies>
+    <ImageName>microsoft/sample-aspnetapp</ImageName>
+    <RepositoryCredential AccountName="youracr.azurecr.io" Password="yourPassword" />
+    <PortBindings>
+    <PortBinding ContainerPort="80" EndpointRef="WebEndpoint" />
+  </PortBindings>
+</ContainerHostPolicies>
+    </pre>
+
+    <ul>
+        <li><b>ImageName</b>: Docker image to pull.</li>
+        <li><b>PortBindings</b>: Map container ports to Service Fabric endpoints.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 2: Deploy to Service Fabric</h5>
+    <ul>
+        <li>Package your application normally (like other Service Fabric apps).</li>
+        <li>Use Visual Studio, PowerShell, or Azure Portal for deployment.</li>
+        <li>Service Fabric will pull the Docker image, launch the container, and monitor it!</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚀 Sample Scenario: Hosting a Web App</h4>
+
+    <p>
+        Imagine you have a simple Node.js website containerized.
+        You can deploy it to Service Fabric in just a few steps — it will automatically restart if it crashes!
+    </p>
+
+    <h5 class="text-info mt-3">Dockerfile (Example)</h5>
+    <pre class="bg-light p-3">
+FROM node:14
+WORKDIR /app
+COPY . .
+RUN npm install
+EXPOSE 3000
+CMD ["node", "server.js"]
+    </pre>
+
+    <h5 class="text-info mt-3">Container Deployment Flow:</h5>
+    <pre class="bg-light p-3">
+[Build Docker Image] → [Push to ACR] → [Reference in Manifest] → [Deploy to Service Fabric]
+    </pre>
+
+    <h4 class="text-success mt-4">📋 Important Notes on Running Containers</h4>
+
+    <ul>
+        <li>Each container runs isolated inside the node's operating system.</li>
+        <li>Resources (CPU, Memory) can be limited per container using ServiceManifest.</li>
+        <li>Service Fabric ensures health monitoring and rebalancing of containers if needed!</li>
+    </ul>
+
+    <h4 class="text-success mt-4">💡 Did You Know?</h4>
+    <div class="alert alert-info">
+        Service Fabric also supports multi-container groups — similar to Kubernetes Pods!
+    </div>
+
+    <h4 class="text-success mt-4">⚡ Common Container Deployment Problems and Solutions</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> "Image Not Found" error.<br>
+            <b>Solution:</b> Verify image repository path and credentials (for private registries).
+        </li>
+        <li>
+            <b>Problem:</b> Port conflict on the node.<br>
+            <b>Solution:</b> Ensure no two containers map to the same external port.
+        </li>
+        <li>
+            <b>Problem:</b> High container restart rate.<br>
+            <b>Solution:</b> Check container logs via <code>docker logs</code> inside the node VM.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚨 Best Practices for Running Containers</h4>
+    <ul>
+        <li>Use lightweight, minimal base images (e.g., Alpine, NanoServer).</li>
+        <li>Define clear CPU and memory limits for each container.</li>
+        <li>Keep container startup and shutdown times minimal for faster failover.</li>
+        <li>Log output from containerized apps properly — use mounted volumes if needed.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>Where can Service Fabric pull container images from?</li>
+        <li>What file do you modify to define a containerized service?</li>
+        <li>What happens if a container inside Service Fabric crashes?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("BackupRecovery", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Backup and Disaster Recovery</a>
+        <a href="@Url.Action("ServiceFabricMesh", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Introduction to Service Fabric Mesh ➡️</a>
+    </div>
+</div>

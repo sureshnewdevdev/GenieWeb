@@ -1,0 +1,127 @@
+﻿@{
+    ViewData["Title"] = "Advanced Scaling and Load Balancing in Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "ScalingLoadBalancing";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Advanced Scaling and Load Balancing in Service Fabric</h2>
+
+    <p class="text-muted">
+        Building scalable, resilient applications is at the heart of cloud-native development.
+        Azure Service Fabric provides built-in support for <b>dynamic scaling</b> and <b>intelligent load balancing</b> across services.
+    </p>
+
+    <h4 class="text-success mt-4">🔍 What is Scaling and Load Balancing?</h4>
+
+    <ul>
+        <li><b>Scaling:</b> Adding or removing service instances (or nodes) based on demand.</li>
+        <li><b>Load Balancing:</b> Evenly distributing traffic, data, and workloads across available nodes to prevent bottlenecks.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Real-World Analogy:</h5>
+    <p>
+        Imagine a call center 📞. Scaling adds more agents during peak hours,
+        and load balancing ensures each agent gets an equal number of calls.
+    </p>
+
+    <h4 class="text-success mt-4">🚀 Types of Scaling in Service Fabric</h4>
+
+    <h5 class="text-info mt-3">1. Vertical Scaling (Scale Up)</h5>
+    <ul>
+        <li>Increase the size of VMs (CPU, memory) in the cluster.</li>
+        <li>Useful when apps need more memory or processing power per node.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">2. Horizontal Scaling (Scale Out)</h5>
+    <ul>
+        <li>Add more nodes (VMs) to the cluster.</li>
+        <li>More nodes = more capacity to run additional applications and partitions.</li>
+        <li>Preferred for cloud-native, resilient architecture!</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🛠️ How Scaling Works in Service Fabric?</h4>
+
+    <ul>
+        <li>Service Fabric distributes replicas (copies) of services across nodes.</li>
+        <li>When a node is added, Service Fabric automatically moves services around to balance load.</li>
+        <li>When a node fails, Service Fabric rebuilds lost replicas elsewhere automatically.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Auto-Scaling Services</h5>
+    <ul>
+        <li>
+            Define scaling policies based on:
+            <ul>
+                <li>CPU utilization</li>
+                <li>Memory usage</li>
+                <li>Custom application metrics (like queue length)</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚀 Load Balancing Mechanisms</h4>
+
+    <h5 class="text-info mt-3">1. Resource Load Balancing</h5>
+    <ul>
+        <li>Service Fabric constantly monitors CPU, memory, and disk usage across nodes.</li>
+        <li>It dynamically moves replicas to underloaded nodes when needed.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">2. Partition-Based Load Balancing</h5>
+    <ul>
+        <li>Stateful services can be partitioned into multiple segments (e.g., by user region).</li>
+        <li>Partitions are distributed evenly across nodes to avoid hotspotting.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">3. Metrics-Based Balancing</h5>
+    <ul>
+        <li>You can define <b>Service Metrics</b> like "RequestsPerSecond" or "QueueLength".</li>
+        <li>Service Fabric tries to distribute these metrics evenly across nodes.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🛠️ Example: Setting Service Metrics</h4>
+    <pre class="bg-light p-3">
+<ServiceTypeServiceGroupMetrics>
+    <ServiceLoadMetric Name="PrimaryCount" Weight="High" PrimaryDefaultLoad="5" SecondaryDefaultLoad="2" />
+    <ServiceLoadMetric Name="MemoryInMB" Weight="Medium" PrimaryDefaultLoad="1000" SecondaryDefaultLoad="800" />
+</ServiceTypeServiceGroupMetrics>
+    </pre>
+
+    <p>This configures how Service Fabric should balance service replicas based on load factors!</p>
+
+    <h4 class="text-success mt-4">⚡ Common Scaling and Load Balancing Problems</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> Uneven service distribution.<br>
+            <b>Solution:</b> Adjust service metrics and replica placement policies.
+        </li>
+        <li>
+            <b>Problem:</b> Nodes running out of memory.<br>
+            <b>Solution:</b> Scale out horizontally or vertically increase VM size.
+        </li>
+        <li>
+            <b>Problem:</b> Slow failover after node failure.<br>
+            <b>Solution:</b> Fine-tune replica restart and rebuild settings.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚨 Best Practices for Scaling and Load Balancing</h4>
+    <ul>
+        <li>Prefer <b>horizontal scaling</b> wherever possible — more nodes = higher resilience.</li>
+        <li>Set proper <b>health policies</b> to avoid unhealthy scaling.</li>
+        <li>Monitor cluster metrics actively and set up alerts (e.g., via Azure Monitor).</li>
+        <li>Distribute partitions thoughtfully — avoid creating single points of overload.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>What is the difference between vertical and horizontal scaling?</li>
+        <li>How does Service Fabric decide when to rebalance replicas?</li>
+        <li>Why is horizontal scaling preferred in cloud-native designs?</li>
+    </ul>
+
+    <div class="d-flex justify-content-start mt-5">
+        <a href="@Url.Action("CICDPipelines", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: CI/CD Pipelines for Service Fabric</a>
+    </div>
+</div>

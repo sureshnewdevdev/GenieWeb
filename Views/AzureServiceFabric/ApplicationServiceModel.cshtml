@@ -1,0 +1,148 @@
+﻿@{
+    ViewData["Title"] = "Application and Service Model in Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "ApplicationServiceModel";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Application and Service Model in Azure Service Fabric</h2>
+
+    <p class="text-muted">
+        In Service Fabric, applications are not deployed as single files.
+        Instead, they are modeled, packaged, and managed systematically.
+        Understanding the Application and Service Model is crucial to design scalable, modular, and manageable cloud-native applications.
+    </p>
+
+    <h4 class="text-success mt-4">📦 What is the Application and Service Model?</h4>
+    <p>
+        Think of your application as a set of different services working together.
+        Each service has its own definition (what it does, how it behaves, configuration), and the application brings them together into a deployable unit.
+    </p>
+
+    <h5 class="text-info mt-4">Simple Analogy:</h5>
+    <p>
+        Imagine you are organizing a wedding event (application).
+        - Catering (service 1)
+        - Decoration (service 2)
+        - Security (service 3)
+
+        Each has its own team, rules, and responsibilities, but together they make the event successful.
+        Similarly, an Application in Service Fabric is a collection of Services bundled together!
+    </p>
+
+    <h4 class="text-success mt-4">🔍 Structure of an Application Package</h4>
+
+    <pre class="bg-light p-3">
+    ApplicationPackage
+    ├── ApplicationManifest.xml
+    ├── Service1Package
+    │    ├── ServiceManifest.xml
+    │    ├── Code (executable code)
+    │    ├── Config (configuration files)
+    │    └── Data (static content if needed)
+    ├── Service2Package
+    │    ├── ServiceManifest.xml
+    │    └── ...
+    </pre>
+
+    <h5 class="text-info mt-4">🧩 Key Components:</h5>
+    <ul>
+        <li><b>Application Manifest:</b> Defines which services are part of the application and their versioning.</li>
+        <li><b>Service Package:</b> Contains everything related to a single service (code, configuration, data).</li>
+        <li><b>Service Manifest:</b> Describes individual service properties like resource requirements, service type, entry points, etc.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">📑 What is a Service Manifest?</h4>
+    <p>
+        The Service Manifest specifies:
+    </p>
+    <ul>
+        <li>Service type (stateless or stateful)</li>
+        <li>Code packages (executables, DLLs)</li>
+        <li>Configuration packages (parameters that change behavior without code changes)</li>
+        <li>Data packages (static data files if required)</li>
+        <li>Resource requirements (CPU, memory, ports)</li>
+    </ul>
+
+    <p>
+        <b>Tip:</b> Code packages can be updated separately from configuration — allowing dynamic behavior changes without redeploying the code!
+    </p>
+
+    <h4 class="text-success mt-4">📜 What is an Application Manifest?</h4>
+    <p>
+        The Application Manifest brings together multiple service manifests and defines:
+    </p>
+    <ul>
+        <li>Application type (unique identifier)</li>
+        <li>Versioning of the application and its services</li>
+        <li>Default configuration parameters</li>
+        <li>Service configuration overrides</li>
+        <li>Policies such as placement, security, and health monitoring rules</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🛠️ How Deployment Works (Step-by-Step)</h4>
+    <ol>
+        <li>Package your services separately with their manifests.</li>
+        <li>Create an Application Manifest to define the overall application.</li>
+        <li>Upload the application package to the Service Fabric image store.</li>
+        <li>Register the Application Type with the cluster.</li>
+        <li>Create an instance of the application in the cluster.</li>
+    </ol>
+
+    <p><b>Result:</b> Your services are intelligently placed across nodes and start running!</p>
+
+    <h4 class="text-success mt-4">📈 Visual Representation</h4>
+
+    <pre class="bg-light p-3">
+    +--------------------------------------------------+
+    |                Application Package               |
+    | +----------------------------------------------+ |
+    | | ApplicationManifest.xml                      | |
+    | +----------------------------------------------+ |
+    | | Service 1 Package (Code + Config + Data)      | |
+    | | Service 2 Package (Code + Config + Data)      | |
+    | +----------------------------------------------+ |
+    +--------------------------------------------------+
+    </pre>
+
+    <h4 class="text-success mt-4">🏆 Advantages of This Model</h4>
+    <ul>
+        <li><b>Modularization:</b> Develop and manage services independently.</li>
+        <li><b>Version Control:</b> Version your applications and roll back if needed.</li>
+        <li><b>Configuration Management:</b> Change settings without touching the code.</li>
+        <li><b>Seamless Upgrades:</b> Upgrade applications with minimal downtime.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">⚡ Common Mistakes to Avoid</h4>
+    <ul>
+        <li>Forgetting to update version numbers after changes — leads to conflicts.</li>
+        <li>Hardcoding environment-specific parameters inside code — avoid by using configuration packages!</li>
+        <li>Deploying services without proper resource limits — can overload nodes.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🧠 FAQs</h4>
+    <p><b>Q:</b> Can services share code packages?</p>
+    <p><b>A:</b> Yes! Multiple services can point to the same code package if needed.</p>
+
+    <p><b>Q:</b> Can we update service configuration without restarting services?</p>
+    <p><b>A:</b> Absolutely. Configuration packages allow dynamic changes without service downtime.</p>
+
+    <h4 class="text-success mt-4">🧠 Quick Summary</h4>
+    <p>
+        In Service Fabric, an application consists of one or more services packaged individually.
+        The Application Manifest coordinates these services, and the entire structure ensures flexible, modular, upgradeable deployments.
+        Mastering this model is key to developing scalable, resilient microservices architectures!
+    </p>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>What files are essential in a Service Fabric application package?</li>
+        <li>What does the Service Manifest define?</li>
+        <li>Why is versioning important in Service Fabric applications?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("ClusterArchitecture", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Cluster Architecture</a>
+        <a href="@Url.Action("StatelessVsStateful", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Stateless vs Stateful Services ➡️</a>
+    </div>
+</div>

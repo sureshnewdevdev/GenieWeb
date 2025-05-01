@@ -1,0 +1,140 @@
+﻿@{
+    ViewData["Title"] = "Creating a Stateless Service in Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "CreateStatelessService";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Creating a Stateless Service in Service Fabric</h2>
+
+    <p class="text-muted">
+        In this tutorial, you will learn how to create, deploy, and test a simple <b>Stateless Service</b> inside a Service Fabric application.
+        This is one of the most common types of microservices used when no local data persistence is required.
+    </p>
+
+    <h4 class="text-success mt-4">🌟 What is a Stateless Service?</h4>
+    <p>
+        A <b>Stateless Service</b> does not maintain any client-specific information or state between calls.
+        Every incoming request is processed independently.
+    </p>
+    <ul>
+        <li>Examples: Web API, Background worker services, Notification senders.</li>
+        <li>Scaling is simpler — no synchronization required between instances.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Real-World Analogy:</h5>
+    <p>
+        Think of a public vending machine — each customer operates independently;
+        the machine doesn't remember who used it before.
+    </p>
+
+    <h4 class="text-success mt-4">🛠️ Prerequisites</h4>
+    <ul>
+        <li>Service Fabric SDK installed.</li>
+        <li>Local or Azure Service Fabric cluster running.</li>
+        <li>Visual Studio 2022 (or higher) installed.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚀 Step-by-Step Guide: Create and Deploy a Stateless Service</h4>
+
+    <h5 class="text-info mt-3">Step 1: Create a New Service Fabric Application</h5>
+    <ol>
+        <li>Open <b>Visual Studio</b> → <b>File</b> → <b>New</b> → <b>Project</b>.</li>
+        <li>Search for "<b>Service Fabric Application</b>".</li>
+        <li>Choose an appropriate name (e.g., <code>StatelessAppDemo</code>).</li>
+    </ol>
+
+    <h5 class="text-info mt-3">Step 2: Add a Stateless Service</h5>
+    <ol>
+        <li>
+            In the service type selection window, choose:
+            <b>Stateless ASP.NET Core Web API</b> or <b>Stateless Worker Service</b>.
+        </li>
+        <li>Click <b>OK</b> to scaffold your service.</li>
+    </ol>
+
+    <h5 class="text-info mt-3">Step 3: Understand the Generated Code</h5>
+    <ul>
+        <li>
+            The main class will inherit from:
+            <pre class="bg-light p-3">
+public class YourServiceName : StatelessService
+            </pre>
+        </li>
+        <li>
+            Overridden methods:
+            <ul>
+                <li><b>CreateServiceInstanceListeners</b>: Setup listeners for communication (HTTP, Remoting).</li>
+                <li><b>RunAsync</b>: Main execution method for your stateless background logic.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 4: Modify the Service (Optional)</h5>
+    <p>
+        Update the <code>RunAsync</code> method to implement your custom logic, like sending notifications, polling APIs, etc.
+    </p>
+
+    <h5 class="text-info mt-3">Step 5: Build and Deploy the Application</h5>
+    <ul>
+        <li>Right-click on the solution → <b>Build</b>.</li>
+        <li>Right-click the Application Project (.sfproj) → <b>Publish</b>.</li>
+        <li>Select <b>Local Cluster</b> or <b>Azure Cluster</b>.</li>
+        <li>Click <b>Publish</b>.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 6: Verify Deployment</h5>
+    <ul>
+        <li>Open <b>Service Fabric Explorer</b>.</li>
+        <li>Expand "Applications" → See your deployed app and service instance.</li>
+        <li>Check service health and partition information.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">📈 Visual Flow Summary</h4>
+    <pre class="bg-light p-3">
+[Create New SF App] 
+    → [Add Stateless Service] 
+        → [Customize RunAsync()] 
+            → [Build and Publish] 
+                → [Monitor in Explorer]
+    </pre>
+
+    <h4 class="text-success mt-4">💡 Did You Know?</h4>
+    <div class="alert alert-info">
+        A Stateless Service can be scaled out easily to 100s of instances without worrying about data loss or session management!
+    </div>
+
+    <h4 class="text-success mt-4">⚡ Common Beginner Mistakes and Solutions</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> Application fails during publishing.<br>
+            <b>Solution:</b> Ensure the local cluster is healthy and started before publishing.
+        </li>
+        <li>
+            <b>Problem:</b> No HTTP endpoint found.<br>
+            <b>Solution:</b> Check if ServiceInstanceListeners are properly configured in your service code.
+        </li>
+        <li>
+            <b>Problem:</b> Scaling issues.<br>
+            <b>Solution:</b> Stateless services don't need sticky sessions — configure load balancer correctly.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚨 Best Practices</h4>
+    <ul>
+        <li>Separate stateless services from stateful data logic — keep services truly stateless.</li>
+        <li>Implement retry policies for external HTTP calls inside stateless services.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>What method is overridden to write the background execution logic?</li>
+        <li>What are ServiceInstanceListeners used for?</li>
+        <li>Can Stateless Services be scaled easily? Why?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("DeploySampleApp", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Deploying a Sample Application</a>
+        <a href="@Url.Action("CreateStatefulService", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Creating a Stateful Service ➡️</a>
+    </div>
+</div>

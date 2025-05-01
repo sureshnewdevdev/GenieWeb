@@ -1,0 +1,144 @@
+﻿@{
+    ViewData["Title"] = "Service Communication (Remoting) in Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "ServiceCommunicationRemoting";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Service Communication (Remoting) in Service Fabric</h2>
+
+    <p class="text-muted">
+        Microservices often need to talk to each other!
+        In Service Fabric, <b>Service Remoting</b> is a built-in, fast way for internal services to exchange messages or invoke operations.
+    </p>
+
+    <h4 class="text-success mt-4">🔗 What is Service Remoting?</h4>
+    <p>
+        Service Remoting is an <b>RPC (Remote Procedure Call)</b> style communication method where:
+    </p>
+    <ul>
+        <li>One service directly calls a method on another service.</li>
+        <li>Service Fabric handles serialization, deserialization, and network transport.</li>
+        <li>Works efficiently inside the cluster (low latency).</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Real-World Analogy:</h5>
+    <p>
+        Think of Remoting as a secure "telephone line" between two services.
+        Service A dials Service B and asks, "Can you fetch these records for me?" 📞
+    </p>
+
+    <h4 class="text-success mt-4">🛠️ Prerequisites</h4>
+    <ul>
+        <li>Both services should be hosted within Service Fabric.</li>
+        <li>They must share contract interfaces (for strong typing).</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚀 Step-by-Step Guide: Implement Service Remoting</h4>
+
+    <h5 class="text-info mt-3">Step 1: Create a Shared Interface Project</h5>
+    <ol>
+        <li>Add a new .NET Standard Class Library project (e.g., <code>SharedContracts</code>).</li>
+        <li>
+            Install NuGet Package:
+            <br />
+            <code>Microsoft.ServiceFabric.Services.Remoting</code>
+        </li>
+        <li>
+            Define your contract interface:
+            <pre class="bg-light p-3">
+using Microsoft.ServiceFabric.Services.Remoting;
+using System.Threading.Tasks;
+
+public interface IOrderService : IService
+{
+    Task<string> GetOrderDetailsAsync(int orderId);
+}
+            </pre>
+        </li>
+    </ol>
+
+    <h5 class="text-info mt-3">Step 2: Implement the Interface in Your Service</h5>
+    <p>In the service project:</p>
+    <pre class="bg-light p-3">
+public class OrderService : StatelessService, IOrderService
+{
+    public OrderService(StatelessServiceContext context)
+        : base(context) { }
+
+    public async Task<string> GetOrderDetailsAsync(int orderId)
+    {
+        return $"Order {orderId}: Confirmed";
+    }
+}
+    </pre>
+
+    <h5 class="text-info mt-3">Step 3: Setup Service Listeners</h5>
+    <p>Override <code>CreateServiceInstanceListeners</code> method to register remoting listeners:</p>
+    <pre class="bg-light p-3">
+protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
+{
+    return new[]
+    {
+        new ServiceInstanceListener(
+            context => this.CreateServiceRemotingListener(context))
+    };
+}
+    </pre>
+
+    <h5 class="text-info mt-3">Step 4: Call the Service from Another Service</h5>
+    <p>In the client service (caller):</p>
+    <pre class="bg-light p-3">
+// Create Proxy
+var proxy = ServiceProxy.Create<IOrderService>(
+    new Uri("fabric:/YourAppName/OrderService"));
+
+// Call remote method
+var details = await proxy.GetOrderDetailsAsync(1001);
+    </pre>
+
+    <h4 class="text-success mt-4">📈 Visual Communication Flow</h4>
+    <pre class="bg-light p-3">
+[Caller Service] → [Service Proxy] → [Fabric Transport] → [Target Service Listener] → [Execute Remote Method]
+    </pre>
+
+    <h4 class="text-success mt-4">💡 Did You Know?</h4>
+    <div class="alert alert-info">
+        Service Fabric Remoting automatically retries calls when a service replica moves (failover) — you get resilience for free!
+    </div>
+
+    <h4 class="text-success mt-4">⚡ Common Beginner Issues and Solutions</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> Cannot resolve proxy.<br>
+            <b>Solution:</b> Make sure the service URI is correct and the service is registered in ApplicationManifest.xml.
+        </li>
+        <li>
+            <b>Problem:</b> Serialization errors.<br>
+            <b>Solution:</b> Only use serializable parameters and return types in remote methods.
+        </li>
+        <li>
+            <b>Problem:</b> Timeout on remote calls.<br>
+            <b>Solution:</b> Check if target service is healthy and endpoint is available.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚨 Best Practices</h4>
+    <ul>
+        <li>Use async/await everywhere for better scalability.</li>
+        <li>Keep contract interfaces lightweight and versioned properly.</li>
+        <li>Prefer small payloads — Remoting is optimized for small fast calls, not for transferring large files.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>What interface must your contract extend for Service Remoting?</li>
+        <li>What class creates a proxy to the remote service?</li>
+        <li>Why should contracts be kept lightweight?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("PackagingDeployment", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Packaging and Deployment</a>
+        <a href="@Url.Action("MonitoringLogging", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Monitoring and Logging ➡️</a>
+    </div>
+</div>

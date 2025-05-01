@@ -1,0 +1,135 @@
+﻿@{
+    ViewData["Title"] = "CI/CD Pipelines for Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "CICDPipelines";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">CI/CD Pipelines for Azure Service Fabric Applications</h2>
+
+    <p class="text-muted">
+        In modern software development, delivering updates quickly and safely is key.
+        CI/CD (Continuous Integration and Continuous Deployment) helps automate the build, test, and deployment process for Service Fabric apps!
+    </p>
+
+    <h4 class="text-success mt-4">🔄 What is CI/CD?</h4>
+    <ul>
+        <li><b>Continuous Integration (CI):</b> Automatically build and test your code whenever you push updates to the repository.</li>
+        <li><b>Continuous Deployment (CD):</b> Automatically deploy successful builds into your Service Fabric cluster with minimal downtime.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Real-World Analogy:</h5>
+    <p>
+        Imagine a bakery 🥖. CI is like preparing dough every time an order comes, and CD is like baking and delivering the bread automatically without waiting!
+    </p>
+
+    <h4 class="text-success mt-4">🚀 Why CI/CD for Service Fabric?</h4>
+    <ul>
+        <li>Faster release cycles.</li>
+        <li>Reduced human error during deployments.</li>
+        <li>Easy rollback to previous versions if issues occur.</li>
+        <li>Automated health checks after each deployment.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🛠️ Tools You Can Use</h4>
+    <ul>
+        <li>Azure DevOps Pipelines (Classic or YAML)</li>
+        <li>GitHub Actions (for smaller or open-source projects)</li>
+        <li>Jenkins, Octopus Deploy (advanced enterprise setups)</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚀 Step-by-Step: Setting up CI/CD with Azure DevOps</h4>
+
+    <h5 class="text-info mt-3">Step 1: Create a Project in Azure DevOps</h5>
+    <ul>
+        <li>Go to <a href="https://dev.azure.com/" target="_blank">Azure DevOps Portal</a>.</li>
+        <li>Create a new Project → Choose Git as the version control.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 2: Create a Build Pipeline (CI)</h5>
+    <ul>
+        <li>Go to <b>Pipelines</b> → New Pipeline → Select your repository.</li>
+        <li>Use a <b>YAML file</b> or Classic UI.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Sample CI YAML for Building a Service Fabric App</h5>
+    <pre class="bg-light p-3">
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: VSBuild@1
+  inputs:
+    solution: '**/*.sln'
+    msbuildArgs: '/p:Configuration=Release'
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+    </pre>
+
+    <h5 class="text-info mt-3">Step 3: Create a Release Pipeline (CD)</h5>
+    <ul>
+        <li>Go to <b>Releases</b> → New Release Pipeline.</li>
+        <li>Add an artifact (the build output from CI pipeline).</li>
+        <li>Add a task: <b>Deploy Service Fabric Application</b>.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Service Fabric Deployment Task Example</h5>
+    <ul>
+        <li>Cluster Connection: Choose Azure subscription and target cluster.</li>
+        <li>Application Package: Specify the path (drop from Build).</li>
+        <li>Application Name: E.g., <code>fabric:/MyApp</code>.</li>
+        <li>Upgrade Strategy: Choose Rolling Upgrade (zero downtime deployment).</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚀 How Rolling Upgrade Works?</h4>
+    <p>
+        A Rolling Upgrade updates the application in batches (Upgrade Domains) —
+        allowing parts of the app to stay online while the update happens.
+    </p>
+
+    <h5 class="text-info mt-3">Rolling Upgrade Diagram:</h5>
+    <pre class="bg-light p-3">
+[UD1 Updated] → [Health Check] → [UD2 Updated] → [Health Check] → ... → [Final UD Updated]
+    </pre>
+
+    <h4 class="text-success mt-4">🛡️ Important Deployment Settings</h4>
+    <ul>
+        <li><b>Health Policy:</b> Fail upgrade if too many service instances fail health checks.</li>
+        <li><b>Upgrade Timeout:</b> Configure enough time for services to restart properly.</li>
+        <li><b>Rollback Policy:</b> Automatically revert if an upgrade fails.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">⚡ Common CI/CD Problems and Solutions</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> Build fails due to missing SDKs.<br>
+            <b>Solution:</b> Ensure Service Fabric SDK and MSBuild tools installed on build agent.
+        </li>
+        <li>
+            <b>Problem:</b> Deployment stuck during upgrade.<br>
+            <b>Solution:</b> Check health events and fix any failing service first.
+        </li>
+        <li>
+            <b>Problem:</b> Rollback not working.<br>
+            <b>Solution:</b> Review rollback policies and make sure health monitoring is enabled.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>What does CI/CD stand for?</li>
+        <li>What is the purpose of a Rolling Upgrade?</li>
+        <li>Which Azure DevOps tasks help deploy to Service Fabric?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("ServiceFabricMesh", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Introduction to Service Fabric Mesh</a>
+        <a href="@Url.Action("ScalingLoadBalancing", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Advanced Scaling and Load Balancing ➡️</a>
+    </div>
+</div>

@@ -1,0 +1,135 @@
+﻿@{
+    ViewData["Title"] = "Monitoring and Logging in Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "MonitoringLogging";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Monitoring and Logging in Service Fabric Applications</h2>
+
+    <p class="text-muted">
+        Building applications is only half the story — you must <b>monitor</b> and <b>log</b> them properly to ensure smooth, reliable operations.
+        Service Fabric provides built-in tools and APIs to help developers monitor service health and troubleshoot issues.
+    </p>
+
+    <h4 class="text-success mt-4">🛰️ Why Monitoring and Logging are Critical?</h4>
+    <ul>
+        <li>Early detection of issues (failures, slowdowns, bottlenecks).</li>
+        <li>Understanding system behavior and usage patterns.</li>
+        <li>Essential for troubleshooting and root cause analysis.</li>
+        <li>Supports proactive scaling and maintenance.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Real-World Analogy:</h5>
+    <p>
+        Monitoring and logging are like the black box and radar in an aircraft —
+        even if everything looks fine, they continuously record data that’s invaluable during emergencies.
+    </p>
+
+    <h4 class="text-success mt-4">🚀 Monitoring Tools in Service Fabric</h4>
+
+    <h5 class="text-info mt-3">1. Service Fabric Explorer (SFX)</h5>
+    <p>
+        A real-time dashboard that shows:
+    </p>
+    <ul>
+        <li>Cluster health (overall and per node).</li>
+        <li>Application health and event logs.</li>
+        <li>Replica status and load metrics.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">2. Application Health Reports</h5>
+    <p>
+        Services can report their health explicitly using Service Fabric APIs:
+    </p>
+    <pre class="bg-light p-3">
+var healthInfo = new HealthInformation("MyApp", "DatabaseConnectivity", HealthState.Warning)
+{
+    Description = "Database connection slow."
+};
+await this.Partition.ReportPartitionHealthAsync(healthInfo);
+    </pre>
+    <p><b>Key Points:</b> Healthy, Warning, Error states can be reported.</p>
+
+    <h5 class="text-info mt-3">3. Event Tracing for Windows (ETW)</h5>
+    <ul>
+        <li>Built-in support for high-performance event logging.</li>
+        <li>View ETW logs using tools like PerfView, Windows Event Viewer, or Azure Monitor.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">4. Application Insights Integration</h5>
+    <ul>
+        <li>Can be easily integrated into Service Fabric services.</li>
+        <li>Provides dashboards for request rates, response times, failure rates, etc.</li>
+        <li>Custom telemetry like traces, exceptions, dependencies.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🛠️ Basic Logging in Service Fabric Services</h4>
+
+    <h5 class="text-info mt-3">Using Built-in EventSource Class</h5>
+    <p>Example:</p>
+    <pre class="bg-light p-3">
+public static class MyServiceEventSource
+{
+    private static readonly EventSource eventSource = new EventSource("MyServiceEvents");
+
+    public static void ServiceMessage(StatelessService service, string message)
+    {
+        eventSource.Write("ServiceMessage", new { ServiceName = service.Context.ServiceName, Message = message });
+    }
+}
+    </pre>
+
+    <h5 class="text-info mt-3">Calling Logger inside Services</h5>
+    <pre class="bg-light p-3">
+MyServiceEventSource.ServiceMessage(this, "Order processed successfully!");
+    </pre>
+
+    <h4 class="text-success mt-4">📈 Visual Monitoring Flow</h4>
+    <pre class="bg-light p-3">
+[Service Health Events] 
+    → [Service Fabric Explorer Dashboard] 
+        → [Alerts, Warnings, Errors Visible]
+            → [Root Cause Analysis and Actions]
+    </pre>
+
+    <h4 class="text-success mt-4">💡 Did You Know?</h4>
+    <div class="alert alert-info">
+        Even if the cluster is down, Service Fabric can persist health events for later analysis!
+    </div>
+
+    <h4 class="text-success mt-4">⚡ Common Beginner Issues and Solutions</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> Missing health reports.<br>
+            <b>Solution:</b> Ensure services call health APIs periodically.
+        </li>
+        <li>
+            <b>Problem:</b> Logs not visible in Event Viewer.<br>
+            <b>Solution:</b> Check if ETW providers are enabled and logs are written correctly.
+        </li>
+        <li>
+            <b>Problem:</b> High latency in monitoring dashboard.<br>
+            <b>Solution:</b> Reduce the number of frequent health reports; aggregate where possible.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚨 Best Practices</h4>
+    <ul>
+        <li>Send regular health checks from services (heartbeat).</li>
+        <li>Integrate Application Insights early — much easier than retrofitting later.</li>
+        <li>Use structured logging (JSON format) when logging complex data.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>What are the three health states that can be reported?</li>
+        <li>Name one tool you can use to view ETW logs.</li>
+        <li>Why is Application Insights useful for Service Fabric applications?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("ServiceCommunicationRemoting", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Service Communication (Remoting)</a>
+        <a href="@Url.Action("ManagingNodeHealth", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Cluster Architecture ➡️</a>
+    </div>
+</div>

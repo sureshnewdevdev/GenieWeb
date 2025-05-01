@@ -1,0 +1,133 @@
+﻿@{
+    ViewData["Title"] = "Cluster Architecture in Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "ClusterArchitecture";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Cluster Architecture in Azure Service Fabric</h2>
+
+    <p class="text-muted">
+        Azure Service Fabric clusters are the core foundation that make it possible to deploy, manage, and scale your applications efficiently.
+        A cluster intelligently distributes workloads across many machines while ensuring high availability, resilience, and self-healing capabilities.
+    </p>
+
+    <h4 class="text-success mt-4">🏗️ What is a Cluster?</h4>
+    <p>
+        A <b>cluster</b> is a group of interconnected machines (nodes) that work together as a single logical unit.
+        These nodes can be physical servers or virtual machines, hosted on Azure, other clouds, or on-premises data centers.
+    </p>
+
+    <p>
+        The cluster is responsible for hosting your applications, monitoring their health, upgrading them safely, and handling failures automatically without human intervention.
+    </p>
+
+    <h5 class="text-info mt-4">Real-Life Analogy:</h5>
+    <p>
+        Think of a cluster as a large hotel (the cluster) where each room (node) can host guests (applications/services).
+        If one room becomes unavailable, guests are moved to other rooms automatically without disturbing the rest of the hotel operations.
+    </p>
+
+    <h4 class="text-success mt-4">🧩 Key Components of Cluster Architecture</h4>
+
+    <h5 class="text-info mt-3">1. Nodes</h5>
+    <p>
+        A <b>node</b> is the basic building block of a cluster — a machine capable of running services and system processes.
+        Every node runs essential Service Fabric components to participate in workload distribution and health reporting.
+    </p>
+
+    <h5 class="text-info mt-3">2. System Services</h5>
+    <p>
+        Service Fabric runs a set of internal system services across nodes to manage the cluster:
+    </p>
+    <ul>
+        <li><b>Cluster Manager Service:</b> Orchestrates application deployments and updates.</li>
+        <li><b>Fault Manager Service:</b> Detects hardware or software faults and recovers automatically.</li>
+        <li><b>Health Manager Service:</b> Continuously monitors the health of services, nodes, and the cluster itself.</li>
+        <li><b>Upgrade Orchestration Service:</b> Coordinates safe upgrades to avoid downtime.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">3. Partitions and Replicas</h5>
+    <p>
+        Services can be partitioned into smaller manageable units (data or workload) across multiple nodes, improving scalability.
+        Each partition for a stateful service typically has multiple <b>replicas</b> for fault tolerance.
+    </p>
+
+    <h4 class="text-success mt-4">🛡️ Fault Domains and Upgrade Domains</h4>
+
+    <h5 class="text-info mt-3">Fault Domains</h5>
+    <p>
+        A <b>fault domain</b> represents a logical group of hardware that shares a single point of failure (like a server rack or power unit).
+        To ensure resilience, Service Fabric places replicas of services across different fault domains.
+    </p>
+
+    <h5 class="text-info mt-3">Upgrade Domains</h5>
+    <p>
+        During upgrades, nodes are divided into <b>upgrade domains</b>. Service Fabric upgrades one domain at a time.
+        If something goes wrong during an upgrade, only a portion of your cluster is affected, and rollback is easy.
+    </p>
+
+    <p><b>Tip:</b> Always plan clusters with multiple fault and upgrade domains for maximum availability!</p>
+
+    <h4 class="text-success mt-4">🔍 How Nodes Are Organized in a Cluster?</h4>
+    <p>
+        Nodes can be organized into logical groups:
+    </p>
+    <ul>
+        <li><b>Seed Nodes:</b> Special nodes that help establish and maintain cluster membership.</li>
+        <li><b>Non-Seed Nodes:</b> Regular nodes that run services and participate in cluster operations.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">📊 Visual Overview</h4>
+
+    <pre class="bg-light p-3">
+    +-------------------------------------------+
+    |         Service Fabric Cluster            |
+    +-------------------------------------------+
+    | Node 1 (Fault Domain 1, Upgrade Domain 1) |
+    | Node 2 (Fault Domain 2, Upgrade Domain 2) |
+    | Node 3 (Fault Domain 3, Upgrade Domain 3) |
+    +-------------------------------------------+
+    | System services + User apps run here      |
+    +-------------------------------------------+
+    </pre>
+
+    <h4 class="text-success mt-4">📈 How Service Fabric Handles Failures?</h4>
+    <ul>
+        <li>If a node fails, Service Fabric automatically moves services to healthy nodes.</li>
+        <li>Service replicas keep running on unaffected nodes.</li>
+        <li>Cluster remains available even during hardware failures.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">⚡ Common Mistakes Beginners Make</h4>
+    <ul>
+        <li>Not configuring enough fault domains → Risk of complete cluster failure.</li>
+        <li>Placing too many services on a single node → Causes bottlenecks and service crashes.</li>
+        <li>Forgetting to plan upgrade domains → Leads to downtime during upgrades.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🧠 FAQs</h4>
+    <p><b>Q:</b> How many nodes are needed for a reliable cluster?</p>
+    <p><b>A:</b> For production, at least 5 nodes (for quorum and resilience); minimum 3 for development/test.</p>
+
+    <p><b>Q:</b> Can I scale the cluster after creation?</p>
+    <p><b>A:</b> Yes! Service Fabric allows you to add/remove nodes dynamically without downtime.</p>
+
+    <h4 class="text-success mt-4">🧠 Quick Summary</h4>
+    <p>
+        A Service Fabric cluster consists of interconnected nodes, running system and user services, organized across fault and upgrade domains.
+        It intelligently distributes workloads and self-heals from hardware failures while ensuring high availability and scalability.
+    </p>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>What is the purpose of upgrade domains?</li>
+        <li>Why should replicas be spread across multiple fault domains?</li>
+        <li>What are seed nodes in a Service Fabric cluster?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("ServiceFabricTerminology", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Terminology Explained</a>
+        <a href="@Url.Action("ApplicationServiceModel", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Application and Service Model ➡️</a>
+    </div>
+</div>

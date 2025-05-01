@@ -1,0 +1,135 @@
+﻿@{
+    ViewData["Title"] = "Application Upgrade Strategies in Azure Service Fabric";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "ApplicationUpgrade";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Application Upgrade Strategies in Service Fabric</h2>
+
+    <p class="text-muted">
+        In a real-world production environment, deploying a new version of your application safely — without downtime — is critical.
+        Azure Service Fabric provides a robust mechanism for <b>Application Upgrades</b> with high availability.
+    </p>
+
+    <h4 class="text-success mt-4">📈 What is an Application Upgrade?</h4>
+    <ul>
+        <li>Deploying a newer version of an existing application without taking the system offline.</li>
+        <li>Service Fabric performs rolling upgrades: upgrading small parts (partitions or nodes) at a time.</li>
+        <li>Supports automatic rollback if issues are detected during upgrade!</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Real-World Analogy:</h5>
+    <p>
+        Imagine upgrading seats inside an airplane — doing it one row at a time,
+        while the flight continues — that's how rolling upgrades work!
+    </p>
+
+    <h4 class="text-success mt-4">🚀 Step-by-Step: How to Upgrade an Application</h4>
+
+    <h5 class="text-info mt-3">Step 1: Create a New Application Version</h5>
+    <ul>
+        <li>Update your service code.</li>
+        <li>
+            Modify <code>ApplicationManifest.xml</code> with a new version number:
+            <pre class="bg-light p-3">
+<ApplicationManifest ApplicationTypeVersion="2.0.0" ...>
+            </pre>
+        </li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 2: Package and Publish New Version</h5>
+    <ul>
+        <li>Package the application (like before).</li>
+        <li>Publish it using Visual Studio or CLI.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 3: Configure Upgrade Settings</h5>
+    <p>Key options during upgrade:</p>
+    <ul>
+        <li><b>Upgrade Mode:</b> Rolling / Monitored / Unmonitored Manual.</li>
+        <li><b>Health Policies:</b> How strict the cluster should be about health during upgrade.</li>
+        <li><b>Failure Action:</b> Rollback automatically or pause on error?</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 4: Monitor the Upgrade</h5>
+    <ul>
+        <li>Use Service Fabric Explorer to watch upgrade domains progress.</li>
+        <li>Rollback happens if health criteria fail (automatic safety!).</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚀 Types of Upgrade Modes</h4>
+
+    <h5 class="text-info mt-3">1. Monitored Upgrade (Recommended)</h5>
+    <ul>
+        <li>Cluster monitors health after each upgrade step.</li>
+        <li>Automatic rollback if problems detected.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">2. Unmonitored Manual Upgrade</h5>
+    <ul>
+        <li>Admin manually advances upgrade even if issues occur.</li>
+        <li>Riskier — only for special scenarios.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">3. Unmonitored Auto Upgrade</h5>
+    <ul>
+        <li>Service Fabric upgrades without any health monitoring.</li>
+        <li>Fast but dangerous in production!</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🛡️ Setting Health Policies for Upgrades</h4>
+
+    <p>Example policy setup:</p>
+    <pre class="bg-light p-3">
+<HealthPolicy>
+    <MaxPercentUnhealthyApplications>10</MaxPercentUnhealthyApplications>
+    <MaxPercentUnhealthyNodes>10</MaxPercentUnhealthyNodes>
+</HealthPolicy>
+    </pre>
+
+    <p>
+        This means — if more than 10% of nodes or applications go unhealthy,
+        the upgrade will pause or rollback automatically.
+    </p>
+
+    <h4 class="text-success mt-4">💡 Did You Know?</h4>
+    <div class="alert alert-info">
+        Service Fabric upgrades only a few nodes at a time using Upgrade Domains to ensure minimal impact!
+    </div>
+
+    <h4 class="text-success mt-4">⚡ Common Upgrade Mistakes and Solutions</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> Upgrade gets stuck.<br>
+            <b>Solution:</b> Check service health — fix the unhealthy services manually and retry.
+        </li>
+        <li>
+            <b>Problem:</b> Rollback triggered even when minor issues.<br>
+            <b>Solution:</b> Relax the Health Policy slightly (but carefully).
+        </li>
+        <li>
+            <b>Problem:</b> Manual version mismatch.<br>
+            <b>Solution:</b> Always update both ApplicationManifest and ServiceManifest versions properly.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚨 Best Practices for Application Upgrades</h4>
+    <ul>
+        <li>Prefer Monitored Upgrades in production always.</li>
+        <li>Test upgrades fully in lower environments first (Dev → QA → Prod).</li>
+        <li>Use Application Parameters to dynamically change configuration without rebuilding apps.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>What are the three upgrade modes?</li>
+        <li>What happens during a monitored upgrade if health is bad?</li>
+        <li>Why is using Upgrade Domains important?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("ManagingNodeHealth", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Managing Node and Application Health</a>
+        <a href="@Url.Action("ScalingCluster", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Scaling the Cluster ➡️</a>
+    </div>
+</div>

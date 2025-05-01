@@ -1,0 +1,145 @@
+﻿@{
+    ViewData["Title"] = "Creating Cluster on Azure Portal";
+    ViewData["ActiveMenu"] = "AzureServiceFabric";
+    ViewData["ActivePage"] = "CreateAzureCluster";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Creating a Service Fabric Cluster on Azure Portal</h2>
+
+    <p class="text-muted">
+        After working locally, it’s time to create a real <b>Azure Service Fabric Cluster</b>.
+        A cluster on Azure allows you to deploy your applications globally, at scale, with built-in security, load balancing, and high availability.
+    </p>
+
+    <h4 class="text-success mt-4">🌐 What is an Azure Service Fabric Cluster?</h4>
+    <p>
+        A <b>Service Fabric Cluster</b> in Azure is a group of virtual machines (VMs) that run your microservices securely and reliably.
+        It acts as the backbone for hosting services like:
+    </p>
+    <ul>
+        <li>Web APIs</li>
+        <li>Background services</li>
+        <li>Containers (e.g., Docker apps)</li>
+        <li>Actor-based systems</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Real-World Analogy:</h5>
+    <p>
+        Imagine setting up a "City" (Cluster) where different "Buildings" (Nodes) host different types of "Businesses" (Services).
+        Azure ensures the "City" has power, security, and maintenance — you only focus on running your "Business".
+    </p>
+
+    <h4 class="text-success mt-4">🛠️ Prerequisites</h4>
+    <ul>
+        <li>Active Azure Subscription (Free Trial or Paid).</li>
+        <li>Resource Group already created (optional but recommended).</li>
+        <li>Basic familiarity with Azure Portal UI.</li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚀 Step-by-Step: Creating a Cluster</h4>
+
+    <h5 class="text-info mt-3">Step 1: Log into Azure Portal</h5>
+    <p>
+        Go to <a href="https://portal.azure.com" target="_blank">portal.azure.com</a> and sign in with your Azure account.
+    </p>
+
+    <h5 class="text-info mt-3">Step 2: Search for "Service Fabric Clusters"</h5>
+    <p>
+        In the Azure search bar, type "<b>Service Fabric Clusters</b>" and select the result.
+    </p>
+
+    <h5 class="text-info mt-3">Step 3: Click "+ Create" to Start New Cluster Wizard</h5>
+    <p>
+        You'll be taken to a guided setup wizard with multiple tabs.
+    </p>
+
+    <h5 class="text-info mt-3">Step 4: Basics Tab - Fill Cluster Information</h5>
+    <ul>
+        <li><b>Subscription:</b> Select your Azure subscription.</li>
+        <li><b>Resource Group:</b> Create a new group (e.g., <code>sf-cluster-rg</code>) or use an existing one.</li>
+        <li><b>Cluster Name:</b> (e.g., <code>myservicefabriccluster</code>)</li>
+        <li><b>Region:</b> Choose a region close to you (e.g., East US, West Europe).</li>
+        <li><b>Orchestration Type:</b> Service Fabric Cluster</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 5: Cluster Configuration Tab</h5>
+    <ul>
+        <li><b>Cluster Size:</b> Choose the number of nodes (recommend starting with 5 for production, but 3 for testing).</li>
+        <li><b>VM Size:</b> Choose small VMs like Standard D2s v3 for testing.</li>
+        <li><b>Durability Tier:</b> Bronze (for development) / Silver/Gold (for production).</li>
+        <li><b>Reliability Tier:</b> Silver (minimum recommended).</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 6: Node Type Details</h5>
+    <ul>
+        <li><b>Primary Node Type:</b> Define the number of VMs and storage type (SSD preferred).</li>
+        <li><b>VM Username/Password:</b> Set admin credentials to access the machines later.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 7: Security Settings</h5>
+    <ul>
+        <li><b>Certificate:</b> For development, you can skip strict security (unsecure cluster for testing only).</li>
+        <li><b>Production:</b> Always use SSL certificates to encrypt node communication.</li>
+    </ul>
+
+    <h5 class="text-info mt-3">Step 8: Review and Create</h5>
+    <ul>
+        <li>Click "Review + Create".</li>
+        <li>Wait for validation to pass.</li>
+        <li>Click "Create" to deploy the cluster!</li>
+    </ul>
+
+    <h4 class="text-success mt-4">📈 Visual Flow of Cluster Creation</h4>
+    <pre class="bg-light p-3">
+Azure Portal → Service Fabric Clusters → Create New → Fill Basics → Configure Cluster → Define Nodes → Security Settings → Review → Create
+    </pre>
+
+    <h4 class="text-success mt-4">💡 Did You Know?</h4>
+    <div class="alert alert-info">
+        Once deployed, your Azure Service Fabric Cluster is visible under "Service Fabric Explorer" URL like:<br />
+        <code>https://<i>your-cluster-name</i>.southcentralus.cloudapp.azure.com:19080/Explorer</code>
+    </div>
+
+    <h4 class="text-success mt-4">⚡ Common Beginner Mistakes and Solutions</h4>
+    <ul>
+        <li>
+            <b>Problem:</b> Cluster stuck in "Deploying".<br>
+            <b>Solution:</b> VM SKU quotas might be exceeded — check your subscription quotas.
+        </li>
+        <li>
+            <b>Problem:</b> Forgot to save admin password.<br>
+            <b>Solution:</b> You must redeploy — passwords cannot be recovered.
+        </li>
+        <li>
+            <b>Problem:</b> Certificate error while deploying.<br>
+            <b>Solution:</b> Choose "Unsecure Cluster" only for development. For production, create and upload valid certificates.
+        </li>
+    </ul>
+
+    <h4 class="text-success mt-4">🚨 Important Tips</h4>
+    <ul>
+        <li><b>Cost:</b> Azure clusters can incur real cost even if idle! Shut down when not in use for development clusters.</li>
+        <li><b>Regions:</b> Choose region close to your users for best latency.</li>
+        <li><b>Security:</b> Never use Unsecure Clusters in production environments!</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Final Cluster Creation Checklist</h4>
+    <ul>
+        <li>Cluster visible under Azure Resource Groups ✔️</li>
+        <li>Cluster endpoint URL accessible ✔️</li>
+        <li>Service Fabric Explorer loads without error ✔️</li>
+    </ul>
+
+    <h4 class="text-success mt-4">✅ Self-Check Quiz</h4>
+    <ul>
+        <li>What is the minimum recommended cluster size for production?</li>
+        <li>Why should you use SSL certificates in a production cluster?</li>
+        <li>What is the purpose of Service Fabric Explorer?</li>
+    </ul>
+
+    <div class="d-flex justify-content-between mt-5">
+        <a href="@Url.Action("SetupLocalCluster", "AzureServiceFabric")" class="btn btn-outline-primary">⬅️ Previous: Setting Up Local Development Cluster</a>
+        <a href="@Url.Action("UseServiceFabricExplorer", "AzureServiceFabric")" class="btn btn-outline-primary">Next: Using Service Fabric Explorer ➡️</a>
+    </div>
+</div>
