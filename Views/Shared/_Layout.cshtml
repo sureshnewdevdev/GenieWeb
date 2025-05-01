@@ -93,7 +93,53 @@
     @*         </div> *@
     @*     </div> *@
     @* </header> *@
-    <header class="navbar navbar-expand-lg navbar-dark bg-dark shadow fixed-top" style="z-index: 1500;">
+    <!-- MOBILE + MEDIUM VIEW (Below lg) -->
+    <header class="d-lg-none navbar navbar-expand-lg navbar-dark bg-dark shadow fixed-top" style="z-index: 1500;">
+        <div class="container-fluid">
+            <!-- Logo and Brand -->
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="~/css/Images/Vinayaga.jpg" alt="Logo" width="40" height="40" class="me-2 rounded-circle" />
+                <span class="fw-bold fs-5">ItTechGenie</span>
+            </a>
+
+            @if (string.IsNullOrEmpty(ViewData["ActiveMenu"] as string))
+            {
+                ViewData["ActiveMenu"] = "Home";
+                ViewData["ActivePage"] = "Home";
+            }
+
+            <!-- Toggle Button -->
+            <!-- Mobile Toggle Button -->
+            <button id="coursedropdownbtn" class="navbar-toggler custom-toggle-btn" type="button" onclick="toggleNavbar()"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                @(string.IsNullOrEmpty(ViewData["ActiveMenu"] as string) ? "Home " : ViewData["ActiveMenu"] + " ")
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Collapsible Navbar -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-3">
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Home" ? "active" : "")" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "CSharp" ? "active" : "")" href="@Url.Action("IntroductionToCSharp", "CSharp")">C#</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Azure" ? "active" : "")" href="@Url.Action("Azure", "Home")">Azure</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "DotNetCore" ? "active" : "")" href="@Url.Action("WhatIsDotNet", "DotNet")">.NET Core</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "React" ? "active" : "")" href="@Url.Action("IntroductionToReact", "React")">React</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "AzureDevOps" ? "active" : "")" href="@Url.Action("WhatIsDevOps", "AzureDevOps")">Azure DevOps</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Docker" ? "active" : "")" href="@Url.Action("DockerInstallation", "Docker")">Docker</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Terraform" ? "active" : "")" href="@Url.Action("IntroductionToTerraform", "Terraform")">Terraform</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "DataStorage" ? "active" : "")" href="@Url.Action("AzureBlobStorage", "DataStorage")">DataStorage</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "DataBricks" ? "active" : "")" href="@Url.Action("IntroductionToDataBricks", "DataBricks")">DataBricks</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "AzureServiceFabric" ? "active" : "")" href="@Url.Action("WhatIsServiceFabric", "AzureServiceFabric")">AzureServiceFabrics</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "PracticeQuestions" ? "active" : "")" href="@Url.Action("CSharpBasics", "PracticeQuestions")">Practice Questions</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "ChoiceQuestions" ? "active" : "")" href="@Url.Action("Index", "TopicSelection")">MCQ'S</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Privacy" ? "active" : "")" href="@Url.Action("Privacy", "Home")">Privacy</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- LARGE VIEW ONLY (≥ lg) -->
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark shadow fixed-top d-none d-lg-flex" style="z-index: 1500;">
         <div class="container-fluid">
             <!-- Brand -->
             <a class="navbar-brand d-flex align-items-center me-3" href="/">
@@ -110,46 +156,41 @@
                 }
             }
 
-            <!-- Toggle for mobile -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <!-- Collapsible Nav Content -->
+            <!-- Nav content -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav flex-row align-items-center w-100" style="white-space: nowrap; scroll-behavior: smooth;">
+                <ul class="navbar-nav flex-row flex-wrap w-100 align-items-center" style="white-space: nowrap; scroll-behavior: smooth;">
 
-                    <!-- Home -->
+                    <!-- Home (Always visible) -->
                     <li class="nav-item">
-                        <a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "Home" ? "active" : "")" href="/">Home</a>
+                        <a class="nav-link @(ViewData["ActiveMenu"] == "Home" ? "active" : "")" href="/">Home</a>
                     </li>
 
-                    <!-- Scrollable Middle (Visible on lg and above) -->
-                    <div class="d-none d-lg-block scrollable-navbar" style="width: 50vw; overflow-x: auto; white-space: nowrap;">
+                    <!-- Scrollable Middle -->
+                    <div class="scrollable-navbar" style="overflow-x: auto; white-space: nowrap; width: 50vw;">
                         <ul class="navbar-nav flex-row">
-                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "Azure" ? "active" : "")" href="@Url.Action("Azure", "Home")">Azure</a></li>
-                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "AzureDevOps" ? "active" : "")" href="@Url.Action("WhatIsDevOps", "AzureDevOps")">Azure DevOps</a></li>
-                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "AzureServiceFabric" ? "active" : "")" href="@Url.Action("WhatIsServiceFabric", "AzureServiceFabric")">AzureServiceFabrics</a></li>
-                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "CSharp" ? "active" : "")" href="@Url.Action("IntroductionToCSharp", "CSharp")">C#</a></li>
-                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "DataBricks" ? "active" : "")" href="@Url.Action("IntroductionToDataBricks", "DataBricks")">DataBricks</a></li>
-                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "DataStorage" ? "active" : "")" href="@Url.Action("AzureBlobStorage", "DataStorage")">DataStorage</a></li>
-                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "Docker" ? "active" : "")" href="@Url.Action("DockerInstallation", "Docker")">Docker</a></li>
-                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "DotNetCore" ? "active" : "")" href="@Url.Action("WhatIsDotNet", "DotNet")">.NET Core</a></li>
-                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "React" ? "active" : "")" href="@Url.Action("IntroductionToReact", "React")">React</a></li>
-                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "Terraform" ? "active" : "")" href="@Url.Action("IntroductionToTerraform", "Terraform")">Terraform</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Azure" ? "active" : "")" href="@Url.Action("Azure", "Home")">Azure</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "AzureDevOps" ? "active" : "")" href="@Url.Action("WhatIsDevOps", "AzureDevOps")">Azure DevOps</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "AzureServiceFabric" ? "active" : "")" href="@Url.Action("WhatIsServiceFabric", "AzureServiceFabric")">AzureServiceFabrics</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "CSharp" ? "active" : "")" href="@Url.Action("IntroductionToCSharp", "CSharp")">C#</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "DataBricks" ? "active" : "")" href="@Url.Action("IntroductionToDataBricks", "DataBricks")">DataBricks</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "DataStorage" ? "active" : "")" href="@Url.Action("AzureBlobStorage", "DataStorage")">DataStorage</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Docker" ? "active" : "")" href="@Url.Action("DockerInstallation", "Docker")">Docker</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "DotNetCore" ? "active" : "")" href="@Url.Action("WhatIsDotNet", "DotNet")">.NET Core</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "React" ? "active" : "")" href="@Url.Action("IntroductionToReact", "React")">React</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Terraform" ? "active" : "")" href="@Url.Action("IntroductionToTerraform", "Terraform")">Terraform</a></li>
                         </ul>
                     </div>
 
                     <!-- Right-Fixed Items -->
-                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "PracticeQuestions" ? "active" : "")" href="@Url.Action("CSharpBasics", "PracticeQuestions")">Practice Questions</a></li>
-                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "ChoiceQuestions" ? "active" : "")" href="@Url.Action("Index", "TopicSelection")">MCQ'S</a></li>
-                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"]?.ToString() == "Privacy" ? "active" : "")" href="@Url.Action("Privacy", "Home")">Privacy</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "PracticeQuestions" ? "active" : "")" href="@Url.Action("CSharpBasics", "PracticeQuestions")">Practice Questions</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "ChoiceQuestions" ? "active" : "")" href="@Url.Action("Index", "TopicSelection")">MCQ'S</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Privacy" ? "active" : "")" href="@Url.Action("Privacy", "Home")">Privacy</a></li>
 
                 </ul>
             </div>
         </div>
     </header>
+
 
     <div class="container-fluid">
         <div class="row">
