@@ -13,6 +13,12 @@ public class HomeController : Controller
         return View("Index");
     }
 
+    public IActionResult SeleniumTesting()
+    {
+        ViewData["ActivePage"] = "SeleniumTesting";
+        ViewData["ActiveMenu"] = "SeleniumTesting";
+        return View("SeleniumTesting");
+    }
      public IActionResult DotNetCore()
     {
         ViewData["ActivePage"] = "DotNetCore";

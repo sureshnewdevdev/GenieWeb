@@ -1,0 +1,163 @@
+﻿@{
+    ViewData["Title"] = "Selenium C# Automation with ChromeDriver";
+    ViewData["ActivePage"] = "SeleniumChrome";
+    ViewData["ActiveMenu"] = "AutomationTesting";
+}
+
+<div class="container mt-4">
+    <h2 class="text-primary">Module: Complete Selenium Automation using ChromeDriver in C#</h2>
+
+    <p class="lead">
+        This guide takes you step-by-step through downloading ChromeDriver, setting up a Selenium project in Visual Studio using NUnit, automating actions on the OrangeHRMS demo site, and generating test reports. No prior coding or test automation experience required.
+    </p>
+
+    <hr />
+
+    <h3 class="text-secondary">1. Download ChromeDriver</h3>
+    <ul>
+        <li>Open <a href="https://chromedriver.chromium.org/downloads" target="_blank">https://chromedriver.chromium.org/downloads</a></li>
+        <li>Find your current Chrome version: Open Chrome → 3-dot menu → Help → About Google Chrome</li>
+        <li>Download the matching version of ChromeDriver ZIP file</li>
+        <li>Extract and place the <code>chromedriver.exe</code> file into a known location (e.g., <code>C:\WebDrivers</code>)</li>
+    </ul>
+
+    <hr />
+
+    <h3 class="text-secondary">2. Install Visual Studio and Create Project</h3>
+    <h5>Step-by-Step:</h5>
+    <ul>
+        <li>Install <a href="https://visualstudio.microsoft.com/" target="_blank">Visual Studio 2022</a></li>
+        <li>Choose <strong>.NET desktop development</strong> during installation</li>
+        <li>After opening Visual Studio → Create New Project → Choose <strong>NUnit Test Project (.NET Core)</strong></li>
+        <li>Project Name: <code>OrangeHRMSAutomation</code></li>
+    </ul>
+
+    <hr />
+
+    <h3 class="text-secondary">3. Add Selenium and Reporting Packages</h3>
+    <h5>Right-click the project → Manage NuGet Packages → Install:</h5>
+    <ul>
+        <li><code>Selenium.WebDriver</code></li>
+        <li><code>Selenium.WebDriver.ChromeDriver</code></li>
+        <li><code>NUnit</code> (if not already added)</li>
+        <li><code>ExtentReports</code> for HTML reporting: <code>ExtentReports.Core</code></li>
+    </ul>
+
+    <hr />
+
+    <h3 class="text-secondary">4. Set Up Basic Selenium Test</h3>
+    <h5>Create a test class <code>LoginTest.cs</code>:</h5>
+    <pre><code class="language-csharp">
+using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using AventStack.ExtentReports;
+using AventStack.ExtentReports.Reporter;
+
+namespace OrangeHRMSAutomation
+{
+    public class LoginTest
+    {
+        IWebDriver driver;
+        ExtentReports extent;
+        ExtentTest test;
+
+        [OneTimeSetUp]
+        public void SetupReporting()
+        {
+            var htmlReporter = new ExtentHtmlReporter("TestReport.html");
+            extent = new ExtentReports();
+            extent.AttachReporter(htmlReporter);
+        }
+
+        [SetUp]
+        public void StartBrowser()
+        {
+            driver = new ChromeDriver(@@"C:\WebDrivers"); // Update path
+            driver.Manage().Window.Maximize();
+            driver.Navigate().GoToUrl("https://opensource-demo.orangehrmlive.com/");
+        }
+
+        [Test]
+        public void LoginToOrangeHRMS()
+        {
+            test = extent.CreateTest("Login Test").Info("Test Started");
+
+            try
+            {
+                driver.FindElement(By.Name("username")).SendKeys("Admin");
+                driver.FindElement(By.Name("password")).SendKeys("admin123");
+                driver.FindElement(By.CssSelector("button[type='submit']")).Click();
+
+                Assert.IsTrue(driver.Url.Contains("dashboard"));
+                test.Pass("Login successful");
+            }
+            catch (Exception ex)
+            {
+                test.Fail("Test failed: " + ex.Message);
+                throw;
+            }
+        }
+
+        [TearDown]
+        public void EndTest()
+        {
+            driver.Quit();
+        }
+
+        [OneTimeTearDown]
+        public void GenerateReport()
+        {
+            extent.Flush();
+        }
+    }
+}
+    </code></pre>
+
+    <hr />
+
+    <h3 class="text-secondary">5. Run Your Test</h3>
+    <h5>From Visual Studio:</h5>
+    <ul>
+        <li>Open <strong>Test Explorer</strong> (View → Test Explorer)</li>
+        <li>Build your solution</li>
+        <li>Click <strong>Run All</strong></li>
+    </ul>
+
+    <div class="alert alert-info">
+        💡 After the test runs, check your project folder for <strong>TestReport.html</strong>. Open it in a browser to view a detailed report.
+    </div>
+
+    <hr />
+
+    <h3 class="text-secondary">6. Add More Tests: Add New Employee (Example)</h3>
+    <h5>Continue recording actions using Chrome → Inspect → Copy Locators</h5>
+    <ul>
+        <li>Click Admin → Users → Add</li>
+        <li>Fill user details</li>
+        <li>Click Save</li>
+    </ul>
+    <p>Use the same approach in a new test method.</p>
+
+    <hr />
+
+    <h3 class="text-secondary">7. Page Object Model (Bonus)</h3>
+    <ul>
+        <li>Create a separate class for each page (e.g., LoginPage.cs)</li>
+        <li>Define methods like <code>Login()</code> and reuse them across test classes</li>
+        <li>Makes your tests modular, reusable, and maintainable</li>
+    </ul>
+
+    <hr />
+
+    <h3 class="text-secondary">8. Summary</h3>
+    <ul>
+        <li>✅ Downloaded ChromeDriver and configured it</li>
+        <li>✅ Set up Selenium in Visual Studio using NUnit</li>
+        <li>✅ Automated login to OrangeHRMS</li>
+        <li>✅ Generated professional HTML test reports</li>
+        <li>✅ Learned how to expand and modularize test cases</li>
+    </ul>
+
+
+</div>
