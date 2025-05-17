@@ -1,0 +1,279 @@
+﻿@{
+    ViewData["Title"] = "React + ASP.NET Core CRUD Tutorial";
+}
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <p class="lead">
+        This tutorial guides you through creating a full-stack application using <strong>React.js</strong> (frontend) and <strong>ASP.NET Core WebAPI</strong> (backend). React handles the UI and sends HTTP requests to the WebAPI for data manipulation.
+    </p>
+</section>
+
+<!-- Section: Backend Setup -->
+<section class="mb-5">
+    <h2 class="text-secondary">Backend: ASP.NET Core Web API</h2>
+
+    <h3 class="text-info">Step 1: Create the WebAPI Project</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>dotnet new webapi -n ProductApi
+cd ProductApi</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">Step 2: Add Database Configuration</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>"ConnectionStrings": {
+  "DefaultConnection": "Server=YOUR_SERVER;Database=ProductDb;Trusted_Connection=True;"
+}</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">Step 3: Install EF Core Packages</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>dotnet add package Microsoft.EntityFrameworkCore
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add package Microsoft.EntityFrameworkCore.Tools</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">Step 4: Create the Product Model</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>public class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+}</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">Step 5: Create DbContext</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>public class AppDbContext : DbContext
+{
+    public AppDbContext(DbContextOptions&lt;AppDbContext&gt; options) : base(options) { }
+    public DbSet&lt;Product&gt; Products { get; set; }
+}</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">Step 6: Register DbContext in Program.cs</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>builder.Services.AddDbContext&lt;AppDbContext&gt;(
+    options =&gt; options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddCors(options =&gt;
+{
+    options.AddPolicy("AllowAll",
+        builder =&gt; builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
+app.UseCors("AllowAll");</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">Step 7: Create ProductsController</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>[ApiController]
+[Route("api/[controller]")]
+public class ProductsController : ControllerBase
+{
+    private readonly AppDbContext _context;
+    public ProductsController(AppDbContext context) =&gt; _context = context;
+
+    [HttpGet]
+    public async Task&lt;IEnumerable&lt;Product&gt;&gt; Get() =&gt; await _context.Products.ToListAsync();
+
+    [HttpPost]
+    public async Task&lt;ActionResult&lt;Product&gt;&gt; Post(Product product)
+    {
+        _context.Products.Add(product);
+        await _context.SaveChangesAsync();
+        return CreatedAtAction(nameof(Get), new { id = product.Id }, product);
+    }
+
+    [HttpPut("{id}")]
+    public async Task&lt;IActionResult&gt; Put(int id, Product product)
+    {
+        if (id != product.Id) return BadRequest();
+        _context.Entry(product).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task&lt;IActionResult&gt; Delete(int id)
+    {
+        var product = await _context.Products.FindAsync(id);
+        if (product is null) return NotFound();
+        _context.Products.Remove(product);
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+}</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">Step 8: Apply Migrations</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>dotnet ef migrations add InitialCreate
+dotnet ef database update</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: React Frontend -->
+<section class="mb-5">
+    <h2 class="text-secondary">Frontend: React App (Created with CRA)</h2>
+
+    <h3 class="text-info">Step 1: Create React App</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>npx create-react-app product-client
+cd product-client</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">Step 2: Install Axios</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>npm install axios</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">Step 3: Create ProductComponent.js</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>
+            import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+const API_URL = "https://localhost:5001/api/products";
+
+function ProductComponent() {
+  const [products, setProducts] = useState([]);
+  const [form, setForm] = useState({ id: 0, name: "", price: "" });
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = () => {
+    axios.get(API_URL)
+      .then(res => setProducts(res.data))
+      .catch(err => console.error("Error fetching products:", err));
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (isEditing) {
+      // Update product
+      axios.put(`${API_URL}/${form.id}`, form)
+        .then(() => {
+          setForm({ id: 0, name: "", price: "" });
+          setIsEditing(false);
+          fetchProducts();
+        });
+    } else {
+      // Create new product
+      axios.post(API_URL, form)
+        .then(() => {
+          setForm({ id: 0, name: "", price: "" });
+          fetchProducts();
+        });
+    }
+  };
+
+  const handleEdit = (product) => {
+    setForm(product);
+    setIsEditing(true);
+  };
+
+  const handleDelete = (id) => {
+    axios.delete(`${API_URL}/${id}`)
+      .then(fetchProducts)
+      .catch(err => console.error("Error deleting product:", err));
+  };
+
+  const cancelEdit = () => {
+    setForm({ id: 0, name: "", price: "" });
+    setIsEditing(false);
+  };
+
+  return (
+        <div>
+        <h2>{isEditing ? "Edit Product" : "Add Product"}</h2>
+        <form onSubmit={handleSubmit}>
+        <input name="name"
+               value={form.name}
+               onChange={handleChange}
+               placeholder="Product Name"
+               required />
+        <input name="price"
+               value={form.price}
+               onChange={handleChange}
+               placeholder="Price"
+               type="number"
+               required />
+        <button type="submit">{isEditing ? "Update" : "Add"}</button>
+        {isEditing && <button type="button" onClick={cancelEdit}>Cancel</button>}
+      </form>
+
+        <h3>Product List</h3>
+        <ul>
+        {products.map(p => (
+        <li key={p.id}>
+            {p.name} - ${p.price}
+        <button onClick={() => handleEdit(p)}>Edit</button>
+        <button onClick={() => handleDelete(p.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default ProductComponent;
+
+        </code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">Step 4: Use Component in App.js</h3>
+    <div class="code-snippet position-relative bg-light p-3 rounded border">
+        <pre class="mb-0"><code>import React from 'react';
+import ProductComponent from './ProductComponent';
+
+function App() {
+  return (
+    &lt;div&gt;
+      &lt;ProductComponent /&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default App;</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: Summary -->
+<section class="mb-5">
+    <h2 class="text-secondary">Summary</h2>
+    <p class="lead">
+        You now have a React frontend and an ASP.NET Core backend working independently. React handles UI rendering and sends CRUD requests to the WebAPI. The API processes requests and responds with JSON data, which React displays dynamically.
+    </p>
+</section>
+
+<!-- JavaScript for Copy Buttons -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

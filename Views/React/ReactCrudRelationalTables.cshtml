@@ -1,0 +1,247 @@
+﻿@{
+    ViewData["Title"] = "React + ASP.NET Core - Related Tables CRUD";
+}
+
+<!-- Section: Introduction -->
+<section class="mb-5">
+    <p class="lead">
+        This guide demonstrates how to perform CRUD operations in a full-stack app with <strong>React</strong> and <strong>ASP.NET Core Web API</strong> using <strong>two related tables</strong>: <code>Category</code> and <code>Product</code>. Each product belongs to one category.
+    </p>
+</section>
+
+<!-- Section: Backend Setup -->
+<section class="mb-5">
+    <h2 class="text-secondary">Backend: ASP.NET Core Web API</h2>
+
+    <h3 class="text-info">Model: Category.cs</h3>
+    <div class="code-snippet bg-light p-3 rounded border position-relative">
+<pre class="mb-0"><code>public class Category
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public ICollection&lt;Product&gt; Products { get; set; }
+}</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">Model: Product.cs</h3>
+    <div class="code-snippet bg-light p-3 rounded border position-relative">
+<pre class="mb-0"><code>public class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+    public int CategoryId { get; set; }
+    public Category Category { get; set; }
+}</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">DbContext Configuration</h3>
+    <div class="code-snippet bg-light p-3 rounded border position-relative">
+<pre class="mb-0"><code>using Microsoft.EntityFrameworkCore;
+using YourNamespace.Models; // Replace with actual namespace
+
+namespace YourNamespace.Data
+{
+    public class AppDbContext : DbContext
+    {
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options) { }
+
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Product> Products { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Category has many Products
+            modelBuilder.Entity<Category>()
+                .HasMany(c => c.Products)
+                .WithOne(p => p.Category)
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict); // or .Cascade
+
+            // Optional: Configure field properties
+            modelBuilder.Entity<Category>()
+                .Property(c => c.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            modelBuilder.Entity<Product>()
+                .Property(p => p.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            modelBuilder.Entity<Product>()
+                .Property(p => p.Price)
+                .HasColumnType("decimal(18,2)");
+        }
+    }
+}
+</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">ProductsController.cs</h3>
+    <div class="code-snippet bg-light p-3 rounded border position-relative">
+<pre class="mb-0"><code>[HttpGet]
+public async Task&lt;ActionResult&lt;IEnumerable&lt;Product&gt;&gt;&gt; Get() =>
+    await _context.Products.Include(p =&gt; p.Category).ToListAsync();
+
+[HttpPost]
+public async Task&lt;ActionResult&lt;Product&gt;&gt; Post(Product product)
+{
+    _context.Products.Add(product);
+    await _context.SaveChangesAsync();
+    return CreatedAtAction(nameof(Get), new { id = product.Id }, product);
+}
+
+[HttpPut("{id}")]
+public async Task&lt;IActionResult&gt; Put(int id, Product product)
+{
+    if (id != product.Id) return BadRequest();
+    _context.Entry(product).State = EntityState.Modified;
+    await _context.SaveChangesAsync();
+    return NoContent();
+}
+
+[HttpDelete("{id}")]
+public async Task&lt;IActionResult&gt; Delete(int id)
+{
+    var product = await _context.Products.FindAsync(id);
+    if (product == null) return NotFound();
+    _context.Products.Remove(product);
+    await _context.SaveChangesAsync();
+    return NoContent();
+}</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+
+    <h3 class="text-info">CategoriesController.cs</h3>
+    <div class="code-snippet bg-light p-3 rounded border position-relative">
+<pre class="mb-0"><code>[HttpGet]
+public async Task&lt;ActionResult&lt;IEnumerable&lt;Category&gt;&gt;&gt; Get() =>
+    await _context.Categories.ToListAsync();
+
+[HttpPost]
+public async Task&lt;ActionResult&lt;Category&gt;&gt; Post(Category category)
+{
+    _context.Categories.Add(category);
+    await _context.SaveChangesAsync();
+    return CreatedAtAction(nameof(Get), new { id = category.Id }, category);
+}</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: React Frontend -->
+<section class="mb-5">
+    <h2 class="text-secondary">Frontend: React Application</h2>
+
+    <h3 class="text-info">ProductComponent.js with Category Link</h3>
+    <div class="code-snippet bg-light p-3 rounded border position-relative">
+<pre class="mb-0"><code>import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+const API = "https://localhost:5001/api";
+
+function ProductComponent() {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [form, setForm] = useState({ id: 0, name: "", price: "", categoryId: "" });
+  const [editing, setEditing] = useState(false);
+
+  useEffect(() => {
+    axios.get(`${API}/categories`).then(res => setCategories(res.data));
+    axios.get(`${API}/products`).then(res => setProducts(res.data));
+  }, []);
+
+  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    const method = editing ? "put" : "post";
+    const url = `${API}/products${editing ? `/${form.id}` : ""}`;
+    axios[method](url, form).then(() => {
+      resetForm();
+      axios.get(`${API}/products`).then(res => setProducts(res.data));
+    });
+  };
+
+  const handleEdit = p => {
+    setForm(p);
+    setEditing(true);
+  };
+
+  const handleDelete = id => {
+    axios.delete(`${API}/products/${id}`).then(() =>
+      setProducts(prev => prev.filter(p => p.id !== id))
+    );
+  };
+
+  const resetForm = () => {
+    setForm({ id: 0, name: "", price: "", categoryId: "" });
+    setEditing(false);
+  };
+
+  return (
+    &lt;div&gt;
+      &lt;h3&gt;{editing ? "Edit Product" : "Add Product"}&lt;/h3&gt;
+      &lt;form onSubmit={handleSubmit}&gt;
+        &lt;input name="name" value={form.name} onChange={handleChange} placeholder="Name" required /&gt;
+        &lt;input name="price" value={form.price} onChange={handleChange} placeholder="Price" type="number" required /&gt;
+        &lt;select name="categoryId" value={form.categoryId} onChange={handleChange} required&gt;
+          &lt;option value=""&gt;-- Select Category --&lt;/option&gt;
+          {categories.map(c =&gt; (
+            &lt;option key={c.id} value={c.id}&gt;{c.name}&lt;/option&gt;
+          ))}
+        &lt;/select&gt;
+        &lt;button type="submit"&gt;{editing ? "Update" : "Add"}&lt;/button&gt;
+        {editing && &lt;button type="button" onClick={resetForm}&gt;Cancel&lt;/button&gt;}
+      &lt;/form&gt;
+
+      &lt;h4&gt;Product List&lt;/h4&gt;
+      &lt;ul&gt;
+        {products.map(p =&gt; (
+          &lt;li key={p.id}&gt;
+            {p.name} (${p.price}) - Category: {p.category?.name}
+            &lt;button onClick={() =&gt; handleEdit(p)}&gt;Edit&lt;/button&gt;
+            &lt;button onClick={() =&gt; handleDelete(p.id)}&gt;Delete&lt;/button&gt;
+          &lt;/li&gt;
+        ))}
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default ProductComponent;</code></pre>
+        <button class="btn btn-outline-secondary copy-btn position-absolute top-0 end-0 m-2">Copy</button>
+    </div>
+</section>
+
+<!-- Section: Summary -->
+<section class="mb-5">
+    <h2 class="text-secondary">Summary</h2>
+    <p class="lead">
+        This setup demonstrates how to build and link related entities in a full-stack app:
+    </p>
+    <ul class="list-group">
+        <li class="list-group-item"><b>Products have a foreign key</b> linking them to Categories</li>
+        <li class="list-group-item"><b>Categories can exist independently</b>, and products are created under them</li>
+        <li class="list-group-item"><b>Product list includes category name</b> using Entity Framework's <code>Include</code></li>
+        <li class="list-group-item">React form uses <code>&lt;select&gt;</code> for category assignment</li>
+        <li class="list-group-item"><b>Full CRUD</b> supported for both tables, including Edit and Delete</li>
+    </ul>
+</section>
+
+<!-- Copy-to-Clipboard Script -->
+<script>
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const code = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        });
+    });
+</script>

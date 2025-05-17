@@ -10,6 +10,20 @@ namespace GenieWeb.Controllers
             ViewData["ActivePage"] = "IntroductionToReact";
             return View("IntroductionToReact");
         }
+
+        public IActionResult ReactCrud()
+        {
+            ViewData["ActiveMenu"] = "React";
+            ViewData["ActivePage"] = "ReactCrud";
+            return View("ReactCrud");
+        }
+
+        public IActionResult ReactCrudRelationalTables()
+        {
+            ViewData["ActiveMenu"] = "React";
+            ViewData["ActivePage"] = "ReactCrudRelationalTables";
+            return View("ReactCrudRelationalTables");
+        }
     }
     
 }
