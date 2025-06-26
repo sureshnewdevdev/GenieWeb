@@ -1,0 +1,96 @@
+﻿@{
+    ViewData["ActivePage"] = "Register";
+}
+
+<div class="container py-5">
+    <div class="form-section mx-auto">
+        <h3 class="text-center mb-4">Register</h3>
+
+        <div class="alert alert-success d-none" id="registerSuccess"></div>
+        <div class="alert alert-danger d-none" id="registerError"></div>
+
+        <form id="registerForm">
+            <div class="mb-3">
+                <label for="fullName" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="fullName" required />
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="email" required />
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" required />
+            </div>
+            <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" id="confirmPassword" required />
+            </div>
+            <button type="submit" class="btn btn-success w-100">Register</button>
+        </form>
+
+        <p class="text-center mt-3">
+            Already have an account? <a href="@Url.Action("Login", "Auth")">Login here</a>
+        </p>
+    </div>
+</div>
+
+<style>
+    .form-section {
+        max-width: 400px;
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+    }
+
+    #sidebarMenu {
+        display: none !important;
+    }
+</style>
+
+<script>
+    document.getElementById("registerForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const fullName = document.getElementById("fullName").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+        const errorBox = document.getElementById("registerError");
+        const successBox = document.getElementById("registerSuccess");
+
+        errorBox.classList.add("d-none");
+        successBox.classList.add("d-none");
+
+        if (password !== confirmPassword) {
+            errorBox.textContent = "❌ Passwords do not match.";
+            errorBox.classList.remove("d-none");
+            return;
+        }
+
+        try {
+            const response = await fetch("@Url.Action("Register", "Auth")", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ fullName, email, password, confirmPassword })
+            });
+
+            const responseText = await response.text();
+
+            if (response.ok) {
+                successBox.textContent = "✅ Registration successful! Check your email to activate your account.";
+                successBox.classList.remove("d-none");
+                document.getElementById("registerForm").reset();
+                document.querySelector("#registerForm button").disabled = true;
+            } else {
+                errorBox.textContent = responseText || "❌ Registration failed.";
+                errorBox.classList.remove("d-none");
+            }
+        } catch (err) {
+            errorBox.textContent = "❌ An error occurred. Please try again.";
+            errorBox.classList.remove("d-none");
+        }
+    });
+</script>

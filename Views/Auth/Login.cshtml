@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["ActivePage"] = "Login";
+}
+
+<div class="container py-5">
+    <div class="form-section mx-auto">
+        <h3 class="text-center mb-4">Login</h3>
+
+        <div class="alert alert-danger d-none" id="loginError"></div>
+
+        <form id="loginForm">
+            <div class="mb-3">
+                <label for="email" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="email" required />
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" required />
+            </div>
+            <button type="submit" class="btn btn-dark w-100">Login</button>
+        </form>
+
+        <p class="text-center mt-3">
+            Don't have an account? <a href="@Url.Action("Register", "Auth")">Register here</a>
+        </p>
+    </div>
+</div>
+
+<style>
+    .form-section {
+        max-width: 400px;
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+    }
+
+    #sidebarMenu {
+        display: none !important;
+    }
+</style>
+
+<script>
+    document.getElementById("loginForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        try {
+            const response = await fetch("@Url.Action("Login", "Auth")", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+
+            const responseText = await response.text();
+
+            if (response.ok) {
+                // ✅ Redirect without using localStorage
+                window.location.href = "/";
+            } else {
+                document.getElementById("loginError").classList.remove("d-none");
+                document.getElementById("loginError").innerText = responseText || "Invalid login attempt.";
+            }
+        } catch {
+            document.getElementById("loginError").classList.remove("d-none");
+            document.getElementById("loginError").innerText = "An error occurred. Please try again.";
+        }
+    });
+</script>
