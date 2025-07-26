@@ -14,6 +14,11 @@ namespace GenieWeb.Controllers
             return View("AzureSubtopics");
         }
 
+        public IActionResult BigDataAssessments()
+        {
+            return View("BigDataAssessments");
+        }
+
         public IActionResult CSharpSubtopics()
         {
             return View("CSharpSubtopics");
