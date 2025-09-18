@@ -1,49 +1,317 @@
 @{
     ViewData["Title"] = "Courses";
+    ViewData["ActiveMenu"] = "Courses";
 }
 
-<div class="container py-5">
-    <div class="row mb-4">
-        <div class="col-12 text-center">
-            <h1 class="display-5 fw-bold">Explore Our Courses</h1>
-            <p class="lead text-muted">Find the right course to boost your tech career.</p>
-        </div>
-    </div>
+<style>
+    .courses-page {
+        position: relative;
+        padding: 8rem 0 5rem;
+        background-color: #020617;
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNjAwJyBoZWlnaHQ9JzkwMCcgdmlld0JveD0nMCAwIDE2MDAgOTAwJz4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0nYmdHcmFkJyB4MT0nMCUnIHkxPScwJScgeDI9JzEwMCUnIHkyPScxMDAlJz4KICAgICAgPHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nIzBmMTcyYScvPgogICAgICA8c3RvcCBvZmZzZXQ9JzEwMCUnIHN0b3AtY29sb3I9JyMwMjA2MTcnLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9J2dsb3cxJyBjeD0nMjAlJyBjeT0nMzAlJyByPSc0MCUnPgogICAgICA8c3RvcCBvZmZzZXQ9JzAlJyBzdG9wLWNvbG9yPScjMzhiZGY4JyBzdG9wLW9wYWNpdHk9JzAuNTUnLz4KICAgICAgPHN0b3Agb2Zmc2V0PScxMDAlJyBzdG9wLWNvbG9yPScjMDIwNjE3JyBzdG9wLW9wYWNpdHk9JzAnLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9J2dsb3cyJyBjeD0nODIlJyBjeT0nNzUlJyByPSc0NSUnPgogICAgICA8c3RvcCBvZmZzZXQ9JzAlJyBzdG9wLWNvbG9yPScjYTg1NWY3JyBzdG9wLW9wYWNpdHk9JzAuNDUnLz4KICAgICAgPHN0b3Agb2Zmc2V0PScxMDAlJyBzdG9wLWNvbG9yPScjMDIwNjE3JyBzdG9wLW9wYWNpdHk9JzAnLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9J2dsb3czJyBjeD0nNjAlJyBjeT0nMjAlJyByPSczNSUnPgogICAgICA8c3RvcCBvZmZzZXQ9JzAlJyBzdG9wLWNvbG9yPScjMjJkM2VlJyBzdG9wLW9wYWNpdHk9JzAuNCcvPgogICAgICA8c3RvcCBvZmZzZXQ9JzEwMCUnIHN0b3AtY29sb3I9JyMwMjA2MTcnIHN0b3Atb3BhY2l0eT0nMCcvPgogICAgPC9yYWRpYWxHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9JzE2MDAnIGhlaWdodD0nOTAwJyBmaWxsPSd1cmwoI2JnR3JhZCknLz4KICA8cmVjdCB3aWR0aD0nMTYwMCcgaGVpZ2h0PSc5MDAnIGZpbGw9J3VybCgjZ2xvdzEpJy8+CiAgPHJlY3Qgd2lkdGg9JzE2MDAnIGhlaWdodD0nOTAwJyBmaWxsPSd1cmwoI2dsb3cyKScvPgogIDxyZWN0IHdpZHRoPScxNjAwJyBoZWlnaHQ9JzkwMCcgZmlsbD0ndXJsKCNnbG93MyknLz4KICA8ZyBzdHJva2U9JyMxZTI5M2InIHN0cm9rZS1vcGFjaXR5PScwLjM1JyBzdHJva2Utd2lkdGg9JzEnPgogICAgPHBhdGggZD0nTTEyMCAxNjAgTDM2MCAyNjAgTDYyMCAxODAgTDg4MCAzMjAgTDExNDAgMjIwIEwxNDIwIDM0MCcvPgogICAgPHBhdGggZD0nTTgwIDQyMCBMMzQwIDU0MCBMNjIwIDQ2MCBMOTAwIDYwMCBMMTE4MCA1MjAgTDE0NDAgNjYwJy8+CiAgICA8cGF0aCBkPSdNMjAwIDYyMCBMNDYwIDcyMCBMNzYwIDY0MCBMMTA0MCA3NjAgTDEzMjAgNjgwIEwxNTAwIDc4MCcvPgogIDwvZz4KICA8ZyBzdHJva2U9JyMzMzQxNTUnIHN0cm9rZS1vcGFjaXR5PScwLjQnIHN0cm9rZS13aWR0aD0nMS4yJyBzdHJva2UtZGFzaGFycmF5PScxNCAxOCc+CiAgICA8cGF0aCBkPSdNMTgwIDEyMCBMNTIwIDM2MCBMNzgwIDIyMCBMMTEyMCA0MjAgTDEzODAgMjgwJy8+CiAgICA8cGF0aCBkPSdNMTQwIDM2MCBMNDgwIDU0MCBMNzQwIDM4MCBMMTA4MCA1ODAgTDE0NjAgNDQwJy8+CiAgPC9nPgogIDxnIGZpbGw9JyMzOGJkZjgnIGZpbGwtb3BhY2l0eT0nMC45Jz4KICAgIDxjaXJjbGUgY3g9JzEyMCcgY3k9JzE2MCcgcj0nOScvPgogICAgPGNpcmNsZSBjeD0nMzYwJyBjeT0nMjYwJyByPSc3Jy8+CiAgICA8Y2lyY2xlIGN4PSc4ODAnIGN5PSczMjAnIHI9JzgnLz4KICAgIDxjaXJjbGUgY3g9JzExODAnIGN5PSc1MjAnIHI9JzknLz4KICAgIDxjaXJjbGUgY3g9JzQ2MCcgY3k9JzcyMCcgcj0nNycvPgogICAgPGNpcmNsZSBjeD0nMTA0MCcgY3k9Jzc2MCcgcj0nOCcvPgogIDwvZz4KICA8ZyBmaWxsPScjODE4Y2Y4JyBmaWxsLW9wYWNpdHk9JzAuODUnPgogICAgPGNpcmNsZSBjeD0nNTIwJyBjeT0nMzYwJyByPSc4Jy8+CiAgICA8Y2lyY2xlIGN4PSc3ODAnIGN5PScyMjAnIHI9JzknLz4KICAgIDxjaXJjbGUgY3g9JzExMjAnIGN5PSc0MjAnIHI9JzgnLz4KICAgIDxjaXJjbGUgY3g9JzEzODAnIGN5PScyODAnIHI9JzcnLz4KICAgIDxjaXJjbGUgY3g9JzQ4MCcgY3k9JzU0MCcgcj0nNycvPgogICAgPGNpcmNsZSBjeD0nMTA4MCcgY3k9JzU4MCcgcj0nOCcvPgogIDwvZz4KICA8ZyBmaWxsPScjYTg1NWY3JyBmaWxsLW9wYWNpdHk9JzAuNzUnPgogICAgPGNpcmNsZSBjeD0nMzQwJyBjeT0nNTQwJyByPSc2Jy8+CiAgICA8Y2lyY2xlIGN4PSc2MjAnIGN5PSc0NjAnIHI9JzgnLz4KICAgIDxjaXJjbGUgY3g9JzkwMCcgY3k9JzYwMCcgcj0nNycvPgogICAgPGNpcmNsZSBjeD0nMTMyMCcgY3k9JzY4MCcgcj0nNycvPgogICAgPGNpcmNsZSBjeD0nMTUwMCcgY3k9Jzc4MCcgcj0nNicvPgogIDwvZz4KICA8ZyBmaWxsPSdub25lJyBzdHJva2U9JyMzOGJkZjgnIHN0cm9rZS1vcGFjaXR5PScwLjE1JyBzdHJva2Utd2lkdGg9JzEnPgogICAgPGNpcmNsZSBjeD0nNDAwJyBjeT0nMjQwJyByPScxNjAnLz4KICAgIDxjaXJjbGUgY3g9JzExODAnIGN5PSc1MDAnIHI9JzIxMCcvPgogIDwvZz4KPC9zdmc+Cg==");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        color: #f8fafc;
+        overflow: hidden;
+    }
 
-    <div class="row g-4">
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">Gen AI with Python</h5>
-                    <p class="card-text flex-grow-1">Build intelligent solutions using Python, machine learning, and GenAI tools.</p>
-                    <a href="https://www.python.org" target="_blank" rel="noopener" class="btn btn-primary mt-3">View details</a>
+    .courses-page::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.88), rgba(30, 41, 59, 0.72));
+        backdrop-filter: blur(2px);
+        z-index: 0;
+    }
+
+    .courses-page .container {
+        position: relative;
+        z-index: 2;
+    }
+
+    .ai-light {
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(60px);
+        opacity: 0.45;
+        z-index: 1;
+    }
+
+    .ai-light.one {
+        width: 320px;
+        height: 320px;
+        top: 10%;
+        left: 5%;
+        background: rgba(99, 102, 241, 0.75);
+    }
+
+    .ai-light.two {
+        width: 360px;
+        height: 360px;
+        bottom: 12%;
+        right: 8%;
+        background: rgba(56, 189, 248, 0.7);
+    }
+
+    .courses-hero h1 {
+        font-weight: 700;
+        font-size: clamp(2.5rem, 5vw, 3.6rem);
+        line-height: 1.1;
+    }
+
+    .courses-hero p {
+        color: rgba(226, 232, 240, 0.85);
+        max-width: 640px;
+        font-size: 1.1rem;
+    }
+
+    .hero-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+    }
+
+    .hero-badge {
+        padding: 0.6rem 1.2rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(99, 102, 241, 0.9));
+        border: 1px solid rgba(148, 163, 184, 0.32);
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #f8fafc;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.45);
+    }
+
+    .preview-card {
+        background: rgba(15, 23, 42, 0.58);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 1.5rem;
+        padding: 1.8rem;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 20px 50px rgba(8, 11, 25, 0.45);
+    }
+
+    .preview-card h5 {
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        color: #e2e8f0;
+    }
+
+    .preview-card ul {
+        margin: 1.1rem 0 0;
+        padding-left: 1.2rem;
+        color: rgba(226, 232, 240, 0.88);
+        font-size: 0.95rem;
+    }
+
+    .preview-card li + li {
+        margin-top: 0.6rem;
+    }
+
+    .courses-grid {
+        margin-top: 3.2rem;
+    }
+
+    .course-card {
+        height: 100%;
+        background: rgba(15, 23, 42, 0.62);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+        backdrop-filter: blur(14px);
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 24px 50px rgba(8, 11, 25, 0.38);
+    }
+
+    .course-card:hover {
+        transform: translateY(-12px);
+        border-color: rgba(129, 140, 248, 0.85);
+        box-shadow: 0 32px 70px rgba(8, 11, 25, 0.48);
+    }
+
+    .course-visual {
+        position: relative;
+        border-radius: 1.25rem;
+        overflow: hidden;
+        height: 180px;
+        margin-bottom: 1.25rem;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .course-visual::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 0.78) 100%);
+    }
+
+    .course-visual span {
+        position: absolute;
+        bottom: 1rem;
+        left: 1.1rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+        color: #e0e7ff;
+        z-index: 1;
+    }
+
+    .course-card h5 {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .course-card p {
+        color: rgba(226, 232, 240, 0.82);
+        margin-bottom: 1.1rem;
+    }
+
+    .course-meta {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        color: rgba(203, 213, 225, 0.9);
+    }
+
+    .course-card .btn {
+        margin-top: 1.4rem;
+        border-radius: 999px;
+        padding: 0.65rem 1.6rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.96), rgba(59, 130, 246, 0.96));
+        border: none;
+        color: #0f172a;
+    }
+
+    .course-card .btn:hover {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.96), rgba(129, 140, 248, 0.96));
+        box-shadow: 0 14px 28px rgba(59, 130, 246, 0.35);
+    }
+
+    .course-visual.ai-python {
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NDAnIGhlaWdodD0nMzYwJyB2aWV3Qm94PScwIDAgNjQwIDM2MCc+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9J2dyYWRpZW50JyB4MT0nMCUnIHkxPScwJScgeDI9JzEwMCUnIHkyPScxMDAlJz4KICAgICAgPHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nIzFkNGVkOCcvPgogICAgICA8c3RvcCBvZmZzZXQ9JzEwMCUnIHN0b3AtY29sb3I9JyMwZjE3MmEnLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSc2NDAnIGhlaWdodD0nMzYwJyBmaWxsPSd1cmwoI2dyYWRpZW50KScvPgogIDxnIHN0cm9rZT0nIzBlYTVlOScgc3Ryb2tlLXdpZHRoPScxLjInIHN0cm9rZS1vcGFjaXR5PScwLjQnPgogICAgPHBhdGggZD0nTTQwIDIyMCBMMTYwIDE0MCBMMjgwIDIyMCBMNDAwIDE2MCBMNTIwIDI0MCBMNjAwIDIwMCcgZmlsbD0nbm9uZScvPgogICAgPHBhdGggZD0nTTYwIDkwIEwyMDAgMTQwIEwzMjAgODAgTDQ2MCAxNDAgTDU4MCA5MCcgZmlsbD0nbm9uZScvPgogIDwvZz4KICA8ZyBmaWxsPScjMzhiZGY4Jz4KICAgIDxjaXJjbGUgY3g9JzE2MCcgY3k9JzE0MCcgcj0nNicvPgogICAgPGNpcmNsZSBjeD0nMjAwJyBjeT0nMTQwJyByPSc1Jy8+CiAgICA8Y2lyY2xlIGN4PSczMjAnIGN5PSc4MCcgcj0nNycvPgogICAgPGNpcmNsZSBjeD0nNDYwJyBjeT0nMTQwJyByPSc2Jy8+CiAgICA8Y2lyY2xlIGN4PSc1MjAnIGN5PScyNDAnIHI9JzcnLz4KICA8L2c+CiAgPGcgZmlsbD0nIzIyZDNlZScgZmlsbC1vcGFjaXR5PScwLjgnPgogICAgPGNpcmNsZSBjeD0nMjgwJyBjeT0nMjIwJyByPSc1Jy8+CiAgICA8Y2lyY2xlIGN4PSc0MDAnIGN5PScxNjAnIHI9JzYnLz4KICAgIDxjaXJjbGUgY3g9JzU4MCcgY3k9JzkwJyByPSc1Jy8+CiAgPC9nPgo8L3N2Zz4K");
+    }
+
+    .course-visual.core-java {
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NDAnIGhlaWdodD0nMzYwJyB2aWV3Qm94PScwIDAgNjQwIDM2MCc+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9J2dyYWRpZW50JyB4MT0nMCUnIHkxPScwJScgeDI9JzEwMCUnIHkyPScxMDAlJz4KICAgICAgPHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nI2Y5NzMxNicvPgogICAgICA8c3RvcCBvZmZzZXQ9JzEwMCUnIHN0b3AtY29sb3I9JyMxMTE4MjcnLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSc2NDAnIGhlaWdodD0nMzYwJyBmaWxsPSd1cmwoI2dyYWRpZW50KScvPgogIDxnIHN0cm9rZT0nI2ZiOTIzYycgc3Ryb2tlLXdpZHRoPScxLjEnIHN0cm9rZS1vcGFjaXR5PScwLjQnPgogICAgPHBhdGggZD0nTTQwIDI1MCBMMTQwIDE4MCBMMjYwIDI1MCBMMzYwIDE4MCBMNDgwIDI2MCBMNjAwIDIxMCcgZmlsbD0nbm9uZScvPgogICAgPHBhdGggZD0nTTkwIDEyMCBMMjEwIDIwMCBMMzMwIDEzMCBMNDUwIDIxMCBMNTYwIDE0MCcgZmlsbD0nbm9uZScvPgogIDwvZz4KICA8ZyBmaWxsPScjZmFjYzE1JyBmaWxsLW9wYWNpdHk9JzAuODUnPgogICAgPGNpcmNsZSBjeD0nMTQwJyBjeT0nMTgwJyByPSc2Jy8+CiAgICA8Y2lyY2xlIGN4PScyMTAnIGN5PScyMDAnIHI9JzUnLz4KICAgIDxjaXJjbGUgY3g9JzMzMCcgY3k9JzEzMCcgcj0nNicvPgogICAgPGNpcmNsZSBjeD0nNDUwJyBjeT0nMjEwJyByPSc1Jy8+CiAgICA8Y2lyY2xlIGN4PSc1NjAnIGN5PScxNDAnIHI9JzYnLz4KICA8L2c+CiAgPGcgZmlsbD0nI2ZiNzE4NScgZmlsbC1vcGFjaXR5PScwLjc1Jz4KICAgIDxjaXJjbGUgY3g9JzI2MCcgY3k9JzI1MCcgcj0nNScvPgogICAgPGNpcmNsZSBjeD0nMzYwJyBjeT0nMTgwJyByPSc2Jy8+CiAgICA8Y2lyY2xlIGN4PSc0ODAnIGN5PScyNjAnIHI9JzcnLz4KICA8L2c+Cjwvc3ZnPgo=");
+    }
+
+    .course-visual.react {
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NDAnIGhlaWdodD0nMzYwJyB2aWV3Qm94PScwIDAgNjQwIDM2MCc+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9J2dyYWRpZW50JyB4MT0nMCUnIHkxPScwJScgeDI9JzEwMCUnIHkyPScxMDAlJz4KICAgICAgPHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nIzBlYTVlOScvPgogICAgICA8c3RvcCBvZmZzZXQ9JzEwMCUnIHN0b3AtY29sb3I9JyMwYjExMjAnLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSc2NDAnIGhlaWdodD0nMzYwJyBmaWxsPSd1cmwoI2dyYWRpZW50KScvPgogIDxnIHN0cm9rZT0nIzIyZDNlZScgc3Ryb2tlLXdpZHRoPScxLjInIHN0cm9rZS1vcGFjaXR5PScwLjQ1Jz4KICAgIDxwYXRoIGQ9J002MCAyODAgQzE0MCAxODAgMjAwIDMwMCAyODAgMjAwIEMzNjAgMTAwIDQyMCAyODAgNTAwIDIwMCBDNTYwIDE0MCA2MDAgMjIwIDYyMCAxODAnIGZpbGw9J25vbmUnLz4KICAgIDxlbGxpcHNlIGN4PSczMjAnIGN5PScxODAnIHJ4PScyMTAnIHJ5PSc4MCcgZmlsbD0nbm9uZScvPgogIDwvZz4KICA8ZyBzdHJva2U9JyM3ZGQzZmMnIHN0cm9rZS13aWR0aD0nMScgc3Rya2UtdGFzaGFycmF5PSc4IDEwJyBzdHJva2Utb3BhY2l0eT0nMC4zNSc+CiAgICA8ZWxsaXBzZSBjeD0nMzIwJyBjeT0nMTgwJyByeD0nMTgwJyByeT0nNjAnIGZpbGw9J25vbmUnLz4KICAgIDxlbGxpcHNlIGN4PSczMjAnIGN5PScxODAnIHJ4PScxNTAnIHJ5PSc1MCcgZmlsbD0nbm9uZScvPgogIDwvZz4KICA8ZyBmaWxsPScjMzhiZGY4Jz4KICAgIDxjaXJjbGUgY3g9JzMyMCcgY3k9JzE4MCcgcj0nMTInLz4KICAgIDxjaXJjbGUgY3g9JzE2MCcgY3k9JzIyMCcgcj0nNicvPgogICAgPGNpcmNsZSBjeD0nNTAwJyBjeT0nMjAwJyByPSc2Jy8+CiAgPC9nPgo8L3N2Zz4K");
+    }
+
+    .course-visual.csharp {
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NDAnIGhlaWdodD0nMzYwJyB2aWV3Qm94PScwIDAgNjQwIDM2MCc+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9J2dyYWRpZW50JyB4MT0nMCUnIHkxPScwJScgeDI9JzEwMCUnIHkyPScxMDAlJz4KICAgICAgPHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nIzkzMzNlYScvPgogICAgICA8c3RvcCBvZmZzZXQ9JzEwMCUnIHN0b3AtY29sb3I9JyMxMTE4MjcnLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSc2NDAnIGhlaWdodD0nMzYwJyBmaWxsPSd1cmwoI2dyYWRpZW50KScvPgogIDxnIHN0cm9rZT0nI2MwODRmYycgc3Ryb2tlLXdpZHRoPScxLjInIHN0cm9rZS1vcGFjaXR5PScwLjQ1Jz4KICAgIDxwYXRoIGQ9J002MCAyNDAgTDE2MCAxNjAgTDI2MCAyNjAgTDM2MCAxODAgTDQ2MCAyNjAgTDU2MCAxOTAnIGZpbGw9J25vbmUnLz4KICAgIDxwYXRoIGQ9J00xMDAgMTIwIEwyMDAgMjAwIEwzMDAgMTUwIEw0MjAgMjMwIEw1MjAgMTcwIEw2MDAgMjQwJyBmaWxsPSdub25lJy8+CiAgPC9nPgogIDxnIGZpbGw9JyNhODU1ZjcnIGZpbGwtb3BhY2l0eT0nMC44NSc+CiAgICA8Y2lyY2xlIGN4PScxNjAnIGN5PScxNjAnIHI9JzYnLz4KICAgIDxjaXJjbGUgY3g9JzIwMCcgY3k9JzIwMCcgcj0nNicvPgogICAgPGNpcmNsZSBjeD0nMzYwJyBjeT0nMTgwJyByPSc3Jy8+CiAgICA8Y2lyY2xlIGN4PSc0NjAnIGN5PScyNjAnIHI9JzYnLz4KICAgIDxjaXJjbGUgY3g9JzUyMCcgY3k9JzE3MCcgcj0nNScvPgogIDwvZz4KICA8ZyBmaWxsPScjYzRiNWZkJyBmaWxsLW9wYWNpdHk9JzAuNzUnPgogICAgPGNpcmNsZSBjeD0nMjYwJyBjeT0nMjYwJyByPSc2Jy8+CiAgICA8Y2lyY2xlIGN4PSc0MjAnIGN5PScyMzAnIHI9JzcnLz4KICAgIDxjaXJjbGUgY3g9JzYwMCcgY3k9JzI0MCcgcj0nNScvPgogIDwvZz4KPC9zdmc+Cg==");
+    }
+
+    @media (max-width: 991.98px) {
+        .courses-page {
+            padding-top: 6.5rem;
+        }
+
+        .preview-card {
+            margin-top: 2.2rem;
+        }
+
+        .hero-badges {
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="courses-page">
+    <span class="ai-light one"></span>
+    <span class="ai-light two"></span>
+
+    <div class="container">
+        <div class="courses-hero">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-7">
+                    <h1>Level Up with AI-Ready Tech Courses</h1>
+                    <p>Master modern engineering workflows with immersive content, guided labs, and project challenges designed around real AI transformation stories.</p>
+                    <div class="hero-badges">
+                        <span class="hero-badge">AI-powered curriculum</span>
+                        <span class="hero-badge">Hands-on cloud labs</span>
+                        <span class="hero-badge">Career-ready portfolios</span>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="preview-card">
+                        <h5>What you'll experience</h5>
+                        <ul>
+                            <li>Cutting-edge lessons blending AI, cloud, and full-stack practices.</li>
+                            <li>Guided exercises that fast-track problem solving with automation.</li>
+                            <li>Mentor-inspired tips, downloadable assets, and certification prep.</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">Core Java</h5>
-                    <p class="card-text flex-grow-1">Master the fundamentals of Java programming for enterprise-grade solutions.</p>
-                    <a href="https://www.oracle.com/java/" target="_blank" rel="noopener" class="btn btn-primary mt-3">View details</a>
+
+        <div class="row g-4 courses-grid">
+            <div class="col-md-6 col-lg-3">
+                <div class="course-card h-100">
+                    <div class="course-visual ai-python">
+                        <span>AI Projects</span>
+                    </div>
+                    <h5>Gen AI with Python</h5>
+                    <p>Build intelligent solutions using Python, machine learning, and generative AI toolchains that scale from prototypes to production.</p>
+                    <div class="course-meta">
+                        <span>Intermediate</span>
+                        <span>12 modules</span>
+                    </div>
+                    <a href="https://www.python.org" target="_blank" rel="noopener" class="btn">View details</a>
                 </div>
             </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">React</h5>
-                    <p class="card-text flex-grow-1">Learn to build fast, modern web interfaces using React and TypeScript.</p>
-                    <a href="https://react.dev/" target="_blank" rel="noopener" class="btn btn-primary mt-3">View details</a>
+            <div class="col-md-6 col-lg-3">
+                <div class="course-card h-100">
+                    <div class="course-visual core-java">
+                        <span>Enterprise Track</span>
+                    </div>
+                    <h5>Core Java</h5>
+                    <p>Master the fundamentals of Java programming with best practices for building stable, enterprise-ready services and microservices.</p>
+                    <div class="course-meta">
+                        <span>Beginner friendly</span>
+                        <span>15 modules</span>
+                    </div>
+                    <a href="https://www.oracle.com/java/" target="_blank" rel="noopener" class="btn">View details</a>
                 </div>
             </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">C#.NET</h5>
-                    <p class="card-text flex-grow-1">Develop robust applications on the .NET platform with modern C# patterns.</p>
-                    <a href="https://dotnet.microsoft.com/" target="_blank" rel="noopener" class="btn btn-primary mt-3">View details</a>
+            <div class="col-md-6 col-lg-3">
+                <div class="course-card h-100">
+                    <div class="course-visual react">
+                        <span>UI Mastery</span>
+                    </div>
+                    <h5>React</h5>
+                    <p>Learn to build fast, modern web interfaces using React, TypeScript, and component-driven workflows that delight end users.</p>
+                    <div class="course-meta">
+                        <span>Intermediate</span>
+                        <span>10 modules</span>
+                    </div>
+                    <a href="https://react.dev/" target="_blank" rel="noopener" class="btn">View details</a>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="course-card h-100">
+                    <div class="course-visual csharp">
+                        <span>Cloud Ready</span>
+                    </div>
+                    <h5>C#.NET</h5>
+                    <p>Develop robust applications on the .NET platform with modern C# patterns, clean architecture techniques, and DevOps integration.</p>
+                    <div class="course-meta">
+                        <span>Advanced</span>
+                        <span>14 modules</span>
+                    </div>
+                    <a href="https://dotnet.microsoft.com/" target="_blank" rel="noopener" class="btn">View details</a>
                 </div>
             </div>
         </div>
