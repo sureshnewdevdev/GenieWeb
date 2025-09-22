@@ -1,224 +1,382 @@
-﻿@{
-    // ViewData["Title"] = "Home";
+@{
+    var menuItems = new[]
+    {
+        new { Title = "Home Overview", Description = "Stay on top of new releases, updates, and recommendations from the ITTechGenie team.", Icon = "fa-solid fa-compass", Url = Url.Action("Index", "Home") ?? "#" },
+        new { Title = "Courses", Description = "Browse structured courses covering cloud, development, automation, and interview prep.", Icon = "fa-solid fa-graduation-cap", Url = Url.Action("Index", "Courses") ?? "#" },
+        new { Title = "AI Syllabus", Description = "Follow our curated roadmap for building practical AI and machine learning solutions.", Icon = "fa-solid fa-robot", Url = Url.Action("Index", "AISyllabus") ?? "#" },
+        new { Title = "C# Fundamentals", Description = "Master the C# language with step-by-step guides, patterns, and hands-on demos.", Icon = "fa-solid fa-code", Url = Url.Action("IntroductionToCSharp", "CSharp") ?? "#" },
+        new { Title = "Azure Cloud", Description = "Design, deploy, and manage cloud-native workloads using Microsoft Azure services.", Icon = "fa-solid fa-cloud", Url = Url.Action("Azure", "Home") ?? "#" },
+        new { Title = ".NET Core", Description = "Build modern, modular applications with our comprehensive .NET Core walkthroughs.", Icon = "fa-solid fa-layer-group", Url = Url.Action("WhatIsDotNet", "DotNet") ?? "#" },
+        new { Title = "React", Description = "Create responsive web applications using React, hooks, and modern tooling.", Icon = "fa-brands fa-react", Url = Url.Action("IntroductionToReact", "React") ?? "#" },
+        new { Title = "Azure DevOps", Description = "Implement CI/CD pipelines, release automation, and agile practices with Azure DevOps.", Icon = "fa-solid fa-diagram-project", Url = Url.Action("WhatIsDevOps", "AzureDevOps") ?? "#" },
+        new { Title = "Selenium Testing", Description = "Automate functional testing workflows with Selenium and proven QA strategies.", Icon = "fa-solid fa-bug", Url = Url.Action("SeleniumTesting", "Home") ?? "#" },
+        new { Title = "Docker", Description = "Package, ship, and run applications reliably using Docker containers and images.", Icon = "fa-brands fa-docker", Url = Url.Action("DockerInstallation", "Docker") ?? "#" },
+        new { Title = "Terraform", Description = "Adopt infrastructure as code on Azure with reusable Terraform patterns and modules.", Icon = "fa-solid fa-cubes", Url = Url.Action("IntroductionToTerraform", "Terraform") ?? "#" },
+        new { Title = "Data Storage", Description = "Store, secure, and optimise data using Azure Blob, Table, Queue, and Files services.", Icon = "fa-solid fa-database", Url = Url.Action("AzureBlobStorage", "DataStorage") ?? "#" },
+        new { Title = "Azure DataBricks", Description = "Scale analytics workloads with Azure DataBricks, Spark, and collaborative notebooks.", Icon = "fa-solid fa-chart-line", Url = Url.Action("IntroductionToDataBricks", "DataBricks") ?? "#" },
+        new { Title = "Azure Service Fabric", Description = "Deliver resilient microservices and stateful workloads with Azure Service Fabric.", Icon = "fa-solid fa-network-wired", Url = Url.Action("WhatIsServiceFabric", "AzureServiceFabric") ?? "#" },
+        new { Title = "Practice Questions", Description = "Sharpen your knowledge with coding exercises and scenario-based challenges.", Icon = "fa-solid fa-lightbulb", Url = Url.Action("CSharpBasics", "PracticeQuestions") ?? "#" },
+        new { Title = "Tech MCQs", Description = "Challenge yourself with rapid-fire multiple-choice questions across every domain.", Icon = "fa-solid fa-list-check", Url = Url.Action("Index", "TopicSelection") ?? "#" },
+        new { Title = "Privacy & Policies", Description = "Review how we protect your data and maintain regulatory compliance.", Icon = "fa-solid fa-user-shield", Url = Url.Action("Privacy", "Home") ?? "#" }
+    };
 }
+
 <style>
     @@media (min-width: 992px) {
-    .col-lg-10 {
-        flex: 0 0 auto;
-        width: 100%;
+        .col-lg-10 {
+            flex: 0 0 auto;
+            width: 100%;
+        }
     }
-}
+
     @@media (min-width: 768px) {
-    .col-md-9 {
-        flex: 0 0 auto;
-        width: 100%;
+        .col-md-9 {
+            flex: 0 0 auto;
+            width: 100%;
+        }
     }
-}
-    .main{
-        margin: 0% !important;
+
+    .main {
+        margin: 0 !important;
     }
-    #sidebarMenu {
+
+    #sidebarMenu,
+    #rightAdSection,
+    #floatingBtn,
+    #contentdropdownbtn {
         display: none !important;
         width: 0 !important;
     }
-    #rightAdSection {
-        display: none !important;
-        width: 0 !important;
-    }
-    /* Make main content full width */
+
     main.col-md-9,
     main.ms-sm-auto,
     main.col-lg-10,
     main.px-md-4 {
-        width: auto !important;
+        width: 100% !important;
         max-width: 100vw;
-        margin: 2vw !important;
+        margin: 0 !important;
         padding-left: 0 !important;
         padding-right: 0 !important;
     }
 
-    #floatingBtn {
-        display: none !important;
+    .home-container {
+        padding: 1.5rem 0 3rem;
     }
 
-    #contentdropdownbtn {
-        display: none !important;
+    .hero-section {
+        background: linear-gradient(135deg, #0d47a1, #5c6bc0);
+        color: #fff;
+        border-radius: 24px;
+        padding: clamp(2.5rem, 4vw, 4rem);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 28px 60px rgba(13, 71, 161, 0.35);
     }
 
-    .card-img-top {
-        width: 150px;
-        height: 150px;
-        object-fit: cover;
-        border-radius: 50%;
-        margin: 20px auto 0 auto;
-        display: block;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        border: 4px solid #f8f9fa;
+    .hero-section::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.25), transparent 65%);
+        pointer-events: none;
     }
 
-    .card-body {
-        text-align: center;
+    .hero-content {
+        position: relative;
+        z-index: 1;
     }
 
-    .card {
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.45rem 1rem;
+        border-radius: 999px;
+        background-color: rgba(255, 255, 255, 0.15);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .hero-section h1 {
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-top: 1.25rem;
+    }
+
+    .hero-section p.lead {
+        font-size: 1.1rem;
+        max-width: 640px;
+        margin-bottom: 1.75rem;
+    }
+
+    .hero-actions .btn {
+        padding: 0.65rem 1.5rem;
+        border-radius: 999px;
+        font-weight: 600;
+    }
+
+    .hero-actions .btn-outline-light:hover {
+        color: #0d47a1;
+        background-color: #fff;
+    }
+
+    .hero-metric {
+        position: relative;
+        z-index: 1;
+        background: rgba(255, 255, 255, 0.12);
         border-radius: 20px;
+        padding: 1.6rem;
+        height: 100%;
+        backdrop-filter: blur(6px);
+    }
+
+    .hero-metric strong {
+        display: block;
+        font-size: 2.4rem;
+        line-height: 1;
+        color: #fff;
+    }
+
+    .hero-metric span {
+        display: block;
+        margin-top: 0.35rem;
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .info-highlight {
+        margin-top: 2.75rem;
+    }
+
+    .info-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 1.6rem;
+        box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+        height: 100%;
+    }
+
+    .info-card strong {
+        font-size: 1.6rem;
+        color: #0d47a1;
+    }
+
+    .info-card p {
+        margin-bottom: 0;
+        color: #4a5568;
+        font-size: 0.95rem;
+    }
+
+    .menu-showcase {
+        margin-top: 3rem;
+    }
+
+    .menu-showcase h2 {
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+    }
+
+    .menu-showcase p.lead {
+        color: #4a5568;
+        max-width: 760px;
+        margin: 0 auto 2.2rem;
+    }
+
+    .menu-card {
+        position: relative;
+        background: #fff;
+        border-radius: 20px;
+        padding: 1.8rem;
+        height: 100%;
+        box-shadow: 0 22px 46px rgba(15, 23, 42, 0.08);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    .menu-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 26px 56px rgba(13, 71, 161, 0.2);
+    }
+
+    .menu-card .icon-circle {
+        width: 64px;
+        height: 64px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #0d47a1, #42a5f5);
+        color: #fff;
+        font-size: 1.6rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 12px 26px rgba(13, 71, 161, 0.25);
+    }
+
+    .menu-card h5 {
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
+    .menu-card p {
+        color: #4a5568;
+        font-size: 0.92rem;
+        margin-bottom: 1.6rem;
+    }
+
+    .menu-card a {
+        font-weight: 600;
+        color: #0d47a1;
+        text-decoration: none;
+    }
+
+    .menu-card a:hover {
+        color: #0b3c91;
+    }
+
+    .value-section {
+        margin-top: 3.25rem;
+    }
+
+    .value-card {
+        background: linear-gradient(135deg, #f8fbff, #eef2ff);
+        border-radius: 20px;
+        padding: 2rem;
+        height: 100%;
+        box-shadow: 0 20px 44px rgba(15, 23, 42, 0.06);
+    }
+
+    .value-card h4 {
+        font-weight: 600;
+        color: #0d47a1;
+    }
+
+    .value-card p {
+        color: #4a5568;
+    }
+
+    footer {
+        margin-top: 3rem;
+    }
+
+    @@media (max-width: 767px) {
+        .hero-section {
+            text-align: center;
         }
 
-    .card-title {
-        font-weight: 600;
+        .hero-section p.lead {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-metric {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .menu-card {
+            text-align: center;
+        }
+
+        .menu-card .icon-circle {
+            margin-left: auto;
+            margin-right: auto;
+        }
     }
 </style>
-<div class="container-fluid">
-    <!-- Hero Section -->
-    <section class="row bg-primary text-white text-center py-5" style="border-radius:20px;margin-left:1vw;margin-right:1vw">
-        <div class="col-12">
-            <h1 class="display-4">Welcome to ITTechGenie!</h1>
-            <p class="lead">Empowering learners with cutting-edge technology training.</p>
-        </div>
-    </section>
 
-    <!-- About Us Section -->
-    <section class="row bg-light py-5">
-        <div class="col-md-8 offset-md-2 text-center">
-            <h2>About Us</h2>
-            <p>At ITTechGenie, we are dedicated to providing top-notch technology education in areas like C#, Azure, .NET Core, React, Azure DevOps, Docker, and Terraform. Our mission is to equip learners with the skills needed to excel in the tech industry.</p>
-        </div>
-    </section>
-
-    <!-- Advertisement Section -->
-    <section class="row py-4">
-        <div class="col-12">
-            <div class="alert alert-warning text-center shadow-sm" role="alert">
-                <strong>Advertisement:</strong>
-                <a href="https://ads.google.com/home/" target="_blank" rel="noopener" class="ms-2">Promote your business with Google Ads</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Featured Courses Section -->
-    <section class="row py-5">
-        <div class="col-12 text-center">
-            <h2>Featured Courses</h2>
-            <p class="lead">Master essential technologies with our expertly crafted tutorials and hands-on guides.</p>
-        </div>
-
-        <!-- C# -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="~/css/Images/Logos/CSharp.svg" class="card-img-top" alt="C# Course">
-                <div class="card-body">
-                    <h5 class="card-title">C# Fundamentals</h5>
-                    <p class="card-text">Start from scratch and learn core C# concepts with real-world examples.</p>
-                    <a href="@Url.Action("IntroductionToCSharp", "CSharp")" class="btn btn-primary">Learn More</a>
+<div class="container-fluid px-3 px-lg-5 home-container">
+    <section class="hero-section">
+        <div class="row align-items-center gy-4">
+            <div class="col-lg-8 hero-content">
+                <span class="hero-badge"><i class="fa-solid fa-sparkles"></i> 2025 Learning Playbook</span>
+                <h1>Master cloud, development, and automation with confidence</h1>
+                <p class="lead">ITTechGenie brings together expert-led tutorials, visual guides, and practical exercises so you can upskill faster and deliver production-ready solutions.</p>
+                <div class="hero-actions d-flex flex-wrap gap-2">
+                    <a class="btn btn-light shadow-sm" href="@Url.Action("Index", "Courses")">Browse Courses</a>
+                    <a class="btn btn-outline-light" href="#menu-showcase">View All Topics</a>
                 </div>
             </div>
-        </div>
-
-        <!-- Azure -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="~/css/Images/Logos/Azure.png" class="card-img-top" alt="Azure Course">
-                <div class="card-body">
-                    <h5 class="card-title">Azure Essentials</h5>
-                    <p class="card-text">Understand cloud computing and Microsoft Azure fundamentals step-by-step.</p>
-                    <a href="@Url.Action("Azure", "Home")" class="btn btn-primary">Learn More</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- .NET Core -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="~/css/Images/Logos/DotNet.png" class="card-img-top" alt=".NET Core Course">
-                <div class="card-body">
-                    <h5 class="card-title">.NET Core Guide</h5>
-                    <p class="card-text">Dive into cross-platform .NET development with modern tools and frameworks.</p>
-                    <a href="@Url.Action("WhatIsDotNet", "DotNet")" class="btn btn-primary">Learn More</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- React -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="~/css/Images/Logos/React.svg" class="card-img-top" alt="React Course">
-                <div class="card-body">
-                    <h5 class="card-title">React for Beginners</h5>
-                    <p class="card-text">Learn to build fast, dynamic web apps using React and modern JavaScript.</p>
-                    <a href="@Url.Action("IntroductionToReact", "React")" class="btn btn-primary">Learn More</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Azure DevOps -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="~/css/Images/Logos/AzureDevOps.png" class="card-img-top" alt="Azure DevOps Course">
-                <div class="card-body">
-                    <h5 class="card-title">Azure DevOps Overview</h5>
-                    <p class="card-text">Master CI/CD pipelines, repos, boards, and more with Azure DevOps services.</p>
-                    <a href="@Url.Action("WhatIsDevOps", "AzureDevOps")" class="btn btn-primary">Learn More</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Docker -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="~/css/Images/Logos/Docker.png" class="card-img-top" alt="Docker Course">
-                <div class="card-body">
-                    <h5 class="card-title">Docker Fundamentals</h5>
-                    <p class="card-text">Get hands-on with containerization, images, volumes, and networking in Docker.</p>
-                    <a href="@Url.Action("DockerInstallation", "Docker")" class="btn btn-primary">Learn More</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Terraform -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="~/css/Images/Logos/Terraform.png" class="card-img-top" alt="Terraform Course">
-                <div class="card-body">
-                    <h5 class="card-title">Terraform on Azure</h5>
-                    <p class="card-text">Learn Infrastructure as Code (IaC) with Terraform to automate your cloud setup.</p>
-                    <a href="@Url.Action("IntroductionToTerraform", "Terraform")" class="btn btn-primary">Learn More</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Practice Questions -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="~/css/Images/Logos/PracticeQuestions.png" class="card-img-top" alt="Practice Questions">
-                <div class="card-body">
-                    <h5 class="card-title">Practice Questions</h5>
-                    <p class="card-text">Sharpen your skills with hands-on coding challenges and explanations.</p>
-                    <a href="@Url.Action("CSharpBasics", "PracticeQuestions")" class="btn btn-primary">Try Now</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- MCQs -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="~/css/Images/Logos/mcq's.png" class="card-img-top" alt="MCQ Practice">
-                <div class="card-body">
-                    <h5 class="card-title">Tech MCQs</h5>
-                    <p class="card-text">Test your knowledge with multiple-choice questions across all major topics.</p>
-                    <a href="@Url.Action("Index", "TopicSelection")" class="btn btn-primary">Start Quiz</a>
+            <div class="col-lg-4">
+                <div class="hero-metric h-100">
+                    <strong>Built by mentors</strong>
+                    <span>Curated by architects who design and ship enterprise platforms every day.</span>
+                    <ul class="list-unstyled small mt-3 mb-0">
+                        <li class="mb-2"><i class="fa-solid fa-check me-2"></i>Real project code snippets & diagrams</li>
+                        <li class="mb-2"><i class="fa-solid fa-check me-2"></i>Downloadable notes and interview prep</li>
+                        <li><i class="fa-solid fa-check me-2"></i>Continuously updated with 2025 releases</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </section>
 
+    <section class="info-highlight">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="info-card h-100">
+                    <strong>16+ Learning Paths</strong>
+                    <p>Deep-dive content spanning cloud, DevOps, backend, front-end, and automation.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-card h-100">
+                    <strong>120+ Articles</strong>
+                    <p>Step-by-step tutorials with visuals, code samples, and guided practice questions.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-card h-100">
+                    <strong>Community First</strong>
+                    <p>Crafted for busy engineers and aspirants who want outcomes, not fluff.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
+    <section id="menu-showcase" class="menu-showcase">
+        <div class="text-center">
+            <h2>Explore every ITTechGenie topic</h2>
+            <p class="lead">All navigation items are now available on one page. Jump straight to the content you need and accelerate your learning journey.</p>
+        </div>
+        <div class="row g-4">
+            @foreach (var item in menuItems)
+            {
+                <div class="col-12 col-sm-6 col-lg-4 col-xxl-3">
+                    <div class="menu-card h-100">
+                        <div class="icon-circle">
+                            <i class="@item.Icon"></i>
+                        </div>
+                        <h5>@item.Title</h5>
+                        <p>@item.Description</p>
+                        <a href="@item.Url" class="stretched-link">Explore @item.Title <i class="fa-solid fa-arrow-right ms-2"></i></a>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
 
+    <section class="value-section">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="value-card h-100">
+                    <h4><i class="fa-solid fa-chalkboard-user me-2"></i>Hands-on by design</h4>
+                    <p>Each module blends explanations with architecture diagrams, command snippets, and real deployment steps so you can replicate the results.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-card h-100">
+                    <h4><i class="fa-solid fa-layer-group me-2"></i>Full-stack mindset</h4>
+                    <p>Connect backend, front-end, DevOps, testing, and data analytics knowledge to deliver production-grade systems confidently.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="value-card h-100">
+                    <h4><i class="fa-solid fa-headset me-2"></i>Stay supported</h4>
+                    <p>Reach out anytime for mentoring, interview preparation, or customised corporate training aligned to your team goals.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
 
 <footer class="bg-dark text-white text-center py-4">
