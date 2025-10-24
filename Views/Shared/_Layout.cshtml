@@ -1789,6 +1789,10 @@
         document.addEventListener("DOMContentLoaded", function () {
         const adContainer = document.getElementById("rightAdSection");
 
+        if (!adContainer) {
+            return;
+        }
+
         const adSlots = [
             "1283766278",
             "9007244980", "6381081648",
@@ -1797,7 +1801,8 @@
 
         const avgAdHeight = 600;
         const pageHeight = document.body.scrollHeight;
-        const maxAds = Math.min(adSlots.length, Math.floor(pageHeight / avgAdHeight));
+        const calculatedAdCount = Math.floor(pageHeight / avgAdHeight);
+        const maxAds = Math.max(1, Math.min(adSlots.length, calculatedAdCount));
 
         // Load one ad at a time with slight delay
         let delay = 0;
