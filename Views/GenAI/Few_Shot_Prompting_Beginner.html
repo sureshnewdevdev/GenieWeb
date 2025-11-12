@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Few-Shot Prompting (Clear Guide) — ItTechGenie</title>
+  <style>
+    :root { --fg:#111; --muted:#6c757d; --bg:#fff; --border:#e9ecef; --good:#e6fffa; --bad:#fff5f5; --note:#eef6ff; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; line-height: 1.65; color: var(--fg); background: var(--bg); margin: 0; }
+    .container { max-width: 980px; margin: 0 auto; padding: 24px 16px; }
+    h1 { margin: 0 0 8px; }
+    h2 { scroll-margin-top: 80px; }
+    .lead { color: var(--muted); margin-top: 0; }
+    .toc, .card, .table { border: 1px solid var(--border); border-radius: 10px; padding: 16px; background: #fff; }
+    .toc { margin: 20px 0; }
+    .card { margin: 16px 0; }
+    .table { overflow-x: auto; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+    pre { background: #f8f9fa; padding: 12px; border-radius: 8px; overflow: auto; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size: 0.95em; }
+    section { scroll-margin-top: 80px; }
+    .fw-semibold { font-weight: 600; }
+    .muted { color: var(--muted); }
+    .mb-0{margin-bottom:0}.mb-1{margin-bottom:.25rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:1rem}.mb-4{margin-bottom:1.5rem}
+    .mt-0{margin-top:0}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:1rem}.mt-4{margin-top:1.5rem}
+    .good { background: var(--good); border: 1px solid #b2f5ea; padding: 12px; border-radius: 8px; }
+    .bad { background: var(--bad); border: 1px solid #fed7d7; padding: 12px; border-radius: 8px; }
+    .note { background: var(--note); border: 1px solid #dbeafe; padding: 12px; border-radius: 8px; }
+    .def { border-left: 4px solid #38bdf8; padding-left: 12px; }
+    .kbd { font-family: ui-monospace, Menlo, Consolas, monospace; background:#f1f5f9; border:1px solid #e2e8f0; padding:2px 6px; border-radius:6px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="mb-3">
+      <h1>Few-Shot Prompting — A Clear, Step-by-Step Guide</h1>
+      <p class="lead">Teach the model with a few small examples. Learn what to include, how many examples to use, and how to structure them.</p>
+    </header>
+
+    <nav class="toc">
+      <div class="fw-semibold mb-2">On this page</div>
+      <ol class="mb-0">
+        <li><a href="#intro">1) What is Few-Shot?</a></li>
+        <li><a href="#blocks">2) Building Blocks (Simple Definitions)</a></li>
+        <li><a href="#recipe">3) A Simple Recipe</a></li>
+        <li><a href="#patterns">4) Prompt Patterns</a></li>
+        <li><a href="#examples">5) Fully Worked Examples</a></li>
+        <li><a href="#dos">6) Do / Don’t (with reasons)</a></li>
+        <li><a href="#practice">7) Practice Tasks</a></li>
+        <li><a href="#glossary">8) Glossary</a></li>
+        <li><a href="#summary">9) Summary</a></li>
+      </ol>
+    </nav>
+
+    <section id="intro" class="mb-4">
+      <h2>1) What is Few-Shot?</h2>
+      <p><strong>Few-shot prompting</strong> means you show the model a small set of <em>examples</em> of the task (inputs with correct outputs) before asking it to solve a new, similar case.</p>
+      <div class="note mt-2"><strong>Think of it as:</strong> “Here are 2–5 solved samples. Now solve this new one in the same way.”</div>
+    </section>
+
+    <section id="blocks" class="mb-4">
+      <h2>2) Building Blocks (Simple Definitions)</h2>
+      <div class="card">
+        <p class="def"><strong>Instruction:</strong> The main command for the task. Example: <span class="kbd">"Classify reviews by sentiment."</span></p>
+        <p class="def"><strong>Example (shot):</strong> A pair of <em>Input</em> and <em>Output</em> that demonstrates the correct style/format.</p>
+        <p class="def"><strong>Demonstration set:</strong> The small collection of examples you include (usually 2–5).</p>
+        <p class="def"><strong>Constraints:</strong> Rules the model must follow (labels, word limits, “JSON only”, etc.).</p>
+        <p class="def"><strong>Output format:</strong> The exact layout for the answer (often JSON).</p>
+        <p class="def"><strong>New input (query):</strong> The fresh case the model must solve after seeing the examples.</p>
+      </div>
+    </section>
+
+    <section id="recipe" class="mb-4">
+      <h2>3) A Simple Recipe</h2>
+      <ol>
+        <li>Write a short <strong>instruction</strong> for the task.</li>
+        <li>Add 2–5 small, varied <strong>examples</strong> (each with input and correct output).</li>
+        <li>State <strong>constraints</strong> and <strong>output format</strong>.</li>
+        <li>Provide the <strong>new input</strong> to solve.</li>
+        <li>(Optional) Add acceptance checks or a role if needed.</li>
+      </ol>
+    </section>
+
+    <section id="patterns" class="mb-4">
+      <h2>4) Prompt Patterns</h2>
+
+      <div class="card">
+        <div class="fw-semibold mb-2">Pattern A — Labeled Examples + New Query</div>
+        <pre><code class="language-text">Instruction: Classify the sentiment as "positive", "negative", or "neutral". Return JSON only.
+
+Examples:
+Input: "The battery lasts all day." 
+Output: {"label":"positive"}
+
+Input: "The camera is blurry and overheats." 
+Output: {"label":"negative"}
+
+Input: "It works okay for now." 
+Output: {"label":"neutral"}
+
+New Input:
+"Delivery was late, but the product quality is excellent."</code></pre>
+      </div>
+
+      <div class="card">
+        <div class="fw-semibold mb-2">Pattern B — Extraction with JSON Schema</div>
+        <pre><code class="language-text">Instruction: Extract {"invoice_no":string, "amount_in_inr":number, "date":"YYYY-MM-DD"|null}. Return JSON only.
+
+Examples:
+Text: "Invoice INV-77 for ₹1250 was paid on 5 Jan 2025." 
+Output: {"invoice_no":"INV-77","amount_in_inr":1250,"date":"2025-01-05"}
+
+Text: "Paid ₹900, invoice X-9. No date mentioned." 
+Output: {"invoice_no":"X-9","amount_in_inr":900,"date":null}
+
+New Text:
+"Please process payment of ₹1,499 for invoice AB-12, meeting on 14 Aug 2024."</code></pre>
+      </div>
+
+      <div class="card">
+        <div class="fw-semibold mb-2">Pattern C — Style Transfer (Few Shots)</div>
+        <pre><code class="language-text">Instruction: Rewrite to a polite, professional tone in ≤20 words. Return only the rewritten sentence.
+
+Examples:
+Original: "Send the file now."
+Rewritten: "Please share the file as soon as possible."
+
+Original: "You missed the deadline."
+Rewritten: "Could you share an update on the deadline when you can?"
+
+New Text:
+"Why is this still pending?"</code></pre>
+      </div>
+    </section>
+
+    <section id="examples" class="mb-4">
+      <h2>5) Fully Worked Examples</h2>
+
+      <div class="bad">
+        <div class="fw-semibold">Needs Improvement (Why it is weak)</div>
+        <pre><code class="language-text">"Classify reviews. Here are many examples..." (100+ lines)</code></pre>
+        <ul class="mb-0">
+          <li>Too many examples can exhaust context and add noise.</li>
+          <li>Examples don’t show all labels or edge cases.</li>
+          <li>No fixed output format (hard to check results).</li>
+        </ul>
+      </div>
+
+      <div class="good mt-2">
+        <div class="fw-semibold">Good Prompt (Clear, Balanced, Teaches the Pattern)</div>
+        <pre><code class="language-text">Instruction: Classify as "positive", "negative", or "neutral". Return JSON only.
+
+Examples:
+Input: "Works like a charm." 
+Output: {"label":"positive"}
+
+Input: "It keeps crashing." 
+Output: {"label":"negative"}
+
+Input: "It's fine." 
+Output: {"label":"neutral"}
+
+New Input: "Good value, but the charger heats up."</code></pre>
+        <div class="mt-2"><em>Why it is good:</em> covers each label, keeps examples short, enforces JSON.</div>
+      </div>
+
+      <div class="card">
+        <div class="fw-semibold">Example — Extraction with Units</div>
+        <pre><code class="language-text">Instruction: Extract {"name":string,"amount_in_inr":number,"date":"YYYY-MM-DD"|null}. Return JSON only.
+
+Examples:
+Text: "Paid ₹1,250 to Priya on 02-01-2025." 
+Output: {"name":"Priya","amount_in_inr":1250,"date":"2025-01-02"}
+
+Text: "Sent 2000 INR to Amit, will confirm date later." 
+Output: {"name":"Amit","amount_in_inr":2000,"date":null}
+
+New Text:
+"Transferred ₹3,150 to Ravi today (14 Aug 2024) for travel."</code></pre>
+        <div class="mt-2">
+          <div class="fw-semibold">Expected Output</div>
+          <pre><code class="language-json">{"name":"Ravi","amount_in_inr":3150,"date":"2024-08-14"}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="dos" class="mb-4">
+      <h2>6) Do / Don’t (with reasons)</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Do</th><th>Don’t</th><th>Reason</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Use 2–5 short, diverse examples.</td>
+              <td>Use very long or many examples.</td>
+              <td>Short examples save space and teach the pattern clearly.</td>
+            </tr>
+            <tr>
+              <td>Cover every label or field at least once.</td>
+              <td>Show only the easy or positive cases.</td>
+              <td>Balanced examples reduce bias and mistakes.</td>
+            </tr>
+            <tr>
+              <td>Fix the output format (e.g., JSON).</td>
+              <td>Allow free-form answers when structure matters.</td>
+              <td>Structure makes results checkable and automatable.</td>
+            </tr>
+            <tr>
+              <td>Place examples before the new input.</td>
+              <td>Put examples after the new input.</td>
+              <td>Order helps the model copy the demonstrated pattern.</td>
+            </tr>
+            <tr>
+              <td>Add edge cases (nulls, mixed signals).</td>
+              <td>Avoid tricky cases.</td>
+              <td>Edge cases prevent surprises later.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="practice" class="mb-4">
+      <h2>7) Practice Tasks</h2>
+      <ol>
+        <li><strong>Classification:</strong> Create a few-shot prompt to label support tickets {"P1","P2","P3"} with JSON output only.</li>
+        <li><strong>Extraction:</strong> Create a few-shot prompt to extract {"customer","order_id","amount_in_inr"} from chat logs. Show two examples with nulls.</li>
+        <li><strong>Rewrite:</strong> Create a few-shot prompt to make messages friendly in ≤20 words. Include two examples and a new text.</li>
+      </ol>
+    </section>
+
+    <section id="glossary" class="mb-4">
+      <h2>8) Glossary</h2>
+      <ul>
+        <li><strong>Few-shot:</strong> Prompting with a handful of examples.</li>
+        <li><strong>Shot:</strong> One example (input → output).</li>
+        <li><strong>Demonstration set:</strong> The small collection of examples shown.</li>
+        <li><strong>Generalization:</strong> The model applying the learned pattern to new inputs.</li>
+        <li><strong>Edge case:</strong> A tricky or uncommon situation that often causes errors.</li>
+      </ul>
+    </section>
+
+    <section id="summary" class="mb-4">
+      <h2>9) Summary</h2>
+      <p>Few-shot prompting teaches by example. Use 2–5 short, varied samples that cover labels and edge cases, lock the output format, then present the new input. This simple structure improves accuracy and consistency.</p>
+    </section>
+
+    <footer class="muted mt-4">© ItTechGenie</footer>
+  </div>
+</body>
+</html>

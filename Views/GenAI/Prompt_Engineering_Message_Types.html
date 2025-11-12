@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prompt Engineering: Types of Messages — System, User, AI — ItTechGenie</title>
+  <style>
+    :root { --fg:#111; --muted:#6c757d; --bg:#fff; --border:#e9ecef; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; line-height: 1.6; color: var(--fg); background: var(--bg); margin: 0; }
+    .container { max-width: 980px; margin: 0 auto; padding: 24px 16px; }
+    h1 { margin: 0 0 8px; }
+    .lead { color: var(--muted); margin-top: 0; }
+    .toc, .card, .table { border: 1px solid var(--border); border-radius: 10px; padding: 16px; background: #fff; }
+    .toc { margin: 20px 0; }
+    .card { margin: 16px 0; }
+    .table { overflow-x: auto; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+    pre { background: #f8f9fa; padding: 12px; border-radius: 8px; overflow: auto; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size: 0.95em; }
+    section { scroll-margin-top: 80px; }
+    .fw-semibold { font-weight: 600; }
+    .muted { color: var(--muted); }
+    .mb-0{margin-bottom:0}.mb-1{margin-bottom:.25rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:1rem}.mb-4{margin-bottom:1.5rem}
+    .mt-0{margin-top:0}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:1rem}.mt-4{margin-top:1.5rem}
+    .tip { background: #f0fff4; border: 1px solid #d1fae5; padding: 10px 12px; border-radius: 8px; }
+    .warn { background: #fff7ed; border: 1px solid #ffedd5; padding: 10px 12px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="mb-3">
+      <h1>Prompt Engineering: Types of Messages — System, User, AI (Assistant)</h1>
+      <p class="lead">Understand how System, User, and Assistant messages work together. Learn their purpose, structure, and best practices with realistic examples and ready-to-use templates.</p>
+    </header>
+
+    <nav class="toc">
+      <div class="fw-semibold mb-2">On this page</div>
+      <ol class="mb-0">
+        <li><a href="#introduction">Introduction</a></li>
+        <li><a href="#syntax">Message Structure &amp; Syntax</a></li>
+        <li><a href="#example">Examples</a></li>
+        <li><a href="#explanation">How the Roles Interact</a></li>
+        <li><a href="#realworld">Real-World Use Cases</a></li>
+        <li><a href="#notes">Key Notes / Tips</a></li>
+        <li><a href="#practice">Practice Exercise</a></li>
+        <li><a href="#summary">Summary</a></li>
+        <li><a href="#templates">Copy-Paste Templates</a></li>
+        <li><a href="#checklist">Quality Checklist</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ol>
+    </nav>
+
+    <section id="introduction" class="mb-4">
+      <h2>Introduction</h2>
+      <p><strong>System</strong>, <strong>User</strong>, and <strong>Assistant</strong> messages form the conversation contract for large language models. Each role has a distinct responsibility that shapes the behavior and quality of the final answer.</p>
+      <ul>
+        <li><strong>System</strong>: Defines role/persona, tone, boundaries, and global formatting or safety rules.</li>
+        <li><strong>User</strong>: States the concrete task, inputs, constraints, and success criteria.</li>
+        <li><strong>Assistant</strong>: Produces the response that follows both System and User guidance.</li>
+      </ul>
+      <div class="tip mt-2"><strong>Tip:</strong> Treat the System message as your “operating manual”, and the User message as the “work order”.</div>
+    </section>
+
+    <section id="syntax" class="mb-4">
+      <h2>Message Structure &amp; Syntax</h2>
+      <div class="card">
+        <div class="fw-semibold mb-2">Generic JSON Conversation Format</div>
+        <pre><code class="language-json">[
+  {"role": "system", "content": "You are a precise technical author. Use step-by-step structure and examples."},
+  {"role": "user",   "content": "Explain Python lists with syntax, examples, and a small exercise."},
+  {"role": "assistant", "content": "(model will generate this response based on the above messages)"}
+]</code></pre>
+      </div>
+
+      <div class="card">
+        <div class="fw-semibold mb-2">Role Purposes</div>
+        <div class="table">
+          <table>
+            <thead>
+              <tr><th>Role</th><th>Purpose</th><th>What to include</th><th>What to avoid</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>System</strong></td>
+                <td>Define persona, tone, boundaries, output format.</td>
+                <td>Role, audience, constraints, safety, style, formatting.</td>
+                <td>Task-specific details that belong in User; ambiguous goals.</td>
+              </tr>
+              <tr>
+                <td><strong>User</strong></td>
+                <td>Provide the actual task, inputs, constraints, success criteria.</td>
+                <td>Goal, context, examples, data, required sections, acceptance tests.</td>
+                <td>Vague asks; mixing global policies better set in System.</td>
+              </tr>
+              <tr>
+                <td><strong>Assistant</strong></td>
+                <td>Produce the answer consistent with System + User.</td>
+                <td>Clear structure, accurate content, follow constraints faithfully.</td>
+                <td>Ignoring system rules; drifting tone; unsafe/unrequested content.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="example" class="mb-4">
+      <h2>Examples</h2>
+
+      <div class="card">
+        <div class="fw-semibold">Example 1 — Educational Page Generation</div>
+        <pre><code class="language-json">[
+  {"role":"system","content":"You are a helpful technical author for ItTechGenie. Use human tone, short paragraphs, and include Syntax, Example, Explanation, Notes, Practice, Summary. Output as a single HTML page only."},
+  {"role":"user","content":"Topic: Python Lists. Include a TOC with anchors and two examples with outputs. Avoid hype and keep it practical."}
+]</code></pre>
+      </div>
+
+      <div class="card">
+        <div class="fw-semibold">Example 2 — Tone &amp; Safety Controls</div>
+        <pre><code class="language-json">[
+  {"role":"system","content":"Act as a concise security-aware assistant. If the user requests unsafe actions, refuse and suggest safer alternatives. Keep answers under 300 words unless examples are requested."},
+  {"role":"user","content":"Explain the difference between hashing and encryption with a small example."}
+]</code></pre>
+      </div>
+
+      <div class="card">
+        <div class="fw-semibold">Example 3 — Output Format Guardrails</div>
+        <pre><code class="language-json">[
+  {"role":"system","content":"Respond only in valid JSON. Include fields: title, summary, steps[]. Refuse non-JSON requests."},
+  {"role":"user","content":"Create a 3-step checklist for enabling MFA in a web app."}
+]</code></pre>
+      </div>
+    </section>
+
+    <section id="explanation" class="mb-4">
+      <h2>How the Roles Interact</h2>
+      <ul>
+        <li><strong>Priority</strong>: System &gt; User &gt; Assistant. When in conflict, System wins.</li>
+        <li><strong>Separation of Concerns</strong>: Keep persona + format in System, task + inputs in User. This improves clarity and reuse.</li>
+        <li><strong>Context Chaining</strong>: Maintain a stable System across turns; refine the User message with new data or constraints.</li>
+        <li><strong>Acceptance Criteria</strong>: Put measurable checks in the User message (e.g., “include 2 examples with outputs”).</li>
+      </ul>
+      <div class="warn mt-2"><strong>Warning:</strong> Mixing style rules into the User message can cause drift. Put style and safety in the System message instead.</div>
+    </section>
+
+    <section id="realworld" class="mb-4">
+      <h2>Real-World Use Cases</h2>
+      <ul>
+        <li><strong>Documentation bots</strong>: System defines brand tone and safety; User supplies the doc request; Assistant returns a styled page.</li>
+        <li><strong>Customer support</strong>: System encodes policy/compliance; User provides a ticket; Assistant returns a compliant resolution.</li>
+        <li><strong>Education content</strong>: System fixes structure (sections, tone); User asks for a topic; Assistant produces consistent lessons.</li>
+        <li><strong>APIs/Tools orchestration</strong>: System locks output format; User gives parameters; Assistant outputs machine-parseable results.</li>
+      </ul>
+    </section>
+
+    <section id="notes" class="mb-4">
+      <h2>Key Notes / Tips</h2>
+      <ul>
+        <li>Write the System message once and reuse it for consistency.</li>
+        <li>Keep paragraphs short (2–4 lines) and avoid filler words.</li>
+        <li>State required sections, formats, and limits explicitly.</li>
+        <li>Include a tiny positive and a negative example to anchor style.</li>
+        <li>Log recurring mistakes, then strengthen the System message.</li>
+      </ul>
+    </section>
+
+    <section id="practice" class="mb-4">
+      <h2>Practice Exercise</h2>
+      <ol>
+        <li>Create a System message for your brand’s writing style, tone, and safety constraints.</li>
+        <li>Write a User message requesting a page on “C# Properties” with two examples and outputs, plus a summary.</li>
+        <li>Verify the output against your acceptance criteria. Iterate on the System message if there’s drift.</li>
+      </ol>
+    </section>
+
+    <section id="summary" class="mb-4">
+      <h2>Summary</h2>
+      <p>System messages define persona, tone, and formatting. User messages define the actual task, inputs, and success criteria. The Assistant must follow both to produce consistent, safe, and useful results. Keep roles separate and measurable for best outcomes.</p>
+    </section>
+
+    <section id="templates" class="mb-4">
+      <h2>Copy-Paste Templates</h2>
+      <div class="card">
+        <div class="fw-semibold mb-2">Reusable System Template</div>
+        <pre><code class="language-json">{"role":"system","content":"You are a professional technical author for ItTechGenie. Use a human tone with short paragraphs. Always include: Introduction, Syntax, Example, Explanation, Real-World Use Case, Key Notes, Practice, Summary. Output a single self-contained HTML page with a TOC and code blocks. Keep CSS minimal in one &lt;style&gt; block."}</code></pre>
+      </div>
+      <div class="card">
+        <div class="fw-semibold mb-2">Reusable User Template</div>
+        <pre><code class="language-json">{"role":"user","content":"Topic: &lt;replace here&gt;. LanguageId for code samples: &lt;python|csharp|sql|...&gt;. Requirements: Include two examples with outputs; keep it practical; ensure anchor links for sections; return a single HTML file only."}</code></pre>
+      </div>
+      <div class="card">
+        <div class="fw-semibold mb-2">Minimal One-Shot Example</div>
+        <pre><code class="language-json">[
+  {"role":"system","content":"You are a technical author. Single HTML file with TOC, sections, and minimal CSS."},
+  {"role":"user","content":"Topic: SQL Joins. LanguageId: sql. Include two examples (with outputs) and a recap."}
+]</code></pre>
+      </div>
+    </section>
+
+    <section id="checklist" class="mb-4">
+      <h2>Quality Checklist</h2>
+      <ul>
+        <li>System covers persona, tone, structure, and safety.</li>
+        <li>User contains a single task with clear inputs and acceptance criteria.</li>
+        <li>Assistant respects both and returns a single clean HTML page.</li>
+        <li>TOC anchors work; examples are realistic; outputs are explicit.</li>
+        <li>Short paragraphs; minimal CSS; readable code blocks.</li>
+      </ul>
+    </section>
+
+    <section id="faq" class="mb-4">
+      <h2>FAQ</h2>
+      <p><strong>Q: Where should I put word limits?</strong><br/>A: In the System message if you want a global rule; in the User message if only for this task.</p>
+      <p><strong>Q: What if the model ignores the structure?</strong><br/>A: Tighten the System message and restate acceptance criteria in the User message.</p>
+      <p><strong>Q: Can I mix multiple tasks in one User message?</strong><br/>A: Avoid it. Split tasks for clarity and better control.</p>
+    </section>
+
+    <footer class="muted mt-4">© ItTechGenie</footer>
+  </div>
+</body>
+</html>
