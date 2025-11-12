@@ -2,40 +2,197 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<section class="py-4">
-    <div class="container">
-        <h1 class="mb-3">Chain-of-Thought (CoT) Prompting</h1>
-        <p class="lead">Chain-of-Thought prompting encourages the model to think step-by-step. Use it when you need the model to show reasoning rather than jump directly to an answer.</p>
+<style>
+    :root {
+        --cot-fg: #111;
+        --cot-muted: #6c757d;
+        --cot-bg: #fff;
+        --cot-border: #e9ecef;
+    }
 
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body">
-                <h2 class="h4">When to use CoT</h2>
-                <ul>
-                    <li>Multi-step calculations or logic puzzles.</li>
-                    <li>Explaining how a conclusion was reached.</li>
-                    <li>Auditing the reasoning process for mistakes.</li>
-                </ul>
+    .cot-container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 24px 16px;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        line-height: 1.6;
+        color: var(--cot-fg);
+        background: var(--cot-bg);
+    }
+
+    .cot-container h1 {
+        margin: 0 0 8px;
+    }
+
+    .cot-lead {
+        color: var(--cot-muted);
+        margin-top: 0;
+    }
+
+    .cot-toc,
+    .cot-card {
+        border: 1px solid var(--cot-border);
+        border-radius: 10px;
+        padding: 16px;
+        background: #fff;
+    }
+
+    .cot-card {
+        margin: 16px 0;
+    }
+
+    .cot-toc {
+        margin: 20px 0;
+    }
+
+    pre {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 8px;
+        overflow: auto;
+    }
+
+    code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        font-size: 0.95em;
+    }
+
+    section {
+        scroll-margin-top: 80px;
+    }
+
+    .cot-fw-semibold {
+        font-weight: 600;
+    }
+
+    .cot-muted {
+        color: var(--cot-muted);
+    }
+
+    .mb-0 { margin-bottom: 0; }
+    .mb-1 { margin-bottom: 0.25rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-3 { margin-bottom: 1rem; }
+    .mb-4 { margin-bottom: 1.5rem; }
+    .mt-0 { margin-top: 0; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-3 { margin-top: 1rem; }
+    .mt-4 { margin-top: 1.5rem; }
+</style>
+
+<div class="cot-container">
+    <header class="mb-3">
+        <h1>Chain-of-Thought Prompting</h1>
+        <p class="cot-lead">Guide models to reason step-by-step so that answers become transparent, auditable, and easier to trust in production workflows.</p>
+    </header>
+
+    <nav class="cot-toc">
+        <div class="cot-fw-semibold mb-2">On this page</div>
+        <ol class="mb-0">
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#syntax">Syntax</a></li>
+            <li><a href="#example">Example</a></li>
+            <li><a href="#explanation">Explanation</a></li>
+            <li><a href="#realworld">Real-World Use Case</a></li>
+            <li><a href="#notes">Key Notes / Tips</a></li>
+            <li><a href="#practice">Practice Exercise</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ol>
+    </nav>
+
+    <section id="introduction" class="mb-4">
+        <h2>Introduction</h2>
+        <p>Chain-of-Thought (CoT) prompting instructs a language model to spell out intermediate reasoning instead of jumping straight to a conclusion.</p>
+        <ul>
+            <li><strong>Definition:</strong> A prompting style that requests the model to list its thinking process before sharing the final answer.</li>
+            <li><strong>Why:</strong> Reveals hidden steps, making it easier to validate calculations and catch logic gaps.</li>
+            <li><strong>Where:</strong> Popular in coding copilots, compliance workflows, analytics bots, and any task requiring human review.</li>
+        </ul>
+    </section>
+
+    <section id="syntax" class="mb-4">
+        <h2>Syntax</h2>
+        <div class="cot-card">
+            <pre><code class="language-json">[
+  {
+    "role": "system",
+    "content": "You are a careful analyst. Explain your reasoning as numbered steps before the final answer."
+  },
+  {
+    "role": "user",
+    "content": "Question: {{problem statement}}\nRemember: Show each step and end with 'Final Answer:'."
+  }
+]</code></pre>
+        </div>
+    </section>
+
+    <section id="example" class="mb-4">
+        <h2>Example</h2>
+
+        <div class="cot-card">
+            <div class="cot-fw-semibold">Example 1 — Business Math</div>
+            <pre><code class="language-json">[
+  {"role": "system", "content": "You are a finance tutor. Think step-by-step and show working."},
+  {"role": "user", "content": "A store sold 120 gadgets in Q1 and 156 in Q2. What is the percentage growth?"}
+]</code></pre>
+            <div class="mt-2">
+                <div class="cot-fw-semibold">Output</div>
+                <pre><code>1. Identify the difference: 156 - 120 = 36
+2. Divide by the original quantity: 36 / 120 = 0.3
+3. Convert to percentage: 0.3 × 100 = 30%
+Final Answer: 30% growth from Q1 to Q2.</code></pre>
             </div>
         </div>
 
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body">
-                <h2 class="h4">Example Prompt</h2>
-                <pre class="bg-light p-3 rounded"><code>System: You are a careful math tutor. Think step-by-step before giving the final answer.
-User: If a factory makes 12 bolts every 5 minutes, how many bolts are produced in 2 hours?</code></pre>
-                <p class="mb-0">Encourage the model to show its intermediate calculations before producing the final value.</p>
-            </div>
+        <div class="cot-card">
+            <div class="cot-fw-semibold">Example 2 — Debugging Assistance</div>
+            <pre><code class="language-json">[
+  {"role": "system", "content": "You are a Python mentor. Reason about the bug before proposing fixes."},
+  {"role": "user", "content": "Why does this list comprehension fail? numbers = [int(x) for x in ['4', '7', 'A']]"}
+]</code></pre>
         </div>
+    </section>
 
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <h2 class="h4">Tips</h2>
-                <ul>
-                    <li>Explicitly ask for reasoning (“show your working” or “list the steps”).</li>
-                    <li>Review the reasoning for hallucinations or arithmetic slips.</li>
-                    <li>Combine with constraints if you only want the final answer in a specific format.</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</section>
+    <section id="explanation" class="mb-4">
+        <h2>Explanation</h2>
+        <ul>
+            <li><strong>System prompt</strong> makes the model adopt a teacher persona that values explicit reasoning.</li>
+            <li><strong>User message</strong> nudges the model to structure thoughts into steps and to label the final answer clearly.</li>
+            <li><strong>Intermediate steps</strong> give reviewers checkpoints to catch arithmetic slips or unsupported claims.</li>
+            <li><strong>Difference from direct prompting:</strong> plain prompts yield a single sentence; CoT surfaces the path taken.</li>
+        </ul>
+    </section>
+
+    <section id="realworld" class="mb-4">
+        <h2>Real-World Use Case</h2>
+        <p>A compliance automation team builds an internal assistant that reviews loan applications. With CoT prompting, every approval or rejection includes numbered reasoning tied to policy clauses, allowing risk officers to audit decisions before they are sent to customers.</p>
+    </section>
+
+    <section id="notes" class="mb-4">
+        <h2>Key Notes / Tips</h2>
+        <ul>
+            <li>Set expectations like “list the steps” or “explain assumptions” to keep the chain structured.</li>
+            <li>Use compact language; overly long reasoning can cost tokens and slow responses.</li>
+            <li>Review the chain—models sometimes fabricate intermediate facts even if the final answer looks plausible.</li>
+            <li>For production, combine CoT with evaluation scripts that flag missing “Final Answer” markers.</li>
+            <li>Consider privacy: redact sensitive data from intermediate reasoning before logging.</li>
+        </ul>
+    </section>
+
+    <section id="practice" class="mb-4">
+        <h2>Practice Exercise</h2>
+        <ol>
+            <li>Create a CoT prompt that solves a percentage discount question for retail sales.</li>
+            <li>Draft a CoT prompt that explains the logic for approving or rejecting a software bug fix.</li>
+            <li>Challenge: Combine CoT with a request to cite the policy or document paragraph that supports each step.</li>
+        </ol>
+    </section>
+
+    <section id="summary" class="mb-4">
+        <h2>Summary</h2>
+        <p>Chain-of-Thought prompting reveals how models think, making decisions traceable and reviewable. Use it whenever the path to the answer matters as much as the answer itself, especially in regulated or high-stakes domains.</p>
+    </section>
+
+    <footer class="cot-muted mt-4">© ItTechGenie</footer>
+</div>
