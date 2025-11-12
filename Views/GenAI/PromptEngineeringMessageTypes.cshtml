@@ -1,0 +1,300 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --genai-fg: #111;
+        --genai-muted: #6c757d;
+        --genai-bg: #fff;
+        --genai-border: #e9ecef;
+    }
+
+    .genai-container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 24px 16px;
+        color: var(--genai-fg);
+        background: var(--genai-bg);
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        line-height: 1.6;
+    }
+
+    .genai-container h1 {
+        margin: 0 0 8px;
+    }
+
+    .genai-lead {
+        color: var(--genai-muted);
+        margin-top: 0;
+    }
+
+    .genai-card,
+    .genai-toc,
+    .genai-table {
+        border: 1px solid var(--genai-border);
+        border-radius: 10px;
+        padding: 16px;
+        background: #fff;
+    }
+
+    .genai-card {
+        margin: 16px 0;
+    }
+
+    .genai-toc {
+        margin: 20px 0;
+    }
+
+    .genai-table {
+        overflow-x: auto;
+    }
+
+    .genai-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .genai-table th,
+    .genai-table td {
+        padding: 10px;
+        border-bottom: 1px solid var(--genai-border);
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .genai-pre {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 8px;
+        overflow: auto;
+    }
+
+    .genai-pre code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        font-size: 0.95em;
+    }
+
+    .genai-section {
+        scroll-margin-top: 80px;
+    }
+
+    .genai-fw-semibold {
+        font-weight: 600;
+    }
+
+    .genai-muted {
+        color: var(--genai-muted);
+    }
+
+    .genai-tip {
+        background: #f0fff4;
+        border: 1px solid #d1fae5;
+        padding: 10px 12px;
+        border-radius: 8px;
+    }
+
+    .genai-warn {
+        background: #fff7ed;
+        border: 1px solid #ffedd5;
+        padding: 10px 12px;
+        border-radius: 8px;
+    }
+
+    .genai-spacer-0 { margin-bottom: 0; }
+    .genai-spacer-1 { margin-bottom: .25rem; }
+    .genai-spacer-2 { margin-bottom: .5rem; }
+    .genai-spacer-3 { margin-bottom: 1rem; }
+    .genai-spacer-4 { margin-bottom: 1.5rem; }
+
+    .genai-mt-0 { margin-top: 0; }
+    .genai-mt-1 { margin-top: .25rem; }
+    .genai-mt-2 { margin-top: .5rem; }
+    .genai-mt-3 { margin-top: 1rem; }
+    .genai-mt-4 { margin-top: 1.5rem; }
+
+    .genai-toc ol {
+        margin-bottom: 0;
+        padding-left: 1.2rem;
+    }
+</style>
+
+<div class="genai-container">
+    <header class="genai-spacer-3">
+        <h1>Prompt Engineering: Types of Messages — System, User, AI (Assistant)</h1>
+        <p class="genai-lead">Understand how System, User, and Assistant messages work together. Learn their purpose, structure, and best practices with realistic examples and ready-to-use templates.</p>
+    </header>
+
+    <nav class="genai-toc">
+        <div class="genai-fw-semibold genai-spacer-2">On this page</div>
+        <ol>
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#syntax">Message Structure &amp; Syntax</a></li>
+            <li><a href="#example">Examples</a></li>
+            <li><a href="#explanation">How the Roles Interact</a></li>
+            <li><a href="#realworld">Real-World Use Cases</a></li>
+            <li><a href="#notes">Key Notes / Tips</a></li>
+            <li><a href="#practice">Practice Exercise</a></li>
+            <li><a href="#summary">Summary</a></li>
+            <li><a href="#templates">Copy-Paste Templates</a></li>
+            <li><a href="#checklist">Quality Checklist</a></li>
+            <li><a href="#faq">FAQ</a></li>
+        </ol>
+    </nav>
+
+    <section id="introduction" class="genai-section genai-spacer-4">
+        <h2>Introduction</h2>
+        <p><strong>System</strong>, <strong>User</strong>, and <strong>Assistant</strong> messages form the conversation contract for large language models. Each role has a distinct responsibility that shapes the behavior and quality of the final answer.</p>
+        <ul>
+            <li><strong>System</strong>: Defines role/persona, tone, boundaries, and global formatting or safety rules.</li>
+            <li><strong>User</strong>: States the concrete task, inputs, constraints, and success criteria.</li>
+            <li><strong>Assistant</strong>: Produces the response that follows both System and User guidance.</li>
+        </ul>
+        <div class="genai-tip genai-mt-2"><strong>Tip:</strong> Treat the System message as your “operating manual”, and the User message as the “work order”.</div>
+    </section>
+
+    <section id="syntax" class="genai-section genai-spacer-4">
+        <h2>Message Structure &amp; Syntax</h2>
+        <div class="genai-card">
+            <div class="genai-fw-semibold genai-spacer-2">Generic JSON Conversation Format</div>
+            <pre class="genai-pre"><code class="language-json">[
+  {"role": "system", "content": "You are a precise technical author. Use step-by-step structure and examples."},
+  {"role": "user",   "content": "Explain Python lists with syntax, examples, and a small exercise."},
+  {"role": "assistant", "content": "(model will generate this response based on the above messages)"}
+]</code></pre>
+        </div>
+
+        <div class="genai-card">
+            <div class="genai-fw-semibold genai-spacer-2">Role Purposes</div>
+            <div class="genai-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Role</th>
+                            <th>Purpose</th>
+                            <th>What to include</th>
+                            <th>What to avoid</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>System</strong></td>
+                            <td>Define persona, tone, boundaries, output format.</td>
+                            <td>Role, audience, constraints, safety, style, formatting.</td>
+                            <td>Task-specific details that belong in User; ambiguous goals.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>User</strong></td>
+                            <td>Provide the actual task, inputs, constraints, success criteria.</td>
+                            <td>Goal, context, examples, data, required sections, acceptance tests.</td>
+                            <td>Vague asks; mixing global policies better set in System.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Assistant</strong></td>
+                            <td>Produce the answer consistent with System + User.</td>
+                            <td>Clear structure, accurate content, follow constraints faithfully.</td>
+                            <td>Ignoring system rules; drifting tone; unsafe/unrequested content.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="example" class="genai-section genai-spacer-4">
+        <h2>Examples</h2>
+
+        <div class="genai-card">
+            <div class="genai-fw-semibold">Example 1 — Educational Page Generation</div>
+            <pre class="genai-pre"><code class="language-json">[
+  {"role":"system","content":"You are a helpful technical author for ItTechGenie. Use human tone, short paragraphs, and include Syntax, Example, Explanation, Notes, Practice, Summary. Output as a single HTML page only."},
+  {"role":"user","content":"Topic: Python Lists. Include a TOC with anchors and two examples with outputs. Avoid hype and keep it practical."}
+]</code></pre>
+        </div>
+
+        <div class="genai-card">
+            <div class="genai-fw-semibold">Example 2 — Tone &amp; Safety Controls</div>
+            <pre class="genai-pre"><code class="language-json">[
+  {"role":"system","content":"You are a friendly AI career coach. Encourage confidence and provide actionable steps. Avoid making up statistics."},
+  {"role":"user","content":"Give me tips to transition from QA to prompt engineering. Include 3 suggested projects."}
+]</code></pre>
+        </div>
+
+        <div class="genai-card">
+            <div class="genai-fw-semibold">Example 3 — Factual Guardrails</div>
+            <pre class="genai-pre"><code class="language-json">[
+  {"role":"system","content":"You are a compliance assistant. Only answer using the provided policy text. Respond with 'I do not have that information' if the policy does not cover it."},
+  {"role":"user","content":"Is it acceptable to store customer passwords in plaintext according to our policy excerpt?"},
+  {"role":"assistant","content":"(model should respond using policy rules or decline)."}
+]</code></pre>
+        </div>
+    </section>
+
+    <section id="explanation" class="genai-section genai-spacer-4">
+        <h2>How the Roles Interact</h2>
+        <p>The System message sets the tone and global instructions. The User message asks the question or task. The Assistant must respect both, balancing creativity with compliance.</p>
+        <ul>
+            <li><strong>System overrides</strong> any conflicting User request.</li>
+            <li><strong>User clarifies</strong> the specific problem to solve.</li>
+            <li><strong>Assistant</strong> applies reasoning, knowledge, and formatting.</li>
+        </ul>
+        <div class="genai-warn genai-mt-2"><strong>Warning:</strong> If the system instructions are missing or vague, the model might fall back to defaults that may not match your needs.</div>
+    </section>
+
+    <section id="realworld" class="genai-section genai-spacer-4">
+        <h2>Real-World Use Cases</h2>
+        <ul>
+            <li><strong>Customer support bots:</strong> Use System messages for tone, escalation rules, compliance disclaimers.</li>
+            <li><strong>Internal knowledge assistants:</strong> System defines reference sources; User message includes the question and relevant document IDs.</li>
+            <li><strong>Educational tutors:</strong> System establishes teaching style; User message describes the lesson topic and student level.</li>
+        </ul>
+    </section>
+
+    <section id="notes" class="genai-section genai-spacer-4">
+        <h2>Key Notes / Tips</h2>
+        <ul>
+            <li>Keep System instructions short but specific.</li>
+            <li>Use bullet lists in User prompts to highlight must-have outputs.</li>
+            <li>Document repeated instructions in a shared System template.</li>
+            <li>Review assistant responses regularly to refine prompts.</li>
+        </ul>
+    </section>
+
+    <section id="practice" class="genai-section genai-spacer-4">
+        <h2>Practice Exercise</h2>
+        <p>Create a System message for a legal drafting assistant. Then craft a User message asking for a contract clause. Compare outputs with and without the System instructions.</p>
+    </section>
+
+    <section id="summary" class="genai-section genai-spacer-4">
+        <h2>Summary</h2>
+        <p>Understanding the three message types lets you control tone, accuracy, and safety. Use System for global rules, User for the task, and expect the Assistant to deliver on both.</p>
+    </section>
+
+    <section id="templates" class="genai-section genai-spacer-4">
+        <h2>Copy-Paste Templates</h2>
+        <div class="genai-card">
+            <div class="genai-fw-semibold">Technical Writer Persona</div>
+            <pre class="genai-pre"><code class="language-json">{"role":"system","content":"You are a senior technical writer. Use numbered steps, highlight warnings, and end with a checklist."}</code></pre>
+        </div>
+        <div class="genai-card">
+            <div class="genai-fw-semibold">Creative Brainstorming Partner</div>
+            <pre class="genai-pre"><code class="language-json">{"role":"system","content":"You are a playful creative partner. Offer 5 distinct ideas, each with a title and 2 bullet points."}</code></pre>
+        </div>
+    </section>
+
+    <section id="checklist" class="genai-section genai-spacer-4">
+        <h2>Quality Checklist</h2>
+        <ul>
+            <li>System instructions written?</li>
+            <li>User task clear and scoped?</li>
+            <li>Assistant response follows both?</li>
+            <li>Any contradictions resolved?</li>
+        </ul>
+    </section>
+
+    <section id="faq" class="genai-section genai-spacer-4">
+        <h2>FAQ</h2>
+        <p><strong>Q:</strong> Can I have multiple System messages?<br /><strong>A:</strong> Yes, but most APIs combine them into a single context block. Keep instructions consistent.</p>
+        <p><strong>Q:</strong> What if the Assistant ignores the System message?<br /><strong>A:</strong> Revise the instructions to be more explicit or break tasks into smaller steps.</p>
+    </section>
+</div>

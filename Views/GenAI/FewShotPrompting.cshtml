@@ -1,0 +1,332 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --few-fg: #111;
+        --few-muted: #6c757d;
+        --few-bg: #fff;
+        --few-border: #e9ecef;
+        --few-good: #e6fffa;
+        --few-bad: #fff5f5;
+        --few-note: #eef6ff;
+    }
+
+    .few-container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 24px 16px;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        line-height: 1.65;
+        color: var(--few-fg);
+        background: var(--few-bg);
+    }
+
+    .few-container h1 {
+        margin: 0 0 8px;
+    }
+
+    .few-container h2 {
+        scroll-margin-top: 80px;
+    }
+
+    .few-lead {
+        color: var(--few-muted);
+        margin-top: 0;
+    }
+
+    .few-card,
+    .few-toc,
+    .few-table {
+        border: 1px solid var(--few-border);
+        border-radius: 10px;
+        padding: 16px;
+        background: #fff;
+    }
+
+    .few-card {
+        margin: 16px 0;
+    }
+
+    .few-toc {
+        margin: 20px 0;
+    }
+
+    .few-table {
+        overflow-x: auto;
+    }
+
+    .few-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .few-table th,
+    .few-table td {
+        padding: 10px;
+        border-bottom: 1px solid var(--few-border);
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .few-pre {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 8px;
+        overflow: auto;
+    }
+
+    .few-pre code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        font-size: 0.95em;
+    }
+
+    .few-fw-semibold {
+        font-weight: 600;
+    }
+
+    .few-good {
+        background: var(--few-good);
+        border: 1px solid #b2f5ea;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .few-bad {
+        background: var(--few-bad);
+        border: 1px solid #fed7d7;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .few-note {
+        background: var(--few-note);
+        border: 1px solid #dbeafe;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .few-def {
+        border-left: 4px solid #38bdf8;
+        padding-left: 12px;
+    }
+
+    .few-kbd {
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 2px 6px;
+        border-radius: 6px;
+    }
+
+    .few-toc ol {
+        margin-bottom: 0;
+        padding-left: 1.2rem;
+    }
+</style>
+
+<div class="few-container">
+    <header class="mb-3">
+        <h1>Few-Shot Prompting — A Clear, Step-by-Step Guide</h1>
+        <p class="few-lead">Teach the model with a few small examples. Learn what to include, how many examples to use, and how to structure them.</p>
+    </header>
+
+    <nav class="few-toc">
+        <div class="few-fw-semibold mb-2">On this page</div>
+        <ol>
+            <li><a href="#intro">1) What is Few-Shot?</a></li>
+            <li><a href="#blocks">2) Building Blocks (Simple Definitions)</a></li>
+            <li><a href="#recipe">3) A Simple Recipe</a></li>
+            <li><a href="#patterns">4) Prompt Patterns</a></li>
+            <li><a href="#examples">5) Fully Worked Examples</a></li>
+            <li><a href="#dos">6) Do / Don’t (with reasons)</a></li>
+            <li><a href="#practice">7) Practice Tasks</a></li>
+            <li><a href="#glossary">8) Glossary</a></li>
+            <li><a href="#summary">9) Summary</a></li>
+        </ol>
+    </nav>
+
+    <section id="intro" class="mb-4">
+        <h2>1) What is Few-Shot?</h2>
+        <p><strong>Few-shot prompting</strong> means you show the model a small set of <em>examples</em> of the task (inputs with correct outputs) before asking it to solve a new, similar case.</p>
+        <div class="few-note mt-2"><strong>Think of it as:</strong> “Here are 2–5 solved samples. Now solve this new one in the same way.”</div>
+    </section>
+
+    <section id="blocks" class="mb-4">
+        <h2>2) Building Blocks (Simple Definitions)</h2>
+        <div class="few-card">
+            <p class="few-def"><strong>Instruction:</strong> The main command for the task. Example: <span class="few-kbd">"Classify reviews by sentiment."</span></p>
+            <p class="few-def"><strong>Example (shot):</strong> A pair of <em>Input</em> and <em>Output</em> that demonstrates the correct style/format.</p>
+            <p class="few-def"><strong>Demonstration set:</strong> The small collection of examples you include (usually 2–5).</p>
+            <p class="few-def"><strong>Constraints:</strong> Rules the model must follow (labels, word limits, “JSON only”, etc.).</p>
+            <p class="few-def"><strong>Output format:</strong> The exact layout for the answer (often JSON).</p>
+            <p class="few-def"><strong>New input (query):</strong> The fresh case the model must solve after seeing the examples.</p>
+        </div>
+    </section>
+
+    <section id="recipe" class="mb-4">
+        <h2>3) A Simple Recipe</h2>
+        <ol>
+            <li>Write a short <strong>instruction</strong> for the task.</li>
+            <li>Add 2–5 small, varied <strong>examples</strong> (each with input and correct output).</li>
+            <li>State <strong>constraints</strong> and <strong>output format</strong>.</li>
+            <li>Provide the <strong>new input</strong> to solve.</li>
+            <li>(Optional) Add acceptance checks or a role if needed.</li>
+        </ol>
+    </section>
+
+    <section id="patterns" class="mb-4">
+        <h2>4) Prompt Patterns</h2>
+
+        <div class="few-card">
+            <div class="few-fw-semibold mb-2">Pattern A — Labeled Examples + New Query</div>
+            <pre class="few-pre"><code class="language-text">Instruction: Classify the sentiment as "positive", "negative", or "neutral". Return JSON only.
+
+Examples:
+Input: "The battery lasts all day."
+Output: {"label":"positive"}
+
+Input: "The camera is blurry and overheats."
+Output: {"label":"negative"}
+
+Input: "It works okay for now."
+Output: {"label":"neutral"}
+
+New Input:
+"Delivery was late, but the product quality is excellent."</code></pre>
+        </div>
+
+        <div class="few-card">
+            <div class="few-fw-semibold mb-2">Pattern B — Extraction with JSON Schema</div>
+            <pre class="few-pre"><code class="language-text">Instruction: Extract {"invoice_no":string, "amount_in_inr":number, "date":"YYYY-MM-DD"|null}. Return JSON only.
+
+Examples:
+Text: "Invoice INV-77 for ₹1250 was paid on 5 Jan 2025."
+Output: {"invoice_no":"INV-77","amount_in_inr":1250,"date":"2025-01-05"}
+
+Text: "Paid ₹900, invoice X-9. No date mentioned."
+Output: {"invoice_no":"X-9","amount_in_inr":900,"date":null}
+
+New Text:
+"Please process payment of ₹1,499 for invoice AB-12, meeting on 14 Aug 2024."</code></pre>
+        </div>
+
+        <div class="few-card">
+            <div class="few-fw-semibold mb-2">Pattern C — Style Transfer (Few Shots)</div>
+            <pre class="few-pre"><code class="language-text">Instruction: Rewrite to a polite, professional tone in ≤20 words. Return only the rewritten sentence.
+
+Examples:
+Original: "Send the file now."
+Rewritten: "Please share the file as soon as possible."
+
+Original: "You missed the deadline."
+Rewritten: "Could you share an update on the deadline when you can?"
+
+New Text:
+"Why is this still pending?"</code></pre>
+        </div>
+    </section>
+
+    <section id="examples" class="mb-4">
+        <h2>5) Fully Worked Examples</h2>
+
+        <div class="few-bad">
+            <div class="few-fw-semibold">Needs Improvement (Why it is weak)</div>
+            <pre class="few-pre"><code class="language-text">"Classify reviews. Here are many examples..." (100+ lines)</code></pre>
+            <ul class="mb-0">
+                <li>Too many examples can exhaust context and add noise.</li>
+                <li>Examples don’t show all labels or edge cases.</li>
+                <li>No fixed output format (hard to check results).</li>
+            </ul>
+        </div>
+
+        <div class="few-good mt-2">
+            <div class="few-fw-semibold">Good Prompt (Clear, Balanced, Teaches the Pattern)</div>
+            <pre class="few-pre"><code class="language-text">Instruction: Classify as "positive", "negative", or "neutral". Return JSON only.
+
+Examples:
+Input: "Works like a charm."
+Output: {"label":"positive"}
+
+Input: "It keeps crashing."
+Output: {"label":"negative"}
+
+Input: "Quality is acceptable." 
+Output: {"label":"neutral"}
+
+New Input:
+"UI looks good, but the app still freezes at login."</code></pre>
+            <div class="mt-2"><em>Why it is good:</em> Balanced examples, clear JSON output, and a realistic new query.</div>
+        </div>
+
+        <div class="few-card">
+            <div class="few-fw-semibold">Example — Support Ticket Triage</div>
+            <pre class="few-pre"><code class="language-text">Instruction: Categorize support tickets as {"category":"bug|feature|billing|other","priority":"low|medium|high"}. Return JSON only.
+
+Examples:
+Ticket: "Login fails when password has special characters." 
+Output: {"category":"bug","priority":"high"}
+
+Ticket: "Please add dark mode in settings." 
+Output: {"category":"feature","priority":"medium"}
+
+Ticket: "I was charged twice for the same month." 
+Output: {"category":"billing","priority":"high"}
+
+New Ticket:
+"Is there a way to export reports as CSV?"</code></pre>
+        </div>
+    </section>
+
+    <section id="dos" class="mb-4">
+        <h2>6) Do / Don’t (with reasons)</h2>
+        <div class="few-table">
+            <table>
+                <thead>
+                    <tr><th>Do</th><th>Don’t</th><th>Reason</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Use 2–5 examples that cover the space.</td>
+                        <td>Include dozens of random samples.</td>
+                        <td>Too many examples can confuse or exceed context.</td>
+                    </tr>
+                    <tr>
+                        <td>Highlight edge cases in examples.</td>
+                        <td>Repeat similar easy cases only.</td>
+                        <td>Coverage teaches the model how to react to tricky inputs.</td>
+                    </tr>
+                    <tr>
+                        <td>Keep outputs short and consistent.</td>
+                        <td>Use different formats in each example.</td>
+                        <td>Consistency makes it easy for the model to copy the pattern.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="practice" class="mb-4">
+        <h2>7) Practice Tasks</h2>
+        <ol>
+            <li>Create a few-shot prompt that categorizes IT incidents into Security, Performance, Usability, Other.</li>
+            <li>Write a prompt with 3 examples that extracts name, email, and phone into JSON.</li>
+            <li>Design a prompt that rewrites short updates into a cheerful tone using two examples.</li>
+        </ol>
+    </section>
+
+    <section id="glossary" class="mb-4">
+        <h2>8) Glossary</h2>
+        <ul>
+            <li><strong>Shot:</strong> An example pair of input and output.</li>
+            <li><strong>Demonstration set:</strong> The group of examples you provide.</li>
+            <li><strong>Context window:</strong> The token limit the model can read.</li>
+        </ul>
+    </section>
+
+    <section id="summary" class="mb-4">
+        <h2>9) Summary</h2>
+        <p>Few-shot prompting teaches the model by example. Include clear instructions, 2–5 varied examples, and keep outputs consistent. After the examples, provide your new input and let the model follow the demonstrated pattern.</p>
+    </section>
+</div>
