@@ -1,0 +1,297 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root {
+        --zero-fg: #111;
+        --zero-muted: #6c757d;
+        --zero-bg: #fff;
+        --zero-border: #e9ecef;
+        --zero-good: #e6fffa;
+        --zero-bad: #fff5f5;
+        --zero-note: #eef6ff;
+    }
+
+    .zero-container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 24px 16px;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        line-height: 1.65;
+        color: var(--zero-fg);
+        background: var(--zero-bg);
+    }
+
+    .zero-container h1 {
+        margin: 0 0 8px;
+    }
+
+    .zero-container h2 {
+        scroll-margin-top: 80px;
+    }
+
+    .zero-lead {
+        color: var(--zero-muted);
+        margin-top: 0;
+    }
+
+    .zero-card,
+    .zero-toc,
+    .zero-table {
+        border: 1px solid var(--zero-border);
+        border-radius: 10px;
+        padding: 16px;
+        background: #fff;
+    }
+
+    .zero-card {
+        margin: 16px 0;
+    }
+
+    .zero-toc {
+        margin: 20px 0;
+    }
+
+    .zero-table {
+        overflow-x: auto;
+    }
+
+    .zero-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .zero-table th,
+    .zero-table td {
+        padding: 10px;
+        border-bottom: 1px solid var(--zero-border);
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .zero-pre {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 8px;
+        overflow: auto;
+    }
+
+    .zero-pre code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        font-size: 0.95em;
+    }
+
+    .zero-fw-semibold {
+        font-weight: 600;
+    }
+
+    .zero-good {
+        background: var(--zero-good);
+        border: 1px solid #b2f5ea;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .zero-bad {
+        background: var(--zero-bad);
+        border: 1px solid #fed7d7;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .zero-note {
+        background: var(--zero-note);
+        border: 1px solid #dbeafe;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .zero-def {
+        border-left: 4px solid #38bdf8;
+        padding-left: 12px;
+    }
+
+    .zero-kbd {
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 2px 6px;
+        border-radius: 6px;
+    }
+
+    .zero-toc ol {
+        margin-bottom: 0;
+        padding-left: 1.2rem;
+    }
+</style>
+
+<div class="zero-container">
+    <header class="mb-3">
+        <h1>Zero‑Shot Prompting — A Clear, Step‑by‑Step Guide</h1>
+        <p class="zero-lead">Learn how to write one simple instruction that a model can follow without any examples. We will define each word, show easy patterns, and practice with small tasks.</p>
+    </header>
+
+    <nav class="zero-toc">
+        <div class="zero-fw-semibold mb-2">On this page</div>
+        <ol>
+            <li><a href="#intro">1) What is Zero‑Shot?</a></li>
+            <li><a href="#blocks">2) Building Blocks (Simple Definitions)</a></li>
+            <li><a href="#recipe">3) A Simple Recipe</a></li>
+            <li><a href="#patterns">4) Prompt Patterns</a></li>
+            <li><a href="#examples">5) Fully Worked Examples</a></li>
+            <li><a href="#dos">6) Do / Don’t (with reasons)</a></li>
+            <li><a href="#practice">7) Practice Tasks</a></li>
+            <li><a href="#glossary">8) Glossary</a></li>
+            <li><a href="#summary">9) Summary</a></li>
+        </ol>
+    </nav>
+
+    <section id="intro" class="mb-4">
+        <h2>1) What is Zero‑Shot?</h2>
+        <p><strong>Zero‑shot prompting</strong> means you write an instruction and the model completes the task <em>without</em> seeing examples for that task. The instruction must be clear and complete.</p>
+        <div class="zero-note mt-2"><strong>Goal:</strong> One good instruction that tells the model what to do, any limits, and the shape of the answer.</div>
+    </section>
+
+    <section id="blocks" class="mb-4">
+        <h2>2) Building Blocks (Simple Definitions)</h2>
+        <div class="zero-card">
+            <p class="zero-def"><strong>Instruction:</strong> The main command. It tells the model what to do. Example: <span class="zero-kbd">"Classify the review as positive, negative, or neutral."</span></p>
+            <p class="zero-def"><strong>Input text (or data):</strong> The content the model must use. Example: <span class="zero-kbd">"The camera is great, but delivery was late."</span></p>
+            <p class="zero-def"><strong>Constraints (rules):</strong> Limits that keep answers consistent. Example: <span class="zero-kbd">"Return only one label. No explanation."</span></p>
+            <p class="zero-def"><strong>Output format:</strong> The exact shape of the answer. Example: <span class="zero-kbd">{ "label": "&lt;positive|negative|neutral&gt;" }</span></p>
+            <p class="zero-def"><strong>Role (optional):</strong> A short role that sets behavior. Example: <span class="zero-kbd">"You are a precise data extractor."</span></p>
+            <p class="zero-def"><strong>Acceptance checks (optional):</strong> How you will check success. Example: <span class="zero-kbd">"Answer must be valid JSON and use ISO dates."</span></p>
+        </div>
+    </section>
+
+    <section id="recipe" class="mb-4">
+        <h2>3) A Simple Recipe</h2>
+        <ol>
+            <li>Write the <strong>instruction</strong> in one clear sentence.</li>
+            <li>Add 1–3 <strong>constraints</strong> (labels, word limit, “no explanation”, etc.).</li>
+            <li>Specify the <strong>output format</strong> (often JSON).</li>
+            <li>Paste the <strong>input text</strong> under a clear heading like <em>Text:</em></li>
+            <li>(Optional) Add a short <strong>role</strong> and <strong>acceptance checks</strong>.</li>
+        </ol>
+    </section>
+
+    <section id="patterns" class="mb-4">
+        <h2>4) Prompt Patterns</h2>
+
+        <div class="zero-card">
+            <div class="zero-fw-semibold mb-2">Pattern A — Instruction + Constraints + Output</div>
+            <pre class="zero-pre"><code class="language-text">Instruction: Classify the sentiment of the review as "positive", "negative", or "neutral".
+Constraints: Use exactly one label. No explanation.
+Output: {"label":"&lt;positive|negative|neutral&gt;"}
+Text: "The camera quality is fantastic and battery lasts all day."</code></pre>
+        </div>
+
+        <div class="zero-card">
+            <div class="zero-fw-semibold mb-2">Pattern B — Role + Task + Checks</div>
+            <pre class="zero-pre"><code class="language-text">Role: You are a precise data extractor.
+Instruction: Extract the person's full name and date from the text.
+Checks: Return JSON only. Use ISO date if present, else null.
+Text: "I, Rakesh Babu, met on 14 Aug 2024 in Chennai."</code></pre>
+        </div>
+
+        <div class="zero-card">
+            <div class="zero-fw-semibold mb-2">Pattern C — JSON‑Only Guardrail</div>
+            <pre class="zero-pre"><code class="language-json">{"role":"system","content":"Respond only in valid JSON with keys: label, confidence. Confidence in [0,1]. Refuse non‑JSON."}</code></pre>
+        </div>
+    </section>
+
+    <section id="examples" class="mb-4">
+        <h2>5) Fully Worked Examples</h2>
+
+        <div class="zero-bad">
+            <div class="zero-fw-semibold">Needs Improvement (Why it is weak)</div>
+            <pre class="zero-pre"><code class="language-text">"Tell me if this review is good or bad."</code></pre>
+            <ul class="mb-0">
+                <li>No label set (What counts as "good"?).</li>
+                <li>No format (How should the answer look?).</li>
+                <li>No constraint (The model may ramble).</li>
+            </ul>
+        </div>
+
+        <div class="zero-good mt-2">
+            <div class="zero-fw-semibold">Good Prompt (Clear and Checkable)</div>
+            <pre class="zero-pre"><code class="language-text">Instruction: Classify the sentiment as "positive", "negative", or "neutral".
+Constraints: Use exactly one label. No explanation.
+Output: {"label":"&lt;positive|negative|neutral&gt;"}
+Text: "I waited long for support, but the agent fixed my problem quickly."</code></pre>
+            <div class="mt-2"><em>Why it is good:</em> clear labels, strict output, and a rule to avoid long answers.</div>
+        </div>
+
+        <div class="zero-card">
+            <div class="zero-fw-semibold">Example — Information Extraction</div>
+            <pre class="zero-pre"><code class="language-text">Instruction: Extract fields as JSON: {"name":string,"meeting_date":"YYYY-MM-DD"|null,"city":string|null}. Return JSON only.
+Text: "I, Rakesh Babu, met on 14 Aug 2024 in Chennai regarding onboarding."</code></pre>
+            <div class="mt-2">
+                <div class="zero-fw-semibold">Expected Output</div>
+                <pre class="zero-pre"><code class="language-json">{"name":"Rakesh Babu","meeting_date":"2024-08-14","city":"Chennai"}</code></pre>
+            </div>
+        </div>
+
+        <div class="zero-card">
+            <div class="zero-fw-semibold">Example — Polite Rewrite</div>
+            <pre class="zero-pre"><code class="language-text">Instruction: Rewrite the sentence in a polite professional tone in 20 words or fewer. Return only the rewritten sentence.
+Text: "Send the report now. You're late again."</code></pre>
+            <div class="mt-2">
+                <div class="zero-fw-semibold">Expected Output</div>
+                <pre class="zero-pre"><code class="language-text">"Please share the report as soon as possible; let’s align on timings to avoid future delays."</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section id="dos" class="mb-4">
+        <h2>6) Do / Don’t (with reasons)</h2>
+        <div class="zero-table">
+            <table>
+                <thead>
+                    <tr><th>Do</th><th>Don’t</th><th>Reason</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>State one task clearly.</td>
+                        <td>Mix multiple tasks ("Summarize and translate").</td>
+                        <td>Models perform better with focused instructions.</td>
+                    </tr>
+                    <tr>
+                        <td>Define the output format.</td>
+                        <td>Assume the model knows your schema.</td>
+                        <td>Explicit formats prevent guesswork.</td>
+                    </tr>
+                    <tr>
+                        <td>Add constraints for length or tone.</td>
+                        <td>Allow unlimited text.</td>
+                        <td>Constraints reduce rambling responses.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="practice" class="mb-4">
+        <h2>7) Practice Tasks</h2>
+        <ol>
+            <li>Create a zero-shot prompt to categorize bug reports into: UI, Backend, Data, Other.</li>
+            <li>Write an instruction that extracts phone numbers from text and outputs them as JSON array.</li>
+            <li>Design a prompt that rewrites a paragraph for a 5th grader in two sentences.</li>
+        </ol>
+    </section>
+
+    <section id="glossary" class="mb-4">
+        <h2>8) Glossary</h2>
+        <ul>
+            <li><strong>Constraint:</strong> A rule to follow (length, tone, format).</li>
+            <li><strong>Schema:</strong> Structure of the data you expect.</li>
+            <li><strong>Guardrail:</strong> A safety instruction that prevents undesired outputs.</li>
+        </ul>
+    </section>
+
+    <section id="summary" class="mb-4">
+        <h2>9) Summary</h2>
+        <p>Zero-shot prompting is about giving the model a single, complete instruction. Define the task, constraints, format, and the input clearly. Practicing with real tasks will make your prompts more reliable.</p>
+    </section>
+</div>
