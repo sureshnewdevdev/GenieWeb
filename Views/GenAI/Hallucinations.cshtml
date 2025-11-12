@@ -2,37 +2,203 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<section class="py-4">
-    <div class="container">
-        <h1 class="mb-3">Understanding Hallucinations</h1>
-        <p class="lead">A hallucination occurs when a model generates confident but incorrect information. Identify the causes and build mitigation strategies.</p>
+<style>
+    :root {
+        --hal-fg: #111;
+        --hal-muted: #6c757d;
+        --hal-bg: #fff;
+        --hal-border: #e9ecef;
+    }
 
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body">
-                <h2 class="h4">Common Causes</h2>
-                <ul>
-                    <li>Ambiguous or underspecified prompts.</li>
-                    <li>Lack of grounding data or outdated knowledge.</li>
-                    <li>Overly creative sampling settings.</li>
-                    <li>Model attempting to satisfy strict instructions with limited context.</li>
-                </ul>
+    .hal-container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 24px 16px;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        line-height: 1.6;
+        color: var(--hal-fg);
+        background: var(--hal-bg);
+    }
+
+    .hal-container h1 {
+        margin: 0 0 8px;
+    }
+
+    .hal-lead {
+        color: var(--hal-muted);
+        margin-top: 0;
+    }
+
+    .hal-toc,
+    .hal-card {
+        border: 1px solid var(--hal-border);
+        border-radius: 10px;
+        padding: 16px;
+        background: #fff;
+    }
+
+    .hal-card {
+        margin: 16px 0;
+    }
+
+    .hal-toc {
+        margin: 20px 0;
+    }
+
+    pre {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 8px;
+        overflow: auto;
+    }
+
+    code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        font-size: 0.95em;
+    }
+
+    section {
+        scroll-margin-top: 80px;
+    }
+
+    .hal-fw-semibold {
+        font-weight: 600;
+    }
+
+    .hal-muted {
+        color: var(--hal-muted);
+    }
+
+    .mb-0 { margin-bottom: 0; }
+    .mb-1 { margin-bottom: 0.25rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-3 { margin-bottom: 1rem; }
+    .mb-4 { margin-bottom: 1.5rem; }
+    .mt-0 { margin-top: 0; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-3 { margin-top: 1rem; }
+    .mt-4 { margin-top: 1.5rem; }
+</style>
+
+<div class="hal-container">
+    <header class="mb-3">
+        <h1>Hallucinations in LLMs</h1>
+        <p class="hal-lead">Minimize fabricated facts by designing prompts, validation steps, and guardrails that demand evidence.</p>
+    </header>
+
+    <nav class="hal-toc">
+        <div class="hal-fw-semibold mb-2">On this page</div>
+        <ol class="mb-0">
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#syntax">Syntax</a></li>
+            <li><a href="#example">Example</a></li>
+            <li><a href="#explanation">Explanation</a></li>
+            <li><a href="#realworld">Real-World Use Case</a></li>
+            <li><a href="#notes">Key Notes / Tips</a></li>
+            <li><a href="#practice">Practice Exercise</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ol>
+    </nav>
+
+    <section id="introduction" class="mb-4">
+        <h2>Introduction</h2>
+        <p>Hallucinations occur when a model generates plausible-sounding but incorrect information.</p>
+        <ul>
+            <li><strong>Definition:</strong> Statements or citations that are not grounded in supplied data or real-world facts.</li>
+            <li><strong>Why it happens:</strong> Models extrapolate patterns; without grounding, they fill gaps with guesses.</li>
+            <li><strong>Where noticed:</strong> Knowledge assistants, regulatory responses, customer support, analytics summaries.</li>
+        </ul>
+    </section>
+
+    <section id="syntax" class="mb-4">
+        <h2>Syntax</h2>
+        <div class="hal-card">
+            <pre><code class="language-json">[
+  {"role": "system", "content": "Answer only using the provided context. If the answer is missing, reply 'Not in dataset.'"},
+  {"role": "user", "content": "Context: {{retrieved documents}}\nQuestion: {{user query}}\nInclude citations like [Doc#]."}
+]</code></pre>
+        </div>
+    </section>
+
+    <section id="example" class="mb-4">
+        <h2>Example</h2>
+
+        <div class="hal-card">
+            <div class="hal-fw-semibold">Example 1 — Cited Response</div>
+            <pre><code class="language-json">[
+  {"role": "system", "content": "You are a compliance analyst. Use bullet points and cite the source doc ID."},
+  {"role": "user", "content": "Context: Doc12 states 'encryption at rest is mandatory'. Doc19 says 'key rotation every 90 days'.\nQuestion: What security controls are required?"}
+]</code></pre>
+            <div class="mt-2">
+                <div class="hal-fw-semibold">Output</div>
+                <pre><code>- Encrypt all stored customer data using approved ciphers. [Doc12]
+- Rotate encryption keys at least every 90 days through the key vault process. [Doc19]</code></pre>
             </div>
         </div>
 
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body">
-                <h2 class="h4">Mitigation Techniques</h2>
-                <ul>
-                    <li>Retrieve authoritative context (RAG) before generation.</li>
-                    <li>Add verification steps or evaluator prompts.</li>
-                    <li>Use structured outputs that can be validated.</li>
-                    <li>Adjust temperature and other sampling parameters.</li>
-                </ul>
-            </div>
-        </div>
+        <div class="hal-card">
+            <div class="hal-fw-semibold">Example 2 — Double Check Strategy</div>
+            <pre><code class="language-python">def ask_with_verification(question: str, context: str) -> str:
+    base = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "Answer using context only. Admit if unsure."},
+            {"role": "user", "content": f"Context: {context}\nQuestion: {question}"}
+        ]
+    )
+    answer = base.choices[0].message.content
 
-        <div class="alert alert-warning" role="alert">
-            <strong>Tip:</strong> Encourage the assistant to say “I don’t know” or “Not enough information” rather than inventing facts.
+    verifier = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are a fact checker. Respond PASS if every statement is supported, otherwise list issues."},
+            {"role": "user", "content": f"Context: {context}\nAnswer: {answer}"}
+        ]
+    )
+    return answer, verifier.choices[0].message.content</code></pre>
         </div>
-    </div>
-</section>
+    </section>
+
+    <section id="explanation" class="mb-4">
+        <h2>Explanation</h2>
+        <ul>
+            <li><strong>Grounding</strong> ensures the model references only retrieved documents or databases.</li>
+            <li><strong>Explicit fallback language</strong> (“Not in dataset”) encourages honesty when information is missing.</li>
+            <li><strong>Verification step</strong> catches unsupported statements before they reach end users.</li>
+            <li><strong>Difference from bias:</strong> Hallucination is factual error; bias is skewed framing or tone.</li>
+        </ul>
+    </section>
+
+    <section id="realworld" class="mb-4">
+        <h2>Real-World Use Case</h2>
+        <p>An insurance firm deploys a policy assistant. Each answer must cite the clause ID. Responses failing the automatic citation check trigger human review, reducing hallucinated policy advice by over 80%.</p>
+    </section>
+
+    <section id="notes" class="mb-4">
+        <h2>Key Notes / Tips</h2>
+        <ul>
+            <li>Always log citations and confidence scores for auditing.</li>
+            <li>Use retrieval augmented generation (RAG) or tool calls to pull authoritative data.</li>
+            <li>Set temperature low for factual workflows to decrease creative deviations.</li>
+            <li>Implement evaluation suites with known right/wrong answers to monitor drift.</li>
+            <li>Escalate unanswered questions to humans instead of guessing.</li>
+        </ul>
+    </section>
+
+    <section id="practice" class="mb-4">
+        <h2>Practice Exercise</h2>
+        <ol>
+            <li>Write a prompt that forces the model to return “Insufficient evidence” whenever citations are missing.</li>
+            <li>Implement a secondary verification call that flags sentences without supporting context.</li>
+            <li>Challenge: Design a logging schema capturing question, answer, sources, and verification score for audits.</li>
+        </ol>
+    </section>
+
+    <section id="summary" class="mb-4">
+        <h2>Summary</h2>
+        <p>Hallucinations erode trust. Counter them with grounded prompts, citation requirements, and automated fact checking so users always know where answers come from.</p>
+    </section>
+
+    <footer class="hal-muted mt-4">© ItTechGenie</footer>
+</div>

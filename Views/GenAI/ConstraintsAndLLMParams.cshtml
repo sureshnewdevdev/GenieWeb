@@ -2,50 +2,217 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<section class="py-4">
-    <div class="container">
-        <h1 class="mb-3">Constraints and LLM Parameters</h1>
-        <p class="lead">Use constraints and parameter tuning to guide large language models toward predictable results. This section highlights common levers and when to use them.</p>
+<style>
+    :root {
+        --clp-fg: #111;
+        --clp-muted: #6c757d;
+        --clp-bg: #fff;
+        --clp-border: #e9ecef;
+    }
 
-        <div class="row g-4">
-            <div class="col-lg-6">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <h2 class="h4">Prompt-level Constraints</h2>
-                        <ul>
-                            <li><strong>Length:</strong> “Answer in 3 bullet points” or “Limit to 100 words”.</li>
-                            <li><strong>Format:</strong> JSON schemas, tables, markdown headings.</li>
-                            <li><strong>Tone and persona:</strong> “You are a patient teacher.”</li>
-                            <li><strong>Guardrails:</strong> “If unsure, respond with ‘Not enough information’.”</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <h2 class="h4">Model Parameters</h2>
-                        <ul>
-                            <li><strong>Temperature:</strong> Lower for deterministic answers, higher for creativity.</li>
-                            <li><strong>Top P / Top K:</strong> Control sampling diversity when exploring ideas.</li>
-                            <li><strong>Max Tokens:</strong> Cap response length to avoid runaway outputs.</li>
-                            <li><strong>Frequency / Presence Penalties:</strong> Reduce repetition or encourage new topics.</li>
-                        </ul>
-                    </div>
-                </div>
+    .clp-container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 24px 16px;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        line-height: 1.6;
+        color: var(--clp-fg);
+        background: var(--clp-bg);
+    }
+
+    .clp-container h1 {
+        margin: 0 0 8px;
+    }
+
+    .clp-lead {
+        color: var(--clp-muted);
+        margin-top: 0;
+    }
+
+    .clp-toc,
+    .clp-card {
+        border: 1px solid var(--clp-border);
+        border-radius: 10px;
+        padding: 16px;
+        background: #fff;
+    }
+
+    .clp-card {
+        margin: 16px 0;
+    }
+
+    .clp-toc {
+        margin: 20px 0;
+    }
+
+    pre {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 8px;
+        overflow: auto;
+    }
+
+    code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        font-size: 0.95em;
+    }
+
+    section {
+        scroll-margin-top: 80px;
+    }
+
+    .clp-fw-semibold {
+        font-weight: 600;
+    }
+
+    .clp-muted {
+        color: var(--clp-muted);
+    }
+
+    .mb-0 { margin-bottom: 0; }
+    .mb-1 { margin-bottom: 0.25rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-3 { margin-bottom: 1rem; }
+    .mb-4 { margin-bottom: 1.5rem; }
+    .mt-0 { margin-top: 0; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-3 { margin-top: 1rem; }
+    .mt-4 { margin-top: 1.5rem; }
+</style>
+
+<div class="clp-container">
+    <header class="mb-3">
+        <h1>Constraints and LLM Parameters</h1>
+        <p class="clp-lead">Control tone, format, and determinism by combining clear prompt rules with the right API parameters.</p>
+    </header>
+
+    <nav class="clp-toc">
+        <div class="clp-fw-semibold mb-2">On this page</div>
+        <ol class="mb-0">
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#syntax">Syntax</a></li>
+            <li><a href="#example">Example</a></li>
+            <li><a href="#explanation">Explanation</a></li>
+            <li><a href="#realworld">Real-World Use Case</a></li>
+            <li><a href="#notes">Key Notes / Tips</a></li>
+            <li><a href="#practice">Practice Exercise</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ol>
+    </nav>
+
+    <section id="introduction" class="mb-4">
+        <h2>Introduction</h2>
+        <p>Constraints ensure that a model’s response follows specific rules, while parameters such as temperature and max tokens steer the model’s sampling behavior.</p>
+        <ul>
+            <li><strong>Definition:</strong> Prompt constraints are explicit instructions; parameters are settings you pass to the API to influence generation.</li>
+            <li><strong>Why:</strong> Together they reduce randomness, enforce formatting, and prevent policy violations.</li>
+            <li><strong>Where:</strong> Enterprise copilots, reporting assistants, and any workflow needing predictable structured output.</li>
+        </ul>
+    </section>
+
+    <section id="syntax" class="mb-4">
+        <h2>Syntax</h2>
+        <div class="clp-card">
+            <pre><code class="language-python">from openai import OpenAI
+
+client = OpenAI()
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    temperature=0.2,           # lower temperature = deterministic output
+    max_tokens=350,            # hard stop to control cost
+    response_format={"type": "json_object"},
+    messages=[
+        {"role": "system", "content": "Return JSON with fields: summary, next_steps, tone."},
+        {"role": "user", "content": "Summarize the incident report and suggest mitigation actions."}
+    ]
+)
+print(response.choices[0].message.content)</code></pre>
+        </div>
+    </section>
+
+    <section id="example" class="mb-4">
+        <h2>Example</h2>
+
+        <div class="clp-card">
+            <div class="clp-fw-semibold">Example 1 — Strict Formatting</div>
+            <pre><code class="language-json">[
+  {"role": "system", "content": "Answer in Markdown with headings: Context, Analysis, Recommendation."},
+  {"role": "user", "content": "Audit yesterday's deployment log and report any anomalies."}
+]</code></pre>
+            <div class="mt-2">
+                <div class="clp-fw-semibold">Output</div>
+                <pre><code>## Context
+Deployment v3.4.2 completed on 2025-02-10 at 22:10 UTC.
+
+## Analysis
+- Warning: Elevated error rate on payment-service (3.1%).
+- Alert: Missing canary verification for checkout pipeline.
+
+## Recommendation
+1. Roll back payment-service to v3.4.1.
+2. Trigger canary suite before reopening traffic.
+3. Record incident in the change log.</code></pre>
             </div>
         </div>
 
-        <div class="card shadow-sm border-0 mt-4">
-            <div class="card-body">
-                <h2 class="h4">Checklist Before Sending a Prompt</h2>
-                <ul>
-                    <li>Have you stated the desired format and length?</li>
-                    <li>Do you describe a fallback when the model lacks information?</li>
-                    <li>Are parameter settings aligned with the task (precision vs. creativity)?</li>
-                    <li>Is there sensitive content that needs filtering or redaction?</li>
-                </ul>
-            </div>
+        <div class="clp-card">
+            <div class="clp-fw-semibold">Example 2 — Parameter Sweep</div>
+            <pre><code class="language-python">def generate_with_temp(temp: float) -> str:
+    completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        temperature=temp,
+        messages=[
+            {"role": "system", "content": "Answer with three concise product taglines."},
+            {"role": "user", "content": "Launch messaging for a privacy-first email app."}
+        ]
+    )
+    return completion.choices[0].message.content
+
+for t in (0.0, 0.5, 0.9):
+    print(f"Temperature {t}:\n{generate_with_temp(t)}\n")</code></pre>
         </div>
-    </div>
-</section>
+    </section>
+
+    <section id="explanation" class="mb-4">
+        <h2>Explanation</h2>
+        <ul>
+            <li><strong>System message</strong> defines mandatory structure; combining with <code>response_format</code> keeps output machine-readable.</li>
+            <li><strong>Temperature</strong> controls randomness; use low values for policy or finance workflows, higher for ideation.</li>
+            <li><strong>Max tokens</strong> ensures the reply does not exceed a safe length, guarding against runaway costs.</li>
+            <li><strong>Top_p and frequency penalties</strong> provide additional levers to curb repetition or encourage novelty.</li>
+        </ul>
+    </section>
+
+    <section id="realworld" class="mb-4">
+        <h2>Real-World Use Case</h2>
+        <p>A managed services team delivers nightly compliance summaries to banks. The pipeline sets <code>temperature=0.1</code>, caps tokens at 400, and requires JSON with signed-off fields. This guarantees predictable downstream parsing for dashboards and archiving.</p>
+    </section>
+
+    <section id="notes" class="mb-4">
+        <h2>Key Notes / Tips</h2>
+        <ul>
+            <li>Combine constraints with schema validation to reject malformed responses.</li>
+            <li>Document default parameter values so all squads use consistent baselines.</li>
+            <li>Beware of overly tight constraints—they can make the model respond with errors or apologies.</li>
+            <li>Monitor token usage after each change; stricter formats can increase output length.</li>
+            <li>When chaining models, pass both the constraints and the actual parameter configuration for observability.</li>
+        </ul>
+    </section>
+
+    <section id="practice" class="mb-4">
+        <h2>Practice Exercise</h2>
+        <ol>
+            <li>Write a prompt + parameter set that generates a JSON list of marketing bullet points with a maximum of five items.</li>
+            <li>Tune temperature and top_p for a creative writing assistant; record how tone changes.</li>
+            <li>Challenge: Build a guardrail that rejects responses not matching your JSON schema, then retry with clarified instructions.</li>
+        </ol>
+    </section>
+
+    <section id="summary" class="mb-4">
+        <h2>Summary</h2>
+        <p>Constraints and parameters are the levers that transform a general-purpose model into a dependable teammate. Set both with intention, log the configuration, and iterate based on feedback from users and monitoring tools.</p>
+    </section>
+
+    <footer class="clp-muted mt-4">© ItTechGenie</footer>
+</div>

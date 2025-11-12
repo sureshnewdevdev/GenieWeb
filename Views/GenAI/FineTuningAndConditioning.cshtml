@@ -2,65 +2,211 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<section class="py-4">
-    <div class="container">
-        <h1 class="mb-3">Fine-tuning and Conditioning</h1>
-        <p class="lead">Extend model behavior through dataset conditioning or managed fine-tunes. Understand the differences and decide when each approach is appropriate.</p>
+<style>
+    :root {
+        --ftc-fg: #111;
+        --ftc-muted: #6c757d;
+        --ftc-bg: #fff;
+        --ftc-border: #e9ecef;
+    }
 
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body">
-                <h2 class="h4">Prompt Conditioning</h2>
-                <p class="mb-2">Conditioning uses carefully designed prompts and reference material to steer the base model without retraining.</p>
-                <ul>
-                    <li>Works with retrieval-augmented generation (RAG).</li>
-                    <li>Fast to iterate and low cost.</li>
-                    <li>Best for content that changes frequently.</li>
-                </ul>
+    .ftc-container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 24px 16px;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        line-height: 1.6;
+        color: var(--ftc-fg);
+        background: var(--ftc-bg);
+    }
+
+    .ftc-container h1 {
+        margin: 0 0 8px;
+    }
+
+    .ftc-lead {
+        color: var(--ftc-muted);
+        margin-top: 0;
+    }
+
+    .ftc-toc,
+    .ftc-card {
+        border: 1px solid var(--ftc-border);
+        border-radius: 10px;
+        padding: 16px;
+        background: #fff;
+    }
+
+    .ftc-card {
+        margin: 16px 0;
+    }
+
+    .ftc-toc {
+        margin: 20px 0;
+    }
+
+    pre {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 8px;
+        overflow: auto;
+    }
+
+    code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        font-size: 0.95em;
+    }
+
+    section {
+        scroll-margin-top: 80px;
+    }
+
+    .ftc-fw-semibold {
+        font-weight: 600;
+    }
+
+    .ftc-muted {
+        color: var(--ftc-muted);
+    }
+
+    .mb-0 { margin-bottom: 0; }
+    .mb-1 { margin-bottom: 0.25rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-3 { margin-bottom: 1rem; }
+    .mb-4 { margin-bottom: 1.5rem; }
+    .mt-0 { margin-top: 0; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-3 { margin-top: 1rem; }
+    .mt-4 { margin-top: 1.5rem; }
+</style>
+
+<div class="ftc-container">
+    <header class="mb-3">
+        <h1>Fine-Tuning and Conditioning</h1>
+        <p class="ftc-lead">Customize base models using curated examples or on-the-fly instructions so they speak your organization’s language.</p>
+    </header>
+
+    <nav class="ftc-toc">
+        <div class="ftc-fw-semibold mb-2">On this page</div>
+        <ol class="mb-0">
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#syntax">Syntax</a></li>
+            <li><a href="#example">Example</a></li>
+            <li><a href="#explanation">Explanation</a></li>
+            <li><a href="#realworld">Real-World Use Case</a></li>
+            <li><a href="#notes">Key Notes / Tips</a></li>
+            <li><a href="#practice">Practice Exercise</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ol>
+    </nav>
+
+    <section id="introduction" class="mb-4">
+        <h2>Introduction</h2>
+        <p>Fine-tuning adapts a model with new training examples, while conditioning supplies context at inference time using prompts, embeddings, or system messages.</p>
+        <ul>
+            <li><strong>Definition:</strong> Fine-tuning = updating model weights; conditioning = steering output without retraining.</li>
+            <li><strong>Why:</strong> Improve accuracy on domain language, tone, and repetitive tasks while controlling cost.</li>
+            <li><strong>Where:</strong> Customer support macros, document classification, branded copywriting, automated QA responses.</li>
+        </ul>
+    </section>
+
+    <section id="syntax" class="mb-4">
+        <h2>Syntax</h2>
+        <div class="ftc-card">
+            <pre><code class="language-python">from openai import OpenAI
+import json
+
+client = OpenAI()
+
+# Step 1: Prepare training file (JSONL with instruction-completion pairs)
+with open("support_faq.jsonl", "w", encoding="utf-8") as fp:
+    fp.write(json.dumps({
+        "messages": [
+            {"role": "system", "content": "You are a polite support agent."},
+            {"role": "user", "content": "Reset password instructions"},
+            {"role": "assistant", "content": "Sure! Visit portal.example.com/reset and follow the OTP prompts."}
+        ]
+    }) + "\n")
+
+training_file = client.files.create(file=open("support_faq.jsonl", "rb"), purpose="fine-tune")
+
+# Step 2: Kick off fine-tune job
+job = client.fine_tuning.jobs.create(
+    training_file=training_file.id,
+    model="gpt-4o-mini"
+)
+print(job.id)</code></pre>
+        </div>
+    </section>
+
+    <section id="example" class="mb-4">
+        <h2>Example</h2>
+
+        <div class="ftc-card">
+            <div class="ftc-fw-semibold">Example 1 — Using a Fine-Tuned Model</div>
+            <pre><code class="language-python">completion = client.chat.completions.create(
+    model="ft:gpt-4o-mini:ittechgenie:support-v1",
+    messages=[
+        {"role": "system", "content": "Always keep answers under 80 words."},
+        {"role": "user", "content": "My MFA token expired. What should I do?"}
+    ]
+)
+print(completion.choices[0].message.content)</code></pre>
+            <div class="mt-2">
+                <div class="ftc-fw-semibold">Output</div>
+                <pre><code>Please open the security portal, choose “Replace MFA token,” and scan the new QR code. If you cannot access the portal, call the service desk at 555-0100 for manual verification.</code></pre>
             </div>
         </div>
 
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body">
-                <h2 class="h4">Fine-tuning</h2>
-                <p class="mb-2">Fine-tuning adapts a model on curated examples and evaluations.</p>
-                <ul>
-                    <li>Produces a specialized model checkpoint.</li>
-                    <li>Useful when prompt engineering alone cannot enforce style or domain rules.</li>
-                    <li>Requires high-quality labeled data and monitoring.</li>
-                </ul>
-            </div>
+        <div class="ftc-card">
+            <div class="ftc-fw-semibold">Example 2 — Conditioning without Fine-Tuning</div>
+            <pre><code class="language-json">[
+  {"role": "system", "content": "You are the ItTechGenie release manager. Reply with risk level, rollback plan, and sign-off."},
+  {"role": "user", "content": "Deployment summary: build v5.6, tests green, one low-severity bug deferred."}
+]</code></pre>
         </div>
+    </section>
 
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <h2 class="h4">Choosing the Right Approach</h2>
-                <table class="table table-bordered mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Scenario</th>
-                            <th>Prefer Conditioning when…</th>
-                            <th>Prefer Fine-tuning when…</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Rapidly changing knowledge</td>
-                            <td>You can retrieve latest content.</td>
-                            <td>Data is stable and curated.</td>
-                        </tr>
-                        <tr>
-                            <td>Strict tone or style</td>
-                            <td>You can describe it in prompts.</td>
-                            <td>Style has many edge cases or implicit rules.</td>
-                        </tr>
-                        <tr>
-                            <td>Latency / cost</td>
-                            <td>Need quick deployment and low cost.</td>
-                            <td>You can afford training and evaluation cycles.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</section>
+    <section id="explanation" class="mb-4">
+        <h2>Explanation</h2>
+        <ul>
+            <li><strong>Training file</strong> uses short, representative conversations. Cover success and failure cases.</li>
+            <li><strong>Fine-tune job</strong> produces a new model ID. Track metrics like loss and validation accuracy.</li>
+            <li><strong>Conditioning</strong> remains vital after fine-tuning—system prompts reinforce policy and reduce drift.</li>
+            <li><strong>Cost/Latency</strong> considerations: fine-tuned models may incur higher storage fees but reduce per-request tokens.</li>
+        </ul>
+    </section>
+
+    <section id="realworld" class="mb-4">
+        <h2>Real-World Use Case</h2>
+        <p>An MSP specializing in SaaS migrations fine-tunes a model on historical support chats. Agents now receive draft replies that mirror the company’s tone and escalation paths, cutting handle time by 35% while keeping satisfaction scores high.</p>
+    </section>
+
+    <section id="notes" class="mb-4">
+        <h2>Key Notes / Tips</h2>
+        <ul>
+            <li>Audit training data for personally identifiable information before uploading.</li>
+            <li>Start with 50–200 high-quality examples; quantity helps, but quality matters more.</li>
+            <li>Version datasets and prompts so you can revert if performance regresses.</li>
+            <li>Evaluate with hold-out conversations and human review before production rollout.</li>
+            <li>Combine with retrieval (RAG) for rapidly changing facts instead of retraining every week.</li>
+        </ul>
+    </section>
+
+    <section id="practice" class="mb-4">
+        <h2>Practice Exercise</h2>
+        <ol>
+            <li>Create three JSONL examples for a billing support assistant. Include both correct answers and polite fallback messages.</li>
+            <li>Simulate conditioning by writing a system prompt that forces answers into a bullet list with SLAs.</li>
+            <li>Challenge: Design an evaluation rubric (accuracy, tone, escalation) to compare base vs. fine-tuned model outputs.</li>
+        </ol>
+    </section>
+
+    <section id="summary" class="mb-4">
+        <h2>Summary</h2>
+        <p>Fine-tuning captures your organization’s voice, while conditioning keeps responses aligned with current goals. Use both strategically to deliver assistants that feel bespoke yet remain maintainable.</p>
+    </section>
+
+    <footer class="ftc-muted mt-4">© ItTechGenie</footer>
+</div>

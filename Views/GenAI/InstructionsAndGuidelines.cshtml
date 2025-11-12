@@ -2,51 +2,201 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<section class="py-4">
-    <div class="container">
-        <h1 class="mb-3">Prompt Instructions and Guidelines</h1>
-        <p class="lead">Consistent instructions make LLM outputs easier to review, reuse, and automate. Borrow these guidelines when designing prompts for your team.</p>
+<style>
+    :root {
+        --ig-fg: #111;
+        --ig-muted: #6c757d;
+        --ig-bg: #fff;
+        --ig-border: #e9ecef;
+    }
 
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body">
-                <h2 class="h4">Structure Checklist</h2>
-                <ol class="mb-0">
-                    <li>Start with the role or persona for the assistant.</li>
-                    <li>Describe the task and expected audience.</li>
-                    <li>List must-have sections or data points.</li>
-                    <li>Specify tone, length, or formatting rules.</li>
-                    <li>State what to do when information is missing.</li>
-                </ol>
+    .ig-container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 24px 16px;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        line-height: 1.6;
+        color: var(--ig-fg);
+        background: var(--ig-bg);
+    }
+
+    .ig-container h1 {
+        margin: 0 0 8px;
+    }
+
+    .ig-lead {
+        color: var(--ig-muted);
+        margin-top: 0;
+    }
+
+    .ig-toc,
+    .ig-card {
+        border: 1px solid var(--ig-border);
+        border-radius: 10px;
+        padding: 16px;
+        background: #fff;
+    }
+
+    .ig-card {
+        margin: 16px 0;
+    }
+
+    .ig-toc {
+        margin: 20px 0;
+    }
+
+    pre {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 8px;
+        overflow: auto;
+    }
+
+    code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        font-size: 0.95em;
+    }
+
+    section {
+        scroll-margin-top: 80px;
+    }
+
+    .ig-fw-semibold {
+        font-weight: 600;
+    }
+
+    .ig-muted {
+        color: var(--ig-muted);
+    }
+
+    .mb-0 { margin-bottom: 0; }
+    .mb-1 { margin-bottom: 0.25rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-3 { margin-bottom: 1rem; }
+    .mb-4 { margin-bottom: 1.5rem; }
+    .mt-0 { margin-top: 0; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-3 { margin-top: 1rem; }
+    .mt-4 { margin-top: 1.5rem; }
+</style>
+
+<div class="ig-container">
+    <header class="mb-3">
+        <h1>Instructions and Guidelines</h1>
+        <p class="ig-lead">Design prompts that set expectations up front: scope, voice, formatting, and any do-or-die requirements.</p>
+    </header>
+
+    <nav class="ig-toc">
+        <div class="ig-fw-semibold mb-2">On this page</div>
+        <ol class="mb-0">
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#syntax">Syntax</a></li>
+            <li><a href="#example">Example</a></li>
+            <li><a href="#explanation">Explanation</a></li>
+            <li><a href="#realworld">Real-World Use Case</a></li>
+            <li><a href="#notes">Key Notes / Tips</a></li>
+            <li><a href="#practice">Practice Exercise</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ol>
+    </nav>
+
+    <section id="introduction" class="mb-4">
+        <h2>Introduction</h2>
+        <p>Instructions provide clear direction to the model so that generated responses align with brand, policy, and reader expectations.</p>
+        <ul>
+            <li><strong>Definition:</strong> Structured rules describing tone, format, scope, and prohibited content.</li>
+            <li><strong>Why:</strong> Without guidelines, the model may improvise, leading to inconsistent or non-compliant answers.</li>
+            <li><strong>Where:</strong> Help centers, internal knowledge bases, onboarding assistants, marketing copy review.</li>
+        </ul>
+    </section>
+
+    <section id="syntax" class="mb-4">
+        <h2>Syntax</h2>
+        <div class="ig-card">
+            <pre><code class="language-json">[
+  {
+    "role": "system",
+    "content": "You are an editor for ItTechGenie. Follow the checklist: tone=confident, format=Markdown, include key takeaways." 
+  },
+  {
+    "role": "user",
+    "content": "Topic: Benefits of Infrastructure as Code. Avoid marketing buzzwords." 
+  }
+]</code></pre>
+        </div>
+    </section>
+
+    <section id="example" class="mb-4">
+        <h2>Example</h2>
+
+        <div class="ig-card">
+            <div class="ig-fw-semibold">Example 1 — Playbook Style</div>
+            <pre><code class="language-json">[
+  {"role": "system", "content": "Respond in numbered steps with short sentences. Conclude with a 3-item checklist."},
+  {"role": "user", "content": "Explain how to roll back a failed Azure deployment."}
+]</code></pre>
+            <div class="mt-2">
+                <div class="ig-fw-semibold">Output</div>
+                <pre><code>1. Pause incoming traffic using the deployment slot swap.
+2. Redeploy the previous stable build from the release pipeline.
+3. Run smoke tests on the restored version before reopening traffic.
+
+Checklist:
+- [x] Incident ticket updated
+- [x] Stakeholders notified
+- [ ] Post-incident review scheduled</code></pre>
             </div>
         </div>
 
-        <div class="row g-4">
-            <div class="col-md-6">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <h2 class="h4">Helpful Phrases</h2>
-                        <ul class="mb-0">
-                            <li>“Respond using markdown headings.”</li>
-                            <li>“Return JSON only with fields …”</li>
-                            <li>“Cite the provided source IDs inline.”</li>
-                            <li>“Ask clarifying questions before answering if requirements are unclear.”</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <h2 class="h4">Quality Guardrails</h2>
-                        <ul class="mb-0">
-                            <li>Define words or acronyms that could be misunderstood.</li>
-                            <li>Call out forbidden behaviors (e.g., “Never fabricate statistics”).</li>
-                            <li>Include a simple acceptance test at the end.</li>
-                            <li>Encourage the assistant to state assumptions explicitly.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+        <div class="ig-card">
+            <div class="ig-fw-semibold">Example 2 — Policy Reminder</div>
+            <pre><code class="language-json">[
+  {"role": "system", "content": "Never invent numbers. Cite the source section when quoting policies."},
+  {"role": "user", "content": "What onboarding steps are required for a contractor according to section 5.2?"}
+]</code></pre>
         </div>
-    </div>
-</section>
+    </section>
+
+    <section id="explanation" class="mb-4">
+        <h2>Explanation</h2>
+        <ul>
+            <li><strong>Instruction hierarchy:</strong> Place non-negotiable guidelines in the System message and optional hints in the User message.</li>
+            <li><strong>Clarity beats length:</strong> Bullet lists and checklists help the model prioritize requirements.</li>
+            <li><strong>Conflict resolution:</strong> If instructions conflict, the earliest (System) direction usually wins—review prompts to avoid ambiguity.</li>
+            <li><strong>Iteration:</strong> Gather feedback from readers and refine instructions to cover edge cases.</li>
+        </ul>
+    </section>
+
+    <section id="realworld" class="mb-4">
+        <h2>Real-World Use Case</h2>
+        <p>A customer-success team builds a knowledge base assistant. System instructions enforce inclusive language, require short paragraphs, and demand links to official docs. Analysts can now trust that every answer aligns with brand tone and compliance rules.</p>
+    </section>
+
+    <section id="notes" class="mb-4">
+        <h2>Key Notes / Tips</h2>
+        <ul>
+            <li>Maintain a shared library of reusable instruction snippets for different personas.</li>
+            <li>Spell out “do not” rules to prevent hallucinated references or promises.</li>
+            <li>Limit the number of goals per prompt—crowded instructions dilute model attention.</li>
+            <li>Use evaluation datasets to check whether guidelines are consistently followed.</li>
+            <li>Document revisions; even small wording changes can shift response quality.</li>
+        </ul>
+    </section>
+
+    <section id="practice" class="mb-4">
+        <h2>Practice Exercise</h2>
+        <ol>
+            <li>Draft a System instruction for a release-notes generator that enforces a change log template.</li>
+            <li>Create a User instruction that prevents mention of internal project names while summarizing incidents.</li>
+            <li>Challenge: Combine System and User instructions to produce bilingual (English + Spanish) answers while staying concise.</li>
+        </ol>
+    </section>
+
+    <section id="summary" class="mb-4">
+        <h2>Summary</h2>
+        <p>Strong instructions anchor the model’s output. Define tone, structure, and guardrails clearly, then iterate until the assistant behaves like a domain expert for your audience.</p>
+    </section>
+
+    <footer class="ig-muted mt-4">© ItTechGenie</footer>
+</div>
