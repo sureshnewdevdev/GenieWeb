@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.IO;
 
 public class CoursesController : Controller
@@ -18,15 +19,23 @@ public class CoursesController : Controller
             return NotFound();
         }
 
-        var safeFileName = Path.GetFileName(fileName);
-        var basePath = Path.Combine(Directory.GetCurrentDirectory(), "Views", "TrainedCourse");
-        var filePath = Path.Combine(basePath, safeFileName);
+        var safeViewName = Path.GetFileNameWithoutExtension(fileName);
 
-        if (!System.IO.File.Exists(filePath))
+        var viewMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["AI900Course"] = "AI900Course",
+            ["GenAISyllabusv1_new"] = "GenAISyllabusv1_new",
+            ["AWS_syllabus"] = "AWS_syllabus",
+            ["InformaticaSyllabus"] = "InformaticaSyllabus",
+            ["PythonSparkSyllabus"] = "PythonSparkSyllabus"
+        };
+
+        if (!viewMap.TryGetValue(safeViewName, out var viewName))
         {
             return NotFound();
         }
 
-        return PhysicalFile(filePath, "text/html");
+        ViewData["ActiveMenu"] = "Courses";
+        return View($"~/Views/TrainedCourse/{viewName}.cshtml");
     }
 }
