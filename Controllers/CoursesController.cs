@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 
 public class CoursesController : Controller
 {
@@ -7,5 +8,25 @@ public class CoursesController : Controller
         ViewData["ActiveMenu"] = "Courses";
         ViewData["Title"] = "Courses";
         return View();
+    }
+
+    [HttpGet]
+    public IActionResult Syllabus(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return NotFound();
+        }
+
+        var safeFileName = Path.GetFileName(fileName);
+        var basePath = Path.Combine(Directory.GetCurrentDirectory(), "Views", "TrainedCourse");
+        var filePath = Path.Combine(basePath, safeFileName);
+
+        if (!System.IO.File.Exists(filePath))
+        {
+            return NotFound();
+        }
+
+        return PhysicalFile(filePath, "text/html");
     }
 }
