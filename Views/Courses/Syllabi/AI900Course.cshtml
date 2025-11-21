@@ -1,0 +1,796 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Azure AI Fundamentals (AI-900) - Course Syllabus";
+    ViewData["ActiveMenu"] = "Courses";
+    ViewData["HideSidebar"] = true;
+}
+<div class="syllabus-page">
+<style>
+
+        :root {
+            --primary: #0078d4;
+            --primary-dark: #106ebe;
+            --secondary: #2b88d8;
+            --light: #f3f2f1;
+            --dark: #323130;
+            --accent: #ffb900;
+            --success: #107c10;
+            --danger: #d13438;
+            --shadow: 0 4px 8px rgba(0,0,0,0.1);
+            --radius: 6px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            border-radius: var(--radius);
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .course-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            background-color: white;
+            padding: 20px;
+            border-radius: var(--radius);
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .info-card {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            margin: 10px;
+            background-color: var(--light);
+            border-radius: var(--radius);
+            text-align: center;
+        }
+        
+        .info-card h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .week-container {
+            margin-bottom: 40px;
+        }
+        
+        .week-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            border-radius: var(--radius) var(--radius) 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .week-header h2 {
+            font-size: 1.5rem;
+        }
+        
+        .week-content {
+            background-color: white;
+            border-radius: 0 0 var(--radius) var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+        
+        .module {
+            border-bottom: 1px solid #e1e1e1;
+            padding: 20px;
+        }
+        
+        .module:last-child {
+            border-bottom: none;
+        }
+        
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .module-title {
+            font-size: 1.3rem;
+            color: var(--primary);
+        }
+        
+        .module-duration {
+            background-color: var(--light);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .learning-objectives {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: var(--radius);
+            margin-bottom: 15px;
+        }
+        
+        .learning-objectives h4 {
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .learning-objectives ul {
+            padding-left: 20px;
+        }
+        
+        .learning-objectives li {
+            margin-bottom: 8px;
+        }
+        
+        .resources {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .resource-btn {
+            background-color: var(--light);
+            border: 1px solid #d1d1d1;
+            padding: 8px 15px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .resource-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .mcq-preview, .interview-preview {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: var(--radius);
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .mcq-preview h4, .interview-preview h4 {
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+        
+        .question {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+        }
+        
+        .question:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .options {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+        
+        .option {
+            margin-bottom: 5px;
+        }
+        
+        .correct {
+            color: var(--success);
+            font-weight: bold;
+        }
+        
+        .interview-answer {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f4fd;
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .expand-icon {
+            transition: transform 0.3s;
+        }
+        
+        .expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+        
+        @@media (max-width: 768px) {
+            .course-info {
+                flex-direction: column;
+            }
+            
+            .info-card {
+                min-width: 100%;
+            }
+            
+            .module-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .module-duration {
+                margin-top: 10px;
+            }
+        }
+    
+</style>
+
+    <div class="container">
+        <header>
+            <h1>Azure AI Fundamentals (AI-900)</h1>
+            <p>40-Hour Comprehensive Online Course with Hands-on Labs, Projects & Exam Preparation</p>
+        </header>
+        
+        <div class="course-info">
+            <div class="info-card">
+                <h3>Duration</h3>
+                <p>40 Hours</p>
+            </div>
+            <div class="info-card">
+                <h3>Format</h3>
+                <p>Online (Live + Labs)</p>
+            </div>
+            <div class="info-card">
+                <h3>Level</h3>
+                <p>Beginner</p>
+            </div>
+            <div class="info-card">
+                <h3>Includes</h3>
+                <p>Labs, Projects, Mock Tests</p>
+            </div>
+        </div>
+        
+        <div class="week-container">
+            <div class="week-header" onclick="toggleWeek(this)">
+                <h2>Week 1 - AI Foundations & Azure Basics (10 Hours)</h2>
+                <span class="expand-icon">▼</span>
+            </div>
+            <div class="week-content">
+                <!-- Module 1 -->
+                <div class="module">
+                    <div class="module-header">
+                        <h3 class="module-title">Module 1: Introduction to AI (2 hours)</h3>
+                        <span class="module-duration">2 hours</span>
+                    </div>
+                    
+                    <div class="learning-objectives">
+                        <h4>📚 What You'll Learn:</h4>
+                        <ul>
+                            <li>Define artificial intelligence and its core concepts</li>
+                            <li>Differentiate between Narrow AI, General AI, and Superintelligent AI</li>
+                            <li>Identify real-world AI applications across various industries</li>
+                            <li>Understand the ethical implications and responsible use of AI</li>
+                            <li>Recognize current limitations and future possibilities of AI</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resources">
+                        <button class="resource-btn" onclick="toggleSection(this, 'mcq1')">MCQ Questions (5)</button>
+                        <button class="resource-btn" onclick="toggleSection(this, 'interview1')">Interview Questions (3)</button>
+                    </div>
+                    
+                    <div id="mcq1" class="mcq-preview">
+                        <h4>Multiple Choice Questions Preview:</h4>
+                        <div class="question">
+                            <p>1. Which type of AI is designed to perform a specific task, such as facial recognition?</p>
+                            <div class="options">
+                                <p class="option">A) Artificial General Intelligence</p>
+                                <p class="option">B) Artificial Superintelligence</p>
+                                <p class="option correct">C) Narrow AI</p>
+                                <p class="option">D) Reactive AI</p>
+                            </div>
+                        </div>
+                        <div class="question">
+                            <p>2. Which of the following is NOT a principle of responsible AI?</p>
+                            <div class="options">
+                                <p class="option">A) Fairness</p>
+                                <p class="option">B) Transparency</p>
+                                <p class="option">C) Privacy and security</p>
+                                <p class="option correct">D) Profit maximization</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="interview1" class="interview-preview">
+                        <h4>Interview Questions Preview:</h4>
+                        <div class="question">
+                            <p>1. What is the difference between Narrow AI and General AI?</p>
+                            <div class="interview-answer">
+                                <p><strong>Answer:</strong> Narrow AI (or Weak AI) is designed and trained for a specific task (like voice assistants or recommendation systems). General AI (or Strong AI) refers to systems that possess the ability to perform any intellectual task that a human can do, which currently doesn't exist beyond theoretical research.</p>
+                            </div>
+                        </div>
+                        <div class="question">
+                            <p>2. Can you explain the concept of "algorithmic bias" in AI systems?</p>
+                            <div class="interview-answer">
+                                <p><strong>Answer:</strong> Algorithmic bias occurs when an AI system produces systematically prejudiced results due to erroneous assumptions in the machine learning process. This often stems from biased training data or flawed algorithm design, leading to unfair outcomes for certain groups of people.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Module 2 -->
+                <div class="module">
+                    <div class="module-header">
+                        <h3 class="module-title">Module 2: Azure Cloud Fundamentals for AI (2 hours)</h3>
+                        <span class="module-duration">2 hours</span>
+                    </div>
+                    
+                    <div class="learning-objectives">
+                        <h4>📚 What You'll Learn:</h4>
+                        <ul>
+                            <li>Understand Microsoft Azure cloud computing platform</li>
+                            <li>Navigate Azure regions, resource groups, and subscriptions</li>
+                            <li>Set up and manage Azure accounts and costs</li>
+                            <li>Use Azure Portal and Azure CLI for basic operations</li>
+                            <li>Identify Azure services relevant to AI workloads</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resources">
+                        <button class="resource-btn" onclick="toggleSection(this, 'mcq2')">MCQ Questions (5)</button>
+                        <button class="resource-btn" onclick="toggleSection(this, 'interview2')">Interview Questions (3)</button>
+                    </div>
+                    
+                    <div id="mcq2" class="mcq-preview">
+                        <h4>Multiple Choice Questions Preview:</h4>
+                        <div class="question">
+                            <p>1. What is the primary purpose of Azure Resource Groups?</p>
+                            <div class="options">
+                                <p class="option correct">A) To manage and organize Azure resources</p>
+                                <p class="option">B) To provide free Azure credits</p>
+                                <p class="option">C) To increase network speed</p>
+                                <p class="option">D) To automatically scale resources</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="interview2" class="interview-preview">
+                        <h4>Interview Questions Preview:</h4>
+                        <div class="question">
+                            <p>1. How would you explain Azure regions and availability zones to a non-technical stakeholder?</p>
+                            <div class="interview-answer">
+                                <p><strong>Answer:</strong> Azure regions are geographical locations around the world where Microsoft has data centers. Each region contains multiple availability zones, which are physically separate data centers with independent power, cooling, and networking. This design ensures high availability and protects applications from data center-level failures.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Module 3 -->
+                <div class="module">
+                    <div class="module-header">
+                        <h3 class="module-title">Module 3: Azure AI Services Overview (3 hours)</h3>
+                        <span class="module-duration">3 hours</span>
+                    </div>
+                    
+                    <div class="learning-objectives">
+                        <h4>📚 What You'll Learn:</h4>
+                        <ul>
+                            <li>Navigate and use Azure AI Studio effectively</li>
+                            <li>Differentiate between various Azure Cognitive Services</li>
+                            <li>Understand Azure OpenAI capabilities and use cases</li>
+                            <li>Compare prebuilt vs. custom AI models</li>
+                            <li>Configure endpoints, keys, and deployments for AI services</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resources">
+                        <button class="resource-btn" onclick="toggleSection(this, 'mcq3')">MCQ Questions (5)</button>
+                        <button class="resource-btn" onclick="toggleSection(this, 'interview3')">Interview Questions (3)</button>
+                    </div>
+                </div>
+                
+                <!-- Module 4 -->
+                <div class="module">
+                    <div class="module-header">
+                        <h3 class="module-title">Module 4: Responsible AI (3 hours)</h3>
+                        <span class="module-duration">3 hours</span>
+                    </div>
+                    
+                    <div class="learning-objectives">
+                        <h4>📚 What You'll Learn:</h4>
+                        <ul>
+                            <li>Apply fairness, transparency, and accountability principles to AI systems</li>
+                            <li>Implement privacy and security measures in AI solutions</li>
+                            <li>Use Microsoft Responsible AI Framework in practice</li>
+                            <li>Analyze real-world AI failure cases and learn from them</li>
+                            <li>Develop AI solutions with ethical considerations</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resources">
+                        <button class="resource-btn" onclick="toggleSection(this, 'mcq4')">MCQ Questions (5)</button>
+                        <button class="resource-btn" onclick="toggleSection(this, 'interview4')">Interview Questions (3)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="week-container">
+            <div class="week-header" onclick="toggleWeek(this)">
+                <h2>Week 2 - Computer Vision & Document Intelligence (10 Hours)</h2>
+                <span class="expand-icon">▼</span>
+            </div>
+            <div class="week-content">
+                <!-- Module 5 -->
+                <div class="module">
+                    <div class="module-header">
+                        <h3 class="module-title">Module 5: Computer Vision Fundamentals (3 hours)</h3>
+                        <span class="module-duration">3 hours</span>
+                    </div>
+                    
+                    <div class="learning-objectives">
+                        <h4>📚 What You'll Learn:</h4>
+                        <ul>
+                            <li>Understand core computer vision concepts and techniques</li>
+                            <li>Differentiate between image classification, object detection, and segmentation</li>
+                            <li>Identify appropriate computer vision solutions for business problems</li>
+                            <li>Explore Azure AI Vision capabilities and use cases</li>
+                            <li>Analyze real-world applications of computer vision</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resources">
+                        <button class="resource-btn" onclick="toggleSection(this, 'mcq5')">MCQ Questions (5)</button>
+                        <button class="resource-btn" onclick="toggleSection(this, 'interview5')">Interview Questions (3)</button>
+                    </div>
+                </div>
+                
+                <!-- Module 6 -->
+                <div class="module">
+                    <div class="module-header">
+                        <h3 class="module-title">Module 6: Hands-on with Azure AI Vision (3 hours)</h3>
+                        <span class="module-duration">3 hours</span>
+                    </div>
+                    
+                    <div class="learning-objectives">
+                        <h4>📚 What You'll Learn:</h4>
+                        <ul>
+                            <li>Implement image analysis using Azure AI Vision</li>
+                            <li>Detect and classify objects in images</li>
+                            <li>Extract text from images using OCR (Optical Character Recognition)</li>
+                            <li>Implement face detection and analysis</li>
+                            <li>Build practical computer vision applications</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resources">
+                        <button class="resource-btn" onclick="toggleSection(this, 'mcq6')">MCQ Questions (5)</button>
+                        <button class="resource-btn" onclick="toggleSection(this, 'interview6')">Interview Questions (3)</button>
+                    </div>
+                </div>
+                
+                <!-- Module 7 -->
+                <div class="module">
+                    <div class="module-header">
+                        <h3 class="module-title">Module 7: Document Intelligence (4 hours)</h3>
+                        <span class="module-duration">4 hours</span>
+                    </div>
+                    
+                    <div class="learning-objectives">
+                        <h4>📚 What You'll Learn:</h4>
+                        <ul>
+                            <li>Leverage Azure Form Recognizer for document processing</li>
+                            <li>Use prebuilt models for receipts, invoices, and business cards</li>
+                            <li>Extract document layout and structure information</li>
+                            <li>Train custom models with specific datasets</li>
+                            <li>Automate document processing workflows</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resources">
+                        <button class="resource-btn" onclick="toggleSection(this, 'mcq7')">MCQ Questions (5)</button>
+                        <button class="resource-btn" onclick="toggleSection(this, 'interview7')">Interview Questions (3)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="week-container">
+            <div class="week-header" onclick="toggleWeek(this)">
+                <h2>Week 3 - NLP, Search, and Conversational AI (10 hours)</h2>
+                <span class="expand-icon">▼</span>
+            </div>
+            <div class="week-content">
+                <!-- Module 8 -->
+                <div class="module">
+                    <div class="module-header">
+                        <h3 class="module-title">Module 8: Natural Language Processing Fundamentals (3 hours)</h3>
+                        <span class="module-duration">3 hours</span>
+                    </div>
+                    
+                    <div class="learning-objectives">
+                        <h4>📚 What You'll Learn:</h4>
+                        <ul>
+                            <li>Understand core NLP concepts and techniques</li>
+                            <li>Implement text classification and sentiment analysis</li>
+                            <li>Extract entities using Named Entity Recognition (NER)</li>
+                            <li>Perform language detection and analysis</li>
+                            <li>Apply language modeling basics to real problems</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resources">
+                        <button class="resource-btn" onclick="toggleSection(this, 'mcq8')">MCQ Questions (5)</button>
+                        <button class="resource-btn" onclick="toggleSection(this, 'interview8')">Interview Questions (3)</button>
+                    </div>
+                </div>
+                
+                <!-- Module 9 -->
+                <div class="module">
+                    <div class="module-header">
+                        <h3 class="module-title">Module 9: Azure Text Analytics (3 hours)</h3>
+                        <span class="module-duration">3 hours</span>
+                    </div>
+                    
+                    <div class="learning-objectives">
+                        <h4>📚 What You'll Learn:</h4>
+                        <ul>
+                            <li>Implement sentiment analysis on text data</li>
+                            <li>Extract key phrases and entities from documents</li>
+                            <li>Detect and redact Personally Identifiable Information (PII)</li>
+                            <li>Perform language detection and analysis</li>
+                            <li>Build practical NLP applications using Azure Text Analytics</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resources">
+                        <button class="resource-btn" onclick="toggleSection(this, 'mcq9')">MCQ Questions (5)</button>
+                        <button class="resource-btn" onclick="toggleSection(this, 'interview9')">Interview Questions (3)</button>
+                    </div>
+                </div>
+                
+                <!-- Module 10 -->
+                <div class="module">
+                    <div class="module-header">
+                        <h3 class="module-title">Module 10: Azure AI Search (2 hours)</h3>
+                        <span class="module-duration">2 hours</span>
+                    </div>
+                    
+                    <div class="learning-objectives">
+                        <h4>📚 What You'll Learn:</h4>
+                        <ul>
+                            <li>Understand cognitive search concepts and architecture</li>
+                            <li>Configure indexers, skills, and knowledge stores</li>
+                            <li>Build search experiences for various document types</li>
+                            <li>Implement AI-enriched search capabilities</li>
+                            <li>Create intelligent search solutions for business applications</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resources">
+                        <button class="resource-btn" onclick="toggleSection(this, 'mcq10')">MCQ Questions (5)</button>
+                        <button class="resource-btn" onclick="toggleSection(this, 'interview10')">Interview Questions (3)</button>
+                    </div>
+                </div>
+                
+                <!-- Module 11 -->
+                <div class="module">
+                    <div class="module-header">
+                        <h3 class="module-title">Module 11: Conversational AI (2 hours)</h3>
+                        <span class="module-duration">2 hours</span>
+                    </div>
+                    
+                    <div class="learning-objectives">
+                        <h4>📚 What You'll Learn:</h4>
+                        <ul>
+                            <li>Understand conversational AI concepts and components</li>
+                            <li>Use Azure Language Service for language understanding</li>
+                            <li>Build QnA bots for knowledge base querying</li>
+                            <li>Create and deploy chatbots using Azure Bot Service</li>
+                            <li>Design effective conversational flows</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resources">
+                        <button class="resource-btn" onclick="toggleSection(this, 'mcq11')">MCQ Questions (5)</button>
+                        <button class="resource-btn" onclick="toggleSection(this, 'interview11')">Interview Questions (3)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="week-container">
+            <div class="week-header" onclick="toggleWeek(this)">
+                <h2>Week 4 - Azure OpenAI, Automation, Deployment & Exam Prep (10 Hours)</h2>
+                <span class="expand-icon">▼</span>
+            </div>
+            <div class="week-content">
+                <!-- Module 12 -->
+                <div class="module">
+                    <div class="module-header">
+                        <h3 class="module-title">Module 12: Azure OpenAI Fundamentals (3 hours)</h3>
+                        <span class="module-duration">3 hours</span>
+                    </div>
+                    
+                    <div class="learning-objectives">
+                        <h4>📚 What You'll Learn:</h4>
+                        <ul>
+                            <li>Understand GPT models and their capabilities</li>
+                            <li>Implement text embeddings for various applications</li>
+                            <li>Apply prompt engineering techniques effectively</li>
+                            <li>Implement content moderation for AI-generated content</li>
+                            <li>Use Chat Completion API for conversational applications</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resources">
+                        <button class="resource-btn" onclick="toggleSection(this, 'mcq12')">MCQ Questions (5)</button>
+                        <button class="resource-btn" onclick="toggleSection(this, 'interview12')">Interview Questions (3)</button>
+                    </div>
+                </div>
+                
+                <!-- Module 13 -->
+                <div class="module">
+                    <div class="module-header">
+                        <h3 class="module-title">Module 13: Build & Deploy an AI App (3 hours)</h3>
+                        <span class="module-duration">3 hours</span>
+                    </div>
+                    
+                    <div class="learning-objectives">
+                        <h4>📚 What You'll Learn:</h4>
+                        <ul>
+                            <li>Design end-to-end AI applications on Azure</li>
+                            <li>Implement backend services using Azure Functions</li>
+                            <li>Connect AI models to APIs and frontend interfaces</li>
+                            <li>Deploy applications to Azure App Service</li>
+                            <li>Monitor and maintain deployed AI applications</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resources">
+                        <button class="resource-btn" onclick="toggleSection(this, 'mcq13')">MCQ Questions (5)</button>
+                        <button class="resource-btn" onclick="toggleSection(this, 'interview13')">Interview Questions (3)</button>
+                    </div>
+                </div>
+                
+                <!-- Module 14 -->
+                <div class="module">
+                    <div class="module-header">
+                        <h3 class="module-title">Module 14: Capstone Project (2 hours)</h3>
+                        <span class="module-duration">2 hours</span>
+                    </div>
+                    
+                    <div class="learning-objectives">
+                        <h4>📚 What You'll Learn:</h4>
+                        <ul>
+                            <li>Apply all course concepts to a real-world project</li>
+                            <li>Choose and implement one of several AI solutions</li>
+                            <li>Integrate multiple Azure AI services in a single application</li>
+                            <li>Document and present your AI solution effectively</li>
+                            <li>Prepare a portfolio-ready AI project</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resources">
+                        <button class="resource-btn" onclick="toggleSection(this, 'mcq14')">MCQ Questions (5)</button>
+                        <button class="resource-btn" onclick="toggleSection(this, 'interview14')">Interview Questions (3)</button>
+                    </div>
+                </div>
+                
+                <!-- Module 15 -->
+                <div class="module">
+                    <div class="module-header">
+                        <h3 class="module-title">Module 15: Exam Preparation (2 hours)</h3>
+                        <span class="module-duration">2 hours</span>
+                    </div>
+                    
+                    <div class="learning-objectives">
+                        <h4>📚 What You'll Learn:</h4>
+                        <ul>
+                            <li>Review all key concepts for the AI-900 exam</li>
+                            <li>Practice with 100+ exam-style questions</li>
+                            <li>Complete mock exam simulations under timed conditions</li>
+                            <li>Apply strategies for passing the exam on first attempt</li>
+                            <li>Address final questions and concerns before the exam</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resources">
+                        <button class="resource-btn" onclick="toggleSection(this, 'mcq15')">MCQ Questions (5)</button>
+                        <button class="resource-btn" onclick="toggleSection(this, 'interview15')">Interview Questions (3)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 Azure AI Fundamentals Course | All Rights Reserved</p>
+            <p>This course prepares you for Microsoft AI-900: Azure AI Fundamentals certification</p>
+        </footer>
+    </div>
+
+    <script>
+        function toggleWeek(header) {
+            const content = header.nextElementSibling;
+            const isExpanded = header.classList.contains('expanded');
+            
+            // Close all other weeks
+            document.querySelectorAll('.week-header').forEach(h => {
+                h.classList.remove('expanded');
+                h.nextElementSibling.style.display = 'none';
+            });
+            
+            // Toggle current week
+            if (!isExpanded) {
+                header.classList.add('expanded');
+                content.style.display = 'block';
+            }
+        }
+        
+        function toggleSection(button, sectionId) {
+            const section = document.getElementById(sectionId);
+            const isVisible = section.style.display === 'block';
+            
+            // Hide all sections in the same module
+            const module = button.closest('.module');
+            module.querySelectorAll('.mcq-preview, .interview-preview').forEach(s => {
+                s.style.display = 'none';
+            });
+            
+            // Toggle current section
+            if (!isVisible) {
+                section.style.display = 'block';
+            }
+        }
+        
+        // Open first week by default
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('.week-header').click();
+        });
+    </script>
+
+</div>

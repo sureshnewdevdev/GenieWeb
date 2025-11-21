@@ -19,6 +19,7 @@
 </head>
 
 <body>
+    @{ var hideSidebar = ViewData["HideSidebar"] as bool? == true; }
     <!-- MOBILE + MEDIUM VIEW (Below lg) -->
     <header class="d-lg-none navbar navbar-expand-lg navbar-dark bg-dark shadow fixed-top" style="z-index: 1500;">
         <div class="container-fluid">
@@ -146,27 +147,29 @@
     </header>
 
 
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Dropdown button with contents for mobiles -->
-            <button class="btn btn-success d-md-none w-100 py-3 my-2 shadow rounded-3 d-flex align-items-center justify-content-center gap-2" id="contentdropdownbtn" type="button" onclick="toggleSidebar()" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-                <span class="fw-semibold">
-                    @((ViewData["ActiveMenu"] as string) == "Home" ? "☰ Quick Actions" : ("☰ " + ViewData["ActiveMenu"] as string) + " Items")
-                </span>
-            </button>
+    @if (!hideSidebar)
+    {
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Dropdown button with contents for mobiles -->
+                <button class="btn btn-success d-md-none w-100 py-3 my-2 shadow rounded-3 d-flex align-items-center justify-content-center gap-2" id="contentdropdownbtn" type="button" onclick="toggleSidebar()" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                    <span class="fw-semibold">
+                        @((ViewData["ActiveMenu"] as string) == "Home" ? "☰ Quick Actions" : ("☰ " + ViewData["ActiveMenu"] as string) + " Items")
+                    </span>
+                </button>
+            </div>
         </div>
-    </div>
-    <!--script to toggle the dropdown content active the bottom -->
-    <!-- Left Menu with Scrollable Feature -->
-    <!-- Sidebar Menu-->
+        <!--script to toggle the dropdown content active the bottom -->
+        <!-- Left Menu with Scrollable Feature -->
+        <!-- Sidebar Menu-->
 
-    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse position-fixed" style="border: 1px solid rgba(0, 0, 0, 0.1)">
+        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse position-fixed" style="border: 1px solid rgba(0, 0, 0, 0.1)">
 
-        <div class="card card-body">
-            <div class="position-sticky pt-3">
-                <p class="text-dark fw-bold">Navigate here to Learn</p>
-                <ul class="nav flex-column">
+            <div class="card card-body">
+                <div class="position-sticky pt-3">
+                    <p class="text-dark fw-bold">Navigate here to Learn</p>
+                    <ul class="nav flex-column">
                     <!-- C# Sidebar (Only shown when ActiveMenu = CSharp) -->
                     @if ((ViewData["ActiveMenu"] as string) == "GenAI")
                     {
@@ -1735,7 +1738,9 @@
                 (adsbygoogle = window.adsbygoogle || []).push({});
             </script>
         </div>
-            </nav>
+        </nav>
+
+    }
 
             <!-- Main Content -->
     <div class="col-md-9 col-lg-10 px-md-4 d-flex flex-column flex-lg-row" style="margin-left: auto;">
@@ -1816,6 +1821,10 @@
         document.addEventListener("DOMContentLoaded", function () {
             let sidebar = document.getElementById("sidebarMenu");
             let mainBtn = document.getElementById("contentdropdownbtn");
+
+            if (!sidebar || !mainBtn) {
+                return;
+            }
 
             // Create Floating Button
             let floatingBtn = document.createElement("button");

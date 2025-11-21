@@ -1,8 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
+using System;
+using System.Collections.Generic;
 
 public class CoursesController : Controller
 {
+    private static readonly Dictionary<string, string> SyllabusViewMap = new(StringComparer.OrdinalIgnoreCase)
+    {
+        { "ai-900-course", "Syllabi/AI900Course" },
+        { "genai-python", "Syllabi/GenAIPython" },
+        { "aws-training", "Syllabi/AWSSyllabus" },
+        { "informatica", "Syllabi/InformaticaSyllabus" },
+        { "python-pyspark", "Syllabi/PythonPySparkSyllabus" }
+    };
+
     public IActionResult Index()
     {
         ViewData["ActiveMenu"] = "Courses";
@@ -11,22 +21,17 @@ public class CoursesController : Controller
     }
 
     [HttpGet]
-    public IActionResult Syllabus(string fileName)
+    public IActionResult Syllabus(string id)
     {
-        if (string.IsNullOrWhiteSpace(fileName))
+        if (string.IsNullOrWhiteSpace(id) || !SyllabusViewMap.TryGetValue(id, out var viewName))
         {
             return NotFound();
         }
 
-        var safeFileName = Path.GetFileName(fileName);
-        var basePath = Path.Combine(Directory.GetCurrentDirectory(), "Views", "TrainedCourse");
-        var filePath = Path.Combine(basePath, safeFileName);
+        ViewData["ActiveMenu"] = "Courses";
+        ViewData["Title"] = "Courses";
+        ViewData["HideSidebar"] = true;
 
-        if (!System.IO.File.Exists(filePath))
-        {
-            return NotFound();
-        }
-
-        return PhysicalFile(filePath, "text/html");
+        return View(viewName);
     }
 }
