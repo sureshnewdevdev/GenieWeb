@@ -1,0 +1,144 @@
+@model GenieWeb.Models.OrchestrationDemoViewModel
+@using System.Linq
+@{
+    ViewData["Title"] = "Orchestration State Demo";
+    ViewData["ActiveMenu"] = "Orchestration";
+    ViewData["ActivePage"] = "OrchestrationDemo";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="d-flex align-items-center mb-4">
+                <span class="badge bg-primary me-2"><i class="fa-solid fa-diagram-project"></i></span>
+                <div>
+                    <h1 class="h3 mb-1">Orchestration workflow playground</h1>
+                    <p class="text-muted mb-0">Spin up orchestrations, advance them through the states, and simulate failures or restarts.</p>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.StatusMessage))
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @Model.StatusMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @Model.ErrorMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="h5">Create a new orchestration</h2>
+                    <p class="text-muted">Provide an optional friendly name or leave it blank to let the app auto-number the request.</p>
+                    <form asp-action="Start" method="post" class="row g-2">
+                        @Html.AntiForgeryToken()
+                        <div class="col-md-8">
+                            <label class="form-label visually-hidden" for="workflowName">Workflow name</label>
+                            <input type="text" name="name" id="workflowName" class="form-control" placeholder="e.g. Provision a new environment" />
+                        </div>
+                        <div class="col-md-4 d-grid">
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus me-1"></i> Start orchestration</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">State progression</h2>
+                    <div class="d-flex flex-wrap gap-3">
+                        @for (var i = 0; i < Model.StateSequence.Count; i++)
+                        {
+                            var state = Model.StateSequence[i];
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-secondary fs-6">@state</span>
+                                @if (i < Model.StateSequence.Count - 1)
+                                {
+                                    <i class="fa-solid fa-angles-right text-muted ms-2"></i>
+                                }
+                            </div>
+                        }
+                    </div>
+                    <p class="text-muted small mt-2 mb-0">Use the actions below to drive each orchestration instance through these states.</p>
+                </div>
+            </div>
+
+            @if (!Model.Workflows.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-regular fa-circle-play fa-3x mb-3"></i>
+                    <p class="lead mb-0">Start your first orchestration to see the state machine in action.</p>
+                </div>
+            }
+            else
+            {
+                foreach (var workflow in Model.Workflows)
+                {
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white d-flex flex-wrap align-items-center justify-content-between">
+                            <div>
+                                <h3 class="h5 mb-1">@workflow.Name</h3>
+                                <p class="text-muted small mb-0">Created @workflow.CreatedAt.ToLocalTime().ToString("f")</p>
+                            </div>
+                            <span class="badge @(workflow.CurrentState == GenieWeb.Models.OrchestrationState.Failed ? "bg-danger" : workflow.CurrentState == GenieWeb.Models.OrchestrationState.Completed ? "bg-success" : "bg-info text-dark") fs-6">
+                                @workflow.CurrentState
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row gy-3">
+                                <div class="col-lg-4">
+                                    <div class="d-grid gap-2">
+                                        <form asp-action="Advance" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@workflow.Id" />
+                                            <button type="submit" class="btn btn-outline-primary" @(workflow.IsTerminal ? "disabled" : string.Empty)>
+                                                <i class="fa-solid fa-forward-step me-1"></i> Advance to next state
+                                            </button>
+                                        </form>
+                                        <form asp-action="Fail" method="post" class="d-flex flex-column gap-2">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@workflow.Id" />
+                                            <div>
+                                                <label class="form-label small" for="reason-@workflow.Id">Failure reason (optional)</label>
+                                                <input type="text" name="reason" id="reason-@workflow.Id" class="form-control form-control-sm" placeholder="e.g. Timeout waiting for callback" />
+                                            </div>
+                                            <button type="submit" class="btn btn-outline-danger" @(workflow.CurrentState == GenieWeb.Models.OrchestrationState.Failed ? "disabled" : string.Empty)>
+                                                <i class="fa-solid fa-triangle-exclamation me-1"></i> Fail orchestration
+                                            </button>
+                                        </form>
+                                        <form asp-action="Reset" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@workflow.Id" />
+                                            <button type="submit" class="btn btn-outline-secondary">
+                                                <i class="fa-solid fa-rotate-left me-1"></i> Reset to start
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-lg-8">
+                                    <h4 class="h6">History</h4>
+                                    <div class="timeline">
+                                        @foreach (var entry in workflow.History.OrderByDescending(h => h.Timestamp))
+                                        {
+                                            <div class="timeline-item border-start ps-3 mb-3">
+                                                <div class="small text-muted">@entry.Timestamp.ToLocalTime().ToString("G")</div>
+                                                <div class="fw-semibold">@entry.State</div>
+                                                <div class="text-muted">@entry.Message</div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
