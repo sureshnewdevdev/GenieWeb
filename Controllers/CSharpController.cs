@@ -11,6 +11,9 @@ namespace GenieWeb.Controllers
             return View(pageName);
         }
 
+        // Kickstart module landing
+        public IActionResult Kickstart() => GenerateView("Kickstart");
+
         // C# Basics Section
         public IActionResult IntroductionToCSharp() => GenerateView("IntroductionToCSharp");
         public IActionResult FeaturesOfCSharp() => GenerateView("FeaturesOfCSharp");

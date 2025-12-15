@@ -1,6 +1,8 @@
-﻿using GenieWeb.Data;
+using GenieWeb.Data;
 using GenieWeb.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Net.Mail;
@@ -71,6 +73,11 @@ namespace GenieWeb
 
             // app.UseHttpsRedirection(); // Enable in production
             app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "SupportFiles")),
+                RequestPath = "/SupportFiles"
+            });
             app.UseRouting();
             app.UseSession();
             app.UseAuthentication();
