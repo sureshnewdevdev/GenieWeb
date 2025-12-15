@@ -1,0 +1,1623 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>01-kickstart.html — Kickstart: Course Fundamentals & .NET Ecosystem (ItTechGenie)</title>
+  <style>
+    :root{
+      --w3-green:#04AA6D;
+      --bg:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --code:#0b1020;
+      --codeText:#e5e7eb;
+      --example:#f3f4f6;
+
+      --noteBlueBg:#e7f3fe;
+      --noteBlueBr:#2196F3;
+      --tipGreenBg:#e8f5e9;
+      --tipGreenBr:#4CAF50;
+      --warnRedBg:#ffebee;
+      --warnRedBr:#f44336;
+
+      --shadow: 0 2px 12px rgba(0,0,0,.06);
+      --radius: 10px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    /* Top bar */
+    .topbar{
+      position: fixed;
+      top:0; left:0; right:0;
+      height:56px;
+      background: var(--w3-green);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      padding:0 16px;
+      z-index: 999;
+      box-shadow: var(--shadow);
+    }
+    .topbar .logo{
+      font-weight:700;
+      letter-spacing:.2px;
+      margin-right:14px;
+    }
+    .topbar .crumb{
+      opacity:.95;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .topbar .right{
+      margin-left:auto;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      font-size:13px;
+      opacity:.95;
+    }
+    .pill{
+      background: rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.25);
+      border-radius: 999px;
+      padding: 6px 10px;
+    }
+
+    /* Layout */
+    .wrap{
+      display:flex;
+      margin-top:56px;
+      min-height: calc(100vh - 56px);
+    }
+
+    /* Sidebar (template-compatible) */
+    .sidebar{
+      position: fixed;
+      top:56px;
+      left:0;
+      width: 300px;
+      height: calc(100vh - 56px);
+      overflow:auto;
+      background:#f9fafb;
+      border-right:1px solid var(--border);
+      padding: 12px 12px 18px;
+    }
+    .sb-title{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: var(--shadow);
+      margin-bottom: 10px;
+    }
+    .sb-brand{
+      font-weight: 800;
+      font-size: 16px;
+      color:#111827;
+    }
+    .sb-course{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top:2px;
+    }
+    .sb-section{
+      font-size: 12px;
+      letter-spacing: .6px;
+      color: var(--muted);
+      margin: 14px 6px 6px;
+      font-weight: 700;
+    }
+    .sb-link{
+      display:block;
+      padding: 9px 10px;
+      margin: 4px 0;
+      border-radius: 8px;
+      color:#111827;
+      text-decoration: none;
+      border:1px solid transparent;
+    }
+    .sb-link:hover{
+      background:#fff;
+      border-color: var(--border);
+    }
+    .sb-module{font-weight: 600;}
+    .sb-sub{
+      padding-left: 16px;
+      font-size: 13px;
+      color:#374151;
+    }
+    .sb-practice{
+      font-weight: 800;
+      color: #0f5132;
+      background: #e8f5e9;
+      border:1px solid #c8e6c9;
+    }
+
+    /* Main content */
+    .content{
+      margin-left: 300px; /* sidebar width */
+      width: calc(100% - 300px);
+      padding: 18px 18px 60px;
+    }
+    .container{
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* Cards / sections */
+    .hero{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+    .hero h1{
+      margin: 0 0 6px;
+      font-size: 26px;
+    }
+    .hero p{margin: 6px 0; color: #374151}
+    .meta{
+      margin-top: 10px;
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toc{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+    .toc h2{margin:0 0 10px; font-size: 18px;}
+    .toc ul{margin:0; padding-left: 18px;}
+    .toc a{color:#0b5; text-decoration:none;}
+    .toc a:hover{text-decoration: underline;}
+
+    .card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin: 14px 0;
+      overflow:hidden;
+    }
+    .card-header{
+      background: var(--w3-green);
+      color:#fff;
+      padding: 12px 14px;
+      font-weight: 800;
+      font-size: 16px;
+    }
+    .card-body{
+      padding: 14px;
+    }
+
+    .ascii{
+      background: #0b1220;
+      color: #d1d5db;
+      border-radius: 10px;
+      padding: 12px;
+      overflow:auto;
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 13px;
+      margin: 10px 0 12px;
+    }
+
+    .example{
+      background: var(--example);
+      border:1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin: 10px 0 12px;
+    }
+    .example .ex-title{
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .code{
+      background: var(--code);
+      color: var(--codeText);
+      border-radius: 10px;
+      padding: 12px;
+      overflow:auto;
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 13px;
+      margin: 10px 0 10px;
+    }
+
+    .try{
+      display:inline-block;
+      margin-top: 8px;
+      background: var(--w3-green);
+      color:#fff;
+      text-decoration:none;
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .try:hover{filter: brightness(.95);}
+
+    .note{
+      border-left: 6px solid;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin: 10px 0;
+      background:#fff;
+    }
+    .note.blue{background: var(--noteBlueBg); border-left-color: var(--noteBlueBr);}
+    .note.green{background: var(--tipGreenBg); border-left-color: var(--tipGreenBr);}
+    .note.red{background: var(--warnRedBg); border-left-color: var(--warnRedBr);}
+    .note .label{font-weight: 800; margin-right: 6px;}
+
+    .two-col{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 980px){
+      .sidebar{position:static; width:100%; height:auto}
+      .content{margin-left:0; width:100%}
+      .wrap{display:block}
+      .two-col{grid-template-columns: 1fr;}
+    }
+
+    /* Next/Prev section nav buttons */
+    .sec-nav{
+      display:flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+    }
+    .btn{
+      display:inline-block;
+      background: var(--w3-green);
+      color:#fff;
+      text-decoration:none;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .btn:hover{filter: brightness(.95);}
+    .btn.ghost{
+      background:#fff;
+      color:#065f46;
+      border:1px solid #a7f3d0;
+    }
+
+    /* Tooltip (HTML+CSS only) */
+    .tt{
+      position: relative;
+      cursor: help;
+      border-bottom: 1px dotted #111827;
+      font-weight: 700;
+      color:#111827;
+    }
+    .tt::after{
+      content: attr(data-tip);
+      position: absolute;
+      left: 0;
+      top: calc(100% + 8px);
+      width: min(360px, 75vw);
+      background: #111827;
+      color: #fff;
+      padding: 10px 10px;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 12px;
+      line-height: 1.35;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity .15s ease, transform .15s ease;
+      z-index: 10;
+      white-space: pre-wrap;
+    }
+    .tt::before{
+      content:"";
+      position:absolute;
+      left: 16px;
+      top: calc(100% + 2px);
+      border: 6px solid transparent;
+      border-bottom-color: #111827;
+      opacity: 0;
+      transition: opacity .15s ease;
+      z-index: 11;
+    }
+    .tt:hover::after,
+    .tt:hover::before{
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Tables */
+    table{
+      width:100%;
+      border-collapse: collapse;
+      margin: 10px 0 4px;
+      font-size: 14px;
+    }
+    th, td{
+      border:1px solid var(--border);
+      padding: 10px;
+      vertical-align: top;
+    }
+    th{
+      background:#f9fafb;
+      text-align:left;
+    }
+
+    .muted{color: var(--muted)}
+    .tag{
+      display:inline-block;
+      font-size:12px;
+      padding: 4px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      margin-right:6px;
+    }
+
+    /* Footer placeholders */
+    .placeholder{
+      background:#fff7ed;
+      border:1px dashed #fdba74;
+      border-radius: 10px;
+      padding: 12px;
+      color:#7c2d12;
+      margin-top: 10px;
+    }
+
+    details{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin: 8px 0;
+    }
+    summary{cursor:pointer; font-weight: 800;}
+    .qblock{
+      border:1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin: 10px 0;
+      background:#fff;
+    }
+    .qblock h4{margin:0 0 6px;}
+    .qgrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 820px){
+      .qgrid{grid-template-columns: 1fr;}
+    }
+  </style>
+</head>
+<body>
+  <!-- Required placeholder anchors -->
+  <div id="prev-subtopic"></div>
+
+  <header class="topbar">
+    <div class="logo">ItTechGenie</div>
+    <div class="crumb">C# Fundamentals → Advanced • Module 01 • Kickstart: Course Fundamentals &amp; .NET Ecosystem</div>
+    <div class="right">
+      <span class="pill">File: 01-kickstart.html</span>
+      <span class="pill">Self-contained</span>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <!-- Sidebar (template + CURRENT_TOPIC_SUBTOPICS filled) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-title">
+        <div class="sb-brand">ItTechGenie</div>
+        <div class="sb-course">C# Fundamentals → Advanced</div>
+      </div>
+
+      <div class="sb-section">COURSE CONTENT</div>
+
+      <a class="sb-link sb-module" href="01-kickstart.html">01. Kickstart: .NET Ecosystem</a>
+      <a class="sb-link sb-module" href="02-control-flow.html">02. Control Flow</a>
+      <a class="sb-link sb-module" href="03-oop-core.html">03. OOP Core</a>
+      <a class="sb-link sb-module" href="04-methods-mastery.html">04. Methods Mastery</a>
+      <a class="sb-link sb-module" href="05-type-conversion.html">05. Type Conversion</a>
+      <a class="sb-link sb-module" href="06-constructors.html">06. Constructors</a>
+      <a class="sb-link sb-module" href="07-properties-inheritance.html">07. Properties &amp; Inheritance</a>
+      <a class="sb-link sb-module" href="08-abstraction-interfaces.html">08. Abstraction &amp; Interfaces</a>
+      <a class="sb-link sb-module" href="09-namespaces-buildingblocks.html">09. Namespaces &amp; Building Blocks</a>
+      <a class="sb-link sb-module" href="10-advanced-toolkit.html">10. Advanced Toolkit</a>
+
+      <div class="sb-section">THIS TOPIC</div>
+      <!-- Filled from topic_plan.json (Topic 01) -->
+      <a class="sb-link sb-sub" href="#t01-dotnet-big-picture">.NET in One Picture</a>
+      <a class="sb-link sb-sub" href="#t01-cli-clr-runtime-framework">CLI vs CLR vs Runtime vs Framework</a>
+      <a class="sb-link sb-sub" href="#t01-compilation-pipeline">Compilation Pipeline: C# → IL → JIT → Native</a>
+      <a class="sb-link sb-sub" href="#t01-sdk-and-project-structure">SDK, Tools, and Project Structure</a>
+      <a class="sb-link sb-sub" href="#t01-visual-studio-tour">Introducing Visual Studio</a>
+      <a class="sb-link sb-sub" href="#t01-csharp-language-basics">C# Language Basics</a>
+      <a class="sb-link sb-sub" href="#t01-tokens-and-syntax">Tokens &amp; Syntax Structure</a>
+      <a class="sb-link sb-sub" href="#t01-first-console-app">Your First C# Console App</a>
+      <a class="sb-link sb-sub" href="#t01-variables-types-operators">Variables, Types, Operators</a>
+      <a class="sb-link sb-sub" href="#t01-mini-programs-and-debugging">Mini Programs &amp; Debugging Habits</a>
+
+      <div class="sb-section">PRACTICE</div>
+      <a class="sb-link sb-practice" href="#practice-coding-questions">To Become Best coder Practice this</a>
+    </aside>
+
+    <main class="content">
+      <div class="container">
+
+        <div class="hero">
+          <h1>Kickstart: Course Fundamentals &amp; .NET Ecosystem</h1>
+          <p>
+            In this module, you’ll build a clear mental model of <span class="tt" data-tip="A developer platform for building apps (web, desktop, mobile, cloud). It includes tools, libraries, and runtimes.\nC# commonly runs on the .NET runtime.">.NET</span>
+            and how C# code runs end-to-end—from writing code to executing native instructions on your machine.
+            You’ll also set up a first console app and practice mini programs with good debugging habits.
+          </p>
+          <div class="meta">
+            <span class="tag">TopicNo: 01</span>
+            <span class="tag">Next Module: 02-control-flow.html</span>
+            <span class="tag muted">Anchors: use the sidebar to jump</span>
+          </div>
+
+          <div class="note blue" style="margin-top:12px;">
+            <span class="label">Note:</span>
+            This page is <b>fully self-contained</b> (no external CSS/JS). All “Try It Yourself” buttons are dummy links.
+          </div>
+        </div>
+
+        <div class="toc">
+          <h2>Table of Contents</h2>
+          <ul>
+            <li><a href="#t01-dotnet-big-picture">.NET in One Picture (What It Is &amp; Why It Exists)</a></li>
+            <li><a href="#t01-cli-clr-runtime-framework">CLI vs CLR vs Runtime vs Framework (Core Architecture)</a></li>
+            <li><a href="#t01-compilation-pipeline">Compilation Pipeline: C# → IL → JIT → Native</a></li>
+            <li><a href="#t01-sdk-and-project-structure">SDK, Tools, and Project Structure (Solution, Project, csproj)</a></li>
+            <li><a href="#t01-visual-studio-tour">Introducing Visual Studio (IDE Tour for Beginners)</a></li>
+            <li><a href="#t01-csharp-language-basics">C# Language Basics (Where C# Fits in .NET)</a></li>
+            <li><a href="#t01-tokens-and-syntax">Tokens &amp; Syntax Structure (Keywords, Identifiers, Statements, Blocks)</a></li>
+            <li><a href="#t01-first-console-app">Your First C# Console App (Console, Main, Output/Input)</a></li>
+            <li><a href="#t01-variables-types-operators">Core Programming Building Blocks (Variables, Types, Operators)</a></li>
+            <li><a href="#t01-mini-programs-and-debugging">Mini Programs &amp; Debugging Habits (3 Programs + Step-by-Step)</a></li>
+            <li><a href="#faqs">FAQs</a></li>
+            <li><a href="#interview">Interview Questions</a></li>
+            <li><a href="#mcq">MCQ Quiz</a></li>
+            <li><a href="#glossary-tooltips">Glossary (Tooltips)</a></li>
+            <li><a href="#practice-coding-questions">To Become Best coder Practice this</a></li>
+            <li><a href="#downloads">Downloadable ZIP / PPT / DOC (Placeholder)</a></li>
+          </ul>
+        </div>
+
+        <!-- =========================================================
+             SECTION 1
+        ========================================================== -->
+        <section class="card" id="t01-dotnet-big-picture">
+          <div class="card-header">.NET in One Picture (What It Is &amp; Why It Exists)</div>
+          <div class="card-body">
+            <p>
+              <span class="tt" data-tip="A developer platform for building apps (web, desktop, mobile, cloud).\nIt includes runtimes, tools, and libraries to speed up development.">.NET</span>
+              is a platform that helps you build many kinds of applications using a consistent set of tools and libraries.
+              It solves common problems like memory management, cross-platform execution, and rich standard libraries.
+              When you write C# code, you’re targeting a runtime that provides services like
+              <span class="tt" data-tip="Automatic memory management. The runtime tracks unused objects and frees memory.\nIt reduces manual memory bugs but requires understanding object lifetimes.">Garbage Collection</span>
+              and error handling.
+              The big idea: write code once, run it reliably, and reuse well-tested building blocks.
+            </p>
+
+            <pre class="ascii">+------------------+     +-----------------------+     +------------------+
+|   Your C# Code    | --> | .NET Libraries (BCL)  | --> |  .NET Runtime     |
+|  (business logic) |     | (collections, IO...)  |     | (executes code)   |
++------------------+     +-----------------------+     +------------------+
+          |                           |                          |
+          +---------------------------+--------------------------+
+                          "Platform = Tools + Libraries + Runtime"</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: What .NET helps you with</div>
+              <ul style="margin:6px 0 0; padding-left:18px;">
+                <li>Building a Web API (ASP.NET Core)</li>
+                <li>Saving files and reading JSON (built-in IO + serialization support)</li>
+                <li>Managing memory safely (GC instead of manual free)</li>
+              </ul>
+              <a class="try" href="#t01-dotnet-big-picture">Try It Yourself</a>
+            </div>
+
+            <pre class="code">// Conceptual example: .NET provides ready libraries (BCL)
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine("Hello from .NET + C#!");
+        // Console is part of the base libraries you get "for free".
+    }
+}</pre>
+
+            <div class="note green">
+              <span class="label">Tip:</span>
+              Learn the mental model: <b>Language (C#)</b> + <b>Libraries</b> + <b>Runtime</b> = the full .NET experience.
+            </div>
+
+            <div class="note blue">
+              <span class="label">Advanced note:</span>
+              Many .NET features are standardized by the <span class="tt" data-tip="Common Language Infrastructure.\nA standard describing IL, metadata, and assemblies so multiple runtimes/languages can interoperate.">CLI</span>,
+              while Microsoft’s main runtime implementation is the <span class="tt" data-tip="Common Language Runtime.\nIt runs managed code and provides services like GC, type safety, and exception handling.">CLR</span>.
+            </div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#prev-subtopic">Previous</a>
+              <a class="btn" href="#t01-cli-clr-runtime-framework">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 2
+        ========================================================== -->
+        <section class="card" id="t01-cli-clr-runtime-framework">
+          <div class="card-header">CLI vs CLR vs Runtime vs Framework (Core Architecture)</div>
+          <div class="card-body">
+            <p>
+              These words sound similar, but they describe different layers.
+              <span class="tt" data-tip="Common Language Infrastructure.\nIt defines IL, metadata, assemblies, and rules for language/runtime interoperability.">CLI</span> is the <i>standard</i>;
+              <span class="tt" data-tip="Common Language Runtime.\nMicrosoft’s runtime that executes .NET managed code and provides GC, JIT, and safety services.">CLR</span> is a main <i>implementation</i>;
+              the <span class="tt" data-tip="The execution environment that runs your program.\nIt loads assemblies, JIT-compiles IL, manages memory, and handles exceptions.">Runtime</span> is the running engine on your machine;
+              and the <span class="tt" data-tip="A set of libraries/APIs that help you build apps faster.\nIn .NET, frameworks provide reusable building blocks like collections and IO.">Framework</span> is the library ecosystem you call from code.
+              Understanding this makes troubleshooting and architecture decisions much easier.
+            </p>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Term</th>
+                  <th>What it is</th>
+                  <th>Simple analogy</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="tt" data-tip="A standard describing how languages target a runtime using IL, metadata, and assemblies.">CLI</span></td>
+                  <td>Specification/standard</td>
+                  <td>Traffic rules</td>
+                </tr>
+                <tr>
+                  <td><span class="tt" data-tip="Microsoft’s implementation of the CLI standard.\nIt runs managed code and provides GC, JIT, and type safety.">CLR</span></td>
+                  <td>Microsoft runtime implementation</td>
+                  <td>A specific car engine</td>
+                </tr>
+                <tr>
+                  <td><span class="tt" data-tip="The environment that executes your program.\nLoads assemblies, JITs IL, manages memory, and handles exceptions.">Runtime</span></td>
+                  <td>Execution environment</td>
+                  <td>The whole car running</td>
+                </tr>
+                <tr>
+                  <td><span class="tt" data-tip="Reusable libraries and APIs you call from code.\nExamples: collections, IO, networking, JSON.">Framework</span></td>
+                  <td>Libraries and APIs</td>
+                  <td>Toolbox in the trunk</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <pre class="ascii">[Standard] CLI
+   |
+   v
+[Implementation] CLR  ---> [Services: GC, JIT, Security, Exceptions]
+   |
+   v
+[Runtime executing your app]  +  [Framework libraries you call]</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: “My app runs on .NET” usually means…</div>
+              <p style="margin:6px 0 0;">
+                You installed a <span class="tt" data-tip="Software Development Kit.\nIncludes compiler, CLI tools, templates, and build system for developing apps.">SDK</span> to build it,
+                and the machine has a compatible <span class="tt" data-tip="The execution environment that runs your program.\nIt loads assemblies and executes your code.">runtime</span> to execute it.
+              </p>
+              <a class="try" href="#t01-cli-clr-runtime-framework">Try It Yourself</a>
+            </div>
+
+            <pre class="code">// A tiny reminder: you write C# (language) against libraries (framework)
+// and it runs via a runtime (CLR).
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine("Language + Libraries + Runtime = .NET experience");
+    }
+}</pre>
+
+            <div class="note green">
+              <span class="label">Tip:</span>
+              When someone says “install .NET”, ask: do you need the <b>runtime</b> (to run) or the <b>SDK</b> (to develop)?
+            </div>
+
+            <div class="note blue">
+              <span class="label">Advanced note:</span>
+              In real deployments, servers typically need only the <b>runtime</b>, while developers install the <b>SDK</b> for building and tooling.
+            </div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t01-dotnet-big-picture">Previous</a>
+              <a class="btn" href="#t01-compilation-pipeline">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 3
+        ========================================================== -->
+        <section class="card" id="t01-compilation-pipeline">
+          <div class="card-header">Compilation Pipeline: C# → IL → JIT → Native</div>
+          <div class="card-body">
+            <p>
+              C# does not become machine code immediately. First it compiles into
+              <span class="tt" data-tip="Intermediate Language.\nC# compiles into IL + metadata; the runtime later turns it into native code using JIT.">IL</span>
+              inside an <span class="tt" data-tip="A compiled output unit in .NET (.dll or .exe).\nContains IL code and metadata; the runtime loads assemblies to run your app.">assembly</span>.
+              At runtime, the <span class="tt" data-tip="Just-In-Time compilation.\nConverts IL to native machine code at runtime and can apply optimizations.">JIT</span> compiles IL into native code for your CPU.
+              This pipeline enables portability and runtime optimizations, but it also explains “first-run warm-up” effects.
+            </p>
+
+            <pre class="ascii">C# Source
+  |
+  v
+Compiler (Roslyn)
+  |
+  v
+Assembly (.dll/.exe) containing IL + metadata
+  |
+  v
+Runtime loads assembly
+  |
+  v
+JIT compiles IL -> Native CPU instructions
+  |
+  v
+Program runs + GC manages memory</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: Why first request can be slower in production</div>
+              <p style="margin:6px 0 0;">
+                The first time a method is executed, the runtime may JIT it.
+                Later calls reuse compiled native code, so they are faster.
+              </p>
+              <a class="try" href="#t01-compilation-pipeline">Try It Yourself</a>
+            </div>
+
+            <pre class="code">// You can't see IL directly here, but you can observe runtime behavior.
+// Example: A loop "warms up" JIT for a method on first call.
+using System;
+
+class Program
+{
+    static int Add(int a, int b) => a + b;
+
+    static void Main()
+    {
+        Console.WriteLine(Add(10, 20));
+        Console.WriteLine(Add(30, 40));
+    }
+}</pre>
+
+            <div class="note green">
+              <span class="label">Tip:</span>
+              Remember the pipeline: <b>C# → IL → JIT → Native</b>. If you know this, debugging performance and deployments gets easier.
+            </div>
+
+            <div class="note blue">
+              <span class="label">Advanced note:</span>
+              JIT can optimize using runtime information (CPU features, inlining decisions). That’s one reason .NET performance keeps improving version to version.
+            </div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t01-cli-clr-runtime-framework">Previous</a>
+              <a class="btn" href="#t01-sdk-and-project-structure">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 4
+        ========================================================== -->
+        <section class="card" id="t01-sdk-and-project-structure">
+          <div class="card-header">SDK, Tools, and Project Structure (Solution, Project, csproj)</div>
+          <div class="card-body">
+            <p>
+              The <span class="tt" data-tip="Software Development Kit.\nIncludes compiler, CLI tools, templates, and build system for developing .NET apps.">SDK</span>
+              is what you install to <i>develop</i> .NET apps: it includes the compiler, templates, and build tools.
+              A <b>Solution</b> groups related projects, while a <b>Project</b> is a buildable unit (like a console app or library).
+              The <b>csproj</b> file describes project settings, dependencies, and build instructions.
+            </p>
+
+            <pre class="ascii">Solution (.sln)
+  |
+  +-- Project A (Console App)  -> Project file (.csproj)
+  |
+  +-- Project B (Class Library)-> Project file (.csproj)</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: Typical folder layout</div>
+              <pre class="ascii" style="margin:8px 0 0;">MySolution/
+  MySolution.sln
+  src/
+    MyApp/
+      MyApp.csproj
+      Program.cs
+    MyLib/
+      MyLib.csproj
+      Helpers.cs</pre>
+              <a class="try" href="#t01-sdk-and-project-structure">Try It Yourself</a>
+            </div>
+
+            <pre class="code">// A csproj is XML, but you usually don't edit it much as a beginner.
+// Here is a minimal representation (for understanding only):
+/*
+&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+  &lt;PropertyGroup&gt;
+    &lt;OutputType&gt;Exe&lt;/OutputType&gt;
+    &lt;TargetFramework&gt;net8.0&lt;/TargetFramework&gt;
+  &lt;/PropertyGroup&gt;
+&lt;/Project&gt;
+*/</pre>
+
+            <div class="note green">
+              <span class="label">Tip:</span>
+              Learn “Solution vs Project” early—teams often have many projects under one solution (UI, API, Domain, Tests).
+            </div>
+
+            <div class="note blue">
+              <span class="label">Advanced note:</span>
+              Project files can contain build properties, package references, and conditional settings (Debug/Release). This becomes important for CI/CD later.
+            </div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t01-compilation-pipeline">Previous</a>
+              <a class="btn" href="#t01-visual-studio-tour">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 5
+        ========================================================== -->
+        <section class="card" id="t01-visual-studio-tour">
+          <div class="card-header">Introducing Visual Studio (IDE Tour for Beginners)</div>
+          <div class="card-body">
+            <p>
+              Visual Studio is an IDE that helps you write, run, and debug C# efficiently.
+              You’ll use it to create projects, manage dependencies, and step through code with breakpoints.
+              The Debugger is your superpower: it shows variable values, call stacks, and lets you “pause time”.
+              Once you master build/run/debug, learning new C# topics becomes much faster.
+            </p>
+
+            <pre class="ascii">IDE Workflow (Beginner Map)
+  Create Project
+      |
+      v
+  Write Code
+      |
+      v
+  Build (compile) ----> Fix Errors
+      |
+      v
+  Run / Debug ----> Breakpoints, Watch, Step Over/Into</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: Your first debugging routine</div>
+              <ol style="margin:6px 0 0; padding-left:18px;">
+                <li>Set a breakpoint on a line</li>
+                <li>Run in Debug mode</li>
+                <li>Hover variables to inspect values</li>
+                <li>Step Over (F10) to move line-by-line</li>
+              </ol>
+              <a class="try" href="#t01-visual-studio-tour">Try It Yourself</a>
+            </div>
+
+            <pre class="code">// Debugging-friendly code: keep it simple, print and inspect values.
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        int price = 1200;
+        int discount = 200;
+        int finalPrice = price - discount; // put breakpoint here
+
+        Console.WriteLine(finalPrice);
+    }
+}</pre>
+
+            <div class="note green">
+              <span class="label">Tip:</span>
+              Don’t “guess” bugs—use breakpoints + watch variables. Debugging is a skill, not luck.
+            </div>
+
+            <div class="note blue">
+              <span class="label">Advanced note:</span>
+              Learn the Call Stack window early. It explains “how you got here” when debugging deeper methods.
+            </div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t01-sdk-and-project-structure">Previous</a>
+              <a class="btn" href="#t01-csharp-language-basics">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 6
+        ========================================================== -->
+        <section class="card" id="t01-csharp-language-basics">
+          <div class="card-header">C# Language Basics (Where C# Fits in .NET)</div>
+          <div class="card-body">
+            <p>
+              C# is a language designed to work naturally with the .NET platform.
+              It compiles to <span class="tt" data-tip="Intermediate Language.\nC# compiles into IL; the runtime later turns it into native code using JIT.">IL</span>,
+              runs under the <span class="tt" data-tip="Common Language Runtime.\nRuns managed code and provides services like GC, type safety, and exception handling.">CLR</span>,
+              and uses the <span class="tt" data-tip="Base Class Library.\nCore libraries for collections, strings, file IO, networking, and more.">BCL</span> to solve everyday tasks.
+              C# focuses on readability, safety (types), and productivity (rich features).
+              In real projects, you combine C# code with libraries and frameworks like ASP.NET Core or .NET MAUI.
+            </p>
+
+            <pre class="ascii">C# (language)
+  |
+  +-- compiles to IL
+  |
+  +-- uses BCL (libraries)
+  |
+  +-- runs on CLR (runtime)
+  |
+  +-- builds apps: console, web, desktop, cloud</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: C# + BCL in 5 lines</div>
+              <p style="margin:6px 0 0;">
+                Use string, math, and console—all come from the standard libraries.
+              </p>
+              <a class="try" href="#t01-csharp-language-basics">Try It Yourself</a>
+            </div>
+
+            <pre class="code">using System;
+
+class Program
+{
+    static void Main()
+    {
+        string name = "ItTechGenie";
+        Console.WriteLine("Hello " + name.ToUpper());
+        Console.WriteLine("2 + 3 = " + (2 + 3));
+    }
+}</pre>
+
+            <div class="note green">
+              <span class="label">Tip:</span>
+              If you feel “stuck”, practice reading and writing small programs daily. C# becomes easy through repetition.
+            </div>
+
+            <div class="note blue">
+              <span class="label">Advanced note:</span>
+              C# versions add features regularly—your project’s language level is typically tied to the target framework and compiler settings.
+            </div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t01-visual-studio-tour">Previous</a>
+              <a class="btn" href="#t01-tokens-and-syntax">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 7
+        ========================================================== -->
+        <section class="card" id="t01-tokens-and-syntax">
+          <div class="card-header">Tokens &amp; Syntax Structure (Keywords, Identifiers, Statements, Blocks)</div>
+          <div class="card-body">
+            <p>
+              To write correct C# you must understand its building blocks: tokens and syntax.
+              <b>Keywords</b> are reserved words (like class, int), <b>identifiers</b> are names you choose,
+              <b>statements</b> are executable lines ending with semicolons, and <b>blocks</b> are code inside braces.
+              Once this grammar feels natural, you’ll write clean code without “fighting the compiler”.
+            </p>
+
+            <pre class="ascii">Tokens & Syntax (C#)
+  Keywords:   class, int, static, void
+  Identifiers: Program, Main, total
+  Operators:  +, -, *, /, =
+  Literals:   10, 3.14, "Hello"
+  Statements: one action; ends with ;
+  Block:      { ... } groups statements</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: Break down a tiny program</div>
+              <p style="margin:6px 0 0;">
+                In <b>int total = a + b;</b> → <i>int</i> is a keyword, <i>total</i> is an identifier,
+                and the whole line is a statement.
+              </p>
+              <a class="try" href="#t01-tokens-and-syntax">Try It Yourself</a>
+            </div>
+
+            <pre class="code">using System;
+
+class Program          // 'class' is a keyword, Program is an identifier
+{
+    static void Main() // static/void are keywords, Main is an identifier
+    {
+        int a = 10;    // int keyword, a identifier, 10 literal
+        int b = 20;
+        int total = a + b; // statement ends with ;
+        Console.WriteLine(total);
+    } // block ends
+}</pre>
+
+            <div class="note green">
+              <span class="label">Tip:</span>
+              If you get errors, read them slowly. Many beginner errors are missing <b>;</b>, missing <b>{ }</b>, or wrong identifier spelling.
+            </div>
+
+            <div class="note blue">
+              <span class="label">Advanced note:</span>
+              Formatting matters for readability (not compilation). Follow consistent style: indentation, meaningful names, and small methods.
+            </div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t01-csharp-language-basics">Previous</a>
+              <a class="btn" href="#t01-first-console-app">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 8
+        ========================================================== -->
+        <section class="card" id="t01-first-console-app">
+          <div class="card-header">Your First C# Console App (Console, Main, Output/Input)</div>
+          <div class="card-body">
+            <p>
+              A console app is the easiest way to practice C# quickly.
+              The program starts at <b>Main</b> (or top-level statements in newer C#).
+              You can print output using Console.WriteLine and read input using Console.ReadLine.
+              As you learn, keep programs small and test with different inputs.
+            </p>
+
+            <pre class="ascii">Console App Flow
+  Start
+   |
+   v
+ Read Input (optional)
+   |
+   v
+ Process (logic)
+   |
+   v
+ Print Output
+   |
+   v
+ End</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: Simple input → output</div>
+              <p style="margin:6px 0 0;">Ask the user their name and greet them.</p>
+              <a class="try" href="#t01-first-console-app">Try It Yourself</a>
+            </div>
+
+            <pre class="code">using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.Write("Enter your name: ");
+        string name = Console.ReadLine();
+
+        Console.WriteLine("Welcome, " + name + "!");
+    }
+}</pre>
+
+            <div class="note green">
+              <span class="label">Tip:</span>
+              Always test console apps with “edge” inputs: empty string, spaces, very large numbers, etc.
+            </div>
+
+            <div class="note blue">
+              <span class="label">Advanced note:</span>
+              Real apps validate input (TryParse) and never assume user input is perfect—this prevents crashes and bad data.
+            </div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t01-tokens-and-syntax">Previous</a>
+              <a class="btn" href="#t01-variables-types-operators">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 9
+        ========================================================== -->
+        <section class="card" id="t01-variables-types-operators">
+          <div class="card-header">Core Programming Building Blocks (Variables, Types, Operators)</div>
+          <div class="card-body">
+            <p>
+              Variables store values, and types define what operations are allowed.
+              C# is strongly typed: you must declare whether a value is an int, double, bool, or string.
+              Operators (like +, -, *, /, ==) help you compute and compare values.
+              When you combine types + operators correctly, you can model real business rules reliably.
+            </p>
+
+            <pre class="ascii">Variables + Types + Operators
+  [Type]  [Name]   [Operator]  [Value]
+   int     age        =         21
+
+Common operators:
+  + - * /  (math)
+  == != > < (comparisons)
+  && || ! (logic)</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: Total price after discount</div>
+              <p style="margin:6px 0 0;">
+                Use variables for price/discount, compute final total, then display it.
+              </p>
+              <a class="try" href="#t01-variables-types-operators">Try It Yourself</a>
+            </div>
+
+            <pre class="code">using System;
+
+class Program
+{
+    static void Main()
+    {
+        double price = 1499.50;
+        double discount = 200.00;
+
+        double finalPrice = price - discount;
+        bool isCheap = finalPrice < 1000;
+
+        Console.WriteLine("Final Price: " + finalPrice);
+        Console.WriteLine("Is cheap (< 1000)? " + isCheap);
+    }
+}</pre>
+
+            <div class="note green">
+              <span class="label">Tip:</span>
+              Use meaningful variable names (finalPrice, discount) instead of a, b, c—your future self will thank you.
+            </div>
+
+            <div class="note blue">
+              <span class="label">Advanced note:</span>
+              For money, prefer <b>decimal</b> over double to avoid floating-point precision issues in financial calculations.
+            </div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t01-first-console-app">Previous</a>
+              <a class="btn" href="#t01-mini-programs-and-debugging">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 10
+        ========================================================== -->
+        <section class="card" id="t01-mini-programs-and-debugging">
+          <div class="card-header">Mini Programs &amp; Debugging Habits (3 Programs + Step-by-Step)</div>
+          <div class="card-body">
+            <p>
+              Mini programs are how you turn theory into skill.
+              We’ll build three beginner-friendly programs: Area of Circle, Feet → Centimeters, and Seconds → Minutes.
+              Each one teaches you: input, conversion, calculation, and output formatting.
+              Also, you’ll practice debugging habits like printing intermediate values and stepping through code.
+            </p>
+
+            <pre class="ascii">Mini Program Pattern
+  1) Read input
+  2) Convert to correct type
+  3) Apply formula
+  4) Print output
+  5) Validate with sample inputs</pre>
+
+            <div class="example">
+              <div class="ex-title">Example set (what we will build)</div>
+              <ul style="margin:6px 0 0; padding-left:18px;">
+                <li>Area of Circle: area = π × r × r</li>
+                <li>Feet → Centimeters: cm = feet × 30.48</li>
+                <li>Seconds → Minutes: minutes = seconds / 60</li>
+              </ul>
+              <a class="try" href="#t01-mini-programs-and-debugging">Try It Yourself</a>
+            </div>
+
+            <pre class="code">using System;
+
+class Program
+{
+    static void Main()
+    {
+        // 1) Area of Circle
+        Console.Write("Enter radius: ");
+        double r = double.Parse(Console.ReadLine());
+        double area = Math.PI * r * r;
+        Console.WriteLine("Area of circle: " + area);
+
+        // 2) Feet to Centimeters
+        Console.Write("Enter feet: ");
+        double feet = double.Parse(Console.ReadLine());
+        double cm = feet * 30.48;
+        Console.WriteLine("Centimeters: " + cm);
+
+        // 3) Seconds to Minutes
+        Console.Write("Enter seconds: ");
+        int seconds = int.Parse(Console.ReadLine());
+        double minutes = seconds / 60.0;
+        Console.WriteLine("Minutes: " + minutes);
+    }
+}</pre>
+
+            <div class="note green">
+              <span class="label">Tip:</span>
+              When results look wrong, print intermediate values (r, area, feet, cm) and verify formula step-by-step.
+            </div>
+
+            <div class="note blue">
+              <span class="label">Advanced note:</span>
+              Replace Parse with TryParse for production-grade input validation. You’ll learn this formally in the Type Conversion module.
+            </div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t01-variables-types-operators">Previous</a>
+              <a class="btn" href="#faqs">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             FAQs
+        ========================================================== -->
+        <section class="card" id="faqs">
+          <div class="card-header">FAQs</div>
+          <div class="card-body">
+            <details>
+              <summary>Do I need to memorize everything about .NET first?</summary>
+              <p>
+                No. Learn the big picture (<span class="tt" data-tip="C# compiles into IL, runtime JITs into native code.\nThis model explains portability and performance.">C# → IL → JIT</span>),
+                then practice small programs. Concepts become natural through usage.
+              </p>
+            </details>
+
+            <details>
+              <summary>What should I install: .NET Runtime or SDK?</summary>
+              <p>
+                If you are coding and building projects, install the <span class="tt" data-tip="Software Development Kit.\nIncludes compiler, tools, and templates for developing .NET apps.">SDK</span>.
+                If you only want to run an already-built app, the runtime is enough.
+              </p>
+            </details>
+
+            <details>
+              <summary>Why does my program crash when I type letters for a number?</summary>
+              <p>
+                That happens when parsing fails. Later you will use <span class="tt" data-tip="A safe parsing method that returns true/false rather than throwing.\nHelps programs avoid crashing on invalid user input.">TryParse</span>
+                to handle invalid input without exceptions.
+              </p>
+            </details>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t01-mini-programs-and-debugging">Previous</a>
+              <a class="btn" href="#interview">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             Interview Questions
+        ========================================================== -->
+        <section class="card" id="interview">
+          <div class="card-header">Interview Questions (Module 01)</div>
+          <div class="card-body">
+            <ol style="margin:0; padding-left:18px;">
+              <li>Explain the difference between <span class="tt" data-tip="A standard describing IL, metadata, and assemblies.\nIt enables multiple languages/runtimes to interoperate.">CLI</span> and <span class="tt" data-tip="Microsoft’s runtime implementation.\nRuns managed code and provides GC, JIT, and safety services.">CLR</span>.</li>
+              <li>What is <span class="tt" data-tip="Intermediate Language.\nC# compiles to IL and runtime converts it to native code.">IL</span> and why does .NET use it?</li>
+              <li>What does the <span class="tt" data-tip="Just-In-Time compilation.\nConverts IL to native machine code at runtime and may optimize.">JIT</span> do?</li>
+              <li>Runtime vs Framework — what changes if you upgrade the runtime version?</li>
+              <li>What is a <span class="tt" data-tip="Compiled output unit like .dll or .exe.\nContains IL and metadata; runtime loads it to run your app.">.NET assembly</span>?</li>
+              <li>Explain the difference between a Solution and a Project.</li>
+              <li>Why is debugging with breakpoints better than only using Console.WriteLine?</li>
+              <li>What are tokens in C#? Give examples.</li>
+            </ol>
+
+            <div class="note green">
+              <span class="label">Tip:</span>
+              For interviews, draw the pipeline diagram (C# → IL → JIT → Native). It instantly shows strong fundamentals.
+            </div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#faqs">Previous</a>
+              <a class="btn" href="#mcq">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             MCQ Quiz
+        ========================================================== -->
+        <section class="card" id="mcq">
+          <div class="card-header">MCQ Quiz (5–10 Questions)</div>
+          <div class="card-body">
+            <p class="muted">No JS scoring here (self-contained rule). Use the answers in the collapsible “Show Answer” sections.</p>
+
+            <details>
+              <summary>1) What does the CLR primarily do?</summary>
+              <ul>
+                <li>A) Stores HTML files</li>
+                <li>B) Executes managed .NET code and provides services like GC</li>
+                <li>C) Replaces the C# compiler</li>
+                <li>D) Encrypts source code</li>
+              </ul>
+              <p><b>Answer:</b> B</p>
+            </details>
+
+            <details>
+              <summary>2) C# code is compiled first into:</summary>
+              <ul>
+                <li>A) Native machine code only</li>
+                <li>B) Java bytecode</li>
+                <li>C) IL (Intermediate Language)</li>
+                <li>D) Assembly language</li>
+              </ul>
+              <p><b>Answer:</b> C</p>
+            </details>
+
+            <details>
+              <summary>3) Which install is required to develop/build .NET projects?</summary>
+              <ul>
+                <li>A) Only the runtime</li>
+                <li>B) Only Visual Studio</li>
+                <li>C) The .NET SDK</li>
+                <li>D) No installs are needed</li>
+              </ul>
+              <p><b>Answer:</b> C</p>
+            </details>
+
+            <details>
+              <summary>4) What is a csproj file?</summary>
+              <ul>
+                <li>A) A log file</li>
+                <li>B) A project configuration/build definition file</li>
+                <li>C) A database file</li>
+                <li>D) A compiled DLL</li>
+              </ul>
+              <p><b>Answer:</b> B</p>
+            </details>
+
+            <details>
+              <summary>5) What is the best first step when debugging wrong output?</summary>
+              <ul>
+                <li>A) Rewrite everything</li>
+                <li>B) Guess the bug</li>
+                <li>C) Inspect variables using breakpoints/watch</li>
+                <li>D) Delete the project</li>
+              </ul>
+              <p><b>Answer:</b> C</p>
+            </details>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#interview">Previous</a>
+              <a class="btn" href="#glossary-tooltips">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             Glossary (Tooltips) table - required
+        ========================================================== -->
+        <section class="card" id="glossary-tooltips">
+          <div class="card-header">Glossary (Tooltips)</div>
+          <div class="card-body">
+            <p class="muted">Terms used with tooltips in this module.</p>
+
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:25%;">Term</th>
+                  <th>Tooltip Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>.NET</td><td>A developer platform for building apps (web, desktop, mobile, cloud). It includes tools, libraries, and runtimes. C# commonly runs on the .NET runtime.</td></tr>
+                <tr><td>CLI</td><td>Common Language Infrastructure. A standard that defines IL, metadata, and assemblies. CLR is Microsoft’s implementation of the CLI standard.</td></tr>
+                <tr><td>CLR</td><td>Common Language Runtime. It executes .NET code and provides services like garbage collection, type safety, and exception handling.</td></tr>
+                <tr><td>Runtime</td><td>The execution environment that runs your program. Loads assemblies, JIT-compiles IL, manages memory, and handles exceptions.</td></tr>
+                <tr><td>Framework</td><td>A set of libraries/APIs that help you build apps faster (collections, IO, networking, etc.).</td></tr>
+                <tr><td>SDK</td><td>Software Development Kit. Includes compiler, CLI tools, templates, and build system needed to develop .NET apps.</td></tr>
+                <tr><td>BCL</td><td>Base Class Library. Core set of libraries like collections, strings, file IO, networking.</td></tr>
+                <tr><td>Assembly</td><td>A compiled unit (.dll/.exe) containing IL + metadata. The runtime loads assemblies to execute your program.</td></tr>
+                <tr><td>IL</td><td>Intermediate Language. C# compiles into IL; the runtime later converts IL to native code via JIT compilation.</td></tr>
+                <tr><td>JIT</td><td>Just-In-Time compilation. Converts IL to native machine code at runtime and may optimize based on runtime conditions.</td></tr>
+                <tr><td>Garbage Collection</td><td>Automatic memory management. Tracks objects no longer used and frees memory, reducing manual memory bugs.</td></tr>
+              </tbody>
+            </table>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#mcq">Previous</a>
+              <a class="btn" href="#practice-coding-questions">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             PRACTICE SECTION (required id + exact title)
+        ========================================================== -->
+        <section class="card" id="practice-coding-questions">
+          <div class="card-header">To Become Best coder Practice this</div>
+          <div class="card-body">
+            <p>
+              Below are 15 coding questions (5 Easy / 5 Medium / 5 Hard). Each includes problem, I/O, examples, constraints, and a hint.
+              Write solutions in C# console apps. Practice using breakpoints and testing multiple inputs.
+            </p>
+
+            <h3 style="margin:10px 0 6px;">Easy (5)</h3>
+
+            <div class="qblock">
+              <h4>E1) Greeting Formatter</h4>
+              <p><b>Problem:</b> Read a name and print: <i>Hello, &lt;name&gt;!</i></p>
+              <div class="qgrid">
+                <div><b>Input:</b> one string</div>
+                <div><b>Output:</b> one line greeting</div>
+              </div>
+              <p><b>Example Input:</b> Gopi<br><b>Example Output:</b> Hello, Gopi!</p>
+              <p><b>Constraints:</b> name length 1 to 50</p>
+              <p><b>Hint:</b> Use Console.ReadLine() and string concatenation.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>E2) Add Two Integers</h4>
+              <p><b>Problem:</b> Read two integers and print their sum.</p>
+              <div class="qgrid">
+                <div><b>Input:</b> two integers (space-separated)</div>
+                <div><b>Output:</b> sum as integer</div>
+              </div>
+              <p><b>Example Input:</b> 10 25<br><b>Example Output:</b> 35</p>
+              <p><b>Constraints:</b> -1,000,000 to 1,000,000</p>
+              <p><b>Hint:</b> Split input by space and parse to int.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>E3) Area of a Circle</h4>
+              <p><b>Problem:</b> Given radius <i>r</i>, print area using π=3.14159 (5 decimal places).</p>
+              <div class="qgrid">
+                <div><b>Input:</b> one double</div>
+                <div><b>Output:</b> area formatted to 5 decimals</div>
+              </div>
+              <p><b>Example Input:</b> 2<br><b>Example Output:</b> 12.56636</p>
+              <p><b>Constraints:</b> 0 ≤ r ≤ 10,000</p>
+              <p><b>Hint:</b> area = 3.14159 * r * r</p>
+            </div>
+
+            <div class="qblock">
+              <h4>E4) Feet to Centimeters</h4>
+              <p><b>Problem:</b> Convert feet to centimeters using 1 ft = 30.48 cm.</p>
+              <div class="qgrid">
+                <div><b>Input:</b> one double (feet)</div>
+                <div><b>Output:</b> centimeters (2 decimals)</div>
+              </div>
+              <p><b>Example Input:</b> 5<br><b>Example Output:</b> 152.40</p>
+              <p><b>Constraints:</b> 0 ≤ feet ≤ 1,000,000</p>
+              <p><b>Hint:</b> cm = feet * 30.48</p>
+            </div>
+
+            <div class="qblock">
+              <h4>E5) Seconds to Minutes and Seconds</h4>
+              <p><b>Problem:</b> Convert total seconds to “minutes seconds” (e.g., 130 → 2 10).</p>
+              <div class="qgrid">
+                <div><b>Input:</b> one integer (seconds)</div>
+                <div><b>Output:</b> minutes and remaining seconds</div>
+              </div>
+              <p><b>Example Input:</b> 130<br><b>Example Output:</b> 2 10</p>
+              <p><b>Constraints:</b> 0 ≤ seconds ≤ 10^9</p>
+              <p><b>Hint:</b> minutes = s / 60, rem = s % 60</p>
+            </div>
+
+            <h3 style="margin:12px 0 6px;">Medium (5)</h3>
+
+            <div class="qblock">
+              <h4>M1) Safe Integer Input</h4>
+              <p><b>Problem:</b> Read a string and print “VALID” if it can be parsed as int, else “INVALID”.</p>
+              <div class="qgrid">
+                <div><b>Input:</b> one string</div>
+                <div><b>Output:</b> VALID or INVALID</div>
+              </div>
+              <p><b>Example Input:</b> 12a<br><b>Example Output:</b> INVALID</p>
+              <p><b>Constraints:</b> input length ≤ 100</p>
+              <p><b>Hint:</b> Use int.TryParse.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>M2) Simple Discount Calculator</h4>
+              <p><b>Problem:</b> Read price and discountPercent (0–100). Print final price (2 decimals).</p>
+              <div class="qgrid">
+                <div><b>Input:</b> price(double), percent(int)</div>
+                <div><b>Output:</b> final price</div>
+              </div>
+              <p><b>Example Input:</b> 1000 15<br><b>Example Output:</b> 850.00</p>
+              <p><b>Constraints:</b> 0 ≤ price ≤ 10^7, 0 ≤ percent ≤ 100</p>
+              <p><b>Hint:</b> final = price * (1 - percent/100.0)</p>
+            </div>
+
+            <div class="qblock">
+              <h4>M3) Basic Menu Loop (3 options)</h4>
+              <p><b>Problem:</b> Repeatedly show menu: 1) Add, 2) Multiply, 3) Exit. Stop on Exit.</p>
+              <div class="qgrid">
+                <div><b>Input:</b> multiple lines (choice and numbers)</div>
+                <div><b>Output:</b> results for operations</div>
+              </div>
+              <p><b>Example Input:</b><br>1<br>2 3<br>2<br>4 5<br>3<br>
+                 <b>Example Output:</b><br>5<br>20</p>
+              <p><b>Constraints:</b> choices only 1–3</p>
+              <p><b>Hint:</b> Use while(true) + break; validate choice.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>M4) Count Digits</h4>
+              <p><b>Problem:</b> Read a non-negative integer and print how many digits it has (0 has 1 digit).</p>
+              <div class="qgrid">
+                <div><b>Input:</b> one long</div>
+                <div><b>Output:</b> digit count</div>
+              </div>
+              <p><b>Example Input:</b> 1000<br><b>Example Output:</b> 4</p>
+              <p><b>Constraints:</b> 0 ≤ n ≤ 10^18</p>
+              <p><b>Hint:</b> Loop with n/=10, handle n==0.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>M5) Temperature Converter</h4>
+              <p><b>Problem:</b> Read Celsius and print Fahrenheit: F = C * 9/5 + 32 (2 decimals).</p>
+              <div class="qgrid">
+                <div><b>Input:</b> one double</div>
+                <div><b>Output:</b> Fahrenheit</div>
+              </div>
+              <p><b>Example Input:</b> 0<br><b>Example Output:</b> 32.00</p>
+              <p><b>Constraints:</b> -1000 ≤ C ≤ 1000</p>
+              <p><b>Hint:</b> Use double math and formatting.</p>
+            </div>
+
+            <h3 style="margin:12px 0 6px;">Hard (5)</h3>
+
+            <div class="qblock">
+              <h4>H1) Robust Input Parser (Two Numbers)</h4>
+              <p><b>Problem:</b> Read a line that should contain two integers. If valid, print sum; else print “ERROR”.</p>
+              <div class="qgrid">
+                <div><b>Input:</b> one line string</div>
+                <div><b>Output:</b> sum or ERROR</div>
+              </div>
+              <p><b>Example Input:</b> 10 x<br><b>Example Output:</b> ERROR</p>
+              <p><b>Constraints:</b> line length ≤ 200</p>
+              <p><b>Hint:</b> Split + TryParse both; check part count == 2.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>H2) Time Breakdown (Seconds → hh:mm:ss)</h4>
+              <p><b>Problem:</b> Convert seconds into hh:mm:ss format (zero-padded).</p>
+              <div class="qgrid">
+                <div><b>Input:</b> one long seconds</div>
+                <div><b>Output:</b> hh:mm:ss</div>
+              </div>
+              <p><b>Example Input:</b> 3661<br><b>Example Output:</b> 01:01:01</p>
+              <p><b>Constraints:</b> 0 ≤ s ≤ 10^12</p>
+              <p><b>Hint:</b> Use division/mod with 3600 and 60; format with ToString("D2").</p>
+            </div>
+
+            <div class="qblock">
+              <h4>H3) Validate a Project Name</h4>
+              <p><b>Problem:</b> A valid name starts with a letter, contains only letters/digits/underscore, length 3–20. Print VALID/INVALID.</p>
+              <div class="qgrid">
+                <div><b>Input:</b> one string</div>
+                <div><b>Output:</b> VALID or INVALID</div>
+              </div>
+              <p><b>Example Input:</b> My_App1<br><b>Example Output:</b> VALID</p>
+              <p><b>Constraints:</b> ASCII only</p>
+              <p><b>Hint:</b> Check first char is letter; loop all chars.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>H4) Mini “Assembly Loader” Simulation</h4>
+              <p><b>Problem:</b> Read N module names and print unique names in the order first seen.</p>
+              <div class="qgrid">
+                <div><b>Input:</b> N then N strings</div>
+                <div><b>Output:</b> unique names, one per line</div>
+              </div>
+              <p><b>Example Input:</b><br>5<br>A<br>B<br>A<br>C<br>B<br>
+                 <b>Example Output:</b><br>A<br>B<br>C</p>
+              <p><b>Constraints:</b> 1 ≤ N ≤ 100000</p>
+              <p><b>Hint:</b> Use HashSet for seen + List for order.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>H5) Precision Trap Detector</h4>
+              <p><b>Problem:</b> Read two decimals a and b. Print “EQUAL” if |a-b| &lt; 0.000001 else “NOT EQUAL”.</p>
+              <div class="qgrid">
+                <div><b>Input:</b> two doubles</div>
+                <div><b>Output:</b> EQUAL or NOT EQUAL</div>
+              </div>
+              <p><b>Example Input:</b> 0.1 0.1000000004<br><b>Example Output:</b> EQUAL</p>
+              <p><b>Constraints:</b> |a|,|b| ≤ 10^9</p>
+              <p><b>Hint:</b> Floating-point comparisons need tolerance (epsilon).</p>
+            </div>
+
+            <div class="note green">
+              <span class="label">Tip:</span>
+              Solve at least 2 questions daily (1 easy + 1 medium). Track your mistakes and fix them with debugging.
+            </div>
+
+            <div class="note blue">
+              <span class="label">Advanced note:</span>
+              When your inputs scale up (N=100000), prefer O(N) solutions with HashSet/Dictionary rather than nested loops.
+            </div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#glossary-tooltips">Previous</a>
+              <a class="btn" href="#downloads">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             Downloads placeholder
+        ========================================================== -->
+        <section class="card" id="downloads">
+          <div class="card-header">Downloadable ZIP / PPT / DOC (Placeholder)</div>
+          <div class="card-body">
+            <div class="placeholder">
+              <b>Placeholder:</b> Add download links here later.
+              <ul style="margin:6px 0 0; padding-left:18px;">
+                <li>ZIP source code bundle</li>
+                <li>PPT slides (trainer deck)</li>
+                <li>DOC/Word notes (printable)</li>
+              </ul>
+            </div>
+
+            <div class="note blue" style="margin-top:12px;">
+              <span class="label">Summary:</span>
+              You learned the .NET big picture, core architecture terms, the compilation pipeline, project structure, Visual Studio workflow,
+              C# syntax basics, and built mini programs with debugging habits.
+            </div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#practice-coding-questions">Previous</a>
+              <a class="btn" href="#next-subtopic">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Required end placeholder anchor -->
+        <div id="next-subtopic"></div>
+
+      </div>
+    </main>
+  </div>
+</body>
+</html>

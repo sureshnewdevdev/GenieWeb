@@ -1,0 +1,1657 @@
+<!-- File: 07-properties-inheritance.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>07. Properties, Indexers & Inheritance Fundamentals | ItTechGenie</title>
+  <style>
+    :root{
+      --green:#04AA6D;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --bg:#ffffff;
+      --panel:#f6f7f9;
+      --border:#e5e7eb;
+      --example:#eef0f2;
+      --code:#0b1020;
+      --codeText:#e5e7eb;
+      --noteBlueBg:#e7f3ff;
+      --noteBlueBorder:#b6dbff;
+      --noteGreenBg:#e8fff3;
+      --noteGreenBorder:#b7f3d1;
+      --noteRedBg:#ffecec;
+      --noteRedBorder:#ffbcbc;
+      --shadow:0 8px 18px rgba(0,0,0,.06);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:var(--bg);
+      line-height:1.55;
+    }
+    .topbar{
+      position:sticky; top:0; z-index:30;
+      background:var(--green);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 16px;
+      box-shadow:0 4px 14px rgba(0,0,0,.12);
+    }
+    .topbar .brand{
+      display:flex; gap:10px; align-items:center;
+      font-weight:800; letter-spacing:.2px;
+    }
+    .pill{
+      display:inline-block;
+      padding:3px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.22);
+      font-size:12px;
+      font-weight:700;
+    }
+    .topbar .nav{
+      display:flex; gap:10px; flex-wrap:wrap;
+      align-items:center;
+    }
+    .topbar a{
+      color:#fff;
+      text-decoration:none;
+      border:1px solid rgba(255,255,255,.28);
+      padding:6px 10px;
+      border-radius:10px;
+      font-weight:700;
+      font-size:13px;
+      background:rgba(255,255,255,.08);
+    }
+    .topbar a:hover{background:rgba(255,255,255,.16)}
+    .layout{
+      display:flex;
+      min-height:calc(100% - 56px);
+    }
+
+    /* =========================================================
+       ItTechGenie Reusable Sidebar Template (Prompt v3 compatible)
+       - Replace {{CURRENT_TOPIC_NO}} and {{CURRENT_TOPIC_SUBTOPICS}}
+       - Keep the PRACTICE link exactly as required.
+    ========================================================= */
+    .sidebar{
+      width:320px;
+      background:var(--panel);
+      border-right:1px solid var(--border);
+      position:sticky;
+      top:56px;
+      height:calc(100vh - 56px);
+      overflow:auto;
+      padding:14px 12px 18px;
+    }
+    .sb-title{
+      padding:10px 10px 12px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#fff;
+      box-shadow:var(--shadow);
+      margin-bottom:12px;
+    }
+    .sb-brand{font-weight:900; font-size:16px;}
+    .sb-course{color:var(--muted); font-weight:700; font-size:12px; margin-top:2px;}
+    .sb-section{
+      margin:14px 6px 6px;
+      font-size:12px;
+      font-weight:900;
+      color:#111827;
+      letter-spacing:.5px;
+    }
+    .sb-link{
+      display:block;
+      margin:6px;
+      padding:10px 10px;
+      border-radius:12px;
+      text-decoration:none;
+      color:#111827;
+      border:1px solid transparent;
+      font-weight:700;
+      font-size:13px;
+    }
+    .sb-link:hover{
+      background:#fff;
+      border-color:var(--border);
+      box-shadow:var(--shadow);
+    }
+    .sb-module{opacity:.95}
+    .sb-sub{
+      background:rgba(4,170,109,.08);
+      border-color:rgba(4,170,109,.18);
+    }
+    .sb-practice{
+      background:rgba(245,158,11,.10);
+      border-color:rgba(245,158,11,.22);
+    }
+
+    .content{
+      flex:1;
+      padding:18px 18px 40px;
+      max-width:1040px;
+    }
+    .hero{
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:16px 16px 14px;
+      background:linear-gradient(180deg,#ffffff 0%, #fbfbfc 100%);
+      box-shadow:var(--shadow);
+    }
+    .hero h1{
+      margin:0 0 6px;
+      font-size:26px;
+      letter-spacing:-.2px;
+    }
+    .hero p{margin:0; color:var(--muted); font-weight:600}
+    .meta{
+      margin-top:12px;
+      display:flex; flex-wrap:wrap; gap:10px;
+    }
+    .chip{
+      font-size:12px;
+      border:1px solid var(--border);
+      padding:6px 10px;
+      border-radius:999px;
+      background:#fff;
+      font-weight:800;
+      color:#111827;
+    }
+
+    .toc{
+      margin-top:14px;
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:#fff;
+      padding:12px 14px;
+    }
+    .toc h2{margin:0 0 8px; font-size:16px;}
+    .toc ul{margin:0; padding-left:18px}
+    .toc a{color:#0b5bd3; text-decoration:none; font-weight:800}
+    .toc a:hover{text-decoration:underline}
+
+    section{
+      margin-top:16px;
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#fff;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .sec-h{
+      background:var(--green);
+      color:#fff;
+      padding:12px 14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .sec-h h2{margin:0; font-size:18px}
+    .sec-h .sec-tag{font-size:12px; font-weight:900; opacity:.95}
+    .sec-b{padding:14px 14px 16px}
+    .lead{margin-top:0}
+    .kicker{color:var(--muted); font-weight:700}
+
+    .note{
+      border-left:6px solid;
+      padding:10px 12px;
+      border-radius:12px;
+      margin:12px 0;
+      font-weight:650;
+    }
+    .note.note-blue{background:var(--noteBlueBg); border-left-color:var(--noteBlueBorder)}
+    .note.note-green{background:var(--noteGreenBg); border-left-color:var(--noteGreenBorder)}
+    .note.note-red{background:var(--noteRedBg); border-left-color:var(--noteRedBorder)}
+
+    .ascii{
+      background:#fff;
+      border:1px dashed var(--border);
+      border-radius:14px;
+      padding:12px;
+      overflow:auto;
+      margin:12px 0;
+      color:#111827;
+      font-weight:800;
+      font-size:12px;
+      line-height:1.35;
+    }
+    .example{
+      background:var(--example);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:12px;
+      margin:12px 0;
+    }
+    .example h3{margin:0 0 8px; font-size:14px}
+    .code{
+      background:var(--code);
+      color:var(--codeText);
+      border-radius:16px;
+      padding:12px;
+      overflow:auto;
+      margin:10px 0 0;
+      border:1px solid rgba(255,255,255,.08);
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:13px;
+      line-height:1.45;
+      white-space:pre;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width:980px){
+      .layout{display:block}
+      .sidebar{
+        width:auto;
+        position:relative;
+        height:auto;
+        top:0;
+      }
+      .content{max-width:none}
+      .grid2{grid-template-columns:1fr}
+    }
+
+    .navbtns{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:14px;
+      padding-top:12px;
+      border-top:1px dashed var(--border);
+      flex-wrap:wrap;
+    }
+    .btn{
+      display:inline-block;
+      text-decoration:none;
+      font-weight:900;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:#fff;
+      color:#111827;
+      box-shadow:var(--shadow);
+      font-size:13px;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn.primary{
+      background:rgba(4,170,109,.10);
+      border-color:rgba(4,170,109,.25);
+    }
+
+    /* Tooltips (HTML + CSS only) */
+    .tt{
+      position:relative;
+      border-bottom:2px dotted rgba(17,24,39,.55);
+      cursor:help;
+      font-weight:900;
+      color:#0f172a;
+      padding:0 1px;
+    }
+    .tt::after{
+      content:attr(data-tip);
+      position:absolute;
+      left:0;
+      bottom:130%;
+      width:min(320px, 80vw);
+      background:#111827;
+      color:#fff;
+      padding:10px 10px;
+      border-radius:12px;
+      font-weight:700;
+      font-size:12px;
+      line-height:1.35;
+      opacity:0;
+      pointer-events:none;
+      transform:translateY(6px);
+      transition:opacity .15s ease, transform .15s ease;
+      box-shadow:0 18px 30px rgba(0,0,0,.22);
+      z-index:40;
+      white-space:normal;
+    }
+    .tt::before{
+      content:"";
+      position:absolute;
+      left:14px;
+      bottom:118%;
+      border:7px solid transparent;
+      border-top-color:#111827;
+      opacity:0;
+      transform:translateY(6px);
+      transition:opacity .15s ease, transform .15s ease;
+      z-index:41;
+    }
+    .tt:hover::after, .tt:hover::before{opacity:1; transform:translateY(0)}
+
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      border:1px solid var(--border);
+      border-radius:14px;
+      overflow:hidden;
+      margin-top:10px;
+      background:#fff;
+    }
+    th,td{
+      padding:10px 10px;
+      border-bottom:1px solid var(--border);
+      vertical-align:top;
+      text-align:left;
+    }
+    th{
+      background:rgba(4,170,109,.10);
+      font-weight:900;
+    }
+    tr:last-child td{border-bottom:none}
+
+    .qcard{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:12px;
+      background:#fff;
+      box-shadow:var(--shadow);
+      margin:10px 0;
+    }
+    .qcard h4{margin:0 0 8px; font-size:14px}
+    .kv{margin:6px 0}
+    .kv b{display:inline-block; min-width:120px}
+
+    .footerbar{
+      margin-top:18px;
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:#fff;
+      padding:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      box-shadow:var(--shadow);
+    }
+    .muted{color:var(--muted); font-weight:650}
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span>ItTechGenie</span>
+      <span class="pill">C# Fundamentals → Advanced</span>
+      <span class="pill">Module 07</span>
+    </div>
+    <nav class="nav" aria-label="Module navigation">
+      <a href="06-constructors.html" title="Go to previous module">← Previous Module</a>
+      <a href="08-abstraction-interfaces.html" title="Go to next module">Next Module →</a>
+      <a href="#top" title="Jump to top">Top ↑</a>
+    </nav>
+  </header>
+
+  <div class="layout" id="top">
+    <!-- Sidebar (template with CURRENT_TOPIC_SUBTOPICS inserted) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-title">
+        <div class="sb-brand">ItTechGenie</div>
+        <div class="sb-course">C# Fundamentals → Advanced</div>
+      </div>
+
+      <div class="sb-section">COURSE CONTENT</div>
+
+      <a class="sb-link sb-module" href="01-kickstart.html">01. Kickstart: .NET Ecosystem</a>
+      <a class="sb-link sb-module" href="02-control-flow.html">02. Control Flow</a>
+      <a class="sb-link sb-module" href="03-oop-core.html">03. OOP Core</a>
+      <a class="sb-link sb-module" href="04-methods-mastery.html">04. Methods Mastery</a>
+      <a class="sb-link sb-module" href="05-type-conversion.html">05. Type Conversion</a>
+      <a class="sb-link sb-module" href="06-constructors.html">06. Constructors</a>
+      <a class="sb-link sb-module" href="07-properties-inheritance.html">07. Properties &amp; Inheritance</a>
+      <a class="sb-link sb-module" href="08-abstraction-interfaces.html">08. Abstraction &amp; Interfaces</a>
+      <a class="sb-link sb-module" href="09-namespaces-buildingblocks.html">09. Namespaces &amp; Building Blocks</a>
+      <a class="sb-link sb-module" href="10-advanced-toolkit.html">10. Advanced Toolkit</a>
+
+      <div class="sb-section">THIS TOPIC</div>
+
+      <!-- {{CURRENT_TOPIC_SUBTOPICS}} replaced for TopicNo 07 -->
+      <a class="sb-link sb-sub" href="#t07-why-properties">Why Properties? (Encapsulation Without Boilerplate)</a>
+      <a class="sb-link sb-sub" href="#t07-auto-properties">Auto-Implemented Properties (Fast and Clean)</a>
+      <a class="sb-link sb-sub" href="#t07-full-properties-validation">Full Properties with Validation (get/set Logic)</a>
+      <a class="sb-link sb-sub" href="#t07-readonly-writeonly-patterns">Read-Only / Write-Only Patterns (When to Restrict Access)</a>
+      <a class="sb-link sb-sub" href="#t07-indexers">Indexers (Object Access Like an Array)</a>
+      <a class="sb-link sb-sub" href="#t07-indexer-overloading">Indexer Overloading (Multiple Key Types)</a>
+      <a class="sb-link sb-sub" href="#t07-inheritance-basics">Inheritance Basics (is-a Relationship)</a>
+      <a class="sb-link sb-sub" href="#t07-base-keyword">base Keyword (Constructor + Member Access)</a>
+      <a class="sb-link sb-sub" href="#t07-overriding-vs-hiding">Overriding vs Hiding (virtual/override vs new)</a>
+      <a class="sb-link sb-sub" href="#t07-sealed-classes-methods">Sealed Classes &amp; Methods (Locking Down Behavior)</a>
+
+      <div class="sb-section">PRACTICE</div>
+
+      <!-- REQUIRED SIDEBAR MENU ADDITION (Prompt v3): exact text + anchor -->
+      <a class="sb-link sb-practice" href="#practice-coding-questions">
+        To Become Best coder Practice this
+      </a>
+    </aside>
+
+    <main class="content">
+      <!-- Placeholder anchors required by Prompt v3 -->
+      <a id="prev-subtopic"></a>
+      <a id="next-subtopic"></a>
+
+      <div class="hero">
+        <h1>07. Properties, Indexers &amp; Inheritance Fundamentals</h1>
+        <p>
+          In this module, you’ll learn how <span class="tt" data-tip="Keeping an object’s internal state protected and exposing safe ways to interact with it. You typically use private fields and public methods/properties to enforce rules.">Encapsulation</span>
+          becomes clean with properties, how <span class="tt" data-tip="Allows objects to be accessed using array-like syntax (obj[key]). Indexers are commonly used to wrap internal collections with controlled access.">Indexers</span> give array-like access, and how
+          <span class="tt" data-tip="A relationship where a class derives from another class to reuse and extend behavior. It models an 'is-a' relationship and enables polymorphism.">Inheritance</span> builds reusable hierarchies safely.
+        </p>
+        <div class="meta">
+          <span class="chip">Focus: Properties → Indexers → Inheritance</span>
+          <span class="chip">Code: C# (Console examples)</span>
+          <span class="chip">Skill goal: Cleaner APIs + safer state</span>
+        </div>
+      </div>
+
+      <div class="toc" aria-label="Table of contents">
+        <h2>Table of Contents</h2>
+        <ul>
+          <li><a href="#t07-why-properties">Why Properties? (Encapsulation Without Boilerplate)</a></li>
+          <li><a href="#t07-auto-properties">Auto-Implemented Properties (Fast and Clean)</a></li>
+          <li><a href="#t07-full-properties-validation">Full Properties with Validation (get/set Logic)</a></li>
+          <li><a href="#t07-readonly-writeonly-patterns">Read-Only / Write-Only Patterns (When to Restrict Access)</a></li>
+          <li><a href="#t07-indexers">Indexers (Object Access Like an Array)</a></li>
+          <li><a href="#t07-indexer-overloading">Indexer Overloading (Multiple Key Types)</a></li>
+          <li><a href="#t07-inheritance-basics">Inheritance Basics (is-a Relationship)</a></li>
+          <li><a href="#t07-base-keyword">base Keyword (Constructor + Member Access)</a></li>
+          <li><a href="#t07-overriding-vs-hiding">Overriding vs Hiding (virtual/override vs new)</a></li>
+          <li><a href="#t07-sealed-classes-methods">Sealed Classes &amp; Methods (Locking Down Behavior)</a></li>
+          <li><a href="#faqs">FAQs</a></li>
+          <li><a href="#interview-questions">Interview Questions</a></li>
+          <li><a href="#mcq">MCQ (5–10 Questions)</a></li>
+          <li><a href="#summary">Summary</a></li>
+          <li><a href="#downloads">Downloadable ZIP/PPT/DOC (Placeholder)</a></li>
+          <li><a href="#glossary-tooltips">Glossary (Tooltips)</a></li>
+          <li><a href="#practice-coding-questions">To Become Best coder Practice this</a></li>
+        </ul>
+      </div>
+
+      <!-- 1) Why Properties -->
+      <section id="t07-why-properties">
+        <div class="sec-h">
+          <h2>Why Properties? (Encapsulation Without Boilerplate)</h2>
+          <div class="sec-tag">Subtopic 1 / 10</div>
+        </div>
+        <div class="sec-b">
+          <p class="lead">
+            A property is a clean way to expose state while still protecting your object’s rules.
+            Instead of public fields (which allow “anything”), properties let you control read/write access using <span class="tt" data-tip="A named block of code that performs an action. Methods can accept inputs (parameters) and return outputs. They help reuse and organize logic.">Method</span>-like logic.
+            This is the practical face of <span class="tt" data-tip="Keeping an object’s internal state protected and exposing safe ways to interact with it. You typically use private fields and public methods/properties to enforce rules.">Encapsulation</span>.
+            Your class becomes safer, easier to maintain, and easier to evolve without breaking callers.
+          </p>
+
+          <div class="ascii" aria-label="ASCII diagram">
+            +-------------------+      set value       +----------------------+
+            |  Outside World    | ------------------>  |  Property (setter)   |
+            |  (other classes)  |                      |  validates / guards  |
+            +-------------------+                      +----------+-----------+
+                                                              |
+                                                              v
+                                                       +------+------+
+                                                       |  Private    |
+                                                       |  Field      |
+                                                       +------+------+
+                                                              ^
+                                                              |
+            +-------------------+      get value       +-------+------+
+            |  Outside World    | <------------------  | Property (get)|
+            +-------------------+                      +--------------+
+          </div>
+
+          <div class="example">
+            <h3>Example (Bad vs Good)</h3>
+            <div class="grid2">
+              <div>
+                <div class="note note-red"><b>Bad:</b> public field allows invalid state anytime.</div>
+                <pre class="code">public class BankAccount
+{
+    public decimal Balance; // anyone can set: -999999
+}</pre>
+              </div>
+              <div>
+                <div class="note note-green"><b>Good:</b> property controls updates and protects rules.</div>
+                <pre class="code">public class BankAccount
+{
+    private decimal _balance;
+
+    public decimal Balance
+    {
+        get { return _balance; }
+        private set { _balance = value; } // restrict external write
+    }
+
+    public void Deposit(decimal amount)
+    {
+        if (amount <= 0) throw new ArgumentException("Amount must be positive.");
+        Balance = Balance + amount;
+    }
+}</pre>
+              </div>
+            </div>
+          </div>
+
+          <p><b>Real-world use case:</b> In a payroll system, you never want someone to directly set salary/bonus fields from random screens. Properties let you restrict writes and keep logic in one place.</p>
+
+          <div class="note note-blue"><b>Beginner tip:</b> Prefer properties over public fields for almost every class you expose to other code.</div>
+          <div class="note note-green"><b>Advanced note:</b> Properties help you keep invariants (rules that must always be true). When the rule changes, you update it in one place instead of chasing field writes across the project.</div>
+
+          <div class="navbtns">
+            <a class="btn" href="#prev-subtopic">← Previous</a>
+            <a class="btn primary" href="#t07-auto-properties">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2) Auto Properties -->
+      <section id="t07-auto-properties">
+        <div class="sec-h">
+          <h2>Auto-Implemented Properties (Fast and Clean)</h2>
+          <div class="sec-tag">Subtopic 2 / 10</div>
+        </div>
+        <div class="sec-b">
+          <p class="lead">
+            Auto-properties are the quickest way to create properties when you don’t need custom logic.
+            The compiler creates a hidden “backing field” for you, so your class stays short and readable.
+            This is perfect for DTOs, simple models, and UI binding scenarios.
+            You still get the benefits of properties (future flexibility) without boilerplate.
+          </p>
+
+          <div class="ascii" aria-label="ASCII diagram">
+            You write:                Compiler generates:
+            ---------               -------------------
+            public string Name {     private string <Name>k__BackingField;
+                get; set; }         public string Name {
+                                      get => <Name>k__BackingField;
+                                      set => <Name>k__BackingField = value;
+                                    }
+          </div>
+
+          <div class="example">
+            <h3>Example (Simple Student Model)</h3>
+            <pre class="code">public class Student
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
+    public string Email { get; set; } = "";
+    public int Grade { get; set; }
+}
+
+// Usage
+var s = new Student { Id = 101, Name = "Aarav", Email = "aarav@mail.com", Grade = 9 };
+Console.WriteLine($"{s.Id} - {s.Name} - Grade {s.Grade}");</pre>
+          </div>
+
+          <p><b>Real-world use case:</b> In Web API responses, you often return clean “data shapes” (DTOs). Auto-properties keep these classes tiny and consistent.</p>
+
+          <div class="note note-blue"><b>Beginner tip:</b> Use auto-properties by default. Switch to a full property only when you truly need validation or side-effects.</div>
+          <div class="note note-green"><b>Advanced note:</b> You can combine auto-properties with restricted setters like <b>private set</b> to make objects “readable from outside, writable only inside.”</div>
+
+          <div class="navbtns">
+            <a class="btn" href="#t07-why-properties">← Previous</a>
+            <a class="btn primary" href="#t07-full-properties-validation">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3) Full Properties with Validation -->
+      <section id="t07-full-properties-validation">
+        <div class="sec-h">
+          <h2>Full Properties with Validation (get/set Logic)</h2>
+          <div class="sec-tag">Subtopic 3 / 10</div>
+        </div>
+        <div class="sec-b">
+          <p class="lead">
+            Full properties are used when you must enforce rules while setting a value.
+            Here, you explicitly store data in a private field and write logic inside the setter.
+            This prevents invalid data from ever entering the object, which avoids bugs later.
+            Typical examples include age, price, stock quantity, and dates.
+          </p>
+
+          <div class="ascii" aria-label="ASCII flowchart">
+            SET Age(value)
+                 |
+                 v
+            Is value < 0 ?
+             /       \
+           Yes       No
+           /           \
+        throw        _age = value
+        error             |
+                          v
+                     object stays valid
+          </div>
+
+          <div class="example">
+            <h3>Example (Age Validation)</h3>
+            <pre class="code">public class UserProfile
+{
+    private int _age;
+
+    public int Age
+    {
+        get { return _age; }
+        set
+        {
+            if (value < 0) throw new ArgumentException("Age cannot be negative.");
+            if (value > 130) throw new ArgumentException("Age seems unrealistic.");
+            _age = value;
+        }
+    }
+
+    public string Name { get; set; } = "";
+}
+
+// Demo
+var u = new UserProfile { Name = "Meera" };
+u.Age = 25;             // OK
+// u.Age = -2;          // throws exception</pre>
+          </div>
+
+          <p><b>Real-world use case:</b> In e-commerce, you must stop “negative stock” at the model level, not only in the UI. Validation in properties protects data even when updates come from APIs or background jobs.</p>
+
+          <div class="note note-blue"><b>Beginner tip:</b> Keep validations short and clear. If logic becomes large, move it to a method (e.g., <b>ChangeAge(value)</b>) and call it from the setter.</div>
+          <div class="note note-green"><b>Advanced note:</b> Choose between exceptions vs “Try-set” patterns depending on context. For user input, you might prefer validation messages rather than throwing and crashing flows.</div>
+
+          <div class="navbtns">
+            <a class="btn" href="#t07-auto-properties">← Previous</a>
+            <a class="btn primary" href="#t07-readonly-writeonly-patterns">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4) Read-Only / Write-Only Patterns -->
+      <section id="t07-readonly-writeonly-patterns">
+        <div class="sec-h">
+          <h2>Read-Only / Write-Only Patterns (When to Restrict Access)</h2>
+          <div class="sec-tag">Subtopic 4 / 10</div>
+        </div>
+        <div class="sec-b">
+          <p class="lead">
+            Sometimes a value should be visible but not editable (read-only), or updateable but not directly readable (rare).
+            Read-only patterns prevent accidental changes and make your objects more reliable.
+            In C#, you commonly restrict setters using <b>private set</b> or provide only a getter that returns a calculated value.
+            This also supports safer APIs in layered applications (UI → service → domain).
+          </p>
+
+          <div class="ascii" aria-label="ASCII diagram">
+            Read-only from outside:
+
+            Outside code:
+              obj.Id = 10;   ❌ blocked
+              Console.Write(obj.Id); ✅ allowed
+
+            Inside class:
+              Id can be set in constructor or methods ✅
+          </div>
+
+          <div class="example">
+            <h3>Example (Order Id read-only + Password write-only-like)</h3>
+            <pre class="code">public class Order
+{
+    public int Id { get; private set; }      // readable everywhere, writable only inside
+    public DateTime CreatedAt { get; }       // getter-only property (set in constructor)
+
+    private string _passwordHash = "";
+
+    public Order(int id)
+    {
+        Id = id;
+        CreatedAt = DateTime.UtcNow;
+    }
+
+    // "Write-only-like" pattern via method (recommended)
+    public void SetPassword(string rawPassword)
+    {
+        if (string.IsNullOrWhiteSpace(rawPassword) || rawPassword.Length < 8)
+            throw new ArgumentException("Password must be at least 8 characters.");
+
+        _passwordHash = "HASHED:" + rawPassword; // demo only
+    }
+}</pre>
+          </div>
+
+          <p><b>Real-world use case:</b> In banking, account numbers and created timestamps should never change after creation. Read-only properties stop accidental “data corruption” across multiple screens and services.</p>
+
+          <div class="note note-blue"><b>Beginner tip:</b> If a property should never change after creation, use a getter-only property and set it in the constructor.</div>
+          <div class="note note-green"><b>Advanced note:</b> For sensitive data (like passwords), avoid storing raw values and avoid public getters. Use methods that store only hashed/derived values.</div>
+
+          <div class="navbtns">
+            <a class="btn" href="#t07-full-properties-validation">← Previous</a>
+            <a class="btn primary" href="#t07-indexers">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5) Indexers -->
+      <section id="t07-indexers">
+        <div class="sec-h">
+          <h2>Indexers (Object Access Like an Array)</h2>
+          <div class="sec-tag">Subtopic 5 / 10</div>
+        </div>
+        <div class="sec-b">
+          <p class="lead">
+            An indexer lets your object be accessed using bracket syntax like an array.
+            Internally, you usually wrap a collection (like a list or dictionary) but expose controlled access.
+            This makes your API feel natural: callers can do <b>obj[key]</b> instead of calling methods everywhere.
+            Indexers are great when your class represents a “container-like” object.
+          </p>
+
+          <div class="ascii" aria-label="ASCII diagram">
+            +---------------------+
+            |  StudentDirectory   |
+            |  (wraps Dictionary) |
+            +----------+----------+
+                       |
+           directory["Aarav"]  --->  returns Student object
+                       |
+                 uses internal
+                 dictionary lookup
+          </div>
+
+          <div class="example">
+            <h3>Example (Directory with Indexer)</h3>
+            <pre class="code">public class Student
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
+}
+
+public class StudentDirectory
+{
+    private readonly Dictionary&lt;string, Student&gt; _byName = new();
+
+    public Student this[string name]
+    {
+        get
+        {
+            if (!_byName.ContainsKey(name))
+                throw new KeyNotFoundException("Student not found: " + name);
+            return _byName[name];
+        }
+        set
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Name key cannot be empty.");
+            _byName[name] = value;
+        }
+    }
+}
+
+// Demo
+var dir = new StudentDirectory();
+dir["Aarav"] = new Student { Id = 1, Name = "Aarav" };
+Console.WriteLine(dir["Aarav"].Id);</pre>
+          </div>
+
+          <p><b>Real-world use case:</b> A configuration object can expose settings via keys: <b>config["ConnectionString"]</b>, but still validate and provide defaults internally.</p>
+
+          <div class="note note-blue"><b>Beginner tip:</b> Start with a dictionary-based indexer. Add validation and good error messages so callers understand what went wrong.</div>
+          <div class="note note-green"><b>Advanced note:</b> Indexers can be read-only by omitting the setter, which is useful when you want safe access but no direct mutation.</div>
+
+          <div class="navbtns">
+            <a class="btn" href="#t07-readonly-writeonly-patterns">← Previous</a>
+            <a class="btn primary" href="#t07-indexer-overloading">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6) Indexer Overloading -->
+      <section id="t07-indexer-overloading">
+        <div class="sec-h">
+          <h2>Indexer Overloading (Multiple Key Types)</h2>
+          <div class="sec-tag">Subtopic 6 / 10</div>
+        </div>
+        <div class="sec-b">
+          <p class="lead">
+            Indexers can be overloaded to support different key types (like <b>int</b> and <b>string</b>).
+            This is useful when users naturally search by ID sometimes and by name at other times.
+            The idea is similar to <span class="tt" data-tip="Having multiple methods with the same name but different parameter lists. It improves API usability but should be used carefully to avoid confusion.">Overloading</span> methods: same “concept”, different inputs.
+            Done well, it creates a friendly API; done poorly, it can confuse callers.
+          </p>
+
+          <div class="ascii" aria-label="ASCII diagram">
+            Directory access choices:
+
+            dir[5]        -> find by Id (int key)
+            dir["Meera"]  -> find by Name (string key)
+
+            Same object, two indexer signatures
+          </div>
+
+          <div class="example">
+            <h3>Example (Access by Id and Name)</h3>
+            <pre class="code">public class Employee
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
+}
+
+public class EmployeeDirectory
+{
+    private readonly Dictionary&lt;int, Employee&gt; _byId = new();
+    private readonly Dictionary&lt;string, Employee&gt; _byName = new(StringComparer.OrdinalIgnoreCase);
+
+    public Employee this[int id]
+    {
+        get { return _byId[id]; }
+        set
+        {
+            _byId[id] = value;
+            _byName[value.Name] = value;
+        }
+    }
+
+    public Employee this[string name]
+    {
+        get { return _byName[name]; }
+        set
+        {
+            _byName[name] = value;
+            _byId[value.Id] = value;
+        }
+    }
+}
+
+// Demo
+var d = new EmployeeDirectory();
+d[101] = new Employee { Id = 101, Name = "Rahul" };
+Console.WriteLine(d["Rahul"].Id);
+Console.WriteLine(d[101].Name);</pre>
+          </div>
+
+          <p><b>Real-world use case:</b> In a helpdesk app, an agent may search tickets by ticket number (int) or customer email/name (string). Overloaded indexers make both fast and natural.</p>
+
+          <div class="note note-blue"><b>Beginner tip:</b> Keep the behavior consistent across overloads (same rules, same error style), otherwise debugging becomes hard.</div>
+          <div class="note note-green"><b>Advanced note:</b> Consider what happens when keys change (e.g., name updates). You may need methods that handle re-indexing safely instead of naive assignments.</div>
+
+          <div class="navbtns">
+            <a class="btn" href="#t07-indexers">← Previous</a>
+            <a class="btn primary" href="#t07-inheritance-basics">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7) Inheritance Basics -->
+      <section id="t07-inheritance-basics">
+        <div class="sec-h">
+          <h2>Inheritance Basics (is-a Relationship)</h2>
+          <div class="sec-tag">Subtopic 7 / 10</div>
+        </div>
+        <div class="sec-b">
+          <p class="lead">
+            Inheritance means one class derives from another to reuse and extend behavior.
+            It models an “is-a” relationship (Manager is an Employee).
+            You put shared fields/methods in the base class, and specialized parts in the derived class.
+            This reduces duplication and supports <span class="tt" data-tip="The ability to treat different derived types through a common base type or interface. Calls resolve to the correct implementation at runtime using overriding.">Polymorphism</span>.
+          </p>
+
+          <div class="ascii" aria-label="ASCII diagram">
+            Employee (base)
+            +--------------------+
+            | Id, Name           |
+            | CalculatePay()     |
+            +---------^----------+
+                      |
+                      |
+            +---------+----------+
+            | Manager (derived) |
+            | TeamSize          |
+            | CalculatePay()    |
+            +-------------------+
+          </div>
+
+          <div class="example">
+            <h3>Example (Employee → Manager)</h3>
+            <pre class="code">public class Employee
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
+
+    public virtual decimal CalculatePay()
+    {
+        return 30000m; // base salary
+    }
+}
+
+public class Manager : Employee
+{
+    public int TeamSize { get; set; }
+
+    public override decimal CalculatePay()
+    {
+        // Managers get base + responsibility allowance
+        return 30000m + (TeamSize * 500m);
+    }
+}
+
+// Demo (polymorphism)
+Employee e1 = new Employee { Id = 1, Name = "Sita" };
+Employee e2 = new Manager { Id = 2, Name = "Arjun", TeamSize = 6 };
+
+Console.WriteLine(e1.CalculatePay()); // 30000
+Console.WriteLine(e2.CalculatePay()); // 33000</pre>
+          </div>
+
+          <p><b>Real-world use case:</b> In HR systems, different employee types (FullTime, Contract, Intern) share identity details but calculate pay differently. Inheritance helps unify shared data and vary only what changes.</p>
+
+          <div class="note note-blue"><b>Beginner tip:</b> Use inheritance only when it truly is an “is-a” relationship. If it’s more like “has-a” (car has an engine), prefer composition.</div>
+          <div class="note note-green"><b>Advanced note:</b> Keep base classes small and stable. Too much in a base class creates rigid designs and makes future changes risky.</div>
+
+          <div class="navbtns">
+            <a class="btn" href="#t07-indexer-overloading">← Previous</a>
+            <a class="btn primary" href="#t07-base-keyword">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8) base Keyword -->
+      <section id="t07-base-keyword">
+        <div class="sec-h">
+          <h2>base Keyword (Constructor + Member Access)</h2>
+          <div class="sec-tag">Subtopic 8 / 10</div>
+        </div>
+        <div class="sec-b">
+          <p class="lead">
+            The <span class="tt" data-tip="Used in derived classes to access base members and to call base constructors. It helps initialize shared state and reuse base behavior safely.">base</span> keyword helps a derived class call the base class constructor and access base members.
+            This matters when the base class requires initialization parameters or has logic you must reuse.
+            Without proper base calls, your object may start in an incomplete state.
+            Think of base as “first build the shared part, then add the specialized part.”
+          </p>
+
+          <div class="ascii" aria-label="ASCII flowchart">
+            new Manager(id,name,teamSize)
+                 |
+                 v
+            Manager ctor starts
+                 |
+                 v
+            calls base(id,name)
+                 |
+                 v
+            Employee ctor sets Id/Name
+                 |
+                 v
+            returns to Manager ctor
+                 |
+                 v
+            Manager sets TeamSize
+          </div>
+
+          <div class="example">
+            <h3>Example (Base Constructor Call)</h3>
+            <pre class="code">public class Employee
+{
+    public int Id { get; }
+    public string Name { get; }
+
+    public Employee(int id, string name)
+    {
+        Id = id;
+        Name = name;
+    }
+
+    public virtual string GetBadgeText()
+    {
+        return $"EMP-{Id}: {Name}";
+    }
+}
+
+public class Manager : Employee
+{
+    public int TeamSize { get; }
+
+    public Manager(int id, string name, int teamSize)
+        : base(id, name) // call base constructor
+    {
+        TeamSize = teamSize;
+    }
+
+    public override string GetBadgeText()
+    {
+        return base.GetBadgeText() + $" (Manager, Team={TeamSize})";
+    }
+}
+
+// Demo
+var m = new Manager(12, "Nisha", 8);
+Console.WriteLine(m.GetBadgeText());</pre>
+          </div>
+
+          <p><b>Real-world use case:</b> In a company ID-card system, base class can format the badge consistently, and derived classes add extra label info (Admin, Manager, Contractor) using base behavior.</p>
+
+          <div class="note note-blue"><b>Beginner tip:</b> If your base class has no parameterless constructor, you must call a base constructor explicitly.</div>
+          <div class="note note-green"><b>Advanced note:</b> Use base calls to reuse tested behavior (like formatting, common validation). This prevents duplicated logic across derived types.</div>
+
+          <div class="navbtns">
+            <a class="btn" href="#t07-inheritance-basics">← Previous</a>
+            <a class="btn primary" href="#t07-overriding-vs-hiding">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9) Overriding vs Hiding -->
+      <section id="t07-overriding-vs-hiding">
+        <div class="sec-h">
+          <h2>Overriding vs Hiding (virtual/override vs new)</h2>
+          <div class="sec-tag">Subtopic 9 / 10</div>
+        </div>
+        <div class="sec-b">
+          <p class="lead">
+            Overriding is true runtime polymorphism: base references call the derived behavior when a method is marked
+            <span class="tt" data-tip="Marks a method as overridable in derived classes. It enables runtime polymorphism by allowing derived classes to replace the base behavior.">virtual</span>
+            and implemented with <span class="tt" data-tip="Replaces a base class virtual/abstract method with a derived implementation. The runtime calls the most derived override when accessed via the base type.">override</span>.
+            Hiding using <b>new</b> creates a separate method that depends on the variable’s compile-time type, which can surprise you.
+            Learn this difference early to avoid confusing bugs in inheritance hierarchies.
+          </p>
+
+          <div class="ascii" aria-label="ASCII diagram">
+            Overriding (runtime):
+              BaseRef -> calls Derived override ✅
+
+            Hiding (compile-time):
+              BaseRef -> calls Base method
+              DerivedRef -> calls Derived method
+              (same object, different call result)
+          </div>
+
+          <div class="example">
+            <h3>Example (Override vs new)</h3>
+            <pre class="code">public class Report
+{
+    public virtual string Generate()
+    {
+        return "Base Report";
+    }
+}
+
+public class SalesReport : Report
+{
+    public override string Generate()
+    {
+        return "Sales Report (override)";
+    }
+}
+
+public class AuditReport : Report
+{
+    // Hides, does NOT override
+    public new string Generate()
+    {
+        return "Audit Report (new)";
+    }
+}
+
+// Demo
+Report r1 = new SalesReport();
+Console.WriteLine(r1.Generate()); // Sales Report (override)
+
+Report r2 = new AuditReport();
+Console.WriteLine(r2.Generate()); // Base Report  (because hiding)
+
+AuditReport r3 = new AuditReport();
+Console.WriteLine(r3.Generate()); // Audit Report (new)</pre>
+          </div>
+
+          <p><b>Real-world use case:</b> In a notification system (Email, SMS, Push), you want base references to call the correct derived send logic. That requires overriding; hiding would cause wrong channel behavior.</p>
+
+          <div class="note note-blue"><b>Beginner tip:</b> If your goal is “base variable should call derived behavior,” always use virtual/override.</div>
+          <div class="note note-green"><b>Advanced note:</b> Use <b>new</b> only when you intentionally want to change the public surface for a derived type (rare). Prefer clearer designs or composition if you often feel the need to hide members.</div>
+
+          <div class="navbtns">
+            <a class="btn" href="#t07-base-keyword">← Previous</a>
+            <a class="btn primary" href="#t07-sealed-classes-methods">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10) Sealed -->
+      <section id="t07-sealed-classes-methods">
+        <div class="sec-h">
+          <h2>Sealed Classes &amp; Methods (Locking Down Behavior)</h2>
+          <div class="sec-tag">Subtopic 10 / 10</div>
+        </div>
+        <div class="sec-b">
+          <p class="lead">
+            The <span class="tt" data-tip="Prevents further inheritance or overriding. Use sealed to lock down behavior for security, correctness, or performance reasons.">sealed</span> keyword prevents further inheritance (for classes) or prevents further overriding (for methods).
+            This is useful when a type’s behavior must not change (security rules, domain invariants, or performance-sensitive code).
+            Sealing reduces unexpected modifications and can make code easier to reason about.
+            Use it thoughtfully—too much sealing can make systems hard to extend.
+          </p>
+
+          <div class="ascii" aria-label="ASCII diagram">
+            sealed class PaymentProcessor
+                 |
+                 +--> cannot derive:
+                      class CustomProcessor : PaymentProcessor  ❌ compile error
+
+            override method can be sealed too:
+              Base virtual -> Derived override sealed -> no further overrides
+          </div>
+
+          <div class="example">
+            <h3>Example (Sealed Class + Sealed Override)</h3>
+            <pre class="code">public sealed class PaymentToken
+{
+    public string Value { get; }
+    public PaymentToken(string value) => Value = value;
+}
+
+public class Logger
+{
+    public virtual string Format(string message) => "[LOG] " + message;
+}
+
+public class SecureLogger : Logger
+{
+    public sealed override string Format(string message)
+    {
+        // enforce security prefix (demo)
+        return "[SECURE] " + message;
+    }
+}
+
+// This would fail:
+// public class CustomLogger : SecureLogger { public override string Format(string m) => m; }</pre>
+          </div>
+
+          <p><b>Real-world use case:</b> In authentication/authorization modules, you may seal key types so nobody can override them and bypass security behavior.</p>
+
+          <div class="note note-blue"><b>Beginner tip:</b> Use sealed when you are confident the type should not be extended (utility types, tokens, stable domain objects).</div>
+          <div class="note note-green"><b>Advanced note:</b> Sealing can improve maintainability and sometimes performance, but it trades away extensibility—balance these based on your project needs.</div>
+
+          <div class="navbtns">
+            <a class="btn" href="#t07-overriding-vs-hiding">← Previous</a>
+            <a class="btn primary" href="#next-subtopic">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQs -->
+      <section id="faqs">
+        <div class="sec-h">
+          <h2>FAQs</h2>
+          <div class="sec-tag">Quick clarity</div>
+        </div>
+        <div class="sec-b">
+          <div class="qcard">
+            <h4>1) Are properties “just fields”?</h4>
+            <p class="muted">No. Properties are access points that can run logic on get/set. They can protect rules and control access, unlike public fields.</p>
+          </div>
+          <div class="qcard">
+            <h4>2) When should I switch from auto-property to full property?</h4>
+            <p class="muted">When you need validation, logging, lazy loading, computed values, or restricted access beyond a simple set.</p>
+          </div>
+          <div class="qcard">
+            <h4>3) Is a write-only property recommended?</h4>
+            <p class="muted">It’s rare and often confusing. Prefer a method (like SetPassword) for write-only-like behavior.</p>
+          </div>
+          <div class="qcard">
+            <h4>4) Indexer vs method: which is better?</h4>
+            <p class="muted">Indexer is great when your object acts like a collection. Methods are clearer when many rules or actions happen during access.</p>
+          </div>
+          <div class="qcard">
+            <h4>5) Does inheritance always mean better reuse?</h4>
+            <p class="muted">Not always. If it’s not an “is-a” relationship, inheritance can create rigid designs. Use composition for “has-a”.</p>
+          </div>
+          <div class="qcard">
+            <h4>6) What is the biggest risk with method hiding using new?</h4>
+            <p class="muted">Calls depend on variable type. A base reference may call base behavior even when the object is derived—this surprises many developers.</p>
+          </div>
+          <div class="qcard">
+            <h4>7) When should I use sealed?</h4>
+            <p class="muted">When extension would break correctness/security, or when a type must stay stable (tokens, core domain invariants, security components).</p>
+          </div>
+          <div class="qcard">
+            <h4>8) Can I override a non-virtual method?</h4>
+            <p class="muted">No. The base method must be virtual (or abstract) to be overridden in derived classes.</p>
+          </div>
+
+          <div class="navbtns">
+            <a class="btn" href="#t07-sealed-classes-methods">← Previous</a>
+            <a class="btn primary" href="#interview-questions">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interview Questions -->
+      <section id="interview-questions">
+        <div class="sec-h">
+          <h2>Interview Questions (with short answers)</h2>
+          <div class="sec-tag">Job-ready review</div>
+        </div>
+        <div class="sec-b">
+          <div class="qcard">
+            <h4>1) Why do properties exist in C#?</h4>
+            <p class="muted">To expose data safely with controlled access (validation, restricted setters) while keeping a simple field-like syntax for callers.</p>
+          </div>
+          <div class="qcard">
+            <h4>2) Auto-property vs full property: explain the difference.</h4>
+            <p class="muted">Auto-property uses a compiler-generated backing field; full property uses an explicit private field and custom get/set logic.</p>
+          </div>
+          <div class="qcard">
+            <h4>3) What is a backing field and why do we use it?</h4>
+            <p class="muted">It stores the actual value behind a property. We use it when we need custom rules or additional logic during get/set.</p>
+          </div>
+          <div class="qcard">
+            <h4>4) Explain private set. Where is it useful?</h4>
+            <p class="muted">It allows external read but restricts write to inside the class. Useful for Ids, timestamps, and domain state changes through methods only.</p>
+          </div>
+          <div class="qcard">
+            <h4>5) What is an indexer and when would you use it?</h4>
+            <p class="muted">An indexer enables obj[key] access. Use it when your type wraps a collection and you want natural, controlled access.</p>
+          </div>
+          <div class="qcard">
+            <h4>6) Can you overload indexers? Give a real case.</h4>
+            <p class="muted">Yes, by changing parameter types. Example: ticket directory access by ticketId (int) and customerEmail (string).</p>
+          </div>
+          <div class="qcard">
+            <h4>7) What is the difference between overriding and hiding?</h4>
+            <p class="muted">Overriding (virtual/override) dispatches at runtime based on actual object type; hiding (new) depends on reference variable type.</p>
+          </div>
+          <div class="qcard">
+            <h4>8) Why should you be careful with base classes?</h4>
+            <p class="muted">Too much logic in base classes creates tight coupling. Changes can break many derived classes, and the design becomes rigid.</p>
+          </div>
+          <div class="qcard">
+            <h4>9) What does the base keyword do?</h4>
+            <p class="muted">It accesses base members and invokes base constructors to initialize shared state or reuse base behavior.</p>
+          </div>
+          <div class="qcard">
+            <h4>10) When is sealed appropriate?</h4>
+            <p class="muted">When you must prevent extension/override for correctness or security (e.g., authentication tokens, secure log formatting).</p>
+          </div>
+          <div class="qcard">
+            <h4>11) How do properties help maintain invariants?</h4>
+            <p class="muted">Setters can enforce rules so invalid values never enter the object—this protects correctness across the entire codebase.</p>
+          </div>
+          <div class="qcard">
+            <h4>12) Give a quick example where composition is better than inheritance.</h4>
+            <p class="muted">A Car has an Engine. Engine is not a type of Car; it’s a part of Car. Use composition to model this “has-a” relationship.</p>
+          </div>
+
+          <div class="navbtns">
+            <a class="btn" href="#faqs">← Previous</a>
+            <a class="btn primary" href="#mcq">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- MCQ -->
+      <section id="mcq">
+        <div class="sec-h">
+          <h2>MCQ (5–10 Questions)</h2>
+          <div class="sec-tag">Check your understanding</div>
+        </div>
+        <div class="sec-b">
+          <div class="qcard">
+            <h4>1) What is the main benefit of properties over public fields?</h4>
+            <p class="muted"><b>A.</b> Faster compilation &nbsp; <b>B.</b> Controlled access with logic &nbsp; <b>C.</b> Smaller executables &nbsp; <b>D.</b> More memory usage</p>
+            <p class="muted"><b>Answer:</b> B</p>
+          </div>
+          <div class="qcard">
+            <h4>2) Which is true about auto-implemented properties?</h4>
+            <p class="muted"><b>A.</b> They require a manual backing field &nbsp; <b>B.</b> They cannot have getters &nbsp; <b>C.</b> Compiler generates backing field &nbsp; <b>D.</b> They only work for int</p>
+            <p class="muted"><b>Answer:</b> C</p>
+          </div>
+          <div class="qcard">
+            <h4>3) If you want a property readable outside but writable only inside the class, which pattern is best?</h4>
+            <p class="muted"><b>A.</b> public field &nbsp; <b>B.</b> public set &nbsp; <b>C.</b> private set &nbsp; <b>D.</b> static property</p>
+            <p class="muted"><b>Answer:</b> C</p>
+          </div>
+          <div class="qcard">
+            <h4>4) What does an indexer enable?</h4>
+            <p class="muted"><b>A.</b> Accessing methods with brackets &nbsp; <b>B.</b> obj[key] syntax &nbsp; <b>C.</b> Overriding constructors &nbsp; <b>D.</b> Hiding fields</p>
+            <p class="muted"><b>Answer:</b> B</p>
+          </div>
+          <div class="qcard">
+            <h4>5) Overriding requires which keywords pair?</h4>
+            <p class="muted"><b>A.</b> new/override &nbsp; <b>B.</b> virtual/override &nbsp; <b>C.</b> sealed/override &nbsp; <b>D.</b> const/readonly</p>
+            <p class="muted"><b>Answer:</b> B</p>
+          </div>
+          <div class="qcard">
+            <h4>6) Method hiding using new is resolved based on:</h4>
+            <p class="muted"><b>A.</b> Runtime object type &nbsp; <b>B.</b> Compile-time reference type &nbsp; <b>C.</b> CPU architecture &nbsp; <b>D.</b> Garbage collection cycle</p>
+            <p class="muted"><b>Answer:</b> B</p>
+          </div>
+          <div class="qcard">
+            <h4>7) Which statement about sealed is correct?</h4>
+            <p class="muted"><b>A.</b> sealed classes can be inherited &nbsp; <b>B.</b> sealed prevents further inheritance/overrides &nbsp; <b>C.</b> sealed only works on structs &nbsp; <b>D.</b> sealed makes code unsafe</p>
+            <p class="muted"><b>Answer:</b> B</p>
+          </div>
+          <div class="qcard">
+            <h4>8) The base keyword is primarily used to:</h4>
+            <p class="muted"><b>A.</b> Create objects faster &nbsp; <b>B.</b> Access derived members &nbsp; <b>C.</b> Access base members/call base constructors &nbsp; <b>D.</b> Replace interfaces</p>
+            <p class="muted"><b>Answer:</b> C</p>
+          </div>
+
+          <div class="navbtns">
+            <a class="btn" href="#interview-questions">← Previous</a>
+            <a class="btn primary" href="#summary">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Summary -->
+      <section id="summary">
+        <div class="sec-h">
+          <h2>Summary</h2>
+          <div class="sec-tag">Key takeaways</div>
+        </div>
+        <div class="sec-b">
+          <ul>
+            <li>Use properties to keep state safe and future-proof your API (avoid public fields).</li>
+            <li>Auto-properties are best for simple models; full properties are best when you need validation or side-effects.</li>
+            <li>Restrict mutability with private setters or getter-only properties to protect important values.</li>
+            <li>Indexers make container-like classes feel natural while still enforcing rules.</li>
+            <li>Inheritance should model “is-a”; for “has-a”, prefer composition.</li>
+            <li>Overriding enables true polymorphism; hiding using new can surprise you.</li>
+            <li>Use base to reuse initialization/behavior; use sealed to lock down critical behavior.</li>
+          </ul>
+
+          <div class="note note-blue"><b>Beginner reminder:</b> Start simple (auto-properties), then add rules only when needed.</div>
+          <div class="note note-green"><b>Advanced reminder:</b> Design for change: stable base types, clear invariants, and minimal surprises in polymorphism.</div>
+
+          <div class="navbtns">
+            <a class="btn" href="#mcq">← Previous</a>
+            <a class="btn primary" href="#downloads">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Download placeholders -->
+      <section id="downloads">
+        <div class="sec-h">
+          <h2>Downloadable ZIP / PPT / DOC (Placeholder)</h2>
+          <div class="sec-tag">Coming soon</div>
+        </div>
+        <div class="sec-b">
+          <p class="kicker">
+            This section is a placeholder for your course packaging workflow.
+            You can later attach a ZIP (code), PPT (slides), and DOC (notes) generated from this module.
+          </p>
+
+          <div class="example">
+            <h3>Planned downloads</h3>
+            <ul>
+              <li><b>ZIP:</b> Module-07-Properties-Indexers-Inheritance.zip (sample projects + exercises)</li>
+              <li><b>PPT:</b> Module-07-Slides.pptx (diagrams + key points)</li>
+              <li><b>DOC:</b> Module-07-Notes.docx (trainer notes + interview Q&amp;A)</li>
+            </ul>
+          </div>
+
+          <div class="note note-blue"><b>Tip:</b> Keep one “Hello OOP” console project per module so learners can run everything quickly.</div>
+
+          <div class="navbtns">
+            <a class="btn" href="#summary">← Previous</a>
+            <a class="btn primary" href="#glossary-tooltips">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Glossary -->
+      <section id="glossary-tooltips">
+        <div class="sec-h">
+          <h2>Glossary (Tooltips)</h2>
+          <div class="sec-tag">Terms used in this module</div>
+        </div>
+        <div class="sec-b">
+          <p class="kicker">These are the tooltip meanings used across this page.</p>
+
+          <table aria-label="Glossary tooltips table">
+            <thead>
+              <tr>
+                <th style="width:28%">Term</th>
+                <th>Tooltip Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Encapsulation</td>
+                <td>Keeping an object’s internal state protected and exposing safe ways to interact with it. You typically use private fields and public methods/properties to enforce rules.</td>
+              </tr>
+              <tr>
+                <td>Indexers</td>
+                <td>Allows objects to be accessed using array-like syntax (obj[key]). Indexers are commonly used to wrap internal collections with controlled access.</td>
+              </tr>
+              <tr>
+                <td>Inheritance</td>
+                <td>A relationship where a class derives from another class to reuse and extend behavior. It models an 'is-a' relationship and enables polymorphism.</td>
+              </tr>
+              <tr>
+                <td>Polymorphism</td>
+                <td>The ability to treat different derived types through a common base type or interface. Calls resolve to the correct implementation at runtime using overriding.</td>
+              </tr>
+              <tr>
+                <td>virtual</td>
+                <td>Marks a method as overridable in derived classes. It enables runtime polymorphism by allowing derived classes to replace the base behavior.</td>
+              </tr>
+              <tr>
+                <td>override</td>
+                <td>Replaces a base class virtual/abstract method with a derived implementation. The runtime calls the most derived override when accessed via the base type.</td>
+              </tr>
+              <tr>
+                <td>sealed</td>
+                <td>Prevents further inheritance or overriding. Use sealed to lock down behavior for security, correctness, or performance reasons.</td>
+              </tr>
+              <tr>
+                <td>base</td>
+                <td>Used in derived classes to access base members and to call base constructors. It helps initialize shared state and reuse base behavior safely.</td>
+              </tr>
+              <tr>
+                <td>Overloading</td>
+                <td>Having multiple methods with the same name but different parameter lists. It improves API usability but should be used carefully to avoid confusion.</td>
+              </tr>
+              <tr>
+                <td>Method</td>
+                <td>A named block of code that performs an action. Methods can accept inputs and return outputs. They help reuse and organize logic.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="navbtns">
+            <a class="btn" href="#downloads">← Previous</a>
+            <a class="btn primary" href="#practice-coding-questions">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRACTICE SECTION (must be at end) -->
+      <section id="practice-coding-questions">
+        <div class="sec-h">
+          <h2>To Become Best coder Practice this</h2>
+          <div class="sec-tag">15 Coding Questions (5 Easy / 5 Medium / 5 Hard)</div>
+        </div>
+        <div class="sec-b">
+          <div class="note note-blue">
+            Practice these in a Console App. For each, write clean classes, use properties/indexers properly, and test with the sample inputs.
+          </div>
+
+          <h3 style="margin:6px 0 8px;">Easy (5)</h3>
+
+          <div class="qcard">
+            <h4>E1) Safe Age Property</h4>
+            <div class="kv"><b>Problem:</b> Create a User class with Age property that rejects negative values.</div>
+            <div class="kv"><b>Input/Output:</b> Input: set Age. Output: print Age or error message.</div>
+            <div class="kv"><b>Example Input:</b> Age = 25</div>
+            <div class="kv"><b>Example Output:</b> 25</div>
+            <div class="kv"><b>Example Input:</b> Age = -3</div>
+            <div class="kv"><b>Example Output:</b> Error: Age cannot be negative</div>
+            <div class="kv"><b>Constraints:</b> Age range 0 to 130.</div>
+            <div class="kv"><b>Hint:</b> Use a private backing field and validate in set.</div>
+          </div>
+
+          <div class="qcard">
+            <h4>E2) Read-only CreatedAt</h4>
+            <div class="kv"><b>Problem:</b> Create an Order class where CreatedAt is set once in constructor and cannot be changed later.</div>
+            <div class="kv"><b>Input/Output:</b> Input: create Order. Output: print CreatedAt.</div>
+            <div class="kv"><b>Example Input:</b> new Order(101)</div>
+            <div class="kv"><b>Example Output:</b> 2025-12-16T...Z (any UTC timestamp)</div>
+            <div class="kv"><b>Constraints:</b> CreatedAt must be UTC.</div>
+            <div class="kv"><b>Hint:</b> Use getter-only property and DateTime.UtcNow.</div>
+          </div>
+
+          <div class="qcard">
+            <h4>E3) Auto-Property DTO</h4>
+            <div class="kv"><b>Problem:</b> Create a ProductDto class with auto-properties: Id, Name, Price.</div>
+            <div class="kv"><b>Input/Output:</b> Input: create and assign values. Output: print in one line.</div>
+            <div class="kv"><b>Example Input:</b> (1, "Pen", 10.5)</div>
+            <div class="kv"><b>Example Output:</b> 1 - Pen - 10.5</div>
+            <div class="kv"><b>Constraints:</b> Name must not be null/empty.</div>
+            <div class="kv"><b>Hint:</b> Initialize Name with empty string to avoid null.</div>
+          </div>
+
+          <div class="qcard">
+            <h4>E4) Private Setter Id</h4>
+            <div class="kv"><b>Problem:</b> Create a Customer class where Id can be set only in constructor, but readable everywhere.</div>
+            <div class="kv"><b>Input/Output:</b> Input: create Customer(7,"Riya"). Output: print Id and Name.</div>
+            <div class="kv"><b>Example Input:</b> 7, "Riya"</div>
+            <div class="kv"><b>Example Output:</b> 7 - Riya</div>
+            <div class="kv"><b>Constraints:</b> Id must be &gt; 0.</div>
+            <div class="kv"><b>Hint:</b> Use { get; private set; } and validate in constructor.</div>
+          </div>
+
+          <div class="qcard">
+            <h4>E5) Simple Indexer by int</h4>
+            <div class="kv"><b>Problem:</b> Create a ScoreBoard class that stores 5 scores and allows access using obj[index].</div>
+            <div class="kv"><b>Input/Output:</b> Input: set score at index. Output: print score at index.</div>
+            <div class="kv"><b>Example Input:</b> scores[2] = 98</div>
+            <div class="kv"><b>Example Output:</b> 98</div>
+            <div class="kv"><b>Constraints:</b> index must be 0..4.</div>
+            <div class="kv"><b>Hint:</b> Wrap an int[] and validate index.</div>
+          </div>
+
+          <h3 style="margin:14px 0 8px;">Medium (5)</h3>
+
+          <div class="qcard">
+            <h4>M1) Stock Quantity with Validation</h4>
+            <div class="kv"><b>Problem:</b> Create InventoryItem with Quantity property that never goes below 0. Add methods AddStock(x) and RemoveStock(x).</div>
+            <div class="kv"><b>Input/Output:</b> Input: operations list. Output: final Quantity or error.</div>
+            <div class="kv"><b>Example Input:</b> Start=10, Remove=3, Add=5</div>
+            <div class="kv"><b>Example Output:</b> 12</div>
+            <div class="kv"><b>Constraints:</b> Remove must not exceed current stock.</div>
+            <div class="kv"><b>Hint:</b> Keep Quantity setter private; modify through methods.</div>
+          </div>
+
+          <div class="qcard">
+            <h4>M2) Dictionary Indexer with Defaults</h4>
+            <div class="kv"><b>Problem:</b> Create AppConfig with indexer this[string key]. If key missing in get, return "N/A" instead of throwing.</div>
+            <div class="kv"><b>Input/Output:</b> Input: set a few keys, then read missing key. Output: value.</div>
+            <div class="kv"><b>Example Input:</b> config["Theme"]="Dark"; read config["Language"]</div>
+            <div class="kv"><b>Example Output:</b> N/A</div>
+            <div class="kv"><b>Constraints:</b> Key cannot be null/empty for set.</div>
+            <div class="kv"><b>Hint:</b> Use Dictionary and ContainsKey.</div>
+          </div>
+
+          <div class="qcard">
+            <h4>M3) Overloaded Indexers (Id and Name)</h4>
+            <div class="kv"><b>Problem:</b> Create StudentBook storing students; allow access by int id and by string name using two indexers.</div>
+            <div class="kv"><b>Input/Output:</b> Input: add 3 students; read by id and name. Output: matching student details.</div>
+            <div class="kv"><b>Example Input:</b> book[1] and book["Aarav"]</div>
+            <div class="kv"><b>Example Output:</b> Same student printed twice</div>
+            <div class="kv"><b>Constraints:</b> Names are case-insensitive.</div>
+            <div class="kv"><b>Hint:</b> Maintain two dictionaries and keep them in sync.</div>
+          </div>
+
+          <div class="qcard">
+            <h4>M4) Inheritance Pay Calculator</h4>
+            <div class="kv"><b>Problem:</b> Create Employee base class with virtual CalculatePay(). Create ContractEmployee and FullTimeEmployee derived classes with different logic.</div>
+            <div class="kv"><b>Input/Output:</b> Input: list of employees. Output: total payroll.</div>
+            <div class="kv"><b>Example Input:</b> FT:30000, Contract: hours=100 rate=200</div>
+            <div class="kv"><b>Example Output:</b> 50000</div>
+            <div class="kv"><b>Constraints:</b> Hours and rate must be non-negative.</div>
+            <div class="kv"><b>Hint:</b> Store as List&lt;Employee&gt; and sum CalculatePay().</div>
+          </div>
+
+          <div class="qcard">
+            <h4>M5) base Constructor Enforcement</h4>
+            <div class="kv"><b>Problem:</b> Create Person(id,name) base class (no parameterless constructor). Create Teacher derived class that must call base constructor correctly.</div>
+            <div class="kv"><b>Input/Output:</b> Input: new Teacher(5,"Anita","Math"). Output: print formatted info.</div>
+            <div class="kv"><b>Example Input:</b> (5,"Anita","Math")</div>
+            <div class="kv"><b>Example Output:</b> 5 - Anita - Math</div>
+            <div class="kv"><b>Constraints:</b> Subject cannot be empty.</div>
+            <div class="kv"><b>Hint:</b> Use : base(id,name) in derived constructor.</div>
+          </div>
+
+          <h3 style="margin:14px 0 8px;">Hard (5)</h3>
+
+          <div class="qcard">
+            <h4>H1) Prevent Invalid State with Sealed Override</h4>
+            <div class="kv"><b>Problem:</b> Build Logger → SecureLogger where SecureLogger overrides Format() and seals it to enforce a prefix. Demonstrate that further override is not allowed.</div>
+            <div class="kv"><b>Input/Output:</b> Input: message string. Output: formatted message.</div>
+            <div class="kv"><b>Example Input:</b> "Payment Approved"</div>
+            <div class="kv"><b>Example Output:</b> "[SECURE] Payment Approved"</div>
+            <div class="kv"><b>Constraints:</b> Must compile without exposing a way to remove the prefix.</div>
+            <div class="kv"><b>Hint:</b> Use sealed override in derived class.</div>
+          </div>
+
+          <div class="qcard">
+            <h4>H2) Override vs new Bug Demonstration</h4>
+            <div class="kv"><b>Problem:</b> Create base Notifier.GenerateMessage(). Create EmailNotifier that overrides, and SmsNotifier that hides with new. Show different outputs when referenced as base type.</div>
+            <div class="kv"><b>Input/Output:</b> Input: create objects and call method. Output: printed messages showing mismatch.</div>
+            <div class="kv"><b>Example Input:</b> Notifier n = new SmsNotifier(); n.GenerateMessage()</div>
+            <div class="kv"><b>Example Output:</b> Base message (unexpected) + explain why</div>
+            <div class="kv"><b>Constraints:</b> Include comments in code explaining the behavior.</div>
+            <div class="kv"><b>Hint:</b> Use virtual/override for correct polymorphism; use new for hiding.</div>
+          </div>
+
+          <div class="qcard">
+            <h4>H3) Indexer with Range Support</h4>
+            <div class="kv"><b>Problem:</b> Create a GradeBook that stores marks and provides: this[int index] to read/write and a method GetRange(int start,int end) returning a formatted string summary.</div>
+            <div class="kv"><b>Input/Output:</b> Input: marks list + range. Output: "avg, min, max" for that range.</div>
+            <div class="kv"><b>Example Input:</b> marks: 70,80,90,60,50; range 1..3</div>
+            <div class="kv"><b>Example Output:</b> avg=76.67 min=60 max=90</div>
+            <div class="kv"><b>Constraints:</b> Validate start/end and ensure start &lt;= end.</div>
+            <div class="kv"><b>Hint:</b> Wrap a List&lt;int&gt; and compute safely.</div>
+          </div>
+
+          <div class="qcard">
+            <h4>H4) Immutable Domain Object Pattern</h4>
+            <div class="kv"><b>Problem:</b> Build a Money class with Amount and Currency that cannot be changed after creation. Provide Add(Money other) that returns a NEW Money.</div>
+            <div class="kv"><b>Input/Output:</b> Input: money1 + money2. Output: new Money and original unchanged.</div>
+            <div class="kv"><b>Example Input:</b> (100,"INR") + (50,"INR")</div>
+            <div class="kv"><b>Example Output:</b> (150,"INR")</div>
+            <div class="kv"><b>Constraints:</b> Currency must match; otherwise error.</div>
+            <div class="kv"><b>Hint:</b> Use getter-only properties and return new instance.</div>
+          </div>
+
+          <div class="qcard">
+            <h4>H5) Polymorphic Billing Engine</h4>
+            <div class="kv"><b>Problem:</b> Create base Plan class with virtual CalculateBill(usage). Derived plans: BasicPlan, ProPlan, EnterprisePlan with different rates and caps. Use a List&lt;Plan&gt; to calculate bills for different customers.</div>
+            <div class="kv"><b>Input/Output:</b> Input: plan + usage. Output: bill amount for each customer.</div>
+            <div class="kv"><b>Example Input:</b> Basic usage=120; Pro usage=120</div>
+            <div class="kv"><b>Example Output:</b> Different bills based on plan rules</div>
+            <div class="kv"><b>Constraints:</b> Usage must be non-negative; Enterprise may have discount beyond threshold.</div>
+            <div class="kv"><b>Hint:</b> Put shared logic in base, vary only rate rules in overrides.</div>
+          </div>
+
+          <div class="footerbar">
+            <div class="muted">Module files: <b>06-constructors.html</b> ← → <b>08-abstraction-interfaces.html</b></div>
+            <div>
+              <a class="btn" href="06-constructors.html">← Previous Module</a>
+              <a class="btn primary" href="08-abstraction-interfaces.html">Next Module →</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</body>
+</html>

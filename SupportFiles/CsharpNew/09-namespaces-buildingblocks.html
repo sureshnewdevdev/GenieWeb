@@ -1,0 +1,1568 @@
+<!-- FileName: 09-namespaces-buildingblocks.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>09. Namespaces & Building Blocks | ItTechGenie</title>
+  <style>
+    :root{
+      --green:#04AA6D;
+      --bg:#ffffff;
+      --text:#1b1f23;
+      --muted:#5b6770;
+      --border:#e6e8eb;
+      --code:#0b1020;
+      --codeText:#e6edf3;
+      --ex:#f2f2f2;
+      --note:#e7f3fe;
+      --tip:#e8f8f0;
+      --warn:#fde7e7;
+      --shadow:0 6px 18px rgba(0,0,0,.08);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:var(--bg);
+      line-height:1.5;
+    }
+    a{color:inherit}
+    .topbar{
+      position:sticky; top:0; z-index:20;
+      background:var(--green);
+      color:#fff;
+      padding:12px 16px;
+      box-shadow: var(--shadow);
+    }
+    .topbar .row{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; max-width:1200px; margin:0 auto;
+    }
+    .brand{
+      font-weight:800; letter-spacing:.2px;
+    }
+    .crumb{
+      font-size:13px; opacity:.95;
+    }
+
+    .wrap{max-width:1200px; margin:0 auto; display:flex; gap:16px; padding:16px;}
+    .sidebar{
+      width:290px; flex:0 0 290px;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      padding:12px;
+      position:sticky; top:64px;
+      height: calc(100vh - 88px);
+      overflow:auto;
+      background:#fff;
+    }
+    .sb-title{padding:8px 10px; border-radius:12px; background:#f7fbf9; border:1px solid #dff2ea;}
+    .sb-brand{font-weight:800}
+    .sb-course{font-size:12px; color:var(--muted); margin-top:2px}
+    .sb-section{
+      margin:14px 6px 6px;
+      font-size:12px; letter-spacing:.6px;
+      color:var(--muted);
+      font-weight:700;
+    }
+    .sb-link{
+      display:block; padding:9px 10px;
+      border-radius:12px; text-decoration:none;
+      border:1px solid transparent;
+      margin:4px 0;
+    }
+    .sb-link:hover{background:#f6f8fa; border-color:var(--border)}
+    .sb-module{font-weight:650}
+    .sb-sub{padding-left:14px; font-size:14px}
+    .sb-practice{background:#fff7e6; border-color:#ffe0a3}
+
+    .content{
+      flex:1;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      background:#fff;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .hero{
+      padding:18px 18px 10px;
+      border-bottom:1px solid var(--border);
+      background: linear-gradient(180deg, #f1fff8 0%, #ffffff 80%);
+    }
+    .hero h1{margin:0 0 6px; font-size:28px}
+    .hero p{margin:0; color:var(--muted)}
+    .meta{
+      margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;
+      font-size:12px; color:var(--muted);
+    }
+    .pill{
+      padding:6px 10px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      background:#fff;
+    }
+
+    .toc{
+      padding:14px 18px;
+      border-bottom:1px solid var(--border);
+      background:#fcfcfd;
+    }
+    .toc h2{margin:0 0 8px; font-size:18px}
+    .toc ul{margin:0; padding-left:18px}
+    .toc a{text-decoration:none; color:#0b6b4c}
+    .toc a:hover{text-decoration:underline}
+
+    section.topic{
+      padding:18px;
+      border-bottom:1px solid var(--border);
+    }
+    section.topic h2{
+      margin:0 0 10px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:#eaf7f1;
+      border:1px solid #d6efe5;
+      color:#0b6b4c;
+      font-size:20px;
+    }
+    .explain{color:var(--text); margin:0 0 10px}
+    .explain .muted{color:var(--muted)}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
+    @media (min-width: 980px){
+      .grid{grid-template-columns: 1fr 1fr;}
+    }
+    .card{
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      padding:12px;
+      background:#fff;
+    }
+    .card h3{margin:0 0 8px; font-size:16px}
+    pre{
+      margin:0;
+      white-space:pre;
+      overflow:auto;
+      border-radius: 12px;
+      border:1px solid var(--border);
+      padding:12px;
+      background:#fff;
+    }
+    pre.ascii{background:#fbfbfb}
+    .ex-box{
+      background:var(--ex);
+      border:1px solid #e0e0e0;
+      border-radius: var(--radius);
+      padding:12px;
+    }
+    .ex-box b{display:inline-block; margin-bottom:6px}
+    .code{
+      background:var(--code);
+      color:var(--codeText);
+      border:1px solid #121a33;
+    }
+    .code code{color:inherit}
+    .callout{
+      padding:12px;
+      border-radius: var(--radius);
+      border:1px solid var(--border);
+    }
+    .note{background:var(--note); border-color:#b6d8ff}
+    .tip{background:var(--tip); border-color:#b9efd6}
+    .warn{background:var(--warn); border-color:#ffb3b3}
+    .callout b{display:block; margin-bottom:6px}
+
+    .nav-btns{
+      display:flex; justify-content:space-between; gap:10px;
+      margin-top:12px;
+    }
+    .btn{
+      display:inline-block;
+      padding:10px 12px;
+      border-radius: 12px;
+      text-decoration:none;
+      border:1px solid var(--border);
+      background:#fff;
+      font-weight:700;
+      font-size:14px;
+    }
+    .btn:hover{background:#f6f8fa}
+    .btn.primary{background:var(--green); color:#fff; border-color:var(--green)}
+    .btn.primary:hover{filter:brightness(.95)}
+
+    /* Tooltip (Prompt v3): CSS-only, using data-tip */
+    .tt{
+      position:relative;
+      border-bottom: 1px dotted #0b6b4c;
+      cursor:help;
+      color:#0b6b4c;
+      font-weight:650;
+    }
+    .tt::after{
+      content: attr(data-tip);
+      position:absolute;
+      left:0;
+      bottom: calc(100% + 10px);
+      width: min(360px, 75vw);
+      background:#111827;
+      color:#fff;
+      padding:10px 12px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      opacity:0;
+      transform: translateY(6px);
+      pointer-events:none;
+      transition: opacity .15s ease, transform .15s ease;
+      font-weight:500;
+      font-size:13px;
+      line-height:1.35;
+      white-space:normal;
+      z-index:50;
+    }
+    .tt::before{
+      content:"";
+      position:absolute;
+      left:14px;
+      bottom: calc(100% + 4px);
+      border:8px solid transparent;
+      border-top-color:#111827;
+      opacity:0;
+      transform: translateY(6px);
+      transition: opacity .15s ease, transform .15s ease;
+      z-index:51;
+    }
+    .tt:hover::after, .tt:hover::before,
+    .tt:focus::after, .tt:focus::before{
+      opacity:1;
+      transform: translateY(0);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      overflow:hidden;
+      border-radius: var(--radius);
+      border:1px solid var(--border);
+    }
+    th, td{
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      vertical-align:top;
+      text-align:left;
+      font-size:14px;
+    }
+    th{background:#f7f7f9; font-weight:800}
+    tr:last-child td{border-bottom:none}
+
+    .footer{
+      padding:18px;
+      background:#0b1020;
+      color:#e6edf3;
+    }
+    .footer p{margin:0; color:#c9d4e6}
+    .small{font-size:13px; color:var(--muted)}
+    .klist{margin:0; padding-left:18px}
+    .klist li{margin:6px 0}
+
+    /* Placeholder anchors requested */
+    #next-subtopic, #prev-subtopic{display:block; height:1px; overflow:hidden;}
+  </style>
+</head>
+<body>
+
+  <a id="prev-subtopic"></a>
+  <a id="next-subtopic"></a>
+
+  <header class="topbar">
+    <div class="row">
+      <div>
+        <div class="brand">ItTechGenie</div>
+        <div class="crumb">C# Fundamentals → Advanced • Module 09</div>
+      </div>
+      <div class="crumb">Organizing & Extending Code: Namespaces and Language Building Blocks</div>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <!-- =========================================================
+         ItTechGenie Reusable Sidebar Template (Prompt v3 compatible)
+         - Replace {{CURRENT_TOPIC_NO}} and {{CURRENT_TOPIC_SUBTOPICS}}
+         - Keep the PRACTICE link exactly as required.
+    ========================================================= -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-title">
+        <div class="sb-brand">ItTechGenie</div>
+        <div class="sb-course">C# Fundamentals → Advanced</div>
+      </div>
+
+      <div class="sb-section">COURSE CONTENT</div>
+
+      <!-- Global course navigation (modules) -->
+      <a class="sb-link sb-module" href="01-kickstart.html">01. Kickstart: .NET Ecosystem</a>
+      <a class="sb-link sb-module" href="02-control-flow.html">02. Control Flow</a>
+      <a class="sb-link sb-module" href="03-oop-core.html">03. OOP Core</a>
+      <a class="sb-link sb-module" href="04-methods-mastery.html">04. Methods Mastery</a>
+      <a class="sb-link sb-module" href="05-type-conversion.html">05. Type Conversion</a>
+      <a class="sb-link sb-module" href="06-constructors.html">06. Constructors</a>
+      <a class="sb-link sb-module" href="07-properties-inheritance.html">07. Properties & Inheritance</a>
+      <a class="sb-link sb-module" href="08-abstraction-interfaces.html">08. Abstraction & Interfaces</a>
+      <a class="sb-link sb-module" href="09-namespaces-buildingblocks.html">09. Namespaces & Building Blocks</a>
+      <a class="sb-link sb-module" href="10-advanced-toolkit.html">10. Advanced Toolkit</a>
+
+      <div class="sb-section">THIS TOPIC</div>
+
+      <!-- Per-page subtopics (generated for Topic 09) -->
+      <a class="sb-link sb-sub" href="#t09-namespaces">Namespaces (Prevent Name Collisions)</a>
+      <a class="sb-link sb-sub" href="#t09-using-directives">using Directives (Imports) and Organization Tips</a>
+      <a class="sb-link sb-sub" href="#t09-using-alias">Using Alias (Disambiguate Types Cleanly)</a>
+      <a class="sb-link sb-sub" href="#t09-static-imports">Static Imports (using static)</a>
+      <a class="sb-link sb-sub" href="#t09-nested-namespaces">Nested Namespaces (Hierarchy and Folder Mapping)</a>
+      <a class="sb-link sb-sub" href="#t09-partial-classes">Partial Classes (Split One Class Across Files)</a>
+      <a class="sb-link sb-sub" href="#t09-static-classes">Static Classes (Utility Containers)</a>
+      <a class="sb-link sb-sub" href="#t09-enumerations">Enumerations (enum) (Readable Named Constants)</a>
+      <a class="sb-link sb-sub" href="#t09-realworld-structure">Real-World Layout: Folder Structure for a Clean C# App</a>
+
+      <div class="sb-section">PRACTICE</div>
+
+      <!-- REQUIRED SIDEBAR MENU ADDITION (Prompt v3): exact text + anchor -->
+      <a class="sb-link sb-practice" href="#practice-coding-questions">
+        To Become Best coder Practice this
+      </a>
+    </aside>
+
+    <main class="content" id="main">
+      <div class="hero">
+        <h1>09. Namespaces & Language Building Blocks</h1>
+        <p>
+          In this module, you’ll learn how <span class="tt" data-tip="A logical container that groups related types and prevents naming conflicts. It helps keep large projects organized and readable.">Namespace</span>
+          and related building blocks (like <span class="tt" data-tip="A keyword meaning the member belongs to the type itself, not to an instance. Static members are shared across all objects of that class.">static</span> and <span class="tt" data-tip="A C# syntax that applies a namespace to the whole file without extra braces. It reduces indentation and improves readability in larger projects.">File-Scoped Namespace</span>)
+          keep real-world C# solutions clean, scalable, and conflict-free.
+        </p>
+        <div class="meta">
+          <span class="pill">Focus: code organization</span>
+          <span class="pill">Skill: readable imports + structure</span>
+          <span class="pill">Outcome: maintainable multi-project apps</span>
+        </div>
+      </div>
+
+      <div class="toc" id="toc">
+        <h2>Table of Contents</h2>
+        <ul>
+          <li><a href="#t09-namespaces">Namespaces (Prevent Name Collisions)</a></li>
+          <li><a href="#t09-using-directives">using Directives (Imports) and Organization Tips</a></li>
+          <li><a href="#t09-using-alias">Using Alias (Disambiguate Types Cleanly)</a></li>
+          <li><a href="#t09-static-imports">Static Imports (using static)</a></li>
+          <li><a href="#t09-nested-namespaces">Nested Namespaces (Hierarchy and Folder Mapping)</a></li>
+          <li><a href="#t09-partial-classes">Partial Classes (Split One Class Across Files)</a></li>
+          <li><a href="#t09-static-classes">Static Classes (Utility Containers)</a></li>
+          <li><a href="#t09-enumerations">Enumerations (enum) (Readable Named Constants)</a></li>
+          <li><a href="#t09-realworld-structure">Real-World Layout: Folder Structure for a Clean C# App</a></li>
+          <li><a href="#t09-downloads">Downloadable ZIP/PPT/DOC (Placeholder)</a></li>
+          <li><a href="#t09-faqs">FAQs</a></li>
+          <li><a href="#t09-interview">Interview Questions</a></li>
+          <li><a href="#t09-mcq">MCQ</a></li>
+          <li><a href="#t09-summary">Summary</a></li>
+          <li><a href="#t09-glossary">Glossary (Tooltips)</a></li>
+          <li><a href="#practice-coding-questions">To Become Best coder Practice this</a></li>
+        </ul>
+        <p class="small" style="margin-top:10px;">
+          Tip: Use the sidebar to jump quickly, and use the Next/Previous buttons at the bottom of each subtopic.
+        </p>
+      </div>
+
+      <!-- =========================
+           SUBTOPIC 1
+      ========================== -->
+      <section class="topic" id="t09-namespaces">
+        <h2>Namespaces (Prevent Name Collisions)</h2>
+
+        <p class="explain">
+          A <span class="tt" data-tip="A logical container that groups related types and prevents naming conflicts. It helps keep large projects organized and readable.">Namespace</span> is like a “folder name” for types (classes, interfaces, enums).<br>
+          It prevents collisions when two libraries define the same type name (like <b>Logger</b> in two packages).<br>
+          Namespaces also improve readability because the type’s full identity is clear.<br>
+          In team projects, namespaces become a map of your architecture (Domain, Services, Repositories).<br>
+          You can reference types using full qualification or by importing with <b>using</b>.
+        </p>
+
+        <div class="grid">
+          <div class="card">
+            <h3>ASCII Flow (Collision Prevention)</h3>
+            <pre class="ascii">
+Two libraries both have: Logger
+
+LibA.Logger  ----\
+                  +--> You choose the correct one using namespace
+LibB.Logger  ----/
+
+Result: No ambiguity, safer code
+            </pre>
+          </div>
+
+          <div class="card">
+            <h3>Grey Example Box (What it solves)</h3>
+            <div class="ex-box">
+              <b>Scenario:</b> Your app uses two NuGet packages, each with a <b>Logger</b> type.<br>
+              <b>Problem:</b> The compiler doesn't know which <b>Logger</b> you mean.<br>
+              <b>Solution:</b> Put your code in a clean namespace, and use fully qualified names or aliases for conflicts.
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3>Dark Code Block (C#)</h3>
+          <pre class="code"><code>namespace ItTechGenie.App.Logging
+{
+    public class Logger
+    {
+        public void Info(string message) =&gt; Console.WriteLine($"INFO: {message}");
+    }
+}
+
+// Somewhere else:
+public class CheckoutService
+{
+    public void Pay()
+    {
+        // Fully qualified usage (no import required):
+        var log = new ItTechGenie.App.Logging.Logger();
+        log.Info("Payment started");
+    }
+}</code></pre>
+        </div>
+
+        <div class="callout note" style="margin-top:12px;">
+          <b>Real-world use case</b>
+          In a microservices solution, each service uses namespaces like <b>ServiceName.Domain</b>, <b>ServiceName.Application</b>, and <b>ServiceName.Infrastructure</b>
+          so developers instantly know where a type belongs and what layer it is part of.
+        </div>
+
+        <div class="grid" style="margin-top:12px;">
+          <div class="callout tip">
+            <b>Beginner Tip</b>
+            Start with a simple pattern: <b>Company.Product.Feature</b> (example: <b>ItTechGenie.Store.Payments</b>).
+          </div>
+          <div class="callout warn">
+            <b>Advanced Note</b>
+            Prefer stable namespaces as part of your public API surface. Renaming namespaces can break consumers and large refactors can be costly.
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <a class="btn" href="#prev-subtopic">◀ Previous</a>
+          <a class="btn primary" href="#t09-using-directives">Next ▶</a>
+        </div>
+      </section>
+
+      <!-- =========================
+           SUBTOPIC 2
+      ========================== -->
+      <section class="topic" id="t09-using-directives">
+        <h2>using Directives (Imports) and Organization Tips</h2>
+
+        <p class="explain">
+          A <b>using directive</b> lets you reference types without writing their full namespace each time.<br>
+          It makes code shorter, but too many usings can hide where types come from.<br>
+          Keep usings organized: system first, then third-party, then your project namespaces.<br>
+          Remove unused imports to reduce confusion and speed up code review.<br>
+          Good import hygiene is a “small habit” that makes big codebases easier.
+        </p>
+
+        <div class="grid">
+          <div class="card">
+            <h3>ASCII Flow (How import resolution works)</h3>
+            <pre class="ascii">
+Compiler sees: List&lt;int&gt;
+
+1) Check current namespace
+2) Check imported namespaces (using ...)
+3) If still not found: error
+
+Rule: Imports are a search list
+            </pre>
+          </div>
+
+          <div class="card">
+            <h3>Grey Example Box (Clean ordering)</h3>
+            <div class="ex-box">
+              <b>Recommendation:</b><br>
+              1) <b>System*</b> namespaces<br>
+              2) External packages (NuGet)<br>
+              3) Your app namespaces (ItTechGenie.*)<br>
+              This keeps files consistent across the team.
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3>Dark Code Block (C#)</h3>
+          <pre class="code"><code>using System;
+using System.Collections.Generic;
+
+// Third-party
+using Newtonsoft.Json;
+
+// Your project
+using ItTechGenie.Store.Domain;
+using ItTechGenie.Store.Services;
+
+namespace ItTechGenie.Store.App
+{
+    public class Program
+    {
+        public static void Main()
+        {
+            List&lt;int&gt; ids = new() { 101, 102, 103 };
+            Console.WriteLine(JsonConvert.SerializeObject(ids));
+        }
+    }
+}</code></pre>
+        </div>
+
+        <div class="callout note" style="margin-top:12px;">
+          <b>Real-world use case</b>
+          In enterprise apps, developers enforce import ordering via code style rules so every file looks familiar,
+          reducing “mental load” during debugging and PR reviews.
+        </div>
+
+        <div class="grid" style="margin-top:12px;">
+          <div class="callout tip">
+            <b>Beginner Tip</b>
+            If you’re unsure where a type comes from, temporarily remove its using and see what fully qualified name your IDE suggests.
+          </div>
+          <div class="callout warn">
+            <b>Advanced Note</b>
+            Prefer explicitness when ambiguity exists. If two namespaces expose the same type name, use aliases (next section) to keep intent crystal clear.
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <a class="btn" href="#t09-namespaces">◀ Previous</a>
+          <a class="btn primary" href="#t09-using-alias">Next ▶</a>
+        </div>
+      </section>
+
+      <!-- =========================
+           SUBTOPIC 3
+      ========================== -->
+      <section class="topic" id="t09-using-alias">
+        <h2>Using Alias (Disambiguate Types Cleanly)</h2>
+
+        <p class="explain">
+          When two types share the same name, aliases let you pick the correct one with a short label.<br>
+          Aliases keep your code readable (better than writing full namespaces everywhere).<br>
+          They are perfect for common collisions like <b>Task</b>, <b>Timer</b>, or <b>Logger</b> across libraries.<br>
+          Use aliases at the top of the file, close to related imports.<br>
+          This makes it obvious to reviewers which type you intend to use.
+        </p>
+
+        <div class="grid">
+          <div class="card">
+            <h3>ASCII Diagram (Alias = nickname)</h3>
+            <pre class="ascii">
+using AppLogger = ItTechGenie.App.Logging.Logger;
+using LibLogger = ThirdParty.Logging.Logger;
+
+AppLogger  ----&gt; points to your Logger
+LibLogger  ----&gt; points to external Logger
+            </pre>
+          </div>
+
+          <div class="card">
+            <h3>Grey Example Box (Why it matters)</h3>
+            <div class="ex-box">
+              <b>Without alias:</b> you write long namespaces repeatedly or get ambiguity errors.<br>
+              <b>With alias:</b> the type is clear and short, so the code reads like a story.
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3>Dark Code Block (C#)</h3>
+          <pre class="code"><code>using System;
+
+// Alias declarations:
+using AppLogger = ItTechGenie.App.Logging.Logger;
+using LibLogger = ThirdParty.Logging.Logger;
+
+namespace ItTechGenie.Store.App
+{
+    public class CheckoutService
+    {
+        private readonly AppLogger _appLog = new();
+        private readonly LibLogger _libLog = new();
+
+        public void Pay()
+        {
+            _appLog.Info("Checkout started");
+            _libLog.Write("Telemetry: payment start");
+        }
+    }
+}</code></pre>
+        </div>
+
+        <div class="callout note" style="margin-top:12px;">
+          <b>Real-world use case</b>
+          In large solutions, teams alias types when migrating libraries (old vs new package) so both can coexist during transition without chaos.
+        </div>
+
+        <div class="grid" style="margin-top:12px;">
+          <div class="callout tip">
+            <b>Beginner Tip</b>
+            Use meaningful alias names like <b>DomainUser</b>, <b>ApiUser</b>, <b>DbUser</b> instead of <b>U1</b>, <b>U2</b>.
+          </div>
+          <div class="callout warn">
+            <b>Advanced Note</b>
+            Avoid over-aliasing. If you alias too many things, your file becomes a “dictionary” that new developers must decode.
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <a class="btn" href="#t09-using-directives">◀ Previous</a>
+          <a class="btn primary" href="#t09-static-imports">Next ▶</a>
+        </div>
+      </section>
+
+      <!-- =========================
+           SUBTOPIC 4
+      ========================== -->
+      <section class="topic" id="t09-static-imports">
+        <h2>Static Imports (using static)</h2>
+
+        <p class="explain">
+          <b>using static</b> imports static members so you can call them without the class name prefix.<br>
+          It reduces noise when you repeatedly call utility methods like <b>Math</b> or <b>Console</b> helpers.<br>
+          Used carefully, it makes code clean; overused, it can hide where methods come from.<br>
+          It works best for small, well-known utility classes.<br>
+          Think of it as “bringing functions into the current scope.”
+        </p>
+
+        <div class="grid">
+          <div class="card">
+            <h3>ASCII Flow (Before vs After)</h3>
+            <pre class="ascii">
+Before:
+Math.Sqrt(25)
+Math.Round(12.345, 2)
+
+After using static Math:
+Sqrt(25)
+Round(12.345, 2)
+
+Less typing, same meaning
+            </pre>
+          </div>
+
+          <div class="card">
+            <h3>Grey Example Box (When to use)</h3>
+            <div class="ex-box">
+              Good for: <b>Math</b>, constants, small helper libraries.<br>
+              Avoid for: large classes with many methods (can cause name confusion).
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3>Dark Code Block (C#)</h3>
+          <pre class="code"><code>using System;
+using static System.Math;
+
+namespace ItTechGenie.Tools
+{
+    public class Geometry
+    {
+        public static void Main()
+        {
+            double r = 3;
+            double area = PI * Pow(r, 2);  // PI and Pow are from Math
+            Console.WriteLine($"Area = {Round(area, 2)}");
+        }
+    }
+}</code></pre>
+        </div>
+
+        <div class="callout note" style="margin-top:12px;">
+          <b>Real-world use case</b>
+          In finance/math-heavy services, developers use static imports for stable, well-known functions to keep formulas readable and closer to business language.
+        </div>
+
+        <div class="grid" style="margin-top:12px;">
+          <div class="callout tip">
+            <b>Beginner Tip</b>
+            If a method call becomes unclear, remove <b>using static</b> and call it with the class prefix again.
+          </div>
+          <div class="callout warn">
+            <b>Advanced Note</b>
+            Watch for collisions: importing static members from multiple classes can create ambiguous method names.
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <a class="btn" href="#t09-using-alias">◀ Previous</a>
+          <a class="btn primary" href="#t09-nested-namespaces">Next ▶</a>
+        </div>
+      </section>
+
+      <!-- =========================
+           SUBTOPIC 5
+      ========================== -->
+      <section class="topic" id="t09-nested-namespaces">
+        <h2>Nested Namespaces (Hierarchy and Folder Mapping)</h2>
+
+        <p class="explain">
+          Nested namespaces create a hierarchy like <b>ItTechGenie.Store.Payments</b> to show logical grouping.<br>
+          This hierarchy often matches your folder layout, making code easy to navigate.<br>
+          Modern C# supports <span class="tt" data-tip="A C# syntax that applies a namespace to the whole file without extra braces. It reduces indentation and improves readability in larger projects.">File-Scoped Namespace</span> to reduce indentation in each file.<br>
+          Use consistent naming across projects so developers instantly understand structure.<br>
+          A good hierarchy supports growth: new features fit into existing “places.”
+        </p>
+
+        <div class="grid">
+          <div class="card">
+            <h3>ASCII Diagram (Namespace ↔ Folders)</h3>
+            <pre class="ascii">
+Namespace: ItTechGenie.Store.Payments
+
+Folders:
+ItTechGenie.Store/
+  Payments/
+    Card/
+    Upi/
+    Refunds/
+
+Goal: structure that matches how humans search
+            </pre>
+          </div>
+
+          <div class="card">
+            <h3>Grey Example Box (File-scoped vs Block)</h3>
+            <div class="ex-box">
+              <b>Block style:</b> namespace { ... } (more indentation)<br>
+              <b>File-scoped style:</b> namespace X; (cleaner for big solutions)
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3>Dark Code Block (C#)</h3>
+          <pre class="code"><code>// File-scoped namespace (less indentation):
+namespace ItTechGenie.Store.Payments;
+
+public class PaymentGateway
+{
+    public string Provider { get; init; } = "MockPay";
+
+    public bool Charge(decimal amount)
+    {
+        return amount &gt; 0;
+    }
+}</code></pre>
+        </div>
+
+        <div class="callout note" style="margin-top:12px;">
+          <b>Real-world use case</b>
+          In multi-team organizations, folder/namespace mapping reduces onboarding time because engineers can predict where code lives just by reading the namespace.
+        </div>
+
+        <div class="grid" style="margin-top:12px;">
+          <div class="callout tip">
+            <b>Beginner Tip</b>
+            Pick one convention and follow it everywhere. Consistency beats cleverness.
+          </div>
+          <div class="callout warn">
+            <b>Advanced Note</b>
+            Don’t create “deep nesting” without purpose. Too many layers (A.B.C.D.E) can make refactoring harder and file paths too long.
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <a class="btn" href="#t09-static-imports">◀ Previous</a>
+          <a class="btn primary" href="#t09-partial-classes">Next ▶</a>
+        </div>
+      </section>
+
+      <!-- =========================
+           SUBTOPIC 6
+      ========================== -->
+      <section class="topic" id="t09-partial-classes">
+        <h2>Partial Classes (Split One Class Across Files)</h2>
+
+        <p class="explain">
+          A <b>partial class</b> lets you split one class definition across multiple files.<br>
+          This is useful when some code is auto-generated (designer, tooling) and some is handwritten.<br>
+          At compile time, all partial pieces merge into one type inside the same <span class="tt" data-tip="A compiled output unit in .NET (usually .dll or .exe). It contains IL code and metadata. The runtime loads assemblies to execute your program.">Assembly</span>.<br>
+          Partial helps you keep generated code separate so you don’t accidentally edit it.<br>
+          It also supports “feature grouping” when a class becomes too large.
+        </p>
+
+        <div class="grid">
+          <div class="card">
+            <h3>ASCII Flow (Compile-time merge)</h3>
+            <pre class="ascii">
+Order.cs      (partial class Order)
+Order.Validation.cs (partial class Order)
+
+Compiler:
+[Order parts] --merge--&gt; Single Order type in output assembly
+            </pre>
+          </div>
+
+          <div class="card">
+            <h3>Grey Example Box (Generated + Manual)</h3>
+            <div class="ex-box">
+              <b>Generated file:</b> UI designer creates fields/properties.<br>
+              <b>Your file:</b> you add validation and business logic safely.
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3>Dark Code Block (C#)</h3>
+          <pre class="code"><code>// File: Order.cs
+namespace ItTechGenie.Store.Domain;
+
+public partial class Order
+{
+    public int Id { get; init; }
+    public decimal Total { get; set; }
+}
+
+// File: Order.Validation.cs
+namespace ItTechGenie.Store.Domain;
+
+public partial class Order
+{
+    public bool IsValid() =&gt; Id &gt; 0 &amp;&amp; Total &gt; 0;
+}</code></pre>
+        </div>
+
+        <div class="callout note" style="margin-top:12px;">
+          <b>Real-world use case</b>
+          In WinForms/WPF projects, designer tools generate a partial class file; developers extend the same class in a separate file without touching generated code.
+        </div>
+
+        <div class="grid" style="margin-top:12px;">
+          <div class="callout tip">
+            <b>Beginner Tip</b>
+            Keep partial files named clearly: <b>Order.Validation.cs</b>, <b>Order.Mapping.cs</b>, etc.
+          </div>
+          <div class="callout warn">
+            <b>Advanced Note</b>
+            Avoid using partial as a “dumping ground.” If a type grows too big, consider extracting smaller classes instead.
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <a class="btn" href="#t09-nested-namespaces">◀ Previous</a>
+          <a class="btn primary" href="#t09-static-classes">Next ▶</a>
+        </div>
+      </section>
+
+      <!-- =========================
+           SUBTOPIC 7
+      ========================== -->
+      <section class="topic" id="t09-static-classes">
+        <h2>Static Classes (Utility Containers)</h2>
+
+        <p class="explain">
+          A static class cannot be instantiated; it only contains static members.<br>
+          It’s commonly used for pure utility helpers (formatting, validation, conversions).<br>
+          Because there is no object state, the methods should be deterministic and side-effect-free.<br>
+          Static classes pair well with <span class="tt" data-tip="A keyword meaning the member belongs to the type itself, not to an instance. Static members are shared across all objects of that class.">static</span> methods like <b>TryParse</b>-style helpers.<br>
+          If you need dependencies (database, HTTP), prefer services + dependency injection instead.
+        </p>
+
+        <div class="grid">
+          <div class="card">
+            <h3>ASCII Diagram (Utility access)</h3>
+            <pre class="ascii">
+Static class: TextUtils
+No instances:
+
+TextUtils.Slugify("Hello World")
+TextUtils.IsEmail("a@b.com")
+
+Good: reusable helpers
+Bad: storing global mutable state
+            </pre>
+          </div>
+
+          <div class="card">
+            <h3>Grey Example Box (What to put inside)</h3>
+            <div class="ex-box">
+              Put: small reusable methods, constants, pure computations.<br>
+              Avoid: storing “global” data that changes (can cause hidden bugs).
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3>Dark Code Block (C#)</h3>
+          <pre class="code"><code>using System;
+using System.Text;
+
+namespace ItTechGenie.Store.Common;
+
+public static class TextUtils
+{
+    public static string Slugify(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return "";
+
+        var sb = new StringBuilder();
+        foreach (char ch in input.Trim().ToLowerInvariant())
+        {
+            if (char.IsLetterOrDigit(ch)) sb.Append(ch);
+            else if (ch == ' ' || ch == '-' || ch == '_') sb.Append('-');
+        }
+        return sb.ToString().Trim('-');
+    }
+}
+
+public class Demo
+{
+    public static void Main()
+    {
+        Console.WriteLine(TextUtils.Slugify("C# Namespaces & Building Blocks"));
+    }
+}</code></pre>
+        </div>
+
+        <div class="callout note" style="margin-top:12px;">
+          <b>Real-world use case</b>
+          Teams often centralize formatting rules (invoice number format, slug rules, phone normalization) into static helper classes so every module behaves consistently.
+        </div>
+
+        <div class="grid" style="margin-top:12px;">
+          <div class="callout tip">
+            <b>Beginner Tip</b>
+            If your static helper starts needing “configuration,” it might be time to switch to a service class with dependency injection.
+          </div>
+          <div class="callout warn">
+            <b>Advanced Note</b>
+            Be careful with thread-safety if you store cached values in static fields; shared state + concurrency can create subtle bugs.
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <a class="btn" href="#t09-partial-classes">◀ Previous</a>
+          <a class="btn primary" href="#t09-enumerations">Next ▶</a>
+        </div>
+      </section>
+
+      <!-- =========================
+           SUBTOPIC 8
+      ========================== -->
+      <section class="topic" id="t09-enumerations">
+        <h2>Enumerations (enum) (Readable Named Constants)</h2>
+
+        <p class="explain">
+          An <b>enum</b> represents a fixed set of named values (like status, roles, payment types).<br>
+          It replaces “magic numbers/strings” with clear, compiler-checked names.<br>
+          Enums improve readability, reduce typos, and make switch statements safer.<br>
+          You can store enums as integers (default) but still display meaningful names to users.<br>
+          For bitwise combinations, you can use flags-style enums (advanced pattern).
+        </p>
+
+        <div class="grid">
+          <div class="card">
+            <h3>ASCII Diagram (Magic string vs enum)</h3>
+            <pre class="ascii">
+Bad:
+status = "Shipped"   (typos possible)
+
+Good:
+OrderStatus.Shipped  (compiler-checked)
+
+Result: fewer production bugs
+            </pre>
+          </div>
+
+          <div class="card">
+            <h3>Grey Example Box (Where enums fit)</h3>
+            <div class="ex-box">
+              Use enums for limited “choices”: OrderStatus, UserRole, PaymentMethod.<br>
+              Avoid enums for frequently changing data (then use DB/config instead).
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3>Dark Code Block (C#)</h3>
+          <pre class="code"><code>using System;
+
+namespace ItTechGenie.Store.Domain;
+
+public enum OrderStatus
+{
+    Created = 0,
+    Paid = 1,
+    Packed = 2,
+    Shipped = 3,
+    Delivered = 4,
+    Cancelled = 5
+}
+
+public class Order
+{
+    public int Id { get; init; }
+    public OrderStatus Status { get; set; } = OrderStatus.Created;
+
+    public void Advance()
+    {
+        Status = Status switch
+        {
+            OrderStatus.Created =&gt; OrderStatus.Paid,
+            OrderStatus.Paid =&gt; OrderStatus.Packed,
+            OrderStatus.Packed =&gt; OrderStatus.Shipped,
+            OrderStatus.Shipped =&gt; OrderStatus.Delivered,
+            _ =&gt; Status
+        };
+    }
+}
+
+public class Demo
+{
+    public static void Main()
+    {
+        var o = new Order { Id = 1001 };
+        o.Advance();
+        Console.WriteLine(o.Status);
+    }
+}</code></pre>
+        </div>
+
+        <div class="callout note" style="margin-top:12px;">
+          <b>Real-world use case</b>
+          In e-commerce systems, enums define order lifecycle states so every team (UI, API, warehouse) shares one consistent meaning of “Packed” or “Delivered.”
+        </div>
+
+        <div class="grid" style="margin-top:12px;">
+          <div class="callout tip">
+            <b>Beginner Tip</b>
+            Always name enum values like words (Created, Paid) and avoid abbreviations unless the whole team agrees.
+          </div>
+          <div class="callout warn">
+            <b>Advanced Note</b>
+            Be cautious when reordering enum numeric values if they are stored in databases or sent to external APIs—changing numbers can break compatibility.
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <a class="btn" href="#t09-static-classes">◀ Previous</a>
+          <a class="btn primary" href="#t09-realworld-structure">Next ▶</a>
+        </div>
+      </section>
+
+      <!-- =========================
+           SUBTOPIC 9
+      ========================== -->
+      <section class="topic" id="t09-realworld-structure">
+        <h2>Real-World Layout: Folder Structure for a Clean C# App</h2>
+
+        <p class="explain">
+          Real teams organize code so folders and namespaces reflect architecture layers and responsibilities.<br>
+          A common approach is separating Domain, Application, and Infrastructure (clean layering).<br>
+          Each folder typically maps to a namespace, making navigation predictable.<br>
+          This structure supports testing (unit tests for Application/Domain, integration tests for Infrastructure).<br>
+          The result: fewer “where does this code go?” debates and faster feature delivery.
+        </p>
+
+        <div class="grid">
+          <div class="card">
+            <h3>ASCII Architecture Map (Folders ↔ Namespaces)</h3>
+            <pre class="ascii">
+ItTechGenie.Store/
+  Domain/            =&gt; ItTechGenie.Store.Domain
+  Application/       =&gt; ItTechGenie.Store.Application
+  Infrastructure/    =&gt; ItTechGenie.Store.Infrastructure
+  Api/               =&gt; ItTechGenie.Store.Api
+
+Rule: layers depend inward (Infra -&gt; App -&gt; Domain)
+            </pre>
+          </div>
+
+          <div class="card">
+            <h3>Grey Example Box (What goes where)</h3>
+            <div class="ex-box">
+              <b>Domain:</b> entities, enums, core rules.<br>
+              <b>Application:</b> use cases, services, interfaces.<br>
+              <b>Infrastructure:</b> database, file IO, external APIs.<br>
+              <b>API/UI:</b> controllers, endpoints, views.
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3>Dark Code Block (C#)</h3>
+          <pre class="code"><code>// Domain: ItTechGenie.Store.Domain
+namespace ItTechGenie.Store.Domain;
+
+public class Product
+{
+    public int Id { get; init; }
+    public string Name { get; init; } = "";
+}
+
+// Application: ItTechGenie.Store.Application
+namespace ItTechGenie.Store.Application;
+
+public interface IProductRepository
+{
+    Product? GetById(int id);
+}
+
+// Infrastructure: ItTechGenie.Store.Infrastructure
+namespace ItTechGenie.Store.Infrastructure;
+
+public class InMemoryProductRepository : IProductRepository
+{
+    private readonly List&lt;Product&gt; _items = new()
+    {
+        new Product { Id = 1, Name = "Laptop" },
+        new Product { Id = 2, Name = "Keyboard" }
+    };
+
+    public Product? GetById(int id) =&gt; _items.FirstOrDefault(p =&gt; p.Id == id);
+}</code></pre>
+        </div>
+
+        <div class="callout note" style="margin-top:12px;">
+          <b>Real-world use case</b>
+          In enterprise projects, this structure helps multiple teams work in parallel: Domain changes remain stable, Application evolves with features, and Infrastructure changes with vendors/DBs.
+        </div>
+
+        <div class="grid" style="margin-top:12px;">
+          <div class="callout tip">
+            <b>Beginner Tip</b>
+            If you’re building a small app, start simple (Domain + App). Add Infrastructure and extra layers only when needed.
+          </div>
+          <div class="callout warn">
+            <b>Advanced Note</b>
+            Enforce boundaries using separate projects (class libraries) so the compiler prevents wrong dependencies (e.g., Domain should not reference Infrastructure).
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <a class="btn" href="#t09-enumerations">◀ Previous</a>
+          <a class="btn primary" href="#next-subtopic">Next ▶</a>
+        </div>
+      </section>
+
+      <!-- =========================
+           PLACEHOLDER DOWNLOADS
+      ========================== -->
+      <section class="topic" id="t09-downloads">
+        <h2>Downloadable ZIP/PPT/DOC (Placeholder)</h2>
+
+        <p class="explain">
+          This section is a placeholder for downloadable resources you may add later.<br>
+          Keep your course assets versioned so students always get the right file for the right module.<br>
+          Suggested downloads: sample solution ZIP, PPT summary slides, and a DOC/handout for offline reading.<br>
+          When publishing, name files consistently with the module number (09-...).<br>
+          You can also include a “mini project” folder showing correct namespaces and structure.
+        </p>
+
+        <div class="grid">
+          <div class="card">
+            <h3>Suggested Assets</h3>
+            <ul class="klist">
+              <li><b>09-sample-solution.zip</b> (folders + namespaces demo)</li>
+              <li><b>09-namespaces-buildingblocks.pptx</b> (slides)</li>
+              <li><b>09-notes.docx</b> (offline handout)</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Packaging Tip</h3>
+            <div class="ex-box">
+              <b>Rule:</b> Include a README that lists required SDK version and how to run the demo project locally.
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <a class="btn" href="#t09-realworld-structure">◀ Previous</a>
+          <a class="btn primary" href="#t09-faqs">Next ▶</a>
+        </div>
+      </section>
+
+      <!-- =========================
+           FAQs
+      ========================== -->
+      <section class="topic" id="t09-faqs">
+        <h2>FAQs</h2>
+
+        <div class="card">
+          <h3>1) Do namespaces affect performance?</h3>
+          <p class="explain">
+            No. Namespaces are primarily for organization and type identification at compile time. Performance depends on runtime behavior, not namespace naming.
+          </p>
+
+          <h3>2) Should folder names always match namespaces?</h3>
+          <p class="explain">
+            It’s not required, but it’s a strong team habit because it makes code navigation predictable and reduces mistakes.
+          </p>
+
+          <h3>3) When should I avoid using static imports?</h3>
+          <p class="explain">
+            Avoid it when it makes code ambiguous or hard to read—especially if multiple utility classes expose similar method names.
+          </p>
+
+          <h3>4) Are partial classes only for generated code?</h3>
+          <p class="explain">
+            They’re most common there, but they can also help split large types by responsibility (validation, mapping, serialization) when used carefully.
+          </p>
+        </div>
+
+        <div class="nav-btns">
+          <a class="btn" href="#t09-downloads">◀ Previous</a>
+          <a class="btn primary" href="#t09-interview">Next ▶</a>
+        </div>
+      </section>
+
+      <!-- =========================
+           INTERVIEW QUESTIONS
+      ========================== -->
+      <section class="topic" id="t09-interview">
+        <h2>Interview Questions</h2>
+
+        <div class="card">
+          <ol class="klist">
+            <li><b>What problem do namespaces solve?</b> Explain how they prevent type name collisions in large solutions.</li>
+            <li><b>How does the compiler resolve a type name?</b> Mention current namespace + imported namespaces + fully qualified name.</li>
+            <li><b>When would you use a using alias?</b> Provide an example with two conflicting type names from different libraries.</li>
+            <li><b>What is file-scoped namespace and why is it useful?</b> Explain reduced indentation and readability.</li>
+            <li><b>What are partial classes used for in real projects?</b> Discuss generated + manual code separation.</li>
+            <li><b>Static class vs normal class?</b> When to choose static, and why dependency injection is preferred for external dependencies.</li>
+            <li><b>Enum pitfalls?</b> Discuss DB storage, API compatibility, and reordering values.</li>
+          </ol>
+        </div>
+
+        <div class="nav-btns">
+          <a class="btn" href="#t09-faqs">◀ Previous</a>
+          <a class="btn primary" href="#t09-mcq">Next ▶</a>
+        </div>
+      </section>
+
+      <!-- =========================
+           MCQ
+      ========================== -->
+      <section class="topic" id="t09-mcq">
+        <h2>MCQ (5–10 Questions)</h2>
+
+        <div class="card">
+          <ol class="klist">
+            <li>
+              <b>What is the main purpose of a namespace?</b><br>
+              A) Speed up runtime execution<br>
+              B) Prevent naming conflicts and organize code<br>
+              C) Replace classes and interfaces<br>
+              D) Encrypt assemblies
+              <div class="small"><b>Answer:</b> B</div>
+            </li>
+            <li>
+              <b>Which statement about using directives is correct?</b><br>
+              A) They change runtime behavior<br>
+              B) They allow referencing types without full namespace<br>
+              C) They only work in Web APIs<br>
+              D) They must be inside methods
+              <div class="small"><b>Answer:</b> B</div>
+            </li>
+            <li>
+              <b>When should you use a using alias?</b><br>
+              A) When you want faster compilation<br>
+              B) When two namespaces contain types with the same name<br>
+              C) When you want to create a new project<br>
+              D) When you want to avoid enums
+              <div class="small"><b>Answer:</b> B</div>
+            </li>
+            <li>
+              <b>using static is best described as:</b><br>
+              A) Importing instance fields into scope<br>
+              B) Importing static members so you can call them without class prefix<br>
+              C) Converting a class into a static class automatically<br>
+              D) Preventing garbage collection
+              <div class="small"><b>Answer:</b> B</div>
+            </li>
+            <li>
+              <b>Partial classes are combined:</b><br>
+              A) At runtime by the CLR<br>
+              B) At compile time into a single type<br>
+              C) Only in Debug builds<br>
+              D) Only when reflection is used
+              <div class="small"><b>Answer:</b> B</div>
+            </li>
+            <li>
+              <b>Which is a good use of enum?</b><br>
+              A) Storing thousands of changing product categories daily<br>
+              B) Representing fixed states like OrderStatus<br>
+              C) Storing large text documents<br>
+              D) Replacing database tables
+              <div class="small"><b>Answer:</b> B</div>
+            </li>
+            <li>
+              <b>File-scoped namespace mainly helps by:</b><br>
+              A) Enabling multiple inheritance<br>
+              B) Reducing indentation and improving readability<br>
+              C) Increasing runtime performance significantly<br>
+              D) Preventing compilation
+              <div class="small"><b>Answer:</b> B</div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="nav-btns">
+          <a class="btn" href="#t09-interview">◀ Previous</a>
+          <a class="btn primary" href="#t09-summary">Next ▶</a>
+        </div>
+      </section>
+
+      <!-- =========================
+           SUMMARY
+      ========================== -->
+      <section class="topic" id="t09-summary">
+        <h2>Summary</h2>
+
+        <div class="card">
+          <ul class="klist">
+            <li><b>Namespaces</b> organize types and prevent collisions across libraries.</li>
+            <li><b>using directives</b> reduce typing and improve readability when kept clean and consistent.</li>
+            <li><b>Aliases</b> solve ambiguity without long fully qualified names.</li>
+            <li><b>using static</b> makes formulas/utility calls cleaner when used carefully.</li>
+            <li><b>Nested namespaces</b> and folder mapping help teams navigate large solutions quickly.</li>
+            <li><b>Partial classes</b> help separate generated code from custom logic.</li>
+            <li><b>Static classes</b> are ideal for pure helper utilities, not dependency-heavy logic.</li>
+            <li><b>Enums</b> replace magic values with readable, compiler-checked constants.</li>
+          </ul>
+          <p class="small">
+            Next step: apply these conventions in your own project so your codebase stays clean as features and teams grow.
+          </p>
+        </div>
+
+        <div class="nav-btns">
+          <a class="btn" href="#t09-mcq">◀ Previous</a>
+          <a class="btn primary" href="#t09-glossary">Next ▶</a>
+        </div>
+      </section>
+
+      <!-- =========================
+           GLOSSARY (TOOLTIPS)
+      ========================== -->
+      <section class="topic" id="t09-glossary">
+        <h2>Glossary (Tooltips)</h2>
+
+        <p class="explain">
+          The terms below appear in this module as tooltip-enabled words. Hover them anywhere in the page to see quick explanations.
+        </p>
+
+        <table aria-label="Glossary Tooltips Table">
+          <thead>
+            <tr>
+              <th>Term</th>
+              <th>Tooltip Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tt" data-tip="A logical container that groups related types and prevents naming conflicts. It helps keep large projects organized and readable.">Namespace</span></td>
+              <td>A logical container that groups related types and prevents naming conflicts. It helps keep large projects organized and readable.</td>
+            </tr>
+            <tr>
+              <td><span class="tt" data-tip="A compiled output unit in .NET (usually .dll or .exe). It contains IL code and metadata. The runtime loads assemblies to execute your program.">Assembly</span></td>
+              <td>A compiled output unit in .NET (usually .dll or .exe). It contains IL code and metadata. The runtime loads assemblies to execute your program.</td>
+            </tr>
+            <tr>
+              <td><span class="tt" data-tip="A keyword meaning the member belongs to the type itself, not to an instance. Static members are shared across all objects of that class.">static</span></td>
+              <td>A keyword meaning the member belongs to the type itself, not to an instance. Static members are shared across all objects of that class.</td>
+            </tr>
+            <tr>
+              <td><span class="tt" data-tip="A C# syntax that applies a namespace to the whole file without extra braces. It reduces indentation and improves readability in larger projects.">File-Scoped Namespace</span></td>
+              <td>A C# syntax that applies a namespace to the whole file without extra braces. It reduces indentation and improves readability in larger projects.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="nav-btns">
+          <a class="btn" href="#t09-summary">◀ Previous</a>
+          <a class="btn primary" href="#practice-coding-questions">Next ▶</a>
+        </div>
+      </section>
+
+      <!-- =========================
+           PRACTICE SECTION (REQUIRED)
+      ========================== -->
+      <section class="topic" id="practice-coding-questions">
+        <h2>To Become Best coder Practice this</h2>
+
+        <div class="callout tip">
+          <b>How to use these questions</b>
+          Try writing the solution in C# Console first. Then refactor: clean namespaces, meaningful enums, and helpers in static classes.
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3>Easy (5)</h3>
+
+          <div class="ex-box">
+            <b>1) Namespace Parent Check</b><br>
+            <b>Problem:</b> Given two namespace strings, determine if the first is a parent namespace of the second.<br>
+            <b>Input/Output:</b> Input: parent, child. Output: True/False.<br>
+            <b>Example Input/Output:</b> parent="ItTechGenie.Store", child="ItTechGenie.Store.Payments" → True<br>
+            <b>Constraints:</b> 1 ≤ length ≤ 200, namespaces contain letters/digits/dots only.<br>
+            <b>Hint:</b> A parent matches exactly or child starts with parent + ".".
+          </div>
+
+          <div class="ex-box" style="margin-top:10px;">
+            <b>2) Enum from Int (Safe)</b><br>
+            <b>Problem:</b> Given an integer, map it to OrderStatus enum; if invalid, output "Invalid".<br>
+            <b>Input/Output:</b> Input: statusCode. Output: enumName or "Invalid".<br>
+            <b>Example Input/Output:</b> 3 → "Shipped", 99 → "Invalid"<br>
+            <b>Constraints:</b> -10^9 ≤ statusCode ≤ 10^9.<br>
+            <b>Hint:</b> Use Enum.IsDefined (or switch) before casting.
+          </div>
+
+          <div class="ex-box" style="margin-top:10px;">
+            <b>3) Clean Using List (Count Only)</b><br>
+            <b>Problem:</b> Given N using directives as strings, count how many unique namespaces exist (case-sensitive).<br>
+            <b>Input/Output:</b> Input: N then N lines. Output: unique count.<br>
+            <b>Example Input/Output:</b> ["System", "System", "ItTechGenie.Store"] → 2<br>
+            <b>Constraints:</b> 1 ≤ N ≤ 10^5.<br>
+            <b>Hint:</b> Use HashSet&lt;string&gt;.
+          </div>
+
+          <div class="ex-box" style="margin-top:10px;">
+            <b>4) Folder Path from Namespace</b><br>
+            <b>Problem:</b> Convert a namespace to a folder path using '/' (dots become slashes).<br>
+            <b>Input/Output:</b> Input: namespace string. Output: path string.<br>
+            <b>Example Input/Output:</b> "ItTechGenie.Store.Payments" → "ItTechGenie/Store/Payments"<br>
+            <b>Constraints:</b> 1 ≤ length ≤ 300.<br>
+            <b>Hint:</b> Split by '.' then join with '/'.
+          </div>
+
+          <div class="ex-box" style="margin-top:10px;">
+            <b>5) Static Helper: Clamp</b><br>
+            <b>Problem:</b> Implement a static method Clamp(x, min, max) that keeps x within [min, max].<br>
+            <b>Input/Output:</b> Input: x, min, max. Output: clamped value.<br>
+            <b>Example Input/Output:</b> x=15, min=0, max=10 → 10<br>
+            <b>Constraints:</b> -10^9 ≤ values ≤ 10^9.<br>
+            <b>Hint:</b> Use if checks or Math.Min/Math.Max.
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3>Medium (5)</h3>
+
+          <div class="ex-box">
+            <b>6) Group Types by Namespace</b><br>
+            <b>Problem:</b> Given a list of fully qualified type names (e.g., A.B.C.Type), group and count types per namespace.<br>
+            <b>Input/Output:</b> Input: N then N lines. Output: each namespace with count (any order).<br>
+            <b>Example Input/Output:</b> ["A.B.X","A.B.Y","A.C.Z"] → A.B=2, A.C=1<br>
+            <b>Constraints:</b> 1 ≤ N ≤ 2*10^5.<br>
+            <b>Hint:</b> Namespace is everything before the last '.'.
+          </div>
+
+          <div class="ex-box" style="margin-top:10px;">
+            <b>7) Detect Ambiguous Type Names</b><br>
+            <b>Problem:</b> Given type names with namespaces, find all simple type names that appear in more than one namespace.<br>
+            <b>Input/Output:</b> Input: N lines (namespace + "." + type). Output: ambiguous type names sorted.<br>
+            <b>Example Input/Output:</b> ["LibA.Logger","LibB.Logger","LibA.User"] → ["Logger"]<br>
+            <b>Constraints:</b> 1 ≤ N ≤ 2*10^5.<br>
+            <b>Hint:</b> Track set of namespaces per simple type name.
+          </div>
+
+          <div class="ex-box" style="margin-top:10px;">
+            <b>8) Flags Enum Bit Count</b><br>
+            <b>Problem:</b> You receive an integer representing combined flags. Return how many flags are set (number of 1 bits).<br>
+            <b>Input/Output:</b> Input: integer x. Output: count of set bits.<br>
+            <b>Example Input/Output:</b> x=13 (1101) → 3<br>
+            <b>Constraints:</b> 0 ≤ x ≤ 2^31-1.<br>
+            <b>Hint:</b> Use bit trick: x &amp;= (x - 1) in a loop.
+          </div>
+
+          <div class="ex-box" style="margin-top:10px;">
+            <b>9) Convert Folder Path to Namespace</b><br>
+            <b>Problem:</b> Convert a folder path like "ItTechGenie/Store/Payments" into "ItTechGenie.Store.Payments".<br>
+            <b>Input/Output:</b> Input: path string. Output: namespace string.<br>
+            <b>Example Input/Output:</b> "A/B/C" → "A.B.C"<br>
+            <b>Constraints:</b> 1 ≤ length ≤ 300. Path uses '/' only.<br>
+            <b>Hint:</b> Split by '/' and join with '.'.
+          </div>
+
+          <div class="ex-box" style="margin-top:10px;">
+            <b>10) Import List Normalizer</b><br>
+            <b>Problem:</b> Given using directives, output a cleaned list: remove duplicates, keep System.* first, then others (alphabetical within group).<br>
+            <b>Input/Output:</b> Input: N and N lines. Output: normalized lines.<br>
+            <b>Example Input/Output:</b> ["ItTechGenie.X","System.IO","System","ItTechGenie.X"] → ["System","System.IO","ItTechGenie.X"]<br>
+            <b>Constraints:</b> 1 ≤ N ≤ 10^5.<br>
+            <b>Hint:</b> Use HashSet for uniqueness + two lists for grouping.
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3>Hard (5)</h3>
+
+          <div class="ex-box">
+            <b>11) Minimal Namespace Prefix</b><br>
+            <b>Problem:</b> Given two fully qualified type names, find the longest common namespace prefix (as dot-separated).<br>
+            <b>Input/Output:</b> Input: typeA, typeB. Output: common namespace prefix or empty string.<br>
+            <b>Example Input/Output:</b> "A.B.C.X" and "A.B.D.Y" → "A.B"<br>
+            <b>Constraints:</b> 1 ≤ length ≤ 500.<br>
+            <b>Hint:</b> Compare namespace segments until mismatch (ignore final type segment).
+          </div>
+
+          <div class="ex-box" style="margin-top:10px;">
+            <b>12) Using Alias Generator</b><br>
+            <b>Problem:</b> For ambiguous simple type names, generate unique aliases using the last namespace segment + type (e.g., LoggingLogger).<br>
+            <b>Input/Output:</b> Input: N fully qualified names. Output: alias lines "using Alias = FullName;".<br>
+            <b>Example Input/Output:</b> "LibA.Logging.Logger" → "using LoggingLogger = LibA.Logging.Logger;"<br>
+            <b>Constraints:</b> 1 ≤ N ≤ 10^5.<br>
+            <b>Hint:</b> Alias = last namespace segment + type; ensure uniqueness by appending a number if needed.
+          </div>
+
+          <div class="ex-box" style="margin-top:10px;">
+            <b>13) File-Scoped Namespace Converter</b><br>
+            <b>Problem:</b> Convert block-style namespace text into file-scoped style for a single file (simple transformation rules).<br>
+            <b>Input/Output:</b> Input: lines of code (as text). Output: transformed text.<br>
+            <b>Example Input/Output:</b> "namespace A { class X {} }" → "namespace A; class X {}"<br>
+            <b>Constraints:</b> Input contains exactly one namespace block; no nested braces inside the namespace line.<br>
+            <b>Hint:</b> Replace "namespace X { ... }" by "namespace X;" and remove one indentation level inside.
+          </div>
+
+          <div class="ex-box" style="margin-top:10px;">
+            <b>14) Layer Dependency Validator</b><br>
+            <b>Problem:</b> Given edges (ProjectA references ProjectB), validate that dependencies only go inward: Api→Infrastructure→Application→Domain.<br>
+            <b>Input/Output:</b> Input: M edges. Output: "Valid" or first invalid edge.<br>
+            <b>Example Input/Output:</b> "Domain -> Infrastructure" is invalid → report it<br>
+            <b>Constraints:</b> 1 ≤ M ≤ 2*10^5.<br>
+            <b>Hint:</b> Assign each layer a rank and ensure fromRank &gt;= toRank (or define allowed edges explicitly).
+          </div>
+
+          <div class="ex-box" style="margin-top:10px;">
+            <b>15) Namespace Refactor Map</b><br>
+            <b>Problem:</b> You are given rename rules (OldPrefix → NewPrefix) and a list of namespaces. Apply the best matching rule (longest old prefix).<br>
+            <b>Input/Output:</b> Input: R rules + Q queries. Output: updated namespaces.<br>
+            <b>Example Input/Output:</b> Rule: "A.B"→"X.Y", Query: "A.B.C" → "X.Y.C"<br>
+            <b>Constraints:</b> 1 ≤ R,Q ≤ 10^5.<br>
+            <b>Hint:</b> Use a trie on dot-separated segments or store rules in a dictionary and check decreasing prefixes.
+          </div>
+        </div>
+
+        <div class="nav-btns">
+          <a class="btn" href="#t09-glossary">◀ Previous</a>
+          <a class="btn primary" href="#toc">Back to TOC ▲</a>
+        </div>
+      </section>
+
+      <div class="footer">
+        <p><b>ItTechGenie • Module 09</b></p>
+        <p>Keep code discoverable: clean namespaces, clean imports, clean structure.</p>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

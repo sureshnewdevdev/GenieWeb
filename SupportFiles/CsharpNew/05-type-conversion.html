@@ -1,0 +1,1116 @@
+<!-- File name: 05-type-conversion.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ItTechGenie — Type Conversion & Data Casting in C#</title>
+  <style>
+    :root{
+      --green:#04AA6D;
+      --light:#f5f6f7;
+      --card:#ffffff;
+      --border:#e3e6ea;
+      --code:#0b1020;
+      --codeText:#e8ecff;
+      --note:#d9edf7;  --noteBorder:#bce8f1;
+      --tip:#dff0d8;   --tipBorder:#c8e5bc;
+      --warn:#f2dede;  --warnBorder:#ebcccc;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--light);color:#1b1b1b;line-height:1.5}
+
+    /* Top bar */
+    .topbar{
+      position:fixed;top:0;left:0;right:0;height:56px;
+      background:var(--green);color:#fff;display:flex;align-items:center;
+      padding:0 16px;z-index:1000
+    }
+    .topbar .brand{font-weight:800;letter-spacing:.3px;margin-right:12px}
+    .topbar .crumb{opacity:.95;font-size:14px}
+    .topbar .right{margin-left:auto;font-size:13px;opacity:.95}
+    .pill{display:inline-block;padding:4px 10px;border:1px solid rgba(255,255,255,.35);border-radius:999px;margin-left:10px}
+
+    /* Sidebar */
+    .sidebar{
+      position:fixed;top:56px;left:0;width:300px;bottom:0;overflow:auto;
+      background:#fff;border-right:1px solid var(--border);padding:14px 10px 18px
+    }
+    .sb-title{padding:8px 10px 12px;border-bottom:1px solid var(--border);margin-bottom:10px}
+    .sb-brand{font-weight:800;color:var(--green);font-size:18px}
+    .sb-course{font-size:12px;color:#666;margin-top:2px}
+    .sb-section{font-size:12px;letter-spacing:.7px;color:#666;margin:12px 10px 6px;font-weight:700}
+    .sb-link{display:block;text-decoration:none;color:#222;padding:8px 10px;border-radius:6px;margin:2px 6px;font-size:14px}
+    .sb-link:hover{background:#f1f1f1}
+    .sb-module{font-weight:700}
+    .sb-sub{padding-left:18px;font-size:13.5px}
+    .sb-practice{font-weight:800;color:#0a5}
+
+    /* Main */
+    .main{margin-left:300px;padding:76px 18px 40px}
+    .container{max-width:980px;margin:0 auto}
+
+    /* Content blocks */
+    .hero{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 0 rgba(0,0,0,.03)}
+    .hero h1{margin:0 0 6px;font-size:28px}
+    .hero p{margin:8px 0 0;color:#444}
+    .meta{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;color:#444;font-size:13px}
+    .tag{background:#eef7f3;border:1px solid #cfeee1;color:#145a46;padding:4px 10px;border-radius:999px}
+
+    .toc{margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+    .toc h2{margin:0 0 10px;font-size:20px}
+    .toc ul{margin:0;padding-left:18px}
+    .toc li{margin:6px 0}
+    .toc a{color:#0a5;text-decoration:none}
+    .toc a:hover{text-decoration:underline}
+
+    .section{margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.03)}
+    .section .sh{background:var(--green);color:#fff;padding:10px 14px;font-weight:800;font-size:18px}
+    .section .sc{padding:14px 16px 16px}
+    .purpose{margin:8px 0 12px;padding:10px 12px;background:#fff7e6;border:1px solid #ffe0a3;border-radius:10px;color:#5b4200;font-size:13.5px}
+
+    .box-note,.box-tip,.box-warn{border-radius:10px;padding:10px 12px;margin:12px 0;border:1px solid transparent}
+    .box-note{background:var(--note);border-color:var(--noteBorder)}
+    .box-tip{background:var(--tip);border-color:var(--tipBorder)}
+    .box-warn{background:var(--warn);border-color:var(--warnBorder)}
+    .box-note b,.box-tip b,.box-warn b{display:inline-block;margin-bottom:4px}
+
+    .example{background:#f1f1f1;border-left:5px solid #bbb;border-radius:10px;padding:12px;margin:12px 0}
+    .example h3{margin:0 0 8px;font-size:16px}
+    .trybtn{display:inline-block;background:var(--green);color:#fff;text-decoration:none;padding:10px 14px;border-radius:8px;font-weight:800;margin-top:10px}
+
+    .codeblock{background:var(--code);color:var(--codeText);border-radius:10px;padding:12px;overflow:auto;margin:12px 0;border:1px solid rgba(255,255,255,.08)}
+    .codeblock code{font-family:Consolas,"Courier New",monospace;font-size:13px}
+
+    .ascii{
+      background:#fff;border:1px dashed #cfd6dd;border-radius:10px;
+      padding:10px 12px;margin:12px 0;color:#2a2a2a;overflow:auto;
+      font-family:Consolas,"Courier New",monospace;font-size:13px
+    }
+
+    table{width:100%;border-collapse:collapse;margin:10px 0;background:#fff}
+    th,td{border:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}
+    th{background:#f7f7f7}
+
+    .navrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+    .navbtn{display:inline-block;background:var(--green);color:#fff;text-decoration:none;padding:10px 14px;border-radius:999px;font-weight:800;font-size:14px}
+    .navbtn.secondary{background:#0a7a53}
+
+    /* Tooltips (HTML + CSS only) */
+    .tt{
+      position:relative;border-bottom:1px dotted #0a5;cursor:help;font-weight:700;color:#0a5
+    }
+    .tt:hover::after{
+      content: attr(data-tip);
+      position:absolute;left:0;top: calc(100% + 10px);
+      width: min(380px, 78vw);
+      background:#0b1020;color:#e8ecff;
+      padding:10px 12px;border-radius:10px;
+      box-shadow:0 6px 18px rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.12);
+      white-space:pre-line;z-index:2000
+    }
+    .tt:hover::before{
+      content:"";position:absolute;left:16px;top: calc(100% + 2px);
+      border:8px solid transparent;border-bottom-color:#0b1020;z-index:2001
+    }
+
+    .small{color:#555;font-size:13px}
+
+    @media (max-width: 900px){
+      .sidebar{position:static;width:auto;height:auto;border-right:none}
+      .main{margin-left:0;padding-top:12px}
+      .topbar{position:static}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="brand">ItTechGenie</div>
+    <div class="crumb">C# Fundamentals → Advanced • Module 05</div>
+    <div class="right">
+      <span class="pill">Self-Contained HTML</span>
+      <span class="pill">No External JS/CSS</span>
+    </div>
+  </div>
+
+  <!-- Sidebar (template applied) -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-title">
+      <div class="sb-brand">ItTechGenie</div>
+      <div class="sb-course">C# Fundamentals → Advanced</div>
+    </div>
+
+    <div class="sb-section">COURSE CONTENT</div>
+    <a class="sb-link sb-module" href="01-kickstart.html">01. Kickstart: .NET Ecosystem</a>
+    <a class="sb-link sb-module" href="02-control-flow.html">02. Control Flow</a>
+    <a class="sb-link sb-module" href="03-oop-core.html">03. OOP Core</a>
+    <a class="sb-link sb-module" href="04-methods-mastery.html">04. Methods Mastery</a>
+    <a class="sb-link sb-module" href="05-type-conversion.html">05. Type Conversion</a>
+    <a class="sb-link sb-module" href="06-constructors.html">06. Constructors</a>
+    <a class="sb-link sb-module" href="07-properties-inheritance.html">07. Properties & Inheritance</a>
+    <a class="sb-link sb-module" href="08-abstraction-interfaces.html">08. Abstraction & Interfaces</a>
+    <a class="sb-link sb-module" href="09-namespaces-buildingblocks.html">09. Namespaces & Building Blocks</a>
+    <a class="sb-link sb-module" href="10-advanced-toolkit.html">10. Advanced Toolkit</a>
+
+    <div class="sb-section">THIS TOPIC</div>
+    <a class="sb-link sb-sub" href="#t05-why-types-matter">Why Types Matter (Safety, Correctness, Performance)</a>
+    <a class="sb-link sb-sub" href="#t05-implicit-conversion">Implicit Conversion (Safe Widening)</a>
+    <a class="sb-link sb-sub" href="#t05-explicit-casting">Explicit Casting (Narrowing + Risk)</a>
+    <a class="sb-link sb-sub" href="#t05-numeric-pitfalls">Numeric Conversion Pitfalls (Overflow, Rounding, Precision)</a>
+    <a class="sb-link sb-sub" href="#t05-parse">Parse (String → Number) and Common Exceptions</a>
+    <a class="sb-link sb-sub" href="#t05-tryparse">TryParse (Safe Parsing Pattern)</a>
+    <a class="sb-link sb-sub" href="#t05-convert-methods">Convert Class &amp; Conversion Methods (When to Use)</a>
+    <a class="sb-link sb-sub" href="#t05-formatting-to-string">Formatting Back to String (ToString, Format Specifiers)</a>
+
+    <div class="sb-section">PRACTICE</div>
+    <!-- REQUIRED SIDEBAR MENU ADDITION -->
+    <a class="sb-link sb-practice" href="#practice-coding-questions">
+      To Become Best coder Practice this
+    </a>
+  </aside>
+
+  <main class="main">
+    <div class="container">
+      <!-- Placeholder anchors required -->
+      <div id="prev-subtopic"></div>
+      <div id="next-subtopic"></div>
+
+      <div class="hero">
+        <h1>Module 05: Type Conversion &amp; Data Casting in C#</h1>
+        <p>
+          C# is strongly typed, which protects you from many bugs—but you still need conversions in real apps.
+          In this module you’ll master
+          <span class="tt" data-tip="Converting a value from one type to another. Some conversions are safe widening; others are risky narrowing and may lose information.">Casting</span>,
+          safe widening, risky narrowing, string parsing, and formatting results for users and logs.
+          This is essential for input handling, APIs, file processing, and calculations.
+        </p>
+        <div class="meta">
+          <span class="tag">C#</span>
+          <span class="tag">Strong Typing</span>
+          <span class="tag">Parse / TryParse</span>
+          <span class="tag">Overflow & Precision</span>
+        </div>
+        <div class="box-note" style="margin-top:14px">
+          <b>Note:</b> Hover green dotted terms for tooltips (HTML + CSS only).
+        </div>
+      </div>
+
+      <div class="toc" id="toc">
+        <h2>Table of Contents</h2>
+        <ul>
+          <li><a href="#t05-why-types-matter">Why Types Matter (Safety, Correctness, Performance)</a></li>
+          <li><a href="#t05-implicit-conversion">Implicit Conversion (Safe Widening)</a></li>
+          <li><a href="#t05-explicit-casting">Explicit Casting (Narrowing + Risk)</a></li>
+          <li><a href="#t05-numeric-pitfalls">Numeric Conversion Pitfalls (Overflow, Rounding, Precision)</a></li>
+          <li><a href="#t05-parse">Parse (String → Number) and Common Exceptions</a></li>
+          <li><a href="#t05-tryparse">TryParse (Safe Parsing Pattern)</a></li>
+          <li><a href="#t05-convert-methods">Convert Class &amp; Conversion Methods (When to Use)</a></li>
+          <li><a href="#t05-formatting-to-string">Formatting Back to String (ToString, Format Specifiers)</a></li>
+          <li><a href="#faqs">FAQs</a></li>
+          <li><a href="#interview">Interview Questions</a></li>
+          <li><a href="#summary">Summary</a></li>
+          <li><a href="#mcq">MCQ Quiz</a></li>
+          <li><a href="#glossary">Glossary (Tooltips)</a></li>
+          <li><a href="#downloads">Downloadables (ZIP/PPT/DOC)</a></li>
+          <li><a href="#practice-coding-questions">To Become Best coder Practice this</a></li>
+        </ul>
+      </div>
+
+      <!-- =========================================================
+           1) Why Types Matter
+      ========================================================= -->
+      <section class="section" id="t05-why-types-matter">
+        <div class="sh">1) Why Types Matter (Safety, Correctness, Performance)</div>
+        <div class="sc">
+          <div class="purpose"><b>Purpose:</b> Understand why C# is strict about types and conversions.</div>
+
+          <p>
+            A <span class="tt" data-tip="A definition of what kind of data something is (int, string, decimal, etc.). Types control allowed operations and prevent invalid actions at compile time.">Type</span>
+            tells the compiler what a value represents and what operations are valid.
+            Strong typing prevents many bugs, like adding a number to a date or comparing unrelated values.
+            It also improves performance because the runtime can store and process values efficiently.
+            Conversions exist because real input often arrives as strings and different systems use different numeric sizes.
+          </p>
+
+          <pre class="ascii">
+Why types matter
+----------------
+Correctness: prevents invalid operations early (compile-time)
+Safety: avoids silent data loss
+Performance: efficient memory & CPU operations for known types
+          </pre>
+
+          <div class="example">
+            <h3>Example</h3>
+            <p><b>Scenario:</b> An API sends "price" as text. Your app must convert it to a numeric type to calculate GST and totals.</p>
+            <p><b>Goal:</b> Convert safely and handle invalid inputs without crashing.</p>
+            <a class="trybtn" href="#t05-why-types-matter">Try It Yourself</a>
+          </div>
+
+          <div class="codeblock" aria-label="C# example - types matter">
+            <code>
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        string priceText = "1299.50";
+        decimal price = decimal.Parse(priceText); // converting string to decimal
+
+        decimal gst = price * 0.18m;
+        decimal total = price + gst;
+
+        Console.WriteLine("Price: " + price);
+        Console.WriteLine("GST: " + gst);
+        Console.WriteLine("Total: " + total);
+    }
+}
+            </code>
+          </div>
+
+          <p><b>Real-world use case:</b> Payment processing, invoice generation, and report calculations depend on correct numeric types (decimal) to avoid rounding surprises.</p>
+
+          <div class="box-tip">
+            <b>Beginner Tip:</b> For money, prefer <b>decimal</b> over <b>double</b> because decimal is designed for base-10 precision.
+          </div>
+
+          <div class="box-note">
+            <b>Advanced Note:</b> Type choices also affect memory layout and overflow behavior—especially for large data pipelines and high-volume services.
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#prev-subtopic">Previous</a>
+            <a class="navbtn" href="#t05-implicit-conversion">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           2) Implicit Conversion
+      ========================================================= -->
+      <section class="section" id="t05-implicit-conversion">
+        <div class="sh">2) Implicit Conversion (Safe Widening)</div>
+        <div class="sc">
+          <div class="purpose"><b>Purpose:</b> Learn when the compiler converts automatically and why.</div>
+
+          <p>
+            An implicit conversion happens automatically when it is guaranteed to be safe (no data loss).
+            This typically means converting from a smaller range type to a larger range type (widening).
+            For example, <b>int</b> can be converted to <b>long</b> or <b>double</b> without extra code.
+            The compiler allows it because every int value fits inside a long.
+          </p>
+
+          <pre class="ascii">
+Widening (safe)
+--------------
+byte  → short → int → long
+int   → double
+(compiler can do automatically)
+          </pre>
+
+          <div class="example">
+            <h3>Example</h3>
+            <p><b>Scenario:</b> Your system stores “items sold” as int, but reporting stores totals as long to avoid overflow.</p>
+            <a class="trybtn" href="#t05-implicit-conversion">Try It Yourself</a>
+          </div>
+
+          <div class="codeblock" aria-label="C# example - implicit conversion">
+            <code>
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        int dailySales = 150000;
+        long monthlySales = dailySales; // implicit conversion int -> long
+
+        Console.WriteLine("Daily: " + dailySales);
+        Console.WriteLine("Monthly (start): " + monthlySales);
+    }
+}
+            </code>
+          </div>
+
+          <p><b>Real-world use case:</b> Analytics and reporting often widen values (int → long) to avoid overflow when aggregating millions of rows.</p>
+
+          <div class="box-tip">
+            <b>Beginner Tip:</b> If the compiler allows it without casting, it’s usually a safe widening conversion.
+          </div>
+
+          <div class="box-note">
+            <b>Advanced Note:</b> Implicit conversion may still introduce precision changes when widening to floating-point types (e.g., long → double for very large values).
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#t05-why-types-matter">Previous</a>
+            <a class="navbtn" href="#t05-explicit-casting">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           3) Explicit Casting
+      ========================================================= -->
+      <section class="section" id="t05-explicit-casting">
+        <div class="sh">3) Explicit Casting (Narrowing + Risk)</div>
+        <div class="sc">
+          <div class="purpose"><b>Purpose:</b> Perform conversions intentionally and handle data loss.</div>
+
+          <p>
+            Explicit casting is required when conversion may lose data or change meaning (narrowing).
+            Example: converting <b>long</b> to <b>int</b>, or <b>double</b> to <b>int</b>.
+            You must write the cast to show you understand the risk.
+            If the value doesn’t fit, you can get overflow (or truncated/rounded results).
+          </p>
+
+          <pre class="ascii">
+Narrowing (risky)
+----------------
+long   → int   (may overflow)
+double → int   (drops decimal part)
+decimal→ int   (drops decimal part)
+          </pre>
+
+          <div class="example">
+            <h3>Example</h3>
+            <p><b>Scenario:</b> A sensor provides temperature as double (e.g., 36.7). Your UI needs an integer value for a simple display.</p>
+            <p><b>What happens:</b> Casting drops the decimal portion.</p>
+            <a class="trybtn" href="#t05-explicit-casting">Try It Yourself</a>
+          </div>
+
+          <div class="codeblock" aria-label="C# example - explicit casting">
+            <code>
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        double temp = 36.7;
+        int displayTemp = (int)temp; // explicit cast, decimal is truncated
+
+        Console.WriteLine("Original: " + temp);
+        Console.WriteLine("Displayed: " + displayTemp);
+    }
+}
+            </code>
+          </div>
+
+          <p><b>Real-world use case:</b> File import jobs often convert string/decimal values into required database types—explicit casting forces you to decide what to do with extra precision.</p>
+
+          <div class="box-tip">
+            <b>Beginner Tip:</b> If you are converting to a “smaller” type, expect risk: overflow or loss of decimals.
+          </div>
+
+          <div class="box-warn">
+            <b>Warning:</b> Casting can silently truncate decimals (36.9 → 36). If you need rounding, use a rounding method before casting.
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#t05-implicit-conversion">Previous</a>
+            <a class="navbtn" href="#t05-numeric-pitfalls">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           4) Numeric Conversion Pitfalls
+      ========================================================= -->
+      <section class="section" id="t05-numeric-pitfalls">
+        <div class="sh">4) Numeric Conversion Pitfalls (Overflow, Rounding, Precision)</div>
+        <div class="sc">
+          <div class="purpose"><b>Purpose:</b> Avoid bugs caused by overflow and floating-point surprises.</div>
+
+          <p>
+            Numeric conversions can fail in three common ways: overflow, rounding behavior, and floating-point precision.
+            Overflow happens when the value exceeds the target type range (e.g., int).
+            Rounding happens when converting decimals to integers (truncate vs round).
+            Precision issues happen with floating-point (double) because some decimal values cannot be represented exactly in binary.
+          </p>
+
+          <pre class="ascii">
+Pitfalls map
+------------
+Overflow:   value too big for target type
+Rounding:   decimals lost or rounded unexpectedly
+Precision:  double math may produce 0.30000000000000004
+          </pre>
+
+          <div class="example">
+            <h3>Example</h3>
+            <p><b>Scenario:</b> Total = 100000 * 100000 (int overflow risk). Also, 0.1 + 0.2 with double can surprise.</p>
+            <a class="trybtn" href="#t05-numeric-pitfalls">Try It Yourself</a>
+          </div>
+
+          <div class="codeblock" aria-label="C# example - numeric pitfalls">
+            <code>
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        // Overflow example (use long to be safe)
+        int a = 100000;
+        int b = 100000;
+
+        long safeTotal = (long)a * b; // cast before multiplication
+        Console.WriteLine("Safe total (long): " + safeTotal);
+
+        // Precision example with double
+        double x = 0.1;
+        double y = 0.2;
+        double z = x + y;
+        Console.WriteLine("0.1 + 0.2 (double) = " + z);
+
+        // Money example: use decimal
+        decimal dx = 0.1m;
+        decimal dy = 0.2m;
+        Console.WriteLine("0.1 + 0.2 (decimal) = " + (dx + dy));
+    }
+}
+            </code>
+          </div>
+
+          <p><b>Real-world use case:</b> Financial apps must avoid double for money. Data pipelines must cast before multiplying large ints to prevent overflow in aggregations.</p>
+
+          <div class="box-tip">
+            <b>Beginner Tip:</b> When multiplying two ints that might be large, cast one to long first.
+          </div>
+
+          <div class="box-note">
+            <b>Advanced Note:</b> Consider <b>checked</b> blocks for critical calculations to throw on overflow instead of silently wrapping.
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#t05-explicit-casting">Previous</a>
+            <a class="navbtn" href="#t05-parse">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           5) Parse
+      ========================================================= -->
+      <section class="section" id="t05-parse">
+        <div class="sh">5) Parse (String → Number) and Common Exceptions</div>
+        <div class="sc">
+          <div class="purpose"><b>Purpose:</b> Convert input strings and understand failure modes.</div>
+
+          <p>
+            <span class="tt" data-tip="Converts a string into another type like int, decimal, or DateTime. It throws an exception if input is invalid, so it must be used carefully.">Parse</span>
+            converts a string into a number (or other type) when you expect the input to be valid.
+            If the text is not a valid number, Parse throws an
+            <span class="tt" data-tip="A runtime error object that represents something that went wrong. Parsing can throw exceptions like FormatException or OverflowException if the input is invalid.">Exception</span>
+            like FormatException or OverflowException.
+            This is why Parse is risky for user input and should be used when you control the input format (like reading from a trusted config).
+          </p>
+
+          <pre class="ascii">
+Parse flow
+----------
+string input
+  |
+  |-- valid numeric text? --> number value
+  |
+  |-- invalid text --------> throws exception
+          </pre>
+
+          <div class="example">
+            <h3>Example</h3>
+            <p><b>Scenario:</b> Reading a “port number” from a config file string.</p>
+            <p><b>Note:</b> If the config is corrupted, Parse will throw.</p>
+            <a class="trybtn" href="#t05-parse">Try It Yourself</a>
+          </div>
+
+          <div class="codeblock" aria-label="C# example - Parse">
+            <code>
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        string portText = "8080";
+        int port = int.Parse(portText);
+
+        Console.WriteLine("Port: " + port);
+
+        // If portText = "8O8O" (letter O), Parse would throw FormatException.
+    }
+}
+            </code>
+          </div>
+
+          <p><b>Real-world use case:</b> Parsing from trusted sources such as validated CSV columns or system configuration values.</p>
+
+          <div class="box-tip">
+            <b>Beginner Tip:</b> Use Parse only when you are confident the string is valid (or you want to fail fast).
+          </div>
+
+          <div class="box-note">
+            <b>Advanced Note:</b> Prefer culture-invariant parsing for machine data (logs/files) to avoid issues with decimal separators across regions.
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#t05-numeric-pitfalls">Previous</a>
+            <a class="navbtn" href="#t05-tryparse">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           6) TryParse
+      ========================================================= -->
+      <section class="section" id="t05-tryparse">
+        <div class="sh">6) TryParse (Safe Parsing Pattern)</div>
+        <div class="sc">
+          <div class="purpose"><b>Purpose:</b> Write robust input-handling code without crashing.</div>
+
+          <p>
+            <span class="tt" data-tip="A safe parsing pattern that returns true/false rather than throwing exceptions. It helps build robust apps that don’t crash on invalid input.">TryParse</span>
+            is designed for real user input where mistakes happen.
+            It returns true when conversion succeeds and false when it fails—without throwing exceptions.
+            This makes your program stable and user-friendly.
+            TryParse is common in menu programs, form inputs, API validation, and CLI tools.
+          </p>
+
+          <pre class="ascii">
+TryParse flow
+-------------
+string input
+  |
+  |-- TryParse(...) returns true  --> use parsed value
+  |
+  |-- returns false              --> show message / ask again
+          </pre>
+
+          <div class="example">
+            <h3>Example</h3>
+            <p><b>Scenario:</b> Read age from the user. If invalid, show error and keep program safe.</p>
+            <a class="trybtn" href="#t05-tryparse">Try It Yourself</a>
+          </div>
+
+          <div class="codeblock" aria-label="C# example - TryParse">
+            <code>
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.Write("Enter age: ");
+        string text = Console.ReadLine();
+
+        bool ok = int.TryParse(text, out int age);
+
+        if (!ok || age &lt; 0)
+        {
+            Console.WriteLine("Invalid age input.");
+            return;
+        }
+
+        Console.WriteLine("Age accepted: " + age);
+    }
+}
+            </code>
+          </div>
+
+          <p><b>Real-world use case:</b> Frontend forms send values as strings; backend services use TryParse to validate inputs safely before storing them.</p>
+
+          <div class="box-tip">
+            <b>Beginner Tip:</b> Use TryParse for any input you don’t fully control (user input, external files, external APIs).
+          </div>
+
+          <div class="box-note">
+            <b>Advanced Note:</b> Avoid exceptions for “normal invalid input.” Exceptions are expensive and should represent exceptional situations, not expected user mistakes.
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#t05-parse">Previous</a>
+            <a class="navbtn" href="#t05-convert-methods">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           7) Convert methods
+      ========================================================= -->
+      <section class="section" id="t05-convert-methods">
+        <div class="sh">7) Convert Class &amp; Conversion Methods (When to Use)</div>
+        <div class="sc">
+          <div class="purpose"><b>Purpose:</b> Pick Convert vs Parse vs casting based on real needs.</div>
+
+          <p>
+            The Convert class provides many helpers like Convert.ToInt32, Convert.ToDecimal, etc.
+            It is helpful when working with object values, database values, or nullable inputs.
+            Convert behaves differently from Parse in some cases—especially with null values.
+            Use casting for numeric type-to-type conversions, Parse/TryParse for string-to-number conversions, and Convert when the input might be an object or null.
+          </p>
+
+          <pre class="ascii">
+Decision guide
+--------------
+Type -> Type     : cast / implicit / explicit
+String -> Number : TryParse (user input) / Parse (trusted)
+Object -> Number : Convert (handles null patterns better)
+          </pre>
+
+          <div class="example">
+            <h3>Example</h3>
+            <p><b>Scenario:</b> Reading a value from a database column as object, convert it to int safely.</p>
+            <a class="trybtn" href="#t05-convert-methods">Try It Yourself</a>
+          </div>
+
+          <div class="codeblock" aria-label="C# example - Convert methods">
+            <code>
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        object dbValue = "42"; // often database values arrive as object
+
+        int n1 = Convert.ToInt32(dbValue); // converts object to int
+        Console.WriteLine("Converted: " + n1);
+
+        object nullValue = null;
+        // Convert.ToInt32(null) returns 0 (use carefully)
+        int n2 = Convert.ToInt32(nullValue);
+        Console.WriteLine("Null converted to: " + n2);
+    }
+}
+            </code>
+          </div>
+
+          <p><b>Real-world use case:</b> Data import jobs where values can be null, empty, or stored as object in DataTables.</p>
+
+          <div class="box-tip">
+            <b>Beginner Tip:</b> For user input, TryParse is usually the best first choice.
+          </div>
+
+          <div class="box-warn">
+            <b>Warning:</b> Convert can turn null into 0 for numeric types. If 0 is not valid, you must explicitly check for null before converting.
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#t05-tryparse">Previous</a>
+            <a class="navbtn" href="#t05-formatting-to-string">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           8) Formatting back to string
+      ========================================================= -->
+      <section class="section" id="t05-formatting-to-string">
+        <div class="sh">8) Formatting Back to String (ToString, Format Specifiers)</div>
+        <div class="sc">
+          <div class="purpose"><b>Purpose:</b> Format outputs cleanly for users, logs, and reports.</div>
+
+          <p>
+            After converting to numeric types and calculating values, you often need to format results for display.
+            ToString supports format specifiers like currency, fixed decimals, and percentages.
+            Formatting matters for user trust (prices must look right) and for log readability.
+            Always format money and dates consistently to avoid confusion.
+          </p>
+
+          <pre class="ascii">
+Formatting flow
+---------------
+number value
+  |
+  |-- ToString("F2")  -> fixed 2 decimals
+  |-- ToString("C")   -> currency style
+  |-- ToString("P")   -> percent style
+          </pre>
+
+          <div class="example">
+            <h3>Example</h3>
+            <p><b>Scenario:</b> Show a bill total with 2 decimals and show GST as percentage.</p>
+            <a class="trybtn" href="#t05-formatting-to-string">Try It Yourself</a>
+          </div>
+
+          <div class="codeblock" aria-label="C# example - formatting to string">
+            <code>
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        decimal total = 1299.5m;
+        decimal gstRate = 0.18m;
+        decimal gst = total * gstRate;
+
+        Console.WriteLine("Total (F2): " + total.ToString("F2"));
+        Console.WriteLine("GST (F2): " + gst.ToString("F2"));
+        Console.WriteLine("GST Rate (P0): " + gstRate.ToString("P0"));
+    }
+}
+            </code>
+          </div>
+
+          <p><b>Real-world use case:</b> Invoice PDFs, SMS/email receipts, and audit logs require consistent formatting so customers and support teams can read them instantly.</p>
+
+          <div class="box-tip">
+            <b>Beginner Tip:</b> Use "F2" for two decimals in totals; it’s common for prices and taxes.
+          </div>
+
+          <div class="box-note">
+            <b>Advanced Note:</b> Formatting depends on culture (decimal separator, currency symbol). Use a consistent culture for machine logs and a user culture for UI when needed.
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#t05-convert-methods">Previous</a>
+            <a class="navbtn" href="#next-subtopic">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQs -->
+      <section class="section" id="faqs">
+        <div class="sh">FAQs</div>
+        <div class="sc">
+          <p><b>Q1) When should I use Parse vs TryParse?</b><br>
+            Use TryParse for user input. Use Parse when you trust the input format (like validated configs or controlled files).
+          </p>
+          <p><b>Q2) Why is decimal recommended for money?</b><br>
+            Because decimal is base-10 precise and avoids common floating-point rounding issues.
+          </p>
+          <p><b>Q3) What is the biggest risk in explicit casting?</b><br>
+            Data loss (truncation) and overflow when values don’t fit in the target type.
+          </p>
+          <p><b>Q4) Is Convert better than Parse?</b><br>
+            Not always. Convert is helpful for object and null scenarios; TryParse is best for user strings.
+          </p>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#t05-formatting-to-string">Previous</a>
+            <a class="navbtn" href="#interview">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interview Questions -->
+      <section class="section" id="interview">
+        <div class="sh">Interview Questions (With Short Answers)</div>
+        <div class="sc">
+          <ol>
+            <li><b>What is implicit conversion?</b><br>
+              A safe widening conversion performed automatically by the compiler when no data loss is possible.
+            </li>
+            <li><b>What is explicit casting?</b><br>
+              A conversion you write manually when there’s risk of loss (narrowing), such as double to int.
+            </li>
+            <li><b>What problems occur with numeric conversions?</b><br>
+              Overflow, truncation/rounding, and floating-point precision errors.
+            </li>
+            <li><b>Parse vs TryParse?</b><br>
+              Parse throws exceptions on invalid input; TryParse returns true/false without throwing.
+            </li>
+            <li><b>When is Convert useful?</b><br>
+              When values come as object or can be null (e.g., database values).
+            </li>
+            <li><b>Why avoid exceptions for normal validation?</b><br>
+              Exceptions are costly and should not represent expected user mistakes; TryParse is cleaner and faster.
+            </li>
+          </ol>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#faqs">Previous</a>
+            <a class="navbtn" href="#summary">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Summary -->
+      <section class="section" id="summary">
+        <div class="sh">Summary of Key Points</div>
+        <div class="sc">
+          <ul>
+            <li>Types protect correctness and improve performance in C#.</li>
+            <li>Implicit conversions are safe widenings (like int → long).</li>
+            <li>Explicit casts are risky narrowings (like double → int).</li>
+            <li>Watch for overflow, truncation, and floating-point precision problems.</li>
+            <li>Use Parse for trusted strings, TryParse for user input.</li>
+            <li>Convert is useful for object/null scenarios.</li>
+            <li>Format results with ToString format specifiers for clean output.</li>
+          </ul>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#interview">Previous</a>
+            <a class="navbtn" href="#mcq">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- MCQ -->
+      <section class="section" id="mcq">
+        <div class="sh">MCQ Quiz (5–10 Questions)</div>
+        <div class="sc">
+          <p class="small">Select one option per question. Answer key is provided below.</p>
+
+          <div class="example">
+            <h3>Q1) Which is an implicit conversion?</h3>
+            <label><input type="radio" name="q1"> A) double → int</label><br>
+            <label><input type="radio" name="q1"> B) int → long</label><br>
+            <label><input type="radio" name="q1"> C) string → int using Parse</label><br>
+            <label><input type="radio" name="q1"> D) decimal → byte</label>
+          </div>
+
+          <div class="example">
+            <h3>Q2) What happens when casting 36.9 (double) to int?</h3>
+            <label><input type="radio" name="q2"> A) It rounds to 37</label><br>
+            <label><input type="radio" name="q2"> B) It becomes 36</label><br>
+            <label><input type="radio" name="q2"> C) It becomes 0</label><br>
+            <label><input type="radio" name="q2"> D) It throws always</label>
+          </div>
+
+          <div class="example">
+            <h3>Q3) Best method for converting user input string to int safely?</h3>
+            <label><input type="radio" name="q3"> A) Parse</label><br>
+            <label><input type="radio" name="q3"> B) TryParse</label><br>
+            <label><input type="radio" name="q3"> C) Explicit cast</label><br>
+            <label><input type="radio" name="q3"> D) None</label>
+          </div>
+
+          <div class="example">
+            <h3>Q4) Which type is recommended for money?</h3>
+            <label><input type="radio" name="q4"> A) double</label><br>
+            <label><input type="radio" name="q4"> B) float</label><br>
+            <label><input type="radio" name="q4"> C) decimal</label><br>
+            <label><input type="radio" name="q4"> D) char</label>
+          </div>
+
+          <div class="example">
+            <h3>Q5) Convert.ToInt32(null) returns…</h3>
+            <label><input type="radio" name="q5"> A) Exception</label><br>
+            <label><input type="radio" name="q5"> B) 0</label><br>
+            <label><input type="radio" name="q5"> C) null</label><br>
+            <label><input type="radio" name="q5"> D) 1</label>
+          </div>
+
+          <div class="box-note">
+            <b>Answer Key:</b> Q1-B, Q2-B, Q3-B, Q4-C, Q5-B
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#summary">Previous</a>
+            <a class="navbtn" href="#glossary">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Glossary (Tooltips) -->
+      <section class="section" id="glossary">
+        <div class="sh">Glossary (Tooltips)</div>
+        <div class="sc">
+          <p class="small">Tooltip terms used in this page (Term → Tooltip Description).</p>
+          <table>
+            <thead><tr><th>Term</th><th>Tooltip Description</th></tr></thead>
+            <tbody>
+              <tr><td>Type</td><td>A definition of what kind of data something is (int, string, decimal, etc.). Types control allowed operations and prevent invalid actions at compile time.</td></tr>
+              <tr><td>Casting</td><td>Converting a value from one type to another. Some conversions are safe widening; others are risky narrowing and may lose information.</td></tr>
+              <tr><td>Parse</td><td>Converts a string into another type like int, decimal, or DateTime. It throws an exception if input is invalid, so it must be used carefully.</td></tr>
+              <tr><td>TryParse</td><td>A safe parsing pattern that returns true/false rather than throwing exceptions. It helps build robust apps that don’t crash on invalid input.</td></tr>
+              <tr><td>Exception</td><td>A runtime error object that represents something that went wrong. Parsing can throw exceptions like FormatException or OverflowException if the input is invalid.</td></tr>
+            </tbody>
+          </table>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#mcq">Previous</a>
+            <a class="navbtn" href="#downloads">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Downloadables placeholder -->
+      <section class="section" id="downloads">
+        <div class="sh">Downloadables (Placeholder)</div>
+        <div class="sc">
+          <div class="example">
+            <h3>Downloadable Resources (Coming Soon)</h3>
+            <ul>
+              <li>📦 ZIP: Code + worksheets (placeholder)</li>
+              <li>📑 PPT: Slide deck (placeholder)</li>
+              <li>📄 DOC: Printable notes (placeholder)</li>
+            </ul>
+            <a class="trybtn" href="#downloads">Try It Yourself</a>
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#glossary">Previous</a>
+            <a class="navbtn" href="#practice-coding-questions">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRACTICE SECTION (Required exact title + 15 questions) -->
+      <section class="section" id="practice-coding-questions">
+        <div class="sh">To Become Best coder Practice this</div>
+        <div class="sc">
+          <div class="box-tip">
+            <b>Practice Goal:</b> Build confidence in conversions by handling real inputs safely, avoiding overflow, and formatting clean outputs.
+          </div>
+
+          <h3>Easy (5)</h3>
+
+          <div class="example">
+            <h3>E1) Implicit widening check</h3>
+            <p><b>Problem:</b> Read an int and store it in a long using implicit conversion. Print the long.</p>
+            <p><b>Input:</b> n (int)<br><b>Output:</b> n as long</p>
+            <p><b>Example Input:</b> 1500<br><b>Example Output:</b> 1500</p>
+            <p><b>Constraints:</b> -2,000,000,000 ≤ n ≤ 2,000,000,000</p>
+            <p><b>Hint:</b> long x = n; works without casting.</p>
+          </div>
+
+          <div class="example">
+            <h3>E2) Explicit cast double to int</h3>
+            <p><b>Problem:</b> Read a double, cast to int, print both values.</p>
+            <p><b>Input:</b> x (double)<br><b>Output:</b> original and cast result</p>
+            <p><b>Example Input:</b> 9.99<br><b>Example Output:</b> 9.99 9</p>
+            <p><b>Constraints:</b> -10^9 ≤ x ≤ 10^9</p>
+            <p><b>Hint:</b> int y = (int)x; truncates decimals.</p>
+          </div>
+
+          <div class="example">
+            <h3>E3) Parse an integer string</h3>
+            <p><b>Problem:</b> Read a numeric string and convert it to int using Parse. Print the int.</p>
+            <p><b>Input:</b> s (string)<br><b>Output:</b> int value</p>
+            <p><b>Example Input:</b> 8080<br><b>Example Output:</b> 8080</p>
+            <p><b>Constraints:</b> s contains only digits, 0 ≤ value ≤ 2,147,483,647</p>
+            <p><b>Hint:</b> int.Parse(s)</p>
+          </div>
+
+          <div class="example">
+            <h3>E4) TryParse validation message</h3>
+            <p><b>Problem:</b> Read a string. If it can be parsed as int print “OK”, else print “Invalid”.</p>
+            <p><b>Input:</b> s (string)<br><b>Output:</b> OK/Invalid</p>
+            <p><b>Example Input:</b> 12a<br><b>Example Output:</b> Invalid</p>
+            <p><b>Constraints:</b> 0 ≤ length ≤ 100</p>
+            <p><b>Hint:</b> int.TryParse(s, out _)</p>
+          </div>
+
+          <div class="example">
+            <h3>E5) Format to 2 decimals</h3>
+            <p><b>Problem:</b> Read a decimal amount and print it with exactly 2 decimal places.</p>
+            <p><b>Input:</b> amount (decimal)<br><b>Output:</b> formatted string</p>
+            <p><b>Example Input:</b> 1299.5<br><b>Example Output:</b> 1299.50</p>
+            <p><b>Constraints:</b> 0 ≤ amount ≤ 10^9</p>
+            <p><b>Hint:</b> amount.ToString("F2")</p>
+          </div>
+
+          <h3>Medium (5)</h3>
+
+          <div class="example">
+            <h3>M1) Safe multiplication (avoid int overflow)</h3>
+            <p><b>Problem:</b> Read two ints a and b. Print their product as long (avoid overflow).</p>
+            <p><b>Input:</b> a, b (int)<br><b>Output:</b> product (long)</p>
+            <p><b>Example Input:</b> 100000 100000<br><b>Example Output:</b> 10000000000</p>
+            <p><b>Constraints:</b> -2,000,000,000 ≤ a,b ≤ 2,000,000,000</p>
+            <p><b>Hint:</b> Cast before multiplying: (long)a * b.</p>
+          </div>
+
+          <div class="example">
+            <h3>M2) Menu input: keep asking until valid int</h3>
+            <p><b>Problem:</b> Read strings until you successfully parse an int. Print the first valid int and stop.</p>
+            <p><b>Input:</b> multiple lines (strings)<br><b>Output:</b> first valid int</p>
+            <p><b>Example Input:</b> aa | 2.5 | 18<br><b>Example Output:</b> 18</p>
+            <p><b>Constraints:</b> At least one valid int exists</p>
+            <p><b>Hint:</b> Use a loop + TryParse.</p>
+          </div>
+
+          <div class="example">
+            <h3>M3) Convert object to int with null handling</h3>
+            <p><b>Problem:</b> Read a string value v. If v is “null” treat it as null object; else keep it as object string. Convert to int using Convert.ToInt32 and print it.</p>
+            <p><b>Input:</b> v (string, either digits or “null”)<br><b>Output:</b> int result</p>
+            <p><b>Example Input:</b> null<br><b>Example Output:</b> 0</p>
+            <p><b>Constraints:</b> digits fit in int</p>
+            <p><b>Hint:</b> object o = (v=="null") ? null : (object)v;</p>
+          </div>
+
+          <div class="example">
+            <h3>M4) Round then cast</h3>
+            <p><b>Problem:</b> Read a double. Round it to nearest int (0.5 up), then print the int.</p>
+            <p><b>Input:</b> x (double)<br><b>Output:</b> rounded int</p>
+            <p><b>Example Input:</b> 36.6<br><b>Example Output:</b> 37</p>
+            <p><b>Constraints:</b> -10^9 ≤ x ≤ 10^9</p>
+            <p><b>Hint:</b> Use Math.Round(x) before casting.</p>
+          </div>
+
+          <div class="example">
+            <h3>M5) Parse + compute GST + format</h3>
+            <p><b>Problem:</b> Read price as string. If valid decimal, compute GST at 18% and print total with 2 decimals. Else print “Invalid”.</p>
+            <p><b>Input:</b> priceText (string)<br><b>Output:</b> total (F2) or Invalid</p>
+            <p><b>Example Input:</b> 100<br><b>Example Output:</b> 118.00</p>
+            <p><b>Constraints:</b> 0 ≤ price ≤ 10^9</p>
+            <p><b>Hint:</b> decimal.TryParse + total.ToString("F2")</p>
+          </div>
+
+          <h3>Hard (5)</h3>
+
+          <div class="example">
+            <h3>H1) Robust CSV numeric cleaning</h3>
+            <p><b>Problem:</b> Read N strings representing prices that may contain commas (e.g., “1,299.50”). Convert each to decimal safely and output the sum (2 decimals). Invalid entries are treated as 0.</p>
+            <p><b>Input:</b> N then N lines<br><b>Output:</b> sum formatted F2</p>
+            <p><b>Example Input:</b> 3 | 1,200.50 | abc | 99.50<br><b>Example Output:</b> 1300.00</p>
+            <p><b>Constraints:</b> 1 ≤ N ≤ 2*10^5</p>
+            <p><b>Hint:</b> Remove commas before TryParse.</p>
+          </div>
+
+          <div class="example">
+            <h3>H2) Overflow-safe running total</h3>
+            <p><b>Problem:</b> Read N integers. Maintain a running sum in long. Print “OverflowRisk” if any intermediate sum exceeds int range, else print final sum.</p>
+            <p><b>Input:</b> N then N ints<br><b>Output:</b> OverflowRisk or sum</p>
+            <p><b>Example Input:</b> 3 | 2000000000 | 2000000000 | -1<br><b>Example Output:</b> OverflowRisk</p>
+            <p><b>Constraints:</b> 1 ≤ N ≤ 2*10^5</p>
+            <p><b>Hint:</b> Check sum against int.MinValue/int.MaxValue after each add.</p>
+          </div>
+
+          <div class="example">
+            <h3>H3) Mixed input: detect int, long, or invalid</h3>
+            <p><b>Problem:</b> Read a string. If it fits in int print “int”, else if it fits in long print “long”, else print “invalid”.</p>
+            <p><b>Input:</b> s (string)<br><b>Output:</b> int/long/invalid</p>
+            <p><b>Example Input:</b> 3000000000<br><b>Example Output:</b> long</p>
+            <p><b>Constraints:</b> 0 ≤ length ≤ 50</p>
+            <p><b>Hint:</b> TryParse int first, then long.</p>
+          </div>
+
+          <div class="example">
+            <h3>H4) Precision test: compare decimal vs double totals</h3>
+            <p><b>Problem:</b> Read N and a value v (like 0.1). Add v N times using double and decimal (decimal literal). Print both totals with 20 digits after decimal.</p>
+            <p><b>Input:</b> N (int), v (string like 0.1)<br><b>Output:</b> doubleTotal and decimalTotal</p>
+            <p><b>Example Input:</b> 3 0.1<br><b>Example Output:</b> (double slightly off) and (decimal exact)</p>
+            <p><b>Constraints:</b> 1 ≤ N ≤ 10^6</p>
+            <p><b>Hint:</b> Parse v into double and decimal; format output with fixed digits.</p>
+          </div>
+
+          <div class="example">
+            <h3>H5) Safe currency formatter with validation</h3>
+            <p><b>Problem:</b> Read a string amount. Accept only positive decimal values. Output: “₹{value with 2 decimals}”. If invalid or ≤ 0, print “Invalid”.</p>
+            <p><b>Input:</b> amountText (string)<br><b>Output:</b> formatted currency or Invalid</p>
+            <p><b>Example Input:</b> 1299.5<br><b>Example Output:</b> ₹1299.50</p>
+            <p><b>Constraints:</b> 0 ≤ length ≤ 100</p>
+            <p><b>Hint:</b> TryParse decimal and check > 0 before formatting.</p>
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#downloads">Previous</a>
+            <a class="navbtn" href="#toc">Back to Top</a>
+          </div>
+        </div>
+      </section>
+
+      <p class="small" style="margin-top:14px;">
+        Placeholder anchors included: <b>#prev-subtopic</b> and <b>#next-subtopic</b>.
+      </p>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,1638 @@
+<!-- File: 08-abstraction-interfaces.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>08. Abstraction & Interfaces: Real Polymorphism in Practice | ItTechGenie</title>
+  <style>
+    :root{
+      --green:#04AA6D;
+      --bg:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --soft:#f3f4f6;
+      --code:#0b1020;
+      --codeText:#e5e7eb;
+      --noteBlue:#e7f3fe;
+      --noteBlueBorder:#2196F3;
+      --tipGreen:#e7f7ef;
+      --tipGreenBorder:#2e7d32;
+      --warnRed:#fdecea;
+      --warnRedBorder:#f44336;
+      --shadow: 0 6px 18px rgba(0,0,0,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:var(--bg);
+      line-height:1.55;
+    }
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:10;
+      background:var(--green);
+      color:#fff;
+      padding:12px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      box-shadow: var(--shadow);
+    }
+    .topbar .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .pill{
+      background: rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.24);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .layout{
+      display:flex;
+      min-height: calc(100vh - 56px);
+    }
+    .sidebar{
+      width: 320px;
+      border-right:1px solid var(--line);
+      background:#fbfbfb;
+      padding:14px 12px 18px;
+      position:sticky;
+      top:56px;
+      height: calc(100vh - 56px);
+      overflow:auto;
+    }
+    .sb-title{
+      padding:10px 10px 12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      box-shadow: 0 4px 14px rgba(0,0,0,.04);
+      margin-bottom:12px;
+    }
+    .sb-brand{font-weight:900; font-size:18px;}
+    .sb-course{color:var(--muted); font-size:12px; margin-top:2px;}
+    .sb-section{
+      margin:12px 8px 6px;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.5px;
+      color:#374151;
+    }
+    .sb-link{
+      display:block;
+      padding:9px 10px;
+      margin:4px 6px;
+      border-radius:10px;
+      text-decoration:none;
+      color:var(--text);
+      border:1px solid transparent;
+    }
+    .sb-link:hover{
+      background:#fff;
+      border-color:var(--line);
+    }
+    .sb-module{font-weight:600}
+    .sb-sub{padding-left:14px; color:#111827}
+    .sb-practice{font-weight:800; border:1px dashed rgba(4,170,109,.45); background: rgba(4,170,109,.07);}
+
+    .content{
+      flex:1;
+      padding:18px 18px 80px;
+      max-width: 1100px;
+    }
+    .hero{
+      border:1px solid var(--line);
+      border-radius:18px;
+      background: linear-gradient(180deg, rgba(4,170,109,.08), rgba(4,170,109,.02));
+      padding:18px 18px 14px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.05);
+    }
+    .hero h1{margin:0 0 6px; font-size:28px;}
+    .hero p{margin:0 0 10px; color:#374151;}
+    .meta{
+      display:flex; flex-wrap:wrap; gap:8px;
+      margin-top:8px;
+    }
+    .meta .tag{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(4,170,109,.25);
+      background:#fff;
+    }
+
+    .card{
+      margin-top:14px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:#fff;
+      box-shadow: 0 6px 18px rgba(0,0,0,.05);
+      padding:16px;
+    }
+    .card h2{
+      margin:0 0 8px;
+      font-size:20px;
+    }
+    .toc{
+      margin:10px 0 0;
+      padding-left:18px;
+    }
+    .toc a{color:#0f766e; text-decoration:none; font-weight:650}
+    .toc a:hover{text-decoration:underline}
+
+    .section{
+      margin-top:18px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+      background:#fff;
+      box-shadow: 0 6px 18px rgba(0,0,0,.05);
+    }
+    .section .hd{
+      background: var(--green);
+      color:#fff;
+      padding:12px 14px;
+      font-weight:900;
+      font-size:18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .section .bd{
+      padding:14px;
+    }
+    .muted{color:var(--muted)}
+    .grid{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap:12px;
+    }
+    @media (max-width: 980px){
+      .sidebar{display:none}
+      .content{max-width:100%}
+      .grid{grid-template-columns: 1fr}
+    }
+
+    .ascii{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size:12.5px;
+      overflow:auto;
+      white-space:pre;
+    }
+    .example-box{
+      background: var(--soft);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px;
+    }
+    .example-box .lbl{
+      font-weight:900;
+      margin-bottom:6px;
+    }
+    pre.code{
+      margin:10px 0 0;
+      background: var(--code);
+      color: var(--codeText);
+      border-radius:12px;
+      padding:12px;
+      overflow:auto;
+      border:1px solid rgba(255,255,255,.08);
+    }
+    pre.code code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size:12.75px;
+    }
+
+    .note, .tip, .warn{
+      border-radius:12px;
+      padding:10px 12px;
+      border-left:5px solid;
+      margin:10px 0 0;
+      background:#fff;
+    }
+    .note{background:var(--noteBlue); border-left-color:var(--noteBlueBorder)}
+    .tip{background:var(--tipGreen); border-left-color:var(--tipGreenBorder)}
+    .warn{background:var(--warnRed); border-left-color:var(--warnRedBorder)}
+    .note b, .tip b, .warn b{display:inline-block; margin-right:6px}
+
+    .nav-row{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding-top:12px;
+      margin-top:12px;
+      border-top:1px dashed var(--line);
+    }
+    .nav-btn{
+      display:inline-block;
+      padding:10px 12px;
+      border-radius:12px;
+      text-decoration:none;
+      font-weight:900;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--text);
+      min-width: 140px;
+      text-align:center;
+    }
+    .nav-btn:hover{border-color: rgba(4,170,109,.45); box-shadow: 0 6px 18px rgba(0,0,0,.06)}
+    .nav-btn.primary{
+      background: rgba(4,170,109,.12);
+      border-color: rgba(4,170,109,.35);
+    }
+
+    /* Tooltip (HTML+CSS only) */
+    .tt{
+      position:relative;
+      border-bottom: 1px dotted rgba(17,24,39,.55);
+      cursor:help;
+      font-weight:800;
+      color:#0f766e;
+      padding:0 2px;
+      border-radius:6px;
+    }
+    .tt::after{
+      content: attr(data-tip);
+      position:absolute;
+      left:0;
+      top: 1.6em;
+      width: min(360px, 80vw);
+      background:#111827;
+      color:#fff;
+      padding:10px 10px;
+      border-radius:12px;
+      box-shadow: var(--shadow);
+      opacity:0;
+      pointer-events:none;
+      transform: translateY(-6px);
+      transition: opacity .16s ease, transform .16s ease;
+      font-weight:600;
+      font-size:12px;
+      line-height:1.35;
+      z-index: 5;
+      white-space:pre-line;
+    }
+    .tt:hover::after{
+      opacity:1;
+      transform: translateY(0);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:10px;
+    }
+    th, td{
+      border:1px solid var(--line);
+      padding:10px;
+      text-align:left;
+      vertical-align:top;
+    }
+    th{
+      background:#f8fafc;
+      font-weight:900;
+    }
+    .small{font-size:12px}
+    .kicker{color:#0f766e; font-weight:900; font-size:12px; letter-spacing:.35px; text-transform:uppercase}
+
+    .q-card{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      margin-top:10px;
+      background:#fff;
+      box-shadow: 0 6px 18px rgba(0,0,0,.04);
+    }
+    .q-card h4{margin:0 0 8px}
+    .q-meta{
+      display:flex; flex-wrap:wrap; gap:8px;
+      margin:6px 0 0;
+    }
+    .badge{
+      font-size:12px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:800;
+    }
+
+    .footer-links{
+      display:flex; flex-wrap:wrap; gap:10px;
+      margin-top:10px;
+    }
+    .mini-link{
+      text-decoration:none;
+      border:1px solid var(--line);
+      padding:8px 10px;
+      border-radius:12px;
+      font-weight:900;
+      color:var(--text);
+      background:#fff;
+    }
+  </style>
+</head>
+<body>
+  <!-- Placeholder anchors required by Prompt v3 -->
+  <a id="prev-subtopic"></a>
+  <a id="next-subtopic"></a>
+
+  <header class="topbar">
+    <div class="brand">
+      <span>ItTechGenie</span>
+      <span class="pill">C# Fundamentals → Advanced</span>
+      <span class="pill">Module 08</span>
+    </div>
+    <div class="pill">Project: Databricks &amp; SQL Assessment Banks</div>
+  </header>
+
+  <div class="layout">
+    <!-- =========================================================
+         Sidebar (sidebar_template.html with {{CURRENT_TOPIC_SUBTOPICS}} replaced)
+    ========================================================== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-title">
+        <div class="sb-brand">ItTechGenie</div>
+        <div class="sb-course">C# Fundamentals → Advanced</div>
+      </div>
+
+      <div class="sb-section">COURSE CONTENT</div>
+
+      <a class="sb-link sb-module" href="01-kickstart.html">01. Kickstart: .NET Ecosystem</a>
+      <a class="sb-link sb-module" href="02-control-flow.html">02. Control Flow</a>
+      <a class="sb-link sb-module" href="03-oop-core.html">03. OOP Core</a>
+      <a class="sb-link sb-module" href="04-methods-mastery.html">04. Methods Mastery</a>
+      <a class="sb-link sb-module" href="05-type-conversion.html">05. Type Conversion</a>
+      <a class="sb-link sb-module" href="06-constructors.html">06. Constructors</a>
+      <a class="sb-link sb-module" href="07-properties-inheritance.html">07. Properties &amp; Inheritance</a>
+      <a class="sb-link sb-module" href="08-abstraction-interfaces.html">08. Abstraction &amp; Interfaces</a>
+      <a class="sb-link sb-module" href="09-namespaces-buildingblocks.html">09. Namespaces &amp; Building Blocks</a>
+      <a class="sb-link sb-module" href="10-advanced-toolkit.html">10. Advanced Toolkit</a>
+
+      <div class="sb-section">THIS TOPIC</div>
+
+      <a class="sb-link sb-sub" href="#t08-abstraction-basics">Abstraction (Hide Details, Expose Contract)</a>
+      <a class="sb-link sb-sub" href="#t08-abstract-classes">Abstract Classes (Shared Base + Required Overrides)</a>
+      <a class="sb-link sb-sub" href="#t08-abstract-methods">Abstract Methods (Must Implement)</a>
+      <a class="sb-link sb-sub" href="#t08-interfaces">Interfaces (Pure Capability Contracts)</a>
+      <a class="sb-link sb-sub" href="#t08-multiple-inheritance-via-interfaces">Multiple Inheritance via Interfaces (The C# Way)</a>
+      <a class="sb-link sb-sub" href="#t08-interface-inheritance">Interface Inheritance (Layered Capabilities)</a>
+      <a class="sb-link sb-sub" href="#t08-explicit-implementation">Explicit Interface Implementation (Conflict Resolution)</a>
+      <a class="sb-link sb-sub" href="#t08-dynamic-polymorphism">Dynamic Polymorphism (Runtime Dispatch in Real Code)</a>
+      <a class="sb-link sb-sub" href="#t08-di-with-interfaces">Real-World Pattern: Dependency Injection with Interfaces</a>
+      <a class="sb-link sb-sub" href="#t08-best-practices">Best Practices (Prefer Composition, Keep Interfaces Small)</a>
+
+      <div class="sb-section">PRACTICE</div>
+
+      <a class="sb-link sb-practice" href="#practice-coding-questions">
+        To Become Best coder Practice this
+      </a>
+    </aside>
+
+    <main class="content" id="main">
+      <section class="hero">
+        <div class="kicker">Module 08</div>
+        <h1>Abstraction &amp; Interfaces: Real Polymorphism in Practice</h1>
+        <p>
+          In this module, you’ll learn how <span class="tt" data-tip="A design technique where you hide internal complexity and expose only what users need.\nIt helps you build clean, stable APIs.\nIt keeps code readable and change-friendly.">Abstraction</span> and
+          <span class="tt" data-tip="A contract that describes capabilities without implementation details.\nClasses can implement multiple interfaces to compose features.\nInterfaces make swapping implementations easy.">Interface</span> design create
+          real runtime flexibility using <span class="tt" data-tip="The ability to treat different implementations through a common base type or interface.\nAt runtime, the correct method implementation is chosen.\nThis enables extensible systems and clean architecture.">Polymorphism</span>.
+          You’ll also see how <span class="tt" data-tip="A pattern where you provide dependencies from the outside instead of creating them inside.\nIt improves testing, reduces coupling, and supports swapping implementations.\nCommon in modern .NET apps with built-in DI containers.">Dependency Injection</span> becomes natural when you code to contracts.
+        </p>
+        <div class="meta">
+          <span class="tag">Focus: Clean APIs</span>
+          <span class="tag">Skills: Contracts, Overrides, DI</span>
+          <span class="tag">Outcome: Testable &amp; Maintainable Code</span>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Table of Contents">
+        <h2>Table of Contents</h2>
+        <p class="muted">Jump to any subtopic:</p>
+        <ul class="toc">
+          <li><a href="#t08-abstraction-basics">Abstraction (Hide Details, Expose Contract)</a></li>
+          <li><a href="#t08-abstract-classes">Abstract Classes (Shared Base + Required Overrides)</a></li>
+          <li><a href="#t08-abstract-methods">Abstract Methods (Must Implement)</a></li>
+          <li><a href="#t08-interfaces">Interfaces (Pure Capability Contracts)</a></li>
+          <li><a href="#t08-multiple-inheritance-via-interfaces">Multiple Inheritance via Interfaces (The C# Way)</a></li>
+          <li><a href="#t08-interface-inheritance">Interface Inheritance (Layered Capabilities)</a></li>
+          <li><a href="#t08-explicit-implementation">Explicit Interface Implementation (Conflict Resolution)</a></li>
+          <li><a href="#t08-dynamic-polymorphism">Dynamic Polymorphism (Runtime Dispatch in Real Code)</a></li>
+          <li><a href="#t08-di-with-interfaces">Real-World Pattern: Dependency Injection with Interfaces</a></li>
+          <li><a href="#t08-best-practices">Best Practices (Prefer Composition, Keep Interfaces Small)</a></li>
+        </ul>
+
+        <div class="footer-links">
+          <a class="mini-link" href="07-properties-inheritance.html">← Previous Module (07)</a>
+          <a class="mini-link" href="09-namespaces-buildingblocks.html">Next Module (09) →</a>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           1) Abstraction (Hide Details, Expose Contract)
+      ========================================================== -->
+      <section class="section" id="t08-abstraction-basics">
+        <div class="hd">
+          <span>Abstraction (Hide Details, Expose Contract)</span>
+          <span class="pill">#t08-abstraction-basics</span>
+        </div>
+        <div class="bd">
+          <div class="grid">
+            <div>
+              <p>
+                <span class="tt" data-tip="A design technique where you hide internal complexity and expose only what users need.\nIt helps you build clean, stable APIs.\nIt keeps code readable and change-friendly.">Abstraction</span> means users of your code see a simple “what” while you keep the complex “how” hidden.
+                You expose a clear <span class="tt" data-tip="A promise about what an API will do (methods, inputs, outputs).\nCallers rely on the contract, not internal details.\nThis allows implementations to change safely over time.">Contract</span> so other parts of the app can depend on it safely.
+                This reduces coupling: you can replace internals without breaking callers.
+                In C#, abstraction is commonly achieved using abstract classes and interfaces.
+              </p>
+              <div class="example-box">
+                <div class="lbl">Grey Example Box: “Payment” abstraction</div>
+                <div class="small muted">
+                  Your checkout page shouldn’t care whether payment is via UPI, Card, or NetBanking.
+                  It should call a simple method like <b>Pay(amount)</b> and trust the contract.
+                </div>
+                <pre class="code"><code>// Abstraction through a contract-like base type
+public abstract class PaymentMethod
+{
+    public abstract string Name { get; }
+    public abstract bool Pay(decimal amount);
+}
+
+public class UpiPayment : PaymentMethod
+{
+    public override string Name =&gt; "UPI";
+    public override bool Pay(decimal amount)
+    {
+        // hidden details: UPI validation, gateway call, retries, etc.
+        return amount &gt; 0;
+    }
+}
+
+// Caller depends on the abstraction, not the details:
+public class CheckoutService
+{
+    private readonly PaymentMethod _method;
+    public CheckoutService(PaymentMethod method) =&gt; _method = method;
+
+    public bool PlaceOrder(decimal total) =&gt; _method.Pay(total);
+}</code></pre>
+              </div>
+
+              <div class="tip"><b>Beginner Tip:</b> When your code starts having many <b>if/else</b> branches for “type”, it’s a sign you need abstraction.</div>
+              <div class="note"><b>Advanced Note:</b> Strong abstractions are small and stable; avoid leaking implementation details into method names or parameters.</div>
+
+              <p class="muted"><b>Real-world use case:</b> E-commerce checkout where gateways change (Paytm/PhonePe/Stripe), but checkout code stays unchanged.</p>
+            </div>
+
+            <div>
+              <div class="ascii">ASCII Flow (Caller sees "what", implementation owns "how")
+
+[Checkout]  --->  [Payment Contract]  --->  [UPI Impl]
+   |                   |                   (gateway, retries)
+   |                   |
+   |                   --->  [Card Impl]
+   |
+   ---> does NOT know internal payment steps</div>
+              <div class="warn"><b>Warning:</b> Over-abstracting too early can make code harder to understand. Abstract only when you have real variation.</div>
+            </div>
+          </div>
+
+          <div class="nav-row">
+            <a class="nav-btn" href="#prev-subtopic">← Previous</a>
+            <a class="nav-btn primary" href="#t08-abstract-classes">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           2) Abstract Classes (Shared Base + Required Overrides)
+      ========================================================== -->
+      <section class="section" id="t08-abstract-classes">
+        <div class="hd">
+          <span>Abstract Classes (Shared Base + Required Overrides)</span>
+          <span class="pill">#t08-abstract-classes</span>
+        </div>
+        <div class="bd">
+          <div class="grid">
+            <div>
+              <p>
+                An <span class="tt" data-tip="A base class that cannot be instantiated and may contain abstract members.\nIt can include shared code plus required overrides.\nUse it when you need a common base with behavior.">Abstract Class</span> is a “partially built” base class.
+                It can include shared fields/methods, and also force child classes to implement certain members.
+                Choose abstract classes when you need a common base identity plus shared logic.
+                It’s best when derived types truly share core behavior and state.
+              </p>
+
+              <div class="example-box">
+                <div class="lbl">Grey Example Box: “Report Exporter” shared base</div>
+                <div class="small muted">
+                  All exporters log and validate, but each exporter writes output differently (PDF vs Excel).
+                </div>
+                <pre class="code"><code>public abstract class ReportExporter
+{
+    public void Export(string reportName, string content)
+    {
+        Validate(reportName, content);
+        LogStart(reportName);
+
+        WriteOutput(reportName, content); // required customization point
+
+        LogEnd(reportName);
+    }
+
+    protected virtual void Validate(string reportName, string content)
+    {
+        if (string.IsNullOrWhiteSpace(reportName)) throw new ArgumentException("reportName");
+        if (content is null) throw new ArgumentNullException(nameof(content));
+    }
+
+    protected abstract void WriteOutput(string reportName, string content);
+
+    private void LogStart(string name) =&gt; Console.WriteLine($"Exporting: {name}...");
+    private void LogEnd(string name)   =&gt; Console.WriteLine($"Done: {name}");
+}
+
+public class PdfExporter : ReportExporter
+{
+    protected override void WriteOutput(string reportName, string content)
+    {
+        Console.WriteLine($"[PDF] {reportName} =&gt; {content.Length} chars");
+    }
+}</code></pre>
+              </div>
+
+              <div class="tip"><b>Beginner Tip:</b> If you need shared code + “must implement” pieces, abstract class is a natural fit.</div>
+              <div class="note"><b>Advanced Note:</b> The “Template Method” style (base controls flow, derived fills steps) is powerful but keep it simple.</div>
+
+              <p class="muted"><b>Real-world use case:</b> Export pipelines (CSV/PDF/Excel) where validation/logging is identical, but output is different.</p>
+            </div>
+
+            <div>
+              <div class="ascii">ASCII Structure (Shared base + forced customization)
+
+          (abstract)
+        ReportExporter
+        /          \
+   PdfExporter   ExcelExporter
+
+Base controls flow:
+Validate -&gt; LogStart -&gt; WriteOutput(*) -&gt; LogEnd</div>
+              <div class="warn"><b>Warning:</b> Abstract classes allow only single inheritance. If your types need many unrelated capabilities, prefer interfaces.</div>
+            </div>
+          </div>
+
+          <div class="nav-row">
+            <a class="nav-btn" href="#t08-abstraction-basics">← Previous</a>
+            <a class="nav-btn primary" href="#t08-abstract-methods">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           3) Abstract Methods (Must Implement)
+      ========================================================== -->
+      <section class="section" id="t08-abstract-methods">
+        <div class="hd">
+          <span>Abstract Methods (Must Implement)</span>
+          <span class="pill">#t08-abstract-methods</span>
+        </div>
+        <div class="bd">
+          <div class="grid">
+            <div>
+              <p>
+                An <span class="tt" data-tip="A method declared without a body in an abstract class.\nDerived classes must provide an override.\nIt defines a required behavior point in your design.">Abstract Method</span> defines “you must implement this” for every derived class.
+                It has no method body in the base class, so it’s purely a requirement.
+                This guarantees important behaviors are not forgotten in derived types.
+                Use it to enforce core actions like calculating price, validating rules, or executing a step.
+              </p>
+
+              <div class="example-box">
+                <div class="lbl">Grey Example Box: Pricing rules enforced by abstract method</div>
+                <div class="small muted">
+                  Every subscription plan must calculate its final monthly price, but discounts differ.
+                </div>
+                <pre class="code"><code>public abstract class SubscriptionPlan
+{
+    public string PlanName { get; }
+    protected SubscriptionPlan(string planName) =&gt; PlanName = planName;
+
+    public decimal FinalMonthlyPrice(decimal basePrice)
+    {
+        if (basePrice &lt;= 0) throw new ArgumentOutOfRangeException(nameof(basePrice));
+        return CalculateFinal(basePrice); // enforced
+    }
+
+    protected abstract decimal CalculateFinal(decimal basePrice);
+}
+
+public class StudentPlan : SubscriptionPlan
+{
+    public StudentPlan() : base("Student") { }
+
+    protected override decimal CalculateFinal(decimal basePrice)
+        =&gt; basePrice * 0.70m; // 30% off
+}
+
+public class BusinessPlan : SubscriptionPlan
+{
+    public BusinessPlan() : base("Business") { }
+
+    protected override decimal CalculateFinal(decimal basePrice)
+        =&gt; basePrice + 499m; // support fee
+}</code></pre>
+              </div>
+
+              <div class="tip"><b>Beginner Tip:</b> If the base class cannot provide a correct default implementation, make it abstract.</div>
+              <div class="note"><b>Advanced Note:</b> Prefer abstract members for “required extension points”, and keep the rest sealed/virtual only when needed.</div>
+
+              <p class="muted"><b>Real-world use case:</b> Pricing engines for different customer segments where every plan must compute final charges.</p>
+            </div>
+
+            <div>
+              <div class="ascii">ASCII Flow (Enforced override)
+
+[FinalMonthlyPrice]
+      |
+      v
+CalculateFinal(*)  --- MUST be implemented
+(StudentPlan / BusinessPlan / ...)</div>
+              <div class="warn"><b>Warning:</b> Don’t put too many abstract methods in a base class; it can become a “god base” that is hard to extend safely.</div>
+            </div>
+          </div>
+
+          <div class="nav-row">
+            <a class="nav-btn" href="#t08-abstract-classes">← Previous</a>
+            <a class="nav-btn primary" href="#t08-interfaces">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           4) Interfaces (Pure Capability Contracts)
+      ========================================================== -->
+      <section class="section" id="t08-interfaces">
+        <div class="hd">
+          <span>Interfaces (Pure Capability Contracts)</span>
+          <span class="pill">#t08-interfaces</span>
+        </div>
+        <div class="bd">
+          <div class="grid">
+            <div>
+              <p>
+                An <span class="tt" data-tip="A contract that describes capabilities without implementation details.\nClasses can implement multiple interfaces to compose features.\nInterfaces are great for testing and swapping implementations.">Interface</span> defines “what a type can do” without describing “how it does it.”
+                It’s ideal for reusable capabilities like logging, caching, or repository access.
+                Interfaces reduce coupling because callers rely on a stable contract.
+                In real projects, you’ll see interfaces like ILogger, IRepository, or IEmailSender.
+              </p>
+
+              <div class="example-box">
+                <div class="lbl">Grey Example Box: ILogger capability</div>
+                <div class="small muted">
+                  Your business logic should log, but it shouldn’t care whether logs go to console, file, or cloud.
+                </div>
+                <pre class="code"><code>public interface ILogger
+{
+    void Info(string message);
+    void Error(string message);
+}
+
+public class ConsoleLogger : ILogger
+{
+    public void Info(string message)  =&gt; Console.WriteLine($"[INFO] {message}");
+    public void Error(string message) =&gt; Console.WriteLine($"[ERROR] {message}");
+}
+
+public class OrderService
+{
+    private readonly ILogger _logger;
+    public OrderService(ILogger logger) =&gt; _logger = logger;
+
+    public void PlaceOrder(string orderId)
+    {
+        _logger.Info($"Placing order: {orderId}");
+        // business logic...
+        _logger.Info($"Order placed: {orderId}");
+    }
+}</code></pre>
+              </div>
+
+              <div class="tip"><b>Beginner Tip:</b> Think of an interface like a “socket shape”: if a plug matches, it works—implementation can vary.</div>
+              <div class="note"><b>Advanced Note:</b> Keep interfaces small (focused). Large interfaces create fragile dependencies and harder mocking/testing.</div>
+
+              <p class="muted"><b>Real-world use case:</b> Logging in microservices where different environments send logs to different sinks.</p>
+            </div>
+
+            <div>
+              <div class="ascii">ASCII Capability Contract
+
+[OrderService] -- depends on --&gt; ILogger
+                     |
+        +------------+------------+
+        |                         |
+  ConsoleLogger               FileLogger
+ (local dev)               (production)</div>
+              <div class="warn"><b>Warning:</b> Don’t create interfaces for everything “just in case”. Create them when you need swapping, testing, or multiple implementations.</div>
+            </div>
+          </div>
+
+          <div class="nav-row">
+            <a class="nav-btn" href="#t08-abstract-methods">← Previous</a>
+            <a class="nav-btn primary" href="#t08-multiple-inheritance-via-interfaces">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           5) Multiple Inheritance via Interfaces (The C# Way)
+      ========================================================== -->
+      <section class="section" id="t08-multiple-inheritance-via-interfaces">
+        <div class="hd">
+          <span>Multiple Inheritance via Interfaces (The C# Way)</span>
+          <span class="pill">#t08-multiple-inheritance-via-interfaces</span>
+        </div>
+        <div class="bd">
+          <div class="grid">
+            <div>
+              <p>
+                C# does not allow a class to inherit from multiple classes, but it <i>does</i> allow multiple interface implementations.
+                This is the safe way to combine capabilities without complex “diamond” inheritance problems.
+                You can build types that are loggable, cacheable, and auditable—without forcing a deep class hierarchy.
+                This supports <span class="tt" data-tip="A principle where you build behavior by combining small components.\nInstead of inheriting large base classes, you 'compose' capabilities.\nThis often improves flexibility and testability.">Composition</span> of features.
+              </p>
+
+              <div class="example-box">
+                <div class="lbl">Grey Example Box: Combine capabilities</div>
+                <div class="small muted">
+                  A background job can be “trackable” and “retryable” at the same time.
+                </div>
+                <pre class="code"><code>public interface ITrackable
+{
+    string CorrelationId { get; }
+}
+
+public interface IRetryable
+{
+    int MaxRetries { get; }
+    bool ShouldRetry(int attempt);
+}
+
+public class DataSyncJob : ITrackable, IRetryable
+{
+    public string CorrelationId { get; } = Guid.NewGuid().ToString();
+    public int MaxRetries =&gt; 3;
+
+    public bool ShouldRetry(int attempt) =&gt; attempt &lt; MaxRetries;
+}</code></pre>
+              </div>
+
+              <div class="tip"><b>Beginner Tip:</b> Use interfaces to “add a capability” to a type without changing its base class.</div>
+              <div class="note"><b>Advanced Note:</b> Favor capability interfaces (IReadable, IWritable, ICache) over role interfaces that become too broad.</div>
+
+              <p class="muted"><b>Real-world use case:</b> Jobs and services in enterprise apps that need multiple cross-cutting behaviors (tracking, retry, auditing).</p>
+            </div>
+
+            <div>
+              <div class="ascii">ASCII Capability Composition
+
+          +-----------+
+          | DataSync  |
+          |   Job     |
+          +-----------+
+           /        \
+   implements     implements
+   ITrackable     IRetryable</div>
+              <div class="warn"><b>Warning:</b> Too many interfaces on one class can signal “too many responsibilities”. Split the class or compose collaborators.</div>
+            </div>
+          </div>
+
+          <div class="nav-row">
+            <a class="nav-btn" href="#t08-interfaces">← Previous</a>
+            <a class="nav-btn primary" href="#t08-interface-inheritance">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           6) Interface Inheritance (Layered Capabilities)
+      ========================================================== -->
+      <section class="section" id="t08-interface-inheritance">
+        <div class="hd">
+          <span>Interface Inheritance (Layered Capabilities)</span>
+          <span class="pill">#t08-interface-inheritance</span>
+        </div>
+        <div class="bd">
+          <div class="grid">
+            <div>
+              <p>
+                Interface inheritance lets you build a specialized contract from a more general one.
+                This helps create layered capabilities: “basic logging” vs “structured logging”.
+                It keeps contracts organized and makes it easy to evolve APIs without duplicating members.
+                Use it to model “is-a-more-specific-capability” relationships.
+              </p>
+
+              <div class="example-box">
+                <div class="lbl">Grey Example Box: Layered logging contract</div>
+                <div class="small muted">
+                  You start with basic messages, then extend for rich context (key/value).
+                </div>
+                <pre class="code"><code>public interface ILogger
+{
+    void Info(string message);
+    void Error(string message);
+}
+
+public interface IStructuredLogger : ILogger
+{
+    void Info(string message, IDictionary&lt;string, string&gt; context);
+    void Error(string message, Exception ex, IDictionary&lt;string, string&gt; context);
+}
+
+public class StructuredConsoleLogger : IStructuredLogger
+{
+    public void Info(string message) =&gt; Console.WriteLine($"[INFO] {message}");
+    public void Error(string message) =&gt; Console.WriteLine($"[ERROR] {message}");
+
+    public void Info(string message, IDictionary&lt;string, string&gt; context)
+        =&gt; Console.WriteLine($"[INFO] {message} | ctx={context.Count}");
+
+    public void Error(string message, Exception ex, IDictionary&lt;string, string&gt; context)
+        =&gt; Console.WriteLine($"[ERROR] {message} | ex={ex.Message} | ctx={context.Count}");
+}</code></pre>
+              </div>
+
+              <div class="tip"><b>Beginner Tip:</b> Interface inheritance avoids repeating the same members in multiple interfaces.</div>
+              <div class="note"><b>Advanced Note:</b> Be careful with deep interface trees; keep layering shallow and meaningful.</div>
+
+              <p class="muted"><b>Real-world use case:</b> Observability—start with simple logs, then extend to structured logs used by dashboards and alerts.</p>
+            </div>
+
+            <div>
+              <div class="ascii">ASCII Interface Inheritance
+
+ILogger
+  |
+  v
+IStructuredLogger (adds richer operations)
+
+Implementation:
+StructuredConsoleLogger : IStructuredLogger</div>
+              <div class="warn"><b>Warning:</b> If your base interface changes often, many implementers may break. Keep base interfaces stable.</div>
+            </div>
+          </div>
+
+          <div class="nav-row">
+            <a class="nav-btn" href="#t08-multiple-inheritance-via-interfaces">← Previous</a>
+            <a class="nav-btn primary" href="#t08-explicit-implementation">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           7) Explicit Interface Implementation (Conflict Resolution)
+      ========================================================== -->
+      <section class="section" id="t08-explicit-implementation">
+        <div class="hd">
+          <span>Explicit Interface Implementation (Conflict Resolution)</span>
+          <span class="pill">#t08-explicit-implementation</span>
+        </div>
+        <div class="bd">
+          <div class="grid">
+            <div>
+              <p>
+                <span class="tt" data-tip="A technique where interface members are implemented so they are accessible only via the interface reference.\nIt helps resolve method name conflicts.\nIt can also hide members from the public class API.">Explicit Interface Implementation</span> is used when:
+                (1) two interfaces have same member names, or (2) you want to hide the interface member from the class’s public surface.
+                The method is callable only through the interface type, not through the class variable.
+                This helps keep your API clean and avoids confusing overloads.
+              </p>
+
+              <div class="example-box">
+                <div class="lbl">Grey Example Box: Conflict resolution (same method name)</div>
+                <div class="small muted">
+                  Two interfaces both define <b>Save()</b> but mean different things.
+                </div>
+                <pre class="code"><code>public interface IUserSettings
+{
+    void Save();
+}
+
+public interface IDraft
+{
+    void Save();
+}
+
+public class ProfileEditor : IUserSettings, IDraft
+{
+    // Explicit implementations (not visible on ProfileEditor directly)
+    void IUserSettings.Save()
+    {
+        Console.WriteLine("Saving user settings to DB...");
+    }
+
+    void IDraft.Save()
+    {
+        Console.WriteLine("Saving draft locally...");
+    }
+
+    // Public method can be a separate, clear API
+    public void SaveAll()
+    {
+        ((IDraft)this).Save();
+        ((IUserSettings)this).Save();
+    }
+}</code></pre>
+              </div>
+
+              <div class="tip"><b>Beginner Tip:</b> If you can avoid name clashes by choosing better interface names, do that first.</div>
+              <div class="note"><b>Advanced Note:</b> Explicit implementation is great for “capability hiding” so consumers see only what they need.</div>
+
+              <p class="muted"><b>Real-world use case:</b> UI editors where “Save draft” and “Save settings” are different operations but share a name.</p>
+            </div>
+
+            <div>
+              <div class="ascii">ASCII Access Rule
+
+ProfileEditor pe = new ProfileEditor();
+// pe.Save();   // NOT available
+
+IDraft d = pe;
+d.Save();      // OK
+
+IUserSettings s = pe;
+s.Save();      // OK</div>
+              <div class="warn"><b>Warning:</b> Overusing explicit implementation can confuse beginners. Use it when there’s a real conflict or a real need to hide.</div>
+            </div>
+          </div>
+
+          <div class="nav-row">
+            <a class="nav-btn" href="#t08-interface-inheritance">← Previous</a>
+            <a class="nav-btn primary" href="#t08-dynamic-polymorphism">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           8) Dynamic Polymorphism (Runtime Dispatch in Real Code)
+      ========================================================== -->
+      <section class="section" id="t08-dynamic-polymorphism">
+        <div class="hd">
+          <span>Dynamic Polymorphism (Runtime Dispatch in Real Code)</span>
+          <span class="pill">#t08-dynamic-polymorphism</span>
+        </div>
+        <div class="bd">
+          <div class="grid">
+            <div>
+              <p>
+                <span class="tt" data-tip="The ability to treat different implementations through a common base type or interface.\nAt runtime, the correct method implementation is chosen.\nThis enables extensible systems and clean architecture.">Polymorphism</span> becomes real when you store objects as an interface/base type and call methods without knowing the concrete class.
+                The runtime dispatches the call to the correct override/implementation.
+                This removes branching logic like “if type is X do Y”.
+                It’s the core technique behind plug-in style designs and extensible systems.
+              </p>
+
+              <div class="example-box">
+                <div class="lbl">Grey Example Box: Notification channel selection without if/else</div>
+                <div class="small muted">
+                  You can add new channels later (WhatsApp, Push) without editing the sender logic.
+                </div>
+                <pre class="code"><code>public interface INotifier
+{
+    void Send(string to, string message);
+}
+
+public class EmailNotifier : INotifier
+{
+    public void Send(string to, string message)
+        =&gt; Console.WriteLine($"EMAIL to {to}: {message}");
+}
+
+public class SmsNotifier : INotifier
+{
+    public void Send(string to, string message)
+        =&gt; Console.WriteLine($"SMS to {to}: {message}");
+}
+
+public class NotificationService
+{
+    private readonly List&lt;INotifier&gt; _notifiers;
+    public NotificationService(List&lt;INotifier&gt; notifiers) =&gt; _notifiers = notifiers;
+
+    public void Broadcast(string user, string msg)
+    {
+        foreach (var n in _notifiers)
+            n.Send(user, msg); // runtime dispatch to EmailNotifier/SmsNotifier/...
+    }
+}</code></pre>
+              </div>
+
+              <div class="tip"><b>Beginner Tip:</b> If you can “add a new type” without changing old code, that’s a sign polymorphism is working well.</div>
+              <div class="note"><b>Advanced Note:</b> Pair polymorphism with good naming and small interfaces; otherwise you’ll move complexity from if/else into giant contracts.</div>
+
+              <p class="muted"><b>Real-world use case:</b> Notification platforms, payment gateways, report exporters, and file storage providers.</p>
+            </div>
+
+            <div>
+              <div class="ascii">ASCII Runtime Dispatch
+
+INotifier n = new EmailNotifier();
+n.Send(...)  ----&gt; EmailNotifier.Send
+
+INotifier n2 = new SmsNotifier();
+n2.Send(...) ----&gt; SmsNotifier.Send</div>
+              <div class="warn"><b>Warning:</b> Avoid “type checking + casting” as your default approach. It often indicates missing polymorphism.</div>
+            </div>
+          </div>
+
+          <div class="nav-row">
+            <a class="nav-btn" href="#t08-explicit-implementation">← Previous</a>
+            <a class="nav-btn primary" href="#t08-di-with-interfaces">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           9) Real-World Pattern: Dependency Injection with Interfaces
+      ========================================================== -->
+      <section class="section" id="t08-di-with-interfaces">
+        <div class="hd">
+          <span>Real-World Pattern: Dependency Injection with Interfaces</span>
+          <span class="pill">#t08-di-with-interfaces</span>
+        </div>
+        <div class="bd">
+          <div class="grid">
+            <div>
+              <p>
+                <span class="tt" data-tip="A pattern where you provide dependencies from the outside instead of creating them inside.\nIt improves testing, reduces coupling, and supports swapping implementations.\nCommon in modern .NET apps with built-in DI containers.">Dependency Injection</span> means your class receives what it needs (like logger, repository) from outside.
+                When you depend on interfaces, you can swap implementations without changing business logic.
+                This makes unit testing easy because you can pass “fake” implementations.
+                In modern .NET apps, DI containers automatically build objects and inject dependencies.
+              </p>
+
+              <div class="example-box">
+                <div class="lbl">Grey Example Box: Repository + fake for testing</div>
+                <div class="small muted">
+                  Business logic depends on <b>IOrderRepository</b>, not a concrete database class.
+                </div>
+                <pre class="code"><code>public record Order(string Id, decimal Total);
+
+public interface IOrderRepository
+{
+    Order? GetById(string id);
+}
+
+public class InMemoryOrderRepository : IOrderRepository
+{
+    private readonly Dictionary&lt;string, Order&gt; _data = new()
+    {
+        ["A101"] = new Order("A101", 1499m),
+        ["A102"] = new Order("A102", 2999m)
+    };
+
+    public Order? GetById(string id) =&gt; _data.TryGetValue(id, out var o) ? o : null;
+}
+
+public class BillingService
+{
+    private readonly IOrderRepository _repo;
+    private readonly ILogger _logger;
+
+    public BillingService(IOrderRepository repo, ILogger logger)
+    {
+        _repo = repo;
+        _logger = logger;
+    }
+
+    public decimal GetPayableAmount(string orderId)
+    {
+        var order = _repo.GetById(orderId);
+        if (order is null)
+        {
+            _logger.Error($"Order not found: {orderId}");
+            return 0m;
+        }
+
+        _logger.Info($"Billing for {order.Id} total={order.Total}");
+        return order.Total;
+    }
+}</code></pre>
+              </div>
+
+              <div class="tip"><b>Beginner Tip:</b> Create dependencies in the “composition root” (startup/main), not inside every class.</div>
+              <div class="note"><b>Advanced Note:</b> Use small interfaces; “Fat repositories” become hard to mock and encourage business logic leakage.</div>
+
+              <p class="muted"><b>Real-world use case:</b> Switching from SQL repository to API repository during migration—business logic stays stable.</p>
+            </div>
+
+            <div>
+              <div class="ascii">ASCII DI Flow
+
+[BillingService] -- needs --&gt; IOrderRepository
+       |
+       +-- needs --&gt; ILogger
+
+Composition Root:
+BillingService(repoImpl, loggerImpl)</div>
+              <div class="warn"><b>Warning:</b> Don’t inject too many dependencies into one class. It’s a sign the class is doing too much.</div>
+            </div>
+          </div>
+
+          <div class="nav-row">
+            <a class="nav-btn" href="#t08-dynamic-polymorphism">← Previous</a>
+            <a class="nav-btn primary" href="#t08-best-practices">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           10) Best Practices (Prefer Composition, Keep Interfaces Small)
+      ========================================================== -->
+      <section class="section" id="t08-best-practices">
+        <div class="hd">
+          <span>Best Practices (Prefer Composition, Keep Interfaces Small)</span>
+          <span class="pill">#t08-best-practices</span>
+        </div>
+        <div class="bd">
+          <div class="grid">
+            <div>
+              <p>
+                Strong designs use <span class="tt" data-tip="A principle where you build behavior by combining small components.\nInstead of inheriting large base classes, you 'compose' capabilities.\nThis often improves flexibility and testability.">Composition</span> more than inheritance.
+                Keep interfaces focused so each contract describes one capability clearly.
+                Prefer “small, stable contracts” that rarely change, because many classes will implement them.
+                Use abstraction to protect callers from churn and keep your system maintainable as it scales.
+              </p>
+
+              <div class="example-box">
+                <div class="lbl">Grey Example Box: Small interfaces + composed services</div>
+                <div class="small muted">
+                  Instead of one giant service, compose small collaborators (validator + calculator + notifier).
+                </div>
+                <pre class="code"><code>public interface IOrderValidator
+{
+    bool IsValid(string orderId);
+}
+
+public interface ITaxCalculator
+{
+    decimal CalculateTax(decimal amount);
+}
+
+public interface INotifier
+{
+    void Send(string to, string message);
+}
+
+public class OrderProcessor
+{
+    private readonly IOrderValidator _validator;
+    private readonly ITaxCalculator _tax;
+    private readonly INotifier _notifier;
+
+    public OrderProcessor(IOrderValidator validator, ITaxCalculator tax, INotifier notifier)
+    {
+        _validator = validator;
+        _tax = tax;
+        _notifier = notifier;
+    }
+
+    public decimal Process(string orderId, decimal amount, string user)
+    {
+        if (!_validator.IsValid(orderId)) return 0m;
+
+        var total = amount + _tax.CalculateTax(amount);
+        _notifier.Send(user, $"Order {orderId} total payable: {total}");
+        return total;
+    }
+}</code></pre>
+              </div>
+
+              <div class="tip"><b>Beginner Tip:</b> Start with simple code, then extract an interface when you need a second implementation or testing seam.</div>
+              <div class="note"><b>Advanced Note:</b> A good interface name reads like a capability: “ICache”, “IClock”, “IIdGenerator”, not “IManagerOfEverything”.</div>
+
+              <p class="muted"><b>Real-world use case:</b> Large apps where different teams swap implementations (tax rules, notifications, validation) without conflicts.</p>
+            </div>
+
+            <div>
+              <div class="ascii">ASCII Preferred Shape
+
+Avoid:
+  BigBaseClass -&gt; BigDerivedClass -&gt; BiggerDerivedClass
+
+Prefer:
+  OrderProcessor
+     |    |    |
+  Validator Tax Notifier
+   (small interfaces + composed collaborators)</div>
+              <div class="warn"><b>Warning:</b> If an interface forces implementers to throw NotImplementedException, the interface is too big.</div>
+            </div>
+          </div>
+
+          <div class="nav-row">
+            <a class="nav-btn" href="#t08-di-with-interfaces">← Previous</a>
+            <a class="nav-btn primary" href="#next-subtopic">Next →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           FAQs
+      ========================================================== -->
+      <section class="section" id="faqs">
+        <div class="hd">
+          <span>FAQs</span>
+          <span class="pill">Common doubts</span>
+        </div>
+        <div class="bd">
+          <div class="q-card">
+            <h4>1) When should I use an abstract class vs an interface?</h4>
+            <p class="muted">
+              Use an abstract class when you need shared state/behavior and a common base identity.
+              Use an interface when you need a pure capability contract and multiple inheritance of behavior is useful.
+            </p>
+          </div>
+          <div class="q-card">
+            <h4>2) Why not just use concrete classes everywhere?</h4>
+            <p class="muted">
+              Concrete-to-concrete coupling makes swapping implementations and testing harder.
+              Contracts help keep your business logic stable even if storage/logging/payment changes.
+            </p>
+          </div>
+          <div class="q-card">
+            <h4>3) Is explicit interface implementation “bad”?</h4>
+            <p class="muted">
+              No—use it when there’s a real conflict or when you intentionally want to hide a member from the public class API.
+            </p>
+          </div>
+          <div class="q-card">
+            <h4>4) What is the biggest beginner mistake with interfaces?</h4>
+            <p class="muted">
+              Creating interfaces for everything “just in case”. Start simple; extract interfaces when you need multiple implementations or test seams.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Interview Questions
+      ========================================================== -->
+      <section class="section" id="interview-questions">
+        <div class="hd">
+          <span>Interview Questions</span>
+          <span class="pill">Module 08</span>
+        </div>
+        <div class="bd">
+          <ol>
+            <li>Explain <span class="tt" data-tip="A design technique where you hide internal complexity and expose only what users need.\nIt helps you build clean, stable APIs.\nIt keeps code readable and change-friendly.">Abstraction</span> with a real example from production systems.</li>
+            <li>What is the difference between an abstract method and a virtual method?</li>
+            <li>Why does C# support multiple interface implementation but not multiple class inheritance?</li>
+            <li>Give a scenario where explicit interface implementation is necessary.</li>
+            <li>How does DI improve unit testing? What changes in your design when you use interfaces?</li>
+            <li>What are symptoms of a “fat interface” and how would you refactor it?</li>
+            <li>How does runtime dispatch work when calling methods through an interface reference?</li>
+            <li>Show how you would replace if/else “type checks” using polymorphism.</li>
+          </ol>
+          <div class="tip"><b>Tip:</b> In interviews, always connect the concept to a real-world case: payment gateway swap, logging sink change, storage provider migration, etc.</div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           MCQ
+      ========================================================== -->
+      <section class="section" id="mcq">
+        <div class="hd">
+          <span>MCQ (5–10 Questions)</span>
+          <span class="pill">Quick check</span>
+        </div>
+        <div class="bd">
+          <ol>
+            <li>
+              An abstract class can be instantiated directly.
+              <div class="q-meta">
+                <span class="badge">A) True</span>
+                <span class="badge">B) False</span>
+              </div>
+            </li>
+            <li>
+              Which is the best reason to use an interface?
+              <div class="q-meta">
+                <span class="badge">A) To share fields</span>
+                <span class="badge">B) To allow multiple capabilities</span>
+                <span class="badge">C) To avoid constructors</span>
+                <span class="badge">D) To prevent overriding</span>
+              </div>
+            </li>
+            <li>
+              Explicit interface implementation makes a member accessible primarily through:
+              <div class="q-meta">
+                <span class="badge">A) The class type</span>
+                <span class="badge">B) The interface type</span>
+                <span class="badge">C) Any base class</span>
+                <span class="badge">D) Only static calls</span>
+              </div>
+            </li>
+            <li>
+              Polymorphism at runtime typically requires:
+              <div class="q-meta">
+                <span class="badge">A) Method overloading</span>
+                <span class="badge">B) Interfaces/virtual/override</span>
+                <span class="badge">C) Only structs</span>
+                <span class="badge">D) Reflection always</span>
+              </div>
+            </li>
+            <li>
+              A “fat interface” violates which idea the most?
+              <div class="q-meta">
+                <span class="badge">A) Keep interfaces small and focused</span>
+                <span class="badge">B) Use loops</span>
+                <span class="badge">C) Use constructors</span>
+                <span class="badge">D) Use namespaces</span>
+              </div>
+            </li>
+            <li>
+              DI helps most with:
+              <div class="q-meta">
+                <span class="badge">A) Hiding source code</span>
+                <span class="badge">B) Reducing coupling and improving testability</span>
+                <span class="badge">C) Preventing compilation</span>
+                <span class="badge">D) Increasing inheritance depth</span>
+              </div>
+            </li>
+          </ol>
+
+          <div class="note"><b>Answer Key:</b> 1-B, 2-B, 3-B, 4-B, 5-A, 6-B</div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Summary
+      ========================================================== -->
+      <section class="section" id="summary">
+        <div class="hd">
+          <span>Summary</span>
+          <span class="pill">What you should remember</span>
+        </div>
+        <div class="bd">
+          <ul>
+            <li><span class="tt" data-tip="A design technique where you hide internal complexity and expose only what users need.\nIt helps you build clean, stable APIs.\nIt keeps code readable and change-friendly.">Abstraction</span> keeps callers stable while implementations evolve.</li>
+            <li>Abstract classes = shared base + required overrides (single inheritance).</li>
+            <li>Interfaces = capability contracts (multiple implementations + multiple inheritance of capabilities).</li>
+            <li><span class="tt" data-tip="The ability to treat different implementations through a common base type or interface.\nAt runtime, the correct method implementation is chosen.\nThis enables extensible systems and clean architecture.">Polymorphism</span> removes if/else branching by letting runtime dispatch do the work.</li>
+            <li><span class="tt" data-tip="A pattern where you provide dependencies from the outside instead of creating them inside.\nIt improves testing, reduces coupling, and supports swapping implementations.\nCommon in modern .NET apps with built-in DI containers.">Dependency Injection</span> works best when your code depends on interfaces.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Placeholder: Downloadable ZIP/PPT/DOC
+      ========================================================== -->
+      <section class="section" id="downloads">
+        <div class="hd">
+          <span>Downloadable Resources (Placeholder)</span>
+          <span class="pill">ZIP / PPT / DOC</span>
+        </div>
+        <div class="bd">
+          <div class="example-box">
+            <div class="lbl">Coming soon</div>
+            <ul class="muted">
+              <li>ZIP: Sample project (Interfaces + DI + Unit-test ready structure)</li>
+              <li>PPT: “Abstraction &amp; Interfaces” trainer deck (diagrams + examples)</li>
+              <li>DOC: Interview Q&amp;A and best-practices cheat sheet</li>
+            </ul>
+            <div class="warn"><b>Note:</b> This section is intentionally a placeholder as requested.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Glossary (Tooltips) Table
+      ========================================================== -->
+      <section class="section" id="glossary-tooltips">
+        <div class="hd">
+          <span>Glossary (Tooltips)</span>
+          <span class="pill">Term → meaning</span>
+        </div>
+        <div class="bd">
+          <p class="muted">These are the tooltip terms used in this page:</p>
+          <table>
+            <thead>
+              <tr>
+                <th style="width:30%;">Term</th>
+                <th>Tooltip Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Abstraction</td>
+                <td>A design technique where you hide internal complexity and expose only what users need.<br/>It helps you build clean, stable APIs.<br/>It keeps code readable and change-friendly.</td>
+              </tr>
+              <tr>
+                <td>Contract</td>
+                <td>A promise about what an API will do (methods, inputs, outputs).<br/>Callers rely on the contract, not internal details.<br/>This allows implementations to change safely over time.</td>
+              </tr>
+              <tr>
+                <td>Abstract Class</td>
+                <td>A base class that cannot be instantiated and may contain abstract members.<br/>It can include shared code plus required overrides.<br/>Use it when you need a common base with behavior.</td>
+              </tr>
+              <tr>
+                <td>Abstract Method</td>
+                <td>A method declared without a body in an abstract class.<br/>Derived classes must provide an override.<br/>It defines a required behavior point in your design.</td>
+              </tr>
+              <tr>
+                <td>Interface</td>
+                <td>A contract that describes capabilities without implementation details.<br/>Classes can implement multiple interfaces to compose features.<br/>Interfaces are great for testing and swapping implementations.</td>
+              </tr>
+              <tr>
+                <td>Polymorphism</td>
+                <td>The ability to treat different implementations through a common base type or interface.<br/>At runtime, the correct method implementation is chosen.<br/>This enables extensible systems and clean architecture.</td>
+              </tr>
+              <tr>
+                <td>Dependency Injection</td>
+                <td>A pattern where you provide dependencies from the outside instead of creating them inside.<br/>It improves testing, reduces coupling, and supports swapping implementations.<br/>Common in modern .NET apps with built-in DI containers.</td>
+              </tr>
+              <tr>
+                <td>Explicit Interface Implementation</td>
+                <td>A technique where interface members are implemented so they are accessible only via the interface reference.<br/>It helps resolve method name conflicts.<br/>It can also hide members from the public class API.</td>
+              </tr>
+              <tr>
+                <td>Composition</td>
+                <td>A principle where you build behavior by combining small components.<br/>Instead of inheriting large base classes, you 'compose' capabilities.<br/>This often improves flexibility and testability.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           PRACTICE SECTION (Required)
+      ========================================================== -->
+      <section class="section" id="practice-coding-questions">
+        <div class="hd">
+          <span>To Become Best coder Practice this</span>
+          <span class="pill">15 Questions</span>
+        </div>
+        <div class="bd">
+          <p class="muted">
+            5 Easy + 5 Medium + 5 Hard. Each question includes Problem, Input/Output, Example Input/Output, Constraints, and Hint.
+          </p>
+
+          <!-- EASY (5) -->
+          <div class="q-card">
+            <h4>Easy 1: Shape Area (Interface Practice)</h4>
+            <p><b>Problem:</b> Define an interface for shapes and compute area for Circle and Rectangle based on a type input.</p>
+            <p><b>Input/Output:</b> Input: shape type + dimensions. Output: computed area (2 decimals).</p>
+            <p><b>Example Input/Output:</b> Input: <span class="muted">Circle 3</span> → Output: <span class="muted">28.27</span></p>
+            <p><b>Constraints:</b> radius, width, height are positive; use π = 3.14159.</p>
+            <p><b>Hint:</b> Create <b>IShape</b> with <b>Area()</b> and implement per shape.</p>
+          </div>
+
+          <div class="q-card">
+            <h4>Easy 2: Simple Logger Switch (Interface Swap)</h4>
+            <p><b>Problem:</b> Implement <b>ILogger</b> and create two loggers (ConsoleLogger, MemoryLogger). Based on input, use one and log 3 messages.</p>
+            <p><b>Input/Output:</b> Input: logger type. Output: final printed logs (console or memory dump).</p>
+            <p><b>Example Input/Output:</b> Input: <span class="muted">Memory</span> → Output: <span class="muted">3 lines from memory</span></p>
+            <p><b>Constraints:</b> Exactly 3 messages; message length ≤ 50.</p>
+            <p><b>Hint:</b> Store logs in a list for MemoryLogger, print at the end.</p>
+          </div>
+
+          <div class="q-card">
+            <h4>Easy 3: Payment Validation (Abstract Method)</h4>
+            <p><b>Problem:</b> Create an abstract class PaymentMethod with an abstract <b>IsValid()</b>. Implement UpiPayment and CardPayment validation rules.</p>
+            <p><b>Input/Output:</b> Input: type + token. Output: VALID or INVALID.</p>
+            <p><b>Example Input/Output:</b> Input: <span class="muted">UPI gopi@upi</span> → Output: <span class="muted">VALID</span></p>
+            <p><b>Constraints:</b> UPI contains '@'; Card token length = 16 digits.</p>
+            <p><b>Hint:</b> Override IsValid() differently per payment type.</p>
+          </div>
+
+          <div class="q-card">
+            <h4>Easy 4: Exporter Name List (Abstract Class)</h4>
+            <p><b>Problem:</b> Create an abstract ReportExporter with abstract <b>FormatName</b>. Implement PdfExporter and CsvExporter and print their names.</p>
+            <p><b>Input/Output:</b> Input: none (hardcoded). Output: two format names in separate lines.</p>
+            <p><b>Example Input/Output:</b> Output: <span class="muted">PDF</span>, <span class="muted">CSV</span></p>
+            <p><b>Constraints:</b> Must use abstract property for the format name.</p>
+            <p><b>Hint:</b> Use <b>public abstract string FormatName { get; }</b>.</p>
+          </div>
+
+          <div class="q-card">
+            <h4>Easy 5: Notifier Broadcast Count (Polymorphism)</h4>
+            <p><b>Problem:</b> Create INotifier with Send(). Add EmailNotifier and SmsNotifier. Put them in a list and broadcast once. Print how many send calls happened.</p>
+            <p><b>Input/Output:</b> Input: message. Output: count of sends.</p>
+            <p><b>Example Input/Output:</b> Input: <span class="muted">Hi</span> → Output: <span class="muted">2</span></p>
+            <p><b>Constraints:</b> Exactly two notifiers in list.</p>
+            <p><b>Hint:</b> Increment a counter inside each Send() implementation.</p>
+          </div>
+
+          <!-- MEDIUM (5) -->
+          <div class="q-card">
+            <h4>Medium 1: Repository + Service (DI-Friendly)</h4>
+            <p><b>Problem:</b> Design IProductRepository with GetPrice(productId). Implement InMemoryProductRepository. Create BillingService that computes total with 18% tax.</p>
+            <p><b>Input/Output:</b> Input: productId and quantity. Output: payable total.</p>
+            <p><b>Example Input/Output:</b> Input: <span class="muted">P100 2</span> → Output: <span class="muted">Total=... </span></p>
+            <p><b>Constraints:</b> Price is positive; quantity 1..100.</p>
+            <p><b>Hint:</b> Inject repository into BillingService constructor.</p>
+          </div>
+
+          <div class="q-card">
+            <h4>Medium 2: Interface Inheritance (Layered Capability)</h4>
+            <p><b>Problem:</b> Create ILogger (Info, Error) and IStructuredLogger (inherits ILogger, adds Info with context). Implement StructuredConsoleLogger and log with and without context.</p>
+            <p><b>Input/Output:</b> Input: message + 2 key/value pairs. Output: printed logs including context count.</p>
+            <p><b>Example Input/Output:</b> Input: <span class="muted">"Login" user=gopi ip=1.2.3.4</span> → Output: <span class="muted">ctx=2</span></p>
+            <p><b>Constraints:</b> Exactly 2 context pairs.</p>
+            <p><b>Hint:</b> Use Dictionary&lt;string,string&gt; for context.</p>
+          </div>
+
+          <div class="q-card">
+            <h4>Medium 3: Explicit Interface Implementation (Two Saves)</h4>
+            <p><b>Problem:</b> Create IUserSettings.Save() and IDraft.Save(). Implement both explicitly in ProfileEditor. Based on input ("draft" or "settings"), call the right Save.</p>
+            <p><b>Input/Output:</b> Input: mode. Output: which save executed.</p>
+            <p><b>Example Input/Output:</b> Input: <span class="muted">draft</span> → Output: <span class="muted">Saving draft locally...</span></p>
+            <p><b>Constraints:</b> Must use explicit interface methods (not public Save methods).</p>
+            <p><b>Hint:</b> Cast object to the selected interface before calling Save().</p>
+          </div>
+
+          <div class="q-card">
+            <h4>Medium 4: Abstract Template Method (Export Pipeline)</h4>
+            <p><b>Problem:</b> Create abstract ReportExporter with public Export() that validates then calls abstract WriteOutput(). Implement PdfExporter and CsvExporter. Print steps in order.</p>
+            <p><b>Input/Output:</b> Input: reportName, content. Output: ordered step messages.</p>
+            <p><b>Example Input/Output:</b> Output: <span class="muted">Validate → Start → Write(PDF) → End</span></p>
+            <p><b>Constraints:</b> Export() must be non-virtual; WriteOutput() must be abstract.</p>
+            <p><b>Hint:</b> Base method controls flow; derived only writes output.</p>
+          </div>
+
+          <div class="q-card">
+            <h4>Medium 5: Multi-Capability Job (Multiple Interfaces)</h4>
+            <p><b>Problem:</b> Create ITrackable (CorrelationId) and IRetryable (MaxRetries, ShouldRetry). Implement DataSyncJob and simulate attempts 1..5 printing retry decisions.</p>
+            <p><b>Input/Output:</b> Input: none. Output: attempt lines with true/false.</p>
+            <p><b>Example Input/Output:</b> Output: <span class="muted">Attempt 1: true ... Attempt 4: false</span></p>
+            <p><b>Constraints:</b> MaxRetries = 3.</p>
+            <p><b>Hint:</b> ShouldRetry(attempt) returns attempt &lt;= MaxRetries.</p>
+          </div>
+
+          <!-- HARD (5) -->
+          <div class="q-card">
+            <h4>Hard 1: Strategy-Based Discount Engine (Polymorphism)</h4>
+            <p><b>Problem:</b> Create IDiscountStrategy.Apply(total). Implement StudentDiscount (30%), FestivalDiscount (flat 500 off if total ≥ 3000), and NoDiscount. Choose strategy by input and compute final payable.</p>
+            <p><b>Input/Output:</b> Input: strategy + total. Output: final payable.</p>
+            <p><b>Example Input/Output:</b> Input: <span class="muted">Festival 3500</span> → Output: <span class="muted">3000</span></p>
+            <p><b>Constraints:</b> total 1..1,000,000; payable cannot be negative.</p>
+            <p><b>Hint:</b> Use a dictionary mapping string → strategy to avoid if/else chains.</p>
+          </div>
+
+          <div class="q-card">
+            <h4>Hard 2: Pluggable Storage Provider (Interface + DI)</h4>
+            <p><b>Problem:</b> Create IStorage.Save(name, data) and Load(name). Implement InMemoryStorage and FileLikeStorage (simulate with a dictionary). Create DocumentService that uses IStorage and supports SaveDoc/LoadDoc.</p>
+            <p><b>Input/Output:</b> Input: command sequence (SAVE/LOAD). Output: loaded content or NOT_FOUND.</p>
+            <p><b>Example Input/Output:</b> Commands: <span class="muted">SAVE a hello; LOAD a</span> → Output: <span class="muted">hello</span></p>
+            <p><b>Constraints:</b> Up to 100 commands; name length ≤ 20; data length ≤ 200.</p>
+            <p><b>Hint:</b> Code DocumentService only against IStorage so swapping storage changes nothing.</p>
+          </div>
+
+          <div class="q-card">
+            <h4>Hard 3: Composite Notifier (Interface Composition)</h4>
+            <p><b>Problem:</b> Create INotifier.Send(to,msg). Implement EmailNotifier and SmsNotifier. Create CompositeNotifier that takes a list of INotifier and sends to all. Print how many succeeded.</p>
+            <p><b>Input/Output:</b> Input: message + N notifier names. Output: success count.</p>
+            <p><b>Example Input/Output:</b> Input: <span class="muted">Hi 2 Email SMS</span> → Output: <span class="muted">2</span></p>
+            <p><b>Constraints:</b> N 1..5; notifier names are unique.</p>
+            <p><b>Hint:</b> CompositeNotifier just loops; each notifier returns true/false for success.</p>
+          </div>
+
+          <div class="q-card">
+            <h4>Hard 4: Rule Pipeline with Abstract Base (Template Method)</h4>
+            <p><b>Problem:</b> Create abstract Rule with Execute(input) that logs, validates, then calls abstract ApplyCore(input). Implement TrimRule, UppercaseRule, and ReplaceSpaceRule. Run pipeline on a string in order.</p>
+            <p><b>Input/Output:</b> Input: string. Output: transformed string after all rules.</p>
+            <p><b>Example Input/Output:</b> Input: <span class="muted">"  hi gopi  "</span> → Output: <span class="muted">HI_GOPI</span></p>
+            <p><b>Constraints:</b> Input length ≤ 500.</p>
+            <p><b>Hint:</b> Base Execute() controls steps; derived only changes ApplyCore().</p>
+          </div>
+
+          <div class="q-card">
+            <h4>Hard 5: Conflict Interfaces + Hidden API (Explicit Implementation)</h4>
+            <p><b>Problem:</b> Create IReadable.Read() and IResettable.Read() with same signature but different meaning (one reads data, one reads reset status). Implement both explicitly in Device. Based on input mode, call the correct Read and print result.</p>
+            <p><b>Input/Output:</b> Input: mode (data/reset). Output: returned string.</p>
+            <p><b>Example Input/Output:</b> Input: <span class="muted">reset</span> → Output: <span class="muted">RESET_OK</span></p>
+            <p><b>Constraints:</b> Must not expose public Read() on Device.</p>
+            <p><b>Hint:</b> Use explicit implementations and cast Device to the requested interface before calling Read().</p>
+          </div>
+
+          <div class="nav-row">
+            <a class="nav-btn" href="#t08-best-practices">← Back to Best Practices</a>
+            <a class="nav-btn primary" href="#main">Back to Top ↑</a>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</body>
+</html>

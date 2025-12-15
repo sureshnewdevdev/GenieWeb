@@ -1,0 +1,1445 @@
+<!-- File: 06-constructors.html | TopicNo: 06 | ItTechGenie Prompt v3 -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>06. Constructors & Object Initialization Patterns | ItTechGenie</title>
+  <style>
+    :root{
+      --green:#04AA6D;
+      --light:#f7f7f7;
+      --border:#e6e6e6;
+      --text:#1f2328;
+      --muted:#57606a;
+      --codebg:#0b1020;
+      --codefg:#e6edf3;
+      --exbg:#f2f2f2;
+      --noteBlue:#e7f3ff;
+      --noteGreen:#e7fff1;
+      --noteRed:#ffe8e8;
+      --notePurple:#f1e9ff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:#fff;
+      line-height:1.45;
+    }
+
+    /* Top bar */
+    .topbar{
+      position:fixed;
+      top:0; left:0; right:0;
+      height:54px;
+      background:var(--green);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 14px;
+      z-index:50;
+    }
+    .topbar .brand{
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .topbar .navlinks{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      font-size:14px;
+    }
+    .topbar a{
+      color:#fff;
+      text-decoration:none;
+      border:1px solid rgba(255,255,255,.35);
+      padding:6px 10px;
+      border-radius:8px;
+      background:rgba(255,255,255,.10);
+    }
+    .topbar a:hover{background:rgba(255,255,255,.18)}
+
+    /* Layout */
+    .layout{
+      display:flex;
+      min-height:100vh;
+      padding-top:54px;
+    }
+
+    /* Sidebar (from template) */
+    .sidebar{
+      width:290px;
+      border-right:1px solid var(--border);
+      background:#fff;
+      position:sticky;
+      top:54px;
+      height:calc(100vh - 54px);
+      overflow:auto;
+      padding:10px 10px 16px 10px;
+    }
+    .sb-title{
+      padding:10px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:var(--light);
+    }
+    .sb-brand{font-weight:800; font-size:16px;}
+    .sb-course{font-size:12px; color:var(--muted); margin-top:4px;}
+    .sb-section{
+      margin:12px 10px 6px 10px;
+      font-size:12px;
+      letter-spacing:.6px;
+      color:var(--muted);
+      font-weight:700;
+    }
+    .sb-link{
+      display:block;
+      margin:4px 8px;
+      padding:8px 10px;
+      border-radius:10px;
+      text-decoration:none;
+      color:var(--text);
+      border:1px solid transparent;
+      font-size:14px;
+    }
+    .sb-link:hover{
+      background:var(--light);
+      border-color:var(--border);
+    }
+    .sb-module{font-weight:600}
+    .sb-sub{padding-left:18px}
+    .sb-practice{
+      font-weight:700;
+      border:1px solid rgba(4,170,109,.35);
+      background:rgba(4,170,109,.08);
+    }
+    .active-module{
+      border-color:rgba(4,170,109,.55) !important;
+      background:rgba(4,170,109,.10) !important;
+    }
+
+    /* Main content */
+    main{
+      flex:1;
+      padding:18px 18px 70px 18px;
+      max-width:1100px;
+    }
+    .page-title{
+      margin:10px 0 8px 0;
+      font-size:28px;
+    }
+    .subtitle{
+      margin:0 0 14px 0;
+      color:var(--muted);
+      max-width:900px;
+    }
+
+    /* Boxes */
+    .card{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#fff;
+      padding:14px;
+      margin:14px 0;
+      box-shadow:0 1px 0 rgba(27,31,36,.04);
+    }
+    .card h2,.card h3{margin-top:0}
+    .toc a{color:#0b5bd3; text-decoration:none}
+    .toc a:hover{text-decoration:underline}
+
+    .section{
+      border:1px solid var(--border);
+      border-radius:14px;
+      overflow:hidden;
+      margin:18px 0;
+      box-shadow:0 1px 0 rgba(27,31,36,.04);
+    }
+    .sec-head{
+      padding:12px 14px;
+      background:rgba(4,170,109,.10);
+      border-bottom:1px solid var(--border);
+    }
+    .sec-head h2{
+      margin:0;
+      font-size:20px;
+    }
+    .sec-body{
+      padding:14px;
+      background:#fff;
+    }
+
+    .ascii{
+      background:#fff;
+      border:1px dashed #cfcfcf;
+      border-radius:12px;
+      padding:12px;
+      overflow:auto;
+      color:#111;
+      margin:12px 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:13px;
+    }
+    .example{
+      background:var(--exbg);
+      border:1px solid #d9d9d9;
+      border-radius:14px;
+      padding:12px 12px 10px 12px;
+      margin:12px 0;
+    }
+    .example .ex-title{
+      font-weight:800;
+      margin:0 0 8px 0;
+    }
+    .code{
+      background:var(--codebg);
+      color:var(--codefg);
+      border-radius:14px;
+      padding:12px;
+      overflow:auto;
+      margin:12px 0;
+      border:1px solid rgba(255,255,255,.08);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:13px;
+    }
+    .usecase{
+      border:1px solid var(--border);
+      background:var(--light);
+      border-radius:14px;
+      padding:12px;
+      margin:12px 0;
+    }
+    .note{
+      border-radius:14px;
+      padding:12px;
+      margin:10px 0;
+      border:1px solid var(--border);
+    }
+    .note b{display:block; margin-bottom:4px}
+    .note.note-blue{background:var(--noteBlue)}
+    .note.note-green{background:var(--noteGreen)}
+    .note.note-red{background:var(--noteRed)}
+    .note.note-purple{background:var(--notePurple)}
+
+    /* Section nav buttons */
+    .nav-btns{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+      padding-top:12px;
+      border-top:1px solid var(--border);
+    }
+    .btn{
+      display:inline-block;
+      padding:9px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      text-decoration:none;
+      color:var(--text);
+      background:#fff;
+      font-weight:700;
+      font-size:14px;
+    }
+    .btn:hover{background:var(--light)}
+
+    /* Tooltips (HTML + CSS only) */
+    .tt{
+      position:relative;
+      border-bottom:1px dotted rgba(0,0,0,.45);
+      cursor:help;
+      padding:0 1px;
+      white-space:nowrap;
+    }
+    .tt::after{
+      content: attr(data-tip);
+      position:absolute;
+      left:0;
+      top:115%;
+      min-width:260px;
+      max-width:360px;
+      padding:10px 10px;
+      background:#111827;
+      color:#fff;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 12px 30px rgba(0,0,0,.18);
+      opacity:0;
+      pointer-events:none;
+      transform:translateY(4px);
+      transition:opacity .15s ease, transform .15s ease;
+      font-size:12px;
+      line-height:1.35;
+      z-index:999;
+      white-space:normal;
+    }
+    .tt:hover::after{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    /* FAQ / Q&A */
+    details{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px 12px;
+      background:#fff;
+      margin:10px 0;
+    }
+    summary{
+      cursor:pointer;
+      font-weight:800;
+    }
+    .k{
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    /* Tables */
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin:10px 0;
+      overflow:hidden;
+      border-radius:12px;
+      border:1px solid var(--border);
+    }
+    th, td{
+      border-bottom:1px solid var(--border);
+      padding:10px;
+      vertical-align:top;
+      text-align:left;
+      font-size:14px;
+    }
+    th{
+      background:var(--light);
+      font-weight:800;
+    }
+
+    /* Footer */
+    footer{
+      margin-top:18px;
+      color:var(--muted);
+      font-size:12px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="brand">ItTechGenie • C# Fundamentals → Advanced</div>
+    <div class="navlinks">
+      <a href="05-type-conversion.html">❮ Prev Module (05)</a>
+      <a href="07-properties-inheritance.html">Next Module (07) ❯</a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- =========================================================
+         Sidebar (template applied + subtopics injected)
+    ========================================================= -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-title">
+        <div class="sb-brand">ItTechGenie</div>
+        <div class="sb-course">C# Fundamentals → Advanced</div>
+      </div>
+
+      <div class="sb-section">COURSE CONTENT</div>
+
+      <a class="sb-link sb-module" href="01-kickstart.html">01. Kickstart: .NET Ecosystem</a>
+      <a class="sb-link sb-module" href="02-control-flow.html">02. Control Flow</a>
+      <a class="sb-link sb-module" href="03-oop-core.html">03. OOP Core</a>
+      <a class="sb-link sb-module" href="04-methods-mastery.html">04. Methods Mastery</a>
+      <a class="sb-link sb-module" href="05-type-conversion.html">05. Type Conversion</a>
+      <a class="sb-link sb-module active-module" href="06-constructors.html">06. Constructors</a>
+      <a class="sb-link sb-module" href="07-properties-inheritance.html">07. Properties &amp; Inheritance</a>
+      <a class="sb-link sb-module" href="08-abstraction-interfaces.html">08. Abstraction &amp; Interfaces</a>
+      <a class="sb-link sb-module" href="09-namespaces-buildingblocks.html">09. Namespaces &amp; Building Blocks</a>
+      <a class="sb-link sb-module" href="10-advanced-toolkit.html">10. Advanced Toolkit</a>
+
+      <div class="sb-section">THIS TOPIC</div>
+
+      <!-- {CURRENT_TOPIC_SUBTOPICS} injected for TopicNo: 06 -->
+      <a class="sb-link sb-sub" href="#t06-constructor-purpose">Constructor Purpose (Guaranteed Object Setup)</a>
+      <a class="sb-link sb-sub" href="#t06-default-and-parameterized">Default &amp; Parameterized Constructors</a>
+      <a class="sb-link sb-sub" href="#t06-overloaded-constructors">Overloaded Constructors (Multiple Ways to Create an Object)</a>
+      <a class="sb-link sb-sub" href="#t06-constructor-chaining">Constructor Chaining (this(...) and base(...))</a>
+      <a class="sb-link sb-sub" href="#t06-static-constructors">Static Constructors (One-Time Type Initialization)</a>
+      <a class="sb-link sb-sub" href="#t06-object-initializers">Object Initializers (Readable Property-Based Setup)</a>
+      <a class="sb-link sb-sub" href="#t06-constructor-best-practices">Best Practices (Validation, Exceptions, Avoid Heavy Work)</a>
+      <a class="sb-link sb-sub" href="#t06-factory-vs-constructor">Real-World Pattern: Factory Method vs Constructor</a>
+
+      <div class="sb-section">PRACTICE</div>
+
+      <!-- REQUIRED SIDEBAR MENU ADDITION (Prompt v3): exact text + anchor -->
+      <a class="sb-link sb-practice" href="#practice-coding-questions">
+        To Become Best coder Practice this
+      </a>
+    </aside>
+
+    <!-- Main -->
+    <main>
+      <!-- Required placeholder anchors -->
+      <a id="prev-subtopic"></a>
+
+      <h1 class="page-title">06. Constructors &amp; Object Initialization Patterns</h1>
+      <p class="subtitle">
+        In this module, you’ll learn how a <span class="tt" data-tip="A special method that runs when an object is created. It sets initial state and ensures the object starts valid. Constructors don’t have return types.">Constructor</span>
+        protects your <span class="tt" data-tip="An instance of a class created in memory. Objects hold state and can perform behavior through methods defined by their class.">Object</span> from invalid states, how to design multiple creation paths safely, and when to prefer factories over direct creation.
+        You’ll also see readable initialization styles and practical rules used in real projects.
+      </p>
+
+      <!-- Table of Contents -->
+      <div class="card toc" id="toc">
+        <h2 style="margin:0 0 10px 0;">Table of Contents</h2>
+        <ol style="margin:0; padding-left:18px;">
+          <li><a href="#t06-constructor-purpose">Constructor Purpose (Guaranteed Object Setup)</a></li>
+          <li><a href="#t06-default-and-parameterized">Default &amp; Parameterized Constructors</a></li>
+          <li><a href="#t06-overloaded-constructors">Overloaded Constructors (Multiple Ways to Create an Object)</a></li>
+          <li><a href="#t06-constructor-chaining">Constructor Chaining (this(...) and base(...))</a></li>
+          <li><a href="#t06-static-constructors">Static Constructors (One-Time Type Initialization)</a></li>
+          <li><a href="#t06-object-initializers">Object Initializers (Readable Property-Based Setup)</a></li>
+          <li><a href="#t06-constructor-best-practices">Best Practices (Validation, Exceptions, Avoid Heavy Work)</a></li>
+          <li><a href="#t06-factory-vs-constructor">Real-World Pattern: Factory Method vs Constructor</a></li>
+          <li><a href="#faqs">FAQs</a></li>
+          <li><a href="#interview-questions">Interview Questions</a></li>
+          <li><a href="#summary">Summary</a></li>
+          <li><a href="#mcq">MCQ</a></li>
+          <li><a href="#downloads">Downloadable ZIP/PPT/DOC (Placeholder)</a></li>
+          <li><a href="#glossary-tooltips">Glossary (Tooltips)</a></li>
+          <li><a href="#practice-coding-questions">To Become Best coder Practice this</a></li>
+        </ol>
+        <p class="k" style="margin:10px 0 0 0;">
+          Tip: Use the left sidebar to jump between subtopics quickly.
+        </p>
+      </div>
+
+      <!-- =========================================================
+           Subtopic 1
+      ========================================================= -->
+      <section class="section" id="t06-constructor-purpose">
+        <div class="sec-head"><h2>Constructor Purpose (Guaranteed Object Setup)</h2></div>
+        <div class="sec-body">
+          <p>
+            A <span class="tt" data-tip="A special method that runs when an object is created. It sets initial state and ensures the object starts valid. Constructors don’t have return types.">Constructor</span> exists to guarantee your <span class="tt" data-tip="An instance of a class created in memory. Objects hold state and can perform behavior through methods defined by their class.">Object</span> starts in a valid state.<br>
+            It is the first “gate” where you enforce rules (like “balance cannot be negative”).<br>
+            This supports <span class="tt" data-tip="Keeping an object’s internal state protected and exposing safe ways to interact with it. You typically use private fields and public methods/properties to enforce rules.">Encapsulation</span> by preventing half-built instances from leaking into your program.<br>
+            If setup fails, throw an <span class="tt" data-tip="A runtime error object that represents something that went wrong. Exceptions can be caught and handled, but they should not be used as normal control flow.">Exception</span> early so bugs are detected near the source.<br>
+            Constructors should set state, not perform slow work like network calls or huge file reads.
+          </p>
+
+          <pre class="ascii">Object Creation Flow
+--------------------
+new Customer(...)
+   |
+   v
+[Constructor Runs]
+   |
+   +--> Validate inputs?
+   |
+   +--> Set fields/properties
+   |
+   v
+[Valid Object Ready] ---> Use safely in app</pre>
+
+          <div class="example">
+            <div class="ex-title">Example (What a constructor should guarantee)</div>
+            <div class="k">We ensure a bank account always starts with a non-negative balance and a non-empty account number.</div>
+          </div>
+
+          <pre class="code"><code>using System;
+
+public class BankAccount
+{
+    private readonly string _accountNumber;
+    public decimal Balance { get; private set; }
+
+    public BankAccount(string accountNumber, decimal openingBalance)
+    {
+        if (string.IsNullOrWhiteSpace(accountNumber))
+            throw new ArgumentException("Account number is required.");
+
+        if (openingBalance &lt; 0)
+            throw new ArgumentOutOfRangeException(nameof(openingBalance), "Opening balance cannot be negative.");
+
+        _accountNumber = accountNumber;
+        Balance = openingBalance;
+    }
+}</code></pre>
+
+          <div class="usecase">
+            <b>Real-world use case</b>
+            In a payment system, you may create a “Transaction” object only if it has a valid amount, currency, and customer id.
+            A constructor prevents invalid transactions from entering the processing pipeline.
+          </div>
+
+          <div class="note note-green">
+            <b>Beginner Tip</b>
+            If you can describe “what must always be true” for the object, put those checks in the constructor.
+          </div>
+
+          <div class="note note-purple">
+            <b>Advanced Note</b>
+            Prefer small, fast constructors. If you need heavy setup (DB calls, web calls), use an async factory or a separate initialization method.
+          </div>
+
+          <div class="nav-btns">
+            <a class="btn" href="#prev-subtopic">❮ Previous</a>
+            <a class="btn" href="#t06-default-and-parameterized">Next ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Subtopic 2
+      ========================================================= -->
+      <section class="section" id="t06-default-and-parameterized">
+        <div class="sec-head"><h2>Default &amp; Parameterized Constructors</h2></div>
+        <div class="sec-body">
+          <p>
+            A default constructor creates a <span class="tt" data-tip="An instance of a class created in memory. Objects hold state and can perform behavior through methods defined by their class.">Object</span> with safe “starter” values when the caller has no inputs.<br>
+            A parameterized constructor takes <span class="tt" data-tip="A variable in a method definition that receives input from the caller. Parameters define what data a method needs to do its job.">Parameter</span> values so the caller can define the initial state clearly.<br>
+            Choosing between them depends on whether the object can have meaningful defaults.<br>
+            If defaults could create invalid states, avoid default constructors and require inputs.<br>
+            The goal is predictable creation: same inputs → same valid initial state.
+          </p>
+
+          <pre class="ascii">Decision Guide
+--------------
+Can this object have safe defaults?
+   |
+   +-- YES --> Provide default ctor (and maybe optional parameters)
+   |
+   +-- NO  --> Require parameterized ctor + validate inputs</pre>
+
+          <div class="example">
+            <div class="ex-title">Example (Default vs Parameterized)</div>
+            <div class="k">A “UserProfile” can default language/timezone, but must require an email for real apps.</div>
+          </div>
+
+          <pre class="code"><code>using System;
+
+public class UserProfile
+{
+    public string Email { get; }
+    public string Language { get; }
+    public string TimeZone { get; }
+
+    // Parameterized: require Email, use defaults for other values
+    public UserProfile(string email, string language = "en", string timeZone = "Asia/Kolkata")
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("Email is required.");
+
+        Email = email;
+        Language = language;
+        TimeZone = timeZone;
+    }
+}
+
+public class Demo
+{
+    public static void Main()
+    {
+        var u1 = new UserProfile("gopi@example.com");
+        var u2 = new UserProfile("team@example.com", language: "ta", timeZone: "Asia/Kolkata");
+        Console.WriteLine($"{u1.Email} | {u1.Language} | {u1.TimeZone}");
+        Console.WriteLine($"{u2.Email} | {u2.Language} | {u2.TimeZone}");
+    }
+}</code></pre>
+
+          <div class="usecase">
+            <b>Real-world use case</b>
+            When building an API DTO or config object, default constructors can be useful for deserialization,
+            but domain objects (like Order, Invoice) often need mandatory inputs to stay valid.
+          </div>
+
+          <div class="note note-green">
+            <b>Beginner Tip</b>
+            If a value is mandatory, make it mandatory in the constructor—don’t “hope” callers remember to set it later.
+          </div>
+
+          <div class="note note-purple">
+            <b>Advanced Note</b>
+            In modern C#, consider records or required members when modeling data, but still use constructors for invariants and validation.
+          </div>
+
+          <div class="nav-btns">
+            <a class="btn" href="#t06-constructor-purpose">❮ Previous</a>
+            <a class="btn" href="#t06-overloaded-constructors">Next ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Subtopic 3
+      ========================================================= -->
+      <section class="section" id="t06-overloaded-constructors">
+        <div class="sec-head"><h2>Overloaded Constructors (Multiple Ways to Create an Object)</h2></div>
+        <div class="sec-body">
+          <p>
+            <span class="tt" data-tip="Having multiple methods with the same name but different parameter lists. It improves API usability but should be used carefully to avoid confusion.">Overloading</span> for constructors means providing multiple ways to create the same <span class="tt" data-tip="An instance of a class created in memory. Objects hold state and can perform behavior through methods defined by their class.">Object</span> with different inputs.<br>
+            Overloads improve usability (callers can pick the “closest” option).<br>
+            But too many overloads can confuse the API, especially when parameters look similar (string vs string).<br>
+            Keep overloads purposeful and avoid duplicating logic in each constructor body.<br>
+            When overloads grow, consider named parameters or a factory method for clarity.
+          </p>
+
+          <pre class="ascii">Overload Mindset
+----------------
+Goal: "Make the easy thing easy"
+Create options:
+ - minimal info
+ - full info
+ - convenience versions
+But centralize logic to avoid repeated code.</pre>
+
+          <div class="example">
+            <div class="ex-title">Example (Multiple creation paths)</div>
+            <div class="k">A Product can be created with just name+price, or with name+price+sku.</div>
+          </div>
+
+          <pre class="code"><code>using System;
+
+public class Product
+{
+    public string Name { get; }
+    public decimal Price { get; }
+    public string Sku { get; }
+
+    // Overload 1: minimal
+    public Product(string name, decimal price)
+        : this(name, price, sku: "NA")
+    {
+    }
+
+    // Overload 2: full
+    public Product(string name, decimal price, string sku)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Name is required.");
+
+        if (price &lt;= 0)
+            throw new ArgumentOutOfRangeException(nameof(price), "Price must be positive.");
+
+        Name = name;
+        Price = price;
+        Sku = string.IsNullOrWhiteSpace(sku) ? "NA" : sku;
+    }
+}</code></pre>
+
+          <div class="usecase">
+            <b>Real-world use case</b>
+            In an e-commerce system, you might create a Product with only “name + price” for internal drafts,
+            but require “name + price + sku” for published catalog items.
+          </div>
+
+          <div class="note note-green">
+            <b>Beginner Tip</b>
+            If you write the same validation in two constructors, you are already drifting toward bugs. Centralize that logic.
+          </div>
+
+          <div class="note note-purple">
+            <b>Advanced Note</b>
+            Be careful with overloads that differ only by optional parameters; ambiguous calls can happen when types overlap (like int vs long, or null).
+          </div>
+
+          <div class="nav-btns">
+            <a class="btn" href="#t06-default-and-parameterized">❮ Previous</a>
+            <a class="btn" href="#t06-constructor-chaining">Next ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Subtopic 4
+      ========================================================= -->
+      <section class="section" id="t06-constructor-chaining">
+        <div class="sec-head"><h2>Constructor Chaining (this(...) and base(...))</h2></div>
+        <div class="sec-body">
+          <p>
+            Constructor chaining with <span class="tt" data-tip="A special method that runs when an object is created. It sets initial state and ensures the object starts valid. Constructors don’t have return types.">Constructor</span> calls lets you reuse initialization logic instead of repeating it.<br>
+            Use this(...) to delegate to another constructor in the same class (best for shared validation).<br>
+            Use base(...) to pass values to a parent class constructor (important with inheritance).<br>
+            Chaining creates a single “source of truth” for object setup, reducing mistakes.<br>
+            The best pattern is: simplest constructor delegates to the most complete constructor.
+          </p>
+
+          <pre class="ascii">Chaining Flow
+-------------
+Ctor A (few inputs)
+   |
+   v  this(...)
+Ctor B (more inputs)
+   |
+   v  base(...)
+Base class ctor
+   |
+   v
+Object ready</pre>
+
+          <div class="example">
+            <div class="ex-title">Example (this(...) and base(...))</div>
+            <div class="k">A PremiumCustomer extends Customer and ensures base setup happens first.</div>
+          </div>
+
+          <pre class="code"><code>using System;
+
+public class Customer
+{
+    public string Name { get; }
+    public string Email { get; }
+
+    public Customer(string name, string email)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Name is required.");
+
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("Email is required.");
+
+        Name = name;
+        Email = email;
+    }
+
+    public Customer(string name) : this(name, email: "unknown@local")
+    {
+    }
+}
+
+public class PremiumCustomer : Customer
+{
+    public int LoyaltyPoints { get; }
+
+    public PremiumCustomer(string name, string email, int loyaltyPoints)
+        : base(name, email) // base(...) chaining
+    {
+        if (loyaltyPoints &lt; 0) throw new ArgumentOutOfRangeException(nameof(loyaltyPoints));
+        LoyaltyPoints = loyaltyPoints;
+    }
+}</code></pre>
+
+          <div class="usecase">
+            <b>Real-world use case</b>
+            When you have “basic user” and “paid user” classes, chaining ensures all users get the same core validation rules,
+            and paid users add extra setup safely.
+          </div>
+
+          <div class="note note-green">
+            <b>Beginner Tip</b>
+            When you feel like copy-pasting constructor code, switch to this(...) chaining.
+          </div>
+
+          <div class="note note-purple">
+            <b>Advanced Note</b>
+            In inheritance, the base constructor runs before the derived constructor body. Design base constructors to enforce core invariants.
+          </div>
+
+          <div class="nav-btns">
+            <a class="btn" href="#t06-overloaded-constructors">❮ Previous</a>
+            <a class="btn" href="#t06-static-constructors">Next ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Subtopic 5
+      ========================================================= -->
+      <section class="section" id="t06-static-constructors">
+        <div class="sec-head"><h2>Static Constructors (One-Time Type Initialization)</h2></div>
+        <div class="sec-body">
+          <p>
+            A <span class="tt" data-tip="A keyword meaning the member belongs to the type itself, not to an instance. Static members are shared across all objects of that class.">static</span> constructor runs once per type (not per object) before the type is used.<br>
+            It’s ideal for initializing shared, read-only resources like lookup tables or cached configuration.<br>
+            It has no access modifiers and takes no parameters, so its job must be deterministic and safe.<br>
+            If it throws an <span class="tt" data-tip="A runtime error object that represents something that went wrong. Exceptions can be caught and handled, but they should not be used as normal control flow.">Exception</span>, the type becomes unusable for the rest of the app lifetime.<br>
+            Keep it fast: do not do networking or heavy disk operations inside it.
+          </p>
+
+          <pre class="ascii">When does a static constructor run?
+-----------------------------------
+First access to the type:
+ - new TypeName()
+ - TypeName.StaticMember
+ - typeof(TypeName)
+   |
+   v
+[static ctor runs ONCE]
+   |
+   v
+Type ready for use</pre>
+
+          <div class="example">
+            <div class="ex-title">Example (Loading a shared lookup)</div>
+            <div class="k">Currency symbols loaded once and reused across all objects.</div>
+          </div>
+
+          <pre class="code"><code>using System;
+using System.Collections.Generic;
+
+public class Currency
+{
+    private static readonly Dictionary&lt;string, string&gt; _symbols;
+
+    static Currency()
+    {
+        // Safe, small, deterministic initialization
+        _symbols = new Dictionary&lt;string, string&gt;(StringComparer.OrdinalIgnoreCase)
+        {
+            { "INR", "₹" },
+            { "USD", "$" },
+            { "EUR", "€" }
+        };
+    }
+
+    public static string SymbolFor(string code)
+    {
+        return _symbols.TryGetValue(code, out var s) ? s : "?";
+    }
+}
+
+public class Demo
+{
+    public static void Main()
+    {
+        Console.WriteLine(Currency.SymbolFor("INR"));
+        Console.WriteLine(Currency.SymbolFor("USD"));
+    }
+}</code></pre>
+
+          <div class="usecase">
+            <b>Real-world use case</b>
+            In a logging library, you might build a shared “level-to-color” map once.
+            Every log call uses that map without rebuilding it.
+          </div>
+
+          <div class="note note-green">
+            <b>Beginner Tip</b>
+            Use static constructors only when you truly need one-time type setup. For simple defaults, normal static fields are enough.
+          </div>
+
+          <div class="note note-purple">
+            <b>Advanced Note</b>
+            Static constructors are thread-safe by runtime design, which can help you implement safe lazy initialization patterns.
+          </div>
+
+          <div class="nav-btns">
+            <a class="btn" href="#t06-constructor-chaining">❮ Previous</a>
+            <a class="btn" href="#t06-object-initializers">Next ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Subtopic 6
+      ========================================================= -->
+      <section class="section" id="t06-object-initializers">
+        <div class="sec-head"><h2>Object Initializers (Readable Property-Based Setup)</h2></div>
+        <div class="sec-body">
+          <p>
+            Object initializers let you create an <span class="tt" data-tip="An instance of a class created in memory. Objects hold state and can perform behavior through methods defined by their class.">Object</span> and set properties in a clean, readable block.<br>
+            They work best for “data holder” objects where you don’t need strict constructor-only rules.<br>
+            However, initializers do not replace constructor validation for invariants that must always hold.<br>
+            A good balance is: constructor enforces core rules, initializer sets optional details.<br>
+            This improves readability in code that creates many objects (tests, seeds, mappings).
+          </p>
+
+          <pre class="ascii">Initializer Idea
+----------------
+new Type(args)  +  { Property = value, ... }
+   |                   |
+   v                   v
+Constructor rules   Optional setup</pre>
+
+          <div class="example">
+            <div class="ex-title">Example (Readable setup)</div>
+            <div class="k">Create a support ticket: required fields via constructor, optional fields via initializer.</div>
+          </div>
+
+          <pre class="code"><code>using System;
+
+public class SupportTicket
+{
+    public string Title { get; }
+    public string CustomerEmail { get; }
+    public string Priority { get; set; } = "Normal";
+    public string AssignedTo { get; set; } = "Unassigned";
+    public DateTime CreatedOn { get; } = DateTime.UtcNow;
+
+    public SupportTicket(string title, string customerEmail)
+    {
+        if (string.IsNullOrWhiteSpace(title)) throw new ArgumentException("Title is required.");
+        if (string.IsNullOrWhiteSpace(customerEmail)) throw new ArgumentException("CustomerEmail is required.");
+        Title = title;
+        CustomerEmail = customerEmail;
+    }
+}
+
+public class Demo
+{
+    public static void Main()
+    {
+        var ticket = new SupportTicket("Login not working", "user@example.com")
+        {
+            Priority = "High",
+            AssignedTo = "SupportAgent-12"
+        };
+
+        Console.WriteLine(ticket.Title + " | " + ticket.Priority + " | " + ticket.AssignedTo);
+    }
+}</code></pre>
+
+          <div class="usecase">
+            <b>Real-world use case</b>
+            In unit tests, object initializers make test data readable:
+            you can quickly see which properties matter without long constructor parameter lists.
+          </div>
+
+          <div class="note note-green">
+            <b>Beginner Tip</b>
+            Use object initializers for optional properties. Keep required rules in the constructor.
+          </div>
+
+          <div class="note note-purple">
+            <b>Advanced Note</b>
+            For immutable designs, prefer constructor-only assignment + read-only properties, or use records with init-only properties.
+          </div>
+
+          <div class="nav-btns">
+            <a class="btn" href="#t06-static-constructors">❮ Previous</a>
+            <a class="btn" href="#t06-constructor-best-practices">Next ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Subtopic 7
+      ========================================================= -->
+      <section class="section" id="t06-constructor-best-practices">
+        <div class="sec-head"><h2>Best Practices (Validation, Exceptions, Avoid Heavy Work)</h2></div>
+        <div class="sec-body">
+          <p>
+            Constructors should validate inputs and fail fast with a clear <span class="tt" data-tip="A runtime error object that represents something that went wrong. Exceptions can be caught and handled, but they should not be used as normal control flow.">Exception</span> message.<br>
+            Keep them small: set fields, enforce invariants, and avoid slow operations (I/O, web calls, database queries).<br>
+            Prefer <span class="tt" data-tip="A field that can be assigned only during initialization or in the constructor. It supports runtime-known constants while still preventing later modification.">readonly</span> fields for values that must never change after creation.<br>
+            If you must compute something expensive, delay it (lazy) or move it to a separate method or factory.<br>
+            Always keep object state consistent: if validation fails, don’t partially assign and continue.
+          </p>
+
+          <pre class="ascii">Constructor Safety Checklist
+----------------------------
+[ ] Validate required inputs
+[ ] Enforce invariants
+[ ] Assign fields/properties consistently
+[ ] Keep it fast (no heavy work)
+[ ] Prefer readonly for immutable state
+[ ] Clear error messages</pre>
+
+          <div class="example">
+            <div class="ex-title">Example (Validation + readonly)</div>
+            <div class="k">An Order must have an ID and at least one item. We keep ID immutable.</div>
+          </div>
+
+          <pre class="code"><code>using System;
+using System.Collections.Generic;
+
+public class Order
+{
+    private readonly string _orderId;
+    public IReadOnlyList&lt;string&gt; Items { get; }
+
+    public Order(string orderId, List&lt;string&gt; items)
+    {
+        if (string.IsNullOrWhiteSpace(orderId))
+            throw new ArgumentException("OrderId is required.");
+
+        if (items == null || items.Count == 0)
+            throw new ArgumentException("Order must contain at least one item.");
+
+        _orderId = orderId;
+        Items = items.AsReadOnly();
+    }
+}</code></pre>
+
+          <div class="usecase">
+            <b>Real-world use case</b>
+            In microservices, constructors should not call other services.
+            If an Order needs product prices, fetch them outside and pass the values in—this keeps creation reliable and testable.
+          </div>
+
+          <div class="note note-green">
+            <b>Beginner Tip</b>
+            If your constructor has more than ~10 lines of logic, it’s a signal to simplify or move work elsewhere.
+          </div>
+
+          <div class="note note-purple">
+            <b>Advanced Note</b>
+            Consider “invariants-first design”: define the rules of your object first, then write constructors that guarantee those rules.
+          </div>
+
+          <div class="nav-btns">
+            <a class="btn" href="#t06-object-initializers">❮ Previous</a>
+            <a class="btn" href="#t06-factory-vs-constructor">Next ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Subtopic 8
+      ========================================================= -->
+      <section class="section" id="t06-factory-vs-constructor">
+        <div class="sec-head"><h2>Real-World Pattern: Factory Method vs Constructor</h2></div>
+        <div class="sec-body">
+          <p>
+            A <span class="tt" data-tip="A creation technique where a named method returns an object, often hiding complex rules or picking a specific subtype. It improves clarity when constructors become confusing.">Factory Method</span> can be clearer than a constructor when creation has rules or multiple possible outcomes.<br>
+            Constructors are great when “new” is straightforward and always returns the same type in a valid state.<br>
+            Factories shine when you need named creation (FromEmail, FromJson), caching, or choosing a subtype based on inputs.<br>
+            They also help when you want to return a “failure” result without throwing exceptions for normal invalid input.<br>
+            In practice, keep constructors simple and use factories for complex creation workflows.
+          </p>
+
+          <pre class="ascii">Constructor vs Factory
+----------------------
+new X(...)                X.Create(...)
+ - simple creation         - named creation intent
+ - always same type        - can pick subtype
+ - validation + setup      - can cache, log, parse
+ - throws on invalid       - can return result object</pre>
+
+          <div class="example">
+            <div class="ex-title">Example (Factory for parsing safely)</div>
+            <div class="k">We create a Money object only when currency + amount are valid, without crashing the app.</div>
+          </div>
+
+          <pre class="code"><code>using System;
+
+public class Money
+{
+    public decimal Amount { get; }
+    public string CurrencyCode { get; }
+
+    private Money(decimal amount, string currencyCode)
+    {
+        Amount = amount;
+        CurrencyCode = currencyCode;
+    }
+
+    public static bool TryCreate(decimal amount, string currencyCode, out Money money)
+    {
+        money = null;
+
+        if (amount &lt; 0) return false;
+        if (string.IsNullOrWhiteSpace(currencyCode)) return false;
+
+        money = new Money(amount, currencyCode.Trim().ToUpperInvariant());
+        return true;
+    }
+}
+
+public class Demo
+{
+    public static void Main()
+    {
+        if (Money.TryCreate(199.99m, "inr", out var m))
+            Console.WriteLine(m.Amount + " " + m.CurrencyCode);
+        else
+            Console.WriteLine("Invalid money input");
+    }
+}</code></pre>
+
+          <div class="usecase">
+            <b>Real-world use case</b>
+            In a file-import pipeline, factories can parse rows safely:
+            invalid rows return false (or a Result object) while the import continues with error reporting.
+          </div>
+
+          <div class="note note-green">
+            <b>Beginner Tip</b>
+            If you want your creation call to “read like English”, use a factory name (Create, FromEmail, FromJson).
+          </div>
+
+          <div class="note note-purple">
+            <b>Advanced Note</b>
+            Factories pair well with dependency injection and testing because you can separate object creation policy from object behavior.
+          </div>
+
+          <div class="nav-btns">
+            <a class="btn" href="#t06-constructor-best-practices">❮ Previous</a>
+            <a class="btn" href="#next-subtopic">Next ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Placeholder anchor required by Prompt v3 -->
+      <a id="next-subtopic"></a>
+
+      <!-- =========================================================
+           FAQs
+      ========================================================= -->
+      <section class="card" id="faqs">
+        <h2>FAQs</h2>
+
+        <details>
+          <summary>Do constructors return a value?</summary>
+          <div class="k">No. A constructor does not have a return type. Its job is to initialize the object so it is ready for use.</div>
+        </details>
+
+        <details>
+          <summary>When should I throw an exception inside a constructor?</summary>
+          <div class="k">Throw when the input violates rules that must always be true (invariants). This prevents invalid objects from existing.</div>
+        </details>
+
+        <details>
+          <summary>Is a static constructor mandatory?</summary>
+          <div class="k">No. Use it only when the type needs one-time initialization before use, especially for shared lookups or cached configuration.</div>
+        </details>
+
+        <details>
+          <summary>Should I prefer object initializers over constructors?</summary>
+          <div class="k">Use initializers for optional properties and readability, but keep mandatory rules in constructors (or factories).</div>
+        </details>
+
+        <details>
+          <summary>When do factories help the most?</summary>
+          <div class="k">When creation is complex (parsing, caching, subtype selection), or when you want named creation for clarity (FromJson, CreatePremium).</div>
+        </details>
+      </section>
+
+      <!-- =========================================================
+           Interview Questions
+      ========================================================= -->
+      <section class="card" id="interview-questions">
+        <h2>Interview Questions</h2>
+
+        <ol>
+          <li>
+            <b>What is the purpose of a constructor?</b><br>
+            <span class="k">To ensure an object starts in a valid state by initializing fields/properties and enforcing invariants.</span>
+          </li>
+          <li>
+            <b>Default constructor vs parameterized constructor — when do you use each?</b><br>
+            <span class="k">Default when safe defaults exist; parameterized when required inputs are needed to keep the object valid.</span>
+          </li>
+          <li>
+            <b>What is constructor chaining and why is it useful?</b><br>
+            <span class="k">Using this(...) or base(...) to reuse setup logic and avoid duplication, especially with multiple overloads and inheritance.</span>
+          </li>
+          <li>
+            <b>What are the rules for static constructors?</b><br>
+            <span class="k">No parameters, no access modifier, runs once per type, should be fast and safe; if it throws, the type becomes unusable.</span>
+          </li>
+          <li>
+            <b>When would you prefer a factory method over a constructor?</b><br>
+            <span class="k">When creation needs naming clarity, parsing/caching, subtype selection, or “try-create” semantics without exceptions for normal invalid input.</span>
+          </li>
+          <li>
+            <b>How do readonly fields relate to constructor design?</b><br>
+            <span class="k">Readonly fields can only be assigned at initialization or inside constructors, supporting immutability and safety.</span>
+          </li>
+          <li>
+            <b>What are common constructor anti-patterns?</b><br>
+            <span class="k">Doing network/database work, heavy file IO, starting background threads, or making the constructor mutate external state.</span>
+          </li>
+        </ol>
+      </section>
+
+      <!-- =========================================================
+           Summary
+      ========================================================= -->
+      <section class="card" id="summary">
+        <h2>Summary</h2>
+        <ul>
+          <li>Constructors enforce “valid from birth” objects by validating inputs and assigning initial state.</li>
+          <li>Use overloads + chaining to offer multiple creation paths without duplicating logic.</li>
+          <li>Static constructors handle one-time type initialization; keep them safe and fast.</li>
+          <li>Object initializers improve readability for optional property setup.</li>
+          <li>Factories are best for complex creation: parsing, caching, subtype selection, or TryCreate patterns.</li>
+        </ul>
+      </section>
+
+      <!-- =========================================================
+           MCQ (5–10)
+      ========================================================= -->
+      <section class="card" id="mcq">
+        <h2>MCQ (Choose the best answer)</h2>
+
+        <ol>
+          <li>
+            <b>What is the primary goal of a constructor?</b>
+            <div class="k">A) Render UI  B) Initialize object state and enforce invariants  C) Query a database  D) Start threads</div>
+            <details><summary>Answer</summary><div class="k">B</div></details>
+          </li>
+          <li>
+            <b>Which statement about static constructors is correct?</b>
+            <div class="k">A) They can take parameters  B) They run once per object  C) They run once per type before first use  D) They must be public</div>
+            <details><summary>Answer</summary><div class="k">C</div></details>
+          </li>
+          <li>
+            <b>Constructor chaining in the same class is done using:</b>
+            <div class="k">A) base(...)  B) this(...)  C) new(...)  D) typeof(...)</div>
+            <details><summary>Answer</summary><div class="k">B</div></details>
+          </li>
+          <li>
+            <b>When should you avoid a default constructor?</b>
+            <div class="k">A) When safe defaults exist  B) When object must have mandatory values to be valid  C) When you want readability  D) When using strings</div>
+            <details><summary>Answer</summary><div class="k">B</div></details>
+          </li>
+          <li>
+            <b>What is a common anti-pattern in constructors?</b>
+            <div class="k">A) Assigning fields  B) Validating inputs  C) Making network calls  D) Using readonly fields</div>
+            <details><summary>Answer</summary><div class="k">C</div></details>
+          </li>
+          <li>
+            <b>Object initializers are best used for:</b>
+            <div class="k">A) Mandatory invariants  B) Optional property setup and readability  C) JIT compilation  D) Garbage collection</div>
+            <details><summary>Answer</summary><div class="k">B</div></details>
+          </li>
+          <li>
+            <b>A factory method is especially useful when:</b>
+            <div class="k">A) Creation is always trivial  B) You need named creation/parsing/caching  C) You want fewer methods  D) You only build console apps</div>
+            <details><summary>Answer</summary><div class="k">B</div></details>
+          </li>
+          <li>
+            <b>Readonly fields can be assigned:</b>
+            <div class="k">A) Anywhere  B) Only in loops  C) Only at initialization or in constructors  D) Only in static methods</div>
+            <details><summary>Answer</summary><div class="k">C</div></details>
+          </li>
+        </ol>
+      </section>
+
+      <!-- =========================================================
+           Placeholder: Downloadable ZIP/PPT/DOC
+      ========================================================= -->
+      <section class="card" id="downloads">
+        <h2>Downloadable ZIP / PPT / DOC (Placeholder)</h2>
+        <p class="k">
+          Placeholder area for your course packaging links. (No external links used here.)
+        </p>
+        <div class="example">
+          <div class="ex-title">Coming Soon</div>
+          <ul style="margin:0; padding-left:18px;">
+            <li>✅ Source Code ZIP (constructors-examples.zip)</li>
+            <li>✅ Slides PPT (06-constructors.pptx)</li>
+            <li>✅ Notes DOC (06-constructors.docx)</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Glossary (Tooltips)
+      ========================================================= -->
+      <section class="card" id="glossary-tooltips">
+        <h2>Glossary (Tooltips)</h2>
+        <p class="k">Terms shown with dotted underline in the page text use CSS-only tooltips. Here are the same definitions in a table.</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width:26%;">Term</th>
+              <th>Tooltip Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Constructor</td>
+              <td>A special method that runs when an object is created. It sets initial state and ensures the object starts valid. Constructors don’t have return types.</td>
+            </tr>
+            <tr>
+              <td>Object</td>
+              <td>An instance of a class created in memory. Objects hold state and can perform behavior through methods defined by their class.</td>
+            </tr>
+            <tr>
+              <td>Encapsulation</td>
+              <td>Keeping an object’s internal state protected and exposing safe ways to interact with it. You typically use private fields and public methods/properties to enforce rules.</td>
+            </tr>
+            <tr>
+              <td>Exception</td>
+              <td>A runtime error object that represents something that went wrong. Exceptions can be caught and handled, but they should not be used as normal control flow.</td>
+            </tr>
+            <tr>
+              <td>Parameter</td>
+              <td>A variable in a method definition that receives input from the caller. Parameters define what data a method needs to do its job.</td>
+            </tr>
+            <tr>
+              <td>Overloading</td>
+              <td>Having multiple methods with the same name but different parameter lists. It improves API usability but should be used carefully to avoid confusion.</td>
+            </tr>
+            <tr>
+              <td>static</td>
+              <td>A keyword meaning the member belongs to the type itself, not to an instance. Static members are shared across all objects of that class.</td>
+            </tr>
+            <tr>
+              <td>readonly</td>
+              <td>A field that can be assigned only during initialization or in the constructor. It supports runtime-known constants while still preventing later modification.</td>
+            </tr>
+            <tr>
+              <td>Factory Method</td>
+              <td>A creation technique where a named method returns an object, often hiding complex rules or picking a specific subtype. It improves clarity when constructors become confusing.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- =========================================================
+           PRACTICE SECTION (REQUIRED)
+      ========================================================= -->
+      <section class="card" id="practice-coding-questions">
+        <h2>To Become Best coder Practice this</h2>
+        <p class="k">
+          15 coding questions (5 Easy / 5 Medium / 5 Hard). Each includes Problem, Input/Output, Example, Constraints, and a Hint.
+        </p>
+
+        <h3>Easy (5)</h3>
+
+        <div class="example">
+          <div class="ex-title">Easy 1 — Safe Default Constructor</div>
+          <b>Problem:</b> Create a class Student with a default constructor that sets Name = "Unknown" and Age = 18. Print the created student.<br>
+          <b>Input/Output:</b> Input: none. Output: Name and Age printed.<br>
+          <b>Example Input/Output:</b> Input: — | Output: <span class="k">Unknown 18</span><br>
+          <b>Constraints:</b> Use a default constructor. Keep fields private and expose read-only properties.<br>
+          <b>Hint:</b> Assign defaults in the constructor body.
+        </div>
+
+        <div class="example">
+          <div class="ex-title">Easy 2 — Parameterized Constructor Basics</div>
+          <b>Problem:</b> Create a Rectangle class with constructor (width, height). Add Area() method and print the area.<br>
+          <b>Input/Output:</b> Input: two integers. Output: area as integer.<br>
+          <b>Example Input/Output:</b> Input: <span class="k">4 5</span> | Output: <span class="k">20</span><br>
+          <b>Constraints:</b> width &gt; 0, height &gt; 0.<br>
+          <b>Hint:</b> Validate inputs in constructor; throw exception if invalid.
+        </div>
+
+        <div class="example">
+          <div class="ex-title">Easy 3 — Constructor Validation (Non-empty)</div>
+          <b>Problem:</b> Create a Book class with Title and Author. Constructor should reject empty Title/Author.<br>
+          <b>Input/Output:</b> Input: two strings. Output: print “Created” or print error message.<br>
+          <b>Example Input/Output:</b> Input: <span class="k">"Clean Code" "Robert C. Martin"</span> | Output: <span class="k">Created</span><br>
+          <b>Constraints:</b> No null/whitespace allowed.<br>
+          <b>Hint:</b> Use string.IsNullOrWhiteSpace checks.
+        </div>
+
+        <div class="example">
+          <div class="ex-title">Easy 4 — Overloaded Constructors (2 options)</div>
+          <b>Problem:</b> Create an Employee class. Overload constructors: (name) and (name, salary). Default salary = 25000 when not provided.<br>
+          <b>Input/Output:</b> Input: name and optional salary. Output: print employee details.<br>
+          <b>Example Input/Output:</b> Input: <span class="k">"Asha"</span> | Output: <span class="k">Asha 25000</span><br>
+          <b>Constraints:</b> salary &gt;= 0.<br>
+          <b>Hint:</b> Use this(name, 25000) in the short constructor.
+        </div>
+
+        <div class="example">
+          <div class="ex-title">Easy 5 — Object Initializer Practice</div>
+          <b>Problem:</b> Create a Course class with required constructor (title). Add optional properties DurationWeeks and TrainerName. Use object initializer to set optional values.<br>
+          <b>Input/Output:</b> Input: title + optional values. Output: print course summary.<br>
+          <b>Example Input/Output:</b> Input: <span class="k">"C# Basics", DurationWeeks=6, TrainerName="Gopi"</span> | Output: <span class="k">C# Basics 6 Gopi</span><br>
+          <b>Constraints:</b> title cannot be empty.<br>
+          <b>Hint:</b> Use new Course("...") { DurationWeeks = 6, TrainerName = "..." }.
+        </div>
+
+        <h3>Medium (5)</h3>
+
+        <div class="example">
+          <div class="ex-title">Medium 1 — Constructor Chaining for Shared Validation</div>
+          <b>Problem:</b> Create a User class with constructors: (email) and (email, phone). Both must validate email; phone is optional. Avoid duplicate validation code.<br>
+          <b>Input/Output:</b> Input: email and optional phone. Output: print “OK” if created, else error.<br>
+          <b>Example Input/Output:</b> Input: <span class="k">"a@b.com"</span> | Output: <span class="k">OK</span><br>
+          <b>Constraints:</b> email must contain '@' and '.' after '@'.<br>
+          <b>Hint:</b> Put validation in the “full” constructor and call it via this(...).
+        </div>
+
+        <div class="example">
+          <div class="ex-title">Medium 2 — Immutable Object with readonly</div>
+          <b>Problem:</b> Build an ApiKey class with readonly Key and CreatedOn. Key must be 32 chars. Do not allow changing after creation.<br>
+          <b>Input/Output:</b> Input: key string. Output: print “Valid” + CreatedOn, else error.<br>
+          <b>Example Input/Output:</b> Input: <span class="k">"aaaaaaaa... (32 chars)"</span> | Output: <span class="k">Valid</span><br>
+          <b>Constraints:</b> Exactly 32 characters, no whitespace.<br>
+          <b>Hint:</b> Validate in constructor; expose get-only properties.
+        </div>
+
+        <div class="example">
+          <div class="ex-title">Medium 3 — Static Constructor Lookup</div>
+          <b>Problem:</b> Create a TaxSlab class that initializes a static dictionary (state → tax%) once. Add a method GetRate(state).<br>
+          <b>Input/Output:</b> Input: state code. Output: tax rate or 0 if not found.<br>
+          <b>Example Input/Output:</b> Input: <span class="k">"TN"</span> | Output: <span class="k">0.18</span><br>
+          <b>Constraints:</b> Must use static constructor for one-time initialization.<br>
+          <b>Hint:</b> Use Dictionary with StringComparer.OrdinalIgnoreCase.
+        </div>
+
+        <div class="example">
+          <div class="ex-title">Medium 4 — Base Constructor Usage (Inheritance)</div>
+          <b>Problem:</b> Create a base class Vehicle (regNo required). Create Car : Vehicle (seats required). Ensure regNo validation happens in base constructor.<br>
+          <b>Input/Output:</b> Input: regNo, seats. Output: print “Created Car”.<br>
+          <b>Example Input/Output:</b> Input: <span class="k">"TN09AB1234" 5</span> | Output: <span class="k">Created Car</span><br>
+          <b>Constraints:</b> seats &gt; 0; regNo not empty.<br>
+          <b>Hint:</b> Use : base(regNo) and validate in base.
+        </div>
+
+        <div class="example">
+          <div class="ex-title">Medium 5 — TryCreate Factory (No Exceptions for Normal Invalid Input)</div>
+          <b>Problem:</b> Create a Password class with private constructor. Provide TryCreate(string raw, out Password p) that returns false if raw is weak (len &lt; 8 or no digit).<br>
+          <b>Input/Output:</b> Input: raw password. Output: true/false + message.<br>
+          <b>Example Input/Output:</b> Input: <span class="k">"Hello123"</span> | Output: <span class="k">true</span><br>
+          <b>Constraints:</b> Do not throw for weak password; return false.<br>
+          <b>Hint:</b> Keep constructor private, validate in factory.
+        </div>
+
+        <h3>Hard (5)</h3>
+
+        <div class="example">
+          <div class="ex-title">Hard 1 — Thread-safe Singleton using static constructor</div>
+          <b>Problem:</b> Implement a Logger singleton where Instance is created once safely using a static constructor. Provide Log(string msg).<br>
+          <b>Input/Output:</b> Input: messages. Output: printed with timestamp.<br>
+          <b>Example Input/Output:</b> Input: <span class="k">"Started"</span> | Output: <span class="k">[time] Started</span><br>
+          <b>Constraints:</b> No locks in user code; rely on static initialization safety.<br>
+          <b>Hint:</b> Use a static readonly field initialized in static ctor.
+        </div>
+
+        <div class="example">
+          <div class="ex-title">Hard 2 — Enforcing Invariants for BankAccount Operations</div>
+          <b>Problem:</b> Create BankAccount where constructor enforces valid initial state and methods enforce invariants: Deposit(&gt;0), Withdraw(&gt;0 and not exceeding balance).<br>
+          <b>Input/Output:</b> Input: opening balance + operations list. Output: final balance or error.<br>
+          <b>Example Input/Output:</b> Input: <span class="k">1000, Withdraw 200, Deposit 50</span> | Output: <span class="k">850</span><br>
+          <b>Constraints:</b> No negative balance allowed.<br>
+          <b>Hint:</b> Constructor validates opening; methods validate actions.
+        </div>
+
+        <div class="example">
+          <div class="ex-title">Hard 3 — Factory chooses subtype based on input</div>
+          <b>Problem:</b> Create abstract Notification (Send). Create EmailNotification and SmsNotification. Build NotificationFactory.Create(type, target) that returns correct subtype.<br>
+          <b>Input/Output:</b> Input: type (“email”/“sms”), target. Output: “Sent”.<br>
+          <b>Example Input/Output:</b> Input: <span class="k">email user@example.com</span> | Output: <span class="k">Sent</span><br>
+          <b>Constraints:</b> Invalid type should return null or a failure result (your choice).<br>
+          <b>Hint:</b> Keep constructors simple; encode selection logic in factory.
+        </div>
+
+        <div class="example">
+          <div class="ex-title">Hard 4 — Building an Object from Config (Validation + Defaults)</div>
+          <b>Problem:</b> Create AppSettings with required constructor (appName) and optional values (maxRetries, timeoutMs). Provide static FromDictionary(Dictionary&lt;string,string&gt;) that validates and applies defaults.<br>
+          <b>Input/Output:</b> Input: key/value pairs. Output: settings summary or errors list.<br>
+          <b>Example Input/Output:</b> Input: <span class="k">{ appName: "ItTechGenie", maxRetries:"3" }</span> | Output: <span class="k">ItTechGenie 3 5000</span><br>
+          <b>Constraints:</b> maxRetries 0..10, timeoutMs 100..60000.<br>
+          <b>Hint:</b> Parse carefully; treat missing keys as defaults; return meaningful errors.
+        </div>
+
+        <div class="example">
+          <div class="ex-title">Hard 5 — Preventing “Half-built” Objects (Two-phase creation)</div>
+          <b>Problem:</b> Model a ReportGenerator that needs heavy data loading. Keep constructor lightweight; provide Initialize() that loads data and returns a ready status. Show usage flow without making constructor do heavy work.<br>
+          <b>Input/Output:</b> Input: data source string. Output: “Ready” then “Report generated”.<br>
+          <b>Example Input/Output:</b> Input: <span class="k">"sales.csv"</span> | Output: <span class="k">Ready → Generated</span><br>
+          <b>Constraints:</b> Constructor must not read files. Initialization must be explicit and checkable.<br>
+          <b>Hint:</b> Use a private state flag like _isReady and validate in GenerateReport().
+        </div>
+      </section>
+
+      <footer>
+        <div>© ItTechGenie • Module 06 • Constructors &amp; Object Initialization Patterns</div>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

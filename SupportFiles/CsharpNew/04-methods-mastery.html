@@ -1,0 +1,1950 @@
+<!-- File: 04-methods-mastery.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>04 - Methods Mastery: Parameters, Overloading & Recursion (ItTechGenie)</title>
+  <style>
+    :root{
+      --green:#04AA6D;
+      --bg:#ffffff;
+      --text:#1f2a33;
+      --muted:#5b6772;
+      --border:#e6e9ee;
+      --soft:#f6f7f9;
+      --example:#f1f1f1;
+      --code:#0f172a;
+      --codeText:#e5e7eb;
+      --noteBlue:#e7f3fe;
+      --noteGreen:#e8f8f1;
+      --noteRed:#fdeaea;
+      --shadow: 0 8px 20px rgba(0,0,0,.06);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.55;
+    }
+    .topbar{
+      position:sticky; top:0; z-index:10;
+      background:var(--green);
+      color:#fff;
+      padding:12px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .brand{
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .brand .t1{font-weight:800; letter-spacing:.2px;}
+    .brand .t2{font-size:12px; opacity:.95}
+    .topbar .meta{
+      font-size:12px;
+      opacity:.95;
+      text-align:right;
+      white-space:nowrap;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 290px 1fr;
+      min-height: calc(100vh - 52px);
+    }
+    @media (max-width: 980px){
+      .layout{grid-template-columns:1fr}
+      .sidebar{position:relative; height:auto; border-right:none}
+    }
+
+    /* Sidebar (from template) */
+    .sidebar{
+      border-right:1px solid var(--border);
+      padding:14px 12px;
+      background:#fff;
+      position:sticky;
+      top:52px;
+      height: calc(100vh - 52px);
+      overflow:auto;
+    }
+    .sb-title{
+      padding:10px 10px 12px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:linear-gradient(180deg,#ffffff, #fbfbfc);
+      box-shadow: var(--shadow);
+      margin-bottom:12px;
+    }
+    .sb-brand{font-weight:900; font-size:16px}
+    .sb-course{font-size:12px; color:var(--muted); margin-top:2px}
+    .sb-section{
+      margin:14px 8px 8px;
+      font-size:12px;
+      letter-spacing:.8px;
+      color:var(--muted);
+      font-weight:800;
+    }
+    .sb-link{
+      display:block;
+      padding:9px 10px;
+      margin:4px 6px;
+      border-radius:12px;
+      color:var(--text);
+      text-decoration:none;
+      border:1px solid transparent;
+    }
+    .sb-link:hover{
+      background:var(--soft);
+      border-color:var(--border);
+    }
+    .sb-module{font-weight:650}
+    .sb-sub{padding-left:14px; font-weight:600; color:#24313b}
+    .sb-practice{font-weight:800; border-color:rgba(4,170,109,.25); background:rgba(4,170,109,.08)}
+    .sb-practice:hover{background:rgba(4,170,109,.12)}
+
+    /* Main */
+    main{
+      padding:18px 18px 60px;
+      background: #fff;
+    }
+    .container{
+      max-width: 1040px;
+      margin:0 auto;
+    }
+
+    .hero{
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:16px;
+      background:linear-gradient(180deg,#ffffff, #fbfbfc);
+      box-shadow: var(--shadow);
+    }
+    h1{margin:0 0 6px; font-size:26px; line-height:1.2}
+    .subtitle{margin:0; color:var(--muted)}
+    .chips{
+      margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;
+    }
+    .chip{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      color:#2b3a45;
+    }
+
+    .toc{
+      margin-top:14px;
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:#fff;
+      padding:14px;
+    }
+    .toc h2{margin:0 0 8px; font-size:18px}
+    .toc ul{margin:0; padding-left:18px}
+    .toc a{color:var(--green); text-decoration:none; font-weight:700}
+    .toc a:hover{text-decoration:underline}
+
+    section{
+      margin-top:18px;
+      border:1px solid var(--border);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow: var(--shadow);
+    }
+    .sec-head{
+      background:var(--green);
+      color:#fff;
+      padding:12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .sec-head h2{
+      margin:0;
+      font-size:18px;
+      line-height:1.2;
+    }
+    .sec-body{padding:14px}
+    .muted{color:var(--muted)}
+
+    .ascii{
+      background:#fff;
+      border:1px dashed var(--border);
+      border-radius:14px;
+      padding:12px;
+      overflow:auto;
+      margin:12px 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size:13px;
+      color:#111827;
+    }
+    .example{
+      background:var(--example);
+      border:1px solid #e1e1e1;
+      border-radius:14px;
+      padding:12px;
+      margin:12px 0;
+    }
+    .example .label{
+      font-weight:900;
+      margin-bottom:8px;
+      color:#111827;
+    }
+    pre.code{
+      background:var(--code);
+      color:var(--codeText);
+      border-radius:14px;
+      padding:12px;
+      overflow:auto;
+      margin:12px 0;
+      border:1px solid rgba(255,255,255,.08);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size:13px;
+    }
+    .notes{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+    @media (max-width: 860px){
+      .notes{grid-template-columns:1fr}
+    }
+    .note{
+      border-radius:14px;
+      padding:12px;
+      border:1px solid var(--border);
+      background:#fff;
+    }
+    .note .title{font-weight:900; margin:0 0 6px}
+    .note.tip{background:var(--noteGreen)}
+    .note.info{background:var(--noteBlue)}
+    .note.warn{background:var(--noteRed)}
+    .note p{margin:0}
+
+    .nav-buttons{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:14px;
+      padding-top:12px;
+      border-top:1px solid var(--border);
+    }
+    .btn{
+      display:inline-block;
+      padding:10px 12px;
+      border-radius:12px;
+      text-decoration:none;
+      font-weight:900;
+      border:1px solid var(--border);
+      background:#fff;
+      color:var(--text);
+    }
+    .btn:hover{background:var(--soft)}
+    .btn.primary{
+      border-color:rgba(4,170,109,.35);
+      background:rgba(4,170,109,.10);
+    }
+
+    /* Tooltip (Prompt v3) */
+    .tt{
+      position:relative;
+      border-bottom: 1px dotted rgba(4,170,109,.85);
+      cursor:help;
+      font-weight:800;
+    }
+    .tt::after{
+      content: attr(data-tip);
+      position:absolute;
+      left:0;
+      top:calc(100% + 8px);
+      width: min(340px, 70vw);
+      background:#0b1220;
+      color:#e5e7eb;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 10px 26px rgba(0,0,0,.18);
+      opacity:0;
+      pointer-events:none;
+      transform: translateY(-4px);
+      transition: opacity .15s ease, transform .15s ease;
+      z-index:20;
+      font-weight:600;
+      font-size:12px;
+      white-space:normal;
+    }
+    .tt::before{
+      content:"";
+      position:absolute;
+      left:14px;
+      top:calc(100% + 2px);
+      border:7px solid transparent;
+      border-bottom-color:#0b1220;
+      opacity:0;
+      transition: opacity .15s ease;
+      z-index:21;
+    }
+    .tt:hover::after, .tt:hover::before{opacity:1; transform: translateY(0)}
+
+    /* Tables */
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#fff;
+    }
+    th, td{
+      padding:10px 10px;
+      border-bottom:1px solid var(--border);
+      vertical-align:top;
+      text-align:left;
+      font-size:14px;
+    }
+    th{background:var(--soft); font-weight:900}
+    tr:last-child td{border-bottom:none}
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+    @media (max-width: 860px){
+      .grid2{grid-template-columns:1fr}
+    }
+    .card{
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:#fff;
+      padding:12px;
+    }
+    .card h3{margin:0 0 6px; font-size:16px}
+    .card p{margin:0}
+
+    .footerish{
+      margin-top:18px;
+      padding:14px;
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:linear-gradient(180deg,#ffffff,#fbfbfc);
+      box-shadow: var(--shadow);
+    }
+    .kicker{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:900;
+      letter-spacing:.8px;
+      text-transform:uppercase;
+      margin:0 0 6px;
+    }
+    .small{font-size:13px}
+    .hr{height:1px; background:var(--border); margin:14px 0}
+
+    /* Practice Q formatting */
+    .qset{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+    .q{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:12px;
+      background:#fff;
+    }
+    .q .qtop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      margin-bottom:8px;
+    }
+    .badge{
+      font-size:12px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:var(--soft);
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .q h3{margin:0; font-size:16px}
+    .q .row{
+      margin-top:8px;
+      padding:10px;
+      border-radius:12px;
+      background:var(--soft);
+      border:1px solid var(--border);
+    }
+    .q .row strong{display:inline-block; min-width:130px}
+    .q .row .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size:13px;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="t1">ItTechGenie</div>
+      <div class="t2">C# Fundamentals → Advanced</div>
+    </div>
+    <div class="meta">
+      Module 04 • Methods Mastery<br/>
+      Parameters • Overloading • Recursion
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- =========================================================
+         ItTechGenie Reusable Sidebar Template (Prompt v3 compatible)
+         - Replace {{CURRENT_TOPIC_NO}} and {{CURRENT_TOPIC_SUBTOPICS}}
+         - Keep the PRACTICE link exactly as required.
+    ========================================================= -->
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-title">
+        <div class="sb-brand">ItTechGenie</div>
+        <div class="sb-course">C# Fundamentals → Advanced</div>
+      </div>
+
+      <div class="sb-section">COURSE CONTENT</div>
+
+      <!-- Global course navigation (modules) -->
+      <a class="sb-link sb-module" href="01-kickstart.html">01. Kickstart: .NET Ecosystem</a>
+      <a class="sb-link sb-module" href="02-control-flow.html">02. Control Flow</a>
+      <a class="sb-link sb-module" href="03-oop-core.html">03. OOP Core</a>
+      <a class="sb-link sb-module" href="04-methods-mastery.html">04. Methods Mastery</a>
+      <a class="sb-link sb-module" href="05-type-conversion.html">05. Type Conversion</a>
+      <a class="sb-link sb-module" href="06-constructors.html">06. Constructors</a>
+      <a class="sb-link sb-module" href="07-properties-inheritance.html">07. Properties & Inheritance</a>
+      <a class="sb-link sb-module" href="08-abstraction-interfaces.html">08. Abstraction & Interfaces</a>
+      <a class="sb-link sb-module" href="09-namespaces-buildingblocks.html">09. Namespaces & Building Blocks</a>
+      <a class="sb-link sb-module" href="10-advanced-toolkit.html">10. Advanced Toolkit</a>
+
+      <div class="sb-section">THIS TOPIC</div>
+
+      <!-- Per-page subtopics go here (generated from course_plan.json for the current topic) -->
+      <a class="sb-link sb-sub" href="#t04-method-anatomy">Method Anatomy (Signature, Return Type, Parameters)</a>
+      <a class="sb-link sb-sub" href="#t04-static-vs-instance-methods">Static Methods vs Instance Methods (How to Call Them)</a>
+      <a class="sb-link sb-sub" href="#t04-parameters-and-returns">Parameters & Return Values (Designing Clean APIs)</a>
+      <a class="sb-link sb-sub" href="#t04-method-overloading">Method Overloading (Same Name, Different Parameters)</a>
+      <a class="sb-link sb-sub" href="#t04-optional-named-args">Optional, Named Arguments (Readable Calls)</a>
+      <a class="sb-link sb-sub" href="#t04-params-modifier">params (Variable Number of Arguments)</a>
+      <a class="sb-link sb-sub" href="#t04-ref-out-in">ref / out / in (By-Reference Parameter Patterns)</a>
+      <a class="sb-link sb-sub" href="#t04-local-functions">Local Functions & Static Local Functions</a>
+      <a class="sb-link sb-sub" href="#t04-recursion-basics">Recursion Basics (Base Case + Recursive Case)</a>
+      <a class="sb-link sb-sub" href="#t04-recursion-examples">Recursion Examples (Factorial, Fibonacci, Sum of Digits)</a>
+
+      <div class="sb-section">PRACTICE</div>
+
+      <!-- REQUIRED SIDEBAR MENU ADDITION (Prompt v3): exact text + anchor -->
+      <a class="sb-link sb-practice" href="#practice-coding-questions">
+        To Become Best coder Practice this
+      </a>
+    </aside>
+
+    <main>
+      <div class="container">
+        <!-- Required placeholder anchors -->
+        <a id="prev-subtopic"></a>
+        <a id="next-subtopic"></a>
+
+        <div class="hero">
+          <h1>Methods Mastery: Parameters, Overloading & Recursion</h1>
+          <p class="subtitle">
+            In this module, you’ll learn how to design clean <span class="tt" data-tip="A named block of code that performs an action. Methods can accept inputs and return outputs. They help reuse and organize logic.">Method</span>s,
+            pick the right <span class="tt" data-tip="A variable in a method definition that receives input from the caller. Parameters define what data a method needs to do its job.">Parameter</span> style,
+            use <span class="tt" data-tip="Having multiple methods with the same name but different parameter lists. It improves API usability but should be used carefully to avoid confusion.">Overloading</span> safely,
+            and build confidence with <span class="tt" data-tip="A technique where a method calls itself to solve a problem. It must have a base case to stop, otherwise it can cause stack overflow.">Recursion</span>.
+          </p>
+          <div class="chips">
+            <span class="chip">Clean APIs</span>
+            <span class="chip">Readable Calls</span>
+            <span class="chip">Performance Patterns</span>
+            <span class="chip">Interview Ready</span>
+          </div>
+
+          <div class="toc" aria-label="Table of contents">
+            <h2>Table of Contents</h2>
+            <ul>
+              <li><a href="#t04-method-anatomy">Method Anatomy (Signature, Return Type, Parameters)</a></li>
+              <li><a href="#t04-static-vs-instance-methods">Static Methods vs Instance Methods (How to Call Them)</a></li>
+              <li><a href="#t04-parameters-and-returns">Parameters & Return Values (Designing Clean APIs)</a></li>
+              <li><a href="#t04-method-overloading">Method Overloading (Same Name, Different Parameters)</a></li>
+              <li><a href="#t04-optional-named-args">Optional, Named Arguments (Readable Calls)</a></li>
+              <li><a href="#t04-params-modifier">params (Variable Number of Arguments)</a></li>
+              <li><a href="#t04-ref-out-in">ref / out / in (By-Reference Parameter Patterns)</a></li>
+              <li><a href="#t04-local-functions">Local Functions & Static Local Functions</a></li>
+              <li><a href="#t04-recursion-basics">Recursion Basics (Base Case + Recursive Case)</a></li>
+              <li><a href="#t04-recursion-examples">Recursion Examples (Factorial, Fibonacci, Sum of Digits)</a></li>
+              <li><a href="#faqs">FAQs</a></li>
+              <li><a href="#interview-questions">Interview Questions</a></li>
+              <li><a href="#mcq">MCQ (5–10 Questions)</a></li>
+              <li><a href="#downloads">Downloadable ZIP/PPT/DOC (Placeholder)</a></li>
+              <li><a href="#glossary-tooltips">Glossary (Tooltips)</a></li>
+              <li><a href="#practice-coding-questions">To Become Best coder Practice this</a></li>
+              <li><a href="#summary">Summary</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- 1) Method Anatomy -->
+        <!-- ===================================================== -->
+        <section id="t04-method-anatomy">
+          <div class="sec-head">
+            <h2>1) Method Anatomy (Signature, Return Type, Parameters)</h2>
+            <div class="muted">Write methods correctly + know what “signature” means</div>
+          </div>
+          <div class="sec-body">
+            <p>
+              A <span class="tt" data-tip="A named block of code that performs an action. Methods can accept inputs and return outputs. They help reuse and organize logic.">Method</span> is defined by its name, return type, and its parameter list.<br/>
+              The method <em>signature</em> is mainly the method name + parameter types/order (return type is not part of signature for overload resolution).<br/>
+              A good return type tells the caller what they get back, and avoids “mystery outputs”.<br/>
+              Keep parameters minimal and meaningful to make the API easy to test and reuse.<br/>
+              If a method does one job clearly, your code becomes readable and maintainable.
+            </p>
+
+            <pre class="ascii">Flow: Caller -> Method Call -> Execute Body -> Return Value
+        ┌────────┐   args   ┌─────────────────┐   result   ┌────────┐
+        │ Caller │ ───────> │   Method Body   │ ────────> │ Caller │
+        └────────┘          └─────────────────┘            └────────┘</pre>
+
+            <div class="example">
+              <div class="label">Example (Grey Box): Identify parts of a method</div>
+              <div class="small">
+                <strong>Name:</strong> CalculateTotal<br/>
+                <strong>Return Type:</strong> decimal<br/>
+                <strong>Parameters:</strong> price, quantity<br/>
+                <strong>Body:</strong> multiply and return
+              </div>
+            </div>
+
+            <pre class="code">using System;
+
+public class Billing
+{
+    // Return type: decimal
+    // Method name: CalculateTotal
+    // Parameters: (decimal price, int quantity)
+    public static decimal CalculateTotal(decimal price, int quantity)
+    {
+        decimal total = price * quantity;
+        return total;
+    }
+
+    public static void Main()
+    {
+        decimal bill = CalculateTotal(199.50m, 3);
+        Console.WriteLine($"Total = {bill}");
+    }
+}</pre>
+
+            <div class="grid2">
+              <div class="card">
+                <h3>Real-world use case</h3>
+                <p>
+                  In an e-commerce checkout, a method like CalculateTotal keeps billing logic in one place
+                  so UI, API, and tests all reuse the same calculation.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Design hint</h3>
+                <p>
+                  Prefer returning a value instead of printing inside the method—this keeps the method reusable
+                  and makes unit testing simpler.
+                </p>
+              </div>
+            </div>
+
+            <div class="notes">
+              <div class="note tip">
+                <p class="title">Beginner Tip</p>
+                <p>Pick method names as verbs (Calculate, Validate, Convert). It reads like a sentence.</p>
+              </div>
+              <div class="note info">
+                <p class="title">Advanced Note</p>
+                <p>Design methods to be “pure” when possible: same inputs → same output, no hidden side effects.</p>
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#prev-subtopic">◀ Previous</a>
+              <a class="btn primary" href="#t04-static-vs-instance-methods">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- 2) Static vs Instance -->
+        <!-- ===================================================== -->
+        <section id="t04-static-vs-instance-methods">
+          <div class="sec-head">
+            <h2>2) Static Methods vs Instance Methods (How to Call Them)</h2>
+            <div class="muted">Choose static/instance based on responsibility and state</div>
+          </div>
+          <div class="sec-body">
+            <p>
+              A <span class="tt" data-tip="A keyword meaning the member belongs to the type itself, not to an instance. Static members are shared across all objects of that class.">static</span> method belongs to the class, so you call it using the type name.<br/>
+              An instance method belongs to an object, so you call it on a created object (instance).<br/>
+              Use static when behavior does not depend on object state (pure utility / helper behavior).<br/>
+              Use instance methods when the method uses or changes an object’s internal data.<br/>
+              This decision affects testability, design clarity, and how state is managed.
+            </p>
+
+            <pre class="ascii">Decision guide:
+  Does it need object state?
+    Yes -> Instance method (obj.DoWork())
+    No  -> Static method   (Type.DoWork())</pre>
+
+            <div class="example">
+              <div class="label">Example (Grey Box): When to use what</div>
+              <div class="small">
+                <strong>Static:</strong> Math helpers, parsing helpers, formatting helpers<br/>
+                <strong>Instance:</strong> BankAccount.Deposit(), Cart.AddItem(), User.ChangePassword()
+              </div>
+            </div>
+
+            <pre class="code">using System;
+
+public class TemperatureConverter
+{
+    // Static: conversion does not need instance state
+    public static double CelsiusToFahrenheit(double c) => (c * 9 / 5) + 32;
+}
+
+public class BankAccount
+{
+    private decimal _balance; // object state
+
+    public BankAccount(decimal opening) { _balance = opening; }
+
+    // Instance: depends on and changes state
+    public void Deposit(decimal amount) => _balance += amount;
+
+    public decimal GetBalance() => _balance;
+}
+
+public class Demo
+{
+    public static void Main()
+    {
+        // Call static
+        Console.WriteLine(TemperatureConverter.CelsiusToFahrenheit(30));
+
+        // Call instance
+        var acc = new BankAccount(1000m);
+        acc.Deposit(250m);
+        Console.WriteLine(acc.GetBalance());
+    }
+}</pre>
+
+            <div class="grid2">
+              <div class="card">
+                <h3>Real-world use case</h3>
+                <p>
+                  In a fintech app, BankAccount methods must be instance methods because each account has its own balance state.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Common mistake</h3>
+                <p>
+                  Putting everything static makes code hard to evolve (global-like behavior). Prefer instance methods for domain objects.
+                </p>
+              </div>
+            </div>
+
+            <div class="notes">
+              <div class="note tip">
+                <p class="title">Beginner Tip</p>
+                <p>If you see “new” before calling, you’re using an instance method.</p>
+              </div>
+              <div class="note info">
+                <p class="title">Advanced Note</p>
+                <p>Static can be fine for stateless helpers, but consider dependency injection for testable services.</p>
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#t04-method-anatomy">◀ Previous</a>
+              <a class="btn primary" href="#t04-parameters-and-returns">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- 3) Parameters & Returns -->
+        <!-- ===================================================== -->
+        <section id="t04-parameters-and-returns">
+          <div class="sec-head">
+            <h2>3) Parameters & Return Values (Designing Clean APIs)</h2>
+            <div class="muted">Pass inputs and return outputs in a clean, testable way</div>
+          </div>
+          <div class="sec-body">
+            <p>
+              A <span class="tt" data-tip="A variable in a method definition that receives input from the caller. Parameters define what data a method needs to do its job.">Parameter</span> is the input a method needs to perform its job.<br/>
+              A return value is the output that should be used by the caller (not printed inside the method).<br/>
+              Prefer returning results and letting the caller decide what to do (display, store, send to API).<br/>
+              Keep parameter lists small; too many parameters usually means your method has too many responsibilities.<br/>
+              If you need multiple outputs, consider returning a tuple or a small result object (or use out in specific patterns).
+            </p>
+
+            <pre class="ascii">Clean API pattern:
+  Input parameters -> Work -> Return result
+  (No hidden reads/writes if avoidable)</pre>
+
+            <div class="example">
+              <div class="label">Example (Grey Box): “Validate + Return errors”</div>
+              <div class="small">
+                A validation method can return a boolean (valid/invalid) and a message to explain the failure.
+              </div>
+            </div>
+
+            <pre class="code">using System;
+
+public static class UserRegistration
+{
+    // Returns a bool and also returns a message (classic pattern)
+    public static bool TryValidateEmail(string email, out string message)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            message = "Email is required.";
+            return false;
+        }
+
+        if (!email.Contains("@"))
+        {
+            message = "Email must contain @.";
+            return false;
+        }
+
+        message = "OK";
+        return true;
+    }
+
+    public static void Main()
+    {
+        bool ok = TryValidateEmail("gopi.example.com", out string msg);
+        Console.WriteLine($"Valid? {ok} | Message: {msg}");
+    }
+}</pre>
+
+            <div class="grid2">
+              <div class="card">
+                <h3>Real-world use case</h3>
+                <p>
+                  In a registration API, validation methods return results instead of writing to console,
+                  so the same logic works for web, mobile, and automated tests.
+                </p>
+              </div>
+              <div class="card">
+                <h3>API cleanliness rule</h3>
+                <p>
+                  If a method name starts with “Try…”, it should not throw for normal invalid input; it should return success/failure.
+                </p>
+              </div>
+            </div>
+
+            <div class="notes">
+              <div class="note tip">
+                <p class="title">Beginner Tip</p>
+                <p>Return values are more reusable than printing. Printing is “UI logic”, not “business logic”.</p>
+              </div>
+              <div class="note info">
+                <p class="title">Advanced Note</p>
+                <p>Prefer small dedicated parameter objects when you have many related inputs (improves readability and versioning).</p>
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#t04-static-vs-instance-methods">◀ Previous</a>
+              <a class="btn primary" href="#t04-method-overloading">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- 4) Overloading -->
+        <!-- ===================================================== -->
+        <section id="t04-method-overloading">
+          <div class="sec-head">
+            <h2>4) Method Overloading (Same Name, Different Parameters)</h2>
+            <div class="muted">Build flexible methods without confusing names</div>
+          </div>
+          <div class="sec-body">
+            <p>
+              <span class="tt" data-tip="Having multiple methods with the same name but different parameter lists. It improves API usability but should be used carefully to avoid confusion.">Overloading</span> means same method name, but different parameter types or counts.<br/>
+              The compiler chooses the best match based on the call’s arguments.<br/>
+              Overloads help create friendly APIs (one concept, multiple input styles).<br/>
+              Avoid overloads that are too similar (can cause ambiguous calls and confusion).<br/>
+              Prefer overloads that clearly represent different “ways to provide the same data”.
+            </p>
+
+            <pre class="ascii">Overload resolution idea:
+  Print(5)      -> chooses Print(int)
+  Print("Hi")   -> chooses Print(string)
+  Print(5, "A") -> chooses Print(int, string)</pre>
+
+            <div class="example">
+              <div class="label">Example (Grey Box): Same intent, different inputs</div>
+              <div class="small">
+                A logging helper can accept a message, or a message + severity, without forcing different names.
+              </div>
+            </div>
+
+            <pre class="code">using System;
+
+public static class AppLogger
+{
+    public static void Log(string message)
+    {
+        Console.WriteLine($"INFO: {message}");
+    }
+
+    public static void Log(string message, string severity)
+    {
+        Console.WriteLine($"{severity.ToUpper()}: {message}");
+    }
+
+    public static void Log(Exception ex)
+    {
+        Console.WriteLine($"ERROR: {ex.Message}");
+    }
+
+    public static void Main()
+    {
+        Log("Service started");
+        Log("Disk space low", "warning");
+        Log(new InvalidOperationException("Invalid state"));
+    }
+}</pre>
+
+            <div class="grid2">
+              <div class="card">
+                <h3>Real-world use case</h3>
+                <p>
+                  In production apps, logging methods often have overloads so developers can log quickly
+                  without repeating common parameters everywhere.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Safety tip</h3>
+                <p>
+                  If you notice developers calling the wrong overload often, your overload set is probably too confusing.
+                </p>
+              </div>
+            </div>
+
+            <div class="notes">
+              <div class="note tip">
+                <p class="title">Beginner Tip</p>
+                <p>Overloads differ by parameters, not by return type.</p>
+              </div>
+              <div class="note info">
+                <p class="title">Advanced Note</p>
+                <p>Be careful with overloads involving null and optional parameters—calls can become ambiguous.</p>
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#t04-parameters-and-returns">◀ Previous</a>
+              <a class="btn primary" href="#t04-optional-named-args">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- 5) Optional + Named -->
+        <!-- ===================================================== -->
+        <section id="t04-optional-named-args">
+          <div class="sec-head">
+            <h2>5) Optional, Named Arguments (Readable Calls)</h2>
+            <div class="muted">Improve readability and reduce repetitive overloads</div>
+          </div>
+          <div class="sec-body">
+            <p>
+              Optional parameters let callers omit values when a sensible default exists.<br/>
+              Named arguments let callers specify parameter names, making calls readable and reducing mistakes.<br/>
+              Use optional parameters for stable defaults (like retryCount = 3).<br/>
+              Use named arguments when a method has multiple similar parameters (like startDay, endDay).<br/>
+              Keep optional parameters at the end of the parameter list for clarity.
+            </p>
+
+            <pre class="ascii">Readable call styles:
+  SendEmail("a@x.com", "Hi", isHtml: true)
+  BookRoom(roomId: 12, nights: 3, includeBreakfast: true)</pre>
+
+            <div class="example">
+              <div class="label">Example (Grey Box): Notification sender</div>
+              <div class="small">
+                Default retries and timeout, but allow overrides only when needed.
+              </div>
+            </div>
+
+            <pre class="code">using System;
+
+public static class Notifier
+{
+    public static void Send(string to, string message, int retryCount = 3, int timeoutSeconds = 10)
+    {
+        Console.WriteLine($"To={to} | Msg={message} | Retries={retryCount} | Timeout={timeoutSeconds}s");
+    }
+
+    public static void Main()
+    {
+        // Uses defaults
+        Send("ops@company.com", "Service healthy");
+
+        // Named args for clarity
+        Send(to: "ops@company.com", message: "Service slow", timeoutSeconds: 30, retryCount: 5);
+    }
+}</pre>
+
+            <div class="grid2">
+              <div class="card">
+                <h3>Real-world use case</h3>
+                <p>
+                  In alerting systems, defaults handle 90% of cases, while named arguments make the “special case”
+                  configuration obvious and self-documenting.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Readable API rule</h3>
+                <p>
+                  If a call looks confusing, named arguments usually make it instantly understandable.
+                </p>
+              </div>
+            </div>
+
+            <div class="notes">
+              <div class="note tip">
+                <p class="title">Beginner Tip</p>
+                <p>Named arguments reduce “what does this number mean?” confusion in method calls.</p>
+              </div>
+              <div class="note info">
+                <p class="title">Advanced Note</p>
+                <p>Changing optional parameter defaults can be risky in shared libraries—callers compiled earlier may still use old defaults.</p>
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#t04-method-overloading">◀ Previous</a>
+              <a class="btn primary" href="#t04-params-modifier">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- 6) params -->
+        <!-- ===================================================== -->
+        <section id="t04-params-modifier">
+          <div class="sec-head">
+            <h2>6) params (Variable Number of Arguments)</h2>
+            <div class="muted">Accept flexible argument counts safely</div>
+          </div>
+          <div class="sec-body">
+            <p>
+              The <span class="tt" data-tip="Allows a method to accept a variable number of arguments as an array. Useful for convenience APIs like Sum(params int[] numbers).">params</span> keyword lets callers pass many values without manually creating an array.<br/>
+              Inside the method, you receive the values as an array, so you can loop safely.<br/>
+              Use this for convenience APIs like Sum, Log, or AddMany, where variable counts are natural.<br/>
+              Avoid params when the method already has many parameters; it can reduce readability.<br/>
+              Prefer strong input validation, because callers might pass nothing (empty array).
+            </p>
+
+            <pre class="ascii">params behavior:
+  Sum(1,2,3)  -> numbers = [1,2,3]
+  Sum()       -> numbers = []</pre>
+
+            <div class="example">
+              <div class="label">Example (Grey Box): Cart total from many item prices</div>
+              <div class="small">
+                A cart might accept multiple item prices and compute the total quickly.
+              </div>
+            </div>
+
+            <pre class="code">using System;
+
+public static class Pricing
+{
+    public static decimal SumPrices(params decimal[] prices)
+    {
+        decimal total = 0m;
+        foreach (var p in prices)
+            total += p;
+        return total;
+    }
+
+    public static void Main()
+    {
+        Console.WriteLine(SumPrices(99.99m, 199.50m, 49.00m));
+        Console.WriteLine(SumPrices()); // empty list -> 0
+    }
+}</pre>
+
+            <div class="grid2">
+              <div class="card">
+                <h3>Real-world use case</h3>
+                <p>
+                  In reporting utilities, you can accept a flexible set of values (daily sales) and compute totals/averages
+                  without forcing callers to allocate arrays manually.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Practical caution</h3>
+                <p>
+                  params may allocate an array under the hood; it’s fine for most apps, but measure in hot loops.
+                </p>
+              </div>
+            </div>
+
+            <div class="notes">
+              <div class="note tip">
+                <p class="title">Beginner Tip</p>
+                <p>If you can call a method with “comma separated values”, params is probably being used.</p>
+              </div>
+              <div class="note info">
+                <p class="title">Advanced Note</p>
+                <p>For performance-critical paths, consider overloads that accept ReadOnlySpan to avoid allocations (advanced topic).</p>
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#t04-optional-named-args">◀ Previous</a>
+              <a class="btn primary" href="#t04-ref-out-in">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- 7) ref/out/in -->
+        <!-- ===================================================== -->
+        <section id="t04-ref-out-in">
+          <div class="sec-head">
+            <h2>7) ref / out / in (By-Reference Parameter Patterns)</h2>
+            <div class="muted">Use reference semantics when performance or multi-returns matter</div>
+          </div>
+          <div class="sec-body">
+            <p>
+              <span class="tt" data-tip="A modifier that passes a variable by reference so changes inside a method affect the caller’s variable. Use it when you must modify the original value.">ref</span> passes a variable by reference, so changes inside the method affect the caller.<br/>
+              <span class="tt" data-tip="A modifier used to return additional values from a method. The method must assign it before returning. Common in TryParse patterns and multi-output methods.">out</span> is used for additional outputs; the method must assign it before returning.<br/>
+              <span class="tt" data-tip="A modifier that passes by reference but treats the parameter as read-only inside the method. It can improve performance for large value types without allowing mutation.">in</span> passes by reference but read-only, useful for large value types where copying is expensive.<br/>
+              Use these carefully: they are powerful but can reduce readability if overused.<br/>
+              If your method returns many values, consider returning a small object/record (cleaner API).
+            </p>
+
+            <pre class="ascii">By-reference idea:
+  Caller variable  <---- shared ---->  Method parameter
+  Changes can flow back (ref/out), or be read-only (in)</pre>
+
+            <div class="example">
+              <div class="label">Example (Grey Box): TryParse pattern</div>
+              <div class="small">
+                Return true/false, and output the parsed result only on success.
+              </div>
+            </div>
+
+            <pre class="code">using System;
+
+public static class Input
+{
+    public static bool TryReadPositiveInt(string text, out int value)
+    {
+        bool ok = int.TryParse(text, out value);
+        if (!ok) return false;
+        if (value <= 0) { value = 0; return false; }
+        return true;
+    }
+
+    public static void ApplyDiscount(ref decimal price, decimal percent)
+    {
+        price = price - (price * percent / 100m);
+    }
+
+    public static decimal Perimeter(in (decimal W, decimal H) rect)
+    {
+        // rect is read-only inside method
+        return 2m * (rect.W + rect.H);
+    }
+
+    public static void Main()
+    {
+        if (TryReadPositiveInt("25", out int qty))
+            Console.WriteLine($"Qty = {qty}");
+
+        decimal p = 1000m;
+        ApplyDiscount(ref p, 10m);
+        Console.WriteLine($"Discounted price = {p}");
+
+        var r = (W: 10m, H: 5m);
+        Console.WriteLine($"Perimeter = {Perimeter(in r)}");
+    }
+}</pre>
+
+            <div class="grid2">
+              <div class="card">
+                <h3>Real-world use case</h3>
+                <p>
+                  Payment validation often uses Try-pattern methods (return success + out result),
+                  so the API stays safe and avoids exceptions for normal invalid input.
+                </p>
+              </div>
+              <div class="card">
+                <h3>When not to use</h3>
+                <p>
+                  If your team frequently misunderstands data flow, prefer returning a result object instead of ref/out.
+                </p>
+              </div>
+            </div>
+
+            <div class="notes">
+              <div class="note tip">
+                <p class="title">Beginner Tip</p>
+                <p>Use out when you want “extra output”, and ref when you want to “modify an existing variable”.</p>
+              </div>
+              <div class="note info">
+                <p class="title">Advanced Note</p>
+                <p>in can help performance for large structs, but always measure—clarity beats micro-optimizations.</p>
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#t04-params-modifier">◀ Previous</a>
+              <a class="btn primary" href="#t04-local-functions">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- 8) Local Functions -->
+        <!-- ===================================================== -->
+        <section id="t04-local-functions">
+          <div class="sec-head">
+            <h2>8) Local Functions & Static Local Functions</h2>
+            <div class="muted">Organize helper logic without polluting the class API</div>
+          </div>
+          <div class="sec-body">
+            <p>
+              Local functions are methods declared inside another method to support that method’s logic.<br/>
+              They keep helper code close to where it is used, improving readability and reducing “helper clutter”.<br/>
+              A static local function cannot capture outer variables, which can improve safety and clarity.<br/>
+              Use local functions when the logic is not useful anywhere else outside that parent method.<br/>
+              This is especially useful for validation, parsing steps, and small repeated calculations.
+            </p>
+
+            <pre class="ascii">Local function structure:
+  ParentMethod()
+    ├─ Step A
+    ├─ Helper()   (local function)
+    └─ Step B</pre>
+
+            <div class="example">
+              <div class="label">Example (Grey Box): Invoice calculation with a local helper</div>
+              <div class="small">
+                You can keep rounding/formatting logic local to the invoice method to avoid extra public methods.
+              </div>
+            </div>
+
+            <pre class="code">using System;
+
+public static class Invoice
+{
+    public static decimal CalculateFinal(decimal price, int qty, decimal taxPercent)
+    {
+        decimal subtotal = price * qty;
+        decimal tax = CalcTax(subtotal, taxPercent);
+        return Round2(subtotal + tax);
+
+        decimal CalcTax(decimal amount, decimal percent)
+        {
+            return amount * percent / 100m;
+        }
+
+        static decimal Round2(decimal amount)
+        {
+            return Math.Round(amount, 2, MidpointRounding.AwayFromZero);
+        }
+    }
+
+    public static void Main()
+    {
+        Console.WriteLine(CalculateFinal(199.99m, 2, 18m));
+    }
+}</pre>
+
+            <div class="grid2">
+              <div class="card">
+                <h3>Real-world use case</h3>
+                <p>
+                  In billing services, local functions let you keep “small steps” (tax, discounts, rounding) together
+                  so the invoice method reads like a clear recipe.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Clean code benefit</h3>
+                <p>
+                  Fewer public helper methods means a smaller public API surface and less accidental misuse.
+                </p>
+              </div>
+            </div>
+
+            <div class="notes">
+              <div class="note tip">
+                <p class="title">Beginner Tip</p>
+                <p>Use local functions when you feel “this helper is only for this one method”.</p>
+              </div>
+              <div class="note info">
+                <p class="title">Advanced Note</p>
+                <p>Static local functions reduce accidental capture of outer variables, which can prevent subtle bugs.</p>
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#t04-ref-out-in">◀ Previous</a>
+              <a class="btn primary" href="#t04-recursion-basics">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- 9) Recursion Basics -->
+        <!-- ===================================================== -->
+        <section id="t04-recursion-basics">
+          <div class="sec-head">
+            <h2>9) Recursion Basics (Base Case + Recursive Case)</h2>
+            <div class="muted">Understand recursion correctly without fear</div>
+          </div>
+          <div class="sec-body">
+            <p>
+              <span class="tt" data-tip="A technique where a method calls itself to solve a problem. It must have a base case to stop, otherwise it can cause stack overflow.">Recursion</span> is when a method solves a problem by calling itself on a smaller version of the same problem.<br/>
+              Every recursive solution needs a base case (stop condition) and a recursive case (the self-call).<br/>
+              If the base case is missing or unreachable, you can get a stack overflow (too many calls).<br/>
+              Think of recursion like “keep reducing” until you reach a simple answer.<br/>
+              Many recursion problems can also be done iteratively; choose what’s clearer and safer.
+            </p>
+
+            <pre class="ascii">Recursion template:
+  Solve(n):
+    if base_case(n) -> return answer
+    else -> return Solve(smaller(n)) + extra_work</pre>
+
+            <div class="example">
+              <div class="label">Example (Grey Box): Visualize the call stack</div>
+              <div class="small">
+                Each recursive call adds a frame; base case starts returning back up the stack.
+              </div>
+            </div>
+
+            <pre class="code">using System;
+
+public static class RecursionIntro
+{
+    public static int SumToN(int n)
+    {
+        if (n <= 1) return n;           // base case
+        return n + SumToN(n - 1);       // recursive case (smaller problem)
+    }
+
+    public static void Main()
+    {
+        Console.WriteLine(SumToN(5)); // 5+4+3+2+1 = 15
+    }
+}</pre>
+
+            <div class="grid2">
+              <div class="card">
+                <h3>Real-world use case</h3>
+                <p>
+                  Recursion naturally fits hierarchical data like folders, org charts, and category trees—process node, then process children.
+                </p>
+              </div>
+              <div class="card">
+                <h3>Safety reminder</h3>
+                <p>
+                  If input can be very large (like 1,000,000), recursion may be risky; iterative solutions may be safer.
+                </p>
+              </div>
+            </div>
+
+            <div class="notes">
+              <div class="note tip">
+                <p class="title">Beginner Tip</p>
+                <p>Always write the base case first, then write the recursive call.</p>
+              </div>
+              <div class="note info">
+                <p class="title">Advanced Note</p>
+                <p>Some languages optimize tail recursion, but typical C# recursion is not guaranteed to be optimized—choose wisely.</p>
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#t04-local-functions">◀ Previous</a>
+              <a class="btn primary" href="#t04-recursion-examples">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- 10) Recursion Examples -->
+        <!-- ===================================================== -->
+        <section id="t04-recursion-examples">
+          <div class="sec-head">
+            <h2>10) Recursion Examples (Factorial, Fibonacci, Sum of Digits)</h2>
+            <div class="muted">Practice recursion with classic interview-friendly problems</div>
+          </div>
+          <div class="sec-body">
+            <p>
+              Factorial uses recursion because n! = n × (n−1)! until 1.<br/>
+              Fibonacci can be recursive, but naive recursion repeats work and becomes slow quickly.<br/>
+              Sum of digits reduces a number by splitting last digit + remaining digits.<br/>
+              Always confirm base cases and consider performance for large inputs.<br/>
+              For Fibonacci, iterative or memoized approaches are usually better in real apps.
+            </p>
+
+            <pre class="ascii">Three classic patterns:
+  Factorial:    n! = n * (n-1)!
+  Fibonacci:    F(n) = F(n-1) + F(n-2)
+  SumDigits:    S(n) = (n % 10) + S(n / 10)</pre>
+
+            <div class="example">
+              <div class="label">Example (Grey Box): Quick sanity tests</div>
+              <div class="small">
+                Factorial(5)=120, Fib(7)=13, SumDigits(947)=20
+              </div>
+            </div>
+
+            <pre class="code">using System;
+using System.Collections.Generic;
+
+public static class RecursionExamples
+{
+    public static long Factorial(int n)
+    {
+        if (n < 0) throw new ArgumentException("n must be >= 0");
+        if (n <= 1) return 1;
+        return n * Factorial(n - 1);
+    }
+
+    // Memoized Fibonacci (fast enough for reasonable n)
+    private static readonly Dictionary<int, long> _memo = new Dictionary<int, long> { {0,0}, {1,1} };
+
+    public static long Fibonacci(int n)
+    {
+        if (n < 0) throw new ArgumentException("n must be >= 0");
+        if (_memo.ContainsKey(n)) return _memo[n];
+        _memo[n] = Fibonacci(n - 1) + Fibonacci(n - 2);
+        return _memo[n];
+    }
+
+    public static int SumOfDigits(int n)
+    {
+        n = Math.Abs(n);
+        if (n < 10) return n;
+        return (n % 10) + SumOfDigits(n / 10);
+    }
+
+    public static void Main()
+    {
+        Console.WriteLine(Factorial(5));
+        Console.WriteLine(Fibonacci(7));
+        Console.WriteLine(SumOfDigits(947));
+    }
+}</pre>
+
+            <div class="grid2">
+              <div class="card">
+                <h3>Real-world use case</h3>
+                <p>
+                  Sum-of-digits logic appears in checksum-like validations and digit-based rules (e.g., simple fraud filters, ID checks).
+                </p>
+              </div>
+              <div class="card">
+                <h3>Performance note</h3>
+                <p>
+                  Fibonacci is a common interview trap: show recursion, then improve using memoization or iteration.
+                </p>
+              </div>
+            </div>
+
+            <div class="notes">
+              <div class="note tip">
+                <p class="title">Beginner Tip</p>
+                <p>Draw the first few calls on paper; recursion becomes easy when you see the pattern shrinking.</p>
+              </div>
+              <div class="note info">
+                <p class="title">Advanced Note</p>
+                <p>When recursion depth is unpredictable, consider iterative loops or explicit stacks for reliability.</p>
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#t04-recursion-basics">◀ Previous</a>
+              <a class="btn primary" href="#next-subtopic">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- FAQs -->
+        <!-- ===================================================== -->
+        <section id="faqs">
+          <div class="sec-head">
+            <h2>FAQs</h2>
+            <div class="muted">Common questions learners ask</div>
+          </div>
+          <div class="sec-body">
+            <div class="qset">
+              <div class="q">
+                <div class="qtop">
+                  <h3>1) Is return type part of a method signature?</h3>
+                  <span class="badge">FAQ</span>
+                </div>
+                <p class="small">
+                  In C#, overload resolution uses method name + parameter types/order. Return type alone cannot distinguish overloads.
+                </p>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>2) When should I use out instead of returning a tuple?</h3>
+                  <span class="badge">FAQ</span>
+                </div>
+                <p class="small">
+                  Use out for Try-pattern APIs (success/failure + result). For general multi-values, a tuple or a small result type is often clearer.
+                </p>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>3) Are optional parameters always better than overloads?</h3>
+                  <span class="badge">FAQ</span>
+                </div>
+                <p class="small">
+                  Not always. Overloads can be clearer when defaults are not stable or when you want strict call shapes for correctness.
+                </p>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>4) Why is naive Fibonacci recursion considered slow?</h3>
+                  <span class="badge">FAQ</span>
+                </div>
+                <p class="small">
+                  It recomputes the same values many times (overlapping subproblems). Memoization or iteration avoids repeated work.
+                </p>
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#t04-recursion-examples">◀ Previous</a>
+              <a class="btn primary" href="#interview-questions">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- Interview Questions -->
+        <!-- ===================================================== -->
+        <section id="interview-questions">
+          <div class="sec-head">
+            <h2>Interview Questions</h2>
+            <div class="muted">Concept + practical answers</div>
+          </div>
+          <div class="sec-body">
+            <div class="qset">
+              <div class="q">
+                <div class="qtop">
+                  <h3>1) Explain static vs instance methods with an example.</h3>
+                  <span class="badge">Interview</span>
+                </div>
+                <div class="row">
+                  <strong>Answer:</strong>
+                  Static methods don’t need object state and are called using the type name. Instance methods act on per-object state and are called using an object reference.
+                </div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>2) What is method overloading and what can cause ambiguity?</h3>
+                  <span class="badge">Interview</span>
+                </div>
+                <div class="row">
+                  <strong>Answer:</strong>
+                  Overloading means same name with different parameter lists. Ambiguity can happen with null arguments, optional parameters, or overloads that are too similar.
+                </div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>3) When would you use ref, out, and in?</h3>
+                  <span class="badge">Interview</span>
+                </div>
+                <div class="row">
+                  <strong>Answer:</strong>
+                  Use out for extra outputs (Try-pattern), ref to modify an existing variable from the caller, and in to pass large value types by reference as read-only.
+                </div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>4) What are the two mandatory parts of a recursive function?</h3>
+                  <span class="badge">Interview</span>
+                </div>
+                <div class="row">
+                  <strong>Answer:</strong>
+                  A base case to stop recursion and a recursive case that reduces the problem size. Missing base case can cause stack overflow.
+                </div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>5) How would you improve Fibonacci recursion for production?</h3>
+                  <span class="badge">Interview</span>
+                </div>
+                <div class="row">
+                  <strong>Answer:</strong>
+                  Use memoization (cache results) or switch to iteration to avoid repeated computations and improve time complexity.
+                </div>
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#faqs">◀ Previous</a>
+              <a class="btn primary" href="#mcq">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- MCQ -->
+        <!-- ===================================================== -->
+        <section id="mcq">
+          <div class="sec-head">
+            <h2>MCQ (5–10 Questions)</h2>
+            <div class="muted">Quick checks for understanding</div>
+          </div>
+          <div class="sec-body">
+            <div class="qset">
+              <div class="q">
+                <div class="qtop">
+                  <h3>1) Which best describes a static method?</h3>
+                  <span class="badge">MCQ</span>
+                </div>
+                <div class="row"><span class="mono">A)</span> Belongs to an object instance</div>
+                <div class="row"><span class="mono">B)</span> Belongs to the class/type itself ✅</div>
+                <div class="row"><span class="mono">C)</span> Can only return void</div>
+                <div class="row"><span class="mono">D)</span> Cannot take parameters</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>2) Overloading can differ by:</h3>
+                  <span class="badge">MCQ</span>
+                </div>
+                <div class="row"><span class="mono">A)</span> Return type only</div>
+                <div class="row"><span class="mono">B)</span> Parameter list (count/types/order) ✅</div>
+                <div class="row"><span class="mono">C)</span> Method body only</div>
+                <div class="row"><span class="mono">D)</span> Access modifier only</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>3) Which keyword allows variable number of arguments?</h3>
+                  <span class="badge">MCQ</span>
+                </div>
+                <div class="row"><span class="mono">A)</span> out</div>
+                <div class="row"><span class="mono">B)</span> ref</div>
+                <div class="row"><span class="mono">C)</span> params ✅</div>
+                <div class="row"><span class="mono">D)</span> in</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>4) A recursive method must have:</h3>
+                  <span class="badge">MCQ</span>
+                </div>
+                <div class="row"><span class="mono">A)</span> A base case ✅</div>
+                <div class="row"><span class="mono">B)</span> At least 3 parameters</div>
+                <div class="row"><span class="mono">C)</span> Only static scope</div>
+                <div class="row"><span class="mono">D)</span> No return type</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>5) out parameters must be:</h3>
+                  <span class="badge">MCQ</span>
+                </div>
+                <div class="row"><span class="mono">A)</span> Assigned before method returns ✅</div>
+                <div class="row"><span class="mono">B)</span> Optional always</div>
+                <div class="row"><span class="mono">C)</span> Immutable inside the method</div>
+                <div class="row"><span class="mono">D)</span> Used only with recursion</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>6) Named arguments help mainly with:</h3>
+                  <span class="badge">MCQ</span>
+                </div>
+                <div class="row"><span class="mono">A)</span> Faster runtime</div>
+                <div class="row"><span class="mono">B)</span> Better readability ✅</div>
+                <div class="row"><span class="mono">C)</span> Avoiding compilation</div>
+                <div class="row"><span class="mono">D)</span> Avoiding return values</div>
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#interview-questions">◀ Previous</a>
+              <a class="btn primary" href="#downloads">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- Downloads Placeholder -->
+        <!-- ===================================================== -->
+        <section id="downloads">
+          <div class="sec-head">
+            <h2>Downloadable ZIP/PPT/DOC (Placeholder)</h2>
+            <div class="muted">Add exports here later</div>
+          </div>
+          <div class="sec-body">
+            <div class="footerish">
+              <p class="kicker">Placeholder</p>
+              <p class="small">
+                Add your downloadable materials here (local files only):
+                <br/>• ZIP: source code + exercises
+                <br/>• PPT: classroom slides
+                <br/>• DOC: trainer notes / handouts
+              </p>
+              <div class="hr"></div>
+              <p class="small muted">
+                Tip: Keep file names aligned with the module number (e.g., <strong>04-methods-mastery.zip</strong>).
+              </p>
+            </div>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#mcq">◀ Previous</a>
+              <a class="btn primary" href="#glossary-tooltips">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- Glossary (Tooltips) -->
+        <!-- ===================================================== -->
+        <section id="glossary-tooltips">
+          <div class="sec-head">
+            <h2>Glossary (Tooltips)</h2>
+            <div class="muted">Terms used with hover tooltips</div>
+          </div>
+          <div class="sec-body">
+            <table aria-label="Glossary tooltips table">
+              <thead>
+                <tr>
+                  <th style="width:26%">Term</th>
+                  <th>Tooltip Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>.NET</td>
+                  <td>A developer platform for building apps (web, desktop, mobile, cloud). It includes tools, libraries, and runtimes. C# code commonly runs on the .NET runtime.</td>
+                </tr>
+                <tr>
+                  <td>Method</td>
+                  <td>A named block of code that performs an action. Methods can accept inputs and return outputs. They help reuse and organize logic.</td>
+                </tr>
+                <tr>
+                  <td>Parameter</td>
+                  <td>A variable in a method definition that receives input from the caller. Parameters define what data a method needs to do its job.</td>
+                </tr>
+                <tr>
+                  <td>Overloading</td>
+                  <td>Having multiple methods with the same name but different parameter lists. It improves API usability but should be used carefully to avoid confusion.</td>
+                </tr>
+                <tr>
+                  <td>static</td>
+                  <td>A keyword meaning the member belongs to the type itself, not to an instance. Static members are shared across all objects of that class.</td>
+                </tr>
+                <tr>
+                  <td>params</td>
+                  <td>Allows a method to accept a variable number of arguments as an array. Useful for convenience APIs like Sum(params int[] numbers).</td>
+                </tr>
+                <tr>
+                  <td>ref</td>
+                  <td>A modifier that passes a variable by reference so changes inside a method affect the caller’s variable. Use it when you must modify the original value.</td>
+                </tr>
+                <tr>
+                  <td>out</td>
+                  <td>A modifier used to return additional values from a method. The method must assign it before returning. Common in TryParse patterns and multi-output methods.</td>
+                </tr>
+                <tr>
+                  <td>in</td>
+                  <td>A modifier that passes by reference but treats the parameter as read-only inside the method. It can improve performance for large value types without allowing mutation.</td>
+                </tr>
+                <tr>
+                  <td>Recursion</td>
+                  <td>A technique where a method calls itself to solve a problem. It must have a base case to stop, otherwise it can cause stack overflow.</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#downloads">◀ Previous</a>
+              <a class="btn primary" href="#practice-coding-questions">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- PRACTICE (Required) -->
+        <!-- ===================================================== -->
+        <section id="practice-coding-questions">
+          <div class="sec-head">
+            <h2>To Become Best coder Practice this</h2>
+            <div class="muted">15 coding questions (5 easy / 5 medium / 5 hard)</div>
+          </div>
+          <div class="sec-body">
+            <p class="small muted">
+              Practice these in a console app. Focus on method design, clean parameters, and readable calls.
+            </p>
+
+            <div class="qset">
+              <!-- EASY (1-5) -->
+              <div class="q">
+                <div class="qtop">
+                  <h3>1) Create a method to find the maximum of two integers</h3>
+                  <span class="badge">Easy</span>
+                </div>
+                <div class="row"><strong>Problem:</strong> Write MaxOfTwo(a, b) that returns the larger number.</div>
+                <div class="row"><strong>Input/Output:</strong> Input: two integers; Output: one integer (max).</div>
+                <div class="row"><strong>Example Input/Output:</strong> <span class="mono">Input: 7 12 → Output: 12</span></div>
+                <div class="row"><strong>Constraints:</strong> a, b in range -10^9 to 10^9</div>
+                <div class="row"><strong>Hint:</strong> Compare using if/else or Math.Max.</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>2) Write a method that converts minutes to seconds</h3>
+                  <span class="badge">Easy</span>
+                </div>
+                <div class="row"><strong>Problem:</strong> ConvertMinutesToSeconds(minutes) returns minutes * 60.</div>
+                <div class="row"><strong>Input/Output:</strong> Input: integer minutes; Output: integer seconds.</div>
+                <div class="row"><strong>Example Input/Output:</strong> <span class="mono">Input: 5 → Output: 300</span></div>
+                <div class="row"><strong>Constraints:</strong> 0 ≤ minutes ≤ 10^7</div>
+                <div class="row"><strong>Hint:</strong> Multiplication only; validate non-negative.</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>3) Create a method to count vowels in a string</h3>
+                  <span class="badge">Easy</span>
+                </div>
+                <div class="row"><strong>Problem:</strong> CountVowels(text) returns number of vowels (a,e,i,o,u) ignoring case.</div>
+                <div class="row"><strong>Input/Output:</strong> Input: string; Output: integer count.</div>
+                <div class="row"><strong>Example Input/Output:</strong> <span class="mono">Input: "Hello" → Output: 2</span></div>
+                <div class="row"><strong>Constraints:</strong> 0 ≤ length ≤ 10^5</div>
+                <div class="row"><strong>Hint:</strong> Convert to lowercase and check characters.</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>4) Make a method that returns true if a number is even</h3>
+                  <span class="badge">Easy</span>
+                </div>
+                <div class="row"><strong>Problem:</strong> IsEven(n) returns true if n is divisible by 2.</div>
+                <div class="row"><strong>Input/Output:</strong> Input: integer; Output: boolean.</div>
+                <div class="row"><strong>Example Input/Output:</strong> <span class="mono">Input: 14 → Output: true</span></div>
+                <div class="row"><strong>Constraints:</strong> n in range -10^9 to 10^9</div>
+                <div class="row"><strong>Hint:</strong> Use n % 2 == 0.</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>5) Create a method that reverses a string</h3>
+                  <span class="badge">Easy</span>
+                </div>
+                <div class="row"><strong>Problem:</strong> ReverseText(text) returns the reversed string.</div>
+                <div class="row"><strong>Input/Output:</strong> Input: string; Output: reversed string.</div>
+                <div class="row"><strong>Example Input/Output:</strong> <span class="mono">Input: "CSharp" → Output: "prahSC"</span></div>
+                <div class="row"><strong>Constraints:</strong> 0 ≤ length ≤ 10^5</div>
+                <div class="row"><strong>Hint:</strong> Convert to char array and reverse, or use a loop.</div>
+              </div>
+
+              <!-- MEDIUM (6-10) -->
+              <div class="q">
+                <div class="qtop">
+                  <h3>6) Create overloaded methods to calculate area (circle and rectangle)</h3>
+                  <span class="badge">Medium</span>
+                </div>
+                <div class="row"><strong>Problem:</strong> Area(radius) returns circle area; Area(width, height) returns rectangle area.</div>
+                <div class="row"><strong>Input/Output:</strong> Inputs: numbers; Output: double area.</div>
+                <div class="row"><strong>Example Input/Output:</strong> <span class="mono">Area(3) → 28.27 (approx), Area(4,5) → 20</span></div>
+                <div class="row"><strong>Constraints:</strong> inputs ≥ 0</div>
+                <div class="row"><strong>Hint:</strong> Use Math.PI for circle; overload by parameter count.</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>7) Build a method that uses optional parameters for discounts</h3>
+                  <span class="badge">Medium</span>
+                </div>
+                <div class="row"><strong>Problem:</strong> FinalPrice(price, discountPercent = 0, taxPercent = 0) returns final amount.</div>
+                <div class="row"><strong>Input/Output:</strong> Input: decimals; Output: decimal final price.</div>
+                <div class="row"><strong>Example Input/Output:</strong> <span class="mono">FinalPrice(100, discountPercent:10, taxPercent:18) → 106.20</span></div>
+                <div class="row"><strong>Constraints:</strong> 0 ≤ percent ≤ 100, price ≥ 0</div>
+                <div class="row"><strong>Hint:</strong> Apply discount first, then tax.</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>8) Use params to compute average of N integers</h3>
+                  <span class="badge">Medium</span>
+                </div>
+                <div class="row"><strong>Problem:</strong> Average(params int[] nums) returns average as double; handle empty input.</div>
+                <div class="row"><strong>Input/Output:</strong> Input: N integers; Output: double average (0 for none).</div>
+                <div class="row"><strong>Example Input/Output:</strong> <span class="mono">Average(2,4,6) → 4.0</span></div>
+                <div class="row"><strong>Constraints:</strong> N up to 10^5</div>
+                <div class="row"><strong>Hint:</strong> Sum in long; if count=0 return 0.</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>9) Implement TryParse-like method for positive decimal</h3>
+                  <span class="badge">Medium</span>
+                </div>
+                <div class="row"><strong>Problem:</strong> TryReadPositiveDecimal(text, out value) returns true only if parsed and value &gt; 0.</div>
+                <div class="row"><strong>Input/Output:</strong> Input: string; Output: bool + out decimal value.</div>
+                <div class="row"><strong>Example Input/Output:</strong> <span class="mono">Input: "12.50" → true, value=12.50</span></div>
+                <div class="row"><strong>Constraints:</strong> text length ≤ 10^5</div>
+                <div class="row"><strong>Hint:</strong> Use decimal.TryParse then check &gt; 0.</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>10) Write a method that swaps two integers using ref</h3>
+                  <span class="badge">Medium</span>
+                </div>
+                <div class="row"><strong>Problem:</strong> Swap(ref a, ref b) exchanges values of a and b.</div>
+                <div class="row"><strong>Input/Output:</strong> Input: two integers by reference; Output: swapped values (in caller).</div>
+                <div class="row"><strong>Example Input/Output:</strong> <span class="mono">a=3,b=9 → after Swap: a=9,b=3</span></div>
+                <div class="row"><strong>Constraints:</strong> integers within -10^9..10^9</div>
+                <div class="row"><strong>Hint:</strong> Use a temp variable.</div>
+              </div>
+
+              <!-- HARD (11-15) -->
+              <div class="q">
+                <div class="qtop">
+                  <h3>11) Recursively compute power (a^b) with fast exponentiation</h3>
+                  <span class="badge">Hard</span>
+                </div>
+                <div class="row"><strong>Problem:</strong> Power(a, b) returns a^b using recursion and exponentiation by squaring.</div>
+                <div class="row"><strong>Input/Output:</strong> Input: integer a, non-negative integer b; Output: long/double.</div>
+                <div class="row"><strong>Example Input/Output:</strong> <span class="mono">Power(2,10) → 1024</span></div>
+                <div class="row"><strong>Constraints:</strong> 0 ≤ b ≤ 10^9 (use log recursion depth)</div>
+                <div class="row"><strong>Hint:</strong> If b even: (a^(b/2))^2; if odd: a*(a^(b-1)).</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>12) Validate balanced parentheses using a helper method</h3>
+                  <span class="badge">Hard</span>
+                </div>
+                <div class="row"><strong>Problem:</strong> IsBalanced(text) returns true if (), {}, [] are balanced and properly nested.</div>
+                <div class="row"><strong>Input/Output:</strong> Input: string; Output: boolean.</div>
+                <div class="row"><strong>Example Input/Output:</strong> <span class="mono">"({[]})" → true, "([)]" → false</span></div>
+                <div class="row"><strong>Constraints:</strong> 0 ≤ length ≤ 2*10^5</div>
+                <div class="row"><strong>Hint:</strong> Use a stack; create a helper method to match closing to opening.</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>13) Recursively traverse a folder-like tree structure (simulate)</h3>
+                  <span class="badge">Hard</span>
+                </div>
+                <div class="row"><strong>Problem:</strong> PrintTree(node) prints names in depth-first order (preorder).</div>
+                <div class="row"><strong>Input/Output:</strong> Input: root node with children; Output: ordered list of names.</div>
+                <div class="row"><strong>Example Input/Output:</strong> <span class="mono">Root(A,B), A(C) → Root, A, C, B</span></div>
+                <div class="row"><strong>Constraints:</strong> total nodes ≤ 10^5 (watch recursion depth)</div>
+                <div class="row"><strong>Hint:</strong> Base case: null/no children; recursive call on each child.</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>14) Design a method to compute invoice with multiple outputs (total + tax + discount)</h3>
+                  <span class="badge">Hard</span>
+                </div>
+                <div class="row"><strong>Problem:</strong> CalculateInvoice(price, qty, discount%, tax%, out taxAmount, out discountAmount) returns final total.</div>
+                <div class="row"><strong>Input/Output:</strong> Input: values; Output: final total + out amounts.</div>
+                <div class="row"><strong>Example Input/Output:</strong> <span class="mono">price=100,qty=2,disc=10,tax=18 → total=212.40, tax=32.40, disc=20</span></div>
+                <div class="row"><strong>Constraints:</strong> percents 0..100, values ≥ 0</div>
+                <div class="row"><strong>Hint:</strong> Compute subtotal → discount → taxable → tax → final.</div>
+              </div>
+
+              <div class="q">
+                <div class="qtop">
+                  <h3>15) Create a method that finds the longest word using ref/out patterns carefully</h3>
+                  <span class="badge">Hard</span>
+                </div>
+                <div class="row"><strong>Problem:</strong> FindLongestWord(sentence, out longest, out length) returns true if found at least one word.</div>
+                <div class="row"><strong>Input/Output:</strong> Input: string; Output: bool + out string longest + out int length.</div>
+                <div class="row"><strong>Example Input/Output:</strong> <span class="mono">"I love ItTechGenie" → true, longest="ItTechGenie", length=10</span></div>
+                <div class="row"><strong>Constraints:</strong> 0 ≤ length ≤ 10^5</div>
+                <div class="row"><strong>Hint:</strong> Split by spaces, track max length, handle empty/whitespace input.</div>
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#glossary-tooltips">◀ Previous</a>
+              <a class="btn primary" href="#summary">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== -->
+        <!-- Summary -->
+        <!-- ===================================================== -->
+        <section id="summary">
+          <div class="sec-head">
+            <h2>Summary</h2>
+            <div class="muted">What you should remember</div>
+          </div>
+          <div class="sec-body">
+            <div class="footerish">
+              <p class="kicker">Key takeaways</p>
+              <ul class="small">
+                <li>Method anatomy = name + return type + parameters; signature is mainly name + parameter list.</li>
+                <li>Static is for behavior without per-object state; instance methods work with object state.</li>
+                <li>Design clean APIs: small parameter lists, return results, use Try-pattern for safe parsing.</li>
+                <li>Overloading improves usability but avoid ambiguous overload sets.</li>
+                <li>Optional + named args improve readability; params supports variable inputs.</li>
+                <li>ref/out/in are powerful; use them with care for clarity and maintainability.</li>
+                <li>Recursion needs base case + recursive case; optimize when performance matters.</li>
+              </ul>
+            </div>
+
+            <div class="nav-buttons">
+              <a class="btn" href="#practice-coding-questions">◀ Previous</a>
+              <a class="btn primary" href="#t04-method-anatomy">Back to Top ▶</a>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</body>
+</html>

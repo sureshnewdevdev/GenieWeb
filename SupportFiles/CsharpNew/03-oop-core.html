@@ -1,0 +1,1482 @@
+<!-- File name: 03-oop-core.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ItTechGenie — OOP Core (Classes, Objects & Encapsulation)</title>
+  <style>
+    :root{
+      --green:#04AA6D;
+      --dark:#111;
+      --mid:#333;
+      --light:#f5f6f7;
+      --card:#ffffff;
+      --border:#e3e6ea;
+      --code:#0b1020;
+      --codeText:#e8ecff;
+      --note:#d9edf7;
+      --noteBorder:#bce8f1;
+      --tip:#dff0d8;
+      --tipBorder:#c8e5bc;
+      --warn:#f2dede;
+      --warnBorder:#ebcccc;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:var(--light);
+      color:#1b1b1b;
+      line-height:1.5;
+    }
+
+    /* Top bar */
+    .topbar{
+      position:fixed;
+      top:0; left:0; right:0;
+      height:56px;
+      background:var(--green);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      padding:0 16px;
+      z-index:1000;
+    }
+    .topbar .brand{
+      font-weight:700;
+      letter-spacing:.3px;
+      margin-right:12px;
+    }
+    .topbar .crumb{
+      opacity:.95;
+      font-size:14px;
+    }
+    .topbar .right{
+      margin-left:auto;
+      font-size:13px;
+      opacity:.95;
+    }
+    .pill{
+      display:inline-block;
+      padding:4px 10px;
+      border:1px solid rgba(255,255,255,.35);
+      border-radius:999px;
+      margin-left:10px;
+    }
+
+    /* Sidebar */
+    .sidebar{
+      position:fixed;
+      top:56px;
+      left:0;
+      width:300px;
+      bottom:0;
+      overflow:auto;
+      background:#fff;
+      border-right:1px solid var(--border);
+      padding:14px 10px 18px;
+    }
+    .sb-title{padding:8px 10px 12px;border-bottom:1px solid var(--border);margin-bottom:10px}
+    .sb-brand{font-weight:800;color:var(--green);font-size:18px}
+    .sb-course{font-size:12px;color:#666;margin-top:2px}
+    .sb-section{
+      font-size:12px;
+      letter-spacing:.7px;
+      color:#666;
+      margin:12px 10px 6px;
+      font-weight:700;
+    }
+    .sb-link{
+      display:block;
+      text-decoration:none;
+      color:#222;
+      padding:8px 10px;
+      border-radius:6px;
+      margin:2px 6px;
+      font-size:14px;
+    }
+    .sb-link:hover{background:#f1f1f1}
+    .sb-module{font-weight:700}
+    .sb-sub{padding-left:18px;font-size:13.5px}
+    .sb-practice{font-weight:800;color:#0a5}
+
+    /* Main */
+    .main{
+      margin-left:300px;
+      padding:76px 18px 40px; /* top accounts for fixed topbar */
+    }
+    .container{
+      max-width:980px;
+      margin:0 auto;
+    }
+
+    /* Cards / sections */
+    .hero{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:18px;
+      box-shadow:0 1px 0 rgba(0,0,0,.03);
+    }
+    .hero h1{margin:0 0 6px;font-size:28px}
+    .hero p{margin:8px 0 0;color:#444}
+    .meta{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      color:#444;
+      font-size:13px;
+    }
+    .tag{
+      background:#eef7f3;
+      border:1px solid #cfeee1;
+      color:#145a46;
+      padding:4px 10px;
+      border-radius:999px;
+    }
+
+    .toc{
+      margin-top:14px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:14px 16px;
+    }
+    .toc h2{margin:0 0 10px;font-size:20px}
+    .toc ul{margin:0;padding-left:18px}
+    .toc li{margin:6px 0}
+    .toc a{color:#0a5;text-decoration:none}
+    .toc a:hover{text-decoration:underline}
+
+    .section{
+      margin-top:14px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:hidden;
+      box-shadow:0 1px 0 rgba(0,0,0,.03);
+    }
+    .section .sh{
+      background:var(--green);
+      color:#fff;
+      padding:10px 14px;
+      font-weight:800;
+      font-size:18px;
+    }
+    .section .sc{
+      padding:14px 16px 16px;
+    }
+    .purpose{
+      margin:8px 0 12px;
+      padding:10px 12px;
+      background:#fff7e6;
+      border:1px solid #ffe0a3;
+      border-radius:10px;
+      color:#5b4200;
+      font-size:13.5px;
+    }
+
+    .box-note, .box-tip, .box-warn{
+      border-radius:10px;
+      padding:10px 12px;
+      margin:12px 0;
+      border:1px solid transparent;
+    }
+    .box-note{background:var(--note);border-color:var(--noteBorder)}
+    .box-tip{background:var(--tip);border-color:var(--tipBorder)}
+    .box-warn{background:var(--warn);border-color:var(--warnBorder)}
+    .box-note b, .box-tip b, .box-warn b{display:inline-block;margin-bottom:4px}
+
+    .example{
+      background:#f1f1f1;
+      border-left:5px solid #bbb;
+      border-radius:10px;
+      padding:12px;
+      margin:12px 0;
+    }
+    .example h3{margin:0 0 8px;font-size:16px}
+    .trybtn{
+      display:inline-block;
+      background:var(--green);
+      color:#fff;
+      text-decoration:none;
+      padding:10px 14px;
+      border-radius:8px;
+      font-weight:800;
+      margin-top:10px;
+    }
+    .trybtn:hover{opacity:.95}
+
+    .codeblock{
+      background:var(--code);
+      color:var(--codeText);
+      border-radius:10px;
+      padding:12px;
+      overflow:auto;
+      margin:12px 0;
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .codeblock code{font-family: Consolas, "Courier New", monospace; font-size:13px}
+
+    .ascii{
+      background:#fff;
+      border:1px dashed #cfd6dd;
+      border-radius:10px;
+      padding:10px 12px;
+      margin:12px 0;
+      color:#2a2a2a;
+      overflow:auto;
+      font-family: Consolas, "Courier New", monospace;
+      font-size:13px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin:10px 0;
+      background:#fff;
+    }
+    th, td{
+      border:1px solid var(--border);
+      padding:10px;
+      text-align:left;
+      vertical-align:top;
+    }
+    th{background:#f7f7f7}
+
+    /* Prev/Next buttons */
+    .navrow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+      padding-top:12px;
+      border-top:1px solid var(--border);
+    }
+    .navbtn{
+      display:inline-block;
+      background:var(--green);
+      color:#fff;
+      text-decoration:none;
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:800;
+      font-size:14px;
+    }
+    .navbtn.secondary{
+      background:#0a7a53;
+    }
+
+    /* Tooltips (HTML + CSS only) */
+    .tt{
+      position:relative;
+      border-bottom:1px dotted #0a5;
+      cursor:help;
+      font-weight:700;
+      color:#0a5;
+    }
+    .tt:hover::after{
+      content: attr(data-tip);
+      position:absolute;
+      left:0;
+      top: calc(100% + 10px);
+      width: min(360px, 75vw);
+      background:#0b1020;
+      color:#e8ecff;
+      padding:10px 12px;
+      border-radius:10px;
+      box-shadow:0 6px 18px rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.12);
+      white-space:pre-line;
+      z-index:2000;
+    }
+    .tt:hover::before{
+      content:"";
+      position:absolute;
+      left:16px;
+      top: calc(100% + 2px);
+      border:8px solid transparent;
+      border-bottom-color:#0b1020;
+      z-index:2001;
+    }
+
+    /* Footer-ish small helper */
+    .small{color:#555;font-size:13px}
+
+    /* Responsive */
+    @media (max-width: 900px){
+      .sidebar{position:static;width:auto;height:auto;border-right:none}
+      .main{margin-left:0;padding-top:12px}
+      .topbar{position:static}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="brand">ItTechGenie</div>
+    <div class="crumb">C# Fundamentals → Advanced • Module 03</div>
+    <div class="right">
+      <span class="pill">Self-Contained HTML</span>
+      <span class="pill">W3Schools-Style</span>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       Sidebar (template applied)
+       CURRENT_TOPIC_SUBTOPICS replaced with Topic 03 subtopics
+  ========================================================= -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-title">
+      <div class="sb-brand">ItTechGenie</div>
+      <div class="sb-course">C# Fundamentals → Advanced</div>
+    </div>
+
+    <div class="sb-section">COURSE CONTENT</div>
+    <a class="sb-link sb-module" href="01-kickstart.html">01. Kickstart: .NET Ecosystem</a>
+    <a class="sb-link sb-module" href="02-control-flow.html">02. Control Flow</a>
+    <a class="sb-link sb-module" href="03-oop-core.html">03. OOP Core</a>
+    <a class="sb-link sb-module" href="04-methods-mastery.html">04. Methods Mastery</a>
+    <a class="sb-link sb-module" href="05-type-conversion.html">05. Type Conversion</a>
+    <a class="sb-link sb-module" href="06-constructors.html">06. Constructors</a>
+    <a class="sb-link sb-module" href="07-properties-inheritance.html">07. Properties & Inheritance</a>
+    <a class="sb-link sb-module" href="08-abstraction-interfaces.html">08. Abstraction & Interfaces</a>
+    <a class="sb-link sb-module" href="09-namespaces-buildingblocks.html">09. Namespaces & Building Blocks</a>
+    <a class="sb-link sb-module" href="10-advanced-toolkit.html">10. Advanced Toolkit</a>
+
+    <div class="sb-section">THIS TOPIC</div>
+    <a class="sb-link sb-sub" href="#t03-why-oop">Why OOP? (From Variables to Real-World Models)</a>
+    <a class="sb-link sb-sub" href="#t03-class-vs-object">Class vs Object (Blueprint vs Instance)</a>
+    <a class="sb-link sb-sub" href="#t03-fields-and-methods">Fields &amp; Methods (State and Behavior)</a>
+    <a class="sb-link sb-sub" href="#t03-create-first-class">Creating Your First Class (BankAccount / Student)</a>
+    <a class="sb-link sb-sub" href="#t03-access-modifiers">Access Modifiers (public/private/internal/protected)</a>
+    <a class="sb-link sb-sub" href="#t03-static-vs-instance">static vs instance (When Data Belongs to the Class)</a>
+    <a class="sb-link sb-sub" href="#t03-const-vs-readonly">const vs readonly (Compile-Time vs Runtime Immutability)</a>
+    <a class="sb-link sb-sub" href="#t03-encapsulation-with-methods">Encapsulation with Methods (Safe Updates to State)</a>
+
+    <div class="sb-section">PRACTICE</div>
+    <a class="sb-link sb-practice" href="#practice-coding-questions">
+      To Become Best coder Practice this
+    </a>
+  </aside>
+
+  <main class="main">
+    <div class="container">
+      <!-- Placeholder anchors required -->
+      <div id="prev-subtopic"></div>
+      <div id="next-subtopic"></div>
+
+      <div class="hero">
+        <h1>Module 03: Object-Oriented Programming Core — Classes, Objects &amp; Encapsulation</h1>
+        <p>
+          In this module, you’ll build a strong <span class="tt" data-tip="A programming style where you model real-world entities as objects with state and behavior. It helps manage large codebases by grouping data + logic together.">OOP</span>
+          foundation: why we use it, how <span class="tt" data-tip="A blueprint that defines state (fields/properties) and behavior (methods). You create objects (instances) from classes.">Class</span> and
+          <span class="tt" data-tip="An instance created in memory from a class. Objects hold state and can execute behavior through methods.">Object</span> work, how to design fields/methods, and how
+          <span class="tt" data-tip="Protecting internal state and exposing safe ways to interact with it. Typically done using private fields and public methods/properties with validation.">Encapsulation</span>
+          keeps your data safe.
+        </p>
+        <div class="meta">
+          <span class="tag">C#</span>
+          <span class="tag">Beginner → Intermediate</span>
+          <span class="tag">Real-World Examples</span>
+          <span class="tag">Practice Included</span>
+        </div>
+        <div class="box-note" style="margin-top:14px">
+          <b>Note:</b> Tooltips are enabled using only HTML + CSS. Hover on green dotted terms to learn quickly.
+        </div>
+      </div>
+
+      <div class="toc" id="toc">
+        <h2>Table of Contents</h2>
+        <ul>
+          <li><a href="#t03-why-oop">Why OOP? (From Variables to Real-World Models)</a></li>
+          <li><a href="#t03-class-vs-object">Class vs Object (Blueprint vs Instance)</a></li>
+          <li><a href="#t03-fields-and-methods">Fields &amp; Methods (State and Behavior)</a></li>
+          <li><a href="#t03-create-first-class">Creating Your First Class (BankAccount / Student)</a></li>
+          <li><a href="#t03-access-modifiers">Access Modifiers (public/private/internal/protected)</a></li>
+          <li><a href="#t03-static-vs-instance">static vs instance (When Data Belongs to the Class)</a></li>
+          <li><a href="#t03-const-vs-readonly">const vs readonly (Compile-Time vs Runtime Immutability)</a></li>
+          <li><a href="#t03-encapsulation-with-methods">Encapsulation with Methods (Safe Updates to State)</a></li>
+          <li><a href="#faqs">FAQs</a></li>
+          <li><a href="#interview">Interview Questions</a></li>
+          <li><a href="#mcq">MCQ Quiz</a></li>
+          <li><a href="#glossary">Glossary (Tooltips)</a></li>
+          <li><a href="#downloads">Downloadables (ZIP/PPT/DOC)</a></li>
+          <li><a href="#practice-coding-questions">To Become Best coder Practice this</a></li>
+        </ul>
+      </div>
+
+      <!-- =========================================================
+           SECTION 1
+      ========================================================= -->
+      <section class="section" id="t03-why-oop">
+        <div class="sh">1) Why OOP? (From Variables to Real-World Models)</div>
+        <div class="sc">
+          <div class="purpose"><b>Purpose:</b> Understand why classes/objects help manage complex software.</div>
+
+          <p>
+            When a program grows beyond a few variables, you start repeating logic and losing control of “who owns what data.”
+            <span class="tt" data-tip="A developer platform for building apps (web, desktop, mobile, cloud). It includes tools, libraries, and runtimes. C# code commonly runs on the .NET runtime.">.NET</span>
+            apps (web, desktop, APIs) often handle many real entities: users, orders, payments, inventory.
+            OOP helps you model these as <span class="tt" data-tip="A blueprint that defines state (fields/properties) and behavior (methods). You create objects (instances) from classes.">Class</span>es and
+            <span class="tt" data-tip="An instance created in memory from a class. Objects hold state and can execute behavior through methods.">Object</span>s so the code stays organized.
+            You group state + behavior together so changes become localized and safer.
+          </p>
+
+          <pre class="ascii">
+Problem without OOP:                With OOP:
+
+many variables + scattered logic     BankAccount object
+--------------------------------     ---------------------------
+balance, name, status, ...           balance + methods in one place
+deposit(), withdraw() in random      Deposit(), Withdraw() in class
+places                                Encapsulation protects rules
+          </pre>
+
+          <div class="example">
+            <h3>Example</h3>
+            <p><b>Scenario:</b> A “Student Portal” tracks name, roll no, fees paid, and eligibility status.</p>
+            <p>
+              Without OOP, you’ll pass many parameters to many functions.
+              With OOP, you create a <b>Student</b> class that owns its data and provides actions like <b>PayFees()</b> and <b>IsEligible()</b>.
+            </p>
+            <a class="trybtn" href="#t03-why-oop">Try It Yourself</a>
+          </div>
+
+          <div class="codeblock" aria-label="C# code example for why OOP">
+            <code>
+using System;
+
+class Student
+{
+    public string Name;
+    public int RollNo;
+    public decimal FeesPaid;
+
+    public bool IsEligible(decimal minimumFees)
+    {
+        return FeesPaid &gt;= minimumFees;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Student s = new Student();
+        s.Name = "Aarav";
+        s.RollNo = 101;
+        s.FeesPaid = 4500;
+
+        Console.WriteLine(s.IsEligible(5000) ? "Eligible" : "Not Eligible");
+    }
+}
+            </code>
+          </div>
+
+          <p><b>Real-world use case:</b> In a billing system, an <b>Invoice</b> object can calculate taxes, apply discounts, and validate totals—so the rules don’t get duplicated across screens and reports.</p>
+
+          <div class="box-tip">
+            <b>Beginner Tip:</b> If you can say “this thing has data + actions,” it’s a strong signal to create a class.
+          </div>
+
+          <div class="box-note">
+            <b>Advanced Note:</b> OOP is not just “classes.” It’s a design style that supports maintainability using encapsulation, clear responsibilities, and meaningful boundaries between modules.
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#prev-subtopic">Previous</a>
+            <a class="navbtn" href="#t03-class-vs-object">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           SECTION 2
+      ========================================================= -->
+      <section class="section" id="t03-class-vs-object">
+        <div class="sh">2) Class vs Object (Blueprint vs Instance)</div>
+        <div class="sc">
+          <div class="purpose"><b>Purpose:</b> Learn the foundational difference with clear mental models.</div>
+
+          <p>
+            A <span class="tt" data-tip="A blueprint that defines state (fields/properties) and behavior (methods). You create objects (instances) from classes.">Class</span> is a blueprint; it describes what an entity “will have” and “can do.”
+            An <span class="tt" data-tip="An instance created in memory from a class. Objects hold state and can execute behavior through methods.">Object</span> is a real created thing in memory, holding actual values.
+            One class can create many objects (many students from one Student class).
+            This separation helps you reuse a design while keeping each instance’s data independent.
+          </p>
+
+          <pre class="ascii">
+Class (Blueprint)                  Object (Instance)
+----------------                  ------------------
+Student                           s1: Student
+- Name                            Name = "Aarav"
+- RollNo                          RollNo = 101
+- FeesPaid                        FeesPaid = 4500
+
+One blueprint  →  many instances (s1, s2, s3...)
+          </pre>
+
+          <div class="example">
+            <h3>Example</h3>
+            <p><b>Blueprint:</b> “Car” defines EngineNo, Model, Start().</p>
+            <p><b>Instances:</b> car1 = “Swift”, car2 = “Nexon”. Both use the same design but store different values.</p>
+            <a class="trybtn" href="#t03-class-vs-object">Try It Yourself</a>
+          </div>
+
+          <div class="codeblock" aria-label="C# code example for class vs object">
+            <code>
+using System;
+
+class Car
+{
+    public string Model;
+    public void Start()
+    {
+        Console.WriteLine(Model + " started.");
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Car car1 = new Car();
+        car1.Model = "Swift";
+
+        Car car2 = new Car();
+        car2.Model = "Nexon";
+
+        car1.Start();
+        car2.Start();
+    }
+}
+            </code>
+          </div>
+
+          <p><b>Real-world use case:</b> In an e-commerce app, a <b>Product</b> class is the template; each product row from the database becomes an object with its own name, price, and stock.</p>
+
+          <div class="box-tip">
+            <b>Beginner Tip:</b> Think: “Class = design; Object = created item.”
+          </div>
+
+          <div class="box-note">
+            <b>Advanced Note:</b> Objects can share behavior but remain isolated in state. This is one reason OOP reduces accidental side effects compared to “global variables everywhere.”
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#t03-why-oop">Previous</a>
+            <a class="navbtn" href="#t03-fields-and-methods">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           SECTION 3
+      ========================================================= -->
+      <section class="section" id="t03-fields-and-methods">
+        <div class="sh">3) Fields &amp; Methods (State and Behavior)</div>
+        <div class="sc">
+          <div class="purpose"><b>Purpose:</b> Store data and define actions within a class.</div>
+
+          <p>
+            <span class="tt" data-tip="A variable inside a class that stores state for an object. Fields hold raw data and are often kept private to protect rules.">Field</span>s represent state: what the object “has” (balance, name, status).
+            <span class="tt" data-tip="A named block of code that performs an action. Methods can accept inputs (parameters) and return outputs. They help reuse and organize logic.">Method</span>s represent behavior: what the object “does” (deposit, withdraw, calculate).
+            A clean class keeps fields minimal and exposes behavior through methods, not by letting everyone modify fields freely.
+          </p>
+
+          <pre class="ascii">
+Object State (Fields)   +   Object Behavior (Methods)
+-----------------------------------------------------
+balance, name, status       Deposit(), Withdraw(), PrintSummary()
+
+Good design: fields are protected, methods enforce rules
+          </pre>
+
+          <div class="example">
+            <h3>Example</h3>
+            <p><b>Goal:</b> Prevent negative deposit and prevent withdraw beyond balance.</p>
+            <p>Instead of changing balance directly, we provide methods that validate input.</p>
+            <a class="trybtn" href="#t03-fields-and-methods">Try It Yourself</a>
+          </div>
+
+          <div class="codeblock" aria-label="C# code example for fields and methods">
+            <code>
+using System;
+
+class Wallet
+{
+    private decimal balance; // field (state)
+
+    public Wallet(decimal initialAmount)
+    {
+        balance = initialAmount;
+    }
+
+    public void Deposit(decimal amount) // method (behavior)
+    {
+        if (amount &lt;= 0) throw new ArgumentException("Deposit must be &gt; 0");
+        balance += amount;
+    }
+
+    public bool TryWithdraw(decimal amount)
+    {
+        if (amount &lt;= 0) return false;
+        if (amount &gt; balance) return false;
+        balance -= amount;
+        return true;
+    }
+
+    public decimal GetBalance()
+    {
+        return balance;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Wallet w = new Wallet(500);
+        w.Deposit(200);
+        Console.WriteLine("Balance: " + w.GetBalance());
+
+        Console.WriteLine(w.TryWithdraw(900) ? "Withdrawn" : "Insufficient funds");
+        Console.WriteLine("Balance: " + w.GetBalance());
+    }
+}
+            </code>
+          </div>
+
+          <p><b>Real-world use case:</b> A “Loyalty Points” object can store points and provide methods to earn/redeem points while enforcing policy rules centrally.</p>
+
+          <div class="box-tip">
+            <b>Beginner Tip:</b> If you find yourself writing the same validation in multiple places, move it into a method on the class.
+          </div>
+
+          <div class="box-note">
+            <b>Advanced Note:</b> Prefer methods/properties over public fields. Public fields leak implementation details and make later refactoring risky.
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#t03-class-vs-object">Previous</a>
+            <a class="navbtn" href="#t03-create-first-class">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           SECTION 4
+      ========================================================= -->
+      <section class="section" id="t03-create-first-class">
+        <div class="sh">4) Creating Your First Class (Real Example: BankAccount / Student)</div>
+        <div class="sc">
+          <div class="purpose"><b>Purpose:</b> Implement a small class and use it from Main.</div>
+
+          <p>
+            The fastest way to learn OOP is to build a tiny real-world model and use it from a console app.
+            We’ll create a BankAccount class that stores account number and balance, and exposes methods to deposit/withdraw safely.
+            Notice how the object “owns” its rules: other code can’t break the balance rules easily.
+          </p>
+
+          <pre class="ascii">
+BankAccount
+-----------
+Fields: accountNo, balance
+Methods: Deposit(amount), Withdraw(amount), Print()
+
+Main() creates object → calls methods → prints result
+          </pre>
+
+          <div class="example">
+            <h3>Example</h3>
+            <p><b>Mini design:</b> Only allow withdraw if you have enough balance.</p>
+            <p><b>Result:</b> The rule lives in ONE place (inside BankAccount).</p>
+            <a class="trybtn" href="#t03-create-first-class">Try It Yourself</a>
+          </div>
+
+          <div class="codeblock" aria-label="C# code example for creating first class">
+            <code>
+using System;
+
+class BankAccount
+{
+    private string accountNo;
+    private decimal balance;
+
+    public BankAccount(string accountNo, decimal openingBalance)
+    {
+        this.accountNo = accountNo;
+        balance = openingBalance;
+    }
+
+    public void Deposit(decimal amount)
+    {
+        if (amount &lt;= 0) throw new ArgumentException("Amount must be &gt; 0");
+        balance += amount;
+    }
+
+    public bool Withdraw(decimal amount)
+    {
+        if (amount &lt;= 0) return false;
+        if (amount &gt; balance) return false;
+        balance -= amount;
+        return true;
+    }
+
+    public void PrintSummary()
+    {
+        Console.WriteLine($"Account: {accountNo} | Balance: {balance}");
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        BankAccount acc = new BankAccount("AC001", 1000);
+
+        acc.Deposit(500);
+        bool ok = acc.Withdraw(1800);
+
+        acc.PrintSummary();
+        Console.WriteLine(ok ? "Withdraw success" : "Withdraw failed");
+    }
+}
+            </code>
+          </div>
+
+          <p><b>Real-world use case:</b> Banking, wallets, subscriptions—any domain where business rules must be consistent across UI, API, and batch jobs.</p>
+
+          <div class="box-tip">
+            <b>Beginner Tip:</b> Start with 2–3 fields and 2–3 methods. Small models teach faster than huge classes.
+          </div>
+
+          <div class="box-note">
+            <b>Advanced Note:</b> In larger apps, you’ll often separate “domain objects” (rules) from “services” (workflows), but the class modeling principle stays the same.
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#t03-fields-and-methods">Previous</a>
+            <a class="navbtn" href="#t03-access-modifiers">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           SECTION 5
+      ========================================================= -->
+      <section class="section" id="t03-access-modifiers">
+        <div class="sh">5) Access Modifiers (public/private/internal/protected)</div>
+        <div class="sc">
+          <div class="purpose"><b>Purpose:</b> Control visibility to protect your code and data.</div>
+
+          <p>
+            An <span class="tt" data-tip="Keywords that control visibility of types/members (public, private, protected, internal). They protect data and shape how other code can use your class.">Access Modifier</span>
+            decides who can see and use your members.
+            Use <b>private</b> to protect internal fields, and expose safe operations via public methods/properties.
+            Use <b>internal</b> to keep APIs inside the same assembly, and <b>protected</b> when derived classes need access.
+            Good visibility choices prevent accidental misuse and reduce debugging time.
+          </p>
+
+          <table>
+            <thead>
+              <tr><th>Modifier</th><th>Who can access?</th><th>Common use</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><b>public</b></td><td>Anywhere</td><td>Expose intended API</td></tr>
+              <tr><td><b>private</b></td><td>Only inside the class</td><td>Hide fields, helper methods</td></tr>
+              <tr><td><b>protected</b></td><td>Class + derived classes</td><td>Inheritance support</td></tr>
+              <tr><td><b>internal</b></td><td>Same project/assembly</td><td>Keep APIs inside solution</td></tr>
+            </tbody>
+          </table>
+
+          <pre class="ascii">
+Visibility (simple view)
+-----------------------
+public     -> everyone
+internal   -> same project
+protected  -> child classes
+private    -> only this class
+          </pre>
+
+          <div class="example">
+            <h3>Example</h3>
+            <p><b>Idea:</b> Keep balance private so no code can set it to -999 directly.</p>
+            <p><b>Expose:</b> Deposit/Withdraw methods that validate business rules.</p>
+            <a class="trybtn" href="#t03-access-modifiers">Try It Yourself</a>
+          </div>
+
+          <div class="codeblock" aria-label="C# code example for access modifiers">
+            <code>
+using System;
+
+class Account
+{
+    private decimal balance; // hidden
+
+    public Account(decimal openingBalance)
+    {
+        balance = openingBalance;
+    }
+
+    public void Deposit(decimal amount)
+    {
+        if (amount &lt;= 0) throw new ArgumentException("Invalid amount");
+        balance += amount;
+    }
+
+    public decimal GetBalance() // public API
+    {
+        return balance;
+    }
+}
+            </code>
+          </div>
+
+          <p><b>Real-world use case:</b> In a payments API, you must prevent outside code from changing sensitive values directly (like payment status). Access modifiers help enforce that safety.</p>
+
+          <div class="box-tip">
+            <b>Beginner Tip:</b> Default to private for fields. Only make something public when you are sure it’s part of your class “contract.”
+          </div>
+
+          <div class="box-note">
+            <b>Advanced Note:</b> A smaller public surface area makes testing and versioning easier because fewer external callers depend on internal details.
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#t03-create-first-class">Previous</a>
+            <a class="navbtn" href="#t03-static-vs-instance">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           SECTION 6
+      ========================================================= -->
+      <section class="section" id="t03-static-vs-instance">
+        <div class="sh">6) static vs instance (When Data Belongs to the Class)</div>
+        <div class="sc">
+          <div class="purpose"><b>Purpose:</b> Understand class-level members vs object-level members.</div>
+
+          <p>
+            <span class="tt" data-tip="A keyword meaning the member belongs to the type itself, not to an instance. Static members are shared across all objects of that class.">static</span>
+            members belong to the class itself, not a specific object.
+            Instance members belong to each created object separately.
+            Use static for shared counters, configuration values, or utility helpers.
+            Use instance members for per-object data like balance, name, and status.
+          </p>
+
+          <pre class="ascii">
+Instance (per object)                 Static (shared)
+-------------------                  ----------------
+acc1.Balance = 1000                  BankAccount.TotalAccounts = 2
+acc2.Balance = 2000                  Same value seen by all objects
+          </pre>
+
+          <div class="example">
+            <h3>Example</h3>
+            <p><b>Goal:</b> Count how many accounts were created (shared counter).</p>
+            <p><b>Approach:</b> Use a static field to track total accounts.</p>
+            <a class="trybtn" href="#t03-static-vs-instance">Try It Yourself</a>
+          </div>
+
+          <div class="codeblock" aria-label="C# code example for static vs instance">
+            <code>
+using System;
+
+class BankAccount
+{
+    public static int TotalAccounts = 0;  // shared
+    public string AccountNo;              // per object
+    private decimal balance;              // per object
+
+    public BankAccount(string accNo, decimal openingBalance)
+    {
+        AccountNo = accNo;
+        balance = openingBalance;
+        TotalAccounts++;
+    }
+
+    public decimal GetBalance() =&gt; balance;
+}
+
+class Program
+{
+    static void Main()
+    {
+        BankAccount a1 = new BankAccount("A1", 1000);
+        BankAccount a2 = new BankAccount("A2", 2000);
+
+        Console.WriteLine("Total: " + BankAccount.TotalAccounts);
+        Console.WriteLine(a1.AccountNo + " balance: " + a1.GetBalance());
+    }
+}
+            </code>
+          </div>
+
+          <p><b>Real-world use case:</b> A logging utility might be static (shared), while each HTTP request object is instance-based with its own headers, body, and user info.</p>
+
+          <div class="box-tip">
+            <b>Beginner Tip:</b> If the value should be the same for every object, consider static.
+          </div>
+
+          <div class="box-warn">
+            <b>Warning:</b> Too much static state can make testing harder and create hidden dependencies. Prefer passing dependencies when building real systems.
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#t03-access-modifiers">Previous</a>
+            <a class="navbtn" href="#t03-const-vs-readonly">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           SECTION 7
+      ========================================================= -->
+      <section class="section" id="t03-const-vs-readonly">
+        <div class="sh">7) const vs readonly (Compile-Time vs Runtime Immutability)</div>
+        <div class="sc">
+          <div class="purpose"><b>Purpose:</b> Choose the right immutability tool for correctness.</div>
+
+          <p>
+            <span class="tt" data-tip="A compile-time constant value that never changes. It must be assigned immediately and is embedded into compiled code, so changes require recompilation.">const</span>
+            values are fixed at compile time and cannot be changed ever.
+            <span class="tt" data-tip="A field that can be assigned only during initialization or in the constructor. It supports runtime-known constants while still preventing later modification.">readonly</span>
+            fields are assigned once (often in the constructor) and then become immutable.
+            Use const for universal constants (like max attempts = 3).
+            Use readonly for values known only at runtime (like an API base URL read from config).
+          </p>
+
+          <pre class="ascii">
+const:
+- must be assigned immediately
+- same value for all instances
+- compile-time embedded
+
+readonly:
+- can be assigned in constructor
+- then becomes immutable
+- supports runtime values
+          </pre>
+
+          <div class="example">
+            <h3>Example</h3>
+            <p><b>const:</b> MaxWithdrawAttempts = 3</p>
+            <p><b>readonly:</b> BankName decided at runtime during object creation</p>
+            <a class="trybtn" href="#t03-const-vs-readonly">Try It Yourself</a>
+          </div>
+
+          <div class="codeblock" aria-label="C# code example for const vs readonly">
+            <code>
+using System;
+
+class Policy
+{
+    public const int MaxAttempts = 3; // compile-time constant
+}
+
+class BankInfo
+{
+    public readonly string BankName;  // runtime immutable
+    public BankInfo(string bankName)
+    {
+        BankName = bankName; // can assign here
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine("Max attempts: " + Policy.MaxAttempts);
+
+        BankInfo info = new BankInfo("ItTechGenie Bank");
+        Console.WriteLine("Bank: " + info.BankName);
+    }
+}
+            </code>
+          </div>
+
+          <p><b>Real-world use case:</b> Use readonly for “created-at timestamp” or “customerId” fields that should never change after object creation.</p>
+
+          <div class="box-tip">
+            <b>Beginner Tip:</b> If the value is truly universal and never changes, use const. If it’s set once during creation, use readonly.
+          </div>
+
+          <div class="box-note">
+            <b>Advanced Note:</b> If you publish libraries, changing a const value can be tricky because consuming projects may need recompilation to pick up the new value.
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#t03-static-vs-instance">Previous</a>
+            <a class="navbtn" href="#t03-encapsulation-with-methods">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           SECTION 8
+      ========================================================= -->
+      <section class="section" id="t03-encapsulation-with-methods">
+        <div class="sh">8) Encapsulation with Methods (Safe Updates to State)</div>
+        <div class="sc">
+          <div class="purpose"><b>Purpose:</b> Protect object state by controlling changes through methods.</div>
+
+          <p>
+            <span class="tt" data-tip="Protecting internal state and exposing safe ways to interact with it. Typically done using private fields and public methods/properties with validation.">Encapsulation</span>
+            means your class prevents invalid states (like negative balance or invalid age).
+            You hide fields and allow updates only through well-defined methods.
+            This keeps rules consistent across your app: UI, API, and background jobs all use the same logic.
+            Encapsulation is one of the biggest reasons OOP reduces bugs in real projects.
+          </p>
+
+          <pre class="ascii">
+Encapsulation Flow
+------------------
+Caller → calls method → method validates → updates private field safely
+
+If invalid:
+Caller → calls method → validation fails → no unsafe state is stored
+          </pre>
+
+          <div class="example">
+            <h3>Example</h3>
+            <p><b>Rule:</b> Balance can’t go below 0. Deposit must be &gt; 0.</p>
+            <p><b>Design:</b> Private balance field + public methods that enforce the rule.</p>
+            <a class="trybtn" href="#t03-encapsulation-with-methods">Try It Yourself</a>
+          </div>
+
+          <div class="codeblock" aria-label="C# code example for encapsulation with methods">
+            <code>
+using System;
+
+class Wallet
+{
+    private decimal balance;
+
+    public Wallet(decimal opening)
+    {
+        if (opening &lt; 0) throw new ArgumentException("Opening must be &gt;= 0");
+        balance = opening;
+    }
+
+    public void Deposit(decimal amount)
+    {
+        if (amount &lt;= 0) throw new ArgumentException("Deposit must be &gt; 0");
+        balance += amount;
+    }
+
+    public bool TryPay(decimal amount, out decimal remaining)
+    {
+        remaining = balance;
+
+        if (amount &lt;= 0) return false;
+        if (amount &gt; balance) return false;
+
+        balance -= amount;
+        remaining = balance;
+        return true;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Wallet w = new Wallet(1000);
+
+        w.Deposit(250);
+
+        bool paid = w.TryPay(400, out decimal rem);
+        Console.WriteLine(paid ? "Payment done" : "Payment failed");
+        Console.WriteLine("Remaining: " + rem);
+    }
+}
+            </code>
+          </div>
+
+          <p><b>Real-world use case:</b> In a “Subscription” domain, methods like Activate(), Pause(), Cancel() enforce valid transitions so your database never stores impossible states.</p>
+
+          <div class="box-tip">
+            <b>Beginner Tip:</b> Ask: “Can someone set this field to an invalid value?” If yes, hide it and expose a method instead.
+          </div>
+
+          <div class="box-note">
+            <b>Advanced Note:</b> Encapsulation improves testability: you can unit-test the class rules without needing UI or database code.
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#t03-const-vs-readonly">Previous</a>
+            <a class="navbtn" href="#next-subtopic">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           FAQs
+      ========================================================= -->
+      <section class="section" id="faqs">
+        <div class="sh">FAQs</div>
+        <div class="sc">
+          <p><b>Q1) Should I always use OOP?</b><br>
+            Not always. For tiny scripts, procedural code can be fine. But for apps with many entities and rules, OOP helps you scale safely.
+          </p>
+          <p><b>Q2) Why not keep everything public for simplicity?</b><br>
+            Public fields/members allow invalid updates. Encapsulation prevents bugs by forcing validation through controlled methods.
+          </p>
+          <p><b>Q3) Is static “bad”?</b><br>
+            No. Static is useful for shared utilities and constants. It becomes risky when you store mutable shared state that many parts of the program can change.
+          </p>
+          <p><b>Q4) What’s the best beginner class example?</b><br>
+            BankAccount, Student, Product, or Wallet—because they naturally have data + actions and require validation rules.
+          </p>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#t03-encapsulation-with-methods">Previous</a>
+            <a class="navbtn" href="#interview">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Interview Questions
+      ========================================================= -->
+      <section class="section" id="interview">
+        <div class="sh">Interview Questions (With Short Answers)</div>
+        <div class="sc">
+          <ol>
+            <li><b>What is OOP and why use it?</b><br>
+              OOP models real-world entities as objects with state + behavior, improving maintainability and reducing duplicated rules.
+            </li>
+            <li><b>Class vs Object?</b><br>
+              Class is a blueprint; object is an instance created from that blueprint with real values in memory.
+            </li>
+            <li><b>Why keep fields private?</b><br>
+              To protect object state and enforce validation through methods/properties (encapsulation).
+            </li>
+            <li><b>static vs instance?</b><br>
+              Static belongs to the class (shared); instance belongs to each object (separate).
+            </li>
+            <li><b>const vs readonly?</b><br>
+              Const is compile-time constant; readonly is assigned once (often in constructor) and then cannot change.
+            </li>
+            <li><b>How does encapsulation help testing?</b><br>
+              You can test rules inside the class without needing UI or database, making unit tests faster and reliable.
+            </li>
+          </ol>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#faqs">Previous</a>
+            <a class="navbtn" href="#summary">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Summary
+      ========================================================= -->
+      <section class="section" id="summary">
+        <div class="sh">Summary of Key Points</div>
+        <div class="sc">
+          <ul>
+            <li>OOP helps manage complexity by modeling real-world entities with classes and objects.</li>
+            <li>Classes define the blueprint; objects are created instances with actual data.</li>
+            <li>Fields store state; methods define behavior and validation rules.</li>
+            <li>Access modifiers control visibility and protect data.</li>
+            <li>Use static for shared members; use instance members for per-object state.</li>
+            <li>Use const for compile-time constants; readonly for runtime values assigned once.</li>
+            <li>Encapsulation keeps your system safe and reduces bugs by controlling state changes.</li>
+          </ul>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#interview">Previous</a>
+            <a class="navbtn" href="#mcq">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           MCQ Quiz (no JS - provide answer key below)
+      ========================================================= -->
+      <section class="section" id="mcq">
+        <div class="sh">MCQ Quiz (5–10 Questions)</div>
+        <div class="sc">
+          <p class="small">Choose one option for each question. (Answer key is provided below.)</p>
+
+          <div class="example">
+            <h3>Q1) Which statement best describes a class?</h3>
+            <label><input type="radio" name="q1"> A) A runtime error handler</label><br>
+            <label><input type="radio" name="q1"> B) A blueprint defining data and behavior</label><br>
+            <label><input type="radio" name="q1"> C) A database table</label><br>
+            <label><input type="radio" name="q1"> D) A compiler option</label>
+          </div>
+
+          <div class="example">
+            <h3>Q2) What is encapsulation?</h3>
+            <label><input type="radio" name="q2"> A) Keeping code in one file</label><br>
+            <label><input type="radio" name="q2"> B) Hiding internal state and exposing safe operations</label><br>
+            <label><input type="radio" name="q2"> C) Running code faster</label><br>
+            <label><input type="radio" name="q2"> D) Removing methods</label>
+          </div>
+
+          <div class="example">
+            <h3>Q3) static members are…</h3>
+            <label><input type="radio" name="q3"> A) Stored per object</label><br>
+            <label><input type="radio" name="q3"> B) Shared across all instances of a class</label><br>
+            <label><input type="radio" name="q3"> C) Always private</label><br>
+            <label><input type="radio" name="q3"> D) Only for arrays</label>
+          </div>
+
+          <div class="example">
+            <h3>Q4) const vs readonly: which is true?</h3>
+            <label><input type="radio" name="q4"> A) readonly must be compile-time constant</label><br>
+            <label><input type="radio" name="q4"> B) const can be assigned in constructor</label><br>
+            <label><input type="radio" name="q4"> C) const is compile-time; readonly is runtime-assigned once</label><br>
+            <label><input type="radio" name="q4"> D) They are identical</label>
+          </div>
+
+          <div class="example">
+            <h3>Q5) Which access modifier limits usage to within the same class?</h3>
+            <label><input type="radio" name="q5"> A) public</label><br>
+            <label><input type="radio" name="q5"> B) internal</label><br>
+            <label><input type="radio" name="q5"> C) protected</label><br>
+            <label><input type="radio" name="q5"> D) private</label>
+          </div>
+
+          <div class="box-note">
+            <b>Answer Key:</b> Q1-B, Q2-B, Q3-B, Q4-C, Q5-D
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#summary">Previous</a>
+            <a class="navbtn" href="#glossary">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Glossary (Tooltips)
+      ========================================================= -->
+      <section class="section" id="glossary">
+        <div class="sh">Glossary (Tooltips)</div>
+        <div class="sc">
+          <p class="small">These are the tooltip terms used in this page (Term → Tooltip Description).</p>
+
+          <table>
+            <thead>
+              <tr><th>Term</th><th>Tooltip Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>.NET</td><td>A developer platform for building apps (web, desktop, mobile, cloud). It includes tools, libraries, and runtimes. C# code commonly runs on the .NET runtime.</td></tr>
+              <tr><td>OOP</td><td>A programming style where you model real-world entities as objects with state and behavior. It helps manage large codebases by grouping data + logic together.</td></tr>
+              <tr><td>Class</td><td>A blueprint that defines state (fields/properties) and behavior (methods). You create objects (instances) from classes.</td></tr>
+              <tr><td>Object</td><td>An instance created in memory from a class. Objects hold state and can execute behavior through methods.</td></tr>
+              <tr><td>Encapsulation</td><td>Protecting internal state and exposing safe ways to interact with it. Typically done using private fields and public methods/properties with validation.</td></tr>
+              <tr><td>Field</td><td>A variable inside a class that stores state for an object. Fields hold raw data and are often kept private to protect rules.</td></tr>
+              <tr><td>Method</td><td>A named block of code that performs an action. Methods can accept inputs (parameters) and return outputs. They help reuse and organize logic.</td></tr>
+              <tr><td>Access Modifier</td><td>Keywords that control visibility of types/members (public, private, protected, internal). They protect data and shape how other code can use your class.</td></tr>
+              <tr><td>static</td><td>A keyword meaning the member belongs to the type itself, not to an instance. Static members are shared across all objects of that class.</td></tr>
+              <tr><td>const</td><td>A compile-time constant value that never changes. It must be assigned immediately and is embedded into compiled code, so changes require recompilation.</td></tr>
+              <tr><td>readonly</td><td>A field that can be assigned only during initialization or in the constructor. It supports runtime-known constants while still preventing later modification.</td></tr>
+            </tbody>
+          </table>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#mcq">Previous</a>
+            <a class="navbtn" href="#downloads">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           Placeholder Downloads
+      ========================================================= -->
+      <section class="section" id="downloads">
+        <div class="sh">Downloadables (Placeholder)</div>
+        <div class="sc">
+          <div class="example">
+            <h3>Downloadable Resources (Coming Soon)</h3>
+            <ul>
+              <li>📦 ZIP: Source code + exercises (placeholder)</li>
+              <li>📑 PPT: Slides for this module (placeholder)</li>
+              <li>📄 DOC: Printable notes (placeholder)</li>
+            </ul>
+            <a class="trybtn" href="#downloads">Try It Yourself</a>
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#glossary">Previous</a>
+            <a class="navbtn" href="#practice-coding-questions">Next</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           PRACTICE SECTION (Required exact title + 15 questions)
+      ========================================================= -->
+      <section class="section" id="practice-coding-questions">
+        <div class="sh">To Become Best coder Practice this</div>
+        <div class="sc">
+          <div class="box-tip">
+            <b>How to use this:</b> Solve Easy → Medium → Hard. Write clean classes, keep fields private, and validate inputs inside methods.
+          </div>
+
+          <h3>Easy (5)</h3>
+
+          <div class="example">
+            <h3>E1) Create a Student class and print details</h3>
+            <p><b>Problem:</b> Create a Student class with Name and RollNo. Read name and roll number, create object, print “Name: X, Roll: Y”.</p>
+            <p><b>Input:</b> Name (string), RollNo (int)<br><b>Output:</b> Formatted string</p>
+            <p><b>Example Input:</b> Aarav 101<br><b>Example Output:</b> Name: Aarav, Roll: 101</p>
+            <p><b>Constraints:</b> 1 ≤ Name length ≤ 50, 1 ≤ RollNo ≤ 100000</p>
+            <p><b>Hint:</b> Store input into fields and use a method Print().</p>
+          </div>
+
+          <div class="example">
+            <h3>E2) Wallet deposit validation</h3>
+            <p><b>Problem:</b> Start with balance 0. Read a deposit amount. If amount ≤ 0 print “Invalid”, else print new balance.</p>
+            <p><b>Input:</b> amount (decimal)<br><b>Output:</b> “Invalid” or “Balance: X”</p>
+            <p><b>Example Input:</b> 250<br><b>Example Output:</b> Balance: 250</p>
+            <p><b>Constraints:</b> -10^6 ≤ amount ≤ 10^6</p>
+            <p><b>Hint:</b> Encapsulate balance as private field; update via Deposit().</p>
+          </div>
+
+          <div class="example">
+            <h3>E3) Rectangle area using a class</h3>
+            <p><b>Problem:</b> Create Rectangle class with length and width. Read both and print area.</p>
+            <p><b>Input:</b> length, width (int)<br><b>Output:</b> area (int)</p>
+            <p><b>Example Input:</b> 5 4<br><b>Example Output:</b> 20</p>
+            <p><b>Constraints:</b> 1 ≤ length,width ≤ 10^5</p>
+            <p><b>Hint:</b> Add method Area() that returns length*width.</p>
+          </div>
+
+          <div class="example">
+            <h3>E4) Count created objects (static)</h3>
+            <p><b>Problem:</b> Create a class CounterObj with static CreatedCount. Read N, create N objects, print CreatedCount.</p>
+            <p><b>Input:</b> N (int)<br><b>Output:</b> CreatedCount (int)</p>
+            <p><b>Example Input:</b> 3<br><b>Example Output:</b> 3</p>
+            <p><b>Constraints:</b> 0 ≤ N ≤ 10^6</p>
+            <p><b>Hint:</b> Increment static count inside constructor.</p>
+          </div>
+
+          <div class="example">
+            <h3>E5) Private field + getter</h3>
+            <p><b>Problem:</b> Create a class Secret with private field message. Read a message, set it via constructor, print it using GetMessage().</p>
+            <p><b>Input:</b> message (string)<br><b>Output:</b> message (string)</p>
+            <p><b>Example Input:</b> Hello<br><b>Example Output:</b> Hello</p>
+            <p><b>Constraints:</b> 0 ≤ length ≤ 200</p>
+            <p><b>Hint:</b> Don’t make the field public.</p>
+          </div>
+
+          <h3>Medium (5)</h3>
+
+          <div class="example">
+            <h3>M1) BankAccount withdraw with Try pattern</h3>
+            <p><b>Problem:</b> Read opening balance and withdraw amount. If withdraw succeeds print remaining balance else print “Insufficient”.</p>
+            <p><b>Input:</b> opening (decimal), withdraw (decimal)<br><b>Output:</b> remaining or “Insufficient”</p>
+            <p><b>Example Input:</b> 1000 1200<br><b>Example Output:</b> Insufficient</p>
+            <p><b>Constraints:</b> 0 ≤ opening ≤ 10^9, 0 ≤ withdraw ≤ 10^9</p>
+            <p><b>Hint:</b> Encapsulate balance and validate inside Withdraw().</p>
+          </div>
+
+          <div class="example">
+            <h3>M2) Student eligibility method</h3>
+            <p><b>Problem:</b> Read FeesPaid and MinRequired. Print “Eligible” if FeesPaid ≥ MinRequired else “Not Eligible”. Implement as Student.IsEligible(min).</p>
+            <p><b>Input:</b> FeesPaid (decimal), MinRequired (decimal)<br><b>Output:</b> Eligible/Not Eligible</p>
+            <p><b>Example Input:</b> 4500 5000<br><b>Example Output:</b> Not Eligible</p>
+            <p><b>Constraints:</b> 0 ≤ values ≤ 10^9</p>
+            <p><b>Hint:</b> Keep FeesPaid in field; comparison inside method.</p>
+          </div>
+
+          <div class="example">
+            <h3>M3) Inventory item with restock and sell</h3>
+            <p><b>Problem:</b> Start with stock S. Read Q operations: “ADD x” or “SELL x”. SELL should fail if not enough stock. Print final stock.</p>
+            <p><b>Input:</b> S, Q then Q lines<br><b>Output:</b> final stock</p>
+            <p><b>Example Input:</b> 10 3 | ADD 5 | SELL 8 | SELL 10<br><b>Example Output:</b> 7</p>
+            <p><b>Constraints:</b> 0 ≤ S ≤ 10^9, 1 ≤ Q ≤ 2*10^5</p>
+            <p><b>Hint:</b> Put stock updates inside methods AddStock()/TrySell().</p>
+          </div>
+
+          <div class="example">
+            <h3>M4) const vs readonly usage decision</h3>
+            <p><b>Problem:</b> Print two lines: (1) Max attempts using const = 3, (2) AppName using readonly from input.</p>
+            <p><b>Input:</b> AppName (string)<br><b>Output:</b> “Max: 3” and “App: X”</p>
+            <p><b>Example Input:</b> EduSync<br><b>Example Output:</b> Max: 3 | App: EduSync</p>
+            <p><b>Constraints:</b> 1 ≤ length ≤ 100</p>
+            <p><b>Hint:</b> const fixed value; readonly assigned in constructor.</p>
+          </div>
+
+          <div class="example">
+            <h3>M5) Access modifiers reasoning output</h3>
+            <p><b>Problem:</b> Given a word: “public/private/protected/internal”, print who can access (as a sentence). Use a method DescribeAccess().</p>
+            <p><b>Input:</b> modifier (string)<br><b>Output:</b> sentence</p>
+            <p><b>Example Input:</b> private<br><b>Example Output:</b> Only the class can access it.</p>
+            <p><b>Constraints:</b> Input is one of the four values</p>
+            <p><b>Hint:</b> Use if/else or switch inside DescribeAccess().</p>
+          </div>
+
+          <h3>Hard (5)</h3>
+
+          <div class="example">
+            <h3>H1) Transaction ledger (encapsulation + validation)</h3>
+            <p><b>Problem:</b> Maintain balance and a transaction count. Read Q operations: DEPOSIT x / WITHDRAW x. Withdraw fails if insufficient. Output final balance and successful transaction count.</p>
+            <p><b>Input:</b> opening, Q then Q lines<br><b>Output:</b> “Balance: X, Txn: Y”</p>
+            <p><b>Example Input:</b> 500 3 | DEPOSIT 100 | WITHDRAW 900 | WITHDRAW 200<br><b>Example Output:</b> Balance: 400, Txn: 2</p>
+            <p><b>Constraints:</b> 0 ≤ opening ≤ 10^9, Q ≤ 2*10^5</p>
+            <p><b>Hint:</b> Only update state after successful validation.</p>
+          </div>
+
+          <div class="example">
+            <h3>H2) Student ranking (objects + sorting)</h3>
+            <p><b>Problem:</b> Read N students (Name, Score). Print the name of the top scorer. If tie, print lexicographically smallest name.</p>
+            <p><b>Input:</b> N then N lines (Name Score)<br><b>Output:</b> top student name</p>
+            <p><b>Example Input:</b> 3 | Arun 90 | Bala 95 | Aakash 95<br><b>Example Output:</b> Aakash</p>
+            <p><b>Constraints:</b> 1 ≤ N ≤ 2*10^5, 0 ≤ Score ≤ 100</p>
+            <p><b>Hint:</b> Track best in one pass; no need to sort if you compare correctly.</p>
+          </div>
+
+          <div class="example">
+            <h3>H3) Library book checkout (state machine)</h3>
+            <p><b>Problem:</b> A book can be AVAILABLE or BORROWED. Read Q commands: BORROW/RETURN. BORROW fails if already borrowed; RETURN fails if available. Print final state and successful operations.</p>
+            <p><b>Input:</b> Q then Q lines<br><b>Output:</b> “State: X, Success: Y”</p>
+            <p><b>Example Input:</b> 4 | BORROW | BORROW | RETURN | RETURN<br><b>Example Output:</b> State: AVAILABLE, Success: 2</p>
+            <p><b>Constraints:</b> 1 ≤ Q ≤ 2*10^5</p>
+            <p><b>Hint:</b> Encapsulate state transitions in methods TryBorrow()/TryReturn().</p>
+          </div>
+
+          <div class="example">
+            <h3>H4) Static ID generator + instance data</h3>
+            <p><b>Problem:</b> Create N users. Each user must auto-assign a unique incremental Id (starting from 1). Read N names and print “Id:Name” for each in order.</p>
+            <p><b>Input:</b> N then N names<br><b>Output:</b> N lines “Id:Name”</p>
+            <p><b>Example Input:</b> 3 | Ravi | Sita | Kiran<br><b>Example Output:</b> 1:Ravi 2:Sita 3:Kiran</p>
+            <p><b>Constraints:</b> 1 ≤ N ≤ 2*10^5</p>
+            <p><b>Hint:</b> Use a static counter that increments in constructor.</p>
+          </div>
+
+          <div class="example">
+            <h3>H5) Budget planner (multiple categories)</h3>
+            <p><b>Problem:</b> Maintain budgets for categories (Food, Travel, Bills). Read Q operations: SET cat x, SPEND cat x. SPEND fails if it exceeds category budget. Print remaining for each category.</p>
+            <p><b>Input:</b> Q then Q lines<br><b>Output:</b> Remaining budgets for Food/Travel/Bills</p>
+            <p><b>Example Input:</b> 4 | SET Food 500 | SET Bills 1000 | SPEND Food 200 | SPEND Bills 1500<br><b>Example Output:</b> Food:300 Travel:0 Bills:1000</p>
+            <p><b>Constraints:</b> Q ≤ 2*10^5, 0 ≤ x ≤ 10^9</p>
+            <p><b>Hint:</b> Store budgets privately and validate spends inside methods.</p>
+          </div>
+
+          <div class="navrow">
+            <a class="navbtn secondary" href="#downloads">Previous</a>
+            <a class="navbtn" href="#toc">Back to Top</a>
+          </div>
+        </div>
+      </section>
+
+      <p class="small" style="margin-top:14px;">
+        Placeholder anchors included: <b>#prev-subtopic</b> and <b>#next-subtopic</b>.
+      </p>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,1619 @@
+<!-- File: 10-advanced-toolkit.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Advanced C# Toolkit: Value Types, Generics, Collections, LINQ, IO & Modern C# (Topic 10)</title>
+  <style>
+    :root{
+      --green:#04AA6D;
+      --bg:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --code:#0b1020;
+      --codeText:#e5e7eb;
+      --ex:#f3f4f6;
+      --note:#e7f3ff;
+      --tip:#e8fff1;
+      --warn:#ffe8e8;
+      --shadow: 0 6px 18px rgba(0,0,0,.08);
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:var(--bg);
+      line-height:1.45;
+    }
+
+    /* Top Nav */
+    .topbar{
+      background:var(--green);
+      color:#fff;
+      padding:12px 16px;
+      position:sticky;
+      top:0;
+      z-index:10;
+      box-shadow: 0 2px 10px rgba(0,0,0,.12);
+    }
+    .topbar .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      font-weight:800;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .pill{
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.25);
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .toplinks a{
+      color:#fff;
+      text-decoration:none;
+      margin-right:10px;
+      font-weight:600;
+      font-size:13px;
+    }
+    .toplinks a:hover{ text-decoration:underline; }
+
+    /* Layout */
+    .layout{
+      display:flex;
+      min-height: calc(100vh - 52px);
+    }
+
+    /* Sidebar (Template-compatible) */
+    .sidebar{
+      width:290px;
+      border-right:1px solid var(--line);
+      padding:14px 10px;
+      position:sticky;
+      top:52px;
+      height: calc(100vh - 52px);
+      overflow:auto;
+      background:#fafafa;
+    }
+    .sb-title{
+      padding:10px 10px 12px 10px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      box-shadow: var(--shadow);
+      margin-bottom:12px;
+    }
+    .sb-brand{ font-weight:900; font-size:16px; }
+    .sb-course{ color:var(--muted); font-size:12px; margin-top:2px; }
+
+    .sb-section{
+      margin:14px 8px 8px 8px;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      letter-spacing:.6px;
+    }
+    .sb-link{
+      display:block;
+      padding:8px 10px;
+      margin:2px 6px;
+      border-radius:10px;
+      text-decoration:none;
+      color:var(--text);
+      border:1px solid transparent;
+      font-size:13px;
+    }
+    .sb-link:hover{
+      background:#fff;
+      border-color:var(--line);
+    }
+    .sb-module{ font-weight:700; }
+    .sb-sub{ padding-left:14px; }
+    .sb-practice{
+      background:#fff;
+      border:1px solid var(--line);
+      font-weight:800;
+    }
+
+    /* Main */
+    .main{
+      flex:1;
+      padding:18px 18px 60px 18px;
+      max-width:1100px;
+    }
+    .wrap{ max-width: 980px; }
+
+    h1{ margin: 10px 0 8px 0; font-size:28px; }
+    .subtitle{ color:var(--muted); margin:0 0 14px 0; }
+
+    .card{
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+      box-shadow: var(--shadow);
+      padding:14px 14px;
+      margin:14px 0;
+    }
+
+    .toc ul{ margin:8px 0 0 18px; }
+    .toc a{ color:var(--green); text-decoration:none; font-weight:700; }
+    .toc a:hover{ text-decoration:underline; }
+
+    section.topic{
+      margin-top:18px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+      overflow:hidden;
+      box-shadow: var(--shadow);
+    }
+    .sec-head{
+      background: linear-gradient(0deg, rgba(4,170,109,.12), rgba(4,170,109,.12));
+      border-bottom:1px solid var(--line);
+      padding:12px 14px;
+    }
+    .sec-head h2{
+      margin:0;
+      font-size:20px;
+    }
+    .sec-body{
+      padding:14px;
+    }
+
+    /* Boxes */
+    .note,.tip,.warn{
+      border:1px solid var(--line);
+      border-left:6px solid;
+      padding:10px 12px;
+      border-radius:12px;
+      margin:10px 0;
+    }
+    .note{ background:var(--note); border-left-color:#2b78ff; }
+    .tip{ background:var(--tip); border-left-color:#16a34a; }
+    .warn{ background:var(--warn); border-left-color:#ef4444; }
+
+    .ex{
+      background:var(--ex);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px;
+      margin:12px 0;
+    }
+    .ex .ex-title{
+      font-weight:900;
+      margin:0 0 6px 0;
+    }
+
+    pre.ascii{
+      background:#fff;
+      border:1px dashed var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      overflow:auto;
+      margin:10px 0;
+      color:#111827;
+    }
+
+    pre.code{
+      background:var(--code);
+      color:var(--codeText);
+      border-radius:12px;
+      padding:12px;
+      overflow:auto;
+      margin:10px 0;
+      border:1px solid rgba(255,255,255,.08);
+    }
+    pre.code code{ color:inherit; }
+
+    .usecase{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      margin:10px 0;
+      background:#fff;
+    }
+    .usecase b{ color:#111827; }
+
+    /* Next/Prev buttons */
+    .navbtns{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:14px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      display:inline-block;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#fff;
+      text-decoration:none;
+      color:var(--text);
+      font-weight:800;
+      box-shadow: 0 3px 10px rgba(0,0,0,.06);
+    }
+    .btn:hover{ border-color:#cbd5e1; }
+
+    /* Tooltip (HTML+CSS only) */
+    .tt{
+      position:relative;
+      display:inline-block;
+      border-bottom: 2px dotted rgba(4,170,109,.75);
+      cursor:help;
+      font-weight:800;
+      color:#0f5132;
+      padding:0 2px;
+    }
+    .tt:hover::after{
+      content: attr(data-tip);
+      position:absolute;
+      left:0;
+      top: calc(100% + 8px);
+      min-width: 260px;
+      max-width: 360px;
+      background:#111827;
+      color:#fff;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.18);
+      box-shadow: var(--shadow);
+      white-space: pre-line;
+      z-index:20;
+    }
+    .tt:hover::before{
+      content:"";
+      position:absolute;
+      left:16px;
+      top: calc(100% + 2px);
+      border-width:6px;
+      border-style:solid;
+      border-color: transparent transparent #111827 transparent;
+      z-index:21;
+    }
+
+    table{
+      border-collapse:collapse;
+      width:100%;
+      margin:10px 0;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:12px;
+      overflow:hidden;
+    }
+    th,td{
+      border-bottom:1px solid var(--line);
+      padding:10px 10px;
+      text-align:left;
+      vertical-align:top;
+      font-size:13px;
+    }
+    th{
+      background:#f8fafc;
+      font-weight:900;
+    }
+    .muted{ color:var(--muted); }
+
+    .q{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      margin:10px 0;
+      background:#fff;
+    }
+    .q h4{ margin:0 0 6px 0; }
+    .q .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:8px;
+    }
+    @media (max-width: 980px){
+      .sidebar{ display:none; }
+      .main{ padding:14px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="row">
+      <div class="brand">
+        <span>ItTechGenie</span>
+        <span class="pill">Topic 10 · Advanced Toolkit</span>
+      </div>
+      <div class="toplinks">
+        <a href="#toc">Table of Contents</a>
+        <a href="#faqs">FAQs</a>
+        <a href="#interview-questions">Interview Qs</a>
+        <a href="#mcq">MCQ</a>
+        <a href="#practice-coding-questions">Practice</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- =========================================================
+         ItTechGenie Reusable Sidebar Template (Prompt v3 compatible)
+         - Replaced {{CURRENT_TOPIC_NO}} and {{CURRENT_TOPIC_SUBTOPICS}}
+         - PRACTICE link kept exactly as required.
+    ========================================================= -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-title">
+        <div class="sb-brand">ItTechGenie</div>
+        <div class="sb-course">C# Fundamentals → Advanced</div>
+      </div>
+
+      <div class="sb-section">COURSE CONTENT</div>
+
+      <!-- Global course navigation (modules) -->
+      <a class="sb-link sb-module" href="01-kickstart.html">01. Kickstart: .NET Ecosystem</a>
+      <a class="sb-link sb-module" href="02-control-flow.html">02. Control Flow</a>
+      <a class="sb-link sb-module" href="03-oop-core.html">03. OOP Core</a>
+      <a class="sb-link sb-module" href="04-methods-mastery.html">04. Methods Mastery</a>
+      <a class="sb-link sb-module" href="05-type-conversion.html">05. Type Conversion</a>
+      <a class="sb-link sb-module" href="06-constructors.html">06. Constructors</a>
+      <a class="sb-link sb-module" href="07-properties-inheritance.html">07. Properties & Inheritance</a>
+      <a class="sb-link sb-module" href="08-abstraction-interfaces.html">08. Abstraction & Interfaces</a>
+      <a class="sb-link sb-module" href="09-namespaces-buildingblocks.html">09. Namespaces & Building Blocks</a>
+      <a class="sb-link sb-module" href="10-advanced-toolkit.html">10. Advanced Toolkit</a>
+
+      <div class="sb-section">THIS TOPIC</div>
+
+      <!-- Per-page subtopics (Topic 10) -->
+      <a class="sb-link sb-sub" href="#t10-structs-vs-classes">Structs vs Classes (Value Type vs Reference Type)</a>
+      <a class="sb-link sb-sub" href="#t10-system-object-overrides">System.Object & Overriding (ToString, Equals, GetHashCode)</a>
+      <a class="sb-link sb-sub" href="#t10-boxing-unboxing">Boxing & Unboxing (Hidden Costs)</a>
+      <a class="sb-link sb-sub" href="#t10-generics-and-constraints">Generics (Classes, Methods) + Constraints</a>
+      <a class="sb-link sb-sub" href="#t10-nullable-and-null-operators">Nullable Types + Null Operators (??, ?., ??=)</a>
+      <a class="sb-link sb-sub" href="#t10-extension-methods">Extension Methods (Add Methods Without Modifying Types)</a>
+      <a class="sb-link sb-sub" href="#t10-pattern-matching">Pattern Matching (is, switch patterns)</a>
+      <a class="sb-link sb-sub" href="#t10-arrays-and-system-array">Arrays Deep Dive (Multi-Dimensional & Jagged) + System.Array</a>
+      <a class="sb-link sb-sub" href="#t10-collections-overview">Collections Overview (List, Dictionary, HashSet, Stack, Queue, etc.)</a>
+      <a class="sb-link sb-sub" href="#t10-custom-collections-interfaces">Custom Collections (IEnumerable, IEnumerator, IComparable, IComparer)</a>
+      <a class="sb-link sb-sub" href="#t10-anonymous-tuples-deconstruction">Anonymous Types, Tuples & Deconstruction</a>
+      <a class="sb-link sb-sub" href="#t10-linq-basics">LINQ Basics + Aggregates (Select, OrderBy, Min/Max/Sum/Avg)</a>
+      <a class="sb-link sb-sub" href="#t10-core-bcl-apis">Core BCL APIs (StringBuilder, DateTime, Math)</a>
+      <a class="sb-link sb-sub" href="#t10-io-serialization-encoding">IO, Serialization & Encoding (Files + JSON/XML)</a>
+      <a class="sb-link sb-sub" href="#t10-exceptions-and-modern-csharp">Exception Handling + Modern C# (Records, Top-Level, File-Scoped)</a>
+
+      <div class="sb-section">PRACTICE</div>
+
+      <!-- REQUIRED SIDEBAR MENU ADDITION (Prompt v3): exact text + anchor -->
+      <a class="sb-link sb-practice" href="#practice-coding-questions">
+        To Become Best coder Practice this
+      </a>
+    </aside>
+
+    <main class="main">
+      <div class="wrap">
+        <!-- Placeholder anchors required by Prompt v3 -->
+        <a id="prev-subtopic"></a>
+
+        <h1>Advanced C# Toolkit: Value Types, Generics, Collections, LINQ, IO & Modern C#</h1>
+        <p class="subtitle">
+          In this module, you’ll build a practical “toolkit” of advanced C# skills: choosing between
+          <span class="tt" data-tip="Stores data directly (like int or struct).&#10;Copying duplicates the value.&#10;Often faster for small data.">Value Type</span>
+          and
+          <span class="tt" data-tip="Stores a reference to an object (like class or array).&#10;Copies share the same object instance.&#10;Common in OOP and collections.">Reference Type</span>,
+          writing reusable
+          <span class="tt" data-tip="Type-parameterized code like List&lt;T&gt;.&#10;Avoids casting and improves safety.&#10;Helps performance by removing boxing.">Generics</span>,
+          querying with
+          <span class="tt" data-tip="Language Integrated Query for data pipelines.&#10;Filter, project, sort, aggregate.&#10;Works best with IEnumerable-based types.">LINQ</span>,
+          and handling real app tasks like IO + serialization safely.
+        </p>
+
+        <div class="card toc" id="toc">
+          <h3 style="margin:0 0 6px 0;">Table of Contents (Auto from Topic 10 Subtopics)</h3>
+          <div class="muted">Click any section to jump directly.</div>
+          <ul>
+            <li><a href="#t10-structs-vs-classes">Structs vs Classes (Value Type vs Reference Type)</a></li>
+            <li><a href="#t10-system-object-overrides">System.Object & Overriding (ToString, Equals, GetHashCode)</a></li>
+            <li><a href="#t10-boxing-unboxing">Boxing & Unboxing (Hidden Costs)</a></li>
+            <li><a href="#t10-generics-and-constraints">Generics (Classes, Methods) + Constraints</a></li>
+            <li><a href="#t10-nullable-and-null-operators">Nullable Types + Null Operators (??, ?., ??=)</a></li>
+            <li><a href="#t10-extension-methods">Extension Methods (Add Methods Without Modifying Types)</a></li>
+            <li><a href="#t10-pattern-matching">Pattern Matching (is, switch patterns)</a></li>
+            <li><a href="#t10-arrays-and-system-array">Arrays Deep Dive (Multi-Dimensional & Jagged) + System.Array</a></li>
+            <li><a href="#t10-collections-overview">Collections Overview</a></li>
+            <li><a href="#t10-custom-collections-interfaces">Custom Collections (IEnumerable, IEnumerator, IComparable, IComparer)</a></li>
+            <li><a href="#t10-anonymous-tuples-deconstruction">Anonymous Types, Tuples & Deconstruction</a></li>
+            <li><a href="#t10-linq-basics">LINQ Basics + Aggregates</a></li>
+            <li><a href="#t10-core-bcl-apis">Core BCL APIs (StringBuilder, DateTime, Math)</a></li>
+            <li><a href="#t10-io-serialization-encoding">IO, Serialization & Encoding (Files + JSON/XML)</a></li>
+            <li><a href="#t10-exceptions-and-modern-csharp">Exception Handling + Modern C# (Records, Top-Level, File-Scoped)</a></li>
+          </ul>
+        </div>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="t10-structs-vs-classes">
+          <div class="sec-head"><h2>Structs vs Classes (Value Type vs Reference Type)</h2></div>
+          <div class="sec-body">
+            <p>
+              A <span class="tt" data-tip="User-defined value type in C#.&#10;Allocated inline or on stack depending on usage.&#10;Best for small immutable data.">struct</span> is a <span class="tt" data-tip="Stores data directly (like int or struct).&#10;Copying duplicates the value.&#10;Great for small data objects.">Value Type</span>:
+              assigning it copies the whole value. A <span class="tt" data-tip="Blueprint that creates objects in heap memory.&#10;Variables store references to instances.&#10;Best for rich entities and polymorphism.">class</span> is a
+              <span class="tt" data-tip="Stores a reference to an object instance.&#10;Copying shares the same underlying object.&#10;Mutations affect all references.">Reference Type</span>: assigning it copies only the reference.
+              Choose structs for tiny “data packets” (like coordinates) and classes for complex entities (like Customer) with identity and behavior.
+            </p>
+
+            <pre class="ascii">Value Copy vs Reference Copy
+----------------------------
+struct (Value Type):             class (Reference Type):
+a = b copies ALL fields          a = b copies ONLY reference
+a changes do NOT affect b        a changes affect b (same object)</pre>
+
+            <div class="ex">
+              <div class="ex-title">Example (When copy matters)</div>
+              Imagine a Point struct for pixels: you want fast copies and no shared mutation.
+              For a Customer class: you want one shared identity across the app.
+            </div>
+
+            <pre class="code"><code>// C# example: struct copies, class shares reference
+public struct Point2D
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+}
+
+public class Customer
+{
+    public string Name { get; set; } = "";
+}
+
+var p1 = new Point2D { X = 10, Y = 20 };
+var p2 = p1;              // copy of values
+p2.X = 99;                // p1.X remains 10
+
+var c1 = new Customer { Name = "Asha" };
+var c2 = c1;              // copy of reference
+c2.Name = "Asha (VIP)";   // c1.Name also changes</code></pre>
+
+            <div class="usecase">
+              <b>Real-world use case:</b> In a gaming app, positions/velocities can be structs (small and frequently copied),
+              while Player/Inventory are classes (shared identity, rich relationships).
+            </div>
+
+            <div class="tip"><b>Beginner tip:</b> If your type is small (few fields) and logically “a value”, start with a struct.</div>
+            <div class="note"><b>Advanced note:</b> Avoid large structs; copying big values repeatedly can be slower than class references and can increase CPU cache pressure.</div>
+
+            <div class="navbtns">
+              <a class="btn" href="#prev-subtopic">◀ Previous</a>
+              <a class="btn" href="#t10-system-object-overrides">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="t10-system-object-overrides">
+          <div class="sec-head"><h2>System.Object & Overriding (ToString, Equals, GetHashCode)</h2></div>
+          <div class="sec-body">
+            <p>
+              In C#, every type ultimately derives from <span class="tt" data-tip="Base type for all .NET types.&#10;Provides methods like ToString, Equals, GetHashCode.&#10;Overrides define identity and display.">System.Object</span>.
+              Overriding <span class="tt" data-tip="Returns a human-readable text representation.&#10;Used in logs and debugging output.&#10;Override for meaningful display.">ToString</span> improves logging,
+              while <span class="tt" data-tip="Defines equality meaning for your type.&#10;Use consistent fields for comparison.&#10;Must match GetHashCode behavior.">Equals</span> and
+              <span class="tt" data-tip="Produces a hash used by dictionaries/sets.&#10;Equal objects must have equal hash codes.&#10;Keep it stable and consistent.">GetHashCode</span> must be consistent.
+              If you define custom equality, you enable correct behavior in Dictionary/HashSet and avoid subtle bugs.
+            </p>
+
+            <pre class="ascii">Equality Flow
+-------------
+Equals()  -> "Are these two instances logically equal?"
+GetHashCode() -> "Which bucket should it go into?"
+Rule: If A.Equals(B) == true, then A.GetHashCode() MUST == B.GetHashCode()</pre>
+
+            <div class="ex">
+              <div class="ex-title">Example (Customer identity)</div>
+              If your system treats Email as unique identity, equality should compare Email (case-insensitive) rather than Name.
+            </div>
+
+            <pre class="code"><code>public class Customer
+{
+    public string Email { get; }
+    public string Name { get; }
+
+    public Customer(string email, string name)
+    {
+        Email = email;
+        Name = name;
+    }
+
+    public override string ToString() =&gt; $"Customer(Name={Name}, Email={Email})";
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is not Customer other) return false;
+        return string.Equals(Email, other.Email, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public override int GetHashCode()
+        =&gt; StringComparer.OrdinalIgnoreCase.GetHashCode(Email);
+}</code></pre>
+
+            <div class="usecase">
+              <b>Real-world use case:</b> In an e-commerce app, you store customers in a HashSet to prevent duplicates.
+              Correct overrides ensure “same email” doesn’t get inserted twice.
+            </div>
+
+            <div class="tip"><b>Beginner tip:</b> If you override Equals, always override GetHashCode too.</div>
+            <div class="note"><b>Advanced note:</b> For many “data-only” types, consider <span class="tt" data-tip="C# data-focused type with value-like equality.&#10;Great for DTOs and immutable models.&#10;Automatically generates useful methods.">Record</span> to get structural equality safely.</div>
+
+            <div class="navbtns">
+              <a class="btn" href="#t10-structs-vs-classes">◀ Previous</a>
+              <a class="btn" href="#t10-boxing-unboxing">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="t10-boxing-unboxing">
+          <div class="sec-head"><h2>Boxing & Unboxing (Hidden Costs)</h2></div>
+          <div class="sec-body">
+            <p>
+              <span class="tt" data-tip="Converts a value type into an object reference.&#10;Allocates memory and copies the value.&#10;Can hurt performance in loops.">Boxing</span> happens when a value type (like int) is treated as object,
+              typically causing a heap allocation and copy. <span class="tt" data-tip="Extracts the value type back from an object.&#10;Requires the boxed type to match exactly.&#10;Wrong type causes InvalidCastException.">Unboxing</span> extracts the value back and can fail if types mismatch.
+              Hidden boxing often appears with non-generic collections, string formatting, or APIs that take object.
+              Avoid it by using generics (List&lt;int&gt;), and by staying in strongly typed pipelines.
+            </p>
+
+            <pre class="ascii">Hidden Cost Snapshot
+--------------------
+Value type (int) --(boxing)--> object (heap allocation)
+object --(unboxing)--> int (type check + copy)</pre>
+
+            <div class="ex">
+              <div class="ex-title">Example (Non-generic collection traps)</div>
+              ArrayList stores everything as object, so ints get boxed. Prefer List&lt;int&gt;.
+            </div>
+
+            <pre class="code"><code>using System.Collections;
+
+var arr = new ArrayList();
+for (int i = 0; i &lt; 3; i++)
+{
+    arr.Add(i); // BOXING each int into object
+}
+
+int first = (int)arr[0];  // UNBOXING back to int
+
+// Better:
+var list = new List&lt;int&gt;();
+list.Add(0);              // no boxing</code></pre>
+
+            <div class="usecase">
+              <b>Real-world use case:</b> In a logging pipeline processing millions of records,
+              accidental boxing can create many allocations and increase GC pressure, slowing the service.
+            </div>
+
+            <div class="tip"><b>Beginner tip:</b> If you see <span class="tt" data-tip="A non-generic type that stores items as object.&#10;Often causes boxing with value types.&#10;Prefer generic collections.">ArrayList</span> or object-based APIs, double-check for boxing.</div>
+            <div class="note"><b>Advanced note:</b> Boxing can also occur with interface calls on structs. Be careful when structs implement interfaces and are used via interface-typed variables.</div>
+
+            <div class="navbtns">
+              <a class="btn" href="#t10-system-object-overrides">◀ Previous</a>
+              <a class="btn" href="#t10-generics-and-constraints">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="t10-generics-and-constraints">
+          <div class="sec-head"><h2>Generics (Classes, Methods) + Constraints</h2></div>
+          <div class="sec-body">
+            <p>
+              <span class="tt" data-tip="Type-parameterized code like List&lt;T&gt;.&#10;Avoids casting and runtime type errors.&#10;Improves performance by removing boxing.">Generics</span> let you write reusable code without losing type safety.
+              Instead of storing “object” and casting later, you keep everything strongly typed.
+              <span class="tt" data-tip="Rules on generic type parameters (where T : class/new()/BaseType).&#10;Lets compiler allow safe operations on T.&#10;Prevents invalid generic usage.">Constraints</span> tell the compiler what T is allowed to be,
+              enabling safe features like calling new(), accessing base members, or requiring interfaces.
+            </p>
+
+            <pre class="ascii">Generic Design
+--------------
+Without generics: store object + cast later (risk)
+With generics:    store T + compile-time safety (safe)</pre>
+
+            <div class="ex">
+              <div class="ex-title">Example (Repository with constraints)</div>
+              If you require an Id, constrain T to an interface like IEntity.
+            </div>
+
+            <pre class="code"><code>public interface IEntity
+{
+    int Id { get; }
+}
+
+public class Repository&lt;T&gt; where T : class, IEntity, new()
+{
+    private readonly Dictionary&lt;int, T&gt; _store = new();
+
+    public T Add(int id)
+    {
+        var entity = new T(); // allowed because of new() constraint
+        _store[id] = entity;
+        return entity;
+    }
+
+    public bool TryGet(int id, out T? entity) =&gt; _store.TryGetValue(id, out entity);
+}</code></pre>
+
+            <div class="usecase">
+              <b>Real-world use case:</b> A shared library for many microservices can provide
+              generic validation, caching, mapping, and repositories that work across entity types.
+            </div>
+
+            <div class="tip"><b>Beginner tip:</b> Prefer List&lt;T&gt;, Dictionary&lt;TKey,TValue&gt; over object-based containers.</div>
+            <div class="note"><b>Advanced note:</b> Use constraints to reduce runtime checks and make your API self-documenting (the compiler enforces the rules).</div>
+
+            <div class="navbtns">
+              <a class="btn" href="#t10-boxing-unboxing">◀ Previous</a>
+              <a class="btn" href="#t10-nullable-and-null-operators">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="t10-nullable-and-null-operators">
+          <div class="sec-head"><h2>Nullable Types + Null Operators (??, ?., ??=)</h2></div>
+          <div class="sec-body">
+            <p>
+              A <span class="tt" data-tip="Feature for representing missing values.&#10;int? can store null as well as an int.&#10;Helps avoid magic numbers like -1.">Nullable</span> value type (like int?) can represent “no value”.
+              Null operators make code safer and shorter: <span class="tt" data-tip="Returns fallback value if left side is null.&#10;Common for defaults and configuration.&#10;Reduces if-null checks.">Null Coalescing</span> (??) provides defaults,
+              <span class="tt" data-tip="Stops member access if left side is null.&#10;Prevents NullReferenceException in chains.&#10;Returns null instead of crashing.">Null Propagation</span> (?.) safely chains access,
+              and ??= assigns only when null.
+            </p>
+
+            <pre class="ascii">Null Safety Flow
+----------------
+value?.Member   -> if value is null, result is null (no crash)
+value ?? backup -> if value is null, use backup
+value ??= x     -> assign x only if value is null</pre>
+
+            <div class="ex">
+              <div class="ex-title">Example (Config fallback)</div>
+              If a setting is missing, default to a safe value and continue smoothly.
+            </div>
+
+            <pre class="code"><code>string? regionFromEnv = Environment.GetEnvironmentVariable("APP_REGION");
+
+// fallback
+string region = regionFromEnv ?? "ap-south-1";
+
+// safe chain
+int? len = regionFromEnv?.Length;
+
+// assign default only if null
+regionFromEnv ??= "unknown";</code></pre>
+
+            <div class="usecase">
+              <b>Real-world use case:</b> In API services, incoming JSON can omit optional fields.
+              Nullable types + null operators prevent crashes and simplify validation logic.
+            </div>
+
+            <div class="tip"><b>Beginner tip:</b> Use TryParse-style patterns for user input, and keep optional fields nullable.</div>
+            <div class="note"><b>Advanced note:</b> Combine null operators with guard clauses to keep methods short and readable (fail fast, then proceed confidently).</div>
+
+            <div class="navbtns">
+              <a class="btn" href="#t10-generics-and-constraints">◀ Previous</a>
+              <a class="btn" href="#t10-extension-methods">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="t10-extension-methods">
+          <div class="sec-head"><h2>Extension Methods (Add Methods Without Modifying Types)</h2></div>
+          <div class="sec-body">
+            <p>
+              <span class="tt" data-tip="Static methods that appear like instance methods.&#10;They extend existing types without editing them.&#10;Used heavily by LINQ for fluent chains.">Extension Methods</span> let you “add” methods to existing types
+              without inheritance or modifying source code. They are static methods in a static class,
+              where the first parameter uses the <span class="tt" data-tip="Marks the first parameter as the type being extended.&#10;Enables instance-like call syntax.&#10;Works at compile-time only.">this</span> keyword.
+              This enables clean fluent APIs, and is perfect for shared utility functions like validation and formatting.
+            </p>
+
+            <pre class="ascii">How it Feels
+------------
+Before: Utils.IsValidEmail(email)
+After:  email.IsValidEmail()   (same static call, nicer syntax)</pre>
+
+            <div class="ex">
+              <div class="ex-title">Example (Email validation helper)</div>
+              Keep validation logic centralized, but call it naturally on string values.
+            </div>
+
+            <pre class="code"><code>public static class StringExtensions
+{
+    public static bool IsValidEmail(this string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return false;
+        return value.Contains("@") &amp;&amp; value.Contains(".");
+    }
+}
+
+string email = "asha@company.com";
+bool ok = email.IsValidEmail();</code></pre>
+
+            <div class="usecase">
+              <b>Real-world use case:</b> In a large codebase, extension methods standardize common operations
+              (normalizing phone numbers, trimming inputs, formatting currency) across teams.
+            </div>
+
+            <div class="tip"><b>Beginner tip:</b> Keep extension methods small and focused; avoid hiding complex business rules inside them.</div>
+            <div class="note"><b>Advanced note:</b> Prefer domain services for behavior that depends on infrastructure (DB, network). Extension methods should be “pure” helpers.</div>
+
+            <div class="navbtns">
+              <a class="btn" href="#t10-nullable-and-null-operators">◀ Previous</a>
+              <a class="btn" href="#t10-pattern-matching">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="t10-pattern-matching">
+          <div class="sec-head"><h2>Pattern Matching (is, switch patterns)</h2></div>
+          <div class="sec-body">
+            <p>
+              <span class="tt" data-tip="Modern way to check types and conditions.&#10;Uses is/switch patterns for clarity.&#10;Reduces nested if statements.">Pattern Matching</span> makes type checks and condition checks readable and safe.
+              With <span class="tt" data-tip="Checks a pattern and can assign a typed variable.&#10;Example: obj is Customer c.&#10;Avoids manual casts.">is</span>, you can both test and capture a typed variable.
+              With switch patterns, you can handle multiple shapes of data cleanly (types, property patterns, guards).
+              This is especially useful when processing mixed message types or API responses.
+            </p>
+
+            <pre class="ascii">Pattern Matching Flow
+---------------------
+input object
+  |
+  +-- is TypeA a  -> handle A
+  +-- is TypeB b  -> handle B
+  +-- null        -> safe fallback</pre>
+
+            <div class="ex">
+              <div class="ex-title">Example (Payment method routing)</div>
+              Different payment methods are handled differently without messy casts.
+            </div>
+
+            <pre class="code"><code>public interface IPayment { }
+public class CardPayment : IPayment { public decimal Amount { get; set; } }
+public class UpiPayment  : IPayment { public decimal Amount { get; set; } }
+
+static string RoutePayment(IPayment? payment) =&gt; payment switch
+{
+    CardPayment c when c.Amount &gt; 0 =&gt; "Route: Card Gateway",
+    UpiPayment u  when u.Amount &gt; 0 =&gt; "Route: UPI Switch",
+    null =&gt; "No payment provided",
+    _ =&gt; "Unsupported payment"
+};</code></pre>
+
+            <div class="usecase">
+              <b>Real-world use case:</b> In an event-driven system, a consumer receives different event types.
+              Pattern matching allows clean routing logic with safer code.
+            </div>
+
+            <div class="tip"><b>Beginner tip:</b> Use “is Type x” to avoid writing separate cast lines.</div>
+            <div class="note"><b>Advanced note:</b> Property patterns and “when” guards can replace many nested validations while keeping logic in one place.</div>
+
+            <div class="navbtns">
+              <a class="btn" href="#t10-extension-methods">◀ Previous</a>
+              <a class="btn" href="#t10-arrays-and-system-array">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="t10-arrays-and-system-array">
+          <div class="sec-head"><h2>Arrays Deep Dive (Multi-Dimensional & Jagged) + System.Array</h2></div>
+          <div class="sec-body">
+            <p>
+              Arrays are fixed-size containers; they are reference types even when holding value types.
+              Multi-dimensional arrays (like int[,]) are “grid-like”, while jagged arrays (int[][]) are arrays of arrays.
+              Use multi-dimensional arrays for true matrix shapes, and jagged arrays when each row can have different length.
+              The <span class="tt" data-tip="Base type for all arrays in .NET.&#10;Provides utilities like Sort, Reverse, Copy.&#10;Helps with common array operations.">System.Array</span> API provides helpers like Sort, Reverse, and Copy.
+            </p>
+
+            <pre class="ascii">Array Shapes
+------------
+Multi-dimensional: int[,] grid (rows x cols, rectangular)
+Jagged:           int[][] rows (each row can vary in length)</pre>
+
+            <div class="ex">
+              <div class="ex-title">Example (Matrix vs variable rows)</div>
+              Exam seating in fixed classroom grid fits int[,]. Monthly sales where each month has different days fits int[][].
+            </div>
+
+            <pre class="code"><code>// Multi-dimensional (rectangular)
+int[,] grid = new int[2,3] { {1,2,3}, {4,5,6} };
+
+// Jagged (rows can differ)
+int[][] jag = new int[2][];
+jag[0] = new int[] { 10, 20 };
+jag[1] = new int[] { 30, 40, 50 };
+
+// System.Array utilities
+int[] scores = { 60, 20, 90, 40 };
+Array.Sort(scores);
+Array.Reverse(scores);</code></pre>
+
+            <div class="usecase">
+              <b>Real-world use case:</b> Image processing often uses a fixed grid (multi-dimensional),
+              while log batches may vary in size (jagged).
+            </div>
+
+            <div class="tip"><b>Beginner tip:</b> Start with List&lt;T&gt; unless you truly need fixed size and maximum performance.</div>
+            <div class="note"><b>Advanced note:</b> Jagged arrays can be more cache-friendly for some variable-length workloads, but require careful null/length checks.</div>
+
+            <div class="navbtns">
+              <a class="btn" href="#t10-pattern-matching">◀ Previous</a>
+              <a class="btn" href="#t10-collections-overview">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="t10-collections-overview">
+          <div class="sec-head"><h2>Collections Overview (List, Dictionary, HashSet, Stack, Queue, etc.)</h2></div>
+          <div class="sec-body">
+            <p>
+              Collections store multiple items, but each collection is optimized for different operations.
+              <span class="tt" data-tip="Resizable array-like collection.&#10;Fast index access, good for ordered lists.&#10;Common default choice.">List</span> is great for ordered data,
+              <span class="tt" data-tip="Key-value mapping for fast lookups.&#10;Average O(1) access by key.&#10;Great for caches and indexes.">Dictionary</span> is best for key-based lookup,
+              and <span class="tt" data-tip="Stores unique items only.&#10;Fast contains checks.&#10;Great for deduplication.">HashSet</span> enforces uniqueness.
+              Use Stack/Queue for LIFO/FIFO workflows, like undo/redo or job processing.
+            </p>
+
+            <pre class="ascii">Pick the Right Tool
+-------------------
+Need order + indexing?      List
+Need key lookup?            Dictionary
+Need uniqueness?            HashSet
+Need FIFO jobs?             Queue
+Need LIFO undo?             Stack</pre>
+
+            <div class="ex">
+              <div class="ex-title">Example (Orders and quick lookups)</div>
+              Store orders in a list (display), and build a dictionary for fast “OrderId → Order” lookup.
+            </div>
+
+            <pre class="code"><code>var orders = new List&lt;string&gt; { "ORD1001", "ORD1002", "ORD1003" };
+
+var orderIndex = new Dictionary&lt;string, string&gt;();
+foreach (var id in orders) orderIndex[id] = id;
+
+bool exists = orderIndex.ContainsKey("ORD1002");
+
+var uniqueCities = new HashSet&lt;string&gt; { "Chennai", "Jaipur", "Chennai" }; // duplicates removed
+
+var jobs = new Queue&lt;string&gt;();
+jobs.Enqueue("SendEmail");
+jobs.Enqueue("GenerateInvoice");
+string nextJob = jobs.Dequeue();</code></pre>
+
+            <div class="usecase">
+              <b>Real-world use case:</b> In a booking system, you maintain unique room numbers (HashSet),
+              a queue of housekeeping tasks (Queue), and a dictionary cache of roomId → roomDetails (Dictionary).
+            </div>
+
+            <div class="tip"><b>Beginner tip:</b> If unsure, start with List&lt;T&gt;, then switch when performance needs appear.</div>
+            <div class="note"><b>Advanced note:</b> Big-O matters, but real performance also depends on allocations, hashing quality, and data size patterns.</div>
+
+            <div class="navbtns">
+              <a class="btn" href="#t10-arrays-and-system-array">◀ Previous</a>
+              <a class="btn" href="#t10-custom-collections-interfaces">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="t10-custom-collections-interfaces">
+          <div class="sec-head"><h2>Custom Collections (IEnumerable, IEnumerator, IComparable, IComparer)</h2></div>
+          <div class="sec-body">
+            <p>
+              Custom collections become powerful when they support foreach iteration and sorting.
+              Implementing <span class="tt" data-tip="Allows a type to be iterated with foreach.&#10;Foundation of LINQ.&#10;Supports streaming sequences.">IEnumerable</span> enables iteration,
+              while <span class="tt" data-tip="Controls iteration (MoveNext, Current).&#10;Used behind foreach internally.&#10;Rarely written manually today.">IEnumerator</span> is the engine behind it.
+              For sorting, <span class="tt" data-tip="Defines the default ordering for a type.&#10;Used by Sort() when no comparer is given.&#10;Keeps a natural sort rule.">IComparable</span> defines “natural” order,
+              and <span class="tt" data-tip="Defines external/custom comparison logic.&#10;Useful for multiple sorting strategies.&#10;Keeps type clean and flexible.">IComparer</span> provides alternate strategies.
+            </p>
+
+            <pre class="ascii">Iteration Model
+---------------
+Collection (IEnumerable)
+  |
+  +-- GetEnumerator() -> Enumerator (IEnumerator)
+        |
+        +-- MoveNext() / Current / Reset()</pre>
+
+            <div class="ex">
+              <div class="ex-title">Example (Iterable custom range + sortable product)</div>
+              Build a custom Range that can be iterated; build Product sorting by default or by price using IComparer.
+            </div>
+
+            <pre class="code"><code>public class SimpleRange : IEnumerable&lt;int&gt;
+{
+    private readonly int _start, _end;
+
+    public SimpleRange(int start, int end)
+    {
+        _start = start;
+        _end = end;
+    }
+
+    public IEnumerator&lt;int&gt; GetEnumerator()
+    {
+        for (int i = _start; i &lt;= _end; i++)
+            yield return i; // compiler creates IEnumerator
+    }
+
+    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        =&gt; GetEnumerator();
+}
+
+public class Product : IComparable&lt;Product&gt;
+{
+    public string Name { get; set; } = "";
+    public decimal Price { get; set; }
+
+    public int CompareTo(Product? other)
+    {
+        if (other is null) return 1;
+        return string.Compare(Name, other.Name, StringComparison.OrdinalIgnoreCase);
+    }
+}
+
+public class PriceComparer : IComparer&lt;Product&gt;
+{
+    public int Compare(Product? x, Product? y)
+        =&gt; (x?.Price ?? 0).CompareTo(y?.Price ?? 0);
+}</code></pre>
+
+            <div class="usecase">
+              <b>Real-world use case:</b> A reporting library exposes custom time ranges (iterable) and allows sorting
+              reports by name, date, or total using different comparers.
+            </div>
+
+            <div class="tip"><b>Beginner tip:</b> Use “yield return” to implement IEnumerable quickly and clearly.</div>
+            <div class="note"><b>Advanced note:</b> Iterator blocks create state machines; for ultra-hot paths, you may optimize to avoid extra allocations.</div>
+
+            <div class="navbtns">
+              <a class="btn" href="#t10-collections-overview">◀ Previous</a>
+              <a class="btn" href="#t10-anonymous-tuples-deconstruction">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="t10-anonymous-tuples-deconstruction">
+          <div class="sec-head"><h2>Anonymous Types, Tuples & Deconstruction</h2></div>
+          <div class="sec-body">
+            <p>
+              Anonymous types are quick, local “shapes” for temporary projections (often used with LINQ).
+              Tuples provide lightweight multiple return values without creating a full class.
+              Deconstruction lets you pull tuple (or custom type) parts into variables in one readable line.
+              Use them for small transformations, but prefer named types for public APIs and long-term models.
+            </p>
+
+            <pre class="ascii">Data Shapes
+-----------
+Anonymous Type: new { Name = ..., Total = ... }  (local only)
+Tuple: (int Id, string Name)                    (lightweight return)
+Deconstruction: var (id, name) = tuple;</pre>
+
+            <div class="ex">
+              <div class="ex-title">Example (Returning two values cleanly)</div>
+              Return (isValid, message) from validation without out parameters.
+            </div>
+
+            <pre class="code"><code>static (bool ok, string message) ValidateAge(int age)
+{
+    if (age &lt; 18) return (false, "Must be 18+");
+    return (true, "OK");
+}
+
+var result = ValidateAge(20);
+var (ok, msg) = result;  // deconstruction
+
+var reportRow = new { Name = "Ravi", Total = 1250m }; // anonymous type</code></pre>
+
+            <div class="usecase">
+              <b>Real-world use case:</b> In data pipelines, you project only what you need (anonymous types),
+              return multi-values from helpers (tuples), and keep code readable with deconstruction.
+            </div>
+
+            <div class="tip"><b>Beginner tip:</b> Use tuples for internal helpers; don’t expose them everywhere in public libraries.</div>
+            <div class="note"><b>Advanced note:</b> Prefer clear domain models (classes/records) for boundaries: API contracts, storage models, and shared packages.</div>
+
+            <div class="navbtns">
+              <a class="btn" href="#t10-custom-collections-interfaces">◀ Previous</a>
+              <a class="btn" href="#t10-linq-basics">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="t10-linq-basics">
+          <div class="sec-head"><h2>LINQ Basics + Aggregates (Select, OrderBy, Min/Max/Sum/Avg)</h2></div>
+          <div class="sec-body">
+            <p>
+              <span class="tt" data-tip="Language Integrated Query for data operations.&#10;Creates readable pipelines using method syntax.&#10;Works on IEnumerable sequences.">LINQ</span> lets you build pipelines: filter, transform, sort, and aggregate.
+              Most LINQ methods work on <span class="tt" data-tip="Interface that supports iteration with foreach.&#10;Foundation for streaming sequences.&#10;Used by most LINQ methods.">IEnumerable</span> so they work across lists, arrays, and custom iterators.
+              Aggregates like Min/Max/Sum/Avg give quick insights.
+              A key idea: many operations are deferred until you enumerate (foreach, ToList, Count).
+            </p>
+
+            <pre class="ascii">LINQ Pipeline
+-------------
+source --Where--> filtered --Select--> projected --OrderBy--> sorted --Aggregate--> result</pre>
+
+            <div class="ex">
+              <div class="ex-title">Example (Sales analytics in memory)</div>
+              Find top sales, average order, and build a simplified view for UI.
+            </div>
+
+            <pre class="code"><code>public record Order(string Id, decimal Total);
+
+var orders = new List&lt;Order&gt;
+{
+    new("ORD1", 1200m),
+    new("ORD2", 250m),
+    new("ORD3", 750m),
+    new("ORD4", 1500m)
+};
+
+var bigOrders = orders
+    .Where(o =&gt; o.Total &gt;= 700m)
+    .Select(o =&gt; new { o.Id, o.Total })
+    .OrderByDescending(x =&gt; x.Total)
+    .ToList();
+
+decimal max = orders.Max(o =&gt; o.Total);
+decimal avg = orders.Average(o =&gt; o.Total);
+decimal sum = orders.Sum(o =&gt; o.Total);</code></pre>
+
+            <div class="usecase">
+              <b>Real-world use case:</b> In dashboards, you often load data from DB once and use LINQ
+              to create multiple filtered views without rewriting loops everywhere.
+            </div>
+
+            <div class="tip"><b>Beginner tip:</b> If a LINQ chain feels confusing, rewrite it as a foreach once, then convert back.</div>
+            <div class="note"><b>Advanced note:</b> Be careful with multiple enumerations; store results with ToList() when you will reuse a query many times.</div>
+
+            <div class="navbtns">
+              <a class="btn" href="#t10-anonymous-tuples-deconstruction">◀ Previous</a>
+              <a class="btn" href="#t10-core-bcl-apis">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="t10-core-bcl-apis">
+          <div class="sec-head"><h2>Core BCL APIs (StringBuilder, DateTime, Math)</h2></div>
+          <div class="sec-body">
+            <p>
+              The <span class="tt" data-tip="Base Class Library: core .NET libraries.&#10;Includes strings, collections, IO, networking.&#10;Used in almost every C# program.">BCL</span> gives battle-tested tools for daily work.
+              Use <span class="tt" data-tip="Efficiently builds strings without many allocations.&#10;Ideal for loops and large concatenations.&#10;Avoids repeated string copies.">StringBuilder</span> for heavy string building,
+              <span class="tt" data-tip="Represents date and time values.&#10;Used for timestamps, scheduling, and durations.&#10;Combine with TimeSpan for differences.">DateTime</span> for time operations,
+              and Math for numeric calculations.
+              These APIs keep code concise and fast when used correctly.
+            </p>
+
+            <pre class="ascii">When to use StringBuilder
+-------------------------
+Many concatenations in a loop?  Use StringBuilder
+A few concatenations?          Normal string is fine</pre>
+
+            <div class="ex">
+              <div class="ex-title">Example (Report line generation)</div>
+              Build a multi-line report efficiently and stamp it with a generated time.
+            </div>
+
+            <pre class="code"><code>using System.Text;
+
+var sb = new StringBuilder();
+sb.AppendLine("Daily Sales Report");
+sb.AppendLine("------------------");
+
+for (int i = 1; i &lt;= 3; i++)
+{
+    sb.AppendLine($"Item {i}: ₹{Math.Round(i * 123.45, 2)}");
+}
+
+string report = sb.ToString();
+DateTime createdAt = DateTime.Now;</code></pre>
+
+            <div class="usecase">
+              <b>Real-world use case:</b> Generating invoices, CSV exports, or log summaries often needs efficient string building and accurate timestamps.
+            </div>
+
+            <div class="tip"><b>Beginner tip:</b> For time differences, use TimeSpan (e.g., end - start) rather than manual math.</div>
+            <div class="note"><b>Advanced note:</b> In distributed systems, prefer UTC timestamps to avoid timezone surprises and DST issues.</div>
+
+            <div class="navbtns">
+              <a class="btn" href="#t10-linq-basics">◀ Previous</a>
+              <a class="btn" href="#t10-io-serialization-encoding">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="t10-io-serialization-encoding">
+          <div class="sec-head"><h2>IO, Serialization & Encoding (Files + JSON/XML)</h2></div>
+          <div class="sec-body">
+            <p>
+              IO is how your program reads/writes data to files, streams, and storage.
+              <span class="tt" data-tip="Converting objects to formats like JSON or XML.&#10;Used for APIs, caching, configs.&#10;Allows data transfer between systems.">Serialization</span> converts objects into JSON/XML for APIs and storage.
+              <span class="tt" data-tip="Maps characters to bytes (UTF-8, UTF-16).&#10;Wrong encoding corrupts text.&#10;Always set encoding intentionally for files.">Encoding</span> controls how text becomes bytes; UTF-8 is a common safe default.
+              Use try/catch for IO failures (missing file, locked file), and validate inputs before writing.
+            </p>
+
+            <pre class="ascii">IO + Serialization Flow
+-----------------------
+Object --Serialize--> JSON string --Encode--> bytes --Write--> file
+File --Read--> bytes --Decode--> JSON string --Deserialize--> Object</pre>
+
+            <div class="ex">
+              <div class="ex-title">Example (Save settings to JSON)</div>
+              Store app configuration in a file so it can be edited or deployed with the application.
+            </div>
+
+            <pre class="code"><code>using System.Text;
+using System.Text.Json;
+
+public record AppSettings(string Region, int RetryCount);
+
+var settings = new AppSettings("ap-south-1", 3);
+
+// Serialize to JSON
+string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
+
+// Write to file with explicit UTF-8
+File.WriteAllText("appsettings.local.json", json, Encoding.UTF8);
+
+// Read back
+string readJson = File.ReadAllText("appsettings.local.json", Encoding.UTF8);
+var loaded = JsonSerializer.Deserialize&lt;AppSettings&gt;(readJson);</code></pre>
+
+            <div class="usecase">
+              <b>Real-world use case:</b> Microservices often store local settings for dev/test,
+              export JSON payloads for audit, or generate XML for legacy systems.
+            </div>
+
+            <div class="tip"><b>Beginner tip:</b> Always use WriteIndented for config files to keep them readable for humans.</div>
+            <div class="note"><b>Advanced note:</b> For large files, prefer streams (FileStream + async) instead of reading everything into memory at once.</div>
+
+            <div class="navbtns">
+              <a class="btn" href="#t10-core-bcl-apis">◀ Previous</a>
+              <a class="btn" href="#t10-exceptions-and-modern-csharp">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="t10-exceptions-and-modern-csharp">
+          <div class="sec-head"><h2>Exception Handling + Modern C# (Records, Top-Level, File-Scoped)</h2></div>
+          <div class="sec-body">
+            <p>
+              <span class="tt" data-tip="Runtime error object representing something went wrong.&#10;Can be caught and handled safely.&#10;Should not be used for normal control flow.">Exception</span> handling prevents your program from crashing and helps you produce clear error messages.
+              Use try/catch/finally around risky operations (IO, parsing, network).
+              Modern C# features like <span class="tt" data-tip="C# programs can be written without explicit Main.&#10;Great for learning and quick demos.&#10;Compiles as normal under the hood.">Top-Level Statements</span>,
+              <span class="tt" data-tip="Applies namespace to entire file without braces.&#10;Reduces indentation and clutter.&#10;Improves readability in big projects.">File-Scoped Namespace</span>,
+              and <span class="tt" data-tip="Data-focused reference type with value-like equality.&#10;Ideal for DTOs and immutable models.&#10;Reduces boilerplate code.">Record</span> improve productivity and correctness.
+            </p>
+
+            <pre class="ascii">Error Handling Flow
+-------------------
+try { risky work }
+catch (specific) { handle + log }
+catch (general)  { fallback }
+finally { cleanup }</pre>
+
+            <div class="ex">
+              <div class="ex-title">Example (Safe file read + parsing)</div>
+              Handle missing file and invalid numbers without crashing, and return a meaningful result.
+            </div>
+
+            <pre class="code"><code>// Example shows try/catch and a record DTO
+public record ImportResult(bool Ok, string Message, int Count);
+
+static ImportResult ImportNumbers(string path)
+{
+    try
+    {
+        if (!File.Exists(path))
+            return new ImportResult(false, "File not found", 0);
+
+        string[] lines = File.ReadAllLines(path);
+        int count = 0;
+
+        foreach (var line in lines)
+        {
+            if (int.TryParse(line, out _)) count++;
+        }
+
+        return new ImportResult(true, "Import complete", count);
+    }
+    catch (UnauthorizedAccessException)
+    {
+        return new ImportResult(false, "No permission to access file", 0);
+    }
+    catch (Exception)
+    {
+        return new ImportResult(false, "Unexpected error during import", 0);
+    }
+}</code></pre>
+
+            <div class="usecase">
+              <b>Real-world use case:</b> Importing CSV/JSON into a system must survive bad inputs and missing files,
+              returning clear errors for support teams and users.
+            </div>
+
+            <div class="tip"><b>Beginner tip:</b> Catch specific exceptions first (like UnauthorizedAccessException), then general ones last.</div>
+            <div class="note"><b>Advanced note:</b> Prefer returning domain-friendly error results at boundaries, and log technical details internally for debugging.</div>
+
+            <div class="navbtns">
+              <a class="btn" href="#t10-io-serialization-encoding">◀ Previous</a>
+              <a class="btn" href="#next-subtopic">Next ▶</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Placeholder anchor required by Prompt v3 -->
+        <a id="next-subtopic"></a>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="faqs">
+          <div class="sec-head"><h2>FAQs</h2></div>
+          <div class="sec-body">
+            <div class="q">
+              <h4>1) When should I choose struct over class?</h4>
+              <div class="grid">
+                <div><b>Answer:</b> Use struct for small, immutable, “value-like” data (e.g., Point, Money) where copying is expected. Use class for entities with identity and shared references.</div>
+              </div>
+            </div>
+            <div class="q">
+              <h4>2) Why does overriding Equals require GetHashCode?</h4>
+              <div class="grid">
+                <div><b>Answer:</b> Hash-based collections rely on GetHashCode to find buckets; if equal objects have different hashes, lookups fail or behave inconsistently.</div>
+              </div>
+            </div>
+            <div class="q">
+              <h4>3) Is LINQ always slower than loops?</h4>
+              <div class="grid">
+                <div><b>Answer:</b> Not always. LINQ is readable and often “fast enough”, but hot paths may benefit from loops. Measure when performance truly matters.</div>
+              </div>
+            </div>
+            <div class="q">
+              <h4>4) Should I store dates as local time or UTC?</h4>
+              <div class="grid">
+                <div><b>Answer:</b> Store UTC and convert to local for display. This avoids timezone and daylight-saving problems.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="interview-questions">
+          <div class="sec-head"><h2>Interview Questions (Topic 10 Focus)</h2></div>
+          <div class="sec-body">
+            <ol>
+              <li><b>Struct vs class:</b> Explain copy behavior and a scenario where using a struct causes performance issues.</li>
+              <li><b>Equality:</b> What rules must Equals/GetHashCode follow for Dictionary keys?</li>
+              <li><b>Boxing:</b> Give two examples of hidden boxing and how to remove them.</li>
+              <li><b>Generics:</b> Why are constraints useful? Provide a “where T : class, new()” scenario.</li>
+              <li><b>Null operators:</b> Compare ??, ?., and ??= with a real example from configuration.</li>
+              <li><b>Extension methods:</b> How do they work at compile-time? Any risks?</li>
+              <li><b>Pattern matching:</b> Show how switch patterns reduce nested if blocks.</li>
+              <li><b>LINQ:</b> What is deferred execution and why can it surprise you?</li>
+              <li><b>Serialization:</b> What are common issues when serializing DateTime and enums?</li>
+              <li><b>Exceptions:</b> When is it wrong to use exceptions as normal flow?</li>
+            </ol>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="summary">
+          <div class="sec-head"><h2>Summary</h2></div>
+          <div class="sec-body">
+            <ul>
+              <li>Choose <b>struct</b> for small value-like data; choose <b>class</b> for identity and shared references.</li>
+              <li>Override Object methods carefully; equality must match hash codes for correct collection behavior.</li>
+              <li>Avoid hidden boxing by using generic collections and type-safe APIs.</li>
+              <li>Use generics + constraints to create reusable, safe libraries.</li>
+              <li>Use null operators to prevent NullReferenceException and reduce defensive code.</li>
+              <li>Use LINQ to build readable pipelines; understand deferred execution and aggregation.</li>
+              <li>Use BCL APIs for everyday tasks; handle IO + serialization with correct encoding.</li>
+              <li>Handle exceptions safely, and apply modern C# features where they improve clarity.</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="mcq">
+          <div class="sec-head"><h2>MCQ (5–10 Questions)</h2></div>
+          <div class="sec-body">
+            <ol>
+              <li>
+                <b>Which statement is true?</b><br/>
+                a) Struct variables always point to heap objects<br/>
+                b) Class assignments copy the whole object<br/>
+                c) Struct assignments copy values<br/>
+                d) Classes cannot be null<br/>
+                <div class="note"><b>Answer:</b> c</div>
+              </li>
+              <li>
+                <b>If A.Equals(B) is true, which must be true?</b><br/>
+                a) A and B must be the same reference<br/>
+                b) A.GetHashCode() == B.GetHashCode()<br/>
+                c) A.ToString() == B.ToString()<br/>
+                d) A must be a record<br/>
+                <div class="note"><b>Answer:</b> b</div>
+              </li>
+              <li>
+                <b>What is a common cause of boxing?</b><br/>
+                a) Using List&lt;int&gt;<br/>
+                b) Using ArrayList with ints<br/>
+                c) Using Dictionary&lt;string,int&gt;<br/>
+                d) Using int? (nullable int)<br/>
+                <div class="note"><b>Answer:</b> b</div>
+              </li>
+              <li>
+                <b>Which operator provides a fallback when left side is null?</b><br/>
+                a) ?. <br/>
+                b) ?? <br/>
+                c) =&gt; <br/>
+                d) :: <br/>
+                <div class="note"><b>Answer:</b> b</div>
+              </li>
+              <li>
+                <b>LINQ works best with which interface?</b><br/>
+                a) IDisposable<br/>
+                b) IEnumerable<br/>
+                c) ICloneable<br/>
+                d) ISerializable<br/>
+                <div class="note"><b>Answer:</b> b</div>
+              </li>
+              <li>
+                <b>Which is best for many string concatenations in a loop?</b><br/>
+                a) string + string<br/>
+                b) StringBuilder<br/>
+                c) Math.Round<br/>
+                d) DateTime.Now.ToString()<br/>
+                <div class="note"><b>Answer:</b> b</div>
+              </li>
+              <li>
+                <b>What does “deferred execution” mean in LINQ?</b><br/>
+                a) Query runs when it is defined<br/>
+                b) Query runs only when enumerated<br/>
+                c) Query runs only on databases<br/>
+                d) Query runs only with foreach disabled<br/>
+                <div class="note"><b>Answer:</b> b</div>
+              </li>
+              <li>
+                <b>Which is a good default encoding for JSON text files?</b><br/>
+                a) ASCII<br/>
+                b) UTF-8<br/>
+                c) EBCDIC<br/>
+                d) Random per machine<br/>
+                <div class="note"><b>Answer:</b> b</div>
+              </li>
+            </ol>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="downloads">
+          <div class="sec-head"><h2>Downloadable ZIP / PPT / DOC (Placeholder)</h2></div>
+          <div class="sec-body">
+            <div class="note">
+              <b>ZIP (Placeholder):</b> [Add link to downloadable source code ZIP here]<br/>
+              <b>PPT (Placeholder):</b> [Add link to slide deck PPT here]<br/>
+              <b>DOC (Placeholder):</b> [Add link to Word notes DOC here]
+            </div>
+            <div class="tip">
+              <b>Suggestion:</b> Package small demos per subtopic (one Console app each) and include a single README for how to run them.
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="glossary-tooltips">
+          <div class="sec-head"><h2>Glossary (Tooltips)</h2></div>
+          <div class="sec-body">
+            <p class="muted">Terms used with tooltips in this page (Term | Tooltip Description).</p>
+            <table>
+              <thead>
+                <tr><th>Term</th><th>Tooltip Description</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>.NET</td><td>A developer platform for building apps (web, desktop, mobile, cloud). It includes tools, libraries, and runtimes. C# code commonly runs on the .NET runtime.</td></tr>
+                <tr><td>Value Type</td><td>Stores data directly (like int or struct). Copying duplicates the value. Often faster for small data objects.</td></tr>
+                <tr><td>Reference Type</td><td>Stores a reference to an object instance. Copying shares the same underlying object. Mutations affect all references.</td></tr>
+                <tr><td>System.Object</td><td>Base type for all .NET types. Provides methods like ToString, Equals, GetHashCode. Overrides define identity and display.</td></tr>
+                <tr><td>ToString</td><td>Returns a human-readable text representation. Used in logs and debugging output. Override for meaningful display.</td></tr>
+                <tr><td>Equals</td><td>Defines equality meaning for your type. Use consistent fields for comparison. Must match GetHashCode behavior.</td></tr>
+                <tr><td>GetHashCode</td><td>Produces a hash used by dictionaries/sets. Equal objects must have equal hash codes. Keep it stable and consistent.</td></tr>
+                <tr><td>Boxing</td><td>Converts a value type into an object reference. Allocates memory and copies the value. Can hurt performance in loops.</td></tr>
+                <tr><td>Unboxing</td><td>Extracts the value type back from an object. Requires the boxed type to match exactly. Wrong type causes InvalidCastException.</td></tr>
+                <tr><td>Generics</td><td>Type-parameterized code like List&lt;T&gt;. Avoids casting and improves safety. Helps performance by removing boxing.</td></tr>
+                <tr><td>Constraints</td><td>Rules on generic type parameters (where T : class/new()/BaseType). Lets compiler allow safe operations on T. Prevents invalid usage.</td></tr>
+                <tr><td>Nullable</td><td>Feature for representing missing values. int? can store null as well as an int. Helps avoid magic numbers like -1.</td></tr>
+                <tr><td>Null Coalescing</td><td>Returns fallback value if left side is null. Common for defaults and configuration. Reduces if-null checks.</td></tr>
+                <tr><td>Null Propagation</td><td>Stops member access if left side is null. Prevents NullReferenceException in chains. Returns null instead of crashing.</td></tr>
+                <tr><td>Extension Methods</td><td>Static methods that appear like instance methods. Extend existing types without editing them. Used heavily by LINQ for fluent chains.</td></tr>
+                <tr><td>Pattern Matching</td><td>Modern way to check types and conditions. Uses is/switch patterns for clarity. Reduces nested if statements.</td></tr>
+                <tr><td>LINQ</td><td>Language Integrated Query for data operations. Creates readable pipelines using method syntax. Works on IEnumerable sequences.</td></tr>
+                <tr><td>IEnumerable</td><td>Interface that supports iteration with foreach. Foundation for streaming sequences. Used by most LINQ methods.</td></tr>
+                <tr><td>Serialization</td><td>Converting objects to formats like JSON or XML. Used for APIs, caching, configs. Allows data transfer between systems.</td></tr>
+                <tr><td>Encoding</td><td>Maps characters to bytes (UTF-8, UTF-16). Wrong encoding corrupts text. Always set encoding intentionally for files.</td></tr>
+                <tr><td>Record</td><td>C# data-focused type with value-like equality. Ideal for DTOs and immutable models. Reduces boilerplate code.</td></tr>
+                <tr><td>Top-Level Statements</td><td>C# programs can be written without explicit Main. Great for learning and quick demos. Compiles as normal under the hood.</td></tr>
+                <tr><td>File-Scoped Namespace</td><td>Applies namespace to entire file without braces. Reduces indentation and clutter. Improves readability in big projects.</td></tr>
+                <tr><td>StringBuilder</td><td>Efficiently builds strings without many allocations. Ideal for loops and large concatenations. Avoids repeated string copies.</td></tr>
+                <tr><td>DateTime</td><td>Represents date and time values. Used for timestamps, scheduling, and durations. Combine with TimeSpan for differences.</td></tr>
+                <tr><td>Exception</td><td>Runtime error object representing something went wrong. Can be caught and handled safely. Should not be used for normal control flow.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <section class="topic" id="practice-coding-questions">
+          <div class="sec-head"><h2>To Become Best coder Practice this</h2></div>
+          <div class="sec-body">
+            <p class="muted">15 coding questions (5 easy / 5 medium / 5 hard). Each includes Problem, Input/Output, Example, Constraints, Hint.</p>
+
+            <h3 style="margin:10px 0 6px 0;">Easy (5)</h3>
+
+            <div class="q">
+              <h4>E1) Sum of Digits</h4>
+              <div><b>Problem:</b> Given a non-negative integer N, return the sum of its digits.</div>
+              <div><b>Input/Output:</b> Input: N (integer). Output: sum (integer).</div>
+              <div><b>Example Input/Output:</b> Input: 5027 → Output: 14</div>
+              <div><b>Constraints:</b> 0 ≤ N ≤ 10^18</div>
+              <div><b>Hint:</b> Repeatedly take N % 10 and divide by 10.</div>
+            </div>
+
+            <div class="q">
+              <h4>E2) Reverse a String</h4>
+              <div><b>Problem:</b> Given a string S, output the reversed string.</div>
+              <div><b>Input/Output:</b> Input: S (string). Output: reversed S.</div>
+              <div><b>Example Input/Output:</b> Input: "ittechgenie" → Output: "eineghcettti"</div>
+              <div><b>Constraints:</b> 1 ≤ |S| ≤ 10^5</div>
+              <div><b>Hint:</b> Use two pointers (left/right) or a char array swap.</div>
+            </div>
+
+            <div class="q">
+              <h4>E3) Count Vowels</h4>
+              <div><b>Problem:</b> Count vowels (a,e,i,o,u) in a string (case-insensitive).</div>
+              <div><b>Input/Output:</b> Input: S. Output: vowelCount.</div>
+              <div><b>Example Input/Output:</b> Input: "Hello World" → Output: 3</div>
+              <div><b>Constraints:</b> 1 ≤ |S| ≤ 10^5</div>
+              <div><b>Hint:</b> Convert to lower-case and check membership in a set.</div>
+            </div>
+
+            <div class="q">
+              <h4>E4) Maximum in Array</h4>
+              <div><b>Problem:</b> Given an array of integers, find the maximum element.</div>
+              <div><b>Input/Output:</b> Input: array A. Output: max value.</div>
+              <div><b>Example Input/Output:</b> Input: [3, -1, 7, 2] → Output: 7</div>
+              <div><b>Constraints:</b> 1 ≤ n ≤ 2×10^5, -10^9 ≤ A[i] ≤ 10^9</div>
+              <div><b>Hint:</b> Track a running maximum while iterating.</div>
+            </div>
+
+            <div class="q">
+              <h4>E5) Palindrome Check (String)</h4>
+              <div><b>Problem:</b> Check if a string S is a palindrome (reads same forward/backward).</div>
+              <div><b>Input/Output:</b> Input: S. Output: true/false.</div>
+              <div><b>Example Input/Output:</b> Input: "level" → Output: true</div>
+              <div><b>Constraints:</b> 1 ≤ |S| ≤ 10^5</div>
+              <div><b>Hint:</b> Compare characters from both ends moving inward.</div>
+            </div>
+
+            <h3 style="margin:14px 0 6px 0;">Medium (5)</h3>
+
+            <div class="q">
+              <h4>M1) Two Sum Indices</h4>
+              <div><b>Problem:</b> Given array A and target T, return indices (i, j) such that A[i] + A[j] = T.</div>
+              <div><b>Input/Output:</b> Input: A (int[]), T (int). Output: pair of indices or (-1,-1) if none.</div>
+              <div><b>Example Input/Output:</b> Input: A=[2,7,11,15], T=9 → Output: (0,1)</div>
+              <div><b>Constraints:</b> 2 ≤ n ≤ 2×10^5, -10^9 ≤ A[i], T ≤ 10^9</div>
+              <div><b>Hint:</b> Use a dictionary: value → index while scanning.</div>
+            </div>
+
+            <div class="q">
+              <h4>M2) Group Anagrams</h4>
+              <div><b>Problem:</b> Group strings that are anagrams of each other.</div>
+              <div><b>Input/Output:</b> Input: list of strings. Output: list of groups (each group is list of anagrams).</div>
+              <div><b>Example Input/Output:</b> Input: ["eat","tea","tan","ate","nat","bat"] → Output: [["eat","tea","ate"],["tan","nat"],["bat"]]</div>
+              <div><b>Constraints:</b> 1 ≤ count ≤ 10^4, 1 ≤ |word| ≤ 100</div>
+              <div><b>Hint:</b> Use sorted string (or character counts) as the key in a dictionary.</div>
+            </div>
+
+            <div class="q">
+              <h4>M3) Validate Balanced Brackets</h4>
+              <div><b>Problem:</b> Determine if brackets in S are balanced: (), {}, [].</div>
+              <div><b>Input/Output:</b> Input: S. Output: true/false.</div>
+              <div><b>Example Input/Output:</b> Input: "{[()]}" → Output: true</div>
+              <div><b>Constraints:</b> 0 ≤ |S| ≤ 2×10^5</div>
+              <div><b>Hint:</b> Use a stack; push opening, pop and match closing.</div>
+            </div>
+
+            <div class="q">
+              <h4>M4) Top K Frequent Elements</h4>
+              <div><b>Problem:</b> Return the K most frequent integers from array A.</div>
+              <div><b>Input/Output:</b> Input: A, K. Output: list of K elements.</div>
+              <div><b>Example Input/Output:</b> Input: A=[1,1,1,2,2,3], K=2 → Output: [1,2]</div>
+              <div><b>Constraints:</b> 1 ≤ n ≤ 2×10^5, 1 ≤ K ≤ distinctCount</div>
+              <div><b>Hint:</b> Frequency map + heap (priority queue) or bucket sort by frequency.</div>
+            </div>
+
+            <div class="q">
+              <h4>M5) Merge Overlapping Intervals</h4>
+              <div><b>Problem:</b> Given intervals [start,end], merge all overlapping intervals.</div>
+              <div><b>Input/Output:</b> Input: intervals. Output: merged intervals.</div>
+              <div><b>Example Input/Output:</b> Input: [[1,3],[2,6],[8,10],[9,12]] → Output: [[1,6],[8,12]]</div>
+              <div><b>Constraints:</b> 1 ≤ n ≤ 2×10^5, -10^9 ≤ start ≤ end ≤ 10^9</div>
+              <div><b>Hint:</b> Sort by start; merge while scanning using current end.</div>
+            </div>
+
+            <h3 style="margin:14px 0 6px 0;">Hard (5)</h3>
+
+            <div class="q">
+              <h4>H1) LRU Cache</h4>
+              <div><b>Problem:</b> Design an LRU cache supporting Get(key) and Put(key,value) in O(1).</div>
+              <div><b>Input/Output:</b> Input: sequence of operations. Output: results of Get operations.</div>
+              <div><b>Example Input/Output:</b> Ops: Put(1,10), Put(2,20), Get(1), Put(3,30), Get(2) → Output: 10, -1</div>
+              <div><b>Constraints:</b> 1 ≤ capacity ≤ 10^5, operations ≤ 2×10^5</div>
+              <div><b>Hint:</b> Combine Dictionary for lookup + Doubly Linked List for recency order.</div>
+            </div>
+
+            <div class="q">
+              <h4>H2) Longest Substring Without Repeating Characters</h4>
+              <div><b>Problem:</b> Given string S, return length of the longest substring with all unique characters.</div>
+              <div><b>Input/Output:</b> Input: S. Output: max length.</div>
+              <div><b>Example Input/Output:</b> Input: "abcabcbb" → Output: 3</div>
+              <div><b>Constraints:</b> 0 ≤ |S| ≤ 2×10^5</div>
+              <div><b>Hint:</b> Sliding window with last-seen index map.</div>
+            </div>
+
+            <div class="q">
+              <h4>H3) Minimum Window Substring</h4>
+              <div><b>Problem:</b> Given S and T, find the smallest substring in S containing all characters of T (with counts).</div>
+              <div><b>Input/Output:</b> Input: S, T. Output: smallest window string (or empty if none).</div>
+              <div><b>Example Input/Output:</b> Input: S="ADOBECODEBANC", T="ABC" → Output: "BANC"</div>
+              <div><b>Constraints:</b> 1 ≤ |S| ≤ 2×10^5, 1 ≤ |T| ≤ 10^5</div>
+              <div><b>Hint:</b> Sliding window with frequency maps and a “formed” counter.</div>
+            </div>
+
+            <div class="q">
+              <h4>H4) Dijkstra Shortest Path (Weighted Graph)</h4>
+              <div><b>Problem:</b> Find shortest distances from source to all nodes in a weighted graph with non-negative weights.</div>
+              <div><b>Input/Output:</b> Input: n, edges (u,v,w), source s. Output: dist[] array.</div>
+              <div><b>Example Input/Output:</b> n=3, edges: (0,1,4),(0,2,1),(2,1,2), s=0 → dist=[0,3,1]</div>
+              <div><b>Constraints:</b> 1 ≤ n ≤ 2×10^5, 0 ≤ m ≤ 2×10^5</div>
+              <div><b>Hint:</b> Use a min-heap (priority queue) with adjacency list.</div>
+            </div>
+
+            <div class="q">
+              <h4>H5) Serialize and Deserialize a Binary Tree</h4>
+              <div><b>Problem:</b> Convert a binary tree to a string and back to the same tree structure.</div>
+              <div><b>Input/Output:</b> Input: root node. Output: serialized string; and reconstructed root.</div>
+              <div><b>Example Input/Output:</b> Tree: [1,2,3,null,null,4,5] → Serialize: "1,2,3,#,#,4,5,#,#,#,#"</div>
+              <div><b>Constraints:</b> Nodes ≤ 2×10^5</div>
+              <div><b>Hint:</b> Use BFS or pre-order with null markers (#) to preserve structure.</div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</body>
+</html>

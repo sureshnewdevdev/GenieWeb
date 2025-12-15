@@ -1,0 +1,1415 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>02-control-flow.html — Control Flow Essentials: Conditions &amp; Looping (ItTechGenie)</title>
+  <style>
+    :root{
+      --w3-green:#04AA6D;
+      --bg:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --code:#0b1020;
+      --codeText:#e5e7eb;
+      --example:#f3f4f6;
+
+      --noteBlueBg:#e7f3fe;
+      --noteBlueBr:#2196F3;
+      --tipGreenBg:#e8f5e9;
+      --tipGreenBr:#4CAF50;
+      --warnRedBg:#ffebee;
+      --warnRedBr:#f44336;
+
+      --shadow: 0 2px 12px rgba(0,0,0,.06);
+      --radius: 10px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    /* Top bar */
+    .topbar{
+      position: fixed;
+      top:0; left:0; right:0;
+      height:56px;
+      background: var(--w3-green);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      padding:0 16px;
+      z-index: 999;
+      box-shadow: var(--shadow);
+    }
+    .topbar .logo{
+      font-weight:700;
+      letter-spacing:.2px;
+      margin-right:14px;
+    }
+    .topbar .crumb{
+      opacity:.95;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .topbar .right{
+      margin-left:auto;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      font-size:13px;
+      opacity:.95;
+    }
+    .pill{
+      background: rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.25);
+      border-radius: 999px;
+      padding: 6px 10px;
+    }
+
+    /* Layout */
+    .wrap{
+      display:flex;
+      margin-top:56px;
+      min-height: calc(100vh - 56px);
+    }
+
+    /* Sidebar */
+    .sidebar{
+      position: fixed;
+      top:56px;
+      left:0;
+      width: 300px;
+      height: calc(100vh - 56px);
+      overflow:auto;
+      background:#f9fafb;
+      border-right:1px solid var(--border);
+      padding: 12px 12px 18px;
+    }
+    .sb-title{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: var(--shadow);
+      margin-bottom: 10px;
+    }
+    .sb-brand{
+      font-weight: 800;
+      font-size: 16px;
+      color:#111827;
+    }
+    .sb-course{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top:2px;
+    }
+    .sb-section{
+      font-size: 12px;
+      letter-spacing: .6px;
+      color: var(--muted);
+      margin: 14px 6px 6px;
+      font-weight: 700;
+    }
+    .sb-link{
+      display:block;
+      padding: 9px 10px;
+      margin: 4px 0;
+      border-radius: 8px;
+      color:#111827;
+      text-decoration: none;
+      border:1px solid transparent;
+    }
+    .sb-link:hover{
+      background:#fff;
+      border-color: var(--border);
+    }
+    .sb-module{font-weight: 600;}
+    .sb-sub{
+      padding-left: 16px;
+      font-size: 13px;
+      color:#374151;
+    }
+    .sb-practice{
+      font-weight: 800;
+      color: #0f5132;
+      background: #e8f5e9;
+      border:1px solid #c8e6c9;
+    }
+
+    /* Main content */
+    .content{
+      margin-left: 300px;
+      width: calc(100% - 300px);
+      padding: 18px 18px 60px;
+    }
+    .container{
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* Cards / sections */
+    .hero{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+    .hero h1{
+      margin: 0 0 6px;
+      font-size: 26px;
+    }
+    .hero p{margin: 6px 0; color: #374151}
+    .meta{
+      margin-top: 10px;
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .tag{
+      display:inline-block;
+      font-size:12px;
+      padding: 4px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      margin-right:6px;
+    }
+
+    .toc{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+    .toc h2{margin:0 0 10px; font-size: 18px;}
+    .toc ul{margin:0; padding-left: 18px;}
+    .toc a{color:#0b5; text-decoration:none;}
+    .toc a:hover{text-decoration: underline;}
+
+    .card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin: 14px 0;
+      overflow:hidden;
+    }
+    .card-header{
+      background: var(--w3-green);
+      color:#fff;
+      padding: 12px 14px;
+      font-weight: 800;
+      font-size: 16px;
+    }
+    .card-body{
+      padding: 14px;
+    }
+
+    .ascii{
+      background: #0b1220;
+      color: #d1d5db;
+      border-radius: 10px;
+      padding: 12px;
+      overflow:auto;
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 13px;
+      margin: 10px 0 12px;
+      white-space: pre;
+    }
+
+    .example{
+      background: var(--example);
+      border:1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin: 10px 0 12px;
+    }
+    .example .ex-title{
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .code{
+      background: var(--code);
+      color: var(--codeText);
+      border-radius: 10px;
+      padding: 12px;
+      overflow:auto;
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 13px;
+      margin: 10px 0 10px;
+      white-space: pre;
+    }
+
+    .try{
+      display:inline-block;
+      margin-top: 8px;
+      background: var(--w3-green);
+      color:#fff;
+      text-decoration:none;
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .try:hover{filter: brightness(.95);}
+
+    .note{
+      border-left: 6px solid;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin: 10px 0;
+      background:#fff;
+    }
+    .note.blue{background: var(--noteBlueBg); border-left-color: var(--noteBlueBr);}
+    .note.green{background: var(--tipGreenBg); border-left-color: var(--tipGreenBr);}
+    .note.red{background: var(--warnRedBg); border-left-color: var(--warnRedBr);}
+    .note .label{font-weight: 800; margin-right: 6px;}
+
+    /* Next/Prev section nav buttons */
+    .sec-nav{
+      display:flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+    }
+    .btn{
+      display:inline-block;
+      background: var(--w3-green);
+      color:#fff;
+      text-decoration:none;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .btn:hover{filter: brightness(.95);}
+    .btn.ghost{
+      background:#fff;
+      color:#065f46;
+      border:1px solid #a7f3d0;
+    }
+
+    /* Tooltip (HTML+CSS only) */
+    .tt{
+      position: relative;
+      cursor: help;
+      border-bottom: 1px dotted #111827;
+      font-weight: 700;
+      color:#111827;
+    }
+    .tt::after{
+      content: attr(data-tip);
+      position: absolute;
+      left: 0;
+      top: calc(100% + 8px);
+      width: min(360px, 75vw);
+      background: #111827;
+      color: #fff;
+      padding: 10px 10px;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 12px;
+      line-height: 1.35;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity .15s ease, transform .15s ease;
+      z-index: 10;
+      white-space: pre-wrap;
+    }
+    .tt::before{
+      content:"";
+      position:absolute;
+      left: 16px;
+      top: calc(100% + 2px);
+      border: 6px solid transparent;
+      border-bottom-color: #111827;
+      opacity: 0;
+      transition: opacity .15s ease;
+      z-index: 11;
+    }
+    .tt:hover::after,
+    .tt:hover::before{
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Tables */
+    table{
+      width:100%;
+      border-collapse: collapse;
+      margin: 10px 0 4px;
+      font-size: 14px;
+    }
+    th, td{
+      border:1px solid var(--border);
+      padding: 10px;
+      vertical-align: top;
+    }
+    th{
+      background:#f9fafb;
+      text-align:left;
+    }
+
+    .muted{color: var(--muted)}
+    details{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin: 8px 0;
+    }
+    summary{cursor:pointer; font-weight: 800;}
+
+    .placeholder{
+      background:#fff7ed;
+      border:1px dashed #fdba74;
+      border-radius: 10px;
+      padding: 12px;
+      color:#7c2d12;
+      margin-top: 10px;
+    }
+
+    .qblock{
+      border:1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin: 10px 0;
+      background:#fff;
+    }
+    .qblock h4{margin:0 0 6px;}
+    .qgrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 980px){
+      .sidebar{position:static; width:100%; height:auto}
+      .content{margin-left:0; width:100%}
+      .wrap{display:block}
+      .qgrid{grid-template-columns: 1fr;}
+    }
+  </style>
+</head>
+<body>
+  <!-- Required placeholder anchors -->
+  <div id="prev-subtopic"></div>
+
+  <header class="topbar">
+    <div class="logo">ItTechGenie</div>
+    <div class="crumb">C# Fundamentals → Advanced • Module 02 • Control Flow Essentials: Conditions &amp; Looping</div>
+    <div class="right">
+      <span class="pill">File: 02-control-flow.html</span>
+      <span class="pill">Self-contained</span>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <!-- Sidebar (template + CURRENT_TOPIC_SUBTOPICS filled for Topic 02) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-title">
+        <div class="sb-brand">ItTechGenie</div>
+        <div class="sb-course">C# Fundamentals → Advanced</div>
+      </div>
+
+      <div class="sb-section">COURSE CONTENT</div>
+      <a class="sb-link sb-module" href="01-kickstart.html">01. Kickstart: .NET Ecosystem</a>
+      <a class="sb-link sb-module" href="02-control-flow.html">02. Control Flow</a>
+      <a class="sb-link sb-module" href="03-oop-core.html">03. OOP Core</a>
+      <a class="sb-link sb-module" href="04-methods-mastery.html">04. Methods Mastery</a>
+      <a class="sb-link sb-module" href="05-type-conversion.html">05. Type Conversion</a>
+      <a class="sb-link sb-module" href="06-constructors.html">06. Constructors</a>
+      <a class="sb-link sb-module" href="07-properties-inheritance.html">07. Properties &amp; Inheritance</a>
+      <a class="sb-link sb-module" href="08-abstraction-interfaces.html">08. Abstraction &amp; Interfaces</a>
+      <a class="sb-link sb-module" href="09-namespaces-buildingblocks.html">09. Namespaces &amp; Building Blocks</a>
+      <a class="sb-link sb-module" href="10-advanced-toolkit.html">10. Advanced Toolkit</a>
+
+      <div class="sb-section">THIS TOPIC</div>
+      <a class="sb-link sb-sub" href="#t02-control-flow-mental-model">Control Flow Mental Model (Decision + Repetition)</a>
+      <a class="sb-link sb-sub" href="#t02-boolean-and-comparisons">Boolean Logic &amp; Comparisons (==, !=, &gt;, &lt;, &amp;&amp;, ||, !)</a>
+      <a class="sb-link sb-sub" href="#t02-if-else-elseif">if / else / else-if (Readable Branching)</a>
+      <a class="sb-link sb-sub" href="#t02-nested-if">Nested if (When It’s OK + When to Refactor)</a>
+      <a class="sb-link sb-sub" href="#t02-switch-case">switch-case (Modern Patterns + Fallthrough Safety)</a>
+      <a class="sb-link sb-sub" href="#t02-practice-conditions">Practice: Height Category + Largest of Three</a>
+      <a class="sb-link sb-sub" href="#t02-loops-overview">Loops Overview (while vs do-while vs for)</a>
+      <a class="sb-link sb-sub" href="#t02-while-do-while">while and do-while (Input Validation &amp; Menu Programs)</a>
+      <a class="sb-link sb-sub" href="#t02-for-loop">for Loop (Counting, Ranges, Iterations)</a>
+      <a class="sb-link sb-sub" href="#t02-break-continue-goto">break / continue / nested loops / goto (Use Wisely)</a>
+
+      <div class="sb-section">PRACTICE</div>
+      <!-- REQUIRED SIDEBAR MENU ADDITION: exact text -->
+      <a class="sb-link sb-practice" href="#practice-coding-questions">To Become Best coder Practice this</a>
+    </aside>
+
+    <main class="content">
+      <div class="container">
+
+        <div class="hero">
+          <h1>Control Flow Essentials: Conditions &amp; Looping</h1>
+          <p>
+            This module teaches how programs <b>decide</b> (conditions) and <b>repeat</b> (loops).
+            You will build strong logic using comparisons and boolean operators, write readable if/switch branches,
+            and create safe loops with validation and exit control. These are the foundations of every real application—from login checks to menus.
+          </p>
+          <div class="meta">
+            <span class="tag">TopicNo: 02</span>
+            <span class="tag">Prev: 01-kickstart.html</span>
+            <span class="tag">Next: 03-oop-core.html</span>
+          </div>
+          <div class="note blue" style="margin-top:12px;">
+            <span class="label">Note:</span>
+            Tooltips use <b>only HTML + CSS</b>. Hover the bold-underlined terms to see quick definitions.
+          </div>
+        </div>
+
+        <div class="toc">
+          <h2>Table of Contents</h2>
+          <ul>
+            <li><a href="#t02-control-flow-mental-model">Control Flow Mental Model (Decision + Repetition)</a></li>
+            <li><a href="#t02-boolean-and-comparisons">Boolean Logic &amp; Comparisons (==, !=, &gt;, &lt;, &amp;&amp;, ||, !)</a></li>
+            <li><a href="#t02-if-else-elseif">if / else / else-if (Readable Branching)</a></li>
+            <li><a href="#t02-nested-if">Nested if (When It’s OK + When to Refactor)</a></li>
+            <li><a href="#t02-switch-case">switch-case (Modern Patterns + Fallthrough Safety)</a></li>
+            <li><a href="#t02-practice-conditions">Practice: Height Category + Largest of Three (Thinking Steps)</a></li>
+            <li><a href="#t02-loops-overview">Loops Overview (while vs do-while vs for)</a></li>
+            <li><a href="#t02-while-do-while">while and do-while (Input Validation &amp; Menu Programs)</a></li>
+            <li><a href="#t02-for-loop">for Loop (Counting, Ranges, Iterations)</a></li>
+            <li><a href="#t02-break-continue-goto">break / continue / nested loops / goto (Use Wisely)</a></li>
+            <li><a href="#faqs">FAQs</a></li>
+            <li><a href="#interview">Interview Questions</a></li>
+            <li><a href="#mcq">MCQ Quiz</a></li>
+            <li><a href="#glossary-tooltips">Glossary (Tooltips)</a></li>
+            <li><a href="#practice-coding-questions">To Become Best coder Practice this</a></li>
+            <li><a href="#downloads">Downloadable ZIP / PPT / DOC (Placeholder)</a></li>
+          </ul>
+        </div>
+
+        <!-- =========================================================
+             SECTION 1
+        ========================================================== -->
+        <section class="card" id="t02-control-flow-mental-model">
+          <div class="card-header">Control Flow Mental Model (Decision + Repetition)</div>
+          <div class="card-body">
+            <p>
+              Control flow is the “path” your program takes while running.
+              It is mainly two actions: <b>decision</b> (choose a branch using conditions) and <b>repetition</b> (repeat steps using loops).
+              Almost every feature—login checks, price calculations, menus—uses control flow.
+              The key skill is to make logic predictable: one clear condition, one clear outcome, repeated safely when needed.
+            </p>
+
+            <pre class="ascii">Program Flow
+  Start
+   |
+   v
+[Decision?] --yes--> Do A
+   |                |
+   no               v
+   v             Continue
+  Do B              |
+   |                v
+   +-------> [Repeat?] --yes--> loop back
+                     |
+                     no
+                     v
+                    End</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: Real-world control flow</div>
+              <p style="margin:6px 0 0;">
+                If password is correct → login success, else → show error.
+                While user is not logged in → keep asking for credentials.
+              </p>
+              <a class="try" href="#t02-control-flow-mental-model">Try It Yourself</a>
+            </div>
+
+            <pre class="code">using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.Write("Enter PIN: ");
+        string pin = Console.ReadLine();
+
+        if (pin == "1234")
+            Console.WriteLine("Access granted");
+        else
+            Console.WriteLine("Access denied");
+    }
+}</pre>
+
+            <div class="note green"><span class="label">Tip:</span> Write the logic in plain English first (“If X then Y else Z”), then code it.</div>
+            <div class="note blue"><span class="label">Advanced note:</span> Keep conditions small and readable; complex business rules are easier to test when split into well-named boolean variables.</div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#prev-subtopic">Previous</a>
+              <a class="btn" href="#t02-boolean-and-comparisons">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 2
+        ========================================================== -->
+        <section class="card" id="t02-boolean-and-comparisons">
+          <div class="card-header">Boolean Logic &amp; Comparisons (==, !=, &gt;, &lt;, &amp;&amp;, ||, !)</div>
+          <div class="card-body">
+            <p>
+              Conditions evaluate to <b>true</b> or <b>false</b>.
+              Comparisons like <b>&gt;</b>, <b>&lt;</b>, <b>==</b>, <b>!=</b> produce booleans, then logical operators combine them.
+              Use <b>&amp;&amp;</b> when <i>both</i> conditions must be true, <b>||</b> when <i>either</i> can be true, and <b>!</b> to invert.
+              Clean boolean logic prevents bugs like wrong eligibility checks or broken validations.
+            </p>
+
+            <pre class="ascii">Truth mini-map
+  A && B  -> true only if both true
+  A || B  -> true if at least one true
+  !A      -> flips true/false
+
+Example:
+  age >= 18 && hasId == true  => eligible</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: Eligibility check (real-world)</div>
+              <p style="margin:6px 0 0;">Allow entry if age ≥ 18 AND user has valid ID.</p>
+              <a class="try" href="#t02-boolean-and-comparisons">Try It Yourself</a>
+            </div>
+
+            <pre class="code">using System;
+
+class Program
+{
+    static void Main()
+    {
+        int age = 20;
+        bool hasId = true;
+
+        bool eligible = (age >= 18) && hasId;
+        Console.WriteLine("Eligible? " + eligible);
+
+        bool blocked = !eligible;
+        Console.WriteLine("Blocked? " + blocked);
+    }
+}</pre>
+
+            <div class="note green"><span class="label">Tip:</span> Use parentheses for readability even when not required—future you will read faster.</div>
+            <div class="note blue"><span class="label">Advanced note:</span> C# uses short-circuit logic: in <b>A &amp;&amp; B</b>, if A is false then B is not evaluated (useful for safe null checks).</div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t02-control-flow-mental-model">Previous</a>
+              <a class="btn" href="#t02-if-else-elseif">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 3
+        ========================================================== -->
+        <section class="card" id="t02-if-else-elseif">
+          <div class="card-header">if / else / else-if (Readable Branching)</div>
+          <div class="card-body">
+            <p>
+              Use <b>if</b> when there is a condition-based decision.
+              Use <b>else if</b> to test another condition when the first is false, and <b>else</b> as the default fallback.
+              The goal is readability: each branch should clearly explain “why” it exists.
+              If branching gets long, consider refactoring (like switch or separate methods) to keep code clean.
+            </p>
+
+            <pre class="ascii">if / else-if / else flow
+  if (cond1) -> block1
+  else if (cond2) -> block2
+  else -> block3 (default)</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: Shipping cost based on distance</div>
+              <p style="margin:6px 0 0;">Distance &lt;= 5 → ₹40, &lt;= 20 → ₹80, else → ₹150</p>
+              <a class="try" href="#t02-if-else-elseif">Try It Yourself</a>
+            </div>
+
+            <pre class="code">using System;
+
+class Program
+{
+    static void Main()
+    {
+        int distanceKm = 12;
+        int cost;
+
+        if (distanceKm <= 5) cost = 40;
+        else if (distanceKm <= 20) cost = 80;
+        else cost = 150;
+
+        Console.WriteLine("Shipping cost: ₹" + cost);
+    }
+}</pre>
+
+            <div class="note green"><span class="label">Tip:</span> Put the most common cases first only if it improves readability; otherwise keep conditions ordered logically.</div>
+            <div class="note blue"><span class="label">Advanced note:</span> Avoid repeating calculations in multiple branches; compute once and reuse to reduce bugs.</div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t02-boolean-and-comparisons">Previous</a>
+              <a class="btn" href="#t02-nested-if">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 4
+        ========================================================== -->
+        <section class="card" id="t02-nested-if">
+          <div class="card-header">Nested if (When It’s OK + When to Refactor)</div>
+          <div class="card-body">
+            <p>
+              Nested if means an if inside another if.
+              It’s OK when the logic is truly hierarchical (first check login, then check role).
+              But deep nesting makes code hard to read and easy to break.
+              A common refactor is to use early returns (in methods), combine conditions, or move logic into helper methods.
+            </p>
+
+            <pre class="ascii">Nested if (hierarchy)
+if (loggedIn)
+{
+   if (isAdmin) -> show admin panel
+   else -> show user panel
+}
+else -> ask login</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: Access control (real-world)</div>
+              <p style="margin:6px 0 0;">If logged in, then check admin role; otherwise block access.</p>
+              <a class="try" href="#t02-nested-if">Try It Yourself</a>
+            </div>
+
+            <pre class="code">using System;
+
+class Program
+{
+    static void Main()
+    {
+        bool loggedIn = true;
+        bool isAdmin = false;
+
+        if (loggedIn)
+        {
+            if (isAdmin)
+                Console.WriteLine("Welcome Admin: show dashboard");
+            else
+                Console.WriteLine("Welcome User: show profile");
+        }
+        else
+        {
+            Console.WriteLine("Please login first");
+        }
+    }
+}</pre>
+
+            <div class="note green"><span class="label">Tip:</span> If nesting goes beyond 2 levels, pause and consider simplifying.</div>
+            <div class="note blue"><span class="label">Advanced note:</span> Prefer guard clauses in methods (early return) to flatten nesting; it improves maintainability and testability.</div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t02-if-else-elseif">Previous</a>
+              <a class="btn" href="#t02-switch-case">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 5
+        ========================================================== -->
+        <section class="card" id="t02-switch-case">
+          <div class="card-header">switch-case (Modern Patterns + Fallthrough Safety)</div>
+          <div class="card-body">
+            <p>
+              Use <b>switch</b> when one value can match many discrete cases (like menu selection or status codes).
+              It can be more readable than long else-if chains.
+              In C#, switch cases do not “fall through” by default—you typically end each case with <b>break</b>.
+              Modern C# also supports switch expressions for concise, safe branching.
+            </p>
+
+            <pre class="ascii">switch mental model
+  value -> match case -> execute block -> break
+                |
+             default (no match)</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: Menu selection (real-world)</div>
+              <p style="margin:6px 0 0;">1=Add, 2=Subtract, 3=Exit. Anything else → Invalid.</p>
+              <a class="try" href="#t02-switch-case">Try It Yourself</a>
+            </div>
+
+            <pre class="code">using System;
+
+class Program
+{
+    static void Main()
+    {
+        int choice = 2;
+
+        switch (choice)
+        {
+            case 1:
+                Console.WriteLine("Add selected");
+                break;
+            case 2:
+                Console.WriteLine("Subtract selected");
+                break;
+            case 3:
+                Console.WriteLine("Exit selected");
+                break;
+            default:
+                Console.WriteLine("Invalid choice");
+                break;
+        }
+    }
+}</pre>
+
+            <div class="note green"><span class="label">Tip:</span> Use switch when decisions depend on a single variable (choice, status, type).</div>
+            <div class="note blue"><span class="label">Advanced note:</span> Switch expressions can reduce code size and errors, especially when every case returns a value.</div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t02-nested-if">Previous</a>
+              <a class="btn" href="#t02-practice-conditions">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 6
+        ========================================================== -->
+        <section class="card" id="t02-practice-conditions">
+          <div class="card-header">Practice: Height Category + Largest of Three (Thinking Steps)</div>
+          <div class="card-body">
+            <p>
+              Practice is where control flow becomes natural.
+              First: categorize height into labels (Short/Medium/Tall) using ordered conditions.
+              Second: find the largest of three numbers using comparisons.
+              Focus on thinking steps: write conditions, test sample inputs, and verify branch selection.
+            </p>
+
+            <pre class="ascii">Thinking steps
+1) Read input(s)
+2) Decide conditions (ordered!)
+3) Execute exactly one correct branch
+4) Print result
+5) Test edge cases</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: Height Category (cm)</div>
+              <p style="margin:6px 0 0;">&lt;150 = Short, 150–169 = Medium, ≥170 = Tall</p>
+              <a class="try" href="#t02-practice-conditions">Try It Yourself</a>
+            </div>
+
+            <pre class="code">using System;
+
+class Program
+{
+    static void Main()
+    {
+        int height = 165;
+
+        if (height < 150) Console.WriteLine("Short");
+        else if (height < 170) Console.WriteLine("Medium");
+        else Console.WriteLine("Tall");
+
+        int a = 10, b = 25, c = 18;
+        int largest = a;
+
+        if (b > largest) largest = b;
+        if (c > largest) largest = c;
+
+        Console.WriteLine("Largest: " + largest);
+    }
+}</pre>
+
+            <div class="note green"><span class="label">Tip:</span> Always order ranges correctly. If you check “&lt;170” first, “&lt;150” will never run.</div>
+            <div class="note blue"><span class="label">Advanced note:</span> For larger comparisons, consider using arrays + loops, or built-in methods (later) to simplify logic.</div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t02-switch-case">Previous</a>
+              <a class="btn" href="#t02-loops-overview">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 7
+        ========================================================== -->
+        <section class="card" id="t02-loops-overview">
+          <div class="card-header">Loops Overview (while vs do-while vs for)</div>
+          <div class="card-body">
+            <p>
+              Loops repeat a block of code until a condition changes.
+              Use <b>while</b> when you don’t know how many times you’ll repeat (keep asking until valid).
+              Use <b>do-while</b> when you must run at least once (show menu at least once).
+              Use <b>for</b> when you know the range/count (repeat 10 times, iterate through indices).
+            </p>
+
+            <pre class="ascii">Choose the loop
+  while     -> repeat while condition is true (0 or more times)
+  do-while  -> run once, then repeat while true (1 or more times)
+  for       -> controlled counting loop (known iterations)</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: Real-world loop selection</div>
+              <p style="margin:6px 0 0;">ATM PIN retries → while, menu display → do-while, print 1..N → for</p>
+              <a class="try" href="#t02-loops-overview">Try It Yourself</a>
+            </div>
+
+            <pre class="code">using System;
+
+class Program
+{
+    static void Main()
+    {
+        // for: known count
+        for (int i = 1; i <= 3; i++)
+            Console.WriteLine("Attempt " + i);
+
+        // while: unknown count (conceptual)
+        int x = 0;
+        while (x < 2)
+        {
+            Console.WriteLine("x = " + x);
+            x++;
+        }
+    }
+}</pre>
+
+            <div class="note green"><span class="label">Tip:</span> Infinite loops happen when the loop condition never becomes false—always ensure progress (increment/change state).</div>
+            <div class="note blue"><span class="label">Advanced note:</span> Many “repeat until valid” problems combine TryParse + while loop for robust input handling.</div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t02-practice-conditions">Previous</a>
+              <a class="btn" href="#t02-while-do-while">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 8
+        ========================================================== -->
+        <section class="card" id="t02-while-do-while">
+          <div class="card-header">while and do-while (Input Validation &amp; Menu Programs)</div>
+          <div class="card-body">
+            <p>
+              while and do-while are perfect for repeated prompts and menu programs.
+              Use while when you want to validate before running the loop body.
+              Use do-while to show the menu once, then repeat until user exits.
+              This pattern is used in real apps for login retries, form validation, and console menus.
+            </p>
+
+            <pre class="ascii">do-while menu pattern
+do
+{
+  show menu
+  read choice
+  run action
+}
+while (choice != exit)</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: Menu program (console)</div>
+              <p style="margin:6px 0 0;">Keep running until user chooses 3 (Exit).</p>
+              <a class="try" href="#t02-while-do-while">Try It Yourself</a>
+            </div>
+
+            <pre class="code">using System;
+
+class Program
+{
+    static void Main()
+    {
+        int choice;
+
+        do
+        {
+            Console.WriteLine("1) Say Hi  2) Show Time  3) Exit");
+            Console.Write("Choice: ");
+            int.TryParse(Console.ReadLine(), out choice);
+
+            switch (choice)
+            {
+                case 1:
+                    Console.WriteLine("Hi!");
+                    break;
+                case 2:
+                    Console.WriteLine("Time: " + DateTime.Now.ToShortTimeString());
+                    break;
+                case 3:
+                    Console.WriteLine("Goodbye!");
+                    break;
+                default:
+                    Console.WriteLine("Invalid choice");
+                    break;
+            }
+        }
+        while (choice != 3);
+    }
+}</pre>
+
+            <div class="note green"><span class="label">Tip:</span> Use TryParse inside loops so invalid input doesn’t crash your program.</div>
+            <div class="note.blue note blue"><span class="label">Advanced note:</span> In larger apps, menu actions are often moved into methods to reduce switch complexity.</div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t02-loops-overview">Previous</a>
+              <a class="btn" href="#t02-for-loop">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 9
+        ========================================================== -->
+        <section class="card" id="t02-for-loop">
+          <div class="card-header">for Loop (Counting, Ranges, Iterations)</div>
+          <div class="card-body">
+            <p>
+              A for loop is best when you know the number of iterations.
+              It has three parts: initialization, condition, and increment.
+              Typical uses: counting, generating tables, iterating index-based arrays.
+              A well-written for loop is easy to debug because the counter tells you exactly where you are.
+            </p>
+
+            <pre class="ascii">for (init; condition; increment)
+{
+   body
+}
+
+Example:
+for (int i=1; i<=5; i++) print i</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: Print a multiplication table</div>
+              <p style="margin:6px 0 0;">Print 7 × 1..10</p>
+              <a class="try" href="#t02-for-loop">Try It Yourself</a>
+            </div>
+
+            <pre class="code">using System;
+
+class Program
+{
+    static void Main()
+    {
+        int n = 7;
+        for (int i = 1; i <= 10; i++)
+        {
+            Console.WriteLine(n + " x " + i + " = " + (n * i));
+        }
+    }
+}</pre>
+
+            <div class="note green"><span class="label">Tip:</span> If you see off-by-one errors, check your loop bounds (<= vs &lt;).</div>
+            <div class="note blue"><span class="label">Advanced note:</span> Use meaningful loop variable names when loops represent concepts (day, index, attempt), not just i/j.</div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t02-while-do-while">Previous</a>
+              <a class="btn" href="#t02-break-continue-goto">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 10
+        ========================================================== -->
+        <section class="card" id="t02-break-continue-goto">
+          <div class="card-header">break / continue / nested loops / goto (Use Wisely)</div>
+          <div class="card-body">
+            <p>
+              <b>break</b> exits the nearest loop immediately, and <b>continue</b> skips to the next iteration.
+              Nested loops are common in grids, tables, and searching combinations.
+              <b>goto</b> exists but is usually avoided because it can make flow hard to follow.
+              Use these tools carefully to keep control flow understandable and safe.
+            </p>
+
+            <pre class="ascii">Loop controls
+  break     -> exit loop now
+  continue  -> skip rest of this iteration
+  nested loop -> loop inside loop (rows x cols)
+  goto      -> jump label (avoid unless necessary)</pre>
+
+            <div class="example">
+              <div class="ex-title">Example: Find first even number in a list</div>
+              <p style="margin:6px 0 0;">Stop searching as soon as you find the first match (break).</p>
+              <a class="try" href="#t02-break-continue-goto">Try It Yourself</a>
+            </div>
+
+            <pre class="code">using System;
+
+class Program
+{
+    static void Main()
+    {
+        int[] nums = { 3, 7, 9, 10, 11 };
+
+        for (int i = 0; i < nums.Length; i++)
+        {
+            if (nums[i] % 2 != 0)
+                continue; // skip odd numbers
+
+            Console.WriteLine("First even: " + nums[i]);
+            break; // stop after first even
+        }
+    }
+}</pre>
+
+            <div class="note green"><span class="label">Tip:</span> Prefer break/continue over complex flags. But if you use many breaks, consider refactoring into methods.</div>
+            <div class="note blue"><span class="label">Advanced note:</span> For nested loops, you can use helper methods (return) or structured logic to exit cleanly without goto.</div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t02-for-loop">Previous</a>
+              <a class="btn" href="#faqs">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             FAQs
+        ========================================================== -->
+        <section class="card" id="faqs">
+          <div class="card-header">FAQs</div>
+          <div class="card-body">
+            <details>
+              <summary>When should I use switch instead of else-if?</summary>
+              <p>Use switch when decisions depend on one variable with many discrete values (menu choice, status code). Else-if is better for range checks (like score bands).</p>
+            </details>
+            <details>
+              <summary>Why do I get infinite loops?</summary>
+              <p>Your loop condition never becomes false. Ensure the state changes each iteration (increment counters, read new input, update flags).</p>
+            </details>
+            <details>
+              <summary>Should I use goto?</summary>
+              <p>Usually no. It can make code harder to understand. Prefer methods + early return, or loop controls (break/continue) where possible.</p>
+            </details>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#t02-break-continue-goto">Previous</a>
+              <a class="btn" href="#interview">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             Interview Questions
+        ========================================================== -->
+        <section class="card" id="interview">
+          <div class="card-header">Interview Questions (Module 02)</div>
+          <div class="card-body">
+            <ol style="margin:0; padding-left:18px;">
+              <li>Explain the difference between <b>==</b> and <b>=</b>.</li>
+              <li>What is short-circuit evaluation in <b>&amp;&amp;</b> and <b>||</b>?</li>
+              <li>When would you prefer switch over else-if?</li>
+              <li>What is an infinite loop and how do you prevent it?</li>
+              <li>Difference between while and do-while with a real example.</li>
+              <li>What do break and continue do inside loops?</li>
+              <li>How would you refactor deep nested-if logic?</li>
+              <li>Give a scenario where nested loops are needed.</li>
+            </ol>
+
+            <div class="note green"><span class="label">Tip:</span> In interviews, show your thinking: state the condition, the expected path, and edge cases.</div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#faqs">Previous</a>
+              <a class="btn" href="#mcq">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             MCQ
+        ========================================================== -->
+        <section class="card" id="mcq">
+          <div class="card-header">MCQ Quiz (5–10 Questions)</div>
+          <div class="card-body">
+            <p class="muted">No JS scoring (self-contained rule). Expand each item to see the answer.</p>
+
+            <details>
+              <summary>1) Which operator means “AND” in C#?</summary>
+              <ul>
+                <li>A) ||</li><li>B) &amp;&amp;</li><li>C) !</li><li>D) ==</li>
+              </ul>
+              <p><b>Answer:</b> B</p>
+            </details>
+
+            <details>
+              <summary>2) A do-while loop executes the body:</summary>
+              <ul>
+                <li>A) 0 or more times</li><li>B) 1 or more times</li><li>C) Exactly 2 times</li><li>D) Only when condition is false</li>
+              </ul>
+              <p><b>Answer:</b> B</p>
+            </details>
+
+            <details>
+              <summary>3) What does break do inside a loop?</summary>
+              <ul>
+                <li>A) Skips current iteration</li><li>B) Exits the loop immediately</li><li>C) Restarts program</li><li>D) Jumps to next case in switch automatically</li>
+              </ul>
+              <p><b>Answer:</b> B</p>
+            </details>
+
+            <details>
+              <summary>4) switch is best used when:</summary>
+              <ul>
+                <li>A) Checking ranges like 10–20</li><li>B) Matching one variable to many discrete values</li><li>C) Doing floating point calculations</li><li>D) Allocating memory</li>
+              </ul>
+              <p><b>Answer:</b> B</p>
+            </details>
+
+            <details>
+              <summary>5) continue inside a loop:</summary>
+              <ul>
+                <li>A) Exits the loop</li><li>B) Skips remaining statements and goes to next iteration</li><li>C) Stops the program</li><li>D) Runs default block</li>
+              </ul>
+              <p><b>Answer:</b> B</p>
+            </details>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#interview">Previous</a>
+              <a class="btn" href="#glossary-tooltips">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             Glossary (Tooltips) - required
+        ========================================================== -->
+        <section class="card" id="glossary-tooltips">
+          <div class="card-header">Glossary (Tooltips)</div>
+          <div class="card-body">
+            <p class="muted">Tooltip terms used in this module (and commonly across the course).</p>
+            <table>
+              <thead><tr><th style="width:25%;">Term</th><th>Tooltip Description</th></tr></thead>
+              <tbody>
+                <tr><td><span class="tt" data-tip="A safe parsing method that returns true/false rather than throwing.\nIt helps programs avoid crashing on invalid input.">TryParse</span></td><td>A safe parsing pattern that returns true/false rather than throwing exceptions. It helps build robust apps that don’t crash on invalid user input.</td></tr>
+                <tr><td><span class="tt" data-tip="A runtime error object representing something went wrong.\nExceptions should be handled, not used for normal control flow.">Exception</span></td><td>A runtime error object that represents something that went wrong. Exceptions can be caught and handled, but shouldn’t be used as normal control flow.</td></tr>
+                <tr><td><span class="tt" data-tip="A definition of what kind of data something is (int, string, etc.).\nTypes control allowed operations and prevent invalid actions.">Type</span></td><td>A definition of what kind of data something is (int, string, custom classes). Types control what operations are allowed and help the compiler prevent invalid actions.</td></tr>
+              </tbody>
+            </table>
+
+            <div class="note blue"><span class="label">Note:</span> This glossary table is required by Prompt v3. Terms are shown with the tooltip wrapper format.</div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#mcq">Previous</a>
+              <a class="btn" href="#practice-coding-questions">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             PRACTICE SECTION (required id + exact title)
+        ========================================================== -->
+        <section class="card" id="practice-coding-questions">
+          <div class="card-header">To Become Best coder Practice this</div>
+          <div class="card-body">
+            <p>
+              15 unique coding questions (5 Easy / 5 Medium / 5 Hard). Practice writing clean conditions, loop safety, and input validation.
+              For each, try at least 3 test cases including edge cases.
+            </p>
+
+            <h3 style="margin:10px 0 6px;">Easy (5)</h3>
+
+            <div class="qblock">
+              <h4>E1) Even or Odd</h4>
+              <p><b>Problem:</b> Read an integer and print EVEN if it’s even, otherwise ODD.</p>
+              <div class="qgrid"><div><b>Input:</b> one integer</div><div><b>Output:</b> EVEN/ODD</div></div>
+              <p><b>Example Input:</b> 7<br><b>Example Output:</b> ODD</p>
+              <p><b>Constraints:</b> -10^9 ≤ n ≤ 10^9</p>
+              <p><b>Hint:</b> Use n % 2.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>E2) Largest of Two</h4>
+              <p><b>Problem:</b> Read two integers and print the larger one (if equal, print either).</p>
+              <div class="qgrid"><div><b>Input:</b> two integers</div><div><b>Output:</b> max value</div></div>
+              <p><b>Example Input:</b> 10 25<br><b>Example Output:</b> 25</p>
+              <p><b>Constraints:</b> -10^9 ≤ a,b ≤ 10^9</p>
+              <p><b>Hint:</b> if (a &gt; b) ...</p>
+            </div>
+
+            <div class="qblock">
+              <h4>E3) Discount Eligibility</h4>
+              <p><b>Problem:</b> Print YES if age ≥ 60, else NO.</p>
+              <div class="qgrid"><div><b>Input:</b> age</div><div><b>Output:</b> YES/NO</div></div>
+              <p><b>Example Input:</b> 61<br><b>Example Output:</b> YES</p>
+              <p><b>Constraints:</b> 0 ≤ age ≤ 120</p>
+              <p><b>Hint:</b> Simple if condition.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>E4) Print 1 to N</h4>
+              <p><b>Problem:</b> Read N and print numbers from 1 to N each on new line.</p>
+              <div class="qgrid"><div><b>Input:</b> N</div><div><b>Output:</b> N lines</div></div>
+              <p><b>Example Input:</b> 3<br><b>Example Output:</b><br>1<br>2<br>3</p>
+              <p><b>Constraints:</b> 1 ≤ N ≤ 10^5</p>
+              <p><b>Hint:</b> Use for loop.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>E5) Password Match</h4>
+              <p><b>Problem:</b> Read a string. Print OK if it equals “admin”, else FAIL.</p>
+              <div class="qgrid"><div><b>Input:</b> one string</div><div><b>Output:</b> OK/FAIL</div></div>
+              <p><b>Example Input:</b> admin<br><b>Example Output:</b> OK</p>
+              <p><b>Constraints:</b> length 1..50</p>
+              <p><b>Hint:</b> Use == for string comparison in C#.</p>
+            </div>
+
+            <h3 style="margin:12px 0 6px;">Medium (5)</h3>
+
+            <div class="qblock">
+              <h4>M1) Grade Calculator</h4>
+              <p><b>Problem:</b> Read marks (0–100). Print A (90–100), B (75–89), C (50–74), F (&lt;50).</p>
+              <div class="qgrid"><div><b>Input:</b> marks</div><div><b>Output:</b> grade letter</div></div>
+              <p><b>Example Input:</b> 78<br><b>Example Output:</b> B</p>
+              <p><b>Constraints:</b> 0 ≤ marks ≤ 100</p>
+              <p><b>Hint:</b> Use ordered else-if from highest to lowest.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>M2) Sum Until Zero</h4>
+              <p><b>Problem:</b> Repeatedly read integers until 0 is entered. Print the sum (excluding 0).</p>
+              <div class="qgrid"><div><b>Input:</b> many integers</div><div><b>Output:</b> sum</div></div>
+              <p><b>Example Input:</b><br>5<br>2<br>-1<br>0<br><b>Example Output:</b> 6</p>
+              <p><b>Constraints:</b> count ≤ 10^6</p>
+              <p><b>Hint:</b> while(true) read; break when 0.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>M3) Menu: Calculator Lite</h4>
+              <p><b>Problem:</b> Show menu: 1 Add, 2 Multiply, 3 Exit. Perform operation until exit.</p>
+              <div class="qgrid"><div><b>Input:</b> choices + numbers</div><div><b>Output:</b> results</div></div>
+              <p><b>Example Input:</b><br>1<br>2 3<br>2<br>4 5<br>3<br><b>Example Output:</b><br>5<br>20</p>
+              <p><b>Constraints:</b> choices 1..3</p>
+              <p><b>Hint:</b> do-while + switch.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>M4) Count Positives, Negatives, Zeros</h4>
+              <p><b>Problem:</b> Read N then N integers. Print three counts: positives negatives zeros.</p>
+              <div class="qgrid"><div><b>Input:</b> N then N ints</div><div><b>Output:</b> three integers</div></div>
+              <p><b>Example Input:</b><br>5<br>-1<br>0<br>2<br>3<br>0<br><b>Example Output:</b> 2 1 2</p>
+              <p><b>Constraints:</b> 1 ≤ N ≤ 10^5</p>
+              <p><b>Hint:</b> Use for loop and if/else ladder.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>M5) Validate PIN with 3 Attempts</h4>
+              <p><b>Problem:</b> Correct PIN is 4321. User gets at most 3 tries. Print SUCCESS or LOCKED.</p>
+              <div class="qgrid"><div><b>Input:</b> up to 3 strings</div><div><b>Output:</b> SUCCESS/LOCKED</div></div>
+              <p><b>Example Input:</b><br>1111<br>2222<br>4321<br><b>Example Output:</b> SUCCESS</p>
+              <p><b>Constraints:</b> attempts fixed to 3</p>
+              <p><b>Hint:</b> for loop with break on success.</p>
+            </div>
+
+            <h3 style="margin:12px 0 6px;">Hard (5)</h3>
+
+            <div class="qblock">
+              <h4>H1) First Multiple Finder</h4>
+              <p><b>Problem:</b> Read N and K. Print the smallest number between 1..N that is divisible by K, else print -1.</p>
+              <div class="qgrid"><div><b>Input:</b> N K</div><div><b>Output:</b> number or -1</div></div>
+              <p><b>Example Input:</b> 10 6<br><b>Example Output:</b> 6</p>
+              <p><b>Constraints:</b> 1 ≤ K ≤ N ≤ 10^9</p>
+              <p><b>Hint:</b> If K ≤ N answer is K, otherwise -1 (avoid looping huge ranges).</p>
+            </div>
+
+            <div class="qblock">
+              <h4>H2) Pattern Printer (Hollow Square)</h4>
+              <p><b>Problem:</b> Read N and print an N×N hollow square of * (border stars, inside spaces).</p>
+              <div class="qgrid"><div><b>Input:</b> N</div><div><b>Output:</b> N lines pattern</div></div>
+              <p><b>Example Input:</b> 4<br><b>Example Output:</b><br>****<br>*  *<br>*  *<br>****</p>
+              <p><b>Constraints:</b> 1 ≤ N ≤ 200</p>
+              <p><b>Hint:</b> Nested loops; print * when on border else space.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>H3) Short-Circuit Safety Check</h4>
+              <p><b>Problem:</b> Read two strings: name and email. Print OK only if name not empty AND email contains '@'.</p>
+              <div class="qgrid"><div><b>Input:</b> two strings</div><div><b>Output:</b> OK/INVALID</div></div>
+              <p><b>Example Input:</b><br>Ravi<br>ravi@mail.com<br><b>Example Output:</b> OK</p>
+              <p><b>Constraints:</b> length ≤ 200</p>
+              <p><b>Hint:</b> Use && and string checks (Length, Contains).</p>
+            </div>
+
+            <div class="qblock">
+              <h4>H4) Exit Nested Loops on Condition</h4>
+              <p><b>Problem:</b> Read a grid (R×C) of integers. Print YES if any value equals X, else NO.</p>
+              <div class="qgrid"><div><b>Input:</b> R C X then R×C ints</div><div><b>Output:</b> YES/NO</div></div>
+              <p><b>Example Input:</b><br>2 3 9<br>1 2 3<br>7 9 8<br><b>Example Output:</b> YES</p>
+              <p><b>Constraints:</b> 1 ≤ R,C ≤ 500</p>
+              <p><b>Hint:</b> Use a flag + break, or move search into a method and return early.</p>
+            </div>
+
+            <div class="qblock">
+              <h4>H5) Balanced Choice Validator</h4>
+              <p><b>Problem:</b> Read a stream of menu choices (integers) ending with -1. Count valid choices (1..4) and invalid others. Print: valid invalid.</p>
+              <div class="qgrid"><div><b>Input:</b> many ints ending with -1</div><div><b>Output:</b> two counts</div></div>
+              <p><b>Example Input:</b><br>1<br>7<br>4<br>0<br>-1<br><b>Example Output:</b> 2 2</p>
+              <p><b>Constraints:</b> total entries ≤ 10^6</p>
+              <p><b>Hint:</b> while(true) read; if -1 break; if 1..4 valid++ else invalid++.</p>
+            </div>
+
+            <div class="note green"><span class="label">Tip:</span> For speed and accuracy, write small test cases first, then code.</div>
+            <div class="note blue"><span class="label">Advanced note:</span> Many hard control-flow bugs come from missing edge cases—always test min/max values and boundary conditions.</div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#glossary-tooltips">Previous</a>
+              <a class="btn" href="#downloads">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             Downloads + Summary
+        ========================================================== -->
+        <section class="card" id="downloads">
+          <div class="card-header">Downloadable ZIP / PPT / DOC (Placeholder)</div>
+          <div class="card-body">
+            <div class="placeholder">
+              <b>Placeholder:</b> Add download links here later.
+              <ul style="margin:6px 0 0; padding-left:18px;">
+                <li>ZIP source code bundle</li>
+                <li>PPT slides (trainer deck)</li>
+                <li>DOC/Word notes (printable)</li>
+              </ul>
+            </div>
+
+            <div class="note blue" style="margin-top:12px;">
+              <span class="label">Summary:</span>
+              You learned control-flow fundamentals: boolean logic and comparisons, if/else branching, nested if refactoring ideas,
+              switch-case for clean multi-branch logic, and all major loops (while, do-while, for) with break/continue guidance.
+            </div>
+
+            <div class="sec-nav">
+              <a class="btn ghost" href="#practice-coding-questions">Previous</a>
+              <a class="btn" href="#next-subtopic">Next</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Required end placeholder anchor -->
+        <div id="next-subtopic"></div>
+
+      </div>
+    </main>
+  </div>
+</body>
+</html>
