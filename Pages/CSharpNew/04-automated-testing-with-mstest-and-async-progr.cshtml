@@ -1,0 +1,1415 @@
+@page "/CSharpNew/04-automated-testing-with-mstest-and-async-progr.html"
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "C# New - Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case";
+    ViewData["ActiveMenu"] = "CSharpNew";
+    ViewData["ActivePage"] = "Module04";
+}
+@section LeftMenu {
+    @await Html.PartialAsync("_LeftMenu_CSharpNew", new { CurrentModule = "04" })
+}
+
+<style>
+    .tt { position: relative; cursor: help; border-bottom: 1px dashed #0d6efd; }
+    .tt::after { content: attr(data-tip); position: absolute; left: 0; bottom: 125%; background: #0d6efd; color: #fff; padding: 6px 8px; border-radius: 6px; opacity: 0; pointer-events: none; width: 240px; transition: opacity .2s; font-size: 0.9rem; }
+    .tt:hover::after { opacity: 1; }
+    .zoomable { transition: transform .25s ease; transition-delay: 3s; transform-origin: center; }
+    .zoomable:hover { transform: scale(1.03); }
+    .example-box { background: #f4f4f4; border: 1px solid #dcdcdc; border-radius: 8px; }
+    .code-block { background: #1e1e1e; color: #e5e5e5; padding: 12px; border-radius: 10px; overflow-x: auto; }
+    .toc-box { background: #eef6ff; border: 1px solid #cfe2ff; border-radius: 8px; }
+    .ans pre.code { background: #1e1e1e; color: #f8f9fa; padding: 12px; border-radius: 8px; overflow-x: auto; }
+</style>
+<main class="container-fluid my-4">
+    <a id="prev-subtopic"></a>
+    <a id="next-subtopic"></a>
+    <header class="mb-3">
+        <h1 class="h3">Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case (Module 04)</h1>
+        <p class="lead zoomable">Welcome to the C# New course. We keep explanations simple, add short steps, and give you room to practice.</p>
+        <p class="zoomable">This module follows the promise: <span class="tt" data-tip="We keep guidance gentle so you can try things fast.">gentle guidance</span>, <span class="tt" data-tip="You get tiny tasks after each idea.">tiny tasks</span>, and <span class="tt" data-tip="You will see how it helps projects.">project focus</span>.</p>
+        <div class="alert alert-info">Mandatory and optional assessment based questions will be provided after each and every module completion</div>
+    </header>
+    <section class="toc-box p-3 mb-4">
+        <h2 class="h5">Auto Table of Contents</h2>
+        <ol>
+            <li><a href="#m04-introduction-to-automation-testing-01">Introduction to Automation Testing</a></li>
+            <li><a href="#m04-introduction-to-selenium-and-selenium-ide-02">Introduction to Selenium & Selenium IDE</a></li>
+            <li><a href="#m04-setting-up-selenium-with-visual-studio-03">Setting up Selenium with Visual Studio</a></li>
+            <li><a href="#m04-introduction-to-selenium-webdriver-3-04">Introduction to Selenium WebDriver 3</a></li>
+            <li><a href="#m04-locators-and-xpath-05">Locators & XPath</a></li>
+            <li><a href="#m04-datadriven-framework-06">DataDriven Framework</a></li>
+            <li><a href="#m04-hybrid-framework-07">Hybrid Framework</a></li>
+            <li><a href="#m04-switches-alerts-and-windows-handling-08">Switches, Alerts & Windows Handling</a></li>
+            <li><a href="#m04-database-testing-09">Database Testing</a></li>
+            <li><a href="#m04-selenium-grid-10">Selenium Grid</a></li>
+            <li><a href="#m04-page-object-model-pom-11">Page Object Model (POM)</a></li>
+            <li><a href="#m04-introduction-to-nunit-12">Introduction to NUnit</a></li>
+            <li><a href="#m04-environment-setup-13">Environment Setup</a></li>
+            <li><a href="#m04-writing-the-first-test-case-14">Writing the First Test Case</a></li>
+            <li><a href="#m04-testfixture-testcase-attribute-15">TestFixture, TestCase Attribute</a></li>
+            <li><a href="#m04-array-and-order-16">Array and Order</a></li>
+            <li><a href="#m04-assert-and-tags-17">Assert & Tags</a></li>
+            <li><a href="#m04-assessment-and-quiz-18">Assessment & Quiz</a></li>
+        </ol>
+    </section>
+
+<section id="m04-introduction-to-automation-testing-01" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Introduction to Automation Testing</h3>
+    </header>
+        <p class="zoomable">Introduction to Automation Testing is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Introduction to Automa]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Introduction to Au</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate introduction to automation testing to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#prev-subtopic">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-introduction-to-selenium-and-selenium-ide-02">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-introduction-to-selenium-and-selenium-ide-02" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Introduction to Selenium & Selenium IDE</h3>
+    </header>
+        <p class="zoomable">Introduction to Selenium & Selenium IDE is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Introduction to Seleni]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Introduction to Se</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate introduction to selenium & selenium ide to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-introduction-to-automation-testing-01">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-setting-up-selenium-with-visual-studio-03">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-setting-up-selenium-with-visual-studio-03" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Setting up Selenium with Visual Studio</h3>
+    </header>
+        <p class="zoomable">Setting up Selenium with Visual Studio is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Setting up Selenium wi]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Setting up Seleniu</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate setting up selenium with visual studio to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-introduction-to-selenium-and-selenium-ide-02">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-introduction-to-selenium-webdriver-3-04">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-introduction-to-selenium-webdriver-3-04" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Introduction to Selenium WebDriver 3</h3>
+    </header>
+        <p class="zoomable">Introduction to Selenium WebDriver 3 is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Introduction to Seleni]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Introduction to Se</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate introduction to selenium webdriver 3 to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-setting-up-selenium-with-visual-studio-03">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-locators-and-xpath-05">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-locators-and-xpath-05" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Locators & XPath</h3>
+    </header>
+        <p class="zoomable">Locators & XPath is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Locators & XPath]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Locators & XPath</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate locators & xpath to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-introduction-to-selenium-webdriver-3-04">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-datadriven-framework-06">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-datadriven-framework-06" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">DataDriven Framework</h3>
+    </header>
+        <p class="zoomable">DataDriven Framework is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[DataDriven Framework]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">DataDriven Framewo</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate datadriven framework to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-locators-and-xpath-05">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-hybrid-framework-07">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-hybrid-framework-07" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Hybrid Framework</h3>
+    </header>
+        <p class="zoomable">Hybrid Framework is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Hybrid Framework]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Hybrid Framework</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate hybrid framework to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-datadriven-framework-06">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-switches-alerts-and-windows-handling-08">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-switches-alerts-and-windows-handling-08" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Switches, Alerts & Windows Handling</h3>
+    </header>
+        <p class="zoomable">Switches, Alerts & Windows Handling is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Switches, Alerts & Win]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Switches, Alerts &</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate switches, alerts & windows handling to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-hybrid-framework-07">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-database-testing-09">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-database-testing-09" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Database Testing</h3>
+    </header>
+        <p class="zoomable">Database Testing is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Database Testing]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Database Testing</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate database testing to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-switches-alerts-and-windows-handling-08">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-selenium-grid-10">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-selenium-grid-10" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Selenium Grid</h3>
+    </header>
+        <p class="zoomable">Selenium Grid is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Selenium Grid]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Selenium Grid</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate selenium grid to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-database-testing-09">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-page-object-model-pom-11">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-page-object-model-pom-11" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Page Object Model (POM)</h3>
+    </header>
+        <p class="zoomable">Page Object Model (POM) is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Page Object Model (POM]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Page Object Model </text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate page object model (pom) to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-selenium-grid-10">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-introduction-to-nunit-12">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-introduction-to-nunit-12" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Introduction to NUnit</h3>
+    </header>
+        <p class="zoomable">Introduction to NUnit is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Introduction to NUnit]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Introduction to NU</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate introduction to nunit to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-page-object-model-pom-11">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-environment-setup-13">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-environment-setup-13" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Environment Setup</h3>
+    </header>
+        <p class="zoomable">Environment Setup is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Environment Setup]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Environment Setup</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate environment setup to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-introduction-to-nunit-12">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-writing-the-first-test-case-14">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-writing-the-first-test-case-14" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Writing the First Test Case</h3>
+    </header>
+        <p class="zoomable">Writing the First Test Case is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Writing the First Test]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Writing the First </text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate writing the first test case to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-environment-setup-13">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-testfixture-testcase-attribute-15">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-testfixture-testcase-attribute-15" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">TestFixture, TestCase Attribute</h3>
+    </header>
+        <p class="zoomable">TestFixture, TestCase Attribute is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[TestFixture, TestCase ]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">TestFixture, TestC</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate testfixture, testcase attribute to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-writing-the-first-test-case-14">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-array-and-order-16">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-array-and-order-16" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Array and Order</h3>
+    </header>
+        <p class="zoomable">Array and Order is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Array and Order]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Array and Order</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate array and order to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-testfixture-testcase-attribute-15">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-assert-and-tags-17">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-assert-and-tags-17" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Assert & Tags</h3>
+    </header>
+        <p class="zoomable">Assert & Tags is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Assert & Tags]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Assert & Tags</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate assert & tags to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-array-and-order-16">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m04-assessment-and-quiz-18">Next</a>
+    </div>
+</section>
+
+
+<section id="m04-assessment-and-quiz-18" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Assessment & Quiz</h3>
+    </header>
+        <p class="zoomable">Assessment & Quiz is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Assessment & Quiz]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Assessment & Quiz</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate assessment & quiz to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+[TestClass]
+public class MathTests{
+    [TestMethod]
+    public async Task AddsSlowly(){
+        var result = await Task.Run(() => 2 + 3);
+        Assert.AreEqual(5, result);
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m04-assert-and-tags-17">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#next-subtopic">Next</a>
+    </div>
+</section>
+
+    
+<section class="my-4">
+    <h3>Glossary (Tooltips)</h3>
+    <table class="table table-bordered">
+        <thead><tr><th>Term</th><th>Tooltip Description</th></tr></thead>
+        <tbody>
+            <tr><td>CLI</td><td>Runs commands from the console to control tools.</td></tr>
+            <tr><td>CLR</td><td>Manages memory and execution for C# apps.</td></tr>
+            <tr><td>OOP</td><td>Organizes code into objects with data and behavior.</td></tr>
+            <tr><td>LINQ</td><td>Query-like syntax for working with data in C#.</td></tr>
+        </tbody>
+    </table>
+</section>
+
+    
+<section id="practice-coding-questions" class="my-5">
+    <h2>To Become Best coder Practice this</h2>
+    
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 1: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case scenario 1</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where automated testing with mstest and async programming in .net + assignment + use case concept 1 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample1 → Output sample1</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 2: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case scenario 2</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where automated testing with mstest and async programming in .net + assignment + use case concept 2 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample2 → Output sample2</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 3: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case scenario 3</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where automated testing with mstest and async programming in .net + assignment + use case concept 3 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample3 → Output sample3</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 4: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case scenario 4</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where automated testing with mstest and async programming in .net + assignment + use case concept 4 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample4 → Output sample4</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 5: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case scenario 5</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where automated testing with mstest and async programming in .net + assignment + use case concept 5 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample5 → Output sample5</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 6: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case scenario 6</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where automated testing with mstest and async programming in .net + assignment + use case concept 6 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample6 → Output sample6</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 7: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case scenario 7</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where automated testing with mstest and async programming in .net + assignment + use case concept 7 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample7 → Output sample7</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 8: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case scenario 8</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where automated testing with mstest and async programming in .net + assignment + use case concept 8 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample8 → Output sample8</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 9: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case scenario 9</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where automated testing with mstest and async programming in .net + assignment + use case concept 9 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample9 → Output sample9</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 10: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case scenario 10</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where automated testing with mstest and async programming in .net + assignment + use case concept 10 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample10 → Output sample10</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+    <h3>Answers (Click to Expand)</h3>
+    
+    <details class="ans mb-2"><summary>Show Answer Code 1</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 1: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 2</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 2: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 3</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 3: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 4</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 4: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 5</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 5: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 6</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 6: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 7</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 7: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 8</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 8: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 9</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 9: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 10</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 10: Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+</section>
+
+    <section class="my-4">
+        <h3>FAQs</h3>
+        <div class="mb-2"><strong>Q1:</strong> How does this help? <br /><span class="text-muted">A1:</span> It gives a quick reminder with a tiny actionable idea.</div>
+<div class="mb-2"><strong>Q2:</strong> How does this help? <br /><span class="text-muted">A2:</span> It gives a quick reminder with a tiny actionable idea.</div>
+<div class="mb-2"><strong>Q3:</strong> How does this help? <br /><span class="text-muted">A3:</span> It gives a quick reminder with a tiny actionable idea.</div>
+<div class="mb-2"><strong>Q4:</strong> How does this help? <br /><span class="text-muted">A4:</span> It gives a quick reminder with a tiny actionable idea.</div>
+<div class="mb-2"><strong>Q5:</strong> How does this help? <br /><span class="text-muted">A5:</span> It gives a quick reminder with a tiny actionable idea.</div>
+<div class="mb-2"><strong>Q6:</strong> How does this help? <br /><span class="text-muted">A6:</span> It gives a quick reminder with a tiny actionable idea.</div>
+    </section>
+    <section class="my-4">
+        <h3>Interview Questions</h3>
+        <ul>
+            <li>Interview Check 1: Explain the idea in 2-3 lines and give a code hint.</li>
+<li>Interview Check 2: Explain the idea in 2-3 lines and give a code hint.</li>
+<li>Interview Check 3: Explain the idea in 2-3 lines and give a code hint.</li>
+<li>Interview Check 4: Explain the idea in 2-3 lines and give a code hint.</li>
+<li>Interview Check 5: Explain the idea in 2-3 lines and give a code hint.</li>
+<li>Interview Check 6: Explain the idea in 2-3 lines and give a code hint.</li>
+<li>Interview Check 7: Explain the idea in 2-3 lines and give a code hint.</li>
+<li>Interview Check 8: Explain the idea in 2-3 lines and give a code hint.</li>
+<li>Interview Check 9: Explain the idea in 2-3 lines and give a code hint.</li>
+        </ul>
+    </section>
+    <section class="my-4">
+        <h3>MCQ</h3>
+        
+        <div class="mb-3">
+            <p><strong>MCQ 1.</strong> Pick the safest option for this module.</p>
+            <ul>
+                <li>A) Quick guess</li>
+                <li>B) Checked with docs</li>
+                <li>C) Tested in code</li>
+                <li>D) Peer reviewed</li>
+            </ul>
+            <p><em>Answer:</em> C</p>
+        </div>
+
+        <div class="mb-3">
+            <p><strong>MCQ 2.</strong> Pick the safest option for this module.</p>
+            <ul>
+                <li>A) Quick guess</li>
+                <li>B) Checked with docs</li>
+                <li>C) Tested in code</li>
+                <li>D) Peer reviewed</li>
+            </ul>
+            <p><em>Answer:</em> C</p>
+        </div>
+
+        <div class="mb-3">
+            <p><strong>MCQ 3.</strong> Pick the safest option for this module.</p>
+            <ul>
+                <li>A) Quick guess</li>
+                <li>B) Checked with docs</li>
+                <li>C) Tested in code</li>
+                <li>D) Peer reviewed</li>
+            </ul>
+            <p><em>Answer:</em> C</p>
+        </div>
+
+        <div class="mb-3">
+            <p><strong>MCQ 4.</strong> Pick the safest option for this module.</p>
+            <ul>
+                <li>A) Quick guess</li>
+                <li>B) Checked with docs</li>
+                <li>C) Tested in code</li>
+                <li>D) Peer reviewed</li>
+            </ul>
+            <p><em>Answer:</em> C</p>
+        </div>
+
+        <div class="mb-3">
+            <p><strong>MCQ 5.</strong> Pick the safest option for this module.</p>
+            <ul>
+                <li>A) Quick guess</li>
+                <li>B) Checked with docs</li>
+                <li>C) Tested in code</li>
+                <li>D) Peer reviewed</li>
+            </ul>
+            <p><em>Answer:</em> C</p>
+        </div>
+
+        <div class="mb-3">
+            <p><strong>MCQ 6.</strong> Pick the safest option for this module.</p>
+            <ul>
+                <li>A) Quick guess</li>
+                <li>B) Checked with docs</li>
+                <li>C) Tested in code</li>
+                <li>D) Peer reviewed</li>
+            </ul>
+            <p><em>Answer:</em> C</p>
+        </div>
+    </section>
+    <section class="my-4">
+        <h3>Summary</h3>
+        <p class="zoomable">You learned the heart of Automated Testing with MSTest and Async Programming in .Net + Assignment + Use case and practiced with small scenarios to build confidence.</p>
+    </section>
+    <section class="my-4">
+        <h3>Downloadable Resources</h3>
+        <ul>
+            <li>ZIP (placeholder)</li>
+            <li>PPT (placeholder)</li>
+            <li>DOC (placeholder)</li>
+        </ul>
+    </section>
+</main>

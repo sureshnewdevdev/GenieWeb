@@ -1,0 +1,1871 @@
+@page "/CSharpNew/05-ado-net-and-linq-and-entity-framework-assignm.html"
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "C# New - ADO.NET and LINQ and Entity Framework + Assignment + Use case";
+    ViewData["ActiveMenu"] = "CSharpNew";
+    ViewData["ActivePage"] = "Module05";
+}
+@section LeftMenu {
+    @await Html.PartialAsync("_LeftMenu_CSharpNew", new { CurrentModule = "05" })
+}
+
+<style>
+    .tt { position: relative; cursor: help; border-bottom: 1px dashed #0d6efd; }
+    .tt::after { content: attr(data-tip); position: absolute; left: 0; bottom: 125%; background: #0d6efd; color: #fff; padding: 6px 8px; border-radius: 6px; opacity: 0; pointer-events: none; width: 240px; transition: opacity .2s; font-size: 0.9rem; }
+    .tt:hover::after { opacity: 1; }
+    .zoomable { transition: transform .25s ease; transition-delay: 3s; transform-origin: center; }
+    .zoomable:hover { transform: scale(1.03); }
+    .example-box { background: #f4f4f4; border: 1px solid #dcdcdc; border-radius: 8px; }
+    .code-block { background: #1e1e1e; color: #e5e5e5; padding: 12px; border-radius: 10px; overflow-x: auto; }
+    .toc-box { background: #eef6ff; border: 1px solid #cfe2ff; border-radius: 8px; }
+    .ans pre.code { background: #1e1e1e; color: #f8f9fa; padding: 12px; border-radius: 8px; overflow-x: auto; }
+</style>
+<main class="container-fluid my-4">
+    <a id="prev-subtopic"></a>
+    <a id="next-subtopic"></a>
+    <header class="mb-3">
+        <h1 class="h3">ADO.NET and LINQ and Entity Framework + Assignment + Use case (Module 05)</h1>
+        <p class="lead zoomable">Welcome to the C# New course. We keep explanations simple, add short steps, and give you room to practice.</p>
+        <p class="zoomable">This module follows the promise: <span class="tt" data-tip="We keep guidance gentle so you can try things fast.">gentle guidance</span>, <span class="tt" data-tip="You get tiny tasks after each idea.">tiny tasks</span>, and <span class="tt" data-tip="You will see how it helps projects.">project focus</span>.</p>
+        <div class="alert alert-info">Mandatory and optional assessment based questions will be provided after each and every module completion</div>
+    </header>
+    <section class="toc-box p-3 mb-4">
+        <h2 class="h5">Auto Table of Contents</h2>
+        <ol>
+            <li><a href="#m05-what-is-ado-net-01">What is ADO.NET?</a></li>
+            <li><a href="#m05-ado-net-architecture-02">ADO.NET Architecture</a></li>
+            <li><a href="#m05-advantages-of-ado-net-03">Advantages of ADO.NET</a></li>
+            <li><a href="#m05-storing-connection-strings-04">Storing Connection Strings</a></li>
+            <li><a href="#m05-building-a-connection-string-05">Building a Connection String</a></li>
+            <li><a href="#m05-connecting-to-sql-server-06">Connecting to SQL Server</a></li>
+            <li><a href="#m05-connecting-to-a-named-instance-of-sql-server-07">Connecting to a Named Instance of SQL Server</a></li>
+            <li><a href="#m05-connecting-to-sql-server-using-ip-address-08">Connecting to SQL Server using IP Address</a></li>
+            <li><a href="#m05-connecting-to-sql-server-using-integrated-security-09">Connecting to SQL Server Using Integrated Security from ASP.NET</a></li>
+            <li><a href="#m05-managing-connection-pooling-10">Managing Connection Pooling</a></li>
+            <li><a href="#m05-error-handling-in-connections-11">Error handling in connections</a></li>
+            <li><a href="#m05-introduction-to-linq-12">Introduction to LINQ</a></li>
+            <li><a href="#m05-advantages-of-linq-13">Advantages of LINQ</a></li>
+            <li><a href="#m05-linq-syntax-14">LINQ Syntax</a></li>
+            <li><a href="#m05-lambda-expressions-15">Lambda Expressions</a></li>
+            <li><a href="#m05-aggregate-functions-16">Aggregate Functions</a></li>
+            <li><a href="#m05-projection-operators-select-selectmany-17">Projection Operators (Select, SelectMany)</a></li>
+            <li><a href="#m05-sorting-operators-18">Sorting Operators</a></li>
+            <li><a href="#m05-partition-operators-19">Partition Operators</a></li>
+            <li><a href="#m05-conversion-operators-20">Conversion Operators</a></li>
+            <li><a href="#m05-element-operators-21">Element Operators</a></li>
+            <li><a href="#m05-grouping-operators-22">Grouping Operators</a></li>
+            <li><a href="#m05-join-operators-23">Join Operators</a></li>
+            <li><a href="#m05-set-operators-24">Set Operators</a></li>
+            <li><a href="#m05-assessment-and-quiz-25">Assessment & Quiz</a></li>
+        </ol>
+    </section>
+
+<section id="m05-what-is-ado-net-01" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">What is ADO.NET?</h3>
+    </header>
+        <p class="zoomable">What is ADO.NET? is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[What is ADO.NET?]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">What is ADO.NET?</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate what is ado.net? to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#prev-subtopic">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-ado-net-architecture-02">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-ado-net-architecture-02" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">ADO.NET Architecture</h3>
+    </header>
+        <p class="zoomable">ADO.NET Architecture is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[ADO.NET Architecture]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">ADO.NET Architectu</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate ado.net architecture to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-what-is-ado-net-01">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-advantages-of-ado-net-03">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-advantages-of-ado-net-03" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Advantages of ADO.NET</h3>
+    </header>
+        <p class="zoomable">Advantages of ADO.NET is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Advantages of ADO.NET]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Advantages of ADO.</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate advantages of ado.net to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-ado-net-architecture-02">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-storing-connection-strings-04">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-storing-connection-strings-04" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Storing Connection Strings</h3>
+    </header>
+        <p class="zoomable">Storing Connection Strings is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Storing Connection Str]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Storing Connection</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate storing connection strings to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-advantages-of-ado-net-03">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-building-a-connection-string-05">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-building-a-connection-string-05" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Building a Connection String</h3>
+    </header>
+        <p class="zoomable">Building a Connection String is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Building a Connection ]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Building a Connect</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate building a connection string to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-storing-connection-strings-04">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-connecting-to-sql-server-06">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-connecting-to-sql-server-06" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Connecting to SQL Server</h3>
+    </header>
+        <p class="zoomable">Connecting to SQL Server is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Connecting to SQL Serv]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Connecting to SQL </text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate connecting to sql server to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-building-a-connection-string-05">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-connecting-to-a-named-instance-of-sql-server-07">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-connecting-to-a-named-instance-of-sql-server-07" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Connecting to a Named Instance of SQL Server</h3>
+    </header>
+        <p class="zoomable">Connecting to a Named Instance of SQL Server is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Connecting to a Named ]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Connecting to a Na</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate connecting to a named instance of sql server to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-connecting-to-sql-server-06">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-connecting-to-sql-server-using-ip-address-08">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-connecting-to-sql-server-using-ip-address-08" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Connecting to SQL Server using IP Address</h3>
+    </header>
+        <p class="zoomable">Connecting to SQL Server using IP Address is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Connecting to SQL Serv]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Connecting to SQL </text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate connecting to sql server using ip address to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-connecting-to-a-named-instance-of-sql-server-07">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-connecting-to-sql-server-using-integrated-security-09">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-connecting-to-sql-server-using-integrated-security-09" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Connecting to SQL Server Using Integrated Security from ASP.NET</h3>
+    </header>
+        <p class="zoomable">Connecting to SQL Server Using Integrated Security from ASP.NET is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Connecting to SQL Serv]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Connecting to SQL </text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate connecting to sql server using integrated security from asp.net to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-connecting-to-sql-server-using-ip-address-08">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-managing-connection-pooling-10">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-managing-connection-pooling-10" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Managing Connection Pooling</h3>
+    </header>
+        <p class="zoomable">Managing Connection Pooling is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Managing Connection Po]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Managing Connectio</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate managing connection pooling to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-connecting-to-sql-server-using-integrated-security-09">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-error-handling-in-connections-11">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-error-handling-in-connections-11" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Error handling in connections</h3>
+    </header>
+        <p class="zoomable">Error handling in connections is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Error handling in conn]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Error handling in </text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate error handling in connections to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-managing-connection-pooling-10">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-introduction-to-linq-12">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-introduction-to-linq-12" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Introduction to LINQ</h3>
+    </header>
+        <p class="zoomable">Introduction to LINQ is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Introduction to LINQ]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Introduction to LI</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate introduction to linq to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-error-handling-in-connections-11">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-advantages-of-linq-13">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-advantages-of-linq-13" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Advantages of LINQ</h3>
+    </header>
+        <p class="zoomable">Advantages of LINQ is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Advantages of LINQ]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Advantages of LINQ</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate advantages of linq to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-introduction-to-linq-12">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-linq-syntax-14">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-linq-syntax-14" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">LINQ Syntax</h3>
+    </header>
+        <p class="zoomable">LINQ Syntax is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[LINQ Syntax]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">LINQ Syntax</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate linq syntax to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-advantages-of-linq-13">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-lambda-expressions-15">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-lambda-expressions-15" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Lambda Expressions</h3>
+    </header>
+        <p class="zoomable">Lambda Expressions is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Lambda Expressions]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Lambda Expressions</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate lambda expressions to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-linq-syntax-14">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-aggregate-functions-16">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-aggregate-functions-16" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Aggregate Functions</h3>
+    </header>
+        <p class="zoomable">Aggregate Functions is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Aggregate Functions]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Aggregate Function</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate aggregate functions to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-lambda-expressions-15">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-projection-operators-select-selectmany-17">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-projection-operators-select-selectmany-17" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Projection Operators (Select, SelectMany)</h3>
+    </header>
+        <p class="zoomable">Projection Operators (Select, SelectMany) is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Projection Operators (]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Projection Operato</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate projection operators (select, selectmany) to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-aggregate-functions-16">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-sorting-operators-18">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-sorting-operators-18" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Sorting Operators</h3>
+    </header>
+        <p class="zoomable">Sorting Operators is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Sorting Operators]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Sorting Operators</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate sorting operators to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-projection-operators-select-selectmany-17">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-partition-operators-19">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-partition-operators-19" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Partition Operators</h3>
+    </header>
+        <p class="zoomable">Partition Operators is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Partition Operators]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Partition Operator</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate partition operators to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-sorting-operators-18">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-conversion-operators-20">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-conversion-operators-20" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Conversion Operators</h3>
+    </header>
+        <p class="zoomable">Conversion Operators is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Conversion Operators]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Conversion Operato</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate conversion operators to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-partition-operators-19">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-element-operators-21">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-element-operators-21" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Element Operators</h3>
+    </header>
+        <p class="zoomable">Element Operators is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Element Operators]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Element Operators</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate element operators to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-conversion-operators-20">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-grouping-operators-22">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-grouping-operators-22" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Grouping Operators</h3>
+    </header>
+        <p class="zoomable">Grouping Operators is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Grouping Operators]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Grouping Operators</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate grouping operators to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-element-operators-21">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-join-operators-23">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-join-operators-23" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Join Operators</h3>
+    </header>
+        <p class="zoomable">Join Operators is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Join Operators]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Join Operators</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate join operators to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-grouping-operators-22">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-set-operators-24">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-set-operators-24" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Set Operators</h3>
+    </header>
+        <p class="zoomable">Set Operators is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Set Operators]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Set Operators</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate set operators to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-join-operators-23">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#m05-assessment-and-quiz-25">Next</a>
+    </div>
+</section>
+
+
+<section id="m05-assessment-and-quiz-25" class="mb-5">
+    <header class="mb-2">
+        <h3 class="h5">Assessment & Quiz</h3>
+    </header>
+        <p class="zoomable">Assessment & Quiz is introduced in plain language so you can connect it to daily tasks.</p>
+        <p class="zoomable">We move step-by-step, showing inputs, outputs, and the small decisions in between.</p>
+        <p class="zoomable">New words are softened with tooltips and short definitions to avoid jargon.</p>
+        <p class="zoomable">You can safely test the idea in a console first before using it in a bigger app.</p>
+    <p class="zoomable fw-semibold text-primary">Why this matters? It keeps your learning focused on real actions you can try right away.</p>
+
+    <pre class="zoomable border rounded p-3 bg-body-secondary">[User Input]
+   |
+   v
+[Assessment & Quiz]
+   |
+   v
+[Clean Output]</pre>
+    
+
+    <figure class="zoomable my-3">
+        <svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="90" height="60" rx="10" fill="#e0f3ff" stroke="#007bff" />
+            <rect x="120" y="20" width="90" height="60" rx="10" fill="#e8f5e9" stroke="#28a745" />
+            <rect x="230" y="20" width="80" height="60" rx="10" fill="#fff3cd" stroke="#ffc107" />
+            <line x1="100" y1="50" x2="120" y2="50" stroke="#007bff" marker-end="url(#arrow)" />
+            <line x1="210" y1="50" x2="230" y2="50" stroke="#28a745" marker-end="url(#arrow)" />
+            <text x="55" y="55" text-anchor="middle" font-size="12">Start</text>
+            <text x="165" y="55" text-anchor="middle" font-size="12">Assessment & Quiz</text>
+            <text x="270" y="55" text-anchor="middle" font-size="12">Result</text>
+            <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" fill="#343a40">
+                    <path d="M0,0 L6,3 L0,6 z" />
+                </marker>
+            </defs>
+        </svg>
+    </figure>
+    
+    <div class="example-box p-3 zoomable">Example: Relate assessment & quiz to a tiny habit like logging a message, branching a repo, or running a quick query.</div>
+    <pre class="code-block zoomable"><code>using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+class PoolingSample{
+    static async Task Main(){
+        var cs = "Server=.;Database=Demo;Trusted_Connection=True;";
+        using var conn = new SqlConnection(cs);
+        await conn.OpenAsync();
+        var cmd = new SqlCommand("SELECT COUNT(*) FROM sys.objects", conn);
+        Console.WriteLine(await cmd.ExecuteScalarAsync());
+    }
+}</code></pre>
+    <p class="zoomable"><strong>Real-world use case:</strong> Teams rely on this idea to reduce manual steps and make releases calmer.</p>
+    <p class="zoomable"><strong>Beginner tip:</strong> Write down what the inputs and outputs should be. <strong>Advanced note:</strong> Automate the check with a script or test.</p>
+    <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary btn-sm" href="#m05-set-operators-24">Prev</a>
+        <a class="btn btn-primary btn-sm" href="#next-subtopic">Next</a>
+    </div>
+</section>
+
+    
+<section class="my-4">
+    <h3>Glossary (Tooltips)</h3>
+    <table class="table table-bordered">
+        <thead><tr><th>Term</th><th>Tooltip Description</th></tr></thead>
+        <tbody>
+            <tr><td>CLI</td><td>Runs commands from the console to control tools.</td></tr>
+            <tr><td>CLR</td><td>Manages memory and execution for C# apps.</td></tr>
+            <tr><td>OOP</td><td>Organizes code into objects with data and behavior.</td></tr>
+            <tr><td>LINQ</td><td>Query-like syntax for working with data in C#.</td></tr>
+        </tbody>
+    </table>
+</section>
+
+    
+<section id="practice-coding-questions" class="my-5">
+    <h2>To Become Best coder Practice this</h2>
+    
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 1: ADO.NET and LINQ and Entity Framework + Assignment + Use case scenario 1</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where ado.net and linq and entity framework + assignment + use case concept 1 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample1 → Output sample1</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 2: ADO.NET and LINQ and Entity Framework + Assignment + Use case scenario 2</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where ado.net and linq and entity framework + assignment + use case concept 2 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample2 → Output sample2</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 3: ADO.NET and LINQ and Entity Framework + Assignment + Use case scenario 3</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where ado.net and linq and entity framework + assignment + use case concept 3 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample3 → Output sample3</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 4: ADO.NET and LINQ and Entity Framework + Assignment + Use case scenario 4</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where ado.net and linq and entity framework + assignment + use case concept 4 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample4 → Output sample4</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 5: ADO.NET and LINQ and Entity Framework + Assignment + Use case scenario 5</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where ado.net and linq and entity framework + assignment + use case concept 5 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample5 → Output sample5</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 6: ADO.NET and LINQ and Entity Framework + Assignment + Use case scenario 6</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where ado.net and linq and entity framework + assignment + use case concept 6 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample6 → Output sample6</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 7: ADO.NET and LINQ and Entity Framework + Assignment + Use case scenario 7</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where ado.net and linq and entity framework + assignment + use case concept 7 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample7 → Output sample7</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 8: ADO.NET and LINQ and Entity Framework + Assignment + Use case scenario 8</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where ado.net and linq and entity framework + assignment + use case concept 8 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample8 → Output sample8</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 9: ADO.NET and LINQ and Entity Framework + Assignment + Use case scenario 9</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where ado.net and linq and entity framework + assignment + use case concept 9 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample9 → Output sample9</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+
+    <article class="practice-question mb-3 p-3 border rounded-3 bg-light">
+        <h4>Question 10: ADO.NET and LINQ and Entity Framework + Assignment + Use case scenario 10</h4>
+        <p><strong>Problem:</strong> Explain and code a tiny scenario where ado.net and linq and entity framework + assignment + use case concept 10 is applied.</p>
+        <p><strong>Input/Output:</strong> Accept simple console input and print a short decision.</p>
+        <p><strong>Example Input/Output:</strong> Input sample10 → Output sample10</p>
+        <p><strong>Constraints:</strong> Keep it small, under 40 lines, with clear variable names.</p>
+        <p><strong>Hint:</strong> Use a helper method and basic validation before processing.</p>
+    </article>
+    <h3>Answers (Click to Expand)</h3>
+    
+    <details class="ans mb-2"><summary>Show Answer Code 1</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 1: ADO.NET and LINQ and Entity Framework + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 2</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 2: ADO.NET and LINQ and Entity Framework + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 3</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 3: ADO.NET and LINQ and Entity Framework + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 4</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 4: ADO.NET and LINQ and Entity Framework + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 5</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 5: ADO.NET and LINQ and Entity Framework + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 6</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 6: ADO.NET and LINQ and Entity Framework + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 7</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 7: ADO.NET and LINQ and Entity Framework + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 8</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 8: ADO.NET and LINQ and Entity Framework + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 9</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 9: ADO.NET and LINQ and Entity Framework + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+
+    <details class="ans mb-2"><summary>Show Answer Code 10</summary>
+        <pre class="code">using System;
+class Demo{
+    static void Main(){
+        Console.WriteLine("Scenario 10: ADO.NET and LINQ and Entity Framework + Assignment + Use case");
+        string input = Console.ReadLine() ?? string.Empty;
+        if(string.IsNullOrWhiteSpace(input)){Console.WriteLine("No data");return;}
+        Console.WriteLine($"Processed: {input.Trim()}");
+    }
+}</pre>
+    </details>
+</section>
+
+    <section class="my-4">
+        <h3>FAQs</h3>
+        <div class="mb-2"><strong>Q1:</strong> How does this help? <br /><span class="text-muted">A1:</span> It gives a quick reminder with a tiny actionable idea.</div>
+<div class="mb-2"><strong>Q2:</strong> How does this help? <br /><span class="text-muted">A2:</span> It gives a quick reminder with a tiny actionable idea.</div>
+<div class="mb-2"><strong>Q3:</strong> How does this help? <br /><span class="text-muted">A3:</span> It gives a quick reminder with a tiny actionable idea.</div>
+<div class="mb-2"><strong>Q4:</strong> How does this help? <br /><span class="text-muted">A4:</span> It gives a quick reminder with a tiny actionable idea.</div>
+<div class="mb-2"><strong>Q5:</strong> How does this help? <br /><span class="text-muted">A5:</span> It gives a quick reminder with a tiny actionable idea.</div>
+<div class="mb-2"><strong>Q6:</strong> How does this help? <br /><span class="text-muted">A6:</span> It gives a quick reminder with a tiny actionable idea.</div>
+    </section>
+    <section class="my-4">
+        <h3>Interview Questions</h3>
+        <ul>
+            <li>Interview Check 1: Explain the idea in 2-3 lines and give a code hint.</li>
+<li>Interview Check 2: Explain the idea in 2-3 lines and give a code hint.</li>
+<li>Interview Check 3: Explain the idea in 2-3 lines and give a code hint.</li>
+<li>Interview Check 4: Explain the idea in 2-3 lines and give a code hint.</li>
+<li>Interview Check 5: Explain the idea in 2-3 lines and give a code hint.</li>
+<li>Interview Check 6: Explain the idea in 2-3 lines and give a code hint.</li>
+<li>Interview Check 7: Explain the idea in 2-3 lines and give a code hint.</li>
+<li>Interview Check 8: Explain the idea in 2-3 lines and give a code hint.</li>
+<li>Interview Check 9: Explain the idea in 2-3 lines and give a code hint.</li>
+        </ul>
+    </section>
+    <section class="my-4">
+        <h3>MCQ</h3>
+        
+        <div class="mb-3">
+            <p><strong>MCQ 1.</strong> Pick the safest option for this module.</p>
+            <ul>
+                <li>A) Quick guess</li>
+                <li>B) Checked with docs</li>
+                <li>C) Tested in code</li>
+                <li>D) Peer reviewed</li>
+            </ul>
+            <p><em>Answer:</em> C</p>
+        </div>
+
+        <div class="mb-3">
+            <p><strong>MCQ 2.</strong> Pick the safest option for this module.</p>
+            <ul>
+                <li>A) Quick guess</li>
+                <li>B) Checked with docs</li>
+                <li>C) Tested in code</li>
+                <li>D) Peer reviewed</li>
+            </ul>
+            <p><em>Answer:</em> C</p>
+        </div>
+
+        <div class="mb-3">
+            <p><strong>MCQ 3.</strong> Pick the safest option for this module.</p>
+            <ul>
+                <li>A) Quick guess</li>
+                <li>B) Checked with docs</li>
+                <li>C) Tested in code</li>
+                <li>D) Peer reviewed</li>
+            </ul>
+            <p><em>Answer:</em> C</p>
+        </div>
+
+        <div class="mb-3">
+            <p><strong>MCQ 4.</strong> Pick the safest option for this module.</p>
+            <ul>
+                <li>A) Quick guess</li>
+                <li>B) Checked with docs</li>
+                <li>C) Tested in code</li>
+                <li>D) Peer reviewed</li>
+            </ul>
+            <p><em>Answer:</em> C</p>
+        </div>
+
+        <div class="mb-3">
+            <p><strong>MCQ 5.</strong> Pick the safest option for this module.</p>
+            <ul>
+                <li>A) Quick guess</li>
+                <li>B) Checked with docs</li>
+                <li>C) Tested in code</li>
+                <li>D) Peer reviewed</li>
+            </ul>
+            <p><em>Answer:</em> C</p>
+        </div>
+
+        <div class="mb-3">
+            <p><strong>MCQ 6.</strong> Pick the safest option for this module.</p>
+            <ul>
+                <li>A) Quick guess</li>
+                <li>B) Checked with docs</li>
+                <li>C) Tested in code</li>
+                <li>D) Peer reviewed</li>
+            </ul>
+            <p><em>Answer:</em> C</p>
+        </div>
+    </section>
+    <section class="my-4">
+        <h3>Summary</h3>
+        <p class="zoomable">You learned the heart of ADO.NET and LINQ and Entity Framework + Assignment + Use case and practiced with small scenarios to build confidence.</p>
+    </section>
+    <section class="my-4">
+        <h3>Downloadable Resources</h3>
+        <ul>
+            <li>ZIP (placeholder)</li>
+            <li>PPT (placeholder)</li>
+            <li>DOC (placeholder)</li>
+        </ul>
+    </section>
+</main>

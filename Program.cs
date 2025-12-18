@@ -20,6 +20,7 @@ namespace GenieWeb
 
             // Add services to the container
             builder.Services.AddControllersWithViews();
+            builder.Services.AddRazorPages();
             builder.Services.AddScoped<EmailService>();
             builder.Services.AddSingleton<QuizService>(); // Or use AddScoped if needed
 
@@ -79,6 +80,7 @@ namespace GenieWeb
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+            app.MapRazorPages();
 
             // Optional: Test email during startup (for diagnostics only)
             Task.Run(() =>
