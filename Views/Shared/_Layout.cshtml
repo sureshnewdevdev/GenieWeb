@@ -543,6 +543,26 @@
 
                             <h5 class="mt-1">
                                 <a class="nav-link text-dark fw-bold d-flex align-items-center"
+                                href="javascript:void(0);" onclick="toggleDropdown('DotNetCoreOverviewMenu', this)"
+                                aria-expanded="@(new List<string> { "DotNetCoreOverview", "DotNetCoreKeyFeatures", "DotNetCoreComponents", "DotNetCoreUseCases", "DotNetCoreHistory", "DotNetCoreFrameworkComparison", "DotNetCoreModernNet" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")">
+                                    📘 .NET Core Overview
+                                    <span class="dropdown-icon ms-auto @(new List<string> { "DotNetCoreOverview", "DotNetCoreKeyFeatures", "DotNetCoreComponents", "DotNetCoreUseCases", "DotNetCoreHistory", "DotNetCoreFrameworkComparison", "DotNetCoreModernNet" }.Contains(ViewData["ActivePage"] as string ?? "") ? "rotate" : "")">&#9654;</span>
+                                </a>
+                            </h5>
+                            <div class="collapse @(new List<string> { "DotNetCoreOverview", "DotNetCoreKeyFeatures", "DotNetCoreComponents", "DotNetCoreUseCases", "DotNetCoreHistory", "DotNetCoreFrameworkComparison", "DotNetCoreModernNet" }.Contains(ViewData["ActivePage"] as string ?? "") ? "show" : "")" id="DotNetCoreOverviewMenu">
+                                <ul class="nav flex-column ms-3">
+                                    <li><a class="nav-link @(ViewData["ActivePage"] as string == "DotNetCoreOverview" ? "active" : "")" href="@Url.Action("DotNetCoreOverview", "DotNet")">.NET Core at a Glance</a></li>
+                                    <li><a class="nav-link @(ViewData["ActivePage"] as string == "DotNetCoreKeyFeatures" ? "active" : "")" href="@Url.Action("DotNetCoreKeyFeatures", "DotNet")">Key Features</a></li>
+                                    <li><a class="nav-link @(ViewData["ActivePage"] as string == "DotNetCoreComponents" ? "active" : "")" href="@Url.Action("DotNetCoreComponents", "DotNet")">Runtime Components</a></li>
+                                    <li><a class="nav-link @(ViewData["ActivePage"] as string == "DotNetCoreUseCases" ? "active" : "")" href="@Url.Action("DotNetCoreUseCases", "DotNet")">Use Cases</a></li>
+                                    <li><a class="nav-link @(ViewData["ActivePage"] as string == "DotNetCoreHistory" ? "active" : "")" href="@Url.Action("DotNetCoreHistory", "DotNet")">History &amp; Milestones</a></li>
+                                    <li><a class="nav-link @(ViewData["ActivePage"] as string == "DotNetCoreFrameworkComparison" ? "active" : "")" href="@Url.Action("DotNetCoreFrameworkComparison", "DotNet")">.NET Core vs .NET Framework</a></li>
+                                    <li><a class="nav-link @(ViewData["ActivePage"] as string == "DotNetCoreModernNet" ? "active" : "")" href="@Url.Action("DotNetCoreModernNet", "DotNet")">Transition to Modern .NET</a></li>
+                                </ul>
+                            </div>
+
+                            <h5 class="mt-1">
+                                <a class="nav-link text-dark fw-bold d-flex align-items-center"
                                 href="javascript:void(0);" onclick="toggleDropdown('GettingStarted', this)"
                                 aria-expanded="@(new List<string> { "WhatIsDotNet", "Evolution", "FrameworkVsCore", "DotNetEcosystem" }.Contains(ViewData["ActivePage"] as string ?? "") ? "true" : "false")">
                                     🚀 Getting Started
@@ -1846,6 +1866,31 @@
             }, { threshold: 0 });
 
             observer.observe(mainBtn);
+
+            // Delayed zoom on sidebar links (2 seconds hover/focus)
+            const zoomTimers = new WeakMap();
+            const zoomTargets = sidebar ? sidebar.querySelectorAll(".nav-link") : [];
+
+            zoomTargets.forEach(link => {
+                const clearZoom = () => {
+                    const timer = zoomTimers.get(link);
+                    if (timer) {
+                        clearTimeout(timer);
+                    }
+                    link.classList.remove("delayed-zoomed");
+                };
+
+                link.addEventListener("mouseenter", () => {
+                    clearZoom();
+                    const timer = setTimeout(() => {
+                        link.classList.add("delayed-zoomed");
+                    }, 2000);
+                    zoomTimers.set(link, timer);
+                });
+
+                link.addEventListener("mouseleave", clearZoom);
+                link.addEventListener("blur", clearZoom);
+            });
 
             //function to scroll to active menu
             const container = document.querySelector(".scrollable-navbar");

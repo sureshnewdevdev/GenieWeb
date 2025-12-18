@@ -9,6 +9,13 @@ namespace YourNamespace.Controllers
         public IActionResult Evolution() => View();
         public IActionResult FrameworkVsCore() => View();
         public IActionResult DotNetEcosystem() => View();
+        public IActionResult DotNetCoreOverview() => View();
+        public IActionResult DotNetCoreKeyFeatures() => View();
+        public IActionResult DotNetCoreComponents() => View();
+        public IActionResult DotNetCoreUseCases() => View();
+        public IActionResult DotNetCoreHistory() => View();
+        public IActionResult DotNetCoreFrameworkComparison() => View();
+        public IActionResult DotNetCoreModernNet() => View();
 
         // Environment Setup
         public IActionResult InstallVS() => View();
