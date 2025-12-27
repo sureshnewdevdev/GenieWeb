@@ -21,10 +21,16 @@ public class CoursesController : Controller
         var safeFileName = Path.GetFileName(fileName);
         var basePath = Path.Combine(Directory.GetCurrentDirectory(), "Views", "TrainedCourse");
         var filePath = Path.Combine(basePath, safeFileName);
+        var extension = Path.GetExtension(safeFileName);
 
         if (!System.IO.File.Exists(filePath))
         {
             return NotFound();
+        }
+
+        if (string.Equals(extension, ".cshtml", System.StringComparison.OrdinalIgnoreCase))
+        {
+            return View($"~/Views/TrainedCourse/{safeFileName}");
         }
 
         return PhysicalFile(filePath, "text/html");
