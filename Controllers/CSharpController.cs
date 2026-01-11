@@ -138,6 +138,13 @@ namespace GenieWeb.Controllers
         // Async & Await Section
         public IActionResult AsyncAwaitExamples() => GenerateView("AsyncAwaitExamples");
 
+        public IActionResult CSharpAdvanced()
+        {
+            ViewData["ActiveMenu"] = "CSharpAdvanced";
+            ViewData["ActivePage"] = "CSharpAdvanced";
+            return View("~/Views/CSharpNew/CSharpNet_MainPage.cshtml");
+        }
+
 
 
     }
