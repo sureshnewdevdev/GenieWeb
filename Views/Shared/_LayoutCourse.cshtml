@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]  ItTechGenie</title>
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <link href="~/css/site.css" rel="stylesheet" />
+    <link href="~/js/site.js" rel="stylesheet" />
+    <meta name="google-adsense-account" content="ca-pub-2270827713894017">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <meta name="ezoic-site-verification" content="KMyFvgX753m4WbAjqAdXR149shyXTj" />
+    <!-- Google AdSense script -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2270827713894017"
+            crossorigin="anonymous"></script>
+</head>
+
+<body class="@(ViewData["BodyClass"] ?? string.Empty)">
+    <!-- MOBILE + MEDIUM VIEW (Below lg) -->
+    <header class="d-lg-none navbar navbar-expand-lg navbar-dark bg-dark shadow fixed-top" style="z-index: 1500;">
+        <div class="container-fluid">
+            <!-- Logo and Brand -->
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="~/css/Images/Vinayaga.jpg" alt="Logo" width="40" height="40" class="me-2 rounded-circle" />
+                <span class="fw-bold fs-5">ItTechGenie</span>
+            </a>
+
+            @if (string.IsNullOrEmpty(ViewData["ActiveMenu"] as string))
+            {
+                ViewData["ActiveMenu"] = "Home";
+                ViewData["ActivePage"] = "Home";
+            }
+
+            <!-- Toggle Button -->
+            <!-- Mobile Toggle Button -->
+            <button id="coursedropdownbtn" class="navbar-toggler custom-toggle-btn" type="button" onclick="toggleNavbar()"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                @(string.IsNullOrEmpty(ViewData["ActiveMenu"] as string) ? "Home " : ViewData["ActiveMenu"] + " ")
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Collapsible Navbar -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-3">
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Home" ? "active" : "")" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Courses" ? "active" : "")" href="@Url.Action("Index", "Courses")">Courses</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "GenAI" ? "active" : "")" href="@Url.Action("PromptEngineeringMessageTypes", "GenAI")">Gen AI</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "AISyllabus" ? "active" : "")" href="@Url.Action("Index", "AISyllabus")">AI Syllabus</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "CSharp" ? "active" : "")" href="@Url.Action("IntroductionToCSharp", "CSharp")">C#</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "CSharpAdvanced" ? "active" : "")" href="@Url.Action("CSharpAdvanced", "CSharp")">C# Advanced</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Azure" ? "active" : "")" href="@Url.Action("Azure", "Home")">Azure</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "DotNetCore" ? "active" : "")" href="@Url.Action("WhatIsDotNet", "DotNet")">.NET Core</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "React" ? "active" : "")" href="@Url.Action("IntroductionToReact", "React")">React</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "AzureDevOps" ? "active" : "")" href="@Url.Action("WhatIsDevOps", "AzureDevOps")">Azure DevOps</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Docker" ? "active" : "")" href="@Url.Action("DockerInstallation", "Docker")">Docker</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Terraform" ? "active" : "")" href="@Url.Action("IntroductionToTerraform", "Terraform")">Terraform</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "DataStorage" ? "active" : "")" href="@Url.Action("AzureBlobStorage", "DataStorage")">DataStorage</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "DataBricks" ? "active" : "")" href="@Url.Action("IntroductionToDataBricks", "DataBricks")">DataBricks</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "AzureServiceFabric" ? "active" : "")" href="@Url.Action("WhatIsServiceFabric", "AzureServiceFabric")">AzureServiceFabrics</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "PracticeQuestions" ? "active" : "")" href="@Url.Action("CSharpBasics", "PracticeQuestions")">Practice Questions</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "ChoiceQuestions" ? "active" : "")" href="@Url.Action("Index", "TopicSelection")">MCQ'S</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Privacy" ? "active" : "")" href="@Url.Action("Privacy", "Home")">Privacy</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- LARGE VIEW ONLY (≥ lg) -->
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark shadow fixed-top d-none d-lg-flex" style="z-index: 1500;">
+        <div class="container-fluid">
+            <!-- Brand -->
+            <a class="navbar-brand d-flex align-items-center me-3" href="/">
+                <img src="~/css/Images/Vinayaga.jpg" alt="Logo" width="40" height="40" class="me-2 rounded-circle" />
+                <span class="fw-bold fs-5">ItTechGenie</span>
+            </a>
+
+            @* Active menu fallback *@
+            @{
+                if (string.IsNullOrEmpty(ViewData["ActiveMenu"] as string))
+                {
+                    ViewData["ActiveMenu"] = "Home";
+                    ViewData["ActivePage"] = "Home";
+                }
+            }
+
+            <!-- Nav content -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav flex-row flex-wrap w-100 align-items-center" style="white-space: nowrap; scroll-behavior: smooth;">
+
+                    <!-- Home (Always visible) -->
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewData["ActiveMenu"] == "Home" ? "active" : "")" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewData["ActiveMenu"] == "Courses" ? "active" : "")" href="@Url.Action("Index", "Courses")">Courses</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewData["ActiveMenu"] == "GenAI" ? "active" : "")" href="@Url.Action("PromptEngineeringMessageTypes", "GenAI")">Gen AI</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewData["ActiveMenu"] == "AISyllabus" ? "active" : "")" href="@Url.Action("Index", "AISyllabus")">AI Syllabus</a>
+                    </li>
+
+                    <!-- Scrollable Middle -->
+                    <div class="scrollable-navbar" style="overflow-x: auto; white-space: nowrap; width: 50vw;">
+                        <ul class="navbar-nav flex-row">
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Azure" ? "active" : "")" href="@Url.Action("Azure", "Home")">Azure</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "AzureDevOps" ? "active" : "")" href="@Url.Action("WhatIsDevOps", "AzureDevOps")">Azure DevOps</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "AzureServiceFabric" ? "active" : "")" href="@Url.Action("WhatIsServiceFabric", "AzureServiceFabric")">AzureServiceFabrics</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "CSharp" ? "active" : "")" href="@Url.Action("IntroductionToCSharp", "CSharp")">C#</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "CSharpAdvanced" ? "active" : "")" href="@Url.Action("CSharpAdvanced", "CSharp")">C# Advanced</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "DataBricks" ? "active" : "")" href="@Url.Action("IntroductionToDataBricks", "DataBricks")">DataBricks</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "DataStorage" ? "active" : "")" href="@Url.Action("AzureBlobStorage", "DataStorage")">DataStorage</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Docker" ? "active" : "")" href="@Url.Action("DockerInstallation", "Docker")">Docker</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "DotNetCore" ? "active" : "")" href="@Url.Action("WhatIsDotNet", "DotNet")">.NET Core</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "React" ? "active" : "")" href="@Url.Action("IntroductionToReact", "React")">React</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Selenium" ? "active" : "")" href="@Url.Action("SeleniumTesting", "Home")">Selenium</a></li>
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Terraform" ? "active" : "")" href="@Url.Action("IntroductionToTerraform", "Terraform")">Terraform</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Right-Fixed Items -->
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "PracticeQuestions" ? "active" : "")" href="@Url.Action("CSharpBasics", "PracticeQuestions")">Practice Questions</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "ChoiceQuestions" ? "active" : "")" href="@Url.Action("Index", "TopicSelection")">MCQ'S</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewData["ActiveMenu"] == "Privacy" ? "active" : "")" href="@Url.Action("Privacy", "Home")">Privacy</a></li>
+
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    @RenderBody()
+
+    <!-- Ad unit placed after the content -->
+    <div class="p-2">
+        <!-- leftrailadunit -->
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-2270827713894017"
+             data-ad-slot="8472074274"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+
+    <!-- Homepage Ad Unit at the Bottom (For All Screen Sizes) -->
+    <div class="col-12 mt-4 text-center">
+        <ins class="adsbygoogle"
+             style="display:block; margin-top:20px;"
+             data-ad-client="ca-pub-2270827713894017"
+             data-ad-slot="9007244980"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+
+    <!-- Right-side Ad Section (Only for Extra-Large Screens) -->
+    <aside id="rightAdSection" class="d-none d-lg-block px-3"
+           style="display:block !important; width:320px; min-height:600px; margin-top:20px;">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-2270827713894017"
+             data-ad-slot="1283766278"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </aside>
+
+    <script>
+        // Toggle navbar for mobile view
+        function toggleNavbar() {
+            var navbar = document.getElementById('navbarNav');
+
+            if (navbar.classList.contains('show')) {
+                navbar.classList.remove('show');
+                navbar.style.display = "none";
+            } else {
+                navbar.classList.add('show');
+                navbar.style.display = "block";
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="@Url.Content("~/css/site.css")" asp-append-version="true" />
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>
