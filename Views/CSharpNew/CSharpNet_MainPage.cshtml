@@ -1,468 +1,2364 @@
 @{
-    ViewData["Title"] = "C#.NET Course Home";
+    ViewData["Title"] = "C#.NET Course (Main Page)";
     ViewData["ActiveMenu"] = "CSharpAdvanced";
     ViewData["ActivePage"] = "CSharpAdvanced";
     Layout = "_LayoutCourse";
 }
 
-<div class="container-fluid px-0">
-    <div class="card border-0 shadow-sm mb-3">
-        <div class="card-body">
-            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-                <div>
-                    <h2 class="mb-1">C#.NET Course — Main Page</h2>
-                    <div class="text-muted">
-                        Expand a topic → click a subtopic to preview details and open the corresponding course page.
-                    </div>
-                </div>
+<style>
+    :root {
+      --bg: #0b1220;
+      --panel: #0f1a2e;
+      --panel2: #111f38;
+      --text: #eaf0ff;
+      --muted: rgba(234, 240, 255, 0.72);
+      --border: rgba(234, 240, 255, 0.12);
+      --accent: #22c55e;
+      --accent2: #60a5fa;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius2: 12px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
 
-                <div class="d-flex align-items-center gap-2">
-                    <div class="input-group" style="max-width:420px;">
-                        <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
-                        <input id="searchBox" type="text" class="form-control" placeholder="Search (e.g., DLL, StreamReader, Registry)" />
-                        <button id="clearBtn" class="btn btn-outline-secondary" type="button">Clear</button>
-                    </div>
-                </div>
-            </div>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: radial-gradient(900px 500px at 20% 0%, rgba(96,165,250,.12), transparent 60%),
+                  radial-gradient(700px 450px at 90% 10%, rgba(34,197,94,.12), transparent 60%),
+                  var(--bg);
+      color: var(--text);
+    }
 
-            <div class="mt-3 d-flex flex-wrap gap-2">
-                <span class="badge text-bg-primary" id="topicCount">Topics: —</span>
-                <span class="badge text-bg-secondary" id="subtopicCount">Subtopics: —</span>
-                <span class="badge text-bg-light border"><i class="fa-regular fa-lightbulb me-1"></i>Tip: Use the search box to filter quickly</span>
-            </div>
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(11, 18, 32, 0.75);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .topbar-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 240px;
+    }
+
+    .logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(34,197,94,.95), rgba(96,165,250,.95));
+      box-shadow: var(--shadow);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      letter-spacing: .5px;
+      color: #061018;
+    }
+
+    .brand-title {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+    .brand-title .project {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .brand-title .name {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      justify-content: flex-end;
+    }
+
+    .search {
+      width: min(520px, 100%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(15, 26, 46, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 10px 12px;
+    }
+    .search input {
+      width: 100%;
+      border: 0;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .search small {
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: rgba(15, 26, 46, 0.75);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .05s ease, border-color .15s ease, background .15s ease;
+      user-select: none;
+    }
+    .btn:hover {
+      border-color: rgba(34,197,94,.45);
+      background: rgba(17, 31, 56, 0.85);
+    }
+    .btn:active { transform: translateY(1px); }
+
+    .layout {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px 16px 34px;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      .brand { min-width: auto; }
+    }
+
+    .panel {
+      background: rgba(15, 26, 46, 0.72);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar { overflow: hidden; }
+
+    .sidebar-head {
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-head h2 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: .2px;
+    }
+
+    .sidebar-head p {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .meta-row {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(17, 31, 56, 0.55);
+    }
+
+    .accordion {
+      padding: 8px;
+      max-height: calc(100vh - 160px);
+      overflow: auto;
+    }
+
+    .topic {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(17, 31, 56, 0.55);
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .topic-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 12px;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      color: var(--text);
+      text-align: left;
+    }
+
+    .topic-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .topic-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: rgba(96,165,250,.12);
+      border: 1px solid rgba(96,165,250,.22);
+      flex: none;
+    }
+
+    .topic-title { display: flex; flex-direction: column; min-width: 0; }
+    .topic-title strong {
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .topic-title span { font-size: 12px; color: var(--muted); }
+
+    .caret {
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(15, 26, 46, 0.65);
+      display: grid;
+      place-items: center;
+      flex: none;
+      transition: transform .15s ease;
+    }
+
+    .topic.open .caret { transform: rotate(180deg); }
+
+    .subtopics {
+      display: none;
+      border-top: 1px solid var(--border);
+      padding: 8px;
+      background: rgba(15, 26, 46, 0.35);
+    }
+    .topic.open .subtopics { display: block; }
+
+    .subtopic {
+      width: 100%;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      padding: 10px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      text-align: left;
+      transition: background .12s ease, border-color .12s ease, transform .05s ease;
+    }
+    .subtopic:hover {
+      background: rgba(96,165,250,.10);
+      border-color: rgba(96,165,250,.20);
+    }
+    .subtopic:active { transform: translateY(1px); }
+    .subtopic .label { font-size: 13.5px; line-height: 1.25; }
+    .subtopic .pill {
+      font-size: 11px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .subtopic.active {
+      background: rgba(34,197,94,.12);
+      border-color: rgba(34,197,94,.25);
+    }
+    .subtopic.active .pill {
+      border-color: rgba(34,197,94,.35);
+      color: rgba(234,240,255,.86);
+    }
+
+    .content { padding: 16px; }
+
+    .hero {
+      padding: 18px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(34,197,94,.10), rgba(96,165,250,.10));
+    }
+
+    .hero h1 { margin: 0 0 8px; font-size: 22px; letter-spacing: .2px; }
+    .hero p { margin: 0; color: var(--muted); line-height: 1.6; font-size: 14px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+      .search { display: none; }
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius2);
+      background: rgba(17, 31, 56, 0.55);
+      padding: 14px;
+    }
+    .card h3 { margin: 0 0 8px; font-size: 14px; }
+    .card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+    .kbd {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(15, 26, 46, 0.65);
+      color: rgba(234, 240, 255, 0.9);
+    }
+
+    .divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+    .breadcrumb {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(15, 26, 46, 0.55);
+      color: rgba(234, 240, 255, 0.88);
+    }
+
+    .badge.green {
+      border-color: rgba(34,197,94,.30);
+      background: rgba(34,197,94,.10);
+    }
+
+    .codebox {
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius2);
+      overflow: hidden;
+      background: rgba(15, 26, 46, 0.75);
+    }
+    .codebox .codehead {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      background: rgba(17, 31, 56, 0.65);
+      border-bottom: 1px solid var(--border);
+    }
+    .codebox .codehead span { font-size: 12px; color: var(--muted); }
+    pre {
+      margin: 0;
+      padding: 12px;
+      overflow: auto;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: rgba(234,240,255,.92);
+    }
+
+    .mini-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+
+    .linkbtn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(15, 26, 46, 0.75);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .linkbtn:hover { border-color: rgba(96,165,250,.35); }
+    .linkbtn.green:hover { border-color: rgba(34,197,94,.35); }
+
+    .muted { color: var(--muted); }
+
+    .footer {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 16px 20px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+  </style>
+
+<header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo">C#</div>
+        <div class="brand-title">
+          <div class="project">Project: Make Learning CSharp is Easy</div>
+          <div class="name">ItTechGenie • C#.NET Course — Start Here</div>
         </div>
+      </div>
+
+      <div class="top-actions">
+        <div class="search" title="Search topics & subtopics">
+          <span class="muted">🔎</span>
+          <input id="searchBox" type="text" placeholder="Search topics / subtopics (e.g., CLR, generics, async)" />
+          <small><span class="kbd">Ctrl</span> + <span class="kbd">K</span></small>
+        </div>
+        <button class="btn" id="collapseAllBtn" type="button">Collapse All</button>
+      </div>
     </div>
+  </header>
 
-    <div class="row g-3">
-        <!-- LEFT: Topics / Subtopics -->
-        <div class="col-12 col-lg-5">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white d-flex align-items-center justify-content-between">
-                    <strong><i class="fa-solid fa-list-check me-2"></i>Topics</strong>
-                    <button id="collapseAllBtn" type="button" class="btn btn-sm btn-outline-secondary">
-                        <i class="fa-solid fa-compress me-1"></i>Collapse all
-                    </button>
-                </div>
+  <main class="layout">
+    <aside class="panel sidebar" aria-label="Course navigation">
+      <div class="sidebar-head">
+        <h2>Topics</h2>
+        <p>Expand a topic, then click a subtopic to open its course page on the right.</p>
+        <div class="meta-row">
+          <span class="chip" id="topicCountChip">Topics: —</span>
+          <span class="chip" id="subtopicCountChip">Subtopics: —</span>
+          <span class="chip">Tip: Use <span class="kbd">Ctrl</span>+<span class="kbd">K</span> to search</span>
+        </div>
+      </div>
 
-                <div class="card-body p-2">
-                    <div class="accordion" id="courseAccordion">
-                        <!-- JS builds topics here -->
-                    </div>
-                </div>
-            </div>
+      <div class="accordion" id="nav"></div>
+    </aside>
+
+    <section class="panel content" aria-label="Course content">
+      <div id="contentArea">
+        <div class="hero">
+          <h1>Welcome 👋</h1>
+          <p>
+            This is a starter <strong>main page</strong> for your C#.NET course website.
+            The left side contains an expandable navigation (Topic → Subtopic).
+            When you click a subtopic, the right panel shows the <strong>suggested course page</strong> and a <strong>recommended MVC route</strong>.
+          </p>
         </div>
 
-        <!-- RIGHT: Preview -->
-        <div class="col-12 col-lg-7">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white d-flex align-items-center justify-content-between">
-                    <strong><i class="fa-solid fa-eye me-2"></i>Preview</strong>
-                    <div class="d-flex gap-2">
-                        <a id="openBtn" class="btn btn-sm btn-success disabled" href="#" role="button">
-                            <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Open page
-                        </a>
-                        <button id="copyRouteBtn" class="btn btn-sm btn-outline-primary" type="button" disabled>
-                            <i class="fa-regular fa-copy me-1"></i>Copy route
-                        </button>
-                    </div>
-                </div>
-
-                <div class="card-body" id="previewArea">
-                    <div class="p-3 bg-light border rounded">
-                        <h5 class="mb-2">Welcome 👋</h5>
-                        <div class="text-muted mb-3">
-                            Select any subtopic from the left. This panel will show the route and a recommended “Beginner‑First” structure for your course page.
-                        </div>
-
-                        <div class="row g-2">
-                            <div class="col-12 col-md-6">
-                                <div class="border rounded p-3 bg-white">
-                                    <div class="fw-semibold mb-1">What you build next</div>
-                                    <div class="text-muted">Create a course page (CSHTML) for each subtopic and map it to a controller action.</div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <div class="border rounded p-3 bg-white">
-                                    <div class="fw-semibold mb-1">Suggested action naming</div>
-                                    <div class="text-muted">Use PascalCase action names (example: <code>/CSharp/CreatingAndUsingADll</code>).</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr class="my-3" />
-
-                        <div class="fw-semibold mb-2">Beginner‑First Page Structure (copy into your prompt)</div>
-                        <ol class="mb-0">
-                            <li>Introduction (What is it?)</li>
-                            <li>Purpose (Why do we need it?)</li>
-                            <li>Real‑World Usage</li>
-                            <li>Prerequisites</li>
-                            <li>Key Terms / Glossary</li>
-                            <li>Syntax</li>
-                            <li>Rules / Key Points (Do’s & Don’ts)</li>
-                            <li>Basic Example + Output</li>
-                            <li>Step‑by‑step Explanation</li>
-                            <li>How it Works Internally</li>
-                            <li>More Examples (Beginner → Intermediate)</li>
-                            <li>Common Mistakes + Fixes</li>
-                            <li>Best Coding Practices</li>
-                            <li>MCQs + Interview Questions + Coding Exercises (Expandable answers)</li>
-                            <li>Summary + What’s Next</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
+        <div class="grid">
+          <div class="card">
+            <h3>✅ How to use this file</h3>
+            <p>
+              Use this HTML as a blueprint for your ASP.NET MVC <span class="kbd">Index</span> view.
+              Replace routes with your real <span class="kbd">Controller/Action</span> names.
+            </p>
+          </div>
+          <div class="card">
+            <h3>⭐ Upgrade idea (Better than W3)</h3>
+            <p>
+              Add progress tracking (Completed/Remaining), MCQs, Interview Qs, and expandable coding solutions per topic.
+              Learners will feel it’s a full course platform—not just notes.
+            </p>
+          </div>
         </div>
-    </div>
-</div>
 
-<script>
+        <div class="divider"></div>
+
+        <div class="card">
+          <h3>Next step for MVC integration</h3>
+          <p>
+            For each subtopic, create a corresponding MVC view (CSHTML) and map the click to a route like:
+            <span class="kbd">/CSharp/Clr</span> or <span class="kbd">/DotNet/FrameworkArchitecture</span>.
+            This demo shows placeholder routes for each subtopic.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="footer">
+    &copy; 2024 ItTechGenie. All rights reserved. • Built with ❤️ for learners.
+  </div>
+
+  <script>
     // -----------------------------
-    // TOC data (from your syllabus)
+    // Course data (from your TOC)
     // -----------------------------
     const COURSE = [
   {
-    "title": "Introduction to C#",
-    "icon": "fa-solid fa-code",
-    "controller": "CSharp",
+    "id": "t01-introduction-to-net-framework-4-7",
+    "title": "Introduction to .NET Framework 4.7",
+    "icon": "🧱",
     "subtopics": [
       {
+        "id": "t01-introduction-to-net-framework-4-7-s01-what-is-net-platform",
+        "label": "What is .NET Platform?",
+        "short": "What is .NET Platform",
+        "route": "/CSharp/WhatIsNetPlatform"
+      },
+      {
+        "id": "t01-introduction-to-net-framework-4-7-s02-what-is-net-framework",
+        "label": "What is .NET Framework",
+        "short": "What is .NET Framework",
+        "route": "/CSharp/WhatIsNetFramework"
+      },
+      {
+        "id": "t01-introduction-to-net-framework-4-7-s03-net-framework-architecture",
+        "label": "Net Framework Architecture",
+        "short": "Net Framework Architecture",
+        "route": "/CSharp/NetFrameworkArchitecture"
+      },
+      {
+        "id": "t01-introduction-to-net-framework-4-7-s04-net-framework-languages-and-tools",
+        "label": ".NET Framework, Languages, and Tools",
+        "short": ".NET Framework, Languages, and Tools",
+        "route": "/CSharp/NetFrameworkLanguagesAndTools"
+      },
+      {
+        "id": "t01-introduction-to-net-framework-4-7-s05-net-framework-major-components",
+        "label": ".NET Framework Major Components",
+        "short": ".NET Framework Major Components",
+        "route": "/CSharp/NetFrameworkMajorComponents"
+      },
+      {
+        "id": "t01-introduction-to-net-framework-4-7-s06-common-language-runtime-clr",
+        "label": "Common Language Runtime (CLR)",
+        "short": "Common Language Runtime (CLR)",
+        "route": "/CSharp/CommonLanguageRuntimeClr"
+      },
+      {
+        "id": "t01-introduction-to-net-framework-4-7-s07-compilation-and-execution-in-net",
+        "label": "Compilation and Execution in .NET",
+        "short": "Compilation and Execution in .NET",
+        "route": "/CSharp/CompilationAndExecutionInNet"
+      },
+      {
+        "id": "t01-introduction-to-net-framework-4-7-s08-understand-the-net-framework-4-7-stack",
+        "label": "Understand the .NET Framework 4.7 stack",
+        "short": "Understand the .NET Framework 4.7 stack",
+        "route": "/CSharp/UnderstandTheNetFramework47Stack"
+      },
+      {
+        "id": "t01-introduction-to-net-framework-4-7-s09-introduction-to-net-core-overview",
+        "label": "Introduction to .NET Core — Overview",
+        "short": ".NET Core Overview",
+        "route": "/CSharp/IntroductionToNetCoreOverview"
+      },
+      {
+        "id": "t01-introduction-to-net-framework-4-7-s10-introduction-to-net-core-versions",
+        "label": "Introduction to .NET Core — Versions",
+        "short": ".NET Core Versions",
+        "route": "/CSharp/IntroductionToNetCoreVersions"
+      },
+      {
+        "id": "t01-introduction-to-net-framework-4-7-s11-introduction-to-net-core-compositions",
+        "label": "Introduction to .NET Core — Compositions",
+        "short": ".NET Core Compositions",
+        "route": "/CSharp/IntroductionToNetCoreCompositions"
+      },
+      {
+        "id": "t01-introduction-to-net-framework-4-7-s12-introduction-to-net-core-dependency-injection",
+        "label": "Introduction to .NET Core — Dependency Injection",
+        "short": "Dependency Injection (.NET Core)",
+        "route": "/CSharp/IntroductionToNetCoreDependencyInjection"
+      }
+    ]
+  },
+  {
+    "id": "t02-introduction-to-c",
+    "title": "Introduction to C#",
+    "icon": "👋",
+    "subtopics": [
+      {
+        "id": "t02-introduction-to-c-s01-features-of-c",
         "label": "Features of C#",
-        "action": "FeaturesOfCSharp",
-        "route": "/CSharp/FeaturesOfCSharp"
+        "short": "Features of C#",
+        "route": "/CSharp/FeaturesOfC"
       },
       {
+        "id": "t02-introduction-to-c-s02-c-compilation-and-execution",
         "label": "C# Compilation and Execution",
-        "action": "CSharpCompilationAndExecution",
-        "route": "/CSharp/CSharpCompilationAndExecution"
+        "short": "C# Compilation and Execution",
+        "route": "/CSharp/CCompilationAndExecution"
       },
       {
+        "id": "t02-introduction-to-c-s03-general-structure-of-a-c-program",
         "label": "General Structure of a C# Program",
-        "action": "GeneralStructureOfACSharpProgram",
-        "route": "/CSharp/GeneralStructureOfACSharpProgram"
+        "short": "General Structure of a C# Program",
+        "route": "/CSharp/GeneralStructureOfACProgram"
       },
       {
+        "id": "t02-introduction-to-c-s04-creating-and-using-a-dll",
         "label": "Creating and Using a DLL",
-        "action": "CreatingAndUsingADll",
+        "short": "Creating and Using a DLL",
         "route": "/CSharp/CreatingAndUsingADll"
       }
     ]
   },
   {
-    "title": "File I/O and Serialization",
-    "icon": "fa-solid fa-file-lines",
-    "controller": "CSharp",
+    "id": "t03-data-types-and-arrays-in-c",
+    "title": "Data Types and Arrays in C#",
+    "icon": "🔢",
     "subtopics": [
       {
+        "id": "t03-data-types-and-arrays-in-c-s01-data-types-in-c",
+        "label": "Data Types in C#",
+        "short": "Data Types in C#",
+        "route": "/CSharp/DataTypesInC"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s02-value-types-and-reference-types",
+        "label": "Value Types and Reference Types",
+        "short": "Value Types and Reference Types",
+        "route": "/CSharp/ValueTypesAndReferenceTypes"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s03-boxing-and-unboxing",
+        "label": "Boxing and Unboxing",
+        "short": "Boxing and Unboxing",
+        "route": "/CSharp/BoxingAndUnboxing"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s04-single-dimensional-arrays",
+        "label": "Single Dimensional Arrays",
+        "short": "Single Dimensional Arrays",
+        "route": "/CSharp/SingleDimensionalArrays"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s05-multi-dimensional-arrays",
+        "label": "Multi-Dimensional Arrays",
+        "short": "Multi-Dimensional Arrays",
+        "route": "/CSharp/MultiDimensionalArrays"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s06-jagged-arrays",
+        "label": "Jagged Arrays",
+        "short": "Jagged Arrays",
+        "route": "/CSharp/JaggedArrays"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s07-nullable-types",
+        "label": "Nullable Types",
+        "short": "Nullable Types",
+        "route": "/CSharp/NullableTypes"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s08-implicitly-typed-local-variables",
+        "label": "Implicitly Typed Local Variables",
+        "short": "Implicitly Typed Local Variables",
+        "route": "/CSharp/ImplicitlyTypedLocalVariables"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s09-var-vs-dynamic",
+        "label": "var vs dynamic",
+        "short": "var vs dynamic",
+        "route": "/CSharp/VarVsDynamic"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s10-is-and-as-operators",
+        "label": "is and as operators",
+        "short": "is and as operators",
+        "route": "/CSharp/IsAndAsOperators"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s11-ref-vs-out-keywords",
+        "label": "ref vs out keywords",
+        "short": "ref vs out keywords",
+        "route": "/CSharp/RefVsOutKeywords"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s12-the-object-base-class-in-net",
+        "label": "The 'object' base class in .NET",
+        "short": "object base class",
+        "route": "/CSharp/TheObjectBaseClassInNet"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s13-equals-vs",
+        "label": "Equals() vs ==",
+        "short": "Equals() vs ==",
+        "route": "/CSharp/EqualsVs"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s14-string-vs-stringbuilder",
+        "label": "String vs StringBuilder",
+        "short": "String vs StringBuilder",
+        "route": "/CSharp/StringVsStringbuilder"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s15-string-manipulation",
+        "label": "String Manipulation",
+        "short": "String Manipulation",
+        "route": "/CSharp/StringManipulation"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s16-various-string-class-methods",
+        "label": "Various String class methods",
+        "short": "String class methods",
+        "route": "/CSharp/VariousStringClassMethods"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s17-default-parameters-named-parameters",
+        "label": "Default parameters, named parameters",
+        "short": "Default & named parameters",
+        "route": "/CSharp/DefaultParametersNamedParameters"
+      },
+      {
+        "id": "t03-data-types-and-arrays-in-c-s18-parse-vs-tryparse-vs-convert",
+        "label": "Parse() vs TryParse() vs Convert",
+        "short": "Parse vs TryParse vs Convert",
+        "route": "/CSharp/ParseVsTryparseVsConvert"
+      }
+    ]
+  },
+  {
+    "id": "t04-using-microsoft-visual-studio-community",
+    "title": "Using Microsoft Visual Studio Community",
+    "icon": "🛠️",
+    "subtopics": [
+      {
+        "id": "t04-using-microsoft-visual-studio-community-s01-overview-of-visual-studio",
+        "label": "Overview of Visual Studio",
+        "short": "Visual Studio Overview",
+        "route": "/CSharp/OverviewOfVisualStudio"
+      },
+      {
+        "id": "t04-using-microsoft-visual-studio-community-s02-tracing-debugging-build",
+        "label": "Tracing, Debugging, Build",
+        "short": "Tracing, Debugging, Build",
+        "route": "/CSharp/TracingDebuggingBuild"
+      },
+      {
+        "id": "t04-using-microsoft-visual-studio-community-s03-using-break-points",
+        "label": "Using break points",
+        "short": "Using break points",
+        "route": "/CSharp/UsingBreakPoints"
+      },
+      {
+        "id": "t04-using-microsoft-visual-studio-community-s04-using-break-conditions",
+        "label": "Using break conditions",
+        "short": "Using break conditions",
+        "route": "/CSharp/UsingBreakConditions"
+      },
+      {
+        "id": "t04-using-microsoft-visual-studio-community-s05-using-watch-and-output-window",
+        "label": "Using watch and output window",
+        "short": "Watch & Output window",
+        "route": "/CSharp/UsingWatchAndOutputWindow"
+      },
+      {
+        "id": "t04-using-microsoft-visual-studio-community-s06-creating-multiple-projects-within-one-solution",
+        "label": "Creating multiple projects within one solution",
+        "short": "Multiple projects in one solution",
+        "route": "/CSharp/CreatingMultipleProjectsWithinOneSolution"
+      }
+    ]
+  },
+  {
+    "id": "t05-common-debugging-practices",
+    "title": "Common Debugging Practices",
+    "icon": "🩺",
+    "subtopics": [
+      {
+        "id": "t05-common-debugging-practices-s01-using-logs-and-trace-statements",
+        "label": "Using logs and trace statements",
+        "short": "Logs & trace statements",
+        "route": "/CSharp/UsingLogsAndTraceStatements"
+      },
+      {
+        "id": "t05-common-debugging-practices-s02-structured-logging-serilog-nlog",
+        "label": "Structured logging (Serilog, NLog)",
+        "short": "Structured logging",
+        "route": "/CSharp/StructuredLoggingSerilogNlog"
+      },
+      {
+        "id": "t05-common-debugging-practices-s03-diagnosing-performance-bottlenecks-profilers-performance-counters",
+        "label": "Diagnosing performance bottlenecks (profilers, performance counters)",
+        "short": "Performance diagnostics",
+        "route": "/CSharp/DiagnosingPerformanceBottlenecksProfilersPerformanceCounters"
+      }
+    ]
+  },
+  {
+    "id": "t06-oop-with-c",
+    "title": "OOP with C#",
+    "icon": "🧩",
+    "subtopics": [
+      {
+        "id": "t06-oop-with-c-s01-method-hiding",
+        "label": "Method Hiding",
+        "short": "Method Hiding",
+        "route": "/CSharp/MethodHiding"
+      },
+      {
+        "id": "t06-oop-with-c-s02-access-modifiers-private-public-protected-internal-protected-internal",
+        "label": "Access modifiers (private, public, protected, internal, protected internal)",
+        "short": "Access modifiers",
+        "route": "/CSharp/AccessModifiersPrivatePublicProtectedInternalProtectedInternal"
+      },
+      {
+        "id": "t06-oop-with-c-s03-anonymous-types",
+        "label": "Anonymous types",
+        "short": "Anonymous types",
+        "route": "/CSharp/AnonymousTypes"
+      },
+      {
+        "id": "t06-oop-with-c-s04-abstract-classes",
+        "label": "Abstract classes",
+        "short": "Abstract classes",
+        "route": "/CSharp/AbstractClasses"
+      },
+      {
+        "id": "t06-oop-with-c-s05-sealed-classes",
+        "label": "Sealed classes",
+        "short": "Sealed classes",
+        "route": "/CSharp/SealedClasses"
+      },
+      {
+        "id": "t06-oop-with-c-s06-creating-interfaces",
+        "label": "Creating Interfaces",
+        "short": "Creating Interfaces",
+        "route": "/CSharp/CreatingInterfaces"
+      },
+      {
+        "id": "t06-oop-with-c-s07-implementing-interface-inheritance",
+        "label": "Implementing Interface inheritance",
+        "short": "Interface inheritance",
+        "route": "/CSharp/ImplementingInterfaceInheritance"
+      },
+      {
+        "id": "t06-oop-with-c-s08-declaring-properties-within-interfaces",
+        "label": "Declaring properties within Interfaces",
+        "short": "Properties in Interfaces",
+        "route": "/CSharp/DeclaringPropertiesWithinInterfaces"
+      },
+      {
+        "id": "t06-oop-with-c-s09-namespaces",
+        "label": "Namespaces",
+        "short": "Namespaces",
+        "route": "/CSharp/Namespaces"
+      }
+    ]
+  },
+  {
+    "id": "t07-c-language-features-core-advanced",
+    "title": "C# Language Features (Core + Advanced)",
+    "icon": "✨",
+    "subtopics": [
+      {
+        "id": "t07-c-language-features-core-advanced-s01-creating-and-using-generic-classes",
+        "label": "Creating and using Generic classes",
+        "short": "Generic classes",
+        "route": "/CSharp/CreatingAndUsingGenericClasses"
+      },
+      {
+        "id": "t07-c-language-features-core-advanced-s02-indexers-properties",
+        "label": "Indexers & Properties",
+        "short": "Indexers & Properties",
+        "route": "/CSharp/IndexersProperties"
+      },
+      {
+        "id": "t07-c-language-features-core-advanced-s03-auto-implemented-properties",
+        "label": "Auto-Implemented properties",
+        "short": "Auto properties",
+        "route": "/CSharp/AutoImplementedProperties"
+      },
+      {
+        "id": "t07-c-language-features-core-advanced-s04-static-classes",
+        "label": "Static Classes",
+        "short": "Static classes",
+        "route": "/CSharp/StaticClasses"
+      },
+      {
+        "id": "t07-c-language-features-core-advanced-s05-property-accessors",
+        "label": "Property Accessors",
+        "short": "Property accessors",
+        "route": "/CSharp/PropertyAccessors"
+      },
+      {
+        "id": "t07-c-language-features-core-advanced-s06-partial-types",
+        "label": "Partial types",
+        "short": "Partial types",
+        "route": "/CSharp/PartialTypes"
+      },
+      {
+        "id": "t07-c-language-features-core-advanced-s07-extension-methods",
+        "label": "Extension methods",
+        "short": "Extension methods",
+        "route": "/CSharp/ExtensionMethods"
+      },
+      {
+        "id": "t07-c-language-features-core-advanced-s08-object-initializer",
+        "label": "Object Initializer",
+        "short": "Object Initializer",
+        "route": "/CSharp/ObjectInitializer"
+      }
+    ]
+  },
+  {
+    "id": "t08-regular-expressions-in-c",
+    "title": "Regular Expressions in C#",
+    "icon": "🔎",
+    "subtopics": [
+      {
+        "id": "t08-regular-expressions-in-c-s01-regex-class",
+        "label": "RegEx class",
+        "short": "Regex class",
+        "route": "/CSharp/RegexClass"
+      },
+      {
+        "id": "t08-regular-expressions-in-c-s02-forming-regular-expressions",
+        "label": "Forming Regular Expressions",
+        "short": "Forming Regex patterns",
+        "route": "/CSharp/FormingRegularExpressions"
+      },
+      {
+        "id": "t08-regular-expressions-in-c-s03-methods-for-regular-expressions",
+        "label": "Methods for Regular Expressions",
+        "short": "Regex methods",
+        "route": "/CSharp/MethodsForRegularExpressions"
+      }
+    ]
+  },
+  {
+    "id": "t09-exception-handling",
+    "title": "Exception Handling",
+    "icon": "🚨",
+    "subtopics": [
+      {
+        "id": "t09-exception-handling-s01-exceptions-in-c",
+        "label": "Exceptions in C#",
+        "short": "Exceptions in C#",
+        "route": "/CSharp/ExceptionsInC"
+      },
+      {
+        "id": "t09-exception-handling-s02-exception-class-hierarchy",
+        "label": "Exception class hierarchy",
+        "short": "Exception hierarchy",
+        "route": "/CSharp/ExceptionClassHierarchy"
+      },
+      {
+        "id": "t09-exception-handling-s03-try-block",
+        "label": "try block",
+        "short": "try block",
+        "route": "/CSharp/TryBlock"
+      },
+      {
+        "id": "t09-exception-handling-s04-multiple-catch-blocks",
+        "label": "Multiple catch blocks",
+        "short": "Multiple catch blocks",
+        "route": "/CSharp/MultipleCatchBlocks"
+      },
+      {
+        "id": "t09-exception-handling-s05-finally-block",
+        "label": "finally block",
+        "short": "finally block",
+        "route": "/CSharp/FinallyBlock"
+      },
+      {
+        "id": "t09-exception-handling-s06-throw-keyword-purpose",
+        "label": "throw keyword (purpose)",
+        "short": "throw keyword",
+        "route": "/CSharp/ThrowKeywordPurpose"
+      },
+      {
+        "id": "t09-exception-handling-s07-inner-exception-purpose",
+        "label": "Inner exception (purpose)",
+        "short": "Inner exception",
+        "route": "/CSharp/InnerExceptionPurpose"
+      },
+      {
+        "id": "t09-exception-handling-s08-creating-custom-exception",
+        "label": "Creating Custom Exception",
+        "short": "Custom exceptions",
+        "route": "/CSharp/CreatingCustomException"
+      },
+      {
+        "id": "t09-exception-handling-s09-exception-logging-file-or-db",
+        "label": "Exception Logging (File or DB)",
+        "short": "Exception logging",
+        "route": "/CSharp/ExceptionLoggingFileOrDb"
+      },
+      {
+        "id": "t09-exception-handling-s10-best-practices-no-silent-catch-all-logging-rethrow-wrap",
+        "label": "Best Practices (no silent catch-all, logging, rethrow/wrap)",
+        "short": "Exception best practices",
+        "route": "/CSharp/BestPracticesNoSilentCatchAllLoggingRethrowWrap"
+      },
+      {
+        "id": "t09-exception-handling-s11-defensive-programming-null-checks-etc",
+        "label": "Defensive programming (null checks etc.)",
+        "short": "Defensive programming",
+        "route": "/CSharp/DefensiveProgrammingNullChecksEtc"
+      }
+    ]
+  },
+  {
+    "id": "t10-garbage-collection-in-c",
+    "title": "Garbage Collection in C#",
+    "icon": "🧹",
+    "subtopics": [
+      {
+        "id": "t10-garbage-collection-in-c-s01-role-of-a-garbage-collector",
+        "label": "Role of a Garbage Collector",
+        "short": "GC role",
+        "route": "/CSharp/RoleOfAGarbageCollector"
+      },
+      {
+        "id": "t10-garbage-collection-in-c-s02-garbage-collection-algorithm",
+        "label": "Garbage Collection Algorithm",
+        "short": "GC algorithm",
+        "route": "/CSharp/GarbageCollectionAlgorithm"
+      },
+      {
+        "id": "t10-garbage-collection-in-c-s03-finalize-vs-dispose",
+        "label": "Finalize vs Dispose",
+        "short": "Finalize vs Dispose",
+        "route": "/CSharp/FinalizeVsDispose"
+      }
+    ]
+  },
+  {
+    "id": "t11-collections-generics",
+    "title": "Collections & Generics",
+    "icon": "📦",
+    "subtopics": [
+      {
+        "id": "t11-collections-generics-s01-system-collections-namespace",
+        "label": "System.Collections namespace",
+        "short": "System.Collections",
+        "route": "/CSharp/SystemCollectionsNamespace"
+      },
+      {
+        "id": "t11-collections-generics-s02-collection-interfaces",
+        "label": "Collection Interfaces",
+        "short": "Collection Interfaces",
+        "route": "/CSharp/CollectionInterfaces"
+      },
+      {
+        "id": "t11-collections-generics-s03-collection-classes",
+        "label": "Collection Classes",
+        "short": "Collection Classes",
+        "route": "/CSharp/CollectionClasses"
+      },
+      {
+        "id": "t11-collections-generics-s04-the-collection-api",
+        "label": "The collection API",
+        "short": "Collection API",
+        "route": "/CSharp/TheCollectionApi"
+      },
+      {
+        "id": "t11-collections-generics-s05-working-with-generics",
+        "label": "Working with Generics",
+        "short": "Working with Generics",
+        "route": "/CSharp/WorkingWithGenerics"
+      },
+      {
+        "id": "t11-collections-generics-s06-creating-generic-class-generic-methods-interfaces-delegates",
+        "label": "Creating Generic class, Generic Methods, Interfaces, Delegates",
+        "short": "Creating generics",
+        "route": "/CSharp/CreatingGenericClassGenericMethodsInterfacesDelegates"
+      },
+      {
+        "id": "t11-collections-generics-s07-collection-initializers",
+        "label": "Collection Initializers",
+        "short": "Collection initializers",
+        "route": "/CSharp/CollectionInitializers"
+      },
+      {
+        "id": "t11-collections-generics-s08-iterators",
+        "label": "Iterators",
+        "short": "Iterators",
+        "route": "/CSharp/Iterators"
+      },
+      {
+        "id": "t11-collections-generics-s09-constraints",
+        "label": "Constraints",
+        "short": "Generic constraints",
+        "route": "/CSharp/Constraints"
+      }
+    ]
+  },
+  {
+    "id": "t12-delegates-and-events",
+    "title": "Delegates and Events",
+    "icon": "📣",
+    "subtopics": [
+      {
+        "id": "t12-delegates-and-events-s01-introduction-to-delegates",
+        "label": "Introduction to Delegates",
+        "short": "Delegates intro",
+        "route": "/CSharp/IntroductionToDelegates"
+      },
+      {
+        "id": "t12-delegates-and-events-s02-implementing-delegates",
+        "label": "Implementing Delegates",
+        "short": "Implementing delegates",
+        "route": "/CSharp/ImplementingDelegates"
+      },
+      {
+        "id": "t12-delegates-and-events-s03-single-multicasting-delegate",
+        "label": "Single & Multicasting Delegate",
+        "short": "Single & multicast delegates",
+        "route": "/CSharp/SingleMulticastingDelegate"
+      },
+      {
+        "id": "t12-delegates-and-events-s04-creating-callback-method-using-delegate",
+        "label": "Creating callback method using Delegate",
+        "short": "Callback using delegate",
+        "route": "/CSharp/CreatingCallbackMethodUsingDelegate"
+      },
+      {
+        "id": "t12-delegates-and-events-s05-events-in-c",
+        "label": "Events in C#",
+        "short": "Events in C#",
+        "route": "/CSharp/EventsInC"
+      },
+      {
+        "id": "t12-delegates-and-events-s06-generic-delegates-and-generic-classes",
+        "label": "Generic delegates and Generic Classes",
+        "short": "Generic delegates & classes",
+        "route": "/CSharp/GenericDelegatesAndGenericClasses"
+      },
+      {
+        "id": "t12-delegates-and-events-s07-action-func-and-predicate",
+        "label": "Action, Func and Predicate",
+        "short": "Action Func Predicate",
+        "route": "/CSharp/ActionFuncAndPredicate"
+      }
+    ]
+  },
+  {
+    "id": "t13-file-i-o-and-serialization",
+    "title": "File I/O and Serialization",
+    "icon": "🗂️",
+    "subtopics": [
+      {
+        "id": "t13-file-i-o-and-serialization-s01-persisting-object-state-to-a-stream",
         "label": "Persisting object state to a stream",
-        "action": "PersistingObjectStateToAStream",
+        "short": "Persisting state to stream",
         "route": "/CSharp/PersistingObjectStateToAStream"
       },
       {
-        "label": "Various classes used for File handling",
-        "action": "VariousClassesUsedForFileHandling",
-        "route": "/CSharp/VariousClassesUsedForFileHandling"
+        "id": "t13-file-i-o-and-serialization-s02-classes-used-for-file-handling",
+        "label": "Classes used for file handling",
+        "short": "File handling classes",
+        "route": "/CSharp/ClassesUsedForFileHandling"
       },
       {
-        "label": "Using StreamReader, StreamWriter",
-        "action": "UsingStreamreaderStreamwriter",
-        "route": "/CSharp/UsingStreamreaderStreamwriter"
+        "id": "t13-file-i-o-and-serialization-s03-streamreader-streamwriter",
+        "label": "StreamReader, StreamWriter",
+        "short": "StreamReader/StreamWriter",
+        "route": "/CSharp/StreamreaderStreamwriter"
       },
       {
-        "label": "Using BinaryReader, BinaryWriter",
-        "action": "UsingBinaryreaderBinarywriter",
-        "route": "/CSharp/UsingBinaryreaderBinarywriter"
+        "id": "t13-file-i-o-and-serialization-s04-binaryreader-binarywriter",
+        "label": "BinaryReader, BinaryWriter",
+        "short": "BinaryReader/BinaryWriter",
+        "route": "/CSharp/BinaryreaderBinarywriter"
       },
       {
-        "label": "Using File, FileInfo, Directory, DirectoryInfo",
-        "action": "UsingFileFileinfoDirectoryDirectoryinfo",
-        "route": "/CSharp/UsingFileFileinfoDirectoryDirectoryinfo"
+        "id": "t13-file-i-o-and-serialization-s05-file-fileinfo-directory-directoryinfo",
+        "label": "File, FileInfo, Directory, DirectoryInfo",
+        "short": "File & Directory APIs",
+        "route": "/CSharp/FileFileinfoDirectoryDirectoryinfo"
       },
       {
+        "id": "t13-file-i-o-and-serialization-s06-serialization-modes-soap-xml-json",
         "label": "Serialization modes: SOAP, XML, JSON",
-        "action": "SerializationModesSoapXmlJson",
+        "short": "Serialization modes",
         "route": "/CSharp/SerializationModesSoapXmlJson"
       }
     ]
   },
   {
-    "title": "Packaging and Deployment",
-    "icon": "fa-solid fa-box-open",
-    "controller": "CSharp",
+    "id": "t14-database-programming",
+    "title": "Database Programming",
+    "icon": "🗃️",
     "subtopics": [
       {
-        "label": "File System Editor",
-        "action": "FileSystemEditor",
-        "route": "/CSharp/FileSystemEditor"
+        "id": "t14-database-programming-s01-connection-oriented-approach",
+        "label": "Connection-oriented approach",
+        "short": "Connection-oriented approach",
+        "route": "/CSharp/ConnectionOrientedApproach"
       },
       {
-        "label": "Registry Editor",
-        "action": "RegistryEditor",
-        "route": "/CSharp/RegistryEditor"
+        "id": "t14-database-programming-s02-connectionless-architecture",
+        "label": "Connectionless architecture",
+        "short": "Connectionless architecture",
+        "route": "/CSharp/ConnectionlessArchitecture"
       },
       {
-        "label": "File Types Editor",
-        "action": "FileTypesEditor",
-        "route": "/CSharp/FileTypesEditor"
+        "id": "t14-database-programming-s03-connection-string",
+        "label": "Connection string",
+        "short": "Connection string",
+        "route": "/CSharp/ConnectionString"
       },
       {
-        "label": "User Interface Editor",
-        "action": "UserInterfaceEditor",
-        "route": "/CSharp/UserInterfaceEditor"
+        "id": "t14-database-programming-s04-sqlconnection-class",
+        "label": "SqlConnection class",
+        "short": "SqlConnection class",
+        "route": "/CSharp/SqlconnectionClass"
       },
       {
-        "label": "Custom Actions",
-        "action": "CustomActions",
-        "route": "/CSharp/CustomActions"
+        "id": "t14-database-programming-s05-sqlcommand-class",
+        "label": "SqlCommand class",
+        "short": "SqlCommand class",
+        "route": "/CSharp/SqlcommandClass"
       },
       {
-        "label": "Launch Condition Editor",
-        "action": "LaunchConditionEditor",
-        "route": "/CSharp/LaunchConditionEditor"
+        "id": "t14-database-programming-s06-sqldatareader-class",
+        "label": "SqlDataReader class",
+        "short": "SqlDataReader class",
+        "route": "/CSharp/SqldatareaderClass"
       },
       {
-        "label": "Creating Uninstall Shortcut",
-        "action": "CreatingUninstallShortcut",
-        "route": "/CSharp/CreatingUninstallShortcut"
+        "id": "t14-database-programming-s07-sqldataadapter-class",
+        "label": "SqlDataAdapter class",
+        "short": "SqlDataAdapter class",
+        "route": "/CSharp/SqldataadapterClass"
+      },
+      {
+        "id": "t14-database-programming-s08-executenonquery-and-executescalar",
+        "label": "ExecuteNonQuery and ExecuteScalar",
+        "short": "ExecuteNonQuery/ExecuteScalar",
+        "route": "/CSharp/ExecuteNonqueryAndExecutescalar"
+      },
+      {
+        "id": "t14-database-programming-s09-dataset-class",
+        "label": "DataSet class",
+        "short": "DataSet class",
+        "route": "/CSharp/DatasetClass"
+      },
+      {
+        "id": "t14-database-programming-s10-datatable-class",
+        "label": "DataTable class",
+        "short": "DataTable class",
+        "route": "/CSharp/DatatableClass"
+      },
+      {
+        "id": "t14-database-programming-s11-datacolumn-class",
+        "label": "DataColumn class",
+        "short": "DataColumn class",
+        "route": "/CSharp/DatacolumnClass"
+      },
+      {
+        "id": "t14-database-programming-s12-datarow-class",
+        "label": "DataRow class",
+        "short": "DataRow class",
+        "route": "/CSharp/DatarowClass"
+      },
+      {
+        "id": "t14-database-programming-s13-sqlexception-class",
+        "label": "SqlException class",
+        "short": "SqlException class",
+        "route": "/CSharp/SqlexceptionClass"
+      },
+      {
+        "id": "t14-database-programming-s14-handling-database-exceptions",
+        "label": "Handling database exceptions",
+        "short": "Database exceptions",
+        "route": "/CSharp/HandlingDatabaseExceptions"
+      }
+    ]
+  },
+  {
+    "id": "t15-disconnected-architecture",
+    "title": "Disconnected Architecture",
+    "icon": "🔌",
+    "subtopics": [
+      {
+        "id": "t15-disconnected-architecture-s01-typed-datasets",
+        "label": "Typed DataSets",
+        "short": "Typed DataSets",
+        "route": "/CSharp/TypedDatasets"
+      },
+      {
+        "id": "t15-disconnected-architecture-s02-creating-typed-dataset",
+        "label": "Creating Typed DataSet",
+        "short": "Creating Typed DataSet",
+        "route": "/CSharp/CreatingTypedDataset"
+      },
+      {
+        "id": "t15-disconnected-architecture-s03-creating-relationship-between-datatables",
+        "label": "Creating Relationship between Datatables",
+        "short": "Creating Relationship",
+        "route": "/CSharp/CreatingRelationshipBetweenDatatables"
+      },
+      {
+        "id": "t15-disconnected-architecture-s04-creating-dataset-using-dataadapter",
+        "label": "Creating Dataset using DataAdapter",
+        "short": "Dataset using DataAdapter",
+        "route": "/CSharp/CreatingDatasetUsingDataadapter"
+      },
+      {
+        "id": "t15-disconnected-architecture-s05-updating-dataset-using-dataadapter",
+        "label": "Updating DataSet using DataAdapter",
+        "short": "Updating DataSet",
+        "route": "/CSharp/UpdatingDatasetUsingDataadapter"
+      },
+      {
+        "id": "t15-disconnected-architecture-s06-creating-xml-from-dataset",
+        "label": "Creating XML from DataSet",
+        "short": "XML from DataSet",
+        "route": "/CSharp/CreatingXmlFromDataset"
+      },
+      {
+        "id": "t15-disconnected-architecture-s07-creating-dataset-from-xml",
+        "label": "Creating DataSet from XML",
+        "short": "DataSet from XML",
+        "route": "/CSharp/CreatingDatasetFromXml"
+      },
+      {
+        "id": "t15-disconnected-architecture-s08-merging-dataset",
+        "label": "Merging DataSet",
+        "short": "Merging DataSet",
+        "route": "/CSharp/MergingDataset"
+      }
+    ]
+  },
+  {
+    "id": "t16-xml-in-c",
+    "title": "XML in C#",
+    "icon": "🧾",
+    "subtopics": [
+      {
+        "id": "t16-xml-in-c-s01-xml-basic",
+        "label": "XML Basic",
+        "short": "XML Basic",
+        "route": "/CSharp/XmlBasic"
+      },
+      {
+        "id": "t16-xml-in-c-s02-xmlreader-class",
+        "label": "XMLReader class",
+        "short": "XMLReader",
+        "route": "/CSharp/XmlreaderClass"
+      },
+      {
+        "id": "t16-xml-in-c-s03-xmlwriter-class",
+        "label": "XMLWriter class",
+        "short": "XMLWriter",
+        "route": "/CSharp/XmlwriterClass"
+      },
+      {
+        "id": "t16-xml-in-c-s04-xmldocument-class",
+        "label": "XmlDocument class",
+        "short": "XmlDocument",
+        "route": "/CSharp/XmlDocumentClass"
+      },
+      {
+        "id": "t16-xml-in-c-s05-xmlelement-class",
+        "label": "XmlElement class",
+        "short": "XmlElement",
+        "route": "/CSharp/XmlElementClass"
+      },
+      {
+        "id": "t16-xml-in-c-s06-creating-xml-document",
+        "label": "Creating XML Document",
+        "short": "Create XML document",
+        "route": "/CSharp/CreatingXmlDocument"
+      },
+      {
+        "id": "t16-xml-in-c-s07-xmlnode-class",
+        "label": "XmlNode class",
+        "short": "XmlNode",
+        "route": "/CSharp/XmlnodeClass"
+      },
+      {
+        "id": "t16-xml-in-c-s08-loading-xml-document",
+        "label": "Loading XML Document",
+        "short": "Load XML document",
+        "route": "/CSharp/LoadingXmlDocument"
+      },
+      {
+        "id": "t16-xml-in-c-s09-select-nodes",
+        "label": "Selecting nodes",
+        "short": "Selecting nodes",
+        "route": "/CSharp/SelectingNodes"
+      },
+      {
+        "id": "t16-xml-in-c-s10-writing-data-to-xml",
+        "label": "Writing data to XML",
+        "short": "Write data to XML",
+        "route": "/CSharp/WritingDataToXml"
+      },
+      {
+        "id": "t16-xml-in-c-s11-xmldocument-to-xmlwriter",
+        "label": "XmlDocument to XmlWriter",
+        "short": "XmlDocument to XmlWriter",
+        "route": "/CSharp/XmlDocumentToXmlwriter"
+      }
+    ]
+  },
+  {
+    "id": "t17-multithreading",
+    "title": "Multithreading",
+    "icon": "🧵",
+    "subtopics": [
+      {
+        "id": "t17-multithreading-s01-multithreading-overview",
+        "label": "Multithreading overview",
+        "short": "Multithreading overview",
+        "route": "/CSharp/MultithreadingOverview"
+      },
+      {
+        "id": "t17-multithreading-s02-thread-class",
+        "label": "Thread class",
+        "short": "Thread class",
+        "route": "/CSharp/ThreadClass"
+      },
+      {
+        "id": "t17-multithreading-s03-multithreading-with-parameters",
+        "label": "Multithreading with parameters",
+        "short": "Multithreading with parameters",
+        "route": "/CSharp/MultithreadingWithParameters"
+      },
+      {
+        "id": "t17-multithreading-s04-thread-synchronization",
+        "label": "Thread Synchronization",
+        "short": "Thread Synchronization",
+        "route": "/CSharp/ThreadSynchronization"
+      },
+      {
+        "id": "t17-multithreading-s05-inter-thread-communication",
+        "label": "Inter-thread communication",
+        "short": "Inter-thread communication",
+        "route": "/CSharp/InterThreadCommunication"
+      },
+      {
+        "id": "t17-multithreading-s06-asynchronous-delegates",
+        "label": "Asynchronous delegates",
+        "short": "Asynchronous delegates",
+        "route": "/CSharp/AsynchronousDelegates"
+      },
+      {
+        "id": "t17-multithreading-s07-thread-pooling",
+        "label": "Thread Pooling",
+        "short": "Thread Pooling",
+        "route": "/CSharp/ThreadPooling"
+      },
+      {
+        "id": "t17-multithreading-s08-task-class",
+        "label": "Task class",
+        "short": "Task class",
+        "route": "/CSharp/TaskClass"
+      },
+      {
+        "id": "t17-multithreading-s09-thread-affinity",
+        "label": "Thread affinity",
+        "short": "Thread affinity",
+        "route": "/CSharp/ThreadAffinity"
+      }
+    ]
+  },
+  {
+    "id": "t18-advanced-c",
+    "title": "Advanced C#",
+    "icon": "🧠",
+    "subtopics": [
+      {
+        "id": "t18-advanced-c-s01-object-pooling",
+        "label": "Object Pooling",
+        "short": "Object Pooling",
+        "route": "/CSharp/ObjectPooling"
+      },
+      {
+        "id": "t18-advanced-c-s02-pointer-to-a-function",
+        "label": "Pointer to a Function",
+        "short": "Pointer to a Function",
+        "route": "/CSharp/PointerToAFunction"
+      },
+      {
+        "id": "t18-advanced-c-s03-unsafe-code",
+        "label": "Unsafe code",
+        "short": "Unsafe code",
+        "route": "/CSharp/UnsafeCode"
+      },
+      {
+        "id": "t18-advanced-c-s04-func-communication-between-unmanaged-and-managed-code",
+        "label": "C# communication between unmanaged and managed code",
+        "short": "Unmanaged + managed",
+        "route": "/CSharp/FuncCommunicationBetweenUnmanagedAndManagedCode"
+      },
+      {
+        "id": "t18-advanced-c-s05-reflection",
+        "label": "Reflection",
+        "short": "Reflection",
+        "route": "/CSharp/Reflection"
+      },
+      {
+        "id": "t18-advanced-c-s06-read-write-to-registry",
+        "label": "Read/write to registry",
+        "short": "Registry read/write",
+        "route": "/CSharp/ReadWriteToRegistry"
+      },
+      {
+        "id": "t18-advanced-c-s07-code-documentation",
+        "label": "Code Documentation",
+        "short": "Code Documentation",
+        "route": "/CSharp/CodeDocumentation"
+      },
+      {
+        "id": "t18-advanced-c-s08-file-creation-with-c",
+        "label": "File creation with C#",
+        "short": "File creation",
+        "route": "/CSharp/FileCreationWithC"
+      },
+      {
+        "id": "t18-advanced-c-s09-file-management",
+        "label": "File management",
+        "short": "File management",
+        "route": "/CSharp/FileManagement"
+      },
+      {
+        "id": "t18-advanced-c-s10-versioning",
+        "label": "Versioning",
+        "short": "Versioning",
+        "route": "/CSharp/Versioning"
+      },
+      {
+        "id": "t18-advanced-c-s11-garbage-collector",
+        "label": "Garbage collector",
+        "short": "Garbage collector",
+        "route": "/CSharp/GarbageCollector"
+      },
+      {
+        "id": "t18-advanced-c-s12-how-c-code-manages-memory",
+        "label": "How C# code manages memory",
+        "short": "Memory management",
+        "route": "/CSharp/HowCCodeManagesMemory"
+      },
+      {
+        "id": "t18-advanced-c-s13-memory-allocations",
+        "label": "Memory allocations",
+        "short": "Memory allocations",
+        "route": "/CSharp/MemoryAllocations"
+      }
+    ]
+  },
+  {
+    "id": "t19-linq",
+    "title": "LINQ",
+    "icon": "🧮",
+    "subtopics": [
+      {
+        "id": "t19-linq-s01-meaning-of-linq",
+        "label": "Meaning of LINQ",
+        "short": "Meaning of LINQ",
+        "route": "/CSharp/MeaningOfLinq"
+      },
+      {
+        "id": "t19-linq-s02-query-on-objects",
+        "label": "Query on Objects",
+        "short": "Query on Objects",
+        "route": "/CSharp/QueryOnObjects"
+      },
+      {
+        "id": "t19-linq-s03-query-on-datasets",
+        "label": "Query on Datasets",
+        "short": "Query on Datasets",
+        "route": "/CSharp/QueryOnDatasets"
+      },
+      {
+        "id": "t19-linq-s04-query-on-xml",
+        "label": "Query on XML",
+        "short": "Query on XML",
+        "route": "/CSharp/QueryOnXml"
+      },
+      {
+        "id": "t19-linq-s05-lambda-expressions",
+        "label": "Lambda expressions",
+        "short": "Lambda expressions",
+        "route": "/CSharp/LambdaExpressions"
+      },
+      {
+        "id": "t19-linq-s06-anonymous-methods",
+        "label": "Anonymous methods",
+        "short": "Anonymous methods",
+        "route": "/CSharp/AnonymousMethods"
+      },
+      {
+        "id": "t19-linq-s07-deferred-execution",
+        "label": "Deferred execution",
+        "short": "Deferred execution",
+        "route": "/CSharp/DeferredExecution"
+      },
+      {
+        "id": "t19-linq-s08-query-execution",
+        "label": "Query execution",
+        "short": "Query execution",
+        "route": "/CSharp/QueryExecution"
+      }
+    ]
+  },
+  {
+    "id": "t20-oops-recap-and-advanced",
+    "title": "OOPs Recap & Advanced",
+    "icon": "🎯",
+    "subtopics": [
+      {
+        "id": "t20-oops-recap-and-advanced-s01-class",
+        "label": "Class",
+        "short": "Class",
+        "route": "/CSharp/Class"
+      },
+      {
+        "id": "t20-oops-recap-and-advanced-s02-object",
+        "label": "Object",
+        "short": "Object",
+        "route": "/CSharp/Object"
+      },
+      {
+        "id": "t20-oops-recap-and-advanced-s03-method",
+        "label": "Method",
+        "short": "Method",
+        "route": "/CSharp/Method"
+      },
+      {
+        "id": "t20-oops-recap-and-advanced-s04-constructor",
+        "label": "Constructor",
+        "short": "Constructor",
+        "route": "/CSharp/Constructor"
+      },
+      {
+        "id": "t20-oops-recap-and-advanced-s05-finalize",
+        "label": "Finalize",
+        "short": "Finalize",
+        "route": "/CSharp/Finalize"
+      },
+      {
+        "id": "t20-oops-recap-and-advanced-s06-destructor",
+        "label": "Destructor",
+        "short": "Destructor",
+        "route": "/CSharp/Destructor"
+      },
+      {
+        "id": "t20-oops-recap-and-advanced-s07-abstraction",
+        "label": "Abstraction",
+        "short": "Abstraction",
+        "route": "/CSharp/Abstraction"
+      },
+      {
+        "id": "t20-oops-recap-and-advanced-s08-encapsulation",
+        "label": "Encapsulation",
+        "short": "Encapsulation",
+        "route": "/CSharp/Encapsulation"
+      },
+      {
+        "id": "t20-oops-recap-and-advanced-s09-inheritance",
+        "label": "Inheritance",
+        "short": "Inheritance",
+        "route": "/CSharp/Inheritance"
+      },
+      {
+        "id": "t20-oops-recap-and-advanced-s10-polymorphism",
+        "label": "Polymorphism",
+        "short": "Polymorphism",
+        "route": "/CSharp/Polymorphism"
+      },
+      {
+        "id": "t20-oops-recap-and-advanced-s11-interface",
+        "label": "Interface",
+        "short": "Interface",
+        "route": "/CSharp/Interface"
+      },
+      {
+        "id": "t20-oops-recap-and-advanced-s12-abstract-class",
+        "label": "Abstract class",
+        "short": "Abstract class",
+        "route": "/CSharp/AbstractClass"
+      },
+      {
+        "id": "t20-oops-recap-and-advanced-s13-sealed-class",
+        "label": "Sealed class",
+        "short": "Sealed class",
+        "route": "/CSharp/SealedClass"
+      }
+    ]
+  },
+  {
+    "id": "t21-gdi",
+    "title": "GDI",
+    "icon": "🎨",
+    "subtopics": [
+      {
+        "id": "t21-gdi-s01-importance-of-graphic-design",
+        "label": "Importance of graphic design",
+        "short": "Graphic design importance",
+        "route": "/CSharp/ImportanceOfGraphicDesign"
+      },
+      {
+        "id": "t21-gdi-s02-gdi-types",
+        "label": "GDI Types",
+        "short": "GDI Types",
+        "route": "/CSharp/GdiTypes"
+      },
+      {
+        "id": "t21-gdi-s03-drawing-types",
+        "label": "Drawing types",
+        "short": "Drawing types",
+        "route": "/CSharp/DrawingTypes"
+      },
+      {
+        "id": "t21-gdi-s04-drawing-text",
+        "label": "Drawing text",
+        "short": "Drawing text",
+        "route": "/CSharp/DrawingText"
+      },
+      {
+        "id": "t21-gdi-s05-drawing-shapes",
+        "label": "Drawing shapes",
+        "short": "Drawing shapes",
+        "route": "/CSharp/DrawingShapes"
+      },
+      {
+        "id": "t21-gdi-s06-drawing-images",
+        "label": "Drawing images",
+        "short": "Drawing images",
+        "route": "/CSharp/DrawingImages"
+      },
+      {
+        "id": "t21-gdi-s07-twod",
+        "label": "2D",
+        "short": "2D",
+        "route": "/CSharp/TwoD"
+      },
+      {
+        "id": "t21-gdi-s08-threed",
+        "label": "3D",
+        "short": "3D",
+        "route": "/CSharp/ThreeD"
+      }
+    ]
+  },
+  {
+    "id": "t22-security",
+    "title": "Security",
+    "icon": "🔐",
+    "subtopics": [
+      {
+        "id": "t22-security-s01-code-access-security",
+        "label": "Code access security",
+        "short": "Code access security",
+        "route": "/CSharp/CodeAccessSecurity"
+      },
+      {
+        "id": "t22-security-s02-message-digest",
+        "label": "Message Digest",
+        "short": "Message Digest",
+        "route": "/CSharp/MessageDigest"
+      },
+      {
+        "id": "t22-security-s03-providers",
+        "label": "Providers",
+        "short": "Providers",
+        "route": "/CSharp/Providers"
+      },
+      {
+        "id": "t22-security-s04-csp",
+        "label": "CSP",
+        "short": "CSP",
+        "route": "/CSharp/Csp"
+      },
+      {
+        "id": "t22-security-s05-encryption",
+        "label": "Encryption",
+        "short": "Encryption",
+        "route": "/CSharp/Encryption"
+      },
+      {
+        "id": "t22-security-s06-decryption",
+        "label": "Decryption",
+        "short": "Decryption",
+        "route": "/CSharp/Decryption"
+      }
+    ]
+  },
+  {
+    "id": "t23-remoting",
+    "title": "Remoting",
+    "icon": "📡",
+    "subtopics": [
+      {
+        "id": "t23-remoting-s01-remoting-overview",
+        "label": "Remoting overview",
+        "short": "Remoting overview",
+        "route": "/CSharp/RemotingOverview"
+      },
+      {
+        "id": "t23-remoting-s02-creating-remoting-objects",
+        "label": "Creating remoting objects",
+        "short": "Creating remoting objects",
+        "route": "/CSharp/CreatingRemotingObjects"
+      },
+      {
+        "id": "t23-remoting-s03-client-activation",
+        "label": "Client activation",
+        "short": "Client activation",
+        "route": "/CSharp/ClientActivation"
+      },
+      {
+        "id": "t23-remoting-s04-deploying-remoting-objects",
+        "label": "Deploying remoting objects",
+        "short": "Deploying remoting objects",
+        "route": "/CSharp/DeployingRemotingObjects"
+      },
+      {
+        "id": "t23-remoting-s05-channels",
+        "label": "Channels",
+        "short": "Channels",
+        "route": "/CSharp/Channels"
+      },
+      {
+        "id": "t23-remoting-s06-serialization",
+        "label": "Serialization",
+        "short": "Serialization",
+        "route": "/CSharp/Serialization"
+      },
+      {
+        "id": "t23-remoting-s07-app-domains",
+        "label": "App domains",
+        "short": "App domains",
+        "route": "/CSharp/AppDomains"
+      },
+      {
+        "id": "t23-remoting-s08-enterprise-services",
+        "label": "Enterprise services",
+        "short": "Enterprise services",
+        "route": "/CSharp/EnterpriseServices"
+      },
+      {
+        "id": "t23-remoting-s09-configuring-remoting",
+        "label": "Configuring remoting",
+        "short": "Configuring remoting",
+        "route": "/CSharp/ConfiguringRemoting"
+      },
+      {
+        "id": "t23-remoting-s10-soap-formatter",
+        "label": "Soap Formatter",
+        "short": "Soap Formatter",
+        "route": "/CSharp/SoapFormatter"
+      }
+    ]
+  },
+  {
+    "id": "t24-security-threads",
+    "title": "Security Threads",
+    "icon": "🧵",
+    "subtopics": [
+      {
+        "id": "t24-security-threads-s01-code-security",
+        "label": "Code security",
+        "short": "Code security",
+        "route": "/CSharp/CodeSecurity"
+      },
+      {
+        "id": "t24-security-threads-s02-serialization-types",
+        "label": "Serialization types",
+        "short": "Serialization types",
+        "route": "/CSharp/SerializationTypes"
+      },
+      {
+        "id": "t24-security-threads-s03-data-protection",
+        "label": "Data protection",
+        "short": "Data protection",
+        "route": "/CSharp/DataProtection"
+      },
+      {
+        "id": "t24-security-threads-s04-thread-security",
+        "label": "Thread security",
+        "short": "Thread security",
+        "route": "/CSharp/ThreadSecurity"
+      },
+      {
+        "id": "t24-security-threads-s05-windows-services",
+        "label": "Windows services",
+        "short": "Windows services",
+        "route": "/CSharp/WindowsServices"
+      }
+    ]
+  },
+  {
+    "id": "t25-web-services",
+    "title": "Web Services",
+    "icon": "🌐",
+    "subtopics": [
+      {
+        "id": "t25-web-services-s01-web-services-overview",
+        "label": "Web Services overview",
+        "short": "Web Services overview",
+        "route": "/CSharp/WebServicesOverview"
+      },
+      {
+        "id": "t25-web-services-s02-soap",
+        "label": "SOAP",
+        "short": "SOAP",
+        "route": "/CSharp/Soap"
+      },
+      {
+        "id": "t25-web-services-s03-windows-communication",
+        "label": "Windows Communication",
+        "short": "Windows Communication",
+        "route": "/CSharp/WindowsCommunication"
+      },
+      {
+        "id": "t25-web-services-s04-wsdl",
+        "label": "WSDL",
+        "short": "WSDL",
+        "route": "/CSharp/Wsdl"
+      },
+      {
+        "id": "t25-web-services-s05-uddi",
+        "label": "UDDI",
+        "short": "UDDI",
+        "route": "/CSharp/Uddi"
+      },
+      {
+        "id": "t25-web-services-s06-web-services-types",
+        "label": "Web Services types",
+        "short": "Web Services types",
+        "route": "/CSharp/WebServicesTypes"
+      }
+    ]
+  },
+  {
+    "id": "t26-multitier",
+    "title": "Multi-tier",
+    "icon": "🏗️",
+    "subtopics": [
+      {
+        "id": "t26-multitier-s01-overview-of-multi-tier",
+        "label": "Overview of multi-tier",
+        "short": "Multi-tier overview",
+        "route": "/CSharp/OverviewOfMultiTier"
+      },
+      {
+        "id": "t26-multitier-s02-remoting-application",
+        "label": "Remoting Application",
+        "short": "Remoting application",
+        "route": "/CSharp/RemotingApplication"
+      }
+    ]
+  },
+  {
+    "id": "t27-performance",
+    "title": "Performance",
+    "icon": "⚡",
+    "subtopics": [
+      {
+        "id": "t27-performance-s01-garbage-collection-performance",
+        "label": "Garbage Collection Performance",
+        "short": "GC Performance",
+        "route": "/CSharp/GarbageCollectionPerformance"
+      },
+      {
+        "id": "t27-performance-s02-net-performance-counters",
+        "label": ".NET Performance counters",
+        "short": "Performance counters",
+        "route": "/CSharp/NetPerformanceCounters"
+      },
+      {
+        "id": "t27-performance-s03-object-pooling",
+        "label": "Object Pooling",
+        "short": "Object Pooling",
+        "route": "/CSharp/ObjectPooling"
+      },
+      {
+        "id": "t27-performance-s04-data-structures-performance",
+        "label": "Data Structures Performance",
+        "short": "Data Structures Performance",
+        "route": "/CSharp/DataStructuresPerformance"
+      },
+      {
+        "id": "t27-performance-s05-windows-services-performance",
+        "label": "Windows Services Performance",
+        "short": "Windows Services Performance",
+        "route": "/CSharp/WindowsServicesPerformance"
+      }
+    ]
+  },
+  {
+    "id": "t28-delegates-and-lambda",
+    "title": "Delegates and Lambda",
+    "icon": "🪢",
+    "subtopics": [
+      {
+        "id": "t28-delegates-and-lambda-s01-events-and-delegates",
+        "label": "Events and Delegates",
+        "short": "Events and Delegates",
+        "route": "/CSharp/EventsAndDelegates"
+      },
+      {
+        "id": "t28-delegates-and-lambda-s02-lambda",
+        "label": "Lambda",
+        "short": "Lambda",
+        "route": "/CSharp/Lambda"
+      },
+      {
+        "id": "t28-delegates-and-lambda-s03-atomic-inbuilt-delegates",
+        "label": "Atomic inbuilt delegates",
+        "short": "Atomic inbuilt delegates",
+        "route": "/CSharp/AtomicInbuiltDelegates"
+      },
+      {
+        "id": "t28-delegates-and-lambda-s04-use-of-action-func-predicate",
+        "label": "Use of Action, Func, Predicate",
+        "short": "Action Func Predicate",
+        "route": "/CSharp/UseOfActionFuncPredicate"
+      }
+    ]
+  },
+  {
+    "id": "t29-advanced-threads",
+    "title": "Advanced Threads",
+    "icon": "🧵",
+    "subtopics": [
+      {
+        "id": "t29-advanced-threads-s01-threadpool",
+        "label": "ThreadPool",
+        "short": "ThreadPool",
+        "route": "/CSharp/Threadpool"
+      },
+      {
+        "id": "t29-advanced-threads-s02-async-await",
+        "label": "Async/Await",
+        "short": "Async/Await",
+        "route": "/CSharp/AsyncAwait"
+      },
+      {
+        "id": "t29-advanced-threads-s03-parallel",
+        "label": "Parallel",
+        "short": "Parallel",
+        "route": "/CSharp/Parallel"
+      }
+    ]
+  },
+  {
+    "id": "t30-security-advanced",
+    "title": "Security (Advanced)",
+    "icon": "🔐",
+    "subtopics": [
+      {
+        "id": "t30-security-advanced-s01-encryption-algorithms",
+        "label": "Encryption algorithms",
+        "short": "Encryption algorithms",
+        "route": "/CSharp/EncryptionAlgorithms"
+      },
+      {
+        "id": "t30-security-advanced-s02-risk-assessment",
+        "label": "Risk assessment",
+        "short": "Risk assessment",
+        "route": "/CSharp/RiskAssessment"
+      },
+      {
+        "id": "t30-security-advanced-s03-authentication",
+        "label": "Authentication",
+        "short": "Authentication",
+        "route": "/CSharp/Authentication"
       }
     ]
   }
 ];
 
-    const accordion = document.getElementById("courseAccordion");
+    const navEl = document.getElementById("nav");
+    const contentArea = document.getElementById("contentArea");
     const searchBox = document.getElementById("searchBox");
-    const clearBtn = document.getElementById("clearBtn");
     const collapseAllBtn = document.getElementById("collapseAllBtn");
+    const topicCountChip = document.getElementById("topicCountChip");
+    const subtopicCountChip = document.getElementById("subtopicCountChip");
 
-    const previewArea = document.getElementById("previewArea");
-    const openBtn = document.getElementById("openBtn");
-    const copyRouteBtn = document.getElementById("copyRouteBtn");
+    let activeSubtopicId = null;
 
-    const topicCount = document.getElementById("topicCount");
-    const subtopicCount = document.getElementById("subtopicCount");
-
-    let active = null;
-
-    topicCount.textContent = "Topics: " + COURSE.length;
-    subtopicCount.textContent = "Subtopics: " + COURSE.reduce((sum, t) => sum + t.subtopics.length, 0);
-
-    function esc(s) {
-        return (s || "")
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, (m) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[m]));
     }
 
-    function makeId(prefix, idx) {
-        return prefix + "_" + idx + "_" + Math.random().toString(16).slice(2);
-    }
+    function buildNav(query) {
+      const q = query.trim().toLowerCase();
+      navEl.innerHTML = "";
 
-    function buildAccordion(filter = "") {
-        accordion.innerHTML = "";
-        const q = (filter || "").trim().toLowerCase();
+      let topicCount = 0;
+      let subtopicCount = 0;
 
-        COURSE.forEach((topic, tIndex) => {
-            const topicId = makeId("topic", tIndex);
-            const collapseId = makeId("collapse", tIndex);
+      COURSE.forEach(topic => {
+        const matchedSubtopics = topic.subtopics.filter(st =>
+          st.label.toLowerCase().includes(q) ||
+          st.short.toLowerCase().includes(q) ||
+          topic.title.toLowerCase().includes(q)
+        );
 
-            // filter subtopics
-            const subs = topic.subtopics.filter(st => {
-                if (!q) return true;
-                const hay = (topic.title + " " + st.label + " " + st.action + " " + st.route).toLowerCase();
-                return hay.includes(q);
-            });
+        if (q && matchedSubtopics.length === 0) return;
 
-            if (q && subs.length === 0) return;
+        topicCount += 1;
+        subtopicCount += matchedSubtopics.length || topic.subtopics.length;
 
-            const item = document.createElement("div");
-            item.className = "accordion-item";
+        const topicDiv = document.createElement("div");
+        topicDiv.className = "topic";
 
-            const header = document.createElement("h2");
-            header.className = "accordion-header";
-            header.id = topicId;
+        const topicBtn = document.createElement("button");
+        topicBtn.type = "button";
+        topicBtn.className = "topic-btn";
+        topicBtn.setAttribute("aria-expanded", "false");
 
-            const button = document.createElement("button");
-            button.className = "accordion-button collapsed";
-            button.type = "button";
-            button.setAttribute("data-bs-toggle", "collapse");
-            button.setAttribute("data-bs-target", "#" + collapseId);
-            button.setAttribute("aria-expanded", "false");
-            button.setAttribute("aria-controls", collapseId);
-            button.innerHTML = `<i class="${esc(topic.icon)} me-2"></i><strong>${esc(topic.title)}</strong>
-                                <span class="ms-2 badge text-bg-light border">${subs.length}</span>`;
+        const left = document.createElement("div");
+        left.className = "topic-left";
 
-            header.appendChild(button);
+        const icon = document.createElement("div");
+        icon.className = "topic-icon";
+        icon.textContent = topic.icon || "📘";
 
-            const collapse = document.createElement("div");
-            collapse.id = collapseId;
-            collapse.className = "accordion-collapse collapse";
-            collapse.setAttribute("aria-labelledby", topicId);
-            collapse.setAttribute("data-bs-parent", "#courseAccordion");
+        const titleWrap = document.createElement("div");
+        titleWrap.className = "topic-title";
 
-            const body = document.createElement("div");
-            body.className = "accordion-body p-2";
+        const strong = document.createElement("strong");
+        strong.textContent = topic.title;
 
-            const list = document.createElement("div");
-            list.className = "list-group";
+        const span = document.createElement("span");
+        span.textContent = `${topic.subtopics.length} subtopics`;
 
-            subs.forEach((st, sIndex) => {
-                const row = document.createElement("div");
-                row.className = "list-group-item list-group-item-action d-flex align-items-start justify-content-between gap-2";
+        titleWrap.appendChild(strong);
+        titleWrap.appendChild(span);
 
-                // left: label
-                const left = document.createElement("div");
-                left.className = "me-2";
-                left.innerHTML = `<div class="fw-semibold">${esc(st.label)}</div>
-                                  <div class="text-muted small">${esc(st.route)}</div>`;
+        left.appendChild(icon);
+        left.appendChild(titleWrap);
 
-                // right: buttons
-                const right = document.createElement("div");
-                right.className = "d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2";
+        const caret = document.createElement("div");
+        caret.className = "caret";
+        caret.textContent = "▾";
 
-                const previewBtn = document.createElement("button");
-                previewBtn.type = "button";
-                previewBtn.className = "btn btn-sm btn-outline-primary";
-                previewBtn.innerHTML = '<i class="fa-solid fa-eye me-1"></i>Preview';
-                previewBtn.addEventListener("click", () => selectSubtopic(topic, st, row));
+        topicBtn.appendChild(left);
+        topicBtn.appendChild(caret);
 
-                const openLink = document.createElement("a");
-                openLink.className = "btn btn-sm btn-success";
-                openLink.href = st.route;
-                openLink.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Open';
-                openLink.title = "Open the course page (create this route in MVC)";
+        const subDiv = document.createElement("div");
+        subDiv.className = "subtopics";
 
-                right.appendChild(previewBtn);
-                right.appendChild(openLink);
+        matchedSubtopics.forEach(st => {
+          const stBtn = document.createElement("button");
+          stBtn.type = "button";
+          stBtn.className = "subtopic" + (st.id === activeSubtopicId ? " active" : "");
+          stBtn.dataset.subtopicId = st.id;
 
-                row.appendChild(left);
-                row.appendChild(right);
+          const label = document.createElement("div");
+          label.className = "label";
+          label.textContent = st.label;
 
-                // clicking row (except Open link) also previews
-                row.addEventListener("click", (e) => {
-                    if (e.target.closest("a")) return;
-                    if (e.target.closest("button")) return;
-                    selectSubtopic(topic, st, row);
-                });
+          const pill = document.createElement("div");
+          pill.className = "pill";
+          pill.textContent = "Open page";
 
-                list.appendChild(row);
-            });
+          stBtn.appendChild(label);
+          stBtn.appendChild(pill);
 
-            body.appendChild(list);
-            collapse.appendChild(body);
+          stBtn.addEventListener("click", () => {
+            selectSubtopic(topic, st);
+          });
 
-            item.appendChild(header);
-            item.appendChild(collapse);
-
-            accordion.appendChild(item);
-
-            // auto open during search
-            if (q) {
-                const bs = bootstrap.Collapse.getOrCreateInstance(collapse, { toggle: false });
-                bs.show();
-                button.classList.remove("collapsed");
-                button.setAttribute("aria-expanded", "true");
-            }
+          subDiv.appendChild(stBtn);
         });
-    }
 
-    function selectSubtopic(topic, st, rowEl) {
-        // clear active
-        accordion.querySelectorAll(".list-group-item").forEach(x => x.classList.remove("active"));
-        rowEl.classList.add("active");
+        topicBtn.addEventListener("click", () => {
+          const isOpen = topicDiv.classList.toggle("open");
+          topicBtn.setAttribute("aria-expanded", String(isOpen));
+        });
 
-        active = { topic, st };
+        if (q !== "") {
+          topicDiv.classList.add("open");
+          topicBtn.setAttribute("aria-expanded", "true");
+        }
 
-        openBtn.classList.remove("disabled");
-        openBtn.href = st.route;
+        topicDiv.appendChild(topicBtn);
+        topicDiv.appendChild(subDiv);
+        navEl.appendChild(topicDiv);
+      });
 
-        copyRouteBtn.disabled = false;
-        copyRouteBtn.dataset.route = st.route;
-
-        const beginnerFirst = [
-            "Introduction (What is it?)",
-            "Purpose (Why do we need it?)",
-            "Real‑World Usage",
-            "Prerequisites",
-            "Key Terms / Glossary",
-            "Syntax",
-            "Rules / Key Points (Do’s & Don’ts)",
-            "Basic Example + Output",
-            "Step‑by‑step Explanation",
-            "How it Works Internally",
-            "More Examples (Beginner → Intermediate)",
-            "Common Mistakes + Fixes",
-            "Best Coding Practices",
-            "MCQs + Interview Questions + Coding Exercises (Expandable answers)",
-            "Summary + What’s Next"
-        ];
-
-        previewArea.innerHTML = `
-            <div class="mb-3">
-                <div class="d-flex flex-wrap align-items-center gap-2">
-                    <span class="badge text-bg-primary"><i class="${esc(topic.icon)} me-1"></i>${esc(topic.title)}</span>
-                    <span class="badge text-bg-success">${esc(st.label)}</span>
-                </div>
-            </div>
-
-            <div class="border rounded p-3 bg-light">
-                <div class="row g-3">
-                    <div class="col-12">
-                        <div class="fw-semibold mb-1">MVC Route</div>
-                        <div class="d-flex flex-column flex-sm-row gap-2 align-items-sm-center">
-                            <code class="border rounded px-2 py-1 bg-white">${esc(st.route)}</code>
-                            <span class="text-muted small">Action: <strong>${esc(st.action)}</strong> | Controller: <strong>${esc(topic.controller)}</strong></span>
-                        </div>
-                    </div>
-
-                    <div class="col-12">
-                        <div class="fw-semibold mb-2">Beginner‑First Content Titles (for this course page)</div>
-                        <ol class="mb-0">
-                            ${beginnerFirst.map(x => `<li>${esc(x)}</li>`).join("")}
-                        </ol>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-3 text-muted small">
-                Note: Create the corresponding CSHTML course page and MVC action for <strong>${esc(st.action)}</strong>.
-            </div>
-        `;
+      topicCountChip.textContent = `Topics: ${topicCount}`;
+      topicCountChip.style.visibility = topicCount ? "visible" : "hidden";
+      subtopicCountChip.textContent = `Subtopics: ${subtopicCount}`;
+      subtopicCountChip.style.visibility = subtopicCount ? "visible" : "hidden";
     }
 
     function collapseAll() {
-        document.querySelectorAll("#courseAccordion .accordion-collapse").forEach(el => {
-            const c = bootstrap.Collapse.getOrCreateInstance(el, { toggle: false });
-            c.hide();
-        });
-        document.querySelectorAll("#courseAccordion .accordion-button").forEach(btn => {
-            btn.classList.add("collapsed");
-            btn.setAttribute("aria-expanded", "false");
-        });
+      document.querySelectorAll(".topic").forEach(t => {
+        t.classList.remove("open");
+        const btn = t.querySelector(".topic-btn");
+        if (btn) btn.setAttribute("aria-expanded", "false");
+      });
     }
 
-    function copyToClipboard(text) {
-        if (!text) return;
-        navigator.clipboard.writeText(text).then(() => {
-            // tiny UX feedback
-            copyRouteBtn.innerHTML = '<i class="fa-solid fa-check me-1"></i>Copied';
-            setTimeout(() => {
-                copyRouteBtn.innerHTML = '<i class="fa-regular fa-copy me-1"></i>Copy route';
-            }, 900);
-        });
+    function setActiveButton(subtopicId) {
+      document.querySelectorAll(".subtopic").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.subtopicId === subtopicId);
+      });
     }
 
-    // events
-    searchBox.addEventListener("input", () => buildAccordion(searchBox.value));
-    clearBtn.addEventListener("click", () => {
-        searchBox.value = "";
-        buildAccordion("");
-        searchBox.focus();
+    function selectSubtopic(topic, subtopic) {
+      activeSubtopicId = subtopic.id;
+      setActiveButton(activeSubtopicId);
+
+      const contentTitles = [
+        "Introduction (What is it?)",
+        "Purpose (Why do we need it?)",
+        "Real-World Usage (Where used in apps)",
+        "Prerequisites",
+        "Key Terms / Glossary",
+        "Syntax",
+        "Rules / Key Points (Do’s & Don’ts)",
+        "Basic Example + Output",
+        "Step-by-step Explanation",
+        "How it Works Internally",
+        "Types / Variations (if applicable)",
+        "More Examples (Beginner → Intermediate)",
+        "Common Mistakes + Fixes",
+        "Best Coding Practices",
+        "Code Quality Checklist",
+        "Logical Building Exercises (Expandable answers)",
+        "Coding Practice Tasks (Expandable solutions)",
+        "Mini Assignment (Expandable full solution)",
+        "MCQ Quiz (Expandable explanations)",
+        "Interview Questions (Expandable best answers)",
+        "Summary (Key takeaways)",
+        "What’s Next (Related topics)"
+      ];
+
+      const suggestedRoute = subtopic.route;
+
+      contentArea.innerHTML = `
+        <div class="hero">
+          <h1>${escapeHtml(subtopic.label)}</h1>
+          <p>
+            <span class="badge green">Topic</span>
+            <span class="badge">${escapeHtml(topic.title)}</span>
+            <span class="badge">Subtopic</span>
+          </p>
+          <div class="divider"></div>
+          <div class="breadcrumb">
+            <span>Navigation:</span>
+            <span class="badge">${escapeHtml(topic.icon || "📘")} ${escapeHtml(topic.title)}</span>
+            <span>→</span>
+            <span class="badge green">${escapeHtml(subtopic.label)}</span>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>✅ What should be inside this course page?</h3>
+            <p class="muted">Use this exact order for beginners (copy into your prompt).</p>
+            <div class="divider"></div>
+            <ul class="muted" style="margin:0; padding-left: 18px; line-height:1.75;">
+              ${contentTitles.map(t => `<li>${escapeHtml(t)}</li>`).join("")}
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3>🔗 Suggested MVC route</h3>
+            <p class="muted">
+              Replace with your real controller/action. For now this demo uses a placeholder route.
+            </p>
+
+            <div class="codebox">
+              <div class="codehead">
+                <span>Route (example)</span>
+                <span class="muted">ASP.NET MVC</span>
+              </div>
+              <pre><code>${escapeHtml(suggestedRoute)}</code></pre>
+            </div>
+
+            <div class="mini-actions">
+              <a class="linkbtn green" href="${escapeHtml(suggestedRoute)}" target="_blank" rel="noopener">
+                Open route in new tab ↗
+              </a>
+              <a class="linkbtn" href="#" onclick="copyText('${suggestedRoute.replace("'", "\\'")}'); return false;">
+                Copy route
+              </a>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3 style="margin-top:0;">📌 Tip (MVC)</h3>
+            <p class="muted">
+              Create a CSHTML page for this subtopic and render it inside your main layout.
+              Keep this navigation as a shared partial view for all pages.
+            </p>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="card">
+          <h3>Suggested next action</h3>
+          <p class="muted">
+            Create a view named like <span class="kbd">${escapeHtml(subtopic.label)}</span> and connect it with a controller action.
+            Then paste your “Beginner-First” sections into that view.
+          </p>
+        </div>
+      `;
+    }
+
+    function copyText(text) {
+      try {
+        navigator.clipboard.writeText(text);
+        alert("Copied: " + text);
+      } catch (e) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+        alert("Copied: " + text);
+      }
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        searchBox?.focus();
+      }
     });
-    collapseAllBtn.addEventListener("click", collapseAll);
-    copyRouteBtn.addEventListener("click", () => copyToClipboard(copyRouteBtn.dataset.route));
 
-    // initial render
-    buildAccordion("");
-</script>
+    searchBox?.addEventListener("input", () => {
+      buildNav(searchBox.value);
+      setActiveButton(activeSubtopicId);
+    });
+
+    collapseAllBtn.addEventListener("click", () => collapseAll());
+
+    buildNav("");
+  </script>
