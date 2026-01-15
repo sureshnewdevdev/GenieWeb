@@ -1170,6 +1170,314 @@ class Program {
         ShowAnswer = false
     }
 }
+    },
+            {
+    "ProgrammingQuestions", new List<QuestionModel> {
+    new QuestionModel {
+        Id = 1,
+        Question = "1. Find Items: Implement methods to look up items by sold count, get min/max sold items, and sort items by sold count.",
+        Explanation = "Builds sorted dictionary operations for lookup, min/max selection, and ascending sorting.",
+        MaxTime = "12 minutes",
+        Answer = @"using System;
+using System.Collections.Generic;
+using System.Linq;
+
+class Program {
+    public static SortedDictionary<string, long> itemDetails = new SortedDictionary<string, long>();
+
+    public static SortedDictionary<string, long> FindItemDetails(long soldCount) {
+        var result = new SortedDictionary<string, long>();
+        foreach (var item in itemDetails) {
+            if (item.Value == soldCount) {
+                result[item.Key] = item.Value;
+            }
+        }
+        return result;
+    }
+
+    public static List<string> FindMinandMaxSoldItems() {
+        var result = new List<string>();
+        if (itemDetails.Count == 0) {
+            return result;
+        }
+
+        long min = itemDetails.Values.Min();
+        long max = itemDetails.Values.Max();
+        result.Add(itemDetails.First(kv => kv.Value == min).Key);
+        result.Add(itemDetails.First(kv => kv.Value == max).Key);
+        return result;
+    }
+
+    public static Dictionary<string, long> SortByCount() {
+        return itemDetails.OrderBy(kv => kv.Value)
+            .ToDictionary(kv => kv.Key, kv => kv.Value);
+    }
+}" ,
+        ShowAnswer = false
+    },
+    new QuestionModel {
+        Id = 2,
+        Question = "2. Calculate Numbers: Add numbers, compute GPA, and return a grade for the GPA.",
+        Explanation = "Uses a list to calculate GPA and map the GPA to a letter grade.",
+        MaxTime = "10 minutes",
+        Answer = @"using System;
+using System.Collections.Generic;
+using System.Linq;
+
+class Program {
+    public static List<int> NumberList = new List<int>();
+
+    public static void AddNumbers(int numbers) {
+        NumberList.Add(numbers);
+    }
+
+    public static double GetGPAScored() {
+        if (NumberList.Count == 0) {
+            return -1;
+        }
+
+        double total = NumberList.Sum(n => n * 3);
+        return total / (NumberList.Count * 3.0);
+    }
+
+    public static char GetGradeScored(double gpa) {
+        if (gpa < 5 || gpa > 10) {
+            return '\0';
+        }
+        if (gpa == 10) return 'S';
+        if (gpa >= 9) return 'A';
+        if (gpa >= 8) return 'B';
+        if (gpa >= 7) return 'C';
+        if (gpa >= 6) return 'D';
+        return 'E';
+    }
+}" ,
+        ShowAnswer = false
+    },
+    new QuestionModel {
+        Id = 3,
+        Question = "3. Movie Stock: Add movies, filter by genre, and sort by ratings.",
+        Explanation = "Parses a comma-separated string into a Movie object and returns sorted or filtered lists.",
+        MaxTime = "12 minutes",
+        Answer = @"using System;
+using System.Collections.Generic;
+using System.Linq;
+
+class Movie {
+    public string Title { get; set; }
+    public string Artist { get; set; }
+    public string Genre { get; set; }
+    public int Ratings { get; set; }
+}
+
+class Program {
+    public static List<Movie> MovieList = new List<Movie>();
+
+    public static void AddMovie(string movieDetails) {
+        var parts = movieDetails.Split(',');
+        MovieList.Add(new Movie {
+            Title = parts[0].Trim(),
+            Artist = parts[1].Trim(),
+            Genre = parts[2].Trim(),
+            Ratings = int.Parse(parts[3].Trim())
+        });
+    }
+
+    public static List<Movie> ViewMoviesByGenre(string genre) {
+        return MovieList.Where(m => m.Genre.Equals(genre, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+
+    public static List<Movie> ViewMoviesByRatings() {
+        return MovieList.OrderBy(m => m.Ratings).ToList();
+    }
+}" ,
+        ShowAnswer = false
+    },
+    new QuestionModel {
+        Id = 4,
+        Question = "4. Yoga Meditation: Store member details, compute BMI, and calculate the membership fee.",
+        Explanation = "Tracks yoga members, computes BMI, and returns a fee based on goal and BMI.",
+        MaxTime = "15 minutes",
+        Answer = @"using System;
+using System.Collections;
+
+class MeditationCenter {
+    public int MemberId { get; set; }
+    public int Age { get; set; }
+    public double Weight { get; set; }
+    public double Height { get; set; }
+    public string Goal { get; set; }
+    public double BMI { get; set; }
+}
+
+class Program {
+    public static ArrayList memberList = new ArrayList();
+
+    public void AddYogaMember(int memberId, int age, double weight, double height, string goal) {
+        memberList.Add(new MeditationCenter {
+            MemberId = memberId,
+            Age = age,
+            Weight = weight,
+            Height = height,
+            Goal = goal
+        });
+    }
+
+    public double CalculateBMI(int memberId) {
+        foreach (MeditationCenter member in memberList) {
+            if (member.MemberId == memberId) {
+                double bmi = member.Weight / (member.Height * member.Height);
+                member.BMI = Math.Floor(bmi * 100) / 100;
+                return member.BMI;
+            }
+        }
+        return 0;
+    }
+
+    public int CalculateYogaFee(int memberId) {
+        foreach (MeditationCenter member in memberList) {
+            if (member.MemberId == memberId) {
+                double bmi = member.BMI;
+                if (member.Goal == ""Weight Loss"") {
+                    if (bmi >= 35) return 3000;
+                    if (bmi >= 30) return 2500;
+                    if (bmi >= 25) return 2000;
+                }
+                if (member.Goal == ""Weight Gain"") {
+                    return 2500;
+                }
+            }
+        }
+        return 0;
+    }
+}" ,
+        ShowAnswer = false
+    },
+    new QuestionModel {
+        Id = 5,
+        Question = "5. Ecommerce Application: Create a payment method that throws an exception when the wallet balance is insufficient.",
+        Explanation = "Uses a custom exception to enforce wallet balance validation.",
+        MaxTime = "12 minutes",
+        Answer = @"using System;
+
+class EcommerceShop {
+    public string UserName { get; set; }
+    public double WalletBalance { get; set; }
+    public double TotalPurchaseAmount { get; set; }
+}
+
+class InsufficientWalletBalanceException : Exception {
+    public InsufficientWalletBalanceException(string message) : base(message) { }
+}
+
+class Program {
+    public EcommerceShop MakePayment(string name, double balance, double amount) {
+        if (balance < amount) {
+            throw new InsufficientWalletBalanceException(""Insufficient balance in your digital wallet"");
+        }
+
+        return new EcommerceShop {
+            UserName = name,
+            WalletBalance = balance,
+            TotalPurchaseAmount = amount
+        };
+    }
+}" ,
+        ShowAnswer = false
+    },
+    new QuestionModel {
+        Id = 6,
+        Question = "6. User Authentication: Validate passwords and throw a mismatch exception when they differ.",
+        Explanation = "Creates a User model and validates the password confirmation with a custom exception.",
+        MaxTime = "12 minutes",
+        Answer = @"using System;
+
+class User {
+    public string Name { get; set; }
+    public string Password { get; set; }
+    public string ConfirmationPassword { get; set; }
+}
+
+class PasswordMismatchException : Exception {
+    public PasswordMismatchException(string message) : base(message) { }
+}
+
+class Program {
+    public User ValidatePassword(string name, string password, string confirmationPassword) {
+        if (!string.Equals(password, confirmationPassword, StringComparison.Ordinal)) {
+            throw new PasswordMismatchException(""Password entered does not match"");
+        }
+
+        return new User {
+            Name = name,
+            Password = password,
+            ConfirmationPassword = confirmationPassword
+        };
+    }
+}" ,
+        ShowAnswer = false
+    },
+    new QuestionModel {
+        Id = 7,
+        Question = "7. Construction Estimate: Validate construction area and throw an exception when it exceeds site area.",
+        Explanation = "Returns EstimateDetails when valid, otherwise throws a ConstructionEstimateException.",
+        MaxTime = "10 minutes",
+        Answer = @"using System;
+
+class EstimateDetails {
+    public float ConstructionArea { get; set; }
+    public float SiteArea { get; set; }
+}
+
+class ConstructionEstimateException : Exception {
+    public ConstructionEstimateException(string message) : base(message) { }
+}
+
+class Program {
+    public EstimateDetails ValidateConstructionEstimate(float constructionArea, float siteArea) {
+        if (constructionArea > siteArea) {
+            throw new ConstructionEstimateException(""Sorry your Construction Estimate is not approved"");
+        }
+
+        return new EstimateDetails {
+            ConstructionArea = constructionArea,
+            SiteArea = siteArea
+        };
+    }
+}" ,
+        ShowAnswer = false
+    },
+    new QuestionModel {
+        Id = 8,
+        Question = "8. User Verification: Validate phone number length and throw an exception on invalid input.",
+        Explanation = "Ensures the phone number length is 10 before returning the User object.",
+        MaxTime = "8 minutes",
+        Answer = @"using System;
+
+class User {
+    public string Name { get; set; }
+    public string PhoneNumber { get; set; }
+}
+
+class InvalidPhoneNumberException : Exception {
+    public InvalidPhoneNumberException(string message) : base(message) { }
+}
+
+class Program {
+    public User ValidatePhoneNumber(string name, string phoneNumber) {
+        if (phoneNumber?.Length != 10) {
+            throw new InvalidPhoneNumberException(""Invalid phone number"");
+        }
+
+        return new User {
+            Name = name,
+            PhoneNumber = phoneNumber
+        };
+    }
+}" ,
+        ShowAnswer = false
+    }
+}
     }
             };
 
@@ -1197,6 +1505,11 @@ class Program {
         public IActionResult CSharpAsynchronousQues()
         {
             return LoadPracticePage("CSharpAsynchronousQues");
+        }
+
+        public IActionResult ProgrammingQuestions()
+        {
+            return LoadPracticePage("ProgrammingQuestions");
         }
 
         private IActionResult LoadPracticePage(string pageName)
