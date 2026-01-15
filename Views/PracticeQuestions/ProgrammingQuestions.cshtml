@@ -1,0 +1,56 @@
+@using Newtonsoft.Json
+
+@{
+    ViewData["ActiveMenu"] = "PracticeQuestions";
+    ViewData["ActivePage"] = "ProgrammingQuestions";
+    string questionsJson =
+    System.Text.Encodings.Web.HtmlEncoder.Default.Encode(JsonConvert.SerializeObject(ViewBag.Questions, Formatting.None));
+}
+
+<h2>C# Programming Questions</h2>
+<p>Click on "Show Answer" to reveal the solution.</p>
+
+@foreach (var question in ViewBag.Questions)
+{
+    <div class="card mb-3" id="question-@question.Id">
+        <div class="card-body">
+            <h5 class="card-title">@question.Question</h5>
+            <p><strong>Max Time:</strong> @question.MaxTime</p>
+            <p><strong>Explanation:</strong> @question.Explanation</p>
+
+            <form method="post" asp-action="ToggleAnswer" asp-controller="PracticeQuestions"
+                onsubmit="setScrollTarget(@question.Id)">
+                <input type="hidden" name="pageName" value="ProgrammingQuestions" />
+                <input type="hidden" name="questionId" value="@question.Id" />
+                <input type="hidden" id="questionsJson" name="questionsJson" value="@questionsJson" />
+
+                <button type="submit" class="btn btn-primary">
+                    @(question.ShowAnswer ? "Hide Answer" : "Show Answer")
+                </button>
+            </form>
+
+            @if (question.ShowAnswer)
+            {
+                <pre class="answer mt-3"><code>@question.Answer</code></pre>
+            }
+        </div>
+    </div>
+}
+
+<script>
+    function setScrollTarget(questionId) {
+        document.cookie = "scrollTarget=question-" + questionId + "; path=/";
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let cookies = document.cookie.split('; ');
+        let scrollTarget = cookies.find(row => row.startsWith("scrollTarget="))?.split('=')[1];
+        if (scrollTarget) {
+            let element = document.getElementById(scrollTarget);
+            if (element) {
+                element.scrollIntoView({ behavior: "smooth" });
+            }
+            document.cookie = "scrollTarget=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
+    });
+</script>
