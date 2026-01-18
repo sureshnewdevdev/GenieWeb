@@ -1,0 +1,1652 @@
+@{
+    ViewData["Title"] = "C# 10 Features";
+}
+
+<style>
+:root{
+      --w3-green:#04AA6D;
+      --bg:#ffffff;
+      --text:#222;
+      --muted:#666;
+      --sidebar:#f1f1f1;
+      --border:#e6e6e6;
+
+      --note:#d9edf7;
+      --note-border:#bce8f1;
+
+      --tip:#dff0d8;
+      --tip-border:#b2dba1;
+
+      --warn:#f2dede;
+      --warn-border:#ebcccc;
+
+      --example:#f7f7f7;
+      --code:#1e1e1e;
+      --codeText:#eaeaea;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.6;
+    }
+
+    /* Top bar (W3-like) */
+    .topbar{
+      position:fixed;
+      top:0; left:0; right:0;
+      height:56px;
+      background:var(--w3-green);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      padding:0 14px;
+      z-index:1000;
+      box-shadow:0 2px 10px rgba(0,0,0,.12);
+    }
+    .brand{
+      font-weight:800;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .brand .logo{
+      width:34px;height:34px;
+      border-radius:8px;
+      background:rgba(255,255,255,.22);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+    }
+    .topbar .title{
+      margin-left:14px;
+      font-weight:700;
+      opacity:.95;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .topbar .spacer{ flex:1; }
+    .topbar .topbtn{
+      border:1px solid rgba(255,255,255,.35);
+      background:rgba(255,255,255,.12);
+      color:#fff;
+      padding:8px 10px;
+      border-radius:999px;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .topbar .topbtn:active{ transform:translateY(1px); }
+
+    /* Layout: sidebar + content */
+    .layout{
+      display:flex;
+      margin-top:56px; /* topbar height */
+      min-height:calc(100vh - 56px);
+    }
+
+    /* REQUIRED SIDEBAR CONTAINER STRUCTURE (kept compatible with your _Layout.cshtml style) */
+    nav#sidebarMenu{
+      width:280px;
+      background:var(--sidebar);
+      border-right:1px solid var(--border);
+      position:fixed;
+      top:56px;
+      left:0;
+      bottom:0;
+      overflow:auto;
+      padding:14px 10px;
+    }
+    .sidecard{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+    }
+    .sidecard h3{
+      margin:0 0 8px 0;
+      font-size:15px;
+      color:#111;
+    }
+    .sidecard .small{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+    .sidelink{
+      display:block;
+      padding:8px 10px;
+      border-radius:10px;
+      color:#222;
+      text-decoration:none;
+      font-size:14px;
+      border:1px solid transparent;
+      margin:3px 0;
+    }
+    .sidelink:hover{
+      background:#f7fff9;
+      border-color:#d7f1e5;
+    }
+    .sidelink.active{
+      background:#e9fff6;
+      border-color:#c9f0de;
+      color:#0b5c3f;
+      font-weight:800;
+    }
+    .sidegroup{
+      margin:10px 0 6px;
+      padding:8px 10px;
+      background:#f8f8f8;
+      border:1px solid var(--border);
+      border-radius:10px;
+      font-weight:800;
+      font-size:13px;
+      color:#333;
+    }
+    .subindent{ margin-left:8px; }
+
+    /* Content */
+    .content{
+      margin-left:280px;
+      width:calc(100% - 280px);
+      padding:18px 18px 80px;
+    }
+    .container{
+      max-width:1020px;
+      margin:0 auto;
+    }
+
+    /* Section style */
+    .section{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      margin:14px 0;
+      overflow:hidden;
+      box-shadow:0 2px 14px rgba(0,0,0,.04);
+    }
+    .section .head{
+      background:var(--w3-green);
+      color:#fff;
+      padding:12px 14px;
+      font-weight:900;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .section .head .tag{
+      font-size:12px;
+      padding:4px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.25);
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .section .body{
+      padding:14px;
+    }
+    .muted{ color:var(--muted); }
+
+    /* W3-like notes */
+    .note, .tip, .warning{
+      padding:12px 12px;
+      border-radius:12px;
+      margin:10px 0;
+      border:1px solid;
+    }
+    .note{ background:var(--note); border-color:var(--note-border); }
+    .tip{ background:var(--tip); border-color:var(--tip-border); }
+    .warning{ background:var(--warn); border-color:var(--warn-border); }
+
+    /* Example box */
+    .example{
+      background:var(--example);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      margin:10px 0;
+    }
+    .example .ex-title{
+      font-weight:900;
+      margin-bottom:6px;
+    }
+
+    /* Code block */
+    pre{
+      background:var(--code);
+      color:var(--codeText);
+      padding:12px;
+      border-radius:12px;
+      overflow:auto;
+      border:1px solid rgba(255,255,255,.06);
+      margin:10px 0;
+    }
+    code{
+      background:#f3f3f3;
+      border:1px solid #e9e9e9;
+      padding:2px 6px;
+      border-radius:8px;
+      font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
+      font-size: 0.95em;
+    }
+
+    /* Try it button */
+    .trybtn{
+      display:inline-block;
+      margin-top:8px;
+      padding:10px 14px;
+      background:var(--w3-green);
+      color:#fff;
+      font-weight:900;
+      border-radius:10px;
+      text-decoration:none;
+      border:1px solid rgba(0,0,0,.06);
+    }
+    .trybtn:hover{ filter:brightness(.98); }
+
+    /* Next/Prev */
+    .pager{
+      display:flex;
+      gap:10px;
+      justify-content:space-between;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+    .pager a{
+      text-decoration:none;
+      background:var(--w3-green);
+      color:#fff;
+      font-weight:900;
+      padding:10px 14px;
+      border-radius:999px;
+      display:inline-block;
+      border:1px solid rgba(0,0,0,.06);
+    }
+    .pager a.secondary{
+      background:#0b5c3f;
+    }
+    .pager .placeholders{
+      width:100%;
+      font-size:12px;
+      color:var(--muted);
+      margin-top:6px;
+    }
+    .pager .placeholders a{
+      background:transparent;
+      color:var(--muted);
+      border:none;
+      padding:0;
+      text-decoration:underline;
+      font-weight:700;
+    }
+
+    /* Tables */
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border-radius:12px;
+      border:1px solid var(--border);
+      margin:10px 0;
+    }
+    th, td{
+      padding:10px 10px;
+      border-bottom:1px solid var(--border);
+      text-align:left;
+      vertical-align:top;
+      font-size:14px;
+    }
+    th{
+      background:#fafafa;
+      font-weight:900;
+    }
+    tr:last-child td{ border-bottom:none; }
+
+    /* Tooltip (STRICT: CSS only, span.tt[data-tip="..."]) */
+    .tt{
+      position:relative;
+      border-bottom:2px dotted rgba(4,170,109,.65);
+      cursor:help;
+      font-weight:800;
+      color:#0b5c3f;
+    }
+    .tt::after{
+      content: attr(data-tip);
+      position:absolute;
+      left:0;
+      top: calc(100% + 10px);
+      width: min(360px, 70vw);
+      background:#111;
+      color:#fff;
+      padding:10px 10px;
+      border-radius:12px;
+      box-shadow:0 12px 30px rgba(0,0,0,.22);
+      opacity:0;
+      pointer-events:none;
+      transform:translateY(-6px);
+      transition:opacity .15s ease, transform .15s ease;
+      font-weight:600;
+      font-size:13px;
+      line-height:1.35;
+      z-index:999;
+      white-space:pre-line;
+    }
+    .tt::before{
+      content:"";
+      position:absolute;
+      left:14px;
+      top: calc(100% + 2px);
+      border:8px solid transparent;
+      border-bottom-color:#111;
+      opacity:0;
+      transform:translateY(-6px);
+      transition:opacity .15s ease, transform .15s ease;
+      z-index:999;
+    }
+    .tt:hover::after,
+    .tt:hover::before{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    /* Simple “hover highlight / zoom” effect for important callouts (CSS only) */
+    .hoverzoom{
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .hoverzoom:hover{
+      transform: scale(1.01);
+      box-shadow:0 10px 30px rgba(0,0,0,.10);
+    }
+
+    /* Responsive */
+    @media (max-width: 980px){
+      nav#sidebarMenu{
+        position:fixed;
+        left:-290px;
+        transition:left .18s ease;
+        z-index:1200;
+      }
+      nav#sidebarMenu.open{ left:0; }
+      .content{
+        margin-left:0;
+        width:100%;
+      }
+      .topbar .title{ display:none; }
+    }
+
+    /* Quiz */
+    .quizQ{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      margin:10px 0;
+      background:#fff;
+    }
+    .quizQ .qtitle{ font-weight:900; }
+    .quizQ label{ display:block; margin:6px 0; cursor:pointer; }
+    .quiz-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .btn{
+      padding:10px 14px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#fff;
+      cursor:pointer;
+      font-weight:900;
+    }
+    .btn.primary{
+      background:var(--w3-green);
+      color:#fff;
+      border-color:rgba(0,0,0,.06);
+    }
+    .btn:active{ transform:translateY(1px); }
+    .scorebox{
+      padding:12px;
+      border-radius:12px;
+      background:#f8fffb;
+      border:1px solid #c9f0de;
+      font-weight:900;
+      color:#0b5c3f;
+      display:none;
+      margin-top:10px;
+    }
+
+    /* Anchors offset for fixed topbar */
+    .anchor{ scroll-margin-top: 70px; }
+
+    /* Footer */
+    .footer{
+      margin-top:18px;
+      color:var(--muted);
+      font-size:13px;
+      text-align:center;
+    }
+</style>
+
+<!-- Placeholder anchors requested -->
+  <a id="prev-subtopic" class="anchor"></a>
+  <a id="next-subtopic" class="anchor"></a>
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">IT</div>
+      <div>ItTechGenie</div>
+    </div>
+    <div class="title">C# 10 Features (W3Schools-style Tutorial)</div>
+    <div class="spacer"></div>
+    <button class="topbtn" onclick="toggleSidebar()">☰ Menu</button>
+  </div>
+
+  <div class="layout">
+    <!-- REQUIRED: same id as your _Layout.cshtml -->
+    <nav id="sidebarMenu" aria-label="Sidebar navigation">
+      <div class="sidecard hoverzoom">
+        <h3>Navigate here to Learn</h3>
+        <div class="small">C# 10 Features • Single Page • Anchors</div>
+
+        <a class="sidelink" href="#intro">1. Overview</a>
+        <a class="sidelink" href="#toc">2. Table of Contents</a>
+
+        <div class="sidegroup">Type System Updates</div>
+        <div class="subindent">
+          <a class="sidelink" href="#record-structs">Record structs</a>
+          <a class="sidelink" href="#struct-improvements">Struct improvements</a>
+          <a class="sidelink" href="#seal-tostring">Seal ToString()</a>
+        </div>
+
+        <div class="sidegroup">Performance & Formatting</div>
+        <div class="subindent">
+          <a class="sidelink" href="#interpolated-handlers">Interpolated string handlers</a>
+          <a class="sidelink" href="#const-interpolated">Const interpolated strings</a>
+        </div>
+
+        <div class="sidegroup">Code Organization</div>
+        <div class="subindent">
+          <a class="sidelink" href="#global-using">global using directives</a>
+          <a class="sidelink" href="#file-scoped-ns">File-scoped namespace</a>
+        </div>
+
+        <div class="sidegroup">Pattern Matching</div>
+        <div class="subindent">
+          <a class="sidelink" href="#extended-property-patterns">Extended property patterns</a>
+        </div>
+
+        <div class="sidegroup">Lambda Improvements</div>
+        <div class="subindent">
+          <a class="sidelink" href="#lambda-improvements">Lambda expression updates</a>
+        </div>
+
+        <div class="sidegroup">Compiler & Safety</div>
+        <div class="subindent">
+          <a class="sidelink" href="#definite-assignment">Improved definite assignment</a>
+          <a class="sidelink" href="#deconstruction-both">Deconstruction: declare + assign</a>
+        </div>
+
+        <div class="sidegroup">Async & Diagnostics</div>
+        <div class="subindent">
+          <a class="sidelink" href="#asyncmethodbuilder">AsyncMethodBuilder attribute</a>
+          <a class="sidelink" href="#callerargumentexpression">CallerArgumentExpression</a>
+          <a class="sidelink" href="#line-pragma">Enhanced #line pragma</a>
+          <a class="sidelink" href="#warning-wave">Warning wave 6</a>
+        </div>
+
+        <div class="sidegroup">Wrap-up</div>
+        <div class="subindent">
+          <a class="sidelink" href="#best-practices">Best practices</a>
+          <a class="sidelink" href="#step-by-step">Step-by-step</a>
+          <a class="sidelink" href="#mini-project">Mini project</a>
+          <a class="sidelink" href="#faqs">FAQs</a>
+          <a class="sidelink" href="#interview">Interview questions</a>
+          <a class="sidelink" href="#mcq">MCQ quiz</a>
+          <a class="sidelink" href="#downloads">Downloads</a>
+          <a class="sidelink" href="#glossary">Glossary (Tooltips)</a>
+        </div>
+
+        <!-- REQUIRED SIDEBAR MENU ADDITION -->
+        <div class="sidegroup">Practice</div>
+        <a class="sidelink" href="#practice-coding-questions">To Become Best coder Practice this</a>
+      </div>
+    </nav>
+
+    <main class="content">
+      <div class="container">
+
+        <!-- INTRO -->
+        <section id="intro" class="section anchor hoverzoom">
+          <div class="head">
+            <div>1) C# 10 Features — Introduction</div>
+            <div class="tag">Beginner → Advanced</div>
+          </div>
+          <div class="body">
+            <p>
+              C# 10 is a major language update designed to make code shorter, safer, and faster—especially for modern
+              .NET apps. Many features improve code structure (like <span class="tt" data-tip="A namespace is a logical folder for code.\nIt prevents name conflicts and organizes classes.\nIn C# 10, you can write it in a shorter file-scoped form.">namespace</span> changes),
+              performance (like <span class="tt" data-tip="A compiler feature that makes string interpolation faster.\nIt builds strings only when needed, reducing allocations.\nGreat for logging and performance-sensitive code.">interpolated string handlers</span>),
+              and safety (like improved <span class="tt" data-tip="A compiler safety rule: variables must be assigned\nbefore you read them.\nC# 10 improves analysis in more scenarios.">definite assignment</span>).
+            </p>
+            <p>
+              If you build Web APIs, MVC apps, microservices, console tools, or libraries, C# 10 helps you write cleaner
+              and more maintainable code with fewer lines—without losing readability.
+            </p>
+
+            <div class="note">
+              <b>Note:</b> C# 10 is the default language version in <b>.NET 6</b>. You can use it in Visual Studio 2022+.
+            </div>
+
+            <div class="example">
+              <div class="ex-title">Visual Flow: Where C# 10 features help</div>
+              <pre>
+Your Codebase
+   |
+   +--> Organization (global using, file-scoped namespace)
+   |
+   +--> Performance (interpolated string handlers)
+   |
+   +--> Safety (definite assignment, diagnostics)
+   |
+   +--> Expressiveness (patterns, lambdas, records)
+              </pre>
+              <a class="trybtn" href="#!" title="Dummy link">Try It Yourself</a>
+            </div>
+
+            <div class="tip">
+              <b>Beginner Tip:</b> Don’t try all features at once. Start with <b>global using</b> and <b>file-scoped namespace</b>—they give immediate readability wins.
+            </div>
+
+            <div class="warning">
+              <b>Advanced Note:</b> Performance wins (like interpolated string handlers) show best in high-volume logging or tight loops—measure with benchmarks before and after.
+            </div>
+
+            <div class="pager">
+              <a class="secondary" href="#prev-subtopic">❮ Previous Page</a>
+              <a href="#toc">Next Page ❯</a>
+              <div class="placeholders">
+                Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> • <a href="#next-subtopic">#next-subtopic</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOC -->
+        <section id="toc" class="section anchor hoverzoom">
+          <div class="head">
+            <div>2) Auto Table of Contents</div>
+            <div class="tag">Quick Jump</div>
+          </div>
+          <div class="body">
+            <p class="muted">
+              This ToC is generated from the sidebar subtopics. Use it like W3Schools to jump to any section.
+            </p>
+
+            <table>
+              <tr><th>Category</th><th>Sections</th></tr>
+              <tr>
+                <td><b>Type System</b></td>
+                <td>
+                  <a href="#record-structs">Record structs</a> •
+                  <a href="#struct-improvements">Struct improvements</a> •
+                  <a href="#seal-tostring">Seal ToString()</a>
+                </td>
+              </tr>
+              <tr>
+                <td><b>Performance</b></td>
+                <td>
+                  <a href="#interpolated-handlers">Interpolated string handlers</a> •
+                  <a href="#const-interpolated">Const interpolated strings</a>
+                </td>
+              </tr>
+              <tr>
+                <td><b>Organization</b></td>
+                <td>
+                  <a href="#global-using">global using directives</a> •
+                  <a href="#file-scoped-ns">File-scoped namespace</a>
+                </td>
+              </tr>
+              <tr>
+                <td><b>Patterns & Lambdas</b></td>
+                <td>
+                  <a href="#extended-property-patterns">Extended property patterns</a> •
+                  <a href="#lambda-improvements">Lambda improvements</a>
+                </td>
+              </tr>
+              <tr>
+                <td><b>Safety & Diagnostics</b></td>
+                <td>
+                  <a href="#definite-assignment">Definite assignment</a> •
+                  <a href="#deconstruction-both">Deconstruction updates</a> •
+                  <a href="#asyncmethodbuilder">AsyncMethodBuilder</a> •
+                  <a href="#callerargumentexpression">CallerArgumentExpression</a> •
+                  <a href="#line-pragma">#line pragma</a> •
+                  <a href="#warning-wave">Warning wave 6</a>
+                </td>
+              </tr>
+            </table>
+
+            <div class="pager">
+              <a class="secondary" href="#intro">❮ Previous Page</a>
+              <a href="#record-structs">Next Page ❯</a>
+              <div class="placeholders">
+                Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> • <a href="#next-subtopic">#next-subtopic</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Record structs -->
+        <section id="record-structs" class="section anchor hoverzoom">
+          <div class="head">
+            <div>3) <span class="tt" data-tip="A record struct is a value type with record-like behavior.\nIt gives built-in value equality, Deconstruct, and printing.\nUse it for small immutable data that should be compared by value.">Record structs</span></div>
+            <div class="tag">Type System</div>
+          </div>
+          <div class="body">
+            <p>
+              A <span class="tt" data-tip="A struct is a value type stored by value (often on the stack).\nIt is efficient for small data objects.\nC# 10 improves how structs can be written and used.">struct</span> is great for small data, but traditional structs take extra code for equality and printing.
+              C# 10 introduces <b>record structs</b>, giving you record-style value equality and nice output while still being a value type.
+              This is perfect for simple “data carriers” like coordinates, money amounts, or IDs.
+            </p>
+            <p>
+              You can create them as <b>positional</b> (short form) or full form. Record structs can also be <b>readonly</b> to reduce accidental mutation.
+            </p>
+
+            <div class="example">
+              <div class="ex-title">ASCII Diagram: class vs struct vs record struct</div>
+              <pre>
+class (reference type)         struct (value type)           record struct (value type + value equality)
+----------------------         --------------------          ------------------------------------------
+Stored by reference            Stored by value               Stored by value
+Equality: reference by default Equality: field-by-field?     Equality: built-in value equality
+ToString: type name            ToString: type name           ToString: useful generated output
+              </pre>
+            </div>
+
+            <div class="example">
+              <div class="ex-title">Example: record struct for money transfer</div>
+              <pre>
+// C# 10
+public readonly record struct Money(decimal Amount, string Currency);
+
+public class Program
+              </pre>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+{
+    public static void Main()
+    {
+        var m1 = new Money(100m, "INR");
+        var m2 = new Money(100m, "INR");
+
+        // Value equality (same data => equal)
+        Console.WriteLine(m1 == m2);   // True
+
+        // Nice ToString output
+        Console.WriteLine(m1);         // Money { Amount = 100, Currency = INR }
+    }
+}
+              </pre>
+              <a class="trybtn" href="#!" title="Dummy link">Try It Yourself</a>
+            </div>
+
+            <div class="tip">
+              <b>Beginner Tip:</b> Use <b>record struct</b> for small “data packets” that you compare often (like coordinates or prices).
+            </div>
+            <div class="warning">
+              <b>Advanced Note:</b> Prefer <b>readonly record struct</b> for performance and correctness—mutable structs can cause surprising bugs when copied.
+            </div>
+
+            <p><b>Real-world use case:</b> In an e-commerce app, you can represent totals, discounts, and tax as small value objects (Money) to avoid passing raw decimals everywhere.</p>
+
+            <div class="pager">
+              <a class="secondary" href="#toc">❮ Previous Page</a>
+              <a href="#struct-improvements">Next Page ❯</a>
+              <div class="placeholders">
+                Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> • <a href="#next-subtopic">#next-subtopic</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Struct improvements -->
+        <section id="struct-improvements" class="section anchor hoverzoom">
+          <div class="head">
+            <div>4) Improvements of structure types</div>
+            <div class="tag">Type System</div>
+          </div>
+          <div class="body">
+            <p>
+              C# 10 improves how you write and initialize <span class="tt" data-tip="A struct is a value type. Copies copy the entire value.\nGreat for small data objects to avoid heap allocations.\nC# 10 adds nicer syntax + analysis improvements.">struct</span> types.
+              The goal is to make struct code feel less “ceremony-heavy” and more consistent with modern C#.
+            </p>
+            <p>
+              Important updates include better support for parameterless constructors (more realistic scenarios), better field initialization patterns, and safer compiler checks.
+              While some behavior depends on runtime and language rules, the big picture is: <b>cleaner struct creation with fewer surprises</b>.
+            </p>
+
+            <div class="example">
+              <div class="ex-title">ASCII Flow: safer struct initialization</div>
+              <pre>
+Old struct risk:
+  create struct -> forget to set fields -> accidental default values
+
+C# 10 improvements:
+  create struct -> clearer initialization options -> compiler checks -> safer usage
+              </pre>
+            </div>
+
+            <div class="example">
+              <div class="ex-title">Example: struct as a small performance-friendly model</div>
+              <pre>
+public struct Point2D
+{
+    public int X { get; init; }
+    public int Y { get; init; }
+}
+
+public class Program
+{
+    public static void Main()
+    {
+        // Clear init-only property initialization (safe and readable)
+        Point2D p = new Point2D { X = 10, Y = 20 };
+        Console.WriteLine($"({p.X}, {p.Y})");
+    }
+}
+              </pre>
+              <a class="trybtn" href="#!" title="Dummy link">Try It Yourself</a>
+            </div>
+
+            <p><b>Real-world use case:</b> In a gaming or mapping application, millions of small points/coordinates can be represented using structs to reduce GC pressure.</p>
+
+            <div class="tip">
+              <b>Beginner Tip:</b> Use structs only for <b>small</b> data. If your type is big or frequently modified, classes can be simpler.
+            </div>
+            <div class="warning">
+              <b>Advanced Note:</b> Be careful with struct copying in collections—each assignment may copy the full value. Use <b>readonly</b> where possible.
+            </div>
+
+            <div class="pager">
+              <a class="secondary" href="#record-structs">❮ Previous Page</a>
+              <a href="#interpolated-handlers">Next Page ❯</a>
+              <div class="placeholders">
+                Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> • <a href="#next-subtopic">#next-subtopic</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Interpolated string handlers -->
+        <section id="interpolated-handlers" class="section anchor hoverzoom">
+          <div class="head">
+            <div>5) <span class="tt" data-tip="A compiler feature that changes how interpolated strings are built.\nIt can avoid allocations and formatting work when not needed.\nMost useful for logging and performance-heavy code paths.">Interpolated string handlers</span></div>
+            <div class="tag">Performance</div>
+          </div>
+          <div class="body">
+            <p>
+              Normal string interpolation (like <code>$"Hello {name}"</code>) often creates strings even when you may not use them (example: debug logs turned off).
+              C# 10 adds interpolated string handlers so APIs (like loggers) can build strings only when needed.
+            </p>
+            <p>
+              Think of it like “lazy string building”: the handler receives pieces and decides whether to format/append them.
+              This reduces allocations and improves speed in heavy logging systems.
+            </p>
+
+            <div class="example">
+              <div class="ex-title">ASCII Diagram: eager vs lazy interpolation</div>
+              <pre>
+Eager:
+  build string -> pass to logger -> logger discards (level disabled)  ❌ wasted work
+
+Handler:
+  logger checks level -> if enabled then build string               ✅ saves work
+              </pre>
+            </div>
+
+            <div class="example">
+              <div class="ex-title">Example: simplified “logger” idea (concept demo)</div>
+              <pre>
+public static class SimpleLogger
+{
+    public static bool IsEnabled = false;
+
+    // When disabled, we skip the expensive formatting work.
+    public static void Log(Func&lt;string&gt; messageFactory)
+    {
+        if (!IsEnabled) return;
+        Console.WriteLine(messageFactory());
+    }
+}
+
+public class Program
+{
+    public static void Main()
+    {
+        SimpleLogger.IsEnabled = false;
+
+        // Similar idea: don't build string unless needed
+        SimpleLogger.Log(() => $"Heavy value: {Expensive()}");
+    }
+
+    static string Expensive()
+    {
+        Console.WriteLine("Expensive() executed!");
+        return new string('X', 1000);
+    }
+}
+              </pre>
+              <div class="note">
+                <b>Note:</b> The real C# 10 feature works at compiler + API level (handlers). This example shows the same “lazy build” idea in a beginner-friendly way.
+              </div>
+              <a class="trybtn" href="#!" title="Dummy link">Try It Yourself</a>
+            </div>
+
+            <p><b>Real-world use case:</b> In microservices, request logging can be huge. Handlers reduce CPU + memory when debug logs are off in production.</p>
+
+            <div class="tip">
+              <b>Beginner Tip:</b> You don’t usually write handlers yourself first. You <b>benefit automatically</b> when using modern logging libraries that support it.
+            </div>
+            <div class="warning">
+              <b>Advanced Note:</b> If you build libraries, consider offering handler-based overloads for hot paths to reduce allocations in consumers.
+            </div>
+
+            <div class="pager">
+              <a class="secondary" href="#struct-improvements">❮ Previous Page</a>
+              <a href="#global-using">Next Page ❯</a>
+              <div class="placeholders">
+                Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> • <a href="#next-subtopic">#next-subtopic</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- global using -->
+        <section id="global-using" class="section anchor hoverzoom">
+          <div class="head">
+            <div>6) <span class="tt" data-tip="A global using applies to the whole project.\nYou define it once, and all files can use those namespaces.\nIt reduces repeated using lines at the top of every file.">global using directives</span></div>
+            <div class="tag">Organization</div>
+          </div>
+          <div class="body">
+            <p>
+              Before C# 10, every file often repeated the same <code>using</code> lines (System, Collections, Linq, etc.).
+              With <b>global using</b>, you can declare common namespaces once and the whole project can use them.
+            </p>
+            <p>
+              This keeps files clean and helps beginners focus on the code logic rather than boilerplate imports.
+              Typically, you create a file like <code>GlobalUsings.cs</code>.
+            </p>
+
+            <div class="example">
+              <div class="ex-title">ASCII Diagram: global using scope</div>
+              <pre>
+GlobalUsings.cs (once)
+   |
+   +--> File1.cs uses it automatically
+   +--> File2.cs uses it automatically
+   +--> File3.cs uses it automatically
+              </pre>
+            </div>
+
+            <div class="example">
+              <div class="ex-title">Example: GlobalUsings.cs</div>
+              <pre>
+// GlobalUsings.cs
+global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+
+// Now any .cs file can use Console, List&lt;&gt;, LINQ without repeating using lines.
+              </pre>
+              <a class="trybtn" href="#!" title="Dummy link">Try It Yourself</a>
+            </div>
+
+            <p><b>Real-world use case:</b> In a large enterprise solution, you may have 200+ files. Global usings reduce repetitive edits and keep diff/PR clean.</p>
+
+            <div class="tip">
+              <b>Beginner Tip:</b> Keep global usings limited to “common everywhere” namespaces. Too many globals can hide where types come from.
+            </div>
+            <div class="warning">
+              <b>Advanced Note:</b> For libraries, be careful: global usings can cause type name conflicts (example: same class name in two namespaces).
+            </div>
+
+            <div class="pager">
+              <a class="secondary" href="#interpolated-handlers">❮ Previous Page</a>
+              <a href="#file-scoped-ns">Next Page ❯</a>
+              <div class="placeholders">
+                Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> • <a href="#next-subtopic">#next-subtopic</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- file-scoped namespace -->
+        <section id="file-scoped-ns" class="section anchor hoverzoom">
+          <div class="head">
+            <div>7) <span class="tt" data-tip="A file-scoped namespace uses a semicolon instead of braces.\nIt reduces indentation and keeps the file clean.\nAll code in the file belongs to that namespace.">File-scoped namespace declaration</span></div>
+            <div class="tag">Organization</div>
+          </div>
+          <div class="body">
+            <p>
+              In older C#, namespaces used braces and added one extra indentation level to your whole file.
+              C# 10 introduces <b>file-scoped namespaces</b>:
+              write the namespace with a semicolon and remove the extra indentation.
+            </p>
+            <p>
+              This is especially helpful in teaching projects and real enterprise solutions where every file becomes easier to scan quickly.
+            </p>
+
+            <div class="example">
+              <div class="ex-title">ASCII Comparison</div>
+              <pre>
+Old:
+namespace MyApp
+{
+    class A { }
+}
+
+New (C# 10):
+namespace MyApp;
+class A { }
+              </pre>
+            </div>
+
+            <div class="example">
+              <div class="ex-title">Example: Clean file layout (recommended)</div>
+              <pre>
+namespace ItTechGenie.CSharp10;
+
+public class InvoiceService
+{
+    public decimal CalculateTotal(decimal basePrice, decimal tax)
+    {
+        return basePrice + tax;
+    }
+}
+              </pre>
+              <a class="trybtn" href="#!" title="Dummy link">Try It Yourself</a>
+            </div>
+
+            <p><b>Real-world use case:</b> In MVC or Web API projects, every controller/service file becomes shorter and easier to maintain.</p>
+
+            <div class="tip">
+              <b>Beginner Tip:</b> Use file-scoped namespaces in new projects. It’s simpler to read and matches modern .NET templates.
+            </div>
+            <div class="warning">
+              <b>Advanced Note:</b> File-scoped namespace applies to the whole file—don’t mix multiple namespaces inside the same file when using this style.
+            </div>
+
+            <div class="pager">
+              <a class="secondary" href="#global-using">❮ Previous Page</a>
+              <a href="#extended-property-patterns">Next Page ❯</a>
+              <div class="placeholders">
+                Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> • <a href="#next-subtopic">#next-subtopic</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- extended property patterns -->
+        <section id="extended-property-patterns" class="section anchor hoverzoom">
+          <div class="head">
+            <div>8) <span class="tt" data-tip="Property patterns let you match object properties inside an if/switch.\nExtended patterns allow deeper nesting with simpler syntax.\nUseful in validation, routing, and business rule checks.">Extended property patterns</span></div>
+            <div class="tag">Pattern Matching</div>
+          </div>
+          <div class="body">
+            <p>
+              Pattern matching lets you “check structure” instead of writing many <code>if</code> conditions.
+              C# 10 extends property patterns so you can match nested properties more naturally.
+            </p>
+            <p>
+              This makes validation and decision logic more readable, especially when dealing with nested DTOs (request objects) in APIs.
+            </p>
+
+            <div class="example">
+              <div class="ex-title">ASCII Diagram: nested object matching</div>
+              <pre>
+Order
+ ├─ Customer
+ │   ├─ Address
+ │   │   └─ Country
+ └─ TotalAmount
+
+Pattern matching checks: Order.Customer.Address.Country == "IN"
+              </pre>
+            </div>
+
+            <div class="example">
+              <div class="ex-title">Example: Validate nested properties</div>
+              <pre>
+public class Address { public string Country { get; set; } = ""; }
+public class Customer { public Address Address { get; set; } = new Address(); }
+public class Order { public Customer Customer { get; set; } = new Customer(); public decimal Total { get; set; } }
+
+public class Program
+{
+    public static void Main()
+    {
+        var order = new Order { Total = 1200m, Customer = new Customer { Address = new Address { Country = "IN" } } };
+
+        // Extended property pattern style
+        if (order is { Customer: { Address: { Country: "IN" } }, Total: &gt; 1000m })
+        {
+            Console.WriteLine("Apply India premium delivery rules");
+        }
+    }
+}
+              </pre>
+              <a class="trybtn" href="#!" title="Dummy link">Try It Yourself</a>
+            </div>
+
+            <p><b>Real-world use case:</b> In a shipping microservice, decide shipping rules based on nested request data (country, state, membership type).</p>
+
+            <div class="tip">
+              <b>Beginner Tip:</b> Start with simple property patterns first, then move to nested patterns.
+            </div>
+            <div class="warning">
+              <b>Advanced Note:</b> Keep patterns readable—if it becomes too complex, extract to a named method like <code>IsPremiumIndianOrder(order)</code>.
+            </div>
+
+            <div class="pager">
+              <a class="secondary" href="#file-scoped-ns">❮ Previous Page</a>
+              <a href="#lambda-improvements">Next Page ❯</a>
+              <div class="placeholders">
+                Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> • <a href="#next-subtopic">#next-subtopic</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- lambda improvements -->
+        <section id="lambda-improvements" class="section anchor hoverzoom">
+          <div class="head">
+            <div>9) <span class="tt" data-tip="A lambda expression is an inline function.\nC# 10 improves typing rules and natural delegate conversions.\nIt makes lambdas easier to use in LINQ and APIs.">Improvements on lambda expressions</span></div>
+            <div class="tag">Functional</div>
+          </div>
+          <div class="body">
+            <p>
+              Lambdas are “small functions” written inline. C# 10 improves lambda typing and reduces friction when passing lambdas to methods.
+              This helps when working with LINQ, event handlers, and modern minimal APIs.
+            </p>
+            <p>
+              Practically, you get better inference and more consistent behavior when converting lambdas to delegate types.
+            </p>
+
+            <div class="example">
+              <div class="ex-title">ASCII Diagram: lambda usage</div>
+              <pre>
+Data list
+  |
+  +--> LINQ Where(x => ...)
+  |
+  +--> Select(x => ...)
+  |
+  +--> Result list
+              </pre>
+            </div>
+
+            <div class="example">
+              <div class="ex-title">Example: cleaner lambdas with inference (LINQ)</div>
+              <pre>
+using System;
+using System.Linq;
+
+public class Program
+{
+    public static void Main()
+    {
+        int[] marks = { 35, 55, 72, 90 };
+
+        // Lambda expressions inside LINQ
+        var passed = marks.Where(m =&gt; m &gt;= 40).ToArray();
+
+        Console.WriteLine(string.Join(", ", passed)); // 55, 72, 90
+    }
+}
+              </pre>
+              <a class="trybtn" href="#!" title="Dummy link">Try It Yourself</a>
+            </div>
+
+            <p><b>Real-world use case:</b> Filtering incoming data (students, employees, orders) using LINQ expressions in service layer.</p>
+
+            <div class="tip">
+              <b>Beginner Tip:</b> Read lambdas as “input goes to output.” Example: <code>m =&gt; m &gt;= 40</code> means “m is passed, returns true/false.”
+            </div>
+            <div class="warning">
+              <b>Advanced Note:</b> Prefer named methods when the lambda grows beyond 1–2 lines—this improves debugging and reuse.
+            </div>
+
+            <div class="pager">
+              <a class="secondary" href="#extended-property-patterns">❮ Previous Page</a>
+              <a href="#const-interpolated">Next Page ❯</a>
+              <div class="placeholders">
+                Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> • <a href="#next-subtopic">#next-subtopic</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- const interpolated strings -->
+        <section id="const-interpolated" class="section anchor hoverzoom">
+          <div class="head">
+            <div>10) <span class="tt" data-tip="A const string is compile-time constant.\nC# 10 allows const strings using interpolation\nwhen all inserted values are also constants.">Allow const interpolated strings</span></div>
+            <div class="tag">Formatting</div>
+          </div>
+          <div class="body">
+            <p>
+              Earlier, you could not write interpolated strings as <code>const</code>.
+              C# 10 allows <b>const interpolated strings</b> if every piece is also compile-time constant.
+              This is useful for constant messages, routes, and standard labels.
+            </p>
+            <p>
+              The compiler builds it once at compile time (not runtime), which makes it safe and fast.
+            </p>
+
+            <div class="example">
+              <div class="ex-title">ASCII Rule: when const interpolation works</div>
+              <pre>
+const string OK:
+  const string x = $"Hello {"World"}";   // all parts are constant
+
+NOT allowed:
+  string name = "Gopi";
+  const string x = $"Hello {name}";      // name is not constant
+              </pre>
+            </div>
+
+            <div class="example">
+              <div class="ex-title">Example: const interpolation with constants</div>
+              <pre>
+public class Program
+{
+    public static void Main()
+    {
+        const string app = "ItTechGenie";
+        const string msg = $"{app} - Welcome"; // OK in C# 10 (all const)
+
+        Console.WriteLine(msg);
+    }
+}
+              </pre>
+              <a class="trybtn" href="#!" title="Dummy link">Try It Yourself</a>
+            </div>
+
+            <p><b>Real-world use case:</b> Constant route prefixes, constant UI labels, constant telemetry event names.</p>
+
+            <div class="tip">
+              <b>Beginner Tip:</b> Use <code>const</code> for values that never change. It prevents accidental modification.
+            </div>
+            <div class="warning">
+              <b>Advanced Note:</b> For shared constants across projects, consider <code>static readonly</code> when values need runtime computation.
+            </div>
+
+            <div class="pager">
+              <a class="secondary" href="#lambda-improvements">❮ Previous Page</a>
+              <a href="#seal-tostring">Next Page ❯</a>
+              <div class="placeholders">
+                Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> • <a href="#next-subtopic">#next-subtopic</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- seal ToString -->
+        <section id="seal-tostring" class="section anchor hoverzoom">
+          <div class="head">
+            <div>11) Record types can seal <code>ToString()</code></div>
+            <div class="tag">Type System</div>
+          </div>
+          <div class="body">
+            <p>
+              Records auto-generate a helpful <code>ToString()</code>. In inheritance scenarios, derived records could override it.
+              C# 10 allows record authors to <span class="tt" data-tip="sealed prevents further overriding in derived types.\nIt locks a virtual member so subclasses cannot change it.\nUsed to protect behavior and improve predictability.">seal</span> <code>ToString()</code>
+              to keep output consistent.
+            </p>
+            <p>
+              This is valuable when logs, audit trails, or debugging tools depend on a stable string representation.
+            </p>
+
+            <div class="example">
+              <div class="ex-title">ASCII: why seal matters</div>
+              <pre>
+Base record ToString() -> used in logs
+     |
+Derived record overrides ToString() -> logs change unexpectedly ❌
+
+Seal ToString() -> derived cannot change it -> logs remain stable ✅
+              </pre>
+            </div>
+
+            <div class="example">
+              <div class="ex-title">Example: sealing ToString()</div>
+              <pre>
+public record Employee(string Name, int Id)
+{
+    public sealed override string ToString() =&gt; $"Emp({Id}) - {Name}";
+}
+
+public class Program
+{
+    public static void Main()
+    {
+        var e = new Employee("Ananya", 101);
+        Console.WriteLine(e.ToString());
+    }
+}
+              </pre>
+              <a class="trybtn" href="#!" title="Dummy link">Try It Yourself</a>
+            </div>
+
+            <p><b>Real-world use case:</b> Audit systems where consistent ToString() output is used in logs or compliance reports.</p>
+
+            <div class="tip">
+              <b>Beginner Tip:</b> If you don’t use inheritance, you may not need sealing. But it’s good to know for large systems.
+            </div>
+            <div class="warning">
+              <b>Advanced Note:</b> Sealing is a design decision—use it when you must preserve behavior for derived types.
+            </div>
+
+            <div class="pager">
+              <a class="secondary" href="#const-interpolated">❮ Previous Page</a>
+              <a href="#definite-assignment">Next Page ❯</a>
+              <div class="placeholders">
+                Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> • <a href="#next-subtopic">#next-subtopic</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- definite assignment -->
+        <section id="definite-assignment" class="section anchor hoverzoom">
+          <div class="head">
+            <div>12) Improved definite assignment</div>
+            <div class="tag">Safety</div>
+          </div>
+          <div class="body">
+            <p>
+              <span class="tt" data-tip="Definite assignment is a compiler rule.\nIt ensures variables are assigned before being read.\nThis prevents runtime bugs due to uninitialized values.">Definite assignment</span> is the compiler’s way of protecting you from using variables before they have a value.
+              C# 10 improves the compiler’s ability to “understand” more code paths, especially around pattern matching and conditions.
+            </p>
+            <p>
+              The result: fewer false warnings and safer code. It’s like having a smarter assistant that checks your variable usage.
+            </p>
+
+            <div class="example">
+              <div class="ex-title">ASCII: safe variable usage</div>
+              <pre>
+Declare variable
+  |
+Assign in all possible paths?
+  |-- Yes --> You can read it ✅
+  |-- No  --> Compiler warns you ❌
+              </pre>
+            </div>
+
+            <div class="example">
+              <div class="ex-title">Example: safer flow checks</div>
+              <pre>
+public class Program
+{
+    public static void Main()
+    {
+        int value;
+
+        if (DateTime.Now.DayOfWeek == DayOfWeek.Sunday)
+        {
+            value = 100;
+        }
+        else
+        {
+            value = 200;
+        }
+
+        // Safe: value is assigned in all paths
+        Console.WriteLine(value);
+    }
+}
+              </pre>
+              <a class="trybtn" href="#!" title="Dummy link">Try It Yourself</a>
+            </div>
+
+            <p><b>Real-world use case:</b> Decision logic (discount rules, eligibility rules) where you must ensure values are set in every path.</p>
+
+            <div class="tip">
+              <b>Beginner Tip:</b> If the compiler says “use of unassigned local variable,” assign a default or ensure every branch sets it.
+            </div>
+            <div class="warning">
+              <b>Advanced Note:</b> Improved analysis reduces noisy warnings, but you should still write clear branches for maintainability.
+            </div>
+
+            <div class="pager">
+              <a class="secondary" href="#seal-tostring">❮ Previous Page</a>
+              <a href="#deconstruction-both">Next Page ❯</a>
+              <div class="placeholders">
+                Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> • <a href="#next-subtopic">#next-subtopic</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- deconstruction assignment + declaration -->
+        <section id="deconstruction-both" class="section anchor hoverzoom">
+          <div class="head">
+            <div>13) Allow both assignment and declaration in the same deconstruction</div>
+            <div class="tag">Safety</div>
+          </div>
+          <div class="body">
+            <p>
+              <span class="tt" data-tip="Deconstruction splits a tuple or object into separate variables.\nExample: (a, b) = GetPair();\nC# 10 allows mixing new declarations and existing variables in one statement.">Deconstruction</span> is when you unpack a tuple into variables.
+              C# 10 improves this by allowing you to declare a new variable and assign to an existing variable in the same deconstruction statement.
+            </p>
+            <p>
+              This is useful when you already have one variable (like a running total) but want a new value from a method at the same time.
+            </p>
+
+            <div class="example">
+              <div class="ex-title">ASCII: unpacking values</div>
+              <pre>
+Method returns: (newValue, updatedValue)
+Deconstruction:
+  declare one new variable
+  assign one existing variable
+              </pre>
+            </div>
+
+            <div class="example">
+              <div class="ex-title">Example: mix declare + assign</div>
+              <pre>
+public class Program
+{
+    static (int current, int next) GetNumbers() =&gt; (10, 11);
+
+    public static void Main()
+    {
+        int next = 0;
+
+        // C# 10 allows: declare "current" and assign existing "next"
+        (int current, next) = GetNumbers();
+
+        Console.WriteLine($"Current: {current}, Next: {next}");
+    }
+}
+              </pre>
+              <a class="trybtn" href="#!" title="Dummy link">Try It Yourself</a>
+            </div>
+
+            <p><b>Real-world use case:</b> Parsing pipelines where you keep one “state variable” but also get fresh computed values from each stage.</p>
+
+            <div class="tip">
+              <b>Beginner Tip:</b> If it looks confusing, split into two lines. Readability is more important than “short code.”
+            </div>
+            <div class="warning">
+              <b>Advanced Note:</b> In performance-sensitive loops, deconstruction may allocate in some scenarios—benchmark if used heavily.
+            </div>
+
+            <div class="pager">
+              <a class="secondary" href="#definite-assignment">❮ Previous Page</a>
+              <a href="#asyncmethodbuilder">Next Page ❯</a>
+              <div class="placeholders">
+                Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> • <a href="#next-subtopic">#next-subtopic</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- AsyncMethodBuilder attribute -->
+        <section id="asyncmethodbuilder" class="section anchor hoverzoom">
+          <div class="head">
+            <div>14) Allow <span class="tt" data-tip="An attribute is metadata applied to code.\nAsyncMethodBuilder lets advanced libraries choose\nhow async methods are built and executed.">AsyncMethodBuilder</span> attribute on methods</div>
+            <div class="tag">Async</div>
+          </div>
+          <div class="body">
+            <p>
+              This feature is advanced and mostly used by library/framework authors.
+              It allows applying an <span class="tt" data-tip="An attribute is extra information attached to code.\nIt can change behavior or provide metadata.\nUsed heavily in frameworks (MVC, DI, serialization).">attribute</span> to an async method to control which “builder” type is used behind the scenes.
+            </p>
+            <p>
+              In simple terms: it gives power users a way to customize how async state machines are created—helpful for performance or specialized async types.
+            </p>
+
+            <div class="example">
+              <div class="ex-title">ASCII: what happens in async (concept)</div>
+              <pre>
+async method
+  |
+compiler creates state machine
+  |
+builder coordinates:
+  - when to continue
+  - how to store state
+  - how to complete result
+              </pre>
+            </div>
+
+            <div class="example">
+              <div class="ex-title">Example (concept-level): normal async usage</div>
+              <pre>
+using System;
+using System.Threading.Tasks;
+
+public class Program
+{
+    public static async Task Main()
+    {
+        Console.WriteLine("Start");
+        await Task.Delay(200);
+        Console.WriteLine("End");
+    }
+}
+              </pre>
+              <div class="note">
+                <b>Note:</b> Most learners don’t need custom builders. You just need to know it exists for advanced frameworks and performance tuning.
+              </div>
+              <a class="trybtn" href="#!" title="Dummy link">Try It Yourself</a>
+            </div>
+
+            <p><b>Real-world use case:</b> High-performance libraries (like custom task-like types) where you want fine control over async machinery.</p>
+
+            <div class="tip">
+              <b>Beginner Tip:</b> Focus on <code>async</code>/<code>await</code> first. Treat this feature as “advanced internals.”
+            </div>
+            <div class="warning">
+              <b>Advanced Note:</b> If you build frameworks, this can reduce allocations and improve async throughput—but it requires deep understanding.
+            </div>
+
+            <div class="pager">
+              <a class="secondary" href="#deconstruction-both">❮ Previous Page</a>
+              <a href="#callerargumentexpression">Next Page ❯</a>
+              <div class="placeholders">
+                Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> • <a href="#next-subtopic">#next-subtopic</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CallerArgumentExpression -->
+        <section id="callerargumentexpression" class="section anchor hoverzoom">
+          <div class="head">
+            <div>15) <span class="tt" data-tip="CallerArgumentExpression captures the expression text passed by the caller.\nIt helps build better error messages and validations.\nGreat for Guard clauses and argument checks.">CallerArgumentExpression</span> attribute</div>
+            <div class="tag">Diagnostics</div>
+          </div>
+          <div class="body">
+            <p>
+              This feature improves error messages and validation.
+              When you write a guard method like <code>NotNull(x)</code>, it can automatically capture the exact expression used by the caller (like <code>user.Name</code>).
+            </p>
+            <p>
+              Result: your exceptions become more informative without manually typing parameter names everywhere.
+              This makes debugging faster in real projects.
+            </p>
+
+            <div class="example">
+              <div class="ex-title">ASCII: how it helps</div>
+              <pre>
+Caller writes: Guard.NotNull(user.Name);
+
+Guard receives:
+  value = user.Name
+  expressionText = "user.Name"   (captured automatically)
+              </pre>
+            </div>
+
+            <div class="example">
+              <div class="ex-title">Example: Guard method with CallerArgumentExpression</div>
+              <pre>
+using System;
+using System.Runtime.CompilerServices;
+
+public static class Guard
+{
+    public static void NotNull(object? value,
+        [CallerArgumentExpression("value")] string? expr = null)
+    {
+        if (value is null)
+            throw new ArgumentNullException(expr, "Value cannot be null");
+    }
+}
+
+public class Program
+{
+    public static void Main()
+    {
+        string? name = null;
+        // Throws: ArgumentNullException: name (Value cannot be null)
+        Guard.NotNull(name);
+    }
+}
+              </pre>
+              <a class="trybtn" href="#!" title="Dummy link">Try It Yourself</a>
+            </div>
+
+            <p><b>Real-world use case:</b> Validation libraries, domain guard checks, preconditions in service methods.</p>
+
+            <div class="tip">
+              <b>Beginner Tip:</b> Use this to create readable validations instead of repeating <code>"paramName"</code> strings.
+            </div>
+            <div class="warning">
+              <b>Advanced Note:</b> This improves maintainability—when you rename a variable, the captured expression updates automatically.
+            </div>
+
+            <div class="pager">
+              <a class="secondary" href="#asyncmethodbuilder">❮ Previous Page</a>
+              <a href="#line-pragma">Next Page ❯</a>
+              <div class="placeholders">
+                Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> • <a href="#next-subtopic">#next-subtopic</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- #line pragma -->
+        <section id="line-pragma" class="section anchor hoverzoom">
+          <div class="head">
+            <div>16) Enhanced <span class="tt" data-tip="#line is a compiler directive.\nIt lets you change reported line numbers / file names.\nUseful for source generators and code produced at build time.">#line pragma</span></div>
+            <div class="tag">Diagnostics</div>
+          </div>
+          <div class="body">
+            <p>
+              The <code>#line</code> directive tells the compiler what line number and file name to report in errors.
+              C# 10 enhances this for better tooling and generated code scenarios.
+            </p>
+            <p>
+              If you use source generators or code generation tools, this helps map errors back to the “original” source location.
+            </p>
+
+            <div class="example">
+              <div class="ex-title">ASCII: mapping generated code to real file</div>
+              <pre>
+GeneratedFile.g.cs  (compiler sees)
+   |
+#line "OriginalTemplate.tt"
+   |
+Errors appear as if they happened in OriginalTemplate.tt  ✅
+              </pre>
+            </div>
+
+            <div class="example">
+              <div class="ex-title">Example: basic #line usage (concept)</div>
+              <pre>
+public class Program
+{
+#line 100 "MyTemplateFile.txt"
+    public static void Main()
+    {
+        // If error happens here, compiler can report it as line 100 in MyTemplateFile.txt
+        int x = "not a number"; // Intentional error
+    }
+}
+              </pre>
+              <div class="warning">
+                <b>Warning:</b> The above code has an intentional compile error to show how line mapping works.
+              </div>
+              <a class="trybtn" href="#!" title="Dummy link">Try It Yourself</a>
+            </div>
+
+            <p><b>Real-world use case:</b> Source generators in .NET (like auto-generating DTOs or mapping code) with accurate error reporting.</p>
+
+            <div class="tip">
+              <b>Beginner Tip:</b> You’ll rarely use <code>#line</code> directly in daily app development—know it mainly for tooling scenarios.
+            </div>
+            <div class="warning">
+              <b>Advanced Note:</b> Correct line mapping improves developer experience significantly in code generation pipelines.
+            </div>
+
+            <div class="pager">
+              <a class="secondary" href="#callerargumentexpression">❮ Previous Page</a>
+              <a href="#warning-wave">Next Page ❯</a>
+              <div class="placeholders">
+                Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> • <a href="#next-subtopic">#next-subtopic</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- warning wave 6 -->
+        <section id="warning-wave" class="section anchor hoverzoom">
+          <div class="head">
+            <div>17) <span class="tt" data-tip="Warning waves are scheduled compiler warning updates.\nThey gradually introduce new warnings to improve code safety.\nWave 6 includes more analyzers and better diagnostics.">Warning wave 6</span></div>
+            <div class="tag">Compiler</div>
+          </div>
+          <div class="body">
+            <p>
+              C# compiler teams release “warning waves” to introduce new warnings gradually.
+              Warning wave 6 adds more diagnostics to help you catch mistakes earlier (nullability, pattern checks, correctness).
+            </p>
+            <p>
+              The idea is: your code quality improves over time without suddenly breaking everything in one upgrade.
+            </p>
+
+            <div class="example">
+              <div class="ex-title">ASCII: safe upgrade path</div>
+              <pre>
+Old version: fewer warnings
+   |
+Upgrade: wave introduces new warnings
+   |
+Fix warnings gradually -> cleaner, safer code ✅
+              </pre>
+            </div>
+
+            <div class="example">
+              <div class="ex-title">Example: treat warnings seriously (recommended)</div>
+              <pre>
+/*
+In Visual Studio / .NET, you can configure:
+- Treat warnings as errors (strict)
+- Or fix warnings in batches (practical)
+*/
+
+public class Program
