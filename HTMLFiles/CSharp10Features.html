@@ -8,33 +8,31 @@
   <style>
     :root{
       --w3-green:#04AA6D;
-      --bg:#ffffff;
-      --text:#222;
-      --muted:#666;
-      --sidebar:#f1f1f1;
-      --border:#e6e6e6;
+      --dark:#1f2937;
+      --dark2:#111827;
+      --light:#f7f7f7;
+      --border:#e5e7eb;
+      --text:#111827;
+      --muted:#6b7280;
 
-      --note:#d9edf7;
-      --note-border:#bce8f1;
+      --note:#e7f3fe;      --note-border:#2196F3;
+      --tip:#e8f5e9;       --tip-border:#2e7d32;
+      --warn:#ffebee;      --warn-border:#e53935;
 
-      --tip:#dff0d8;
-      --tip-border:#b2dba1;
-
-      --warn:#f2dede;
-      --warn-border:#ebcccc;
-
-      --example:#f7f7f7;
-      --code:#1e1e1e;
-      --codeText:#eaeaea;
+      --example:#f3f4f6;
+      --code-bg:#0b1020;
+      --code-fg:#e5e7eb;
+      --page-zoom:1;
     }
 
     *{ box-sizing:border-box; }
     body{
       margin:0;
       font-family: Arial, Helvetica, sans-serif;
-      background:var(--bg);
+      background:#ffffff;
       color:var(--text);
       line-height:1.6;
+      font-size: calc(16px * var(--page-zoom));
     }
 
     /* Top bar (W3-like) */
@@ -46,34 +44,46 @@
       color:#fff;
       display:flex;
       align-items:center;
-      padding:0 14px;
+      justify-content:space-between;
+      padding:0 16px;
       z-index:1000;
-      box-shadow:0 2px 10px rgba(0,0,0,.12);
+      box-shadow: 0 2px 10px rgba(0,0,0,.12);
+      gap:12px;
     }
     .brand{
-      font-weight:800;
-      letter-spacing:.2px;
       display:flex;
       align-items:center;
       gap:10px;
-    }
-    .brand .logo{
-      width:34px;height:34px;
-      border-radius:8px;
-      background:rgba(255,255,255,.22);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:900;
-    }
-    .topbar .title{
-      margin-left:14px;
       font-weight:700;
-      opacity:.95;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      letter-spacing:.2px;
       white-space:nowrap;
     }
+    .brand-badge{
+      width:34px; height:34px;
+      border-radius:50%;
+      background:#ffffff;
+      color:var(--w3-green);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+      box-shadow: inset 0 0 0 2px rgba(4,170,109,.25);
+    }
+    .top-links{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      font-size:13px;
+    }
+    .top-links a{
+      color:#fff;
+      text-decoration:none;
+      padding:6px 10px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.35);
+    }
+    .top-links a:hover{ background: rgba(255,255,255,.15); }
     .topbar .spacer{ flex:1; }
     .topbar .topbtn{
       border:1px solid rgba(255,255,255,.35);
@@ -85,6 +95,25 @@
       cursor:pointer;
     }
     .topbar .topbtn:active{ transform:translateY(1px); }
+    .zoom-controls{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      color:#fff;
+      font-size:13px;
+      font-weight:700;
+      white-space:nowrap;
+    }
+    .zoom-controls button{
+      border:1px solid rgba(255,255,255,.35);
+      background:rgba(255,255,255,.12);
+      color:#fff;
+      padding:4px 8px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:800;
+    }
+    .zoom-controls button:active{ transform:translateY(1px); }
 
     /* Layout: sidebar + content */
     .layout{
@@ -96,14 +125,14 @@
     /* REQUIRED SIDEBAR CONTAINER STRUCTURE (kept compatible with your _Layout.cshtml style) */
     nav#sidebarMenu{
       width:280px;
-      background:var(--sidebar);
+      background:var(--light);
       border-right:1px solid var(--border);
       position:fixed;
       top:56px;
       left:0;
       bottom:0;
       overflow:auto;
-      padding:14px 10px;
+      padding:14px 12px;
     }
     .sidecard{
       background:#fff;
@@ -114,7 +143,7 @@
     .sidecard h3{
       margin:0 0 8px 0;
       font-size:15px;
-      color:#111;
+      color:#0b2e1d;
     }
     .sidecard .small{
       font-size:12px;
@@ -124,16 +153,18 @@
     .sidelink{
       display:block;
       padding:8px 10px;
-      border-radius:10px;
-      color:#222;
+      border-radius:8px;
+      color:#0f172a;
       text-decoration:none;
       font-size:14px;
       border:1px solid transparent;
       margin:3px 0;
+      font-weight:700;
     }
     .sidelink:hover{
-      background:#f7fff9;
-      border-color:#d7f1e5;
+      background:#e9f8f1;
+      outline:1px solid rgba(4,170,109,.25);
+      color:#0b5c3f;
     }
     .sidelink.active{
       background:#e9fff6;
@@ -144,12 +175,12 @@
     .sidegroup{
       margin:10px 0 6px;
       padding:8px 10px;
-      background:#f8f8f8;
+      background:#ffffff;
       border:1px solid var(--border);
       border-radius:10px;
       font-weight:800;
       font-size:13px;
-      color:#333;
+      color:#0f172a;
     }
     .subindent{ margin-left:8px; }
 
@@ -171,42 +202,45 @@
       border-radius:14px;
       margin:14px 0;
       overflow:hidden;
-      box-shadow:0 2px 14px rgba(0,0,0,.04);
+      box-shadow: 0 6px 20px rgba(17,24,39,.04);
     }
     .section .head{
-      background:var(--w3-green);
-      color:#fff;
+      background:linear-gradient(0deg, rgba(4,170,109,.09), rgba(4,170,109,.09)), #fff;
+      border-bottom:1px solid rgba(4,170,109,.25);
       padding:12px 14px;
-      font-weight:900;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
+      color:#064e3b;
+      font-weight:800;
     }
     .section .head .tag{
       font-size:12px;
       padding:4px 10px;
       border-radius:999px;
-      background:rgba(255,255,255,.18);
-      border:1px solid rgba(255,255,255,.25);
+      background:#f8fafc;
+      border:1px solid var(--border);
       font-weight:800;
+      color:var(--muted);
       white-space:nowrap;
     }
     .section .body{
-      padding:14px;
+      padding:14px 14px 10px;
     }
     .muted{ color:var(--muted); }
 
     /* W3-like notes */
     .note, .tip, .warning{
-      padding:12px 12px;
-      border-radius:12px;
-      margin:10px 0;
-      border:1px solid;
+      padding:10px 12px;
+      border-radius:10px;
+      margin:12px 0;
+      border-left:6px solid;
+      background:#fff;
     }
-    .note{ background:var(--note); border-color:var(--note-border); }
-    .tip{ background:var(--tip); border-color:var(--tip-border); }
-    .warning{ background:var(--warn); border-color:var(--warn-border); }
+    .note{ background:var(--note); border-left-color:var(--note-border); }
+    .tip{ background:var(--tip); border-left-color:var(--tip-border); }
+    .warning{ background:var(--warn); border-left-color:var(--warn-border); }
 
     /* Example box */
     .example{
@@ -223,8 +257,8 @@
 
     /* Code block */
     pre{
-      background:var(--code);
-      color:var(--codeText);
+      background:var(--code-bg);
+      color:var(--code-fg);
       padding:12px;
       border-radius:12px;
       overflow:auto;
@@ -382,7 +416,8 @@
         margin-left:0;
         width:100%;
       }
-      .topbar .title{ display:none; }
+      .top-links{ display:none; }
+      .zoom-controls{ display:none; }
     }
 
     /* Quiz */
@@ -437,6 +472,39 @@
       text-align:center;
     }
   </style>
+  <script>
+    let zoomLevel = 1;
+    const minZoom = 0.8;
+    const maxZoom = 1.4;
+
+    function applyZoom(level) {
+      zoomLevel = Math.min(maxZoom, Math.max(minZoom, level));
+      document.documentElement.style.setProperty("--page-zoom", zoomLevel);
+      const label = document.getElementById("zoomValue");
+      if (label) {
+        label.textContent = `${Math.round(zoomLevel * 100)}%`;
+      }
+    }
+
+    function adjustZoom(delta) {
+      applyZoom(zoomLevel + delta);
+    }
+
+    function resetZoom() {
+      applyZoom(1);
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebarMenu");
+      if (sidebar) {
+        sidebar.classList.toggle("open");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      applyZoom(1);
+    });
+  </script>
 </head>
 
 <body>
@@ -446,11 +514,22 @@
 
   <div class="topbar">
     <div class="brand">
-      <div class="logo">IT</div>
-      <div>ItTechGenie</div>
+      <span class="brand-badge">IT</span>
+      <span>ItTechGenie • C# 10 Features</span>
     </div>
-    <div class="title">C# 10 Features (W3Schools-style Tutorial)</div>
+    <div class="top-links">
+      <a href="#intro">Intro</a>
+      <a href="#toc">TOC</a>
+      <a href="#mcq">MCQ</a>
+      <a href="#practice-coding-questions">Practice</a>
+    </div>
     <div class="spacer"></div>
+    <div class="zoom-controls" aria-label="Zoom controls">
+      <span id="zoomValue">100%</span>
+      <button type="button" onclick="adjustZoom(-0.1)" aria-label="Zoom out">−</button>
+      <button type="button" onclick="adjustZoom(0.1)" aria-label="Zoom in">＋</button>
+      <button type="button" onclick="resetZoom()" aria-label="Reset zoom">Reset</button>
+    </div>
     <button class="topbtn" onclick="toggleSidebar()">☰ Menu</button>
   </div>
 
