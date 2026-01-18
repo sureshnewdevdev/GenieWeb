@@ -1,0 +1,1982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>C# 8.0 Features | ItTechGenie (W3Schools-style)</title>
+  <style>
+    :root{
+      --w3-green:#04AA6D;
+      --dark:#1f2937;
+      --dark2:#111827;
+      --light:#f7f7f7;
+      --border:#e5e7eb;
+      --text:#111827;
+      --muted:#6b7280;
+
+      --note:#e7f3fe;      --note-border:#2196F3;
+      --tip:#e8f5e9;       --tip-border:#2e7d32;
+      --warn:#ffebee;      --warn-border:#e53935;
+
+      --example:#f3f4f6;
+      --code-bg:#0b1020;
+      --code-fg:#e5e7eb;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:#ffffff;
+      line-height:1.55;
+    }
+
+    /* Top bar (W3 style) */
+    .topbar{
+      position:fixed;
+      top:0; left:0; right:0;
+      height:56px;
+      background:var(--w3-green);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 16px;
+      z-index:1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,.12);
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .brand-badge{
+      width:34px; height:34px;
+      border-radius:50%;
+      background:#ffffff;
+      color:var(--w3-green);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+      box-shadow: inset 0 0 0 2px rgba(4,170,109,.25);
+    }
+    .top-links{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      font-size:13px;
+    }
+    .top-links a{
+      color:#fff;
+      text-decoration:none;
+      padding:6px 10px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.35);
+    }
+    .top-links a:hover{ background: rgba(255,255,255,.15); }
+
+    /* Layout: fixed sidebar + content */
+    .wrap{
+      display:flex;
+      margin-top:56px;
+      min-height: calc(100vh - 56px);
+    }
+    .sidebar{
+      position:fixed;
+      top:56px; left:0;
+      width:280px;
+      height: calc(100vh - 56px);
+      overflow:auto;
+      background:var(--light);
+      border-right:1px solid var(--border);
+      padding:14px 12px;
+    }
+    .sidebar h3{
+      margin:8px 8px 10px;
+      font-size:14px;
+      color:#0b2e1d;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .menu{
+      list-style:none;
+      padding:0;
+      margin:0;
+    }
+    .menu li{ margin:2px 0; }
+    .menu a{
+      display:block;
+      padding:8px 10px;
+      border-radius:8px;
+      color:#0f172a;
+      text-decoration:none;
+      font-size:14px;
+    }
+    .menu a:hover{
+      background:#e9f8f1;
+      outline:1px solid rgba(4,170,109,.25);
+    }
+    .menu .group{
+      margin:10px 0 6px;
+      padding:8px 10px;
+      border-radius:10px;
+      background:#ffffff;
+      border:1px solid var(--border);
+      font-weight:700;
+      font-size:13px;
+      color:#0f172a;
+    }
+    .menu .sub{
+      margin-left:8px;
+      border-left:3px solid rgba(4,170,109,.25);
+      padding-left:6px;
+    }
+
+    .content{
+      margin-left:280px;
+      width: calc(100% - 280px);
+      padding:18px 18px 70px;
+    }
+
+    /* Section boxes with green headers */
+    .section{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      margin:14px 0 18px;
+      overflow:hidden;
+      box-shadow: 0 6px 20px rgba(17,24,39,.04);
+    }
+    .section .sh{
+      background:linear-gradient(0deg, rgba(4,170,109,.09), rgba(4,170,109,.09)), #fff;
+      border-bottom:1px solid rgba(4,170,109,.25);
+      padding:12px 14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .section .sh h2{
+      margin:0;
+      font-size:18px;
+      color:#064e3b;
+    }
+    .section .bd{
+      padding:14px 14px 10px;
+    }
+
+    .kicker{
+      display:inline-block;
+      font-size:12px;
+      color:var(--muted);
+      background:#f8fafc;
+      border:1px solid var(--border);
+      padding:4px 10px;
+      border-radius:999px;
+      margin-bottom:10px;
+    }
+
+    /* Notes / Tip / Warning */
+    .callout{
+      border-left:6px solid;
+      padding:10px 12px;
+      border-radius:10px;
+      margin:12px 0;
+      background:#fff;
+    }
+    .note{ background:var(--note); border-left-color:var(--note-border); }
+    .tip{  background:var(--tip);  border-left-color:var(--tip-border);  }
+    .warn{ background:var(--warn); border-left-color:var(--warn-border); }
+
+    /* Example box */
+    .example{
+      background:var(--example);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      margin:12px 0;
+    }
+    .example h3{
+      margin:0 0 8px;
+      font-size:15px;
+      color:#111827;
+    }
+
+    /* Code blocks */
+    pre{
+      margin:10px 0 0;
+      background:var(--code-bg);
+      color:var(--code-fg);
+      border-radius:12px;
+      padding:12px;
+      overflow:auto;
+      border:1px solid rgba(255,255,255,.08);
+    }
+    code{ font-family: Consolas, "Courier New", monospace; font-size:13px; }
+
+    /* ASCII diagram */
+    .diagram{
+      background:#0b1220;
+      border:1px dashed rgba(229,231,235,.35);
+      color:#e5e7eb;
+      border-radius:12px;
+      padding:12px;
+      overflow:auto;
+      margin:12px 0;
+    }
+
+    /* Buttons */
+    .btnrow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      margin-top:14px;
+      padding:10px 14px 14px;
+      border-top:1px solid var(--border);
+      background:#fafafa;
+    }
+    .btn{
+      display:inline-block;
+      background:var(--w3-green);
+      color:#fff;
+      text-decoration:none;
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:700;
+      font-size:14px;
+      border:1px solid rgba(0,0,0,.05);
+    }
+    .btn:hover{ filter: brightness(.95); }
+    .btn.secondary{
+      background:#ffffff;
+      color:#064e3b;
+      border:1px solid rgba(4,170,109,.35);
+    }
+
+    .try{
+      display:inline-block;
+      margin-top:10px;
+      text-decoration:none;
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid rgba(4,170,109,.45);
+      color:#064e3b;
+      background:#e9f8f1;
+      font-weight:700;
+      font-size:13px;
+    }
+    .try:hover{ background:#dff6ee; }
+
+    /* Tables */
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin:12px 0;
+      font-size:14px;
+    }
+    th, td{
+      border:1px solid var(--border);
+      padding:10px;
+      vertical-align:top;
+    }
+    th{
+      background:#f9fafb;
+      text-align:left;
+    }
+
+    /* Tooltips */
+    .tt{
+      position:relative;
+      cursor:help;
+      border-bottom:1px dotted rgba(4,170,109,.9);
+      color:#065f46;
+      font-weight:700;
+    }
+    .tt::after{
+      content: attr(data-tip);
+      position:absolute;
+      left:0;
+      top: calc(100% + 10px);
+      min-width: 260px;
+      max-width: 360px;
+      background:#0b1020;
+      color:#e5e7eb;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      opacity:0;
+      transform: translateY(-4px);
+      pointer-events:none;
+      transition: all .15s ease;
+      font-weight:500;
+      line-height:1.35;
+      z-index:50;
+      white-space:normal;
+    }
+    .tt::before{
+      content:"";
+      position:absolute;
+      left:18px;
+      top: calc(100% + 2px);
+      border:8px solid transparent;
+      border-bottom-color:#0b1020;
+      opacity:0;
+      transition: all .15s ease;
+      z-index:51;
+    }
+    .tt:hover::after, .tt:hover::before{ opacity:1; transform: translateY(0); }
+
+    /* TOC */
+    .toc{
+      border:1px solid var(--border);
+      background:#ffffff;
+      border-radius:14px;
+      padding:12px 14px;
+      margin:14px 0 18px;
+    }
+    .toc h2{ margin:0 0 8px; font-size:16px; color:#064e3b; }
+    .toc a{ color:#065f46; text-decoration:none; font-weight:700; }
+    .toc a:hover{ text-decoration:underline; }
+    .toc ul{ margin:8px 0 0 18px; }
+
+    /* Small screen */
+    @media (max-width: 980px){
+      .sidebar{ position:static; width:100%; height:auto; }
+      .content{ margin-left:0; width:100%; }
+      .wrap{ flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Placeholder anchors for navigation requirement -->
+  <a id="prev-subtopic"></a>
+
+  <div class="topbar">
+    <div class="brand" aria-label="ItTechGenie Header">
+      <span class="brand-badge">IT</span>
+      <span>ItTechGenie • C# 8.0 Features</span>
+    </div>
+    <div class="top-links">
+      <a href="#intro">Intro</a>
+      <a href="#setup">Setup</a>
+      <a href="#mcq-quiz">MCQ</a>
+      <a href="#practice-coding-questions">Practice</a>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <!-- Sidebar (in the spirit of _Layout.cshtml: left nav + card-like list) -->
+    <aside class="sidebar">
+      <h3>Navigate Here</h3>
+
+      <div class="menu">
+        <div class="group">Getting Started</div>
+        <ul class="menu">
+          <li><a href="#intro">1.1 Introduction</a></li>
+          <li><a href="#overview">1.2 What’s New (Overview)</a></li>
+          <li><a href="#setup">1.3 Enable C# 8 + Nullable</a></li>
+        </ul>
+
+        <div class="group">Core Enhancements</div>
+        <ul class="menu">
+          <li><a href="#readonly-members">2.1 Read-only Members</a></li>
+          <li><a href="#default-interface-methods">2.2 Default Interface Methods</a></li>
+          <li><a href="#pattern-matching">2.3 Pattern Matching Enhancements</a></li>
+        </ul>
+
+        <div class="group">Resource & Code Cleanliness</div>
+        <ul class="menu">
+          <li><a href="#using-declarations">3.1 Using Declarations</a></li>
+          <li><a href="#static-local-functions">3.2 Static Local Functions</a></li>
+          <li><a href="#disposable-ref-structs">3.3 Disposable ref structs</a></li>
+        </ul>
+
+        <div class="group">Null Safety</div>
+        <ul class="menu">
+          <li><a href="#nullable-reference-types">4.1 Nullable Reference Types</a></li>
+          <li><a href="#null-coalescing-assignment">4.2 Null-coalescing Assignment</a></li>
+        </ul>
+
+        <div class="group">Modern Async</div>
+        <ul class="menu">
+          <li><a href="#async-streams">5.1 Asynchronous Streams</a></li>
+          <li><a href="#async-disposable">5.2 Asynchronous Disposable</a></li>
+        </ul>
+
+        <div class="group">Indexing & Slicing</div>
+        <ul class="menu">
+          <li><a href="#indices-ranges">6.1 Indices and Ranges</a></li>
+        </ul>
+
+        <div class="group">Advanced / Low-level</div>
+        <ul class="menu">
+          <li><a href="#unmanaged-constructed-types">7.1 Unmanaged Constructed Types</a></li>
+          <li><a href="#stackalloc-nested">7.2 Stackalloc in Nested Expressions</a></li>
+          <li><a href="#interpolated-verbatim">7.3 Interpolated Verbatim Strings</a></li>
+        </ul>
+
+        <div class="group">Wrap-up</div>
+        <ul class="menu">
+          <li><a href="#best-practices">8. Best Practices & Migration</a></li>
+          <li><a href="#mini-project">9. Mini Project</a></li>
+          <li><a href="#faqs">10. FAQs</a></li>
+          <li><a href="#interview-questions">11. Interview Questions</a></li>
+          <li><a href="#mcq-quiz">12. MCQ Quiz</a></li>
+          <li><a href="#downloadables">13. Downloadables</a></li>
+          <li><a href="#glossary">14. Glossary (Tooltips)</a></li>
+        </ul>
+
+        <!-- REQUIRED SIDEBAR MENU ADDITION -->
+        <div class="group">Practice</div>
+        <ul class="menu">
+          <li><a href="#practice-coding-questions">To Become Best coder Practice this</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="toc" aria-label="Auto-generated Table of Contents">
+        <h2>Table of Contents</h2>
+        <ul>
+          <li><a href="#intro">Introduction</a></li>
+          <li><a href="#overview">What’s New in C# 8.0</a></li>
+          <li><a href="#setup">Setup: Enable C# 8 + Nullable</a></li>
+          <li><a href="#readonly-members">Read-only Members</a></li>
+          <li><a href="#default-interface-methods">Default Interface Methods</a></li>
+          <li><a href="#pattern-matching">Pattern Matching Enhancements</a></li>
+          <li><a href="#using-declarations">Using Declarations</a></li>
+          <li><a href="#static-local-functions">Static Local Functions</a></li>
+          <li><a href="#disposable-ref-structs">Disposable ref structs</a></li>
+          <li><a href="#nullable-reference-types">Nullable Reference Types</a></li>
+          <li><a href="#async-streams">Asynchronous Streams</a></li>
+          <li><a href="#async-disposable">Asynchronous Disposable</a></li>
+          <li><a href="#indices-ranges">Indices and Ranges</a></li>
+          <li><a href="#null-coalescing-assignment">Null-coalescing Assignment</a></li>
+          <li><a href="#unmanaged-constructed-types">Unmanaged Constructed Types</a></li>
+          <li><a href="#stackalloc-nested">Stackalloc in Nested Expressions</a></li>
+          <li><a href="#interpolated-verbatim">Interpolated Verbatim Strings</a></li>
+          <li><a href="#best-practices">Best Practices & Migration</a></li>
+          <li><a href="#mini-project">Mini Project</a></li>
+          <li><a href="#faqs">FAQs</a></li>
+          <li><a href="#interview-questions">Interview Questions</a></li>
+          <li><a href="#mcq-quiz">MCQ Quiz</a></li>
+          <li><a href="#downloadables">Downloadables</a></li>
+          <li><a href="#glossary">Glossary (Tooltips)</a></li>
+          <li><a href="#practice-coding-questions">To Become Best coder Practice this</a></li>
+        </ul>
+      </div>
+
+      <!-- 1.1 INTRO -->
+      <section class="section" id="intro">
+        <div class="sh">
+          <h2>1.1 Introduction to <span class="tt" data-tip="A version of the C# language that introduced safer null-handling, modern async streams, and cleaner resource management features. Great for writing robust production code.">C# 8.0</span> Features</h2>
+        </div>
+        <div class="bd">
+          <span class="kicker">Beginner → Advanced</span>
+          <p>
+            C# 8.0 is a major update that focuses on safer code, cleaner syntax, and modern async programming.
+            It works closely with the <span class="tt" data-tip="The execution environment that runs .NET applications. It manages memory, loads assemblies, and executes code securely.">.NET runtime</span> and improves how you write everyday application logic.
+            If you build APIs, web apps, desktop apps, or services, these features help you reduce bugs and write more readable code.
+            Many C# 8 features are especially useful when working with <span class="tt" data-tip="A programming style where you handle tasks without blocking threads. In C#, async/await helps you write non-blocking code that still reads like normal code.">async/await</span>, resources, and null values.
+          </p>
+
+          <pre class="diagram">ASCII Map: Where C# 8.0 helps
++------------------------+------------------------------+
+| Problem in real apps   | C# 8.0 feature that helps    |
++------------------------+------------------------------+
+| NullReferenceException | Nullable reference types     |
+| Many using {} blocks   | Using declarations           |
+| Streaming data         | Async streams (IAsyncEnumerable) |
+| Interface evolution    | Default interface methods    |
+| Cleaner slicing        | Indices and ranges           |
++------------------------+------------------------------+</pre>
+
+          <div class="example">
+            <h3>Example (Simple Idea)</h3>
+            <p>
+              Imagine you are reading rows from a database and you want to process them one-by-one without loading everything in memory.
+              C# 8.0 gives you <b>asynchronous streams</b> to do this safely and efficiently.
+            </p>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+            <pre><code>// C# 8.0 concept preview (we'll learn this in detail later)
+public async IAsyncEnumerable&lt;int&gt; GetNumbersAsync()
+{
+    for (int i = 1; i &lt;= 3; i++)
+    {
+        await Task.Delay(200);
+        yield return i;
+    }
+}</code></pre>
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> Learn C# 8.0 features one by one—start with nullable references and using declarations (they give the fastest real-world benefit).
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> Many C# 8.0 features shine when your project uses the correct language version and nullable context settings; otherwise you won’t see the expected warnings and safety checks.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#prev-subtopic">Previous Page</a>
+          <a class="btn" href="#overview">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 1.2 OVERVIEW -->
+      <section class="section" id="overview">
+        <div class="sh">
+          <h2>1.2 What’s New in C# 8.0 (Quick Overview)</h2>
+        </div>
+        <div class="bd">
+          <p>
+            C# 8.0 introduced a set of practical improvements rather than “just syntax sugar”.
+            The biggest themes are: safer null-handling, better async data processing, and cleaner resource usage.
+            It also improves pattern matching so your decision logic becomes shorter and more readable.
+          </p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Feature</th>
+                <th>Why it matters</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Safety</td>
+                <td>Nullable reference types</td>
+                <td>Prevents many runtime null crashes by giving compile-time warnings</td>
+              </tr>
+              <tr>
+                <td>Async</td>
+                <td>Async streams, async disposable</td>
+                <td>Process streaming data efficiently; clean up async resources properly</td>
+              </tr>
+              <tr>
+                <td>Clean code</td>
+                <td>Using declarations, static local functions</td>
+                <td>Less nesting, clearer intent, fewer accidental captures</td>
+              </tr>
+              <tr>
+                <td>Evolution</td>
+                <td>Default interface methods</td>
+                <td>Interfaces can add new methods without breaking old implementations</td>
+              </tr>
+              <tr>
+                <td>Productivity</td>
+                <td>Indices &amp; ranges</td>
+                <td>Simple, readable slicing and indexing</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <pre class="diagram">ASCII Timeline idea
+C# 7.x  ----(pattern matching starts)----&gt;  C# 8.0  ----(null safety + async streams)----&gt;  Modern C#
+            |                                        |
+        switch, tuples                          nullable refs, IAsyncEnumerable</pre>
+
+          <div class="example">
+            <h3>Example (Before vs After: Slicing)</h3>
+            <p>Indices and ranges make substring/array slicing more readable.</p>
+            <pre><code>// Before (older style)
+int[] a = { 10, 20, 30, 40, 50 };
+int[] middle = a.Skip(1).Take(3).ToArray();
+
+// After (C# 8.0 ranges)
+int[] b = { 10, 20, 30, 40, 50 };
+int[] mid = b[1..4]; // 20,30,40</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> Don’t try to memorize all features. Practice with 2–3 features in one mini project (like “file processing + async streams + using declarations”).
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> Nullable reference types are opt-in and change how you interpret “string” vs “string?” in API design, DTOs, and EF models.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#intro">Previous Page</a>
+          <a class="btn" href="#setup">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 1.3 SETUP -->
+      <section class="section" id="setup">
+        <div class="sh">
+          <h2>1.3 Setup: Enable C# 8.0 + Nullable in Your Project</h2>
+        </div>
+        <div class="bd">
+          <p>
+            To use C# 8.0 features reliably, your project must target a compatible SDK and set the language version.
+            For the best experience, also enable nullable warnings so the compiler points out risky null usage.
+            In .NET projects, these settings live in your <span class="tt" data-tip="An MSBuild file that defines how your .NET project is compiled (target framework, language version, references, build settings).">.csproj</span>.
+          </p>
+
+          <pre class="diagram">ASCII Flow: Setup
+Open project
+   |
+   v
+Edit .csproj
+   |
+   +-- Set LangVersion=8.0
+   |
+   +-- Enable Nullable warnings
+   v
+Build and observe warnings</pre>
+
+          <div class="example">
+            <h3>Example (.csproj settings)</h3>
+            <pre><code>&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+  &lt;PropertyGroup&gt;
+    &lt;TargetFramework&gt;netcoreapp3.1&lt;/TargetFramework&gt;
+    &lt;LangVersion&gt;8.0&lt;/LangVersion&gt;
+    &lt;Nullable&gt;enable&lt;/Nullable&gt;
+  &lt;/PropertyGroup&gt;
+&lt;/Project&gt;</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="note callout">
+            <b>Real-world use case:</b> In a team project, enabling nullable prevents “hidden bugs” when one developer assumes a value is never null and another developer sends null from an API/DB.
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> After enabling nullable, fix warnings slowly. Start with “public API” models (DTOs) and move inward.
+          </div>
+
+          <div class="warn callout">
+            <b>Warning:</b> Enabling nullable on a large existing project can produce many warnings. Treat it like a “migration sprint” and fix module-by-module.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#overview">Previous Page</a>
+          <a class="btn" href="#readonly-members">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 2.1 Read-only members -->
+      <section class="section" id="readonly-members">
+        <div class="sh">
+          <h2>2.1 Read-only Members</h2>
+        </div>
+        <div class="bd">
+          <p>
+            In C# 8.0, you can mark members of a <span class="tt" data-tip="A lightweight value type stored on the stack or inline in objects. Good for small data. Structs copy by value, not by reference.">struct</span> as <b>readonly</b>.
+            This tells the compiler the method/property will not modify the struct state.
+            It improves correctness and can avoid defensive copies when calling methods on readonly structs.
+            This is especially helpful for performance-critical code and immutable value types.
+          </p>
+
+          <pre class="diagram">ASCII Idea: Why readonly members matter
+Readonly struct value
+   |
+   +-- calling non-readonly method may cause a copy
+   |
+   +-- calling readonly method avoids copy and prevents changes</pre>
+
+          <div class="example">
+            <h3>Example (readonly member)</h3>
+            <pre><code>public struct Money
+{
+    public decimal Amount { get; }
+    public Money(decimal amount) =&gt; Amount = amount;
+
+    // C# 8.0: readonly member
+    public readonly string Format() =&gt; $@"₹ {Amount:0.00}";
+}
+
+// Usage
+var m = new Money(199.5m);
+Console.WriteLine(m.Format());</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="note callout">
+            <b>Real-world use case:</b> Financial and measurement types (Money, Distance, Temperature) are often immutable. Readonly members keep them safe and fast.
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> If your struct should behave like “fixed data”, mark it readonly or use readonly members to protect it.
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> Readonly members help prevent hidden copies when a readonly struct is accessed through readonly references (common in high-performance code).
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#setup">Previous Page</a>
+          <a class="btn" href="#default-interface-methods">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 2.2 Default interface methods -->
+      <section class="section" id="default-interface-methods">
+        <div class="sh">
+          <h2>2.2 Default Interface Methods</h2>
+        </div>
+        <div class="bd">
+          <p>
+            An <span class="tt" data-tip="A contract that defines what members a type must provide. In C#, interfaces typically contain method/property signatures without implementation.">interface</span> can now include method implementations.
+            This helps when you want to evolve an interface without forcing every existing class to implement new methods.
+            It’s commonly used in libraries/frameworks to add features while maintaining backward compatibility.
+            Think of it like giving “a default behavior” that types can override if needed.
+          </p>
+
+          <pre class="diagram">ASCII: Interface evolution
+Old interface (v1)
+  |
+  +-- Many apps implement it
+  |
+Add new method in v2
+  |
+  +-- With default implementation =&gt; old apps still compile</pre>
+
+          <div class="example">
+            <h3>Example (default implementation)</h3>
+            <pre><code>public interface ILogger
+{
+    void Log(string message);
+
+    // C# 8.0: default interface method
+    void LogInfo(string message) =&gt; Log("INFO: " + message);
+}
+
+public class ConsoleLogger : ILogger
+{
+    public void Log(string message) =&gt; Console.WriteLine(message);
+}
+
+// Usage
+ILogger logger = new ConsoleLogger();
+logger.LogInfo("Server started");</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="note callout">
+            <b>Real-world use case:</b> In shared company libraries, adding new methods to interfaces used across many projects becomes safe and non-breaking.
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> Prefer this mainly in library design. In app code, it’s still fine—but don’t overuse it (keep interfaces simple).
+          </div>
+
+          <div class="warn callout">
+            <b>Warning:</b> Default interface methods can complicate versioning if multiple assemblies provide different defaults. Use strong version control in shared libraries.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#readonly-members">Previous Page</a>
+          <a class="btn" href="#pattern-matching">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 2.3 Pattern matching -->
+      <section class="section" id="pattern-matching">
+        <div class="sh">
+          <h2>2.3 Pattern Matching Enhancements</h2>
+        </div>
+        <div class="bd">
+          <p>
+            Pattern matching in C# 8.0 becomes more expressive and readable.
+            You can match shapes of objects (properties), tuples, and use <b>switch expressions</b> to reduce bulky switch statements.
+            This is great for validation, mapping, and business rules where you branch based on object data.
+            It makes your code feel more “rule-based” and less nested.
+          </p>
+
+          <pre class="diagram">ASCII: switch statement vs switch expression
+switch(x) { case ...: return ...; default: return ...; }
+
+becomes
+
+return x switch { pattern =&gt; value, _ =&gt; value };</pre>
+
+          <div class="example">
+            <h3>Example (switch expression + property pattern)</h3>
+            <pre><code>public record Order(decimal Total, bool IsPremium);
+
+public static string GetDiscountLabel(Order o) =&gt; o switch
+{
+    { IsPremium: true, Total: &gt;= 5000 } =&gt; "Premium 20% Discount",
+    { IsPremium: true }               =&gt; "Premium 10% Discount",
+    { Total: &gt;= 3000 }                =&gt; "Regular 5% Discount",
+    _                                 =&gt; "No Discount"
+};
+
+// Usage
+Console.WriteLine(GetDiscountLabel(new Order(6000, true)));</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="note callout">
+            <b>Real-world use case:</b> E-commerce rules (discount, shipping fees, fraud checks) become cleaner as switch expressions with patterns.
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> Start with switch expressions only. Once comfortable, add property patterns for readable business rules.
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> Combine patterns with nullable reference types to handle null safely using patterns like <b>null</b> and <b>not null</b> checks.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#default-interface-methods">Previous Page</a>
+          <a class="btn" href="#using-declarations">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 3.1 Using declarations -->
+      <section class="section" id="using-declarations">
+        <div class="sh">
+          <h2>3.1 Using Declarations</h2>
+        </div>
+        <div class="bd">
+          <p>
+            A using declaration lets you create an object that must be disposed, without wrapping it in a full <b>using { }</b> block.
+            The object will be disposed automatically at the end of the current scope.
+            This reduces indentation and makes “happy path” code easier to read.
+            It relies on the <span class="tt" data-tip="A standard C# interface that enables deterministic cleanup of resources like files, network connections, DB connections, etc. Used by 'using' to dispose safely.">IDisposable</span> pattern.
+          </p>
+
+          <pre class="diagram">ASCII: Dispose timing
+Method scope starts
+  |
+  +-- using var stream = ...
+  |
+  +-- do work
+  |
+Scope ends =&gt; Dispose() called automatically</pre>
+
+          <div class="example">
+            <h3>Example (using var)</h3>
+            <pre><code>using var writer = new StreamWriter("log.txt");
+writer.WriteLine("App started");
+writer.WriteLine("App finished");
+// Dispose happens automatically here (end of scope)</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="note callout">
+            <b>Real-world use case:</b> Logging, reading CSV files, writing reports—cleaner file operations with fewer nested blocks.
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> Prefer using declarations for simple scopes. Use using blocks when you want a smaller disposal scope inside a larger method.
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> Using declarations dispose in reverse order when multiple are declared—similar to stacked cleanup.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#pattern-matching">Previous Page</a>
+          <a class="btn" href="#static-local-functions">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 3.2 Static local functions -->
+      <section class="section" id="static-local-functions">
+        <div class="sh">
+          <h2>3.2 Static Local Functions</h2>
+        </div>
+        <div class="bd">
+          <p>
+            Local functions are methods defined inside another method. In C# 8.0, you can mark them <b>static</b>.
+            A static local function cannot capture variables from the outer method (no hidden closure).
+            This prevents accidental memory allocations and makes intent explicit: the function is self-contained.
+            It’s useful in algorithms and validation helpers inside a method.
+          </p>
+
+          <pre class="diagram">ASCII: Capturing vs not capturing
+Outer method variables
+   |
+   +-- local function (non-static) can capture =&gt; closure allocation
+   |
+   +-- local function (static) cannot capture =&gt; safer + faster</pre>
+
+          <div class="example">
+            <h3>Example (static local function)</h3>
+            <pre><code>public static bool IsValidEmail(string email)
+{
+    // static local function: cannot capture outer variables
+    static bool HasAtSymbol(string value) =&gt; value.Contains("@");
+
+    if (string.IsNullOrWhiteSpace(email)) return false;
+    return HasAtSymbol(email);
+}</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="note callout">
+            <b>Real-world use case:</b> Validation logic inside API endpoints can use static local functions to avoid accidental captures and keep code organized.
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> Use static local functions when the helper does not need external variables. If you need outer variables, keep it non-static.
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> This can reduce allocations in hot paths (e.g., parsing many rows, processing events, streaming).
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#using-declarations">Previous Page</a>
+          <a class="btn" href="#disposable-ref-structs">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 3.3 Disposable ref structs -->
+      <section class="section" id="disposable-ref-structs">
+        <div class="sh">
+          <h2>3.3 Disposable <span class="tt" data-tip="A special stack-only struct that cannot be boxed or captured by lambdas. Used for high-performance memory scenarios (Span<T>, etc.).">ref struct</span>s</h2>
+        </div>
+        <div class="bd">
+          <p>
+            Some types are stack-only (ref struct) for performance and safety. In C# 8.0, these can participate in the using pattern.
+            That means you can write code that ensures cleanup even for stack-only constructs.
+            The cleanup is done using a <b>Dispose()</b> method pattern, typically for performance-sensitive resources.
+            This feature supports modern memory patterns used in parsing and pipelines.
+          </p>
+
+          <pre class="diagram">ASCII: Stack-only safety
+Heap objects   =&gt; can live long, can be captured
+ref struct     =&gt; stack-only, short-lived, safe for spans
+C# 8 enables: using var x = ref struct;  // clean end-of-scope</pre>
+
+          <div class="example">
+            <h3>Example (conceptual pattern)</h3>
+            <pre><code>// Example pattern: a ref struct with Dispose method
+public ref struct TempBuffer
+{
+    public void Dispose()
+    {
+        // cleanup logic (concept)
+    }
+}
+
+public static void UseBuffer()
+{
+    // C# 8.0: using works with ref struct (pattern-based)
+    using var buf = new TempBuffer();
+    // work with buf
+}</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="note callout">
+            <b>Real-world use case:</b> High-performance parsing (CSV, JSON, network frames) often uses Span/stack buffers—this keeps cleanup consistent.
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> You don’t need this every day. Learn it for performance topics after mastering using declarations and async.
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> This connects with pipelines, Span&lt;T&gt;, and avoiding heap allocations—key for low-latency systems.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#static-local-functions">Previous Page</a>
+          <a class="btn" href="#nullable-reference-types">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 4.1 Nullable reference types -->
+      <section class="section" id="nullable-reference-types">
+        <div class="sh">
+          <h2>4.1 Nullable Reference Types</h2>
+        </div>
+        <div class="bd">
+          <p>
+            Nullable reference types help you avoid the most common C# production bug: null reference crashes.
+            With nullable enabled, <b>string</b> means “should not be null” and <b>string?</b> means “may be null”.
+            The compiler warns you when you might return, pass, or dereference null.
+            It doesn’t change runtime behavior automatically; it changes how you design and validate your code.
+          </p>
+
+          <pre class="diagram">ASCII: Meaning
+string   =&gt; expected non-null
+string?  =&gt; allowed to be null
+Compiler =&gt; warns if you treat string? like string</pre>
+
+          <div class="example">
+            <h3>Example (safe handling)</h3>
+            <pre><code>#nullable enable
+
+public static string GetDisplayName(string? name)
+{
+    if (name is null) return "Guest";
+    return name.Trim();
+}
+
+// Usage
+Console.WriteLine(GetDisplayName(null));      // Guest
+Console.WriteLine(GetDisplayName("  Gopi ")); // Gopi</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="note callout">
+            <b>Real-world use case:</b> API DTOs and database results often contain nullable columns. Nullable references make your code honest and safer.
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> When you see warnings, don’t ignore them. Decide: should this value really be nullable? If yes, handle it. If no, fix the source.
+          </div>
+
+          <div class="warn callout">
+            <b>Warning:</b> Don’t silence warnings using <b>!</b> everywhere. That hides real bugs. Use it only when you are 100% sure.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#disposable-ref-structs">Previous Page</a>
+          <a class="btn" href="#null-coalescing-assignment">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 4.2 Null-coalescing assignment -->
+      <section class="section" id="null-coalescing-assignment">
+        <div class="sh">
+          <h2>4.2 Null-coalescing Assignment (<span class="tt" data-tip="An operator that assigns a value only if the left side is currently null. It reduces boilerplate initialization checks.">??=</span>)</h2>
+        </div>
+        <div class="bd">
+          <p>
+            The <b>??=</b> operator assigns a value only when the left-hand side is null.
+            This is perfect for lazy initialization: create something only when you actually need it.
+            It reduces repeated “if (x == null) x = ...” blocks and keeps code cleaner.
+            It works nicely with nullable reference types to make intent obvious.
+          </p>
+
+          <pre class="diagram">ASCII: Behavior
+x ??= value
+IF x is null  =&gt; x becomes value
+ELSE          =&gt; x stays same</pre>
+
+          <div class="example">
+            <h3>Example (lazy init)</h3>
+            <pre><code>List&lt;string&gt;? logs = null;
+
+// Later...
+logs ??= new List&lt;string&gt;();
+logs.Add("Started");</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="note callout">
+            <b>Real-world use case:</b> Caching computed values, initializing collections for responses, or setting default config objects.
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> Use ??= when “create only if missing” is your intention. It keeps your code short and readable.
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> Combine ??= with thread-safety patterns if multiple threads may initialize the same object.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#nullable-reference-types">Previous Page</a>
+          <a class="btn" href="#async-streams">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 5.1 Async streams -->
+      <section class="section" id="async-streams">
+        <div class="sh">
+          <h2>5.1 Asynchronous Streams (<span class="tt" data-tip="An async-friendly sequence that yields items over time. It lets you 'await foreach' to process streaming data without loading everything into memory.">IAsyncEnumerable&lt;T&gt;</span>)</h2>
+        </div>
+        <div class="bd">
+          <p>
+            Asynchronous streams let you return data gradually over time, while still using async.
+            Instead of returning a full list, you yield items one by one using <b>yield return</b> in an async iterator.
+            The caller consumes items with <b>await foreach</b>, which is perfect for streaming APIs and large data processing.
+            This is ideal when data arrives slowly (network, database paging, files, IoT events).
+          </p>
+
+          <pre class="diagram">ASCII: Streaming idea
+Producer (async iterator)        Consumer
+  yield item #1  --------------&gt;  await foreach handles #1
+  yield item #2  --------------&gt;  await foreach handles #2
+  ...                               ...
+No need to store full list in memory</pre>
+
+          <div class="example">
+            <h3>Example (producer + consumer)</h3>
+            <pre><code>public static async IAsyncEnumerable&lt;string&gt; ReadLinesAsync()
+{
+    // Simulating "lines coming over time"
+    yield return "Line 1";
+    await Task.Delay(150);
+    yield return "Line 2";
+    await Task.Delay(150);
+    yield return "Line 3";
+}
+
+public static async Task Demo()
+{
+    await foreach (var line in ReadLinesAsync())
+    {
+        Console.WriteLine(line);
+    }
+}</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="note callout">
+            <b>Real-world use case:</b> Read huge logs line-by-line from cloud storage and process them as they arrive (without memory spikes).
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> If you already know IEnumerable&lt;T&gt;, think of IAsyncEnumerable&lt;T&gt; as “IEnumerable + await”.
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> Async streams often pair with cancellation tokens and backpressure-like behavior in pipelines.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#null-coalescing-assignment">Previous Page</a>
+          <a class="btn" href="#async-disposable">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 5.2 Async disposable -->
+      <section class="section" id="async-disposable">
+        <div class="sh">
+          <h2>5.2 Asynchronous Disposable (<span class="tt" data-tip="A pattern for releasing resources asynchronously. Instead of Dispose(), you use DisposeAsync() and 'await using' to clean up non-blocking.">IAsyncDisposable</span>)</h2>
+        </div>
+        <div class="bd">
+          <p>
+            Some resources require async cleanup (like flushing buffers to the network or finishing an async operation).
+            C# 8.0 introduces <b>await using</b> so you can dispose asynchronously using <b>DisposeAsync()</b>.
+            This prevents blocking threads during cleanup and improves scalability in servers.
+            Use this when the type implements IAsyncDisposable.
+          </p>
+
+          <pre class="diagram">ASCII: Cleanup flow
+await using resource = ...
+   |
+   +-- use resource
+   |
+scope ends =&gt; await resource.DisposeAsync()</pre>
+
+          <div class="example">
+            <h3>Example (custom async disposable)</h3>
+            <pre><code>public class AsyncConnection : IAsyncDisposable
+{
+    public async ValueTask DisposeAsync()
+    {
+        await Task.Delay(100); // simulate async cleanup
+        Console.WriteLine("Async cleanup done");
+    }
+}
+
+public static async Task Demo()
+{
+    await using var conn = new AsyncConnection();
+    Console.WriteLine("Using connection...");
+}</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="note callout">
+            <b>Real-world use case:</b> Async network streams, async database drivers, or cloud SDK objects that flush or finalize operations asynchronously.
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> If DisposeAsync exists, prefer await using. If only Dispose exists, use using declaration.
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> ValueTask is used to reduce allocations when cleanup completes synchronously.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#async-streams">Previous Page</a>
+          <a class="btn" href="#indices-ranges">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 6.1 Indices and ranges -->
+      <section class="section" id="indices-ranges">
+        <div class="sh">
+          <h2>6.1 Indices and Ranges</h2>
+        </div>
+        <div class="bd">
+          <p>
+            Indices and ranges make accessing and slicing arrays/strings easier.
+            The <b>^</b> operator counts from the end (like “last element”).
+            The <b>..</b> operator creates a slice (range) between two positions.
+            This improves readability in data processing, parsing, and UI display logic.
+          </p>
+
+          <pre class="diagram">ASCII: Index and range
+a[^1]   =&gt; last element
+a[1..4] =&gt; elements 1,2,3  (end is exclusive)</pre>
+
+          <div class="example">
+            <h3>Example (slice + last item)</h3>
+            <pre><code>int[] a = { 10, 20, 30, 40, 50 };
+
+int last = a[^1];     // 50
+int[] slice = a[1..4];// 20,30,40
+
+Console.WriteLine(last);
+Console.WriteLine(string.Join(",", slice));</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="note callout">
+            <b>Real-world use case:</b> Processing “last N transactions”, slicing “top 3 items”, extracting “middle segment” from arrays or strings.
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> Remember: the end index in ranges is exclusive (like many loops).
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> For huge arrays, ranges can be efficient, but watch allocations when slicing into new arrays.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#async-disposable">Previous Page</a>
+          <a class="btn" href="#unmanaged-constructed-types">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 7.1 Unmanaged constructed types -->
+      <section class="section" id="unmanaged-constructed-types">
+        <div class="sh">
+          <h2>7.1 Unmanaged Constructed Types</h2>
+        </div>
+        <div class="bd">
+          <p>
+            C# supports the <b>unmanaged</b> constraint in generics for types that contain no managed references.
+            In C# 8.0, the rules improved so some constructed generic types can qualify as unmanaged when their type arguments are unmanaged.
+            This matters for interop, low-level memory operations, and high-performance structures.
+            It’s a specialized feature used mainly in advanced scenarios.
+          </p>
+
+          <pre class="diagram">ASCII: Idea
+unmanaged type =&gt; no object references inside
+Examples: int, double, struct of unmanaged fields
+Benefit: can use stackalloc / unsafe / interop safely</pre>
+
+          <div class="example">
+            <h3>Example (generic constraint)</h3>
+            <pre><code>public struct Point2D
+{
+    public int X;
+    public int Y;
+}
+
+public static int SizeOf&lt;T&gt;() where T : unmanaged
+{
+    // concept: safe to do low-level operations
+    return sizeof(T);
+}
+
+Console.WriteLine(SizeOf&lt;Point2D&gt;());</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="note callout">
+            <b>Real-world use case:</b> Game engines, device drivers, and performance-critical libraries that interact with native code.
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> Learn this after mastering generics and memory basics. For most business apps, you won’t need unmanaged constraints.
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> Unmanaged constraints are common when building custom buffers, structs, and interop utilities.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#indices-ranges">Previous Page</a>
+          <a class="btn" href="#stackalloc-nested">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 7.2 Stackalloc nested -->
+      <section class="section" id="stackalloc-nested">
+        <div class="sh">
+          <h2>7.2 Stackalloc in Nested Expressions</h2>
+        </div>
+        <div class="bd">
+          <p>
+            <b>stackalloc</b> allocates memory on the stack for very fast temporary buffers.
+            C# 8.0 improved where stackalloc can be used, including in more nested expressions.
+            This helps in high-performance parsing and small temporary allocations.
+            It is an advanced feature and should be used carefully to avoid stack overflows.
+          </p>
+
+          <pre class="diagram">ASCII: Why stackalloc?
+Heap allocation =&gt; slower + garbage collection later
+Stack allocation =&gt; very fast + freed automatically at scope end</pre>
+
+          <div class="example">
+            <h3>Example (temporary buffer)</h3>
+            <pre><code>// Advanced concept: stackalloc buffer (simplified example)
+Span&lt;int&gt; buf = stackalloc int[3];
+buf[0] = 10;
+buf[1] = 20;
+buf[2] = 30;
+
+Console.WriteLine(buf[1]);</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="note callout">
+            <b>Real-world use case:</b> Parsing protocols, formatting numbers, or building small buffers repeatedly in hot paths.
+          </div>
+
+          <div class="warn callout">
+            <b>Warning:</b> Avoid large stackalloc sizes. Large stack allocations can crash your program with stack overflow.
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> Stackalloc pairs well with Span&lt;T&gt; and reduces GC pressure in high-throughput applications.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#unmanaged-constructed-types">Previous Page</a>
+          <a class="btn" href="#interpolated-verbatim">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 7.3 Interpolated verbatim strings -->
+      <section class="section" id="interpolated-verbatim">
+        <div class="sh">
+          <h2>7.3 Enhancement of Interpolated Verbatim Strings</h2>
+        </div>
+        <div class="bd">
+          <p>
+            C# supports interpolated strings (<b>$"..."</b>) and verbatim strings (<b>@"..."</b>).
+            C# 8.0 improved how you can combine them and use them in more convenient ways.
+            This is useful when building file paths, templates, or multi-line strings with variables.
+            It reduces escaping pain and improves readability in logging and UI templates.
+          </p>
+
+          <pre class="diagram">ASCII: String styles
+"Normal"          =&gt; escape needed for backslash
+@"Verbatim"       =&gt; fewer escapes, better for paths
+$"Interpolated"   =&gt; embed variables with { }
+$@"Both"          =&gt; paths/templates + variables</pre>
+
+          <div class="example">
+            <h3>Example (path template)</h3>
+            <pre><code>string user = "Gopi";
+string folder = $@"C:\Users\{user}\Documents\Reports";
+Console.WriteLine(folder);</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="note callout">
+            <b>Real-world use case:</b> Building multi-line email templates, log messages, JSON snippets, or Windows file paths in a readable way.
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> Use $@"..." for Windows-like paths and multi-line templates to reduce escape confusion.
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> In production, prefer Path.Combine for cross-platform paths, then use interpolation only for presentation/logging.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#stackalloc-nested">Previous Page</a>
+          <a class="btn" href="#best-practices">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 8 Best practices -->
+      <section class="section" id="best-practices">
+        <div class="sh">
+          <h2>8. Best Practices & Migration Checklist</h2>
+        </div>
+        <div class="bd">
+          <p>
+            When upgrading to C# 8.0, focus on features that increase safety and readability.
+            Start with nullable reference types (biggest bug reduction) and using declarations (cleaner resource usage).
+            Then add async streams for streaming workloads and pattern matching for business rules.
+            Finally, adopt advanced features only when you truly need performance or interop improvements.
+          </p>
+
+          <pre class="diagram">ASCII: Migration order (recommended)
+1) Enable C# 8 + build
+2) Enable Nullable (module-by-module)
+3) Convert using blocks to using declarations where safe
+4) Refactor decision logic with switch expressions
+5) Introduce async streams for large/streaming data
+6) Evaluate advanced memory features if performance needed</pre>
+
+          <div class="example">
+            <h3>Checklist Table</h3>
+            <table>
+              <thead>
+                <tr><th>Step</th><th>Action</th><th>Success signal</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>1</td><td>Set LangVersion and Nullable in csproj</td><td>Build shows meaningful warnings</td></tr>
+                <tr><td>2</td><td>Fix nullable warnings in DTOs/models first</td><td>API boundaries become clear</td></tr>
+                <tr><td>3</td><td>Replace deep using blocks with using declarations</td><td>Less nesting, same behavior</td></tr>
+                <tr><td>4</td><td>Use switch expressions for mapping/validation</td><td>Smaller, rule-based code</td></tr>
+                <tr><td>5</td><td>Add await foreach streaming where needed</td><td>Lower memory usage</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> Treat compiler warnings like “free code review”. Fixing them is real learning.
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> For libraries, default interface methods can reduce breaking changes—but require disciplined versioning.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#interpolated-verbatim">Previous Page</a>
+          <a class="btn" href="#mini-project">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 9 Mini project -->
+      <section class="section" id="mini-project">
+        <div class="sh">
+          <h2>9. Mini Project (Practice Scenario)</h2>
+        </div>
+        <div class="bd">
+          <p>
+            Build a “Log Processing Utility” that reads lines from a source, filters them, and writes a summary report.
+            Use <b>async streams</b> to process logs line-by-line, <b>using declarations</b> to handle files, and <b>nullable references</b> to validate input.
+            Add pattern matching to classify log entries as Error/Warning/Info.
+            This mini project connects multiple C# 8.0 features in one realistic workflow.
+          </p>
+
+          <pre class="diagram">ASCII: Data Flow
+Log Source (stream)
+   |
+   v  await foreach (async stream)
+Filter + classify (pattern matching)
+   |
+   v
+Write report (using declarations)
+   |
+   v
+Output summary</pre>
+
+          <div class="example">
+            <h3>Starter Skeleton (C#)</h3>
+            <pre><code>#nullable enable
+public static class LogProcessor
+{
+    public static async Task RunAsync(string? inputPath)
+    {
+        if (string.IsNullOrWhiteSpace(inputPath))
+        {
+            Console.WriteLine("Input path is required.");
+            return;
+        }
+
+        using var writer = new StreamWriter("summary.txt");
+        await foreach (var line in ReadLogLinesAsync(inputPath))
+        {
+            // classify with pattern matching (exercise)
+            await writer.WriteLineAsync(line);
+        }
+    }
+
+    public static async IAsyncEnumerable&lt;string&gt; ReadLogLinesAsync(string path)
+    {
+        using var reader = new StreamReader(path);
+        while (!reader.EndOfStream)
+        {
+            var line = await reader.ReadLineAsync();
+            if (line != null) yield return line;
+        }
+    }
+}</code></pre>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Try it Yourself »</a>
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> First make it work for 5–10 lines. Then scale it to large files.
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> Add cancellation and batching (buffered writes) to improve throughput.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#best-practices">Previous Page</a>
+          <a class="btn" href="#faqs">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 10 FAQs -->
+      <section class="section" id="faqs">
+        <div class="sh">
+          <h2>10. FAQs</h2>
+        </div>
+        <div class="bd">
+          <table>
+            <thead><tr><th>Question</th><th>Answer</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Does nullable reference types change runtime behavior?</td>
+                <td>No. It mainly adds compile-time warnings and changes how you design types (string vs string?).</td>
+              </tr>
+              <tr>
+                <td>Should I enable nullable in an old project?</td>
+                <td>Yes, but do it module-by-module. Start with DTOs and public APIs.</td>
+              </tr>
+              <tr>
+                <td>When should I use async streams?</td>
+                <td>When data arrives over time or is very large (logs, network, paging from DB).</td>
+              </tr>
+              <tr>
+                <td>Are default interface methods common in app code?</td>
+                <td>More common in libraries/frameworks. Use them carefully in app code.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> If you are confused, build a tiny console demo for each feature. Small examples make the rules clear.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#mini-project">Previous Page</a>
+          <a class="btn" href="#interview-questions">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 11 Interview -->
+      <section class="section" id="interview-questions">
+        <div class="sh">
+          <h2>11. Interview Questions</h2>
+        </div>
+        <div class="bd">
+          <ol>
+            <li>What problem do nullable reference types solve, and how do they work?</li>
+            <li>Explain using declarations vs using blocks. When would you prefer each?</li>
+            <li>What is IAsyncEnumerable&lt;T&gt; and how do you consume it?</li>
+            <li>What is IAsyncDisposable and why is await using needed?</li>
+            <li>How do default interface methods help library versioning?</li>
+            <li>Explain indices (^) and ranges (..) with an example.</li>
+            <li>What is a ref struct and why is it stack-only?</li>
+            <li>How do static local functions improve performance and safety?</li>
+            <li>Give a real-world example of pattern matching in business rules.</li>
+            <li>What is the risk of overusing the null-forgiving operator (!) ?</li>
+          </ol>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> In interviews, always explain the “why” (bug prevention, performance, readability) in addition to syntax.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#faqs">Previous Page</a>
+          <a class="btn" href="#mcq-quiz">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 12 MCQ -->
+      <section class="section" id="mcq-quiz">
+        <div class="sh">
+          <h2>12. MCQ Quiz (C# 8.0 Features)</h2>
+        </div>
+        <div class="bd">
+          <p>
+            Choose the best answer. (Answers are provided after the questions so learners can self-check.)
+          </p>
+
+          <div class="example">
+            <h3>Questions</h3>
+            <ol>
+              <li>Nullable reference types mainly provide:
+                <ul>
+                  <li>A) Runtime exceptions for null</li>
+                  <li>B) Compile-time warnings for risky null usage</li>
+                  <li>C) Automatic null conversion at runtime</li>
+                  <li>D) Removal of null from C#</li>
+                </ul>
+              </li>
+              <li>Which syntax is used to dispose asynchronously?
+                <ul>
+                  <li>A) using var</li>
+                  <li>B) await using</li>
+                  <li>C) dispose using</li>
+                  <li>D) async using()</li>
+                </ul>
+              </li>
+              <li>What does <b>a[^1]</b> return?
+                <ul>
+                  <li>A) First item</li>
+                  <li>B) Second item</li>
+                  <li>C) Last item</li>
+                  <li>D) Middle item</li>
+                </ul>
+              </li>
+              <li>Using declarations dispose resources:
+                <ul>
+                  <li>A) Immediately after creation</li>
+                  <li>B) At end of current scope</li>
+                  <li>C) Only when GC runs</li>
+                  <li>D) Only if you call Dispose manually</li>
+                </ul>
+              </li>
+              <li>Static local functions:
+                <ul>
+                  <li>A) Can capture outer variables freely</li>
+                  <li>B) Cannot capture outer variables</li>
+                  <li>C) Always run faster than normal methods</li>
+                  <li>D) Are only for async methods</li>
+                </ul>
+              </li>
+              <li>IAsyncEnumerable&lt;T&gt; is commonly consumed using:
+                <ul>
+                  <li>A) foreach</li>
+                  <li>B) await foreach</li>
+                  <li>C) for loop only</li>
+                  <li>D) while(true)</li>
+                </ul>
+              </li>
+              <li>Default interface methods are especially useful for:
+                <ul>
+                  <li>A) Reducing class file size</li>
+                  <li>B) Evolving interfaces without breaking implementations</li>
+                  <li>C) Replacing inheritance</li>
+                  <li>D) Removing interfaces</li>
+                </ul>
+              </li>
+            </ol>
+
+            <h3>Answer Key</h3>
+            <ul>
+              <li>1) B</li>
+              <li>2) B</li>
+              <li>3) C</li>
+              <li>4) B</li>
+              <li>5) B</li>
+              <li>6) B</li>
+              <li>7) B</li>
+            </ul>
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> After answering, build a mini code snippet for the questions you got wrong. That’s the fastest way to learn.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#interview-questions">Previous Page</a>
+          <a class="btn" href="#downloadables">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 13 Downloadables placeholder -->
+      <section class="section" id="downloadables">
+        <div class="sh">
+          <h2>13. Downloadables (ZIP / PPT / DOC Placeholder)</h2>
+        </div>
+        <div class="bd">
+          <p>
+            This section is a placeholder for your course assets. In your ItTechGenie site, you can attach:
+            ZIP for sample projects, PPT for classroom slides, and DOC for printable notes.
+          </p>
+
+          <div class="example">
+            <h3>Placeholder Blocks</h3>
+            <ul>
+              <li><b>ZIP:</b> CSharp8_Samples.zip (source code, exercises)</li>
+              <li><b>PPT:</b> CSharp8_Features_Slides.pptx (training deck)</li>
+              <li><b>DOC:</b> CSharp8_Notes.docx (printable notes)</li>
+            </ul>
+            <a class="try" href="#!" aria-label="Try It Yourself (dummy)">Download (dummy) »</a>
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#mcq-quiz">Previous Page</a>
+          <a class="btn" href="#glossary">Next Page</a>
+        </div>
+      </section>
+
+      <!-- 14 Glossary -->
+      <section class="section" id="glossary">
+        <div class="sh">
+          <h2>14. Glossary (Tooltips)</h2>
+        </div>
+        <div class="bd">
+          <p>
+            These are the key tooltip terms used in this page. In your lessons, encourage learners to hover and read slowly.
+          </p>
+
+          <table>
+            <thead><tr><th>Term</th><th>Tooltip Description</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>C# 8.0</td>
+                <td>A C# language version that introduced safer null-handling, async streams, and cleaner resource management.</td>
+              </tr>
+              <tr>
+                <td>.NET runtime</td>
+                <td>The environment that runs .NET apps, manages memory, loads assemblies, and executes code securely.</td>
+              </tr>
+              <tr>
+                <td>async/await</td>
+                <td>A non-blocking programming style. async/await helps write asynchronous code that reads like normal code.</td>
+              </tr>
+              <tr>
+                <td>.csproj</td>
+                <td>A project configuration file that controls target framework, language version, nullable, and build behavior.</td>
+              </tr>
+              <tr>
+                <td>struct</td>
+                <td>A value type copied by value, often used for small immutable data like points, money, measurements.</td>
+              </tr>
+              <tr>
+                <td>interface</td>
+                <td>A contract defining members a type must implement; C# 8 also allows default implementations in interfaces.</td>
+              </tr>
+              <tr>
+                <td>IDisposable</td>
+                <td>An interface for deterministic cleanup of resources (files, connections). Used by using declarations/blocks.</td>
+              </tr>
+              <tr>
+                <td>ref struct</td>
+                <td>A stack-only struct used in high-performance memory scenarios. Cannot be boxed or captured.</td>
+              </tr>
+              <tr>
+                <td>??=</td>
+                <td>Assigns a value only if the left side is null, useful for lazy initialization and defaults.</td>
+              </tr>
+              <tr>
+                <td>IAsyncEnumerable&lt;T&gt;</td>
+                <td>An async sequence consumed via await foreach; yields items over time without loading everything in memory.</td>
+              </tr>
+              <tr>
+                <td>IAsyncDisposable</td>
+                <td>Async cleanup pattern using DisposeAsync; used with await using for non-blocking disposal.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> For your CSHTML integration, you can keep the tooltip HTML structure exactly the same and move CSS to your site.css later.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#downloadables">Previous Page</a>
+          <a class="btn" href="#practice-coding-questions">Next Page</a>
+        </div>
+      </section>
+
+      <!-- PRACTICE SECTION (REQUIRED) -->
+      <section class="section" id="practice-coding-questions">
+        <div class="sh">
+          <h2>To Become Best coder Practice this</h2>
+        </div>
+        <div class="bd">
+          <p>
+            Below are 15 practical coding questions based on C# 8.0 features. Mix of Easy/Medium/Hard.
+            Each includes a problem statement, I/O format, example, constraints, and a short hint (no full solution).
+          </p>
+
+          <div class="example">
+            <h3>Easy (1–5)</h3>
+            <ol>
+              <li>
+                <b>Nullable Display Name</b><br/>
+                <b>Problem:</b> Write a method that returns "Guest" when the input name is null/empty; otherwise returns trimmed name.<br/>
+                <b>I/O:</b> Input: string? name → Output: string<br/>
+                <b>Example:</b> Input: null → Output: Guest<br/>
+                <b>Constraints:</b> name length ≤ 200<br/>
+                <b>Hint:</b> Use nullable reference types and a null check.
+              </li>
+              <li>
+                <b>Lazy Initialize List</b><br/>
+                <b>Problem:</b> If a List&lt;string&gt;? is null, initialize it and add a message.<br/>
+                <b>I/O:</b> Input: List&lt;string&gt;? logs, string msg → Output: List&lt;string&gt;<br/>
+                <b>Example:</b> Input: null,"Hi" → Output: ["Hi"]<br/>
+                <b>Constraints:</b> msg length ≤ 100<br/>
+                <b>Hint:</b> Use ??= to initialize.
+              </li>
+              <li>
+                <b>Last Element Finder</b><br/>
+                <b>Problem:</b> Return the last element of an int array using indices (^).<br/>
+                <b>I/O:</b> Input: int[] a → Output: int<br/>
+                <b>Example:</b> [5,7,9] → 9<br/>
+                <b>Constraints:</b> array length ≥ 1<br/>
+                <b>Hint:</b> Use a[^1].
+              </li>
+              <li>
+                <b>Middle Slice</b><br/>
+                <b>Problem:</b> Return a slice of an array from index 1 to index 3 (end exclusive).<br/>
+                <b>I/O:</b> Input: int[] a → Output: int[]<br/>
+                <b>Example:</b> [10,20,30,40,50] → [20,30,40]<br/>
+                <b>Constraints:</b> length ≥ 4<br/>
+                <b>Hint:</b> Use ranges: a[1..4].
+              </li>
+              <li>
+                <b>Using Declaration File Write</b><br/>
+                <b>Problem:</b> Write two lines to a file using using declaration (no using block).<br/>
+                <b>I/O:</b> Input: string path → Output: file created/updated<br/>
+                <b>Example:</b> path="out.txt" → file contains 2 lines<br/>
+                <b>Constraints:</b> valid path<br/>
+                <b>Hint:</b> using var writer = new StreamWriter(path);
+              </li>
+            </ol>
+          </div>
+
+          <div class="example">
+            <h3>Medium (6–10)</h3>
+            <ol start="6">
+              <li>
+                <b>Order Discount Rule Engine</b><br/>
+                <b>Problem:</b> Use switch expression + property patterns to return discount labels based on Total and IsPremium.<br/>
+                <b>I/O:</b> Input: (decimal Total, bool IsPremium) → Output: string<br/>
+                <b>Example:</b> (6000,true) → "Premium 20% Discount"<br/>
+                <b>Constraints:</b> Total ≥ 0<br/>
+                <b>Hint:</b> Use record + switch expression with property patterns.
+              </li>
+              <li>
+                <b>Static Local Validator</b><br/>
+                <b>Problem:</b> Write a method that validates a product code using a static local function (no captures).<br/>
+                <b>I/O:</b> Input: string code → Output: bool<br/>
+                <b>Example:</b> "PRD-1001" → true<br/>
+                <b>Constraints:</b> code length ≤ 50<br/>
+                <b>Hint:</b> Put regex/format checks into static local function.
+              </li>
+              <li>
+                <b>Async Stream Number Generator</b><br/>
+                <b>Problem:</b> Create an async iterator that yields numbers 1..N with delay, then consume using await foreach.<br/>
+                <b>I/O:</b> Input: int N → Output: prints numbers<br/>
+                <b>Example:</b> N=3 → prints 1,2,3<br/>
+                <b>Constraints:</b> 1 ≤ N ≤ 1000<br/>
+                <b>Hint:</b> async IAsyncEnumerable + yield return + Task.Delay.
+              </li>
+              <li>
+                <b>Null-safe Customer Mapper</b><br/>
+                <b>Problem:</b> Map a DTO to a domain model ensuring nullable fields are handled safely (no warnings).<br/>
+                <b>I/O:</b> Input: CustomerDto → Output: Customer<br/>
+                <b>Example:</b> dto.Name=null → model.Name="Unknown"<br/>
+                <b>Constraints:</b> keep model non-nullable<br/>
+                <b>Hint:</b> Use ?? and null checks; avoid overusing !.
+              </li>
+              <li>
+                <b>Path Template Builder</b><br/>
+                <b>Problem:</b> Build a multi-line report header using interpolated verbatim string $@"...".<br/>
+                <b>I/O:</b> Input: string user, DateTime date → Output: string header<br/>
+                <b>Example:</b> user=Gopi → includes user line<br/>
+                <b>Constraints:</b> header ≤ 2000 chars<br/>
+                <b>Hint:</b> Use $@"Line1{var}\nLine2".
+              </li>
+            </ol>
+          </div>
+
+          <div class="example">
+            <h3>Hard (11–15)</h3>
+            <ol start="11">
+              <li>
+                <b>Async Log Processor with Filtering</b><br/>
+                <b>Problem:</b> Read a huge log file using async streams, filter only ERROR lines, write them to a new file using using declarations.<br/>
+                <b>I/O:</b> Input: inputPath, outputPath → Output: filtered file<br/>
+                <b>Example:</b> "app.log" → "errors.log" contains only ERROR lines<br/>
+                <b>Constraints:</b> file can be very large<br/>
+                <b>Hint:</b> async iterator yields lines; consumer writes only matching lines.
+              </li>
+              <li>
+                <b>Async Disposable Wrapper</b><br/>
+                <b>Problem:</b> Create a custom resource that buffers data and flushes asynchronously on DisposeAsync; use await using in a demo.<br/>
+                <b>I/O:</b> Input: list of messages → Output: flush confirmation<br/>
+                <b>Example:</b> ["a","b"] → prints "Flushed 2 items"<br/>
+                <b>Constraints:</b> must not block thread in cleanup<br/>
+                <b>Hint:</b> Implement IAsyncDisposable with ValueTask DisposeAsync().
+              </li>
+              <li>
+                <b>Nullable-Aware API Response Builder</b><br/>
+                <b>Problem:</b> Build an API response object where optional fields are nullable, but required fields are non-nullable. Ensure zero nullable warnings.<br/>
+                <b>I/O:</b> Input: domain model with optional values → Output: response DTO<br/>
+                <b>Example:</b> optional description null → response.Description=null<br/>
+                <b>Constraints:</b> no suppression operator (!) allowed except rare cases<br/>
+                <b>Hint:</b> Design DTO with string? only where needed; validate required fields.
+              </li>
+              <li>
+                <b>Rule Engine with Pattern Matching + Ranges</b><br/>
+                <b>Problem:</b> Given an array of daily sales, classify it:
+                - If last 3 days are all &gt;= 1000 → "Hot"
+                - If last day &lt; 200 → "Cold"
+                - else "Normal"<br/>
+                <b>I/O:</b> Input: int[] sales → Output: string<br/>
+                <b>Example:</b> [500,1200,1300,1500] → Hot<br/>
+                <b>Constraints:</b> length ≥ 3<br/>
+                <b>Hint:</b> Use sales[^3..] to slice last 3, then pattern/conditions.
+              </li>
+              <li>
+                <b>High-performance Parser (Stackalloc + Span)</b><br/>
+                <b>Problem:</b> Parse a 3-digit code from a string without allocations using Span and a small stackalloc buffer (conceptual).<br/>
+                <b>I/O:</b> Input: string s like "ID:123" → Output: int 123<br/>
+                <b>Example:</b> "ID:123" → 123<br/>
+                <b>Constraints:</b> input format guaranteed; keep allocations minimal<br/>
+                <b>Hint:</b> Use Span<char> and stackalloc for temp; convert digits manually.
+              </li>
+            </ol>
+          </div>
+
+          <div class="tip callout">
+            <b>Beginner Tip:</b> For each question, write a “first working solution” first, then refactor to use the C# 8.0 feature requested.
+          </div>
+
+          <div class="note callout">
+            <b>Advanced Note:</b> After finishing, add tests (NUnit/xUnit) and ensure nullable warnings stay clean with Nullable enabled.
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <a class="btn secondary" href="#glossary">Previous Page</a>
+          <a class="btn" href="#next-subtopic">Next Page</a>
+        </div>
+      </section>
+
+      <!-- Placeholder anchor for last "Next Page" -->
+      <a id="next-subtopic"></a>
+
+    </main>
+  </div>
+</body>
+</html>

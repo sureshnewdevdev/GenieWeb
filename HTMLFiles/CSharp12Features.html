@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ItTechGenie • C# 12 Features (W3Schools Style)</title>
+  <style>
+    :root{
+      --green:#04AA6D;
+      --dark:#1f1f1f;
+      --code:#0f172a;
+      --sidebar:#f3f4f6;
+      --box:#ffffff;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --note:#e8f0fe;
+      --tip:#e7f7ef;
+      --warn:#ffe8e8;
+      --example:#f2f2f2;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:#fff;
+      color:#111827;
+    }
+
+    /* Top bar (W3-like) */
+    .topbar{
+      position:fixed; top:0; left:0; right:0;
+      height:56px;
+      background:var(--green);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      padding:0 16px;
+      z-index:999;
+      box-shadow:0 2px 8px rgba(0,0,0,.15);
+    }
+    .brand{
+      font-weight:800;
+      letter-spacing:.3px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .brand .logo{
+      width:34px; height:34px;
+      border-radius:50%;
+      background:rgba(255,255,255,.25);
+      display:inline-flex;
+      align-items:center; justify-content:center;
+      font-weight:900;
+    }
+    .brand small{
+      display:block;
+      font-weight:600;
+      opacity:.92;
+      letter-spacing:0;
+    }
+    .topbar .right{
+      margin-left:auto;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      font-size:14px;
+      opacity:.95;
+    }
+    .pill{
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.25);
+      padding:6px 10px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+
+    /* Layout */
+    .layout{
+      display:flex;
+      padding-top:56px; /* topbar */
+    }
+
+    /* Sidebar (W3 left menu) */
+    .sidebar{
+      position:fixed;
+      top:56px;
+      left:0;
+      bottom:0;
+      width:290px;
+      background:var(--sidebar);
+      border-right:1px solid var(--border);
+      overflow:auto;
+      padding:14px 10px 40px;
+    }
+    .sidebar h3{
+      margin:10px 10px 6px;
+      font-size:14px;
+      color:#111827;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .menu a{
+      display:block;
+      text-decoration:none;
+      color:#111827;
+      padding:9px 10px;
+      margin:2px 6px;
+      border-radius:6px;
+      font-size:14px;
+      line-height:1.2;
+    }
+    .menu a:hover{ background:#e9ecef; }
+    .menu .indent{ padding-left:22px; }
+    .menu .indent2{ padding-left:34px; }
+    .menu .active{
+      background:#d9f3ea;
+      border:1px solid #bfead9;
+      font-weight:700;
+    }
+
+    /* Main content */
+    .main{
+      margin-left:290px;
+      width:calc(100% - 290px);
+      padding:18px 18px 60px;
+      background:#fff;
+    }
+
+    /* Section box with green header */
+    .section{
+      background:var(--box);
+      border:1px solid var(--border);
+      border-radius:10px;
+      overflow:hidden;
+      margin:14px 0;
+      box-shadow:0 1px 10px rgba(0,0,0,.04);
+    }
+    .section .head{
+      background:var(--green);
+      color:#fff;
+      padding:12px 14px;
+      font-size:18px;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .section .body{
+      padding:14px;
+    }
+    .muted{ color:var(--muted); }
+    .kpi{
+      font-size:13px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.28);
+      white-space:nowrap;
+    }
+
+    /* Notes */
+    .note, .tip, .warn{
+      border-radius:10px;
+      padding:12px 12px;
+      margin:12px 0;
+      border:1px solid var(--border);
+    }
+    .note{ background:var(--note); border-color:#c7dcff; }
+    .tip{ background:var(--tip); border-color:#bfead9; }
+    .warn{ background:var(--warn); border-color:#ffbdbd; }
+    .note b, .tip b, .warn b{ display:inline-block; margin-bottom:6px; }
+
+    /* Example */
+    .example{
+      background:var(--example);
+      border:1px solid var(--border);
+      padding:12px;
+      border-radius:10px;
+      margin:12px 0;
+    }
+    .try{
+      display:inline-block;
+      background:var(--green);
+      color:#fff;
+      text-decoration:none;
+      padding:9px 14px;
+      border-radius:8px;
+      font-weight:700;
+      margin-top:8px;
+    }
+    .try:hover{ filter:brightness(.95); }
+
+    /* Code block (dark) */
+    pre{
+      background:var(--code);
+      color:#e5e7eb;
+      padding:12px;
+      border-radius:10px;
+      overflow:auto;
+      border:1px solid rgba(255,255,255,.08);
+      margin:10px 0;
+    }
+    code{ font-family: Consolas, Menlo, Monaco, "Courier New", monospace; }
+
+    /* ASCII diagram box */
+    .ascii{
+      font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
+      background:#0b1020;
+      color:#dbeafe;
+      padding:12px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.08);
+      margin:10px 0;
+      white-space:pre;
+      overflow:auto;
+    }
+
+    /* Next/Prev buttons */
+    .navbtns{
+      display:flex;
+      gap:10px;
+      justify-content:space-between;
+      margin-top:14px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      display:inline-block;
+      background:var(--green);
+      color:#fff;
+      text-decoration:none;
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:800;
+      min-width:170px;
+      text-align:center;
+    }
+    .btn.secondary{
+      background:#111827;
+    }
+    .btn:hover{ filter:brightness(.95); }
+
+    /* Tables */
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin:10px 0;
+      font-size:14px;
+    }
+    th, td{
+      border:1px solid var(--border);
+      padding:10px;
+      vertical-align:top;
+    }
+    th{
+      background:#f9fafb;
+      text-align:left;
+    }
+
+    /* Tooltip */
+    .tt{
+      position:relative;
+      border-bottom:1px dotted #111827;
+      cursor:help;
+      font-weight:700;
+    }
+    .tt::after{
+      content:attr(data-tip);
+      position:absolute;
+      left:0;
+      top:120%;
+      width:min(360px, 70vw);
+      background:#111827;
+      color:#fff;
+      padding:10px 10px;
+      border-radius:10px;
+      font-weight:500;
+      font-size:13px;
+      line-height:1.25;
+      box-shadow:0 10px 22px rgba(0,0,0,.25);
+      opacity:0;
+      pointer-events:none;
+      transform:translateY(6px);
+      transition:opacity .15s ease, transform .15s ease;
+      white-space:pre-line;
+      z-index:50;
+    }
+    .tt::before{
+      content:"";
+      position:absolute;
+      left:14px;
+      top:112%;
+      border:8px solid transparent;
+      border-bottom-color:#111827;
+      opacity:0;
+      transform:translateY(6px);
+      transition:opacity .15s ease, transform .15s ease;
+      z-index:51;
+    }
+    .tt:hover::after, .tt:hover::before{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .sidebar{ position:static; width:100%; height:auto; }
+      .main{ margin-left:0; width:100%; }
+      .layout{ display:block; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">IT</div>
+      <div>
+        ItTechGenie
+        <small>C# 12 Features • W3Schools-style Tutorial</small>
+      </div>
+    </div>
+    <div class="right">
+      <div class="pill">Theme: #04AA6D</div>
+      <div class="pill">Single-page anchors</div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- Left Sidebar (W3 style) -->
+    <aside class="sidebar" id="sidebarMenu">
+      <h3>Overview</h3>
+      <nav class="menu">
+        <a class="active" href="#intro">C# 12 Features</a>
+        <a href="#prereq">Prerequisites & Setup</a>
+        <a href="#toc">Table of Contents</a>
+
+        <h3>Features</h3>
+        <a href="#primary-constructors" class="indent">Primary Constructors</a>
+        <a href="#collection-expressions" class="indent">Collection Expressions</a>
+        <a href="#inline-arrays" class="indent">Inline Arrays</a>
+        <a href="#optional-lambda-params" class="indent">Optional Lambda Parameters</a>
+        <a href="#ref-readonly-params" class="indent">ref readonly Parameters</a>
+        <a href="#alias-any-type" class="indent">Alias Any Type</a>
+        <a href="#experimental-attribute" class="indent">Experimental Attribute</a>
+
+        <h3>Guidance</h3>
+        <a href="#best-practices">Best Practices & Migration</a>
+        <a href="#mini-project">Mini Project</a>
+
+        <h3>Assessments</h3>
+        <a href="#faqs">FAQs</a>
+        <a href="#interview">Interview Questions</a>
+        <a href="#mcq">MCQ Quiz</a>
+
+        <h3>Resources</h3>
+        <a href="#glossary">Glossary (Tooltips)</a>
+        <a href="#downloads">Downloadables</a>
+
+        <h3>Practice</h3>
+        <a href="#practice-coding-questions">To Become Best coder Practice this</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Placeholder anchors requested -->
+      <a id="prev-subtopic"></a>
+      <a id="next-subtopic"></a>
+
+      <!-- INTRO -->
+      <section class="section" id="intro">
+        <div class="head">
+          <span>Introduction to C# 12 Features</span>
+          <span class="kpi">Goal: Write cleaner, safer, faster C#</span>
+        </div>
+        <div class="body">
+          <p>
+            C# 12 focuses on practical improvements that help you write more expressive code with less boilerplate.
+            Many of these features pair naturally with modern .NET projects and improve readability without sacrificing performance.
+            You’ll see enhancements around constructors, collections, memory-friendly data structures, and safer “opt-in” APIs.
+            If you already know C# basics, C# 12 makes your day-to-day code feel smoother and more maintainable.
+          </p>
+
+          <div class="ascii">C# 12 Adoption Flow
++-------------------+     +-----------------------+     +-----------------------+
+| Upgrade .NET SDK   | --> | Enable C# 12 features | --> | Refactor incrementally |
++-------------------+     +-----------------------+     +-----------------------+
+        |                               |                           |
+        v                               v                           v
+   Validate builds                Update style                 Add tests / review</div>
+
+          <div class="note">
+            <b>Note:</b>
+            The <span class="tt" data-tip="The .NET SDK is the toolset that contains the compiler, CLI, and templates.\nIt decides which C# language version you can use.\nUpdating the SDK is the first step to using new language features.">.NET SDK</span>
+            and project settings control which C# features are available.
+          </div>
+
+          <div class="example">
+            <b>Example:</b> You can keep existing code as-is, and adopt C# 12 features only in new classes first.
+            <br/>
+            <a class="try" href="#next-subtopic">Try It Yourself</a>
+          </div>
+
+          <div class="tip">
+            <b>Beginner Tip:</b> Treat C# 12 as “quality-of-life upgrades” — learn one feature, use it in one file, then expand.
+          </div>
+
+          <div class="warn">
+            <b>Warning:</b> If your team uses multiple machines/agents, ensure build servers use the same SDK version to avoid “works on my machine”.
+          </div>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#prev-subtopic">❮ Previous Page</a>
+            <a class="btn" href="#prereq">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- PREREQ -->
+      <section class="section" id="prereq">
+        <div class="head">
+          <span>Prerequisites & Project Setup</span>
+          <span class="kpi">Make your compiler “see” C# 12</span>
+        </div>
+        <div class="body">
+          <p>
+            To use C# 12 reliably, start with a modern .NET project and confirm the selected language version.
+            In most cases, using the latest .NET SDK automatically enables the latest C# version.
+            If you need explicit control (common in enterprises), you can set <span class="tt" data-tip="A language version is the compiler switch that enables a set of C# features.\nIt allows you to lock projects to a stable feature set.\nThis prevents accidental feature usage when upgrading developer machines.">language version</span>
+            in your project file. Keep your team consistent across local builds and CI pipelines.
+          </p>
+
+          <div class="ascii">Build Consistency Checklist
+[1] SDK version aligned
+[2] CI uses same SDK
+[3] Project sets LangVersion (optional)
+[4] Tests validate behavior</div>
+
+          <div class="example">
+            <b>Example:</b> Pin language version in <span class="tt" data-tip="A .csproj file defines your .NET project build settings.\nIt controls language version, target framework, dependencies, and more.\nEditing it is the most direct way to lock compile behavior.">.csproj</span>.
+          </div>
+
+          <pre><code>&lt;!-- MyApp.csproj --&gt;
+&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+  &lt;PropertyGroup&gt;
+    &lt;TargetFramework&gt;net8.0&lt;/TargetFramework&gt;
+    &lt;LangVersion&gt;12.0&lt;/LangVersion&gt;
+    &lt;Nullable&gt;enable&lt;/Nullable&gt;
+  &lt;/PropertyGroup&gt;
+&lt;/Project&gt;</code></pre>
+
+          <p><b>Real-world use case:</b> Large teams pin <code>LangVersion</code> to avoid unexpected compile errors when some developers update SDK earlier than others.</p>
+
+          <div class="tip"><b>Beginner Tip:</b> If you’re learning, using the latest SDK is easiest — you get new features without extra configuration.</div>
+          <div class="note"><b>Advanced Note:</b> In CI, use a pinned SDK via <code>global.json</code> so build agents never “drift”.</div>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#intro">❮ Previous Page</a>
+            <a class="btn" href="#toc">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- TOC -->
+      <section class="section" id="toc">
+        <div class="head">
+          <span>Table of Contents</span>
+          <span class="kpi">Jump to any feature</span>
+        </div>
+        <div class="body">
+          <table>
+            <thead>
+              <tr><th>Section</th><th>What you learn</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><a href="#primary-constructors">Primary Constructors</a></td><td>Reduce boilerplate in types by declaring parameters at the type level</td></tr>
+              <tr><td><a href="#collection-expressions">Collection Expressions</a></td><td>Create lists/arrays/span-like collections with a concise syntax</td></tr>
+              <tr><td><a href="#inline-arrays">Inline Arrays</a></td><td>Store fixed-size buffers efficiently inside structs</td></tr>
+              <tr><td><a href="#optional-lambda-params">Optional Lambda Parameters</a></td><td>Give lambda parameters defaults (where supported) for cleaner APIs</td></tr>
+              <tr><td><a href="#ref-readonly-params">ref readonly Parameters</a></td><td>Avoid copies of large structs while preventing modification</td></tr>
+              <tr><td><a href="#alias-any-type">Alias Any Type</a></td><td>Use aliases beyond namespaces (e.g., tuples, generics)</td></tr>
+              <tr><td><a href="#experimental-attribute">Experimental Attribute</a></td><td>Mark APIs as experimental to warn consumers and tools</td></tr>
+            </tbody>
+          </table>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#prereq">❮ Previous Page</a>
+            <a class="btn" href="#primary-constructors">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRIMARY CONSTRUCTORS -->
+      <section class="section" id="primary-constructors">
+        <div class="head">
+          <span><span class="tt" data-tip="Primary constructors let you declare constructor parameters on the type itself.\nThese parameters become available in the type body for initialization.\nIt reduces repetition and makes intent clearer for data-carrying types.">Primary Constructors</span></span>
+          <span class="kpi">Less boilerplate</span>
+        </div>
+        <div class="body">
+          <p>
+            Primary constructors allow you to declare constructor parameters directly on the class or struct declaration.
+            This is especially useful when your type mainly exists to store and validate incoming values.
+            The parameters are in scope for field/property initialization, helping you avoid repeating assignments.
+            Think of it as a cleaner “front door” for creating objects, while keeping the type’s purpose obvious.
+          </p>
+
+          <div class="ascii">Object Creation Flow
+new Customer(id, name)
+        |
+        v
+Primary constructor parameters (id, name)
+        |
+        v
+Initialize fields/properties + validate
+        |
+        v
+Ready-to-use instance</div>
+
+          <div class="example">
+            <b>Example:</b> Customer type that validates input and exposes immutable state.
+            <br/><a class="try" href="#next-subtopic">Try It Yourself</a>
+          </div>
+
+          <pre><code>public class Customer(int id, string name)
+{
+    public int Id { get; } = id &gt; 0 ? id : throw new ArgumentOutOfRangeException(nameof(id));
+    public string Name { get; } = !string.IsNullOrWhiteSpace(name) ? name : throw new ArgumentException("Name required");
+
+    public override string ToString() =&gt; $"{Id} - {Name}";
+}
+
+// Usage:
+var c = new Customer(101, "Asha");
+Console.WriteLine(c);</code></pre>
+
+          <p><b>Real-world use case:</b> DTO-style domain objects in microservices where you want quick validation at construction time.</p>
+          <div class="tip"><b>Beginner Tip:</b> Use primary constructors for small, focused types. Keep logic simple and readable.</div>
+          <div class="note"><b>Advanced Note:</b> Combine with <span class="tt" data-tip="Immutability means values don’t change after creation.\nIt reduces bugs in multi-threaded or complex code.\nIt also makes behavior easier to reason about in large systems.">immutability</span> to make objects thread-friendly and testable.</div>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#toc">❮ Previous Page</a>
+            <a class="btn" href="#collection-expressions">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- COLLECTION EXPRESSIONS -->
+      <section class="section" id="collection-expressions">
+        <div class="head">
+          <span><span class="tt" data-tip="Collection expressions provide a unified, concise way to create collections.\nThey can build arrays, lists, and more with a compact syntax.\nIt improves readability when constructing or combining data sets.">Collection Expressions</span></span>
+          <span class="kpi">Cleaner collection creation</span>
+        </div>
+        <div class="body">
+          <p>
+            Collection expressions introduce a compact way to create and combine collections.
+            They reduce noise when you build lists/arrays and when you “spread” existing items into a new collection.
+            This is great for APIs that accept sequences, especially where you used to write multiple lines of setup.
+            The result: fewer braces, fewer temp variables, and code that reads like the data it represents.
+          </p>
+
+          <div class="ascii">Combine Collections
+existing:  [1,2]
+more:      [3,4]
+result:    [1,2,3,4]</div>
+
+          <div class="example">
+            <b>Example:</b> Build a request payload list by combining defaults + user items.
+          </div>
+
+          <pre><code>int[] defaults = { 1, 2 };
+int[] userItems = { 7, 8 };
+
+// Conceptually: [..defaults, 5, ..userItems]
+var merged = new List&lt;int&gt;();
+merged.AddRange(defaults);
+merged.Add(5);
+merged.AddRange(userItems);
+
+Console.WriteLine(string.Join(", ", merged));</code></pre>
+
+          <p class="muted">
+            In real C# 12 projects, the syntax can be much more concise (depending on the target type).
+            The key learning: the language is moving toward a consistent “collection literal” feel.
+          </p>
+
+          <p><b>Real-world use case:</b> Building API query filters: default filters + user-selected filters merged cleanly.</p>
+          <div class="tip"><b>Beginner Tip:</b> Prefer readability over cleverness—keep merged expressions short.</div>
+          <div class="note"><b>Advanced Note:</b> Watch allocations; in hot paths, consider spans or pooling if lists are large.</div>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#primary-constructors">❮ Previous Page</a>
+            <a class="btn" href="#inline-arrays">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- INLINE ARRAYS -->
+      <section class="section" id="inline-arrays">
+        <div class="head">
+          <span><span class="tt" data-tip="Inline arrays let you declare a fixed-size buffer inside a struct.\nThey reduce allocations and can improve cache locality.\nUseful for performance-sensitive code with small fixed data.">Inline Arrays</span></span>
+          <span class="kpi">Performance-friendly fixed buffers</span>
+        </div>
+        <div class="body">
+          <p>
+            Inline arrays help you store a small, fixed number of elements directly inside a <span class="tt" data-tip="A struct is a value type in C#.\nValue types are copied by value and usually allocated inline.\nThey are efficient for small data with predictable size.">struct</span> without separate heap allocations.
+            This can improve performance by keeping data contiguous and avoiding extra objects.
+            They are especially useful in low-level libraries, parsers, or numeric scenarios where the size is known.
+            If you’re building everyday business apps, you may use them less often—but it’s powerful to understand them.
+          </p>
+
+          <div class="ascii">Memory Idea (Simplified)
+Without inline array:
+struct --&gt; reference --&gt; heap array [ .. ]
+
+With inline array:
+struct contains elements inline:
+struct [e0][e1][e2][e3]  (no extra array object)</div>
+
+          <div class="example">
+            <b>Example:</b> Keep last 4 temperature readings for a sensor record (fixed size).
+          </div>
+
+          <pre><code>public struct SensorSnapshot
+{
+    // Simple fixed layout (illustrative):
+    public float R0;
+    public float R1;
+    public float R2;
+    public float R3;
+
+    public float Average() =&gt; (R0 + R1 + R2 + R3) / 4f;
+}
+
+// Usage:
+var s = new SensorSnapshot { R0 = 26.2f, R1 = 26.1f, R2 = 26.4f, R3 = 26.0f };
+Console.WriteLine(s.Average());</code></pre>
+
+          <p><b>Real-world use case:</b> Streaming telemetry: keep a tiny rolling window of values without allocating many arrays.</p>
+          <div class="tip"><b>Beginner Tip:</b> Only use fixed buffers when the size is truly constant and small.</div>
+          <div class="note"><b>Advanced Note:</b> Inline arrays shine when you care about GC pressure and memory locality in tight loops.</div>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#collection-expressions">❮ Previous Page</a>
+            <a class="btn" href="#optional-lambda-params">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- OPTIONAL LAMBDA PARAMETERS -->
+      <section class="section" id="optional-lambda-params">
+        <div class="head">
+          <span><span class="tt" data-tip="A lambda expression is an inline function you can pass as data.\nIt is common in LINQ, events, and callbacks.\nOptional lambda parameters reduce overload noise in some delegate scenarios.">Optional Parameters in Lambda Expressions</span></span>
+          <span class="kpi">Cleaner callback APIs</span>
+        </div>
+        <div class="body">
+          <p>
+            Lambdas are compact functions often used for filters, transformations, and event handlers.
+            Optional parameters in lambdas (where supported) can reduce the need for multiple overloads or wrapper functions.
+            This can be helpful when you build reusable libraries that accept delegates with “extra” context.
+            The main value: simpler calling code while keeping the callback flexible.
+          </p>
+
+          <div class="ascii">Callback Shape
+Caller --(passes lambda)--> API
+API invokes: lambda(data, optionalContext?)</div>
+
+          <div class="example">
+            <b>Example:</b> A simple processing method that can accept an optional “tag”.
+          </div>
+
+          <pre><code>public static void Process(IEnumerable&lt;int&gt; numbers, Func&lt;int, string, string&gt; formatter)
+{
+    foreach (var n in numbers)
+        Console.WriteLine(formatter(n, "default-tag"));
+}
+
+// Usage:
+Process(new[] { 1, 2, 3 }, (n, tag) =&gt; $"{tag}: {n*n}");</code></pre>
+
+          <p><b>Real-world use case:</b> Logging pipelines where callbacks optionally include correlation IDs or categories.</p>
+          <div class="tip"><b>Beginner Tip:</b> If optional parameters confuse readers, prefer explicit overloads for clarity.</div>
+          <div class="note"><b>Advanced Note:</b> Keep delegate signatures stable; changing callback shapes is a breaking change for consumers.</div>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#inline-arrays">❮ Previous Page</a>
+            <a class="btn" href="#ref-readonly-params">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- REF READONLY PARAMETERS -->
+      <section class="section" id="ref-readonly-params">
+        <div class="head">
+          <span><span class="tt" data-tip="ref readonly passes a value type by reference but prevents modification.\nIt avoids copying large structs while keeping them safe.\nUseful for performance where immutability is desired.">ref readonly Parameters</span></span>
+          <span class="kpi">Avoid copies safely</span>
+        </div>
+        <div class="body">
+          <p>
+            When you pass a large struct, the runtime may copy it, which can be expensive in tight loops.
+            Using <span class="tt" data-tip="Passing by reference means the method uses the original value location.\nIt can reduce copying costs for large value types.\nIt must be used carefully to avoid unintended modifications.">by reference</span> avoids copying, but plain <code>ref</code> allows mutation.
+            <code>ref readonly</code> is a safer middle ground: it prevents modifications but still avoids copies.
+            This is a strong feature for performance-sensitive libraries and numeric code.
+          </p>
+
+          <div class="ascii">Passing a Large Struct
+Value copy:    method(valueCopy)   (extra cost)
+ref readonly:  method(reference)   (no copy + safe)</div>
+
+          <div class="example">
+            <b>Example:</b> Calculate distance without copying the struct repeatedly.
+          </div>
+
+          <pre><code>public readonly struct Point3D
+{
+    public double X { get; init; }
+    public double Y { get; init; }
+    public double Z { get; init; }
+}
+
+public static double DistanceFromOrigin(ref readonly Point3D p)
+{
+    return Math.Sqrt(p.X * p.X + p.Y * p.Y + p.Z * p.Z);
+}
+
+// Usage:
+var p = new Point3D { X = 10, Y = 20, Z = 5 };
+Console.WriteLine(DistanceFromOrigin(ref p));</code></pre>
+
+          <p><b>Real-world use case:</b> Game engines and simulation systems that handle many vectors/points per frame.</p>
+          <div class="tip"><b>Beginner Tip:</b> Use normal parameters first; reach for <code>ref readonly</code> only when profiling shows benefit.</div>
+          <div class="note"><b>Advanced Note:</b> This works best with truly immutable structs; avoid exposing mutable fields.</div>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#optional-lambda-params">❮ Previous Page</a>
+            <a class="btn" href="#alias-any-type">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ALIAS ANY TYPE -->
+      <section class="section" id="alias-any-type">
+        <div class="head">
+          <span><span class="tt" data-tip="A type alias gives a shorter, clearer name to a complex type.\nC# 12 expands aliasing beyond namespaces to many type forms.\nThis improves readability in APIs that use tuples or generics.">Alias Any Type</span></span>
+          <span class="kpi">Readable names for complex types</span>
+        </div>
+        <div class="body">
+          <p>
+            Type aliases help when your code uses complex generic types or tuples repeatedly.
+            Instead of repeating long type signatures everywhere, you define a single alias name.
+            In C# 12, aliasing becomes more flexible, helping modern codebases stay readable.
+            This improves maintainability and reduces mistakes when copy-pasting type shapes.
+          </p>
+
+          <div class="ascii">Before vs After
+Before: Dictionary&lt;string, List&lt;(int Id, string Name)&gt;&gt;
+After : CustomerIndex</div>
+
+          <div class="example">
+            <b>Example:</b> Alias a tuple-based model used across methods.
+          </div>
+
+          <pre><code>// Alias example (illustrative)
+using CustomerRow = System.ValueTuple&lt;int, string&gt;;
+
+public static CustomerRow CreateCustomerRow(int id, string name)
+{
+    return (id, name);
+}
+
+var row = CreateCustomerRow(1, "Ravi");
+Console.WriteLine(row);</code></pre>
+
+          <p><b>Real-world use case:</b> Data processing layers where types are “pipeline shapes” (e.g., tuple rows, nested generics).</p>
+          <div class="tip"><b>Beginner Tip:</b> Alias only when it truly improves understanding. Don’t hide simple types behind aliases.</div>
+          <div class="note"><b>Advanced Note:</b> Use aliases to stabilize public APIs—consumers see the alias name, not the complex internal type.</div>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#ref-readonly-params">❮ Previous Page</a>
+            <a class="btn" href="#experimental-attribute">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- EXPERIMENTAL ATTRIBUTE -->
+      <section class="section" id="experimental-attribute">
+        <div class="head">
+          <span><span class="tt" data-tip="The Experimental attribute marks APIs as not final.\nIt warns consumers that behavior may change or be removed.\nThis is useful for preview features or early-access library methods.">Experimental Attribute</span></span>
+          <span class="kpi">Safer preview APIs</span>
+        </div>
+        <div class="body">
+          <p>
+            When you ship libraries, sometimes you want early feedback before finalizing an API.
+            The experimental attribute helps you “label” methods/types as preview, so developers get warnings.
+            This improves communication: consumers know the risk and can avoid depending on unstable behavior.
+            It also supports better versioning strategies for teams shipping internal frameworks.
+          </p>
+
+          <div class="ascii">API Lifecycle
+Experimental --&gt; Feedback --&gt; Stabilize --&gt; Supported API</div>
+
+          <div class="example">
+            <b>Example:</b> Mark an API as experimental (illustrative pattern).
+          </div>
+
+          <pre><code>[Obsolete("Experimental API: may change", false)]
+public static class PreviewFeatures
+{
+    public static string NewFormatter(string input)
+        =&gt; input.Trim().ToUpperInvariant();
+}
+
+// Usage:
+Console.WriteLine(PreviewFeatures.NewFormatter("  hello  "));</code></pre>
+
+          <p><b>Real-world use case:</b> Internal platform teams releasing preview helpers to multiple product teams before formal support.</p>
+          <div class="tip"><b>Beginner Tip:</b> If the compiler warns, read the warning—often it tells you exactly what risk exists.</div>
+          <div class="note"><b>Advanced Note:</b> Combine experimental flags with semantic versioning and clear release notes for consumers.</div>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#alias-any-type">❮ Previous Page</a>
+            <a class="btn" href="#best-practices">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- BEST PRACTICES -->
+      <section class="section" id="best-practices">
+        <div class="head">
+          <span>Best Practices & Migration Tips</span>
+          <span class="kpi">Adopt safely</span>
+        </div>
+        <div class="body">
+          <p>
+            The best way to adopt C# 12 is incrementally: enable the SDK, then modernize one feature at a time.
+            Focus on readability first, and measure performance only when you have evidence (profiling).
+            Prefer features that reduce boilerplate without obscuring intent (primary constructors, aliases).
+            Always keep code reviews and tests strong—language upgrades should never reduce correctness.
+          </p>
+
+          <div class="ascii">Incremental Upgrade Plan
+1) Update SDK + CI
+2) Enable LangVersion (optional)
+3) Refactor 1 feature per PR
+4) Add tests / run analyzers
+5) Document guidelines</div>
+
+          <table>
+            <thead>
+              <tr><th>Feature</th><th>When to Use</th><th>Common Mistake</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Primary constructors</td><td>Data-heavy types / simple validation</td><td>Putting too much logic in the constructor</td></tr>
+              <tr><td>Inline arrays</td><td>Small fixed buffers + perf needs</td><td>Using in business code with no perf requirement</td></tr>
+              <tr><td>Aliases</td><td>Complex type signatures repeated often</td><td>Creating too many aliases that hide meaning</td></tr>
+            </tbody>
+          </table>
+
+          <div class="tip"><b>Beginner Tip:</b> Add a “C# 12 usage” section in your team coding standards so everyone stays consistent.</div>
+          <div class="note"><b>Advanced Note:</b> Pair upgrades with analyzers/formatters to keep style consistent across new syntax patterns.</div>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#experimental-attribute">❮ Previous Page</a>
+            <a class="btn" href="#mini-project">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- MINI PROJECT -->
+      <section class="section" id="mini-project">
+        <div class="head">
+          <span>Mini Project: Modern Student Registry</span>
+          <span class="kpi">Use features together</span>
+        </div>
+        <div class="body">
+          <p>
+            In this mini project, you’ll model students and registrations using cleaner construction,
+            readable type aliases, and performance-friendly value types where it matters.
+            The goal is to practice feature selection: not every feature fits every file.
+            You’ll also learn to keep API surfaces safe by marking preview methods clearly.
+          </p>
+
+          <div class="ascii">Mini Project Modules
+[Student] --&gt; [Registry] --&gt; [Search/Filter] --&gt; [Export Summary]
+   |              |               |                  |
+Primary ctor   Collections     Lambdas           Aliases</div>
+
+          <div class="example">
+            <b>Example skeleton:</b> A simple registry with clean construction.
+          </div>
+
+          <pre><code>using StudentRow = System.ValueTuple&lt;int, string&gt;;
+
+public class Student(int id, string name)
+{
+    public int Id { get; } = id;
+    public string Name { get; } = name;
+}
+
+public static class Registry
+{
+    public static List&lt;Student&gt; Seed()
+        =&gt; new()
+        {
+            new Student(1, "Ananya"),
+            new Student(2, "Karthik"),
+            new Student(3, "Meera")
+        };
+
+    public static IEnumerable&lt;StudentRow&gt; ExportRows(IEnumerable&lt;Student&gt; students)
+        =&gt; students.Select(s =&gt; (s.Id, s.Name));
+}</code></pre>
+
+          <p><b>Real-world use case:</b> Training institute portals can model students/courses with minimal boilerplate and clearer data flow.</p>
+          <div class="tip"><b>Beginner Tip:</b> Start with correctness and clarity. Add performance tweaks only if needed.</div>
+          <div class="note"><b>Advanced Note:</b> You can extend this to file export, JSON serialization, and LINQ queries as next steps.</div>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#best-practices">❮ Previous Page</a>
+            <a class="btn" href="#faqs">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="section" id="faqs">
+        <div class="head">
+          <span>FAQs</span>
+          <span class="kpi">Common learner doubts</span>
+        </div>
+        <div class="body">
+          <table>
+            <thead><tr><th>Question</th><th>Answer</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Do I need to rewrite old code to use C# 12?</td>
+                <td>No. You can adopt features gradually in new files and refactors.</td>
+              </tr>
+              <tr>
+                <td>Are these features only for .NET 8?</td>
+                <td>They are compiler features; typically you get best experience with the latest SDK and target framework.</td>
+              </tr>
+              <tr>
+                <td>Will newer syntax make code harder for beginners?</td>
+                <td>If introduced slowly with examples and standards, it usually improves readability.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#mini-project">❮ Previous Page</a>
+            <a class="btn" href="#interview">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interview -->
+      <section class="section" id="interview">
+        <div class="head">
+          <span>Interview Questions (C# 12 Features)</span>
+          <span class="kpi">Be job-ready</span>
+        </div>
+        <div class="body">
+          <ol>
+            <li>Explain <b>primary constructors</b>. What problem do they solve compared to normal constructors?</li>
+            <li>When would you use <b>inline arrays</b> and when would you avoid them?</li>
+            <li>What does <b>ref readonly</b> guarantee and why is it useful for large structs?</li>
+            <li>How do <b>type aliases</b> improve code maintainability in generic-heavy code?</li>
+            <li>How would you ship a preview API safely in a shared library?</li>
+            <li>What strategy would you follow to upgrade a large solution to C# 12?</li>
+          </ol>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#faqs">❮ Previous Page</a>
+            <a class="btn" href="#mcq">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- MCQ -->
+      <section class="section" id="mcq">
+        <div class="head">
+          <span>MCQ Quiz (C# 12 Features)</span>
+          <span class="kpi">5–10 Questions</span>
+        </div>
+        <div class="body">
+          <ol>
+            <li>
+              Primary constructors are mainly used to:
+              <br/>A) Improve SQL performance
+              <br/>B) Reduce boilerplate by declaring constructor parameters at the type declaration
+              <br/>C) Replace interfaces completely
+              <br/>D) Avoid using properties
+            </li>
+            <li>
+              <code>ref readonly</code> is best described as:
+              <br/>A) Pass by value and allow mutation
+              <br/>B) Pass by reference and prevent mutation
+              <br/>C) Pass by pointer and allow mutation
+              <br/>D) Pass by value and prevent reading
+            </li>
+            <li>
+              Inline arrays are most helpful when:
+              <br/>A) You need dynamic resizing frequently
+              <br/>B) You need fixed-size buffers with fewer allocations
+              <br/>C) You want to store strings in database
+              <br/>D) You want to avoid using structs
+            </li>
+            <li>
+              Type aliasing is helpful to:
+              <br/>A) Hide exceptions from code
+              <br/>B) Rename variables at runtime
+              <br/>C) Give readable names to complex type signatures
+              <br/>D) Disable compilation warnings
+            </li>
+            <li>
+              Marking an API as experimental is useful to:
+              <br/>A) Guarantee backwards compatibility forever
+              <br/>B) Communicate that the API may change or be removed
+              <br/>C) Speed up garbage collection
+              <br/>D) Remove the need for documentation
+            </li>
+          </ol>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#interview">❮ Previous Page</a>
+            <a class="btn" href="#glossary">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Glossary -->
+      <section class="section" id="glossary">
+        <div class="head">
+          <span>Glossary (Tooltips)</span>
+          <span class="kpi">Hover terms in content</span>
+        </div>
+        <div class="body">
+          <table>
+            <thead><tr><th>Term</th><th>Tooltip Description</th></tr></thead>
+            <tbody>
+              <tr><td>.NET SDK</td><td>The toolset containing compiler, CLI, templates; controls available language features.</td></tr>
+              <tr><td>Language version</td><td>Compiler switch that enables a set of C# features; helps lock project behavior.</td></tr>
+              <tr><td>.csproj</td><td>Project file controlling target framework, dependencies, and compilation settings.</td></tr>
+              <tr><td>Primary constructors</td><td>Declare constructor parameters on the type; reduce repetition and boilerplate.</td></tr>
+              <tr><td>Collection expressions</td><td>Concise ways to create/compose collections with more readable syntax patterns.</td></tr>
+              <tr><td>Struct</td><td>Value type allocated inline; efficient for small, fixed-size data.</td></tr>
+              <tr><td>Lambda expression</td><td>Inline function passed as data; used in callbacks, LINQ, and event handlers.</td></tr>
+              <tr><td>By reference</td><td>Passes the original value location; can reduce copying for large value types.</td></tr>
+              <tr><td>ref readonly</td><td>Pass by reference while preventing modification; avoids copies safely.</td></tr>
+              <tr><td>Immutability</td><td>Values don’t change after creation; reduces bugs and improves reasoning.</td></tr>
+              <tr><td>Type alias</td><td>Readable name for a complex type; reduces repeated long signatures.</td></tr>
+              <tr><td>Experimental API</td><td>Preview method/type that may change; warnings help consumers avoid tight coupling.</td></tr>
+            </tbody>
+          </table>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#mcq">❮ Previous Page</a>
+            <a class="btn" href="#downloads">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Downloads -->
+      <section class="section" id="downloads">
+        <div class="head">
+          <span>Downloadables (Placeholder)</span>
+          <span class="kpi">ZIP • PPT • DOC</span>
+        </div>
+        <div class="body">
+          <p class="muted">
+            This section is a placeholder for your ItTechGenie assets. You can later replace the buttons with real downloads
+            from your MVC project (controller action / static files).
+          </p>
+
+          <div class="example">
+            <b>What you can add here:</b>
+            <ul>
+              <li>✅ Source code ZIP (mini project)</li>
+              <li>✅ PPT slides (C# 12 summary)</li>
+              <li>✅ DOC/Word notes for learners</li>
+            </ul>
+            <a class="try" href="#practice-coding-questions">Go to Practice</a>
+          </div>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#glossary">❮ Previous Page</a>
+            <a class="btn" href="#practice-coding-questions">Next Page ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRACTICE -->
+      <section class="section" id="practice-coding-questions">
+        <div class="head">
+          <span>To Become Best coder Practice this</span>
+          <span class="kpi">15 Questions • Easy/Medium/Hard</span>
+        </div>
+        <div class="body">
+          <p>
+            Solve these practical problems to gain confidence with C# 12 concepts. Keep your solutions clean,
+            add validations, and write short unit-style tests where possible.
+          </p>
+
+          <h3>Easy (5)</h3>
+          <ol>
+            <li>
+              <b>Primary Constructor Basics</b><br/>
+              Problem: Create a <code>Book</code> type using a primary constructor with <code>id</code> and <code>title</code>, and print it.<br/>
+              Input/Output: Input: id, title → Output: formatted string.<br/>
+              Example Input: 10, "Clean Code" → Example Output: "10 - Clean Code"<br/>
+              Constraints: id &gt; 0, title not empty<br/>
+              Hint: Validate in property initializers.
+            </li>
+            <li>
+              <b>Alias a Tuple</b><br/>
+              Problem: Create a type alias for <code>(int Id, string Name)</code> and return it from a function.<br/>
+              Example Input: 1, "Riya" → Example Output: "(1, Riya)"<br/>
+              Constraints: Name length 1..50<br/>
+              Hint: Use a <code>using</code> alias at top of file.
+            </li>
+            <li>
+              <b>Simple Collection Build</b><br/>
+              Problem: Build a collection of 5 integers and print them comma-separated.<br/>
+              Example Input: (none) → Example Output: "1,2,3,4,5"<br/>
+              Constraints: Exactly 5 items<br/>
+              Hint: Focus on clean initialization.
+            </li>
+            <li>
+              <b>Lambda Formatter</b><br/>
+              Problem: Pass a lambda to format each number as "Square: x".<br/>
+              Example Input: [2,3] → Example Output: "Square: 4", "Square: 9"<br/>
+              Constraints: Positive integers only<br/>
+              Hint: Use <code>Func&lt;int,string&gt;</code>.
+            </li>
+            <li>
+              <b>Readonly Struct Distance</b><br/>
+              Problem: Create a small immutable struct with X,Y and compute distance from origin.<br/>
+              Example Input: (3,4) → Example Output: 5<br/>
+              Constraints: -1000..1000<br/>
+              Hint: Use <code>Math.Sqrt</code>.
+            </li>
+          </ol>
+
+          <h3>Medium (5)</h3>
+          <ol start="6">
+            <li>
+              <b>Primary Constructor + Validation</b><br/>
+              Problem: Create <code>Employee</code> with (id, name, salary) and reject invalid salary (&lt;= 0).<br/>
+              Example Input: 2, "Ajay", 50000 → Output: "Ajay (2) - 50000"<br/>
+              Constraints: salary &gt; 0<br/>
+              Hint: Throw an exception in property initialization.
+            </li>
+            <li>
+              <b>Merge Two Lists (Readable)</b><br/>
+              Problem: Merge default roles ["User"] with user roles input; avoid duplicates.<br/>
+              Example Input: ["Admin","User"] → Example Output: ["User","Admin"] (unique)<br/>
+              Constraints: Max 20 roles<br/>
+              Hint: Use <code>HashSet</code> for uniqueness.
+            </li>
+            <li>
+              <b>ref readonly Performance Pattern</b><br/>
+              Problem: Given a large struct (e.g., 10 fields), write a method that reads values without copying.<br/>
+              Example Input: struct values → Output: computed sum<br/>
+              Constraints: No mutation allowed<br/>
+              Hint: Use <code>ref readonly</code> parameter.
+            </li>
+            <li>
+              <b>Alias a Nested Generic</b><br/>
+              Problem: Alias <code>Dictionary&lt;string, List&lt;int&gt;&gt;</code> as <code>ScoreIndex</code> and build a sample map.<br/>
+              Example Input: ("Asha": [90,95]) → Output: average 92.5<br/>
+              Constraints: 1..100 scores<br/>
+              Hint: Create helper method to average.
+            </li>
+            <li>
+              <b>Experimental API Wrapper</b><br/>
+              Problem: Create a “preview” formatter method and ensure callers see a warning (simulate using attributes).<br/>
+              Example Input: "  hi " → Output: "HI"<br/>
+              Constraints: string length 0..200<br/>
+              Hint: Use <code>Obsolete</code> with message to simulate preview.
+            </li>
+          </ol>
+
+          <h3>Hard (5)</h3>
+          <ol start="11">
+            <li>
+              <b>Mini Registry with Clean Construction</b><br/>
+              Problem: Build a registry that adds students, prevents duplicate IDs, and exports tuples using alias.<br/>
+              Input/Output: Input: list of students → Output: exported rows (Id, Name)<br/>
+              Example Input: (1,"Meera"), (1,"Meera2") → Output: second rejected<br/>
+              Constraints: Up to 10,000 entries<br/>
+              Hint: Use Dictionary for fast lookup.
+            </li>
+            <li>
+              <b>Rolling Window Snapshot</b><br/>
+              Problem: Maintain last 4 readings and compute average; no dynamic resizing allowed.<br/>
+              Example Input: 10,20,30,40 → Output: 25<br/>
+              Constraints: Exactly 4 stored values<br/>
+              Hint: Use fixed fields or inline-buffer style struct.
+            </li>
+            <li>
+              <b>Functional Pipeline</b><br/>
+              Problem: Accept a list and a lambda pipeline: filter + transform + format output lines.<br/>
+              Example Input: [1..10], filter even → Output: "E: 4", "E: 16"...<br/>
+              Constraints: N up to 100,000<br/>
+              Hint: Avoid multiple enumerations; consider single pass.
+            </li>
+            <li>
+              <b>Safe Large Struct Calculations</b><br/>
+              Problem: Implement vector magnitude and dot product using ref readonly to minimize copies.<br/>
+              Example Input: v=(1,2,3), w=(4,5,6) → Output: dot=32<br/>
+              Constraints: doubles in -1e6..1e6<br/>
+              Hint: Keep structs immutable and readonly.
+            </li>
+            <li>
+              <b>Migration Assistant (Rules)</b><br/>
+              Problem: Write a console app that scans class files (strings) and flags opportunities:
+              repeated constructor assignments, complex generic types, and preview APIs used.<br/>
+              Example Input: source text → Output: list of suggestions<br/>
+              Constraints: Up to 1MB text input<br/>
+              Hint: Use simple pattern matching; focus on reporting, not perfect parsing.
+            </li>
+          </ol>
+
+          <div class="navbtns">
+            <a class="btn secondary" href="#downloads">❮ Previous Page</a>
+            <a class="btn" href="#intro">Back to Top ❯</a>
+          </div>
+        </div>
+      </section>
+
+      <div class="section">
+        <div class="head">
+          <span>Summary of Key Points</span>
+          <span class="kpi">Quick revision</span>
+        </div>
+        <div class="body">
+          <ul>
+            <li>Adopt C# 12 incrementally and keep builds consistent across team + CI.</li>
+            <li>Use primary constructors to reduce boilerplate in data-focused types.</li>
+            <li>Use <code>ref readonly</code> for safe performance gains when large structs are involved.</li>
+            <li>Use aliases to simplify complex type signatures and improve readability.</li>
+            <li>Mark preview APIs clearly so consumers understand the risk.</li>
+          </ul>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</body>
+</html>
