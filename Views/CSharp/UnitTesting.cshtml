@@ -1,0 +1,938 @@
+@{
+    ViewData["Title"] = "Unit Testing in C#";
+}
+
+<style>
+:root{
+    --w3-green:#04AA6D;
+    --dark:#1f2937;
+    --dark2:#111827;
+    --light:#f7f7f7;
+    --border:#e5e7eb;
+    --text:#111827;
+    --muted:#6b7280;
+
+    --note:#e7f3fe;      --note-border:#2196F3;
+    --tip:#e8f5e9;       --tip-border:#2e7d32;
+    --warn:#ffebee;      --warn-border:#e53935;
+
+    --example:#f3f4f6;
+    --code-bg:#0b1020;
+    --code-fg:#e5e7eb;
+}
+
+*{ box-sizing:border-box; }
+body{
+    margin:0;
+    font-family: Arial, Helvetica, sans-serif;
+    background:#ffffff;
+    color:var(--text);
+    line-height:1.6;
+}
+
+.topbar{
+    position:fixed;
+    top:0; left:0; right:0;
+    height:56px;
+    background:var(--w3-green);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 16px;
+    z-index:1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,.12);
+    gap:12px;
+}
+.brand{ display:flex; align-items:center; gap:10px; font-weight:700; }
+.brand-badge{
+    width:34px; height:34px; border-radius:50%;
+    background:#fff; color:var(--w3-green);
+    display:inline-flex; align-items:center; justify-content:center;
+    font-weight:800; box-shadow: inset 0 0 0 2px rgba(4,170,109,.25);
+}
+.top-links a{ color:#fff; text-decoration:none; padding:6px 10px; font-size:13px; }
+
+.layout{ display:flex; padding-top:56px; }
+.sidebar{
+    position:fixed;
+    top:56px; left:0; bottom:0;
+    width:280px;
+    overflow-y:auto;
+    background:var(--light);
+    border-right:1px solid var(--border);
+    padding:16px;
+}
+.sidebar h3{ margin:8px 0 12px; color:#111; font-size:16px; }
+.sidebar a{ display:block; color:#111; text-decoration:none; padding:6px 8px; border-radius:6px; font-size:14px; }
+.sidebar a:hover{ background:#e5f7ef; }
+.sidebar .group{ margin-top:12px; font-weight:700; color:#374151; font-size:12px; text-transform:uppercase; }
+
+.content{
+    margin-left:280px;
+    padding:24px 28px 80px;
+    width:100%;
+}
+
+.section{
+    margin-bottom:28px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:#fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.section h2{
+    margin:0;
+    padding:12px 16px;
+    background:var(--w3-green);
+    color:#fff;
+    border-radius:10px 10px 0 0;
+    font-size:20px;
+}
+.section-body{ padding:16px; }
+
+.note{ background:var(--note); border-left:4px solid var(--note-border); padding:10px 12px; border-radius:6px; }
+.tip{ background:var(--tip); border-left:4px solid var(--tip-border); padding:10px 12px; border-radius:6px; }
+.warn{ background:var(--warn); border-left:4px solid var(--warn-border); padding:10px 12px; border-radius:6px; }
+
+.example{ background:var(--example); border:1px solid var(--border); padding:12px; border-radius:6px; }
+.code{
+    background:var(--code-bg);
+    color:var(--code-fg);
+    padding:12px;
+    border-radius:6px;
+    overflow:auto;
+}
+.trybtn{
+    display:inline-block;
+    margin-top:8px;
+    background:#04AA6D;
+    color:#fff;
+    padding:8px 12px;
+    border-radius:6px;
+    text-decoration:none;
+    font-weight:700;
+    font-size:13px;
+}
+
+.ascii{
+    background:#0b1020;
+    color:#d1d5db;
+    padding:12px;
+    border-radius:6px;
+    overflow:auto;
+}
+
+.table{
+    width:100%;
+    border-collapse:collapse;
+    margin:8px 0 16px;
+}
+.table th, .table td{ border:1px solid var(--border); padding:8px; text-align:left; }
+.table th{ background:#f8fafc; }
+
+.nav-buttons{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+.nav-buttons a{
+    background:#04AA6D;
+    color:#fff;
+    padding:8px 14px;
+    border-radius:20px;
+    text-decoration:none;
+    font-weight:700;
+    font-size:13px;
+}
+.placeholder-links{ font-size:12px; color:var(--muted); margin-top:6px; display:block; }
+
+.tt{
+    border-bottom:1px dotted #374151;
+    cursor:help;
+    position:relative;
+}
+.tt::after{
+    content: attr(data-tip);
+    position:absolute;
+    left:0;
+    bottom:120%;
+    background:#111827;
+    color:#fff;
+    padding:8px 10px;
+    border-radius:6px;
+    width:260px;
+    opacity:0;
+    pointer-events:none;
+    transform:translateY(6px);
+    transition:opacity .2s ease, transform .2s ease;
+    font-size:12px;
+    line-height:1.4;
+    z-index:20;
+}
+.tt:hover::after{ opacity:1; transform:translateY(0); }
+
+.hover-highlight{ transition: background-color 0.3s ease; }
+.hover-highlight:hover{ background:#e8f5e9; transition-delay:2s; }
+
+@@media (max-width: 980px){
+    .sidebar{ position:static; width:100%; height:auto; border-right:none; }
+    .content{ margin-left:0; }
+}
+</style>
+
+<div class="topbar">
+    <div class="brand">
+        <span class="brand-badge">IT</span>
+        ItTechGenie C# Tutorial
+    </div>
+    <div class="top-links">
+        <a href="#toc">Table of Contents</a>
+        <a href="#practice-coding-questions">Practice</a>
+        <a href="#glossary">Glossary</a>
+    </div>
+</div>
+
+<div class="layout">
+    <aside class="sidebar">
+        <h3>UNIT Testing (C#)</h3>
+        <div class="group">Getting Started</div>
+        <a href="#intro">1. Unit Testing Fundamentals</a>
+        <a href="#aaa">2. Arrange-Act-Assert</a>
+        <a href="#assertions">3. Assertions & Outcomes</a>
+        <div class="group">Design & Quality</div>
+        <a href="#doubles">4. Test Doubles & Mocking</a>
+        <a href="#coverage">5. Coverage & Boundaries</a>
+        <a href="#best-practices">6. Best Practices</a>
+        <div class="group">Hands-on</div>
+        <a href="#step-by-step">7. Step-by-Step Setup</a>
+        <a href="#sample-project">8. Sample Project</a>
+        <div class="group">Reference</div>
+        <a href="#faqs">9. FAQs</a>
+        <a href="#interview">10. Interview Questions</a>
+        <a href="#mcq">11. MCQ Quiz</a>
+        <a href="#summary">12. Summary</a>
+        <a href="#downloads">13. Downloads</a>
+        <a href="#glossary">14. Glossary (Tooltips)</a>
+        <div class="group">Practice</div>
+        <a href="#practice-coding-questions">To Become Best coder Practice this</a>
+    </aside>
+
+    <main class="content">
+        <section id="toc" class="section">
+            <h2>Table of Contents</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    This table mirrors the sidebar subtopics and helps you jump to any section quickly.
+                    It acts as your quick navigation map while learning unit testing.
+                    Use it to revisit concepts like assertions, mocks, and coverage without scrolling.
+                    A good ToC also reveals the structure of the learning path.
+                </p>
+                <pre class="ascii">Start -> Pick Section -> Learn -> Practice</pre>
+                <div class="example">
+                    <strong>Example:</strong> Jump from fundamentals to the sample project when you want to see real code.
+                </div>
+                <pre class="code"><code>// Example navigation flow
+// Read intro -> review AAA -> attempt practice questions</code></pre>
+                <p><strong>Real-world use case:</strong> Quickly revisiting the best practices section before code reviews.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Use the ToC to keep a steady learning rhythm.</div>
+                <div class="note"><strong>Advanced Note:</strong> Share anchor links with teammates when discussing specific topics.</div>
+                <ol>
+                    <li><a href="#intro">Unit Testing Fundamentals</a></li>
+                    <li><a href="#aaa">Arrange-Act-Assert</a></li>
+                    <li><a href="#assertions">Assertions & Outcomes</a></li>
+                    <li><a href="#doubles">Test Doubles & Mocking</a></li>
+                    <li><a href="#coverage">Coverage & Boundaries</a></li>
+                    <li><a href="#best-practices">Best Practices</a></li>
+                    <li><a href="#step-by-step">Step-by-Step Setup</a></li>
+                    <li><a href="#sample-project">Sample Project</a></li>
+                    <li><a href="#faqs">FAQs</a></li>
+                    <li><a href="#interview">Interview Questions</a></li>
+                    <li><a href="#mcq">MCQ Quiz</a></li>
+                    <li><a href="#summary">Summary</a></li>
+                    <li><a href="#downloads">Downloads</a></li>
+                    <li><a href="#glossary">Glossary</a></li>
+                    <li><a href="#practice-coding-questions">Practice</a></li>
+                </ol>
+            </div>
+        </section>
+        <section id="intro" class="section">
+            <h2>1. <span class="tt" data-tip="Unit testing verifies the smallest testable parts of code (like methods) in isolation. It gives fast feedback and guards against regressions by running each time you change code.">Unit Testing</span> Fundamentals</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    <span class="tt" data-tip="A test framework is a library that provides attributes, runners, and assertions to structure and execute tests. It standardizes how tests are written and reported.">Test frameworks</span>
+                    make small, repeatable tests that validate behavior one method at a time.
+                    A <span class="tt" data-tip="A test case is a single test method with inputs, actions, and expected results. It describes one scenario the code must satisfy.">test case</span>
+                    is quick to run, easy to read, and focused on a single expectation.
+                    Unit tests reduce bugs early and support safe refactoring.
+                    They are different from integration tests because they avoid external dependencies.
+                    Clean unit tests are deterministic, fast, and act as living documentation.
+                </p>
+                <pre class="ascii">Code Change
+   |
+   v
+Unit Test ----> Pass/Fail ----> Confidence
+   |
+   v
+Refactor Safely</pre>
+                <div class="example">
+                    <strong>Example:</strong> Testing a discount calculator method with specific inputs and expected totals.
+                </div>
+                <pre class="code"><code>public int ApplyDiscount(int total, int percent)
+{
+    if (percent &lt; 0) throw new ArgumentOutOfRangeException(nameof(percent));
+    return total - (total * percent / 100);
+}
+
+// Unit test pseudo-check
+Assert.AreEqual(90, ApplyDiscount(100, 10));</code></pre>
+                <p><strong>Real-world use case:</strong> Ensuring a billing rule stays correct when pricing logic changes.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Start by testing pure functions with no I/O to build confidence quickly.</div>
+                <div class="note"><strong>Advanced Note:</strong> Keep units small by isolating dependencies via interfaces and injecting them.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#prev-subtopic">Previous Page</a>
+                    <a href="#aaa">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="aaa" class="section">
+            <h2>2. <span class="tt" data-tip="Arrange-Act-Assert is a testing structure: set up data, execute the method, then verify expectations. It keeps tests readable and consistent.">Arrange-Act-Assert</span> (AAA)</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    AAA is a simple flow for writing a clear unit test.
+                    You <span class="tt" data-tip="Arrange means setting up inputs, dependencies, and initial state before running the unit. It is the preparation step.">arrange</span> the data and mocks,
+                    <span class="tt" data-tip="Act means executing the method or function under test. It is the single operation the test is about.">act</span> by calling the method,
+                    then <span class="tt" data-tip="Assert is a verification step that compares expected and actual outcomes. A failing assertion signals a test failure.">assert</span> the expected result.
+                    This pattern avoids long, confusing tests by separating phases.
+                    It also highlights when a test tries to do too much.
+                </p>
+                <pre class="ascii">Arrange ---> Act ---> Assert
+  setup      execute    verify</pre>
+                <div class="example">
+                    <strong>Example:</strong> Arrange a cart with items, act by calculating total, assert the tax amount.
+                </div>
+                <pre class="code"><code>[Test]
+public void Total_Includes_Tax()
+{
+    // Arrange
+    var cart = new Cart(100m);
+
+    // Act
+    var total = cart.TotalWithTax(0.10m);
+
+    // Assert
+    Assert.AreEqual(110m, total);
+}</code></pre>
+                <p><strong>Real-world use case:</strong> Validating that a shipping fee is added when weight exceeds a threshold.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Use clear comments like Arrange/Act/Assert to guide readers.</div>
+                <div class="note"><strong>Advanced Note:</strong> Prefer a single assert when possible, or use grouped assertions when supported.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#intro">Previous Page</a>
+                    <a href="#assertions">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="assertions" class="section">
+            <h2>3. <span class="tt" data-tip="An assertion is a statement in a test that verifies an expected result. If the assertion fails, the test fails.">Assertions</span> & Outcomes</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Assertions are the core of a unit test because they compare expected and actual values.
+                    A good assertion explains what behavior matters most to your business rule.
+                    Use descriptive messages so failures are easy to diagnose.
+                    Avoid over-asserting, which can make tests brittle when implementation changes.
+                    A focused test with one key expectation is easier to maintain.
+                </p>
+                <pre class="ascii">Input
+  |
+  v
+Method
+  |
+  v
+Expected == Actual ?</pre>
+                <div class="example">
+                    <strong>Example:</strong> Verify an API response mapper sets status to "Active".
+                </div>
+                <pre class="code"><code>[Test]
+public void MapStatus_ReturnsActive()
+{
+    var result = StatusMapper.Map("A");
+    Assert.AreEqual("Active", result, "Status code 'A' should map to Active");
+}</code></pre>
+                <p><strong>Real-world use case:</strong> Catching regressions in status mapping used for customer dashboards.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Assert on the smallest observable output rather than internals.</div>
+                <div class="note"><strong>Advanced Note:</strong> Use constraint-based assertions for complex objects to avoid noisy equality code.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#aaa">Previous Page</a>
+                    <a href="#doubles">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="doubles" class="section">
+            <h2>4. <span class="tt" data-tip="Test doubles are stand-ins for real dependencies. They include fakes, stubs, mocks, and spies that isolate a unit from external systems.">Test Doubles</span> & <span class="tt" data-tip="Mocking is creating a fake object that records how it was used and returns predefined results. It helps isolate the unit under test from external dependencies.">Mocking</span></h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Unit tests stay fast by replacing slow dependencies with test doubles.
+                    <span class="tt" data-tip="Dependency Injection passes required services into a class so they can be swapped for mocks in tests. This keeps code flexible and testable.">Dependency Injection</span>
+                    makes it easy to swap real services with fakes.
+                    Use mocks to verify interactions, like ensuring an email sender was called.
+                    Prefer simple fakes for data access or configuration when behavior is predictable.
+                    Avoid over-mocking, which can mirror the implementation too closely.
+                </p>
+                <pre class="ascii">Service ----> External API
+   |              |
+   v              v
+Mock Service <---X</pre>
+                <div class="example">
+                    <strong>Example:</strong> Mock a payment gateway to simulate approval and rejection paths.
+                </div>
+                <pre class="code"><code>[Test]
+public void Checkout_SendsEmailOnSuccess()
+{
+    var email = new Mock&lt;IEmailService&gt;();
+    var checkout = new Checkout(email.Object);
+
+    checkout.CompleteOrder();
+
+    email.Verify(m =&gt; m.Send(It.IsAny&lt;string&gt;()), Times.Once);
+}</code></pre>
+                <p><strong>Real-world use case:</strong> Testing invoice generation without calling a real SMTP server.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Start with fakes for repositories before adding complex mocks.</div>
+                <div class="note"><strong>Advanced Note:</strong> Use strict mocks to catch unexpected calls in critical logic.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#assertions">Previous Page</a>
+                    <a href="#coverage">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="coverage" class="section">
+            <h2>5. <span class="tt" data-tip="Code coverage measures which lines or branches were executed by tests. It helps identify untested areas but does not prove correctness.">Coverage</span> & Boundary Testing</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Coverage reports show which code paths your tests executed.
+                    Boundary testing focuses on the edges: minimums, maximums, and invalid inputs.
+                    Combine both to reveal missing scenarios in business logic.
+                    High coverage is helpful, but meaningful assertions are more important than numbers.
+                    Track coverage trends to detect risk areas during refactors.
+                </p>
+                <pre class="ascii">Input Range
+[ min | valid | max ]
+   ^      ^      ^
+ test  test  test</pre>
+                <div class="example">
+                    <strong>Example:</strong> Test coupon rules at 0%, 100%, and invalid percentages.
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr><th>Boundary</th><th>Example Input</th><th>Expected</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Minimum</td><td>0 items</td><td>No discount</td></tr>
+                        <tr><td>Typical</td><td>3 items</td><td>Standard discount</td></tr>
+                        <tr><td>Maximum</td><td>100 items</td><td>Bulk discount</td></tr>
+                    </tbody>
+                </table>
+                <pre class="code"><code>[TestCase(0, 0)]
+[TestCase(3, 5)]
+[TestCase(100, 20)]
+public void Discount_Boundaries(int items, int expected)
+{
+    Assert.AreEqual(expected, DiscountRules.Calculate(items));
+}</code></pre>
+                <p><strong>Real-world use case:</strong> Preventing pricing bugs when orders spike during promotions.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Always test the smallest and largest values your API accepts.</div>
+                <div class="note"><strong>Advanced Note:</strong> Pair coverage with mutation testing to validate assertion strength.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#doubles">Previous Page</a>
+                    <a href="#best-practices">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="best-practices" class="section">
+            <h2>6. Best Practices & Anti-Patterns</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Keep tests isolated, fast, and readable.
+                    Avoid sharing state between tests because order dependence hides failures.
+                    Name tests with clear intent such as Method_WhenCondition_ShouldResult.
+                    Use small test data builders to reduce duplication.
+                    Avoid testing private methods directly; test through public behavior.
+                </p>
+                <pre class="ascii">Good Test
+  |
+  +--> Isolated
+  +--> Deterministic
+  +--> Readable</pre>
+                <div class="example">
+                    <strong>Example:</strong> Rename "Test1" to "CalculateTax_WhenZero_ReturnsZero".
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr><th>Practice</th><th>Benefit</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>One assertion focus</td><td>Clear intent</td></tr>
+                        <tr><td>Arrange test data builders</td><td>Less duplication</td></tr>
+                        <tr><td>Independent tests</td><td>Reliable runs</td></tr>
+                    </tbody>
+                </table>
+                <pre class="code"><code>[Test]
+public void CalculateTax_WhenZero_ReturnsZero()
+{
+    var tax = TaxCalculator.Calculate(0m, 0.1m);
+    Assert.AreEqual(0m, tax);
+}</code></pre>
+                <p><strong>Real-world use case:</strong> Preventing flaky tests in CI pipelines.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> If a test fails randomly, it likely shares state or relies on time.</div>
+                <div class="warn"><strong>Advanced Note:</strong> Anti-patterns like testing implementation details make refactoring painful.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#coverage">Previous Page</a>
+                    <a href="#step-by-step">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="step-by-step" class="section">
+            <h2>7. Step-by-Step: Create Unit Tests in C#</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    A <span class="tt" data-tip="A test runner discovers test methods, executes them, and reports results. It can run in an IDE or CI pipeline.">test runner</span>
+                    loads your tests and reports pass/fail results.
+                    Start by creating a test project and referencing the production project.
+                    Add a test framework and write your first test class.
+                    Execute tests locally to confirm the setup works before expanding coverage.
+                    Repeat the loop as you add features.
+                </p>
+                <pre class="ascii">Create Project
+   |
+Add Reference
+   |
+Write Test
+   |
+Run Runner</pre>
+                <div class="example">
+                    <strong>Example:</strong> Step list for a .NET solution with app + tests.
+                </div>
+                <ol>
+                    <li>Create a test project named <strong>MyApp.Tests</strong>.</li>
+                    <li>Reference the main project in the test project.</li>
+                    <li>Install a unit testing package.</li>
+                    <li>Add a test class and run tests.</li>
+                </ol>
+                <pre class="code"><code>dotnet new nunit -n MyApp.Tests
+cd MyApp.Tests
+ dotnet add reference ../MyApp/MyApp.csproj
+ dotnet test</code></pre>
+                <p><strong>Real-world use case:</strong> Adding guard tests before refactoring a legacy service.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Run tests after every small change to catch issues early.</div>
+                <div class="note"><strong>Advanced Note:</strong> Parallelize test execution once your suite grows large.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#best-practices">Previous Page</a>
+                    <a href="#sample-project">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="sample-project" class="section">
+            <h2>8. Sample Project: Pricing Rules</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    This sample tests a pricing engine with tiered discounts.
+                    The <span class="tt" data-tip="Test fixtures group related tests with shared setup data. They are typically a class that contains multiple tests.">test fixture</span>
+                    includes tests for base price, bulk discounts, and invalid inputs.
+                    It demonstrates use of parameters and boundary checks.
+                    You can extend the project to include taxes or regional pricing rules.
+                </p>
+                <pre class="ascii">Items -> PricingEngine -> FinalTotal
+   ^           |
+   |           v
+ Test Data  Assertions</pre>
+                <div class="example">
+                    <strong>Example:</strong> Given 10 items, discount should be 5%.
+                </div>
+                <pre class="code"><code>[TestFixture]
+public class PricingEngineTests
+{
+    [TestCase(1, 0)]
+    [TestCase(10, 5)]
+    [TestCase(100, 20)]
+    public void Discount_ByQuantity(int items, int expected)
+    {
+        Assert.AreEqual(expected, PricingEngine.Discount(items));
+    }
+}</code></pre>
+                <p><strong>Real-world use case:</strong> Preventing incorrect discounting during seasonal campaigns.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Start with the simplest rule and add scenarios incrementally.</div>
+                <div class="note"><strong>Advanced Note:</strong> Keep shared test data in builders to avoid cross-test coupling.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#step-by-step">Previous Page</a>
+                    <a href="#faqs">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="faqs" class="section">
+            <h2>9. FAQs</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    FAQs clarify common questions about unit testing scope and tooling.
+                    They help beginners differentiate between unit, integration, and end-to-end tests.
+                    Use FAQs to settle questions about speed, isolation, and test reliability.
+                    Keep answers short and link to deeper sections in your docs.
+                </p>
+                <pre class="ascii">Q1? -> A1
+Q2? -> A2
+Q3? -> A3</pre>
+                <div class="example">
+                    <strong>Example:</strong> Q: "Should I test private methods?" A: "Test via public behavior." 
+                </div>
+                <pre class="code"><code>// FAQ example:
+// Q: Should tests call databases?
+// A: Not in unit tests; use integration tests instead.</code></pre>
+                <p><strong>Real-world use case:</strong> Onboarding new team members into a testing culture.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Use simple language in FAQs to reduce confusion.</div>
+                <div class="note"><strong>Advanced Note:</strong> Revisit FAQs after incidents to address recurring misunderstandings.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#sample-project">Previous Page</a>
+                    <a href="#interview">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="interview" class="section">
+            <h2>10. Interview Questions</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Interview questions assess your ability to explain why tests matter.
+                    They cover terms like <span class="tt" data-tip="Test-driven development (TDD) writes tests before production code. It improves design by forcing small, testable units.">TDD</span>
+                    and how you isolate dependencies.
+                    Use clear answers with examples from real projects.
+                    Show how you prevent flaky tests and use CI.
+                </p>
+                <pre class="ascii">Question -> Reasoning -> Example</pre>
+                <div class="example">
+                    <strong>Example:</strong> "Explain AAA and why it improves test readability."
+                </div>
+                <ul>
+                    <li>What is the difference between unit and integration testing?</li>
+                    <li>How do mocks help maintain test isolation?</li>
+                    <li>When would you use parameterized tests?</li>
+                    <li>How does CI benefit from fast unit tests?</li>
+                </ul>
+                <pre class="code"><code>// Sample response snippet
+// "I use parameterized tests when the same logic must
+// be validated across multiple input combinations."</code></pre>
+                <p><strong>Real-world use case:</strong> Preparing for senior developer interviews.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Relate answers to a real bug you caught with tests.</div>
+                <div class="note"><strong>Advanced Note:</strong> Discuss trade-offs like mock-heavy tests vs. in-memory fakes.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#faqs">Previous Page</a>
+                    <a href="#mcq">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="mcq" class="section">
+            <h2>11. MCQ Quiz</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Multiple-choice questions reinforce key concepts quickly.
+                    They are useful for quick self-assessment after reading the tutorial.
+                    Focus on important definitions and practices such as mocks and assertions.
+                    Add explanations for correct answers when you publish the quiz.
+                </p>
+                <pre class="ascii">Question -> Options -> Answer</pre>
+                <div class="example">
+                    <strong>Example:</strong> Q: Which step verifies expected outcome? A: Assert.
+                </div>
+                <ol>
+                    <li>Which is the correct order in AAA? (Arrange, Act, Assert)</li>
+                    <li>What does a mock primarily verify? (Interactions)</li>
+                    <li>What should a unit test avoid? (External I/O)</li>
+                    <li>What is a test case? (Single scenario)</li>
+                    <li>Why keep tests fast? (Enable frequent runs)</li>
+                </ol>
+                <pre class="code"><code>// Quiz grading pseudo-code
+var score = answers.Count(a =&gt; a.IsCorrect);</code></pre>
+                <p><strong>Real-world use case:</strong> Running a quick knowledge check during onboarding.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Start with 5 questions and expand once learners are comfortable.</div>
+                <div class="note"><strong>Advanced Note:</strong> Mix scenario-based questions to test applied understanding.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#interview">Previous Page</a>
+                    <a href="#summary">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="summary" class="section">
+            <h2>12. Summary of Key Points</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Unit testing builds confidence in small pieces of code by verifying behavior.
+                    Use AAA to structure tests and clear assertions to describe expectations.
+                    Mocks and fakes isolate dependencies, keeping tests fast and deterministic.
+                    Coverage and boundary tests highlight missing scenarios.
+                    Consistent naming and isolation reduce flaky tests in CI pipelines.
+                </p>
+                <pre class="ascii">Reliable Tests -> Safer Refactors -> Stable Releases</pre>
+                <div class="example">
+                    <strong>Example:</strong> A stable billing suite prevents revenue-impacting bugs.</n                </div>
+                <pre class="code"><code>// Summary checklist
+// 1) Isolated units
+// 2) Clear AAA
+// 3) Meaningful assertions</code></pre>
+                <p><strong>Real-world use case:</strong> Quick review before a major release.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Keep a testing checklist with your team to align on standards.</div>
+                <div class="note"><strong>Advanced Note:</strong> Use CI gates to fail builds when critical tests break.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#mcq">Previous Page</a>
+                    <a href="#downloads">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="downloads" class="section">
+            <h2>13. Downloadable Resources (ZIP, PPT, DOC)</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Provide downloadable assets so learners can practice offline.
+                    A ZIP can include sample code and datasets.
+                    A PPT can summarize key concepts for classroom delivery.
+                    A DOC can include exercises and project briefs.
+                    Keep download sections updated as content evolves.
+                </p>
+                <pre class="ascii">Resources
+  |- UnitTesting.zip
+  |- UnitTesting.pptx
+  |- UnitTesting.docx</pre>
+                <div class="example">
+                    <strong>Example:</strong> Include a ready-to-run test project with fixtures and mocks.</div>
+                <pre class="code"><code>// Placeholder links
+// [Download ZIP] [Download PPT] [Download DOC]</code></pre>
+                <p><strong>Real-world use case:</strong> Training workshops that need offline materials.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Start with a single ZIP containing minimal files.</div>
+                <div class="note"><strong>Advanced Note:</strong> Version downloads alongside releases so learners match code with docs.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#summary">Previous Page</a>
+                    <a href="#glossary">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="glossary" class="section">
+            <h2>14. Glossary (Tooltips)</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    This glossary lists the tooltip terms used throughout the page.
+                    Review it to reinforce your understanding of testing vocabulary.
+                    Each term matches the tooltip description shown on hover.
+                    Use it as a quick reference while writing tests.
+                </p>
+                <pre class="ascii">Term -> Meaning -> Usage</pre>
+                <div class="example">
+                    <strong>Example:</strong> "Assertion" explains what is verified in a test.</div>
+                <table class="table">
+                    <thead>
+                        <tr><th>Term</th><th>Tooltip Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Unit Testing</td><td>Verifies smallest code units in isolation for fast feedback and regression safety.</td></tr>
+                        <tr><td>Test Framework</td><td>Library that provides attributes, assertions, and a test runner.</td></tr>
+                        <tr><td>Test Case</td><td>Single test method covering one scenario with expected results.</td></tr>
+                        <tr><td>Arrange-Act-Assert</td><td>Pattern to structure tests into setup, execution, and verification.</td></tr>
+                        <tr><td>Assert</td><td>Check comparing expected and actual values to pass or fail tests.</td></tr>
+                        <tr><td>Test Doubles</td><td>Stand-ins for dependencies like fakes, stubs, and mocks.</td></tr>
+                        <tr><td>Mocking</td><td>Creating fake objects that track interactions and return preset data.</td></tr>
+                        <tr><td>Dependency Injection</td><td>Passing services into a class so they can be replaced for tests.</td></tr>
+                        <tr><td>Test Runner</td><td>Tool that discovers and executes tests, reporting results.</td></tr>
+                        <tr><td>TDD</td><td>Test-driven development: write tests first, then code to pass.</td></tr>
+                        <tr><td>Coverage</td><td>Measure of code executed by tests, helpful for finding gaps.</td></tr>
+                        <tr><td>Test Fixture</td><td>Class grouping related tests with shared setup.</td></tr>
+                    </tbody>
+                </table>
+                <pre class="code"><code>// Glossary usage example
+// "Use AAA to structure each test case."</code></pre>
+                <p><strong>Real-world use case:</strong> Quick reference for teams adopting a new testing standard.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Hover terms while reading to build vocabulary quickly.</div>
+                <div class="note"><strong>Advanced Note:</strong> Expand the glossary as your team adds new testing tools.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#downloads">Previous Page</a>
+                    <a href="#practice-coding-questions">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="practice-coding-questions" class="section">
+            <h2>To Become Best coder Practice this</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Practice questions strengthen your testing skills with realistic scenarios.
+                    Each question includes inputs, outputs, constraints, and a hint.
+                    Solve them using C# unit tests and validate expected outcomes.
+                    Mix easy, medium, and hard problems to build depth.
+                </p>
+                <pre class="ascii">Practice -> Implement -> Test -> Review</pre>
+                <div class="example">
+                    <strong>Example:</strong> Write tests for a currency conversion method with invalid inputs.
+                </div>
+                <h3>Easy (5)</h3>
+                <ol>
+                    <li>
+                        <strong>Problem:</strong> Test that a temperature converter returns 32°F for 0°C.<br/>
+                        <strong>Input/Output:</strong> Input: 0, Output: 32.<br/>
+                        <strong>Example:</strong> In: 0 → Out: 32.<br/>
+                        <strong>Constraints:</strong> -100 ≤ C ≤ 100.<br/>
+                        <strong>Hint:</strong> Use the formula C * 9/5 + 32.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that a string reverser handles empty strings.<br/>
+                        <strong>Input/Output:</strong> Input: "", Output: "".<br/>
+                        <strong>Example:</strong> In: "" → Out: "".<br/>
+                        <strong>Constraints:</strong> Length ≤ 100.<br/>
+                        <strong>Hint:</strong> Treat empty as a valid input.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that a sum method returns 0 for an empty list.<br/>
+                        <strong>Input/Output:</strong> Input: [], Output: 0.<br/>
+                        <strong>Example:</strong> In: [] → Out: 0.<br/>
+                        <strong>Constraints:</strong> List size ≤ 1000.<br/>
+                        <strong>Hint:</strong> Initialize sum to 0.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that a boolean toggle flips true to false.<br/>
+                        <strong>Input/Output:</strong> Input: true, Output: false.<br/>
+                        <strong>Example:</strong> In: true → Out: false.<br/>
+                        <strong>Constraints:</strong> Boolean only.<br/>
+                        <strong>Hint:</strong> Use logical negation.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that a string length function handles null safely.
+                        <br/><strong>Input/Output:</strong> Input: null, Output: 0.
+                        <br/><strong>Example:</strong> In: null → Out: 0.
+                        <br/><strong>Constraints:</strong> Null allowed.
+                        <br/><strong>Hint:</strong> Use null-coalescing.
+                    </li>
+                </ol>
+
+                <h3>Medium (5)</h3>
+                <ol>
+                    <li>
+                        <strong>Problem:</strong> Test that order totals include shipping for weights over 5kg.
+                        <br/><strong>Input/Output:</strong> Input: weight=6, Output: total+shipping.
+                        <br/><strong>Example:</strong> In: 6kg → Out: base+shipping.
+                        <br/><strong>Constraints:</strong> weight ≥ 0.
+                        <br/><strong>Hint:</strong> Boundary at 5kg.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that a login method locks after 3 failed attempts.
+                        <br/><strong>Input/Output:</strong> Input: 3 fails, Output: locked=true.
+                        <br/><strong>Example:</strong> In: 3 fails → Out: locked.
+                        <br/><strong>Constraints:</strong> Attempts ≤ 10.
+                        <br/><strong>Hint:</strong> Use a counter state.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that a coupon applies only to eligible categories.
+                        <br/><strong>Input/Output:</strong> Input: category=Electronics, Output: no discount.
+                        <br/><strong>Example:</strong> In: Electronics → Out: 0%.
+                        <br/><strong>Constraints:</strong> Category list fixed.
+                        <br/><strong>Hint:</strong> Use a set of allowed categories.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test a paging method returns correct items on page 2.
+                        <br/><strong>Input/Output:</strong> Input: page=2,size=5 → Output: items 6-10.
+                        <br/><strong>Example:</strong> In: 2,5 → Out: [6..10].
+                        <br/><strong>Constraints:</strong> size ≤ 50.
+                        <br/><strong>Hint:</strong> Skip (page-1)*size.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that a validator rejects emails without '@'.
+                        <br/><strong>Input/Output:</strong> Input: "user.com" → Output: false.
+                        <br/><strong>Example:</strong> In: user.com → Out: false.
+                        <br/><strong>Constraints:</strong> Length ≤ 255.
+                        <br/><strong>Hint:</strong> Check for '@' presence.
+                    </li>
+                </ol>
+
+                <h3>Hard (5)</h3>
+                <ol>
+                    <li>
+                        <strong>Problem:</strong> Test concurrency safety in a counter increment method.
+                        <br/><strong>Input/Output:</strong> Input: 100 parallel increments → Output: 100.
+                        <br/><strong>Example:</strong> In: 100 tasks → Out: 100.
+                        <br/><strong>Constraints:</strong> Use thread-safe operations.
+                        <br/><strong>Hint:</strong> Consider lock or Interlocked.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test a cache with expiration invalidates after 5 minutes.
+                        <br/><strong>Input/Output:</strong> Input: time=6 min → Output: cache miss.
+                        <br/><strong>Example:</strong> In: 6 min → Out: miss.
+                        <br/><strong>Constraints:</strong> Use a clock abstraction.
+                        <br/><strong>Hint:</strong> Inject a fake time provider.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test a retry policy stops after max attempts on failure.
+                        <br/><strong>Input/Output:</strong> Input: max=3, Output: 3 tries.
+                        <br/><strong>Example:</strong> In: 3 → Out: 3.
+                        <br/><strong>Constraints:</strong> Do not sleep in tests.
+                        <br/><strong>Hint:</strong> Mock delay service.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test a price calculator for overlapping discount rules.
+                        <br/><strong>Input/Output:</strong> Input: VIP + Bulk → Output: best discount.
+                        <br/><strong>Example:</strong> In: VIP+Bulk → Out: max discount.
+                        <br/><strong>Constraints:</strong> Only one discount applies.
+                        <br/><strong>Hint:</strong> Use rule priority.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test an event-driven handler publishes an audit record.
+                        <br/><strong>Input/Output:</strong> Input: event, Output: audit call once.
+                        <br/><strong>Example:</strong> In: event → Out: publish.
+                        <br/><strong>Constraints:</strong> Idempotent writes.
+                        <br/><strong>Hint:</strong> Mock publisher and verify invocation.
+                    </li>
+                </ol>
+                <pre class="code"><code>// Practice scaffolding
+// Use AAA, clear assertions, and deterministic fakes.</code></pre>
+                <p><strong>Real-world use case:</strong> Preparing for coding assessments with a testing focus.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Write the tests before the implementation to sharpen focus.</div>
+                <div class="note"><strong>Advanced Note:</strong> Add negative tests to validate error paths.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#glossary">Previous Page</a>
+                    <a href="#next-subtopic">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+        <a id="prev-subtopic"></a>
+        <a id="next-subtopic"></a>
+    </main>
+</div>

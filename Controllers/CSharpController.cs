@@ -123,6 +123,8 @@ namespace GenieWeb.Controllers
         public IActionResult ParallelExtensions() => GenerateView("ParallelExtensions");
         public IActionResult TaskBasedAsyncModel() => GenerateView("TaskBasedAsyncModel");
         public IActionResult AsyncAwait() => GenerateView("AsyncAwait");
+        public IActionResult UnitTesting() => GenerateView("UnitTesting");
+        public IActionResult NUnitTest() => GenerateView("NUnitTest");
         public IActionResult UsingLocks() => GenerateView("UsingLocks");
 
         // C# Latest Features Section
