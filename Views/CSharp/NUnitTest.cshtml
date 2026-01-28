@@ -1,0 +1,923 @@
+@{
+    ViewData["Title"] = "NUnit Testing in C#";
+}
+
+<style>
+:root{
+    --w3-green:#04AA6D;
+    --dark:#1f2937;
+    --dark2:#111827;
+    --light:#f7f7f7;
+    --border:#e5e7eb;
+    --text:#111827;
+    --muted:#6b7280;
+
+    --note:#e7f3fe;      --note-border:#2196F3;
+    --tip:#e8f5e9;       --tip-border:#2e7d32;
+    --warn:#ffebee;      --warn-border:#e53935;
+
+    --example:#f3f4f6;
+    --code-bg:#0b1020;
+    --code-fg:#e5e7eb;
+}
+
+*{ box-sizing:border-box; }
+body{
+    margin:0;
+    font-family: Arial, Helvetica, sans-serif;
+    background:#ffffff;
+    color:var(--text);
+    line-height:1.6;
+}
+
+.topbar{
+    position:fixed;
+    top:0; left:0; right:0;
+    height:56px;
+    background:var(--w3-green);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 16px;
+    z-index:1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,.12);
+    gap:12px;
+}
+.brand{ display:flex; align-items:center; gap:10px; font-weight:700; }
+.brand-badge{
+    width:34px; height:34px; border-radius:50%;
+    background:#fff; color:var(--w3-green);
+    display:inline-flex; align-items:center; justify-content:center;
+    font-weight:800; box-shadow: inset 0 0 0 2px rgba(4,170,109,.25);
+}
+.top-links a{ color:#fff; text-decoration:none; padding:6px 10px; font-size:13px; }
+
+.layout{ display:flex; padding-top:56px; }
+.sidebar{
+    position:fixed;
+    top:56px; left:0; bottom:0;
+    width:280px;
+    overflow-y:auto;
+    background:var(--light);
+    border-right:1px solid var(--border);
+    padding:16px;
+}
+.sidebar h3{ margin:8px 0 12px; color:#111; font-size:16px; }
+.sidebar a{ display:block; color:#111; text-decoration:none; padding:6px 8px; border-radius:6px; font-size:14px; }
+.sidebar a:hover{ background:#e5f7ef; }
+.sidebar .group{ margin-top:12px; font-weight:700; color:#374151; font-size:12px; text-transform:uppercase; }
+
+.content{
+    margin-left:280px;
+    padding:24px 28px 80px;
+    width:100%;
+}
+
+.section{
+    margin-bottom:28px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:#fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+.section h2{
+    margin:0;
+    padding:12px 16px;
+    background:var(--w3-green);
+    color:#fff;
+    border-radius:10px 10px 0 0;
+    font-size:20px;
+}
+.section-body{ padding:16px; }
+
+.note{ background:var(--note); border-left:4px solid var(--note-border); padding:10px 12px; border-radius:6px; }
+.tip{ background:var(--tip); border-left:4px solid var(--tip-border); padding:10px 12px; border-radius:6px; }
+.warn{ background:var(--warn); border-left:4px solid var(--warn-border); padding:10px 12px; border-radius:6px; }
+
+.example{ background:var(--example); border:1px solid var(--border); padding:12px; border-radius:6px; }
+.code{
+    background:var(--code-bg);
+    color:var(--code-fg);
+    padding:12px;
+    border-radius:6px;
+    overflow:auto;
+}
+.trybtn{
+    display:inline-block;
+    margin-top:8px;
+    background:#04AA6D;
+    color:#fff;
+    padding:8px 12px;
+    border-radius:6px;
+    text-decoration:none;
+    font-weight:700;
+    font-size:13px;
+}
+
+.ascii{
+    background:#0b1020;
+    color:#d1d5db;
+    padding:12px;
+    border-radius:6px;
+    overflow:auto;
+}
+
+.table{
+    width:100%;
+    border-collapse:collapse;
+    margin:8px 0 16px;
+}
+.table th, .table td{ border:1px solid var(--border); padding:8px; text-align:left; }
+.table th{ background:#f8fafc; }
+
+.nav-buttons{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+.nav-buttons a{
+    background:#04AA6D;
+    color:#fff;
+    padding:8px 14px;
+    border-radius:20px;
+    text-decoration:none;
+    font-weight:700;
+    font-size:13px;
+}
+.placeholder-links{ font-size:12px; color:var(--muted); margin-top:6px; display:block; }
+
+.tt{
+    border-bottom:1px dotted #374151;
+    cursor:help;
+    position:relative;
+}
+.tt::after{
+    content: attr(data-tip);
+    position:absolute;
+    left:0;
+    bottom:120%;
+    background:#111827;
+    color:#fff;
+    padding:8px 10px;
+    border-radius:6px;
+    width:260px;
+    opacity:0;
+    pointer-events:none;
+    transform:translateY(6px);
+    transition:opacity .2s ease, transform .2s ease;
+    font-size:12px;
+    line-height:1.4;
+    z-index:20;
+}
+.tt:hover::after{ opacity:1; transform:translateY(0); }
+
+.hover-highlight{ transition: background-color 0.3s ease; }
+.hover-highlight:hover{ background:#e8f5e9; transition-delay:2s; }
+
+@@media (max-width: 980px){
+    .sidebar{ position:static; width:100%; height:auto; border-right:none; }
+    .content{ margin-left:0; }
+}
+</style>
+
+<div class="topbar">
+    <div class="brand">
+        <span class="brand-badge">IT</span>
+        ItTechGenie C# Tutorial
+    </div>
+    <div class="top-links">
+        <a href="#toc">Table of Contents</a>
+        <a href="#practice-coding-questions">Practice</a>
+        <a href="#glossary">Glossary</a>
+    </div>
+</div>
+
+<div class="layout">
+    <aside class="sidebar">
+        <h3>NUNIT Test (C#)</h3>
+        <div class="group">Getting Started</div>
+        <a href="#intro">1. NUnit Overview</a>
+        <a href="#setup">2. Project Setup</a>
+        <a href="#attributes">3. Attributes & Fixtures</a>
+        <div class="group">Writing Tests</div>
+        <a href="#assertions">4. Assertions</a>
+        <a href="#parameterized">5. Parameterized Tests</a>
+        <a href="#lifecycle">6. Setup & Teardown</a>
+        <div class="group">Execution</div>
+        <a href="#runner">7. Test Runners & Adapters</a>
+        <a href="#best-practices">8. Best Practices</a>
+        <a href="#sample-project">9. Sample Project</a>
+        <div class="group">Reference</div>
+        <a href="#faqs">10. FAQs</a>
+        <a href="#interview">11. Interview Questions</a>
+        <a href="#mcq">12. MCQ Quiz</a>
+        <a href="#summary">13. Summary</a>
+        <a href="#downloads">14. Downloads</a>
+        <a href="#glossary">15. Glossary (Tooltips)</a>
+        <div class="group">Practice</div>
+        <a href="#practice-coding-questions">To Become Best coder Practice this</a>
+    </aside>
+
+    <main class="content">
+        <section id="toc" class="section">
+            <h2>Table of Contents</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    This table mirrors the sidebar subtopics and helps you jump to any section quickly.
+                    It gives a structured roadmap of NUnit concepts from setup to best practices.
+                    Use it to return to attributes, fixtures, or runners when needed.
+                    A clear ToC keeps learning efficient and reduces context switching.
+                </p>
+                <pre class="ascii">Start -> Topic -> Example -> Practice</pre>
+                <div class="example">
+                    <strong>Example:</strong> Jump directly to setup when building a new test project.
+                </div>
+                <pre class="code"><code>// Example learning path
+// Setup -> Attributes -> Parameterized tests -> Practice</code></pre>
+                <p><strong>Real-world use case:</strong> Sharing deep links to sections in team documentation.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Use the ToC to plan your study session.</div>
+                <div class="note"><strong>Advanced Note:</strong> Bookmark anchors for quick reference during debugging.</div>
+                <ol>
+                    <li><a href="#intro">NUnit Overview</a></li>
+                    <li><a href="#setup">Project Setup</a></li>
+                    <li><a href="#attributes">Attributes & Fixtures</a></li>
+                    <li><a href="#assertions">Assertions</a></li>
+                    <li><a href="#parameterized">Parameterized Tests</a></li>
+                    <li><a href="#lifecycle">Setup & Teardown</a></li>
+                    <li><a href="#runner">Test Runners & Adapters</a></li>
+                    <li><a href="#best-practices">Best Practices</a></li>
+                    <li><a href="#sample-project">Sample Project</a></li>
+                    <li><a href="#faqs">FAQs</a></li>
+                    <li><a href="#interview">Interview Questions</a></li>
+                    <li><a href="#mcq">MCQ Quiz</a></li>
+                    <li><a href="#summary">Summary</a></li>
+                    <li><a href="#downloads">Downloads</a></li>
+                    <li><a href="#glossary">Glossary</a></li>
+                    <li><a href="#practice-coding-questions">Practice</a></li>
+                </ol>
+            </div>
+        </section>
+
+        <section id="intro" class="section">
+            <h2>1. <span class="tt" data-tip="NUnit is a popular open-source testing framework for .NET. It provides attributes, assertions, and test runners to build automated tests.">NUnit</span> Overview</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    NUnit works on the <span class="tt" data-tip="The .NET runtime is the execution environment that runs C# code. It manages memory, exceptions, and JIT compilation.">.NET runtime</span>
+                    and supports unit testing across libraries and applications.
+                    It uses <span class="tt" data-tip="Attributes are metadata placed on classes or methods. NUnit uses them to mark tests, setup methods, and fixtures.">attributes</span>
+                    to identify tests and configure behavior.
+                    NUnit integrates with IDEs and CI systems via adapters.
+                    It is lightweight, fast, and widely supported.
+                </p>
+                <pre class="ascii">NUnit Framework
+   |
+Attributes + Assertions
+   |
+Test Runner</pre>
+                <div class="example">
+                    <strong>Example:</strong> Mark a method with [Test] to execute it as a unit test.
+                </div>
+                <pre class="code"><code>[Test]
+public void Add_ReturnsSum()
+{
+    Assert.AreEqual(5, Add(2, 3));
+}</code></pre>
+                <p><strong>Real-world use case:</strong> Validating business rules in a finance API.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Start with NUnit templates to avoid setup mistakes.</div>
+                <div class="note"><strong>Advanced Note:</strong> Use NUnit categories to segment fast vs. slow tests.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#prev-subtopic">Previous Page</a>
+                    <a href="#setup">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="setup" class="section">
+            <h2>2. Project Setup</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Create a test project and reference the main project assembly.
+                    The <span class="tt" data-tip="An assembly is a compiled .NET output (.dll or .exe) that contains code, metadata, and resources.">assembly</span>
+                    holds your compiled classes under test.
+                    Add the NUnit package and a test adapter for your IDE or CI.
+                    Run a simple test to confirm everything is connected.
+                </p>
+                <pre class="ascii">App Project -> Build -> Test Project
+                 \-> NUnit Packages</pre>
+                <div class="example">
+                    <strong>Example:</strong> Use dotnet CLI to create an NUnit test project.
+                </div>
+                <pre class="code"><code>dotnet new nunit -n MyApp.Tests
+cd MyApp.Tests
+ dotnet add reference ../MyApp/MyApp.csproj
+ dotnet add package NUnit3TestAdapter
+ dotnet test</code></pre>
+                <p><strong>Real-world use case:</strong> Bootstrapping tests for a new microservice.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Keep the test project next to the app project in the solution.</div>
+                <div class="note"><strong>Advanced Note:</strong> Configure test run settings for parallelization when needed.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#intro">Previous Page</a>
+                    <a href="#attributes">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="attributes" class="section">
+            <h2>3. Attributes & <span class="tt" data-tip="A test fixture is a class that groups related tests with shared setup. NUnit discovers fixtures to organize test suites.">Fixtures</span></h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    NUnit relies on attributes to declare tests, fixtures, and categories.
+                    Use <span class="tt" data-tip="A namespace is a logical container for types in .NET. It prevents naming conflicts and helps organize code.">namespaces</span>
+                    to group your fixtures by feature.
+                    Fixtures can include setup methods to reduce duplication.
+                    Clear naming helps test discovery in large solutions.
+                </p>
+                <pre class="ascii">[TestFixture]
+   |
+[Test] methods</pre>
+                <div class="example">
+                    <strong>Example:</strong> Create a fixture for payment validations.
+                </div>
+                <pre class="code"><code>[TestFixture]
+public class PaymentTests
+{
+    [Test]
+    public void Validate_ReturnsTrue_ForValidCard()
+    {
+        Assert.IsTrue(Payment.Validate("4111"));
+    }
+}</code></pre>
+                <p><strong>Real-world use case:</strong> Organizing tests for multiple payment providers.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Keep one fixture per feature for clarity.</div>
+                <div class="note"><strong>Advanced Note:</strong> Use [Category] to filter tests during CI runs.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#setup">Previous Page</a>
+                    <a href="#assertions">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="assertions" class="section">
+            <h2>4. <span class="tt" data-tip="Assertions verify expected results. NUnit provides many assertion helpers like AreEqual, IsTrue, and Throws.">Assertions</span></h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Assertions validate outcomes and define test success criteria.
+                    Use the most specific assertion available to keep failures clear.
+                    NUnit supports constraint-based assertions for expressive checks.
+                    Clear assertion messages help debugging when a test fails.
+                </p>
+                <pre class="ascii">Expected vs Actual
+     |     |
+     +-- Assert</pre>
+                <div class="example">
+                    <strong>Example:</strong> Assert a result is within a tolerance range.
+                </div>
+                <pre class="code"><code>[Test]
+public void CalculateTax_ReturnsExpected()
+{
+    var tax = Calculator.Tax(200m, 0.05m);
+    Assert.That(tax, Is.EqualTo(10m));
+}</code></pre>
+                <p><strong>Real-world use case:</strong> Ensuring tax calculations stay precise.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Prefer Assert.That for readable, expressive checks.</div>
+                <div class="note"><strong>Advanced Note:</strong> Use Assert.Multiple to group related checks carefully.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#attributes">Previous Page</a>
+                    <a href="#parameterized">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="parameterized" class="section">
+            <h2>5. <span class="tt" data-tip="Parameterized tests run the same test logic with different input data. NUnit uses attributes like TestCase and TestCaseSource.">Parameterized Tests</span></h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Parameterized tests help cover multiple scenarios without duplicating code.
+                    Use TestCase for simple values or TestCaseSource for complex datasets.
+                    This keeps your test suite compact and easier to maintain.
+                    It also highlights boundary values in a consistent format.
+                </p>
+                <pre class="ascii">Input A -> Test
+Input B -> Test
+Input C -> Test</pre>
+                <div class="example">
+                    <strong>Example:</strong> Validate discount values for multiple item counts.
+                </div>
+                <pre class="code"><code>[TestCase(1, 0)]
+[TestCase(10, 5)]
+[TestCase(50, 10)]
+public void Discount_ByCount(int items, int expected)
+{
+    Assert.AreEqual(expected, DiscountRules.Calculate(items));
+}</code></pre>
+                <p><strong>Real-world use case:</strong> Verifying discount tiers for an e-commerce platform.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Keep parameter sets small to avoid slow test runs.</div>
+                <div class="note"><strong>Advanced Note:</strong> Use TestCaseSource for dynamic or generated inputs.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#assertions">Previous Page</a>
+                    <a href="#lifecycle">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="lifecycle" class="section">
+            <h2>6. Setup & Teardown</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    NUnit offers setup and teardown to prepare test data and clean resources.
+                    Use <span class="tt" data-tip="Setup/Teardown are lifecycle methods that run before/after tests. They reduce duplication by sharing initialization and cleanup logic.">setup/teardown</span>
+                    attributes like [SetUp], [TearDown], [OneTimeSetUp].
+                    Keep them short to avoid hidden dependencies.
+                    When tests run in parallel, shared state must be protected.
+                </p>
+                <pre class="ascii">OneTimeSetUp
+   |
+ SetUp -> Test -> TearDown
+   |
+OneTimeTearDown</pre>
+                <div class="example">
+                    <strong>Example:</strong> Reset a calculator before each test.
+                </div>
+                <pre class="code"><code>[SetUp]
+public void BeforeEach()
+{
+    _calculator = new Calculator();
+}
+
+[TearDown]
+public void AfterEach()
+{
+    _calculator = null;
+}</code></pre>
+                <p><strong>Real-world use case:</strong> Cleaning temporary files created during a test run.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Only put shared setup in [SetUp]; keep test data inside tests.</div>
+                <div class="note"><strong>Advanced Note:</strong> Use OneTimeSetUp for expensive operations like loading large datasets.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#parameterized">Previous Page</a>
+                    <a href="#runner">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="runner" class="section">
+            <h2>7. <span class="tt" data-tip="A test runner discovers, executes, and reports test results. NUnit uses adapters to integrate with IDE and CI tools.">Test Runners</span> & Adapters</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    NUnit tests run via a test runner like dotnet test or IDE runners.
+                    Install the NUnit adapter so discovery works correctly in Visual Studio.
+                    The runner uses metadata to find [Test] methods and execute them.
+                    Reports can be exported to CI dashboards for visibility.
+                </p>
+                <pre class="ascii">IDE/CLI Runner
+     |
+  NUnit Adapter
+     |
+ Test Results</pre>
+                <div class="example">
+                    <strong>Example:</strong> Running all tests in a solution with dotnet test.
+                </div>
+                <pre class="code"><code>dotnet test --logger "trx"
+# Run in CI and publish results</code></pre>
+                <p><strong>Real-world use case:</strong> Enforcing quality gates in a CI pipeline.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Run tests locally before pushing to avoid CI failures.</div>
+                <div class="note"><strong>Advanced Note:</strong> Configure test filters to target specific categories in releases.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#lifecycle">Previous Page</a>
+                    <a href="#best-practices">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="best-practices" class="section">
+            <h2>8. Best Practices</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Write tests that are deterministic and independent of external systems.
+                    Use clear naming to express what the test verifies.
+                    Keep tests fast by avoiding sleeps and unnecessary I/O.
+                    Organize fixtures by feature and use categories for filtering.
+                </p>
+                <pre class="ascii">Clean Test Suite
+  + Clear Names
+  + Fast Runs
+  + Isolated Data</pre>
+                <div class="example">
+                    <strong>Example:</strong> Use naming like CalculateTax_WhenZero_ReturnsZero.
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr><th>Practice</th><th>Why it Helps</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>One Arrange block</td><td>Clarity</td></tr>
+                        <tr><td>Test data builders</td><td>Reuse and readability</td></tr>
+                        <tr><td>Categories</td><td>Selective runs</td></tr>
+                    </tbody>
+                </table>
+                <pre class="code"><code>[Test]
+public void CalculateTax_WhenZero_ReturnsZero()
+{
+    Assert.That(Calculator.Tax(0m, 0.1m), Is.EqualTo(0m));
+}</code></pre>
+                <p><strong>Real-world use case:</strong> Keeping enterprise test suites maintainable over years.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> If a test needs too much setup, simplify the unit.</div>
+                <div class="warn"><strong>Advanced Note:</strong> Avoid overusing mocks; prefer real objects when cheap.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#runner">Previous Page</a>
+                    <a href="#sample-project">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="sample-project" class="section">
+            <h2>9. Sample Project: Inventory Rules</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Build a sample project that validates inventory thresholds.
+                    Use a fixture to group stock and reorder tests.
+                    Add parameterized tests for different reorder points.
+                    The sample demonstrates clean setup and focused assertions.
+                </p>
+                <pre class="ascii">Inventory -> Rule Engine -> Reorder?</pre>
+                <div class="example">
+                    <strong>Example:</strong> If stock &lt; reorder point, flag reorder.
+                </div>
+                <pre class="code"><code>[TestFixture]
+public class InventoryRulesTests
+{
+    [TestCase(2, 5, true)]
+    [TestCase(10, 5, false)]
+    public void ShouldReorder(int stock, int threshold, bool expected)
+    {
+        Assert.AreEqual(expected, InventoryRules.ShouldReorder(stock, threshold));
+    }
+}</code></pre>
+                <p><strong>Real-world use case:</strong> Preventing stock-outs in a warehouse system.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Keep the project small and add tests with each rule.</div>
+                <div class="note"><strong>Advanced Note:</strong> Add edge cases for negative inventory or missing data.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#best-practices">Previous Page</a>
+                    <a href="#faqs">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="faqs" class="section">
+            <h2>10. FAQs</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    FAQs address common NUnit questions about setup, assertions, and adapters.
+                    They also clarify when to use NUnit versus other frameworks.
+                    Keep answers practical and link back to core sections.
+                    Use FAQs to reduce repetitive support questions.
+                </p>
+                <pre class="ascii">Question -> Answer -> Reference</pre>
+                <div class="example">
+                    <strong>Example:</strong> Q: Do I need an adapter? A: Yes, for IDE discovery.
+                </div>
+                <pre class="code"><code>// FAQ snippet
+// Q: Can NUnit run in CI?
+// A: Yes, via dotnet test and adapters.</code></pre>
+                <p><strong>Real-world use case:</strong> Helping teams standardize their testing toolchain.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Add new FAQs when the same question repeats twice.</div>
+                <div class="note"><strong>Advanced Note:</strong> Document adapter versions with the framework version.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#sample-project">Previous Page</a>
+                    <a href="#interview">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="interview" class="section">
+            <h2>11. Interview Questions</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Interview questions evaluate your ability to explain NUnit usage clearly.
+                    They cover attributes, fixtures, assertions, and test discovery.
+                    Use real-world examples to show your experience with CI.
+                    Explain trade-offs between NUnit and other frameworks.
+                </p>
+                <pre class="ascii">Question -> Approach -> Example</pre>
+                <div class="example">
+                    <strong>Example:</strong> "Explain [SetUp] vs [OneTimeSetUp]."
+                </div>
+                <ul>
+                    <li>How does NUnit discover tests?</li>
+                    <li>What is the purpose of TestCase?</li>
+                    <li>Why use an adapter in Visual Studio?</li>
+                    <li>How do you structure fixtures in large solutions?</li>
+                </ul>
+                <pre class="code"><code>// Sample answer snippet
+// "I use TestCase to cover multiple inputs with the same logic."</code></pre>
+                <p><strong>Real-world use case:</strong> Preparing for QA automation and backend interviews.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Tie answers to a specific project to be memorable.</div>
+                <div class="note"><strong>Advanced Note:</strong> Discuss how you handle flaky tests in NUnit.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#faqs">Previous Page</a>
+                    <a href="#mcq">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="mcq" class="section">
+            <h2>12. MCQ Quiz</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    This quiz checks key NUnit concepts like attributes and assertions.
+                    It is a fast way to confirm understanding after reading.
+                    Use the quiz to identify topics you should revisit.
+                    Provide correct answers when distributing to learners.
+                </p>
+                <pre class="ascii">Question -> Option A/B/C -> Answer</pre>
+                <div class="example">
+                    <strong>Example:</strong> Q: Which attribute marks a test method? A: [Test].
+                </div>
+                <ol>
+                    <li>Which attribute marks a test method? ([Test])</li>
+                    <li>What is a fixture? (Class grouping tests)</li>
+                    <li>Which runner executes NUnit tests? (dotnet test)</li>
+                    <li>Which attribute supplies multiple inputs? ([TestCase])</li>
+                    <li>What should tests avoid? (External I/O)</li>
+                </ol>
+                <pre class="code"><code>// Quiz scoring
+var score = answers.Count(x =&gt; x.IsCorrect);</code></pre>
+                <p><strong>Real-world use case:</strong> Short assessments during training sessions.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Use 5-10 questions to keep the quiz quick.</div>
+                <div class="note"><strong>Advanced Note:</strong> Add scenario questions for deeper understanding.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#interview">Previous Page</a>
+                    <a href="#summary">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="summary" class="section">
+            <h2>13. Summary of Key Points</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    NUnit offers a rich set of attributes, fixtures, and assertions for unit testing.
+                    Parameterized tests reduce duplication and increase coverage.
+                    Setup and teardown keep tests clean and repeatable.
+                    Test runners and adapters integrate NUnit with IDEs and CI.
+                    Following best practices keeps the suite maintainable.
+                </p>
+                <pre class="ascii">NUnit + Good Practices -> Reliable Test Suite</pre>
+                <div class="example">
+                    <strong>Example:</strong> A stable test suite that runs on every pull request.
+                </div>
+                <pre class="code"><code>// Summary checklist
+// 1) Clear fixtures
+// 2) Expressive assertions
+// 3) Fast runners</code></pre>
+                <p><strong>Real-world use case:</strong> Release readiness checks before deploying.
+                </p>
+                <div class="tip"><strong>Beginner Tip:</strong> Keep a short checklist for each new test class.</div>
+                <div class="note"><strong>Advanced Note:</strong> Add reporting to visualize failures over time.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#mcq">Previous Page</a>
+                    <a href="#downloads">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="downloads" class="section">
+            <h2>14. Downloadable Resources (ZIP, PPT, DOC)</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Provide offline resources for learners.
+                    Include a ZIP with sample NUnit tests, a PPT for presentations, and a DOC with exercises.
+                    Keep files versioned alongside the tutorial so they stay current.
+                    Use consistent naming for easy discovery.
+                </p>
+                <pre class="ascii">Resources
+  |- NUnitSamples.zip
+  |- NUnitSlides.pptx
+  |- NUnitExercises.docx</pre>
+                <div class="example">
+                    <strong>Example:</strong> ZIP with fixtures, parameterized tests, and adapters configured.</div>
+                <pre class="code"><code>// Placeholder links
+// [Download ZIP] [Download PPT] [Download DOC]</code></pre>
+                <p><strong>Real-world use case:</strong> Facilitating classroom labs without internet access.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Start with a single ZIP to keep it simple.</div>
+                <div class="note"><strong>Advanced Note:</strong> Include a change log with each resource update.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#summary">Previous Page</a>
+                    <a href="#glossary">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="glossary" class="section">
+            <h2>15. Glossary (Tooltips)</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    This glossary lists the tooltip terms used on the NUnit page.
+                    It helps you quickly refresh definitions while writing tests.
+                    Hover over terms in sections to see these descriptions.
+                    Update the glossary as your testing vocabulary grows.
+                </p>
+                <pre class="ascii">Term -> Definition -> Example</pre>
+                <div class="example">
+                    <strong>Example:</strong> "Attribute" indicates how NUnit interprets a method.</div>
+                <table class="table">
+                    <thead>
+                        <tr><th>Term</th><th>Tooltip Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>NUnit</td><td>Open-source .NET testing framework with attributes, assertions, and runners.</td></tr>
+                        <tr><td>.NET runtime</td><td>Execution environment for C# that manages memory and runs code.</td></tr>
+                        <tr><td>Attribute</td><td>Metadata applied to code, used by NUnit to mark tests and lifecycle hooks.</td></tr>
+                        <tr><td>Assembly</td><td>Compiled .NET output containing code, metadata, and resources.</td></tr>
+                        <tr><td>Namespace</td><td>Logical container to organize types and avoid naming conflicts.</td></tr>
+                        <tr><td>Test Fixture</td><td>Class grouping related tests with shared setup.</td></tr>
+                        <tr><td>Assertions</td><td>Checks comparing expected vs. actual results.</td></tr>
+                        <tr><td>Parameterized Tests</td><td>Same test logic executed with multiple inputs.</td></tr>
+                        <tr><td>Setup/Teardown</td><td>Lifecycle hooks that run before or after tests.</td></tr>
+                        <tr><td>Test Runner</td><td>Tool that discovers and executes tests, reporting results.</td></tr>
+                    </tbody>
+                </table>
+                <pre class="code"><code>// Glossary usage example
+// "Use [TestCase] to create parameterized tests."</code></pre>
+                <p><strong>Real-world use case:</strong> Standardizing testing terminology across teams.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Review this glossary after finishing each chapter.</div>
+                <div class="note"><strong>Advanced Note:</strong> Add internal terms like naming conventions or build tags.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#downloads">Previous Page</a>
+                    <a href="#practice-coding-questions">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+
+        <section id="practice-coding-questions" class="section">
+            <h2>To Become Best coder Practice this</h2>
+            <div class="section-body hover-highlight">
+                <p>
+                    Practice these NUnit-focused questions to improve test design.
+                    Each question includes inputs, outputs, constraints, and a hint.
+                    Use NUnit attributes and assertions when writing your answers.
+                    Mix easy, medium, and hard tasks for balanced learning.
+                </p>
+                <pre class="ascii">Problem -> Test -> Assert -> Review</pre>
+                <div class="example">
+                    <strong>Example:</strong> Write NUnit tests for a currency converter.
+                </div>
+                <h3>Easy (5)</h3>
+                <ol>
+                    <li>
+                        <strong>Problem:</strong> Test that Add(2,3) returns 5.
+                        <br/><strong>Input/Output:</strong> Input: 2,3 Output: 5.
+                        <br/><strong>Example:</strong> In: 2,3 → Out: 5.
+                        <br/><strong>Constraints:</strong> Integers only.
+                        <br/><strong>Hint:</strong> Use Assert.AreEqual.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that IsEven(4) returns true.
+                        <br/><strong>Input/Output:</strong> Input: 4 Output: true.
+                        <br/><strong>Example:</strong> In: 4 → Out: true.
+                        <br/><strong>Constraints:</strong> n ≥ 0.
+                        <br/><strong>Hint:</strong> Use modulo.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that Reverse("") returns empty string.
+                        <br/><strong>Input/Output:</strong> Input: "" Output: "".
+                        <br/><strong>Example:</strong> In: "" → Out: "".
+                        <br/><strong>Constraints:</strong> Length ≤ 200.
+                        <br/><strong>Hint:</strong> Handle empty as valid.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that Clamp(5,1,10) returns 5.
+                        <br/><strong>Input/Output:</strong> Input: 5,1,10 Output: 5.
+                        <br/><strong>Example:</strong> In: 5 → Out: 5.
+                        <br/><strong>Constraints:</strong> min ≤ max.
+                        <br/><strong>Hint:</strong> Compare with min and max.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that SafeDivide(10,0) throws.
+                        <br/><strong>Input/Output:</strong> Input: 10,0 Output: exception.
+                        <br/><strong>Example:</strong> In: 10,0 → Out: exception.
+                        <br/><strong>Constraints:</strong> divisor can be 0.
+                        <br/><strong>Hint:</strong> Use Assert.Throws.
+                    </li>
+                </ol>
+
+                <h3>Medium (5)</h3>
+                <ol>
+                    <li>
+                        <strong>Problem:</strong> Parameterized test for tax rates 0%, 5%, 10%.
+                        <br/><strong>Input/Output:</strong> Input: rate, Output: expected tax.
+                        <br/><strong>Example:</strong> In: 100,0.05 → Out: 5.
+                        <br/><strong>Constraints:</strong> rate 0-1.
+                        <br/><strong>Hint:</strong> Use [TestCase].
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that a validator rejects usernames shorter than 3 chars.
+                        <br/><strong>Input/Output:</strong> Input: "ab" Output: false.
+                        <br/><strong>Example:</strong> In: ab → Out: false.
+                        <br/><strong>Constraints:</strong> length ≤ 20.
+                        <br/><strong>Hint:</strong> Use boundary tests.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that checkout applies free shipping for totals ≥ 50.
+                        <br/><strong>Input/Output:</strong> Input: 50 Output: free shipping.
+                        <br/><strong>Example:</strong> In: 50 → Out: free.
+                        <br/><strong>Constraints:</strong> total ≥ 0.
+                        <br/><strong>Hint:</strong> Assert on shipping fee.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that a cache returns stored value within 1 minute.
+                        <br/><strong>Input/Output:</strong> Input: key, Output: value.
+                        <br/><strong>Example:</strong> In: key → Out: value.
+                        <br/><strong>Constraints:</strong> Use fake clock.
+                        <br/><strong>Hint:</strong> Inject time provider.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that inventory reorder triggers when stock below threshold.
+                        <br/><strong>Input/Output:</strong> Input: stock=2, threshold=5 Output: true.
+                        <br/><strong>Example:</strong> In: 2,5 → Out: true.
+                        <br/><strong>Constraints:</strong> non-negative stock.
+                        <br/><strong>Hint:</strong> Use parameterized tests.
+                    </li>
+                </ol>
+
+                <h3>Hard (5)</h3>
+                <ol>
+                    <li>
+                        <strong>Problem:</strong> Test concurrency safety for a thread-safe queue.
+                        <br/><strong>Input/Output:</strong> Input: 100 enqueue/dequeue → Output: empty queue.
+                        <br/><strong>Example:</strong> In: 100 ops → Out: empty.
+                        <br/><strong>Constraints:</strong> Use parallel tasks.
+                        <br/><strong>Hint:</strong> Assert final count.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test a retry policy stops after max retries with specific exception.
+                        <br/><strong>Input/Output:</strong> Input: max=3 → Output: 3 attempts.
+                        <br/><strong>Example:</strong> In: 3 → Out: 3 attempts.
+                        <br/><strong>Constraints:</strong> Avoid delays in tests.
+                        <br/><strong>Hint:</strong> Inject a delay strategy.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that a rule engine selects highest priority rule.
+                        <br/><strong>Input/Output:</strong> Input: rules+input → Output: selected rule.
+                        <br/><strong>Example:</strong> In: A,B → Out: A.
+                        <br/><strong>Constraints:</strong> Priority unique.
+                        <br/><strong>Hint:</strong> Assert on chosen rule id.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that a scheduler fires a job exactly once at time.
+                        <br/><strong>Input/Output:</strong> Input: time=10:00 → Output: one call.
+                        <br/><strong>Example:</strong> In: 10:00 → Out: 1 call.
+                        <br/><strong>Constraints:</strong> Use fake clock.
+                        <br/><strong>Hint:</strong> Verify invocation count.
+                    </li>
+                    <li>
+                        <strong>Problem:</strong> Test that a parser rejects malformed JSON with a specific exception type.
+                        <br/><strong>Input/Output:</strong> Input: malformed JSON → Output: exception.
+                        <br/><strong>Example:</strong> In: "{bad" → Out: JsonException.
+                        <br/><strong>Constraints:</strong> No external network.
+                        <br/><strong>Hint:</strong> Use Assert.Throws with type.
+                    </li>
+                </ol>
+                <pre class="code"><code>// Practice scaffold
+// Use NUnit attributes: [Test], [TestCase], [SetUp].</code></pre>
+                <p><strong>Real-world use case:</strong> Preparing for NUnit-focused interviews and assessments.</p>
+                <div class="tip"><strong>Beginner Tip:</strong> Write the failing test first to clarify expected behavior.</div>
+                <div class="note"><strong>Advanced Note:</strong> Add negative tests for invalid inputs and exceptions.</div>
+                <a class="trybtn" href="#!">Try It Yourself</a>
+                <div class="nav-buttons">
+                    <a href="#glossary">Previous Page</a>
+                    <a href="#next-subtopic">Next Page</a>
+                </div>
+                <span class="placeholder-links">Placeholders: <a href="#prev-subtopic">#prev-subtopic</a> | <a href="#next-subtopic">#next-subtopic</a></span>
+            </div>
+        </section>
+        <a id="prev-subtopic"></a>
+        <a id="next-subtopic"></a>
+    </main>
+</div>
