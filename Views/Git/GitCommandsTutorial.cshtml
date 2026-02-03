@@ -1,0 +1,754 @@
+@{
+    ViewData["Title"] = "Git Commands - Spoon Feeding Tutorial";
+    ViewData["ActiveMenu"] = "Git";
+    ViewData["ActivePage"] = "GitCommands";
+    // Uses your project master page:
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* Page-only styles (safe with _Layout.cshtml) */
+    .itg-side a { text-decoration: none; }
+    .itg-side .list-group-item { border-radius: 10px; margin-bottom: 8px; }
+    .itg-side .list-group-item.active { background: #0d6efd; border-color: #0d6efd; }
+    .itg-code { background: #0b1020; color: #e6edf3; border-radius: 12px; padding: 14px; overflow:auto; }
+    .itg-code code { color: inherit; }
+    .itg-note { border-left: 6px solid #0d6efd; background: #f3f7ff; border-radius: 12px; padding: 12px 14px; }
+    .itg-warn { border-left: 6px solid #dc3545; background: #fff5f5; border-radius: 12px; padding: 12px 14px; }
+    .itg-tip  { border-left: 6px solid #198754; background: #f3fff7; border-radius: 12px; padding: 12px 14px; }
+    .itg-card { border-radius: 16px; box-shadow: 0 10px 28px rgba(0,0,0,.06); border: 1px solid rgba(0,0,0,.08); }
+    .itg-h { scroll-margin-top: 90px; } /* helps anchor jump under sticky navbar */
+    .itg-badge { font-size: .78rem; }
+    .itg-kbd kbd { background:#111827; padding: 3px 7px; border-radius: 6px; }
+</style>
+
+<div class="container-fluid py-3">
+    <div class="row g-3">
+
+        <!-- Local Left Menu (Topic + Subtopics) -->
+        <aside class="col-12 col-md-3 col-lg-3 itg-side">
+            <div class="card itg-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="mb-0"><i class="fa-brands fa-git-alt me-2 text-danger"></i>Git Tutorials</h5>
+                        <span class="badge text-bg-primary itg-badge">ItTechGenie</span>
+                    </div>
+
+                    <hr class="my-3" />
+
+                    <div class="list-group">
+                        <a class="list-group-item list-group-item-action active" href="#intro">1) What is Git?</a>
+                        <a class="list-group-item list-group-item-action" href="#install">2) Install + Setup</a>
+                        <a class="list-group-item list-group-item-action" href="#firstrepo">3) First Repo in 10 Minutes</a>
+                        <a class="list-group-item list-group-item-action" href="#corecycle">4) Core Cycle: status → add → commit</a>
+                        <a class="list-group-item list-group-item-action" href="#history">5) See History: log + show</a>
+                        <a class="list-group-item list-group-item-action" href="#diff">6) Compare Changes: diff</a>
+                        <a class="list-group-item list-group-item-action" href="#branching">7) Branching</a>
+                        <a class="list-group-item list-group-item-action" href="#merge">8) Merge (with Conflicts)</a>
+                        <a class="list-group-item list-group-item-action" href="#remote">9) Remote: clone, push, pull</a>
+                        <a class="list-group-item list-group-item-action" href="#undo">10) Undo safely: restore, revert, reset</a>
+                        <a class="list-group-item list-group-item-action" href="#stash">11) Stash: save work temporarily</a>
+                        <a class="list-group-item list-group-item-action" href="#tags">12) Tags + Releases</a>
+                        <a class="list-group-item list-group-item-action" href="#gitignore">13) .gitignore (must know)</a>
+                        <a class="list-group-item list-group-item-action" href="#workflows">14) Real-world Workflow</a>
+                        <a class="list-group-item list-group-item-action" href="#cheatsheet">15) Cheatsheet</a>
+                        <a class="list-group-item list-group-item-action" href="#practice">16) Practice Tasks</a>
+                        <a class="list-group-item list-group-item-action" href="#faq">17) FAQ + Common Errors</a>
+                    </div>
+
+                    <hr class="my-3" />
+                    <div class="itg-kbd small text-muted">
+                        Tip: Use <kbd>Ctrl</kbd> + <kbd>F</kbd> to search commands quickly.
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="col-12 col-md-9 col-lg-9">
+            <div class="card itg-card">
+                <div class="card-body p-4">
+
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div>
+                            <h1 class="h3 mb-1"><i class="fa-brands fa-git-alt text-danger me-2"></i>Git Commands – Spoon Feeding Notes</h1>
+                            <div class="text-muted">A beginner-friendly, step-by-step Git web tutorial for <strong>ItTechGenie.com</strong>.</div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge text-bg-dark itg-badge me-1">Beginner</span>
+                            <span class="badge text-bg-success itg-badge">Hands-on</span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <!-- 1) Intro -->
+                    <section id="intro" class="itg-h">
+                        <h2 class="h4">1) What is Git?</h2>
+                        <p>
+                            <strong>Git</strong> is a <strong>Version Control System (VCS)</strong>.
+                            It helps you track <strong>who changed what</strong>, <strong>when</strong>, and <strong>why</strong>.
+                            You can also create separate copies of code using <strong>branches</strong> and merge them later.
+                        </p>
+
+                        <div class="itg-note mb-3">
+                            <strong>Real-world:</strong> In a team, Git prevents “last person overwrote my code” problem.
+                            Every change becomes a commit with a message and history.
+                        </div>
+
+                        <h3 class="h6 mb-2">Git basic terms (very simple)</h3>
+                        <ul class="mb-3">
+                            <li><strong>Repository (repo):</strong> A folder tracked by Git.</li>
+                            <li><strong>Commit:</strong> A saved checkpoint of your changes.</li>
+                            <li><strong>Branch:</strong> A separate line of work (like “feature-login”).</li>
+                            <li><strong>Remote:</strong> Repo hosted online (e.g., GitHub / Azure Repos).</li>
+                        </ul>
+
+                        <h3 class="h6 mb-2">Diagram: Git keeps snapshots (commits)</h3>
+                        <div class="itg-code mb-4"><code>Working Folder  →  Staging Area  →  Repository (Commits)
+  (edit files)         (git add)        (git commit)
+
+Example:
+  A.txt changed   →   A.txt staged  →   Commit "Added login validation"</code></div>
+                    </section>
+
+                    <!-- 2) Install -->
+                    <section id="install" class="itg-h">
+                        <h2 class="h4">2) Install + Setup</h2>
+                        <p>
+                            For Windows, install <strong>Git for Windows</strong> (it includes <strong>Git Bash</strong>).
+                            For Mac/Linux, Git often comes pre-installed or can be installed from package manager.
+                        </p>
+
+                        <div class="itg-tip mb-3">
+                            After installation, open <strong>Git Bash</strong> (Windows) or Terminal (Mac/Linux).
+                        </div>
+
+                        <h3 class="h6">Step 1: Check Git version</h3>
+                        <div class="itg-code mb-3"><code>git --version</code></div>
+
+                        <h3 class="h6">Step 2: Set your name and email (must do once)</h3>
+                        <div class="itg-code mb-3"><code>git config --global user.name "Gopi Suresh"
+git config --global user.email "youremail@example.com"</code></div>
+
+                        <h3 class="h6">Step 3: Verify configuration</h3>
+                        <div class="itg-code mb-3"><code>git config --global --list</code></div>
+
+                        <div class="itg-note">
+                            <strong>Why this is needed?</strong> Git writes your name/email into commits to show who made the change.
+                        </div>
+                    </section>
+
+                    <hr class="my-4" />
+
+                    <!-- 3) First Repo -->
+                    <section id="firstrepo" class="itg-h">
+                        <h2 class="h4">3) First Repo in 10 Minutes (Beginner Demo)</h2>
+                        <p>We will create a new folder, initialize Git, then commit a file.</p>
+
+                        <h3 class="h6">Step-by-step</h3>
+                        <div class="itg-code mb-3"><code># 1) Create a folder and go inside
+mkdir itg-git-demo
+cd itg-git-demo
+
+# 2) Initialize Git repository
+git init
+
+# 3) Create a file
+echo "Hello Git" &gt; readme.txt
+
+# 4) Check status
+git status</code></div>
+
+                        <div class="itg-note mb-4">
+                            <strong>What you will see:</strong> Git will show that <code>readme.txt</code> is an <strong>untracked file</strong>.
+                            It means: file exists but Git is not tracking it yet.
+                        </div>
+
+                        <h3 class="h6">Diagram: What git init creates</h3>
+                        <div class="row g-3">
+                            <div class="col-12 col-lg-7">
+                                <div class="itg-code"><code>itg-git-demo/
+  readme.txt
+  .git/   ← hidden folder (Git database)</code></div>
+                            </div>
+                            <div class="col-12 col-lg-5">
+                                <!-- simple inline SVG -->
+                                <svg class="w-100" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Git repo folder diagram">
+                                    <rect x="20" y="30" width="220" height="160" rx="14" fill="#f8f9fa" stroke="#adb5bd" />
+                                    <text x="40" y="65" font-size="16" fill="#212529">Working Folder</text>
+                                    <rect x="50" y="85" width="160" height="36" rx="10" fill="#ffffff" stroke="#ced4da" />
+                                    <text x="70" y="108" font-size="14" fill="#212529">readme.txt</text>
+
+                                    <rect x="280" y="30" width="220" height="160" rx="14" fill="#f8f9fa" stroke="#adb5bd" />
+                                    <text x="300" y="65" font-size="16" fill="#212529">.git (Repository)</text>
+                                    <rect x="310" y="85" width="160" height="36" rx="10" fill="#ffffff" stroke="#ced4da" />
+                                    <text x="330" y="108" font-size="14" fill="#212529">objects</text>
+                                    <rect x="310" y="130" width="160" height="36" rx="10" fill="#ffffff" stroke="#ced4da" />
+                                    <text x="330" y="153" font-size="14" fill="#212529">refs / HEAD</text>
+
+                                    <path d="M240 110 L280 110" stroke="#0d6efd" stroke-width="4" />
+                                    <polygon points="280,110 270,104 270,116" fill="#0d6efd" />
+                                    <text x="248" y="98" font-size="12" fill="#0d6efd">tracked by</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </section>
+
+                    <hr class="my-4" />
+
+                    <!-- 4) Core Cycle -->
+                    <section id="corecycle" class="itg-h">
+                        <h2 class="h4">4) Core Cycle: <code>status</code> → <code>add</code> → <code>commit</code></h2>
+
+                        <h3 class="h6">A) Check what changed</h3>
+                        <div class="itg-code mb-3"><code>git status</code></div>
+
+                        <h3 class="h6">B) Add file to staging (tell Git to include in next commit)</h3>
+                        <div class="itg-code mb-3"><code># Add one file
+git add readme.txt
+
+# Add all changed files
+git add .</code></div>
+
+                        <div class="itg-note mb-3">
+                            <strong>Staging area</strong> is like “shopping cart”.
+                            You choose what to commit.
+                        </div>
+
+                        <h3 class="h6">C) Commit (save checkpoint)</h3>
+                        <div class="itg-code mb-3"><code>git commit -m "Added initial readme"</code></div>
+
+                        <h3 class="h6">D) Quick diagram (Most important)</h3>
+                        <div class="itg-code"><code>1) Edit file   →  Working Tree has changes
+2) git add      →  Changes go to Staging
+3) git commit   →  Changes saved as a Commit (History)
+
+Working Tree   [git add]   Staging   [git commit]   History</code></div>
+
+                        <div class="itg-warn mt-3">
+                            <strong>Common beginner mistake:</strong> You edited file but forgot to run <code>git add</code>.
+                            Then commit creates “nothing to commit”.
+                        </div>
+                    </section>
+
+                    <hr class="my-4" />
+
+                    <!-- 5) History -->
+                    <section id="history" class="itg-h">
+                        <h2 class="h4">5) See History: <code>log</code> + <code>show</code></h2>
+
+                        <h3 class="h6">A) View commit list</h3>
+                        <div class="itg-code mb-3"><code>git log</code></div>
+
+                        <h3 class="h6">B) One-line history (best for beginners)</h3>
+                        <div class="itg-code mb-3"><code>git log --oneline --decorate --graph --all</code></div>
+
+                        <h3 class="h6">C) View details of a commit</h3>
+                        <div class="itg-code mb-3"><code># Replace abc123 with real commit id from log
+git show abc123</code></div>
+
+                        <div class="itg-tip">
+                            <strong>Shortcut:</strong> Use <code>git show HEAD</code> to see latest commit.
+                        </div>
+                    </section>
+
+                    <hr class="my-4" />
+
+                    <!-- 6) Diff -->
+                    <section id="diff" class="itg-h">
+                        <h2 class="h4">6) Compare Changes: <code>diff</code></h2>
+
+                        <p><strong>diff</strong> shows what changed (line by line).</p>
+
+                        <h3 class="h6">A) Compare working changes (not staged)</h3>
+                        <div class="itg-code mb-3"><code>git diff</code></div>
+
+                        <h3 class="h6">B) Compare staged changes</h3>
+                        <div class="itg-code mb-3"><code>git diff --staged</code></div>
+
+                        <h3 class="h6">C) Compare two commits</h3>
+                        <div class="itg-code"><code>git diff abc123 def456</code></div>
+
+                        <div class="itg-note mt-3">
+                            <strong>Use case:</strong> Before committing, run <code>git diff</code> to confirm you didn’t accidentally change something.
+                        </div>
+                    </section>
+
+                    <hr class="my-4" />
+
+                    <!-- 7) Branching -->
+                    <section id="branching" class="itg-h">
+                        <h2 class="h4">7) Branching (Work safely)</h2>
+
+                        <p>
+                            Branch is like making a <strong>new working line</strong> for a feature.
+                            Your <strong>main</strong> branch remains stable.
+                        </p>
+
+                        <h3 class="h6">A) See branches</h3>
+                        <div class="itg-code mb-3"><code>git branch</code></div>
+
+                        <h3 class="h6">B) Create a new branch</h3>
+                        <div class="itg-code mb-3"><code>git branch feature-login</code></div>
+
+                        <h3 class="h6">C) Switch to branch</h3>
+                        <div class="itg-code mb-3"><code># New Git:
+git switch feature-login
+
+# Older Git:
+git checkout feature-login</code></div>
+
+                        <h3 class="h6">D) Create + switch in one command</h3>
+                        <div class="itg-code mb-3"><code>git switch -c feature-login</code></div>
+
+                        <h3 class="h6">Diagram: Branch split</h3>
+                        <div class="itg-code"><code>main:          A --- B --- C
+                    \
+feature-login:       D --- E</code></div>
+
+                        <div class="itg-tip">
+                            <strong>Team rule:</strong> Always create feature branches. Don’t directly commit to main.
+                        </div>
+                    </section>
+
+                    <hr class="my-4" />
+
+                    <!-- 8) Merge -->
+                    <section id="merge" class="itg-h">
+                        <h2 class="h4">8) Merge (Including Conflicts)</h2>
+
+                        <h3 class="h6">A) Merge feature branch into main</h3>
+                        <div class="itg-code mb-3"><code># Go to main
+git switch main
+
+# Pull latest (if using remote)
+git pull
+
+# Merge feature
+git merge feature-login</code></div>
+
+                        <h3 class="h6">Diagram: Merge</h3>
+                        <div class="itg-code mb-3"><code>Before merge:
+main:          A --- B --- C
+                    \
+feature-login:       D --- E
+
+After merge:
+main:          A --- B --- C ------- M
+                    \              /
+feature-login:       D --- E ------</code></div>
+
+                        <h3 class="h6">B) If conflict happens (very common)</h3>
+                        <div class="itg-warn mb-3">
+                            Conflict means Git cannot automatically decide which lines are correct.
+                            You must open the file, choose the correct code, then commit.
+                        </div>
+
+                        <div class="itg-code mb-3"><code># 1) See conflict files
+git status
+
+# 2) Open the conflict file and fix it manually
+#    Remove conflict markers: &lt;&lt;&lt;&lt;&lt;&lt;&lt;, =======, &gt;&gt;&gt;&gt;&gt;&gt;&gt;
+
+# 3) Add fixed file
+git add filename.ext
+
+# 4) Complete merge commit
+git commit -m "Merged feature-login into main"</code></div>
+
+                        <div class="itg-note">
+                            <strong>Conflict markers example:</strong>
+                            <div class="itg-code mt-2"><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+Console.WriteLine("Main branch message");
+=======
+Console.WriteLine("Feature branch message");
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature-login</code></div>
+                        </div>
+                    </section>
+
+                    <hr class="my-4" />
+
+                    <!-- 9) Remote -->
+                    <section id="remote" class="itg-h">
+                        <h2 class="h4">9) Remote: <code>clone</code>, <code>push</code>, <code>pull</code>, <code>fetch</code></h2>
+
+                        <h3 class="h6">A) Clone a remote repository</h3>
+                        <div class="itg-code mb-3"><code>git clone https://github.com/ORG/REPO.git</code></div>
+
+                        <h3 class="h6">B) Check remote URL</h3>
+                        <div class="itg-code mb-3"><code>git remote -v</code></div>
+
+                        <h3 class="h6">C) Push your branch</h3>
+                        <div class="itg-code mb-3"><code># First push (set upstream)
+git push -u origin feature-login
+
+# Next pushes
+git push</code></div>
+
+                        <h3 class="h6">D) Pull changes (fetch + merge)</h3>
+                        <div class="itg-code mb-3"><code>git pull</code></div>
+
+                        <h3 class="h6">E) Fetch changes (only downloads, does not merge)</h3>
+                        <div class="itg-code mb-3"><code>git fetch</code></div>
+
+                        <div class="itg-note">
+                            <strong>Easy memory:</strong>
+                            <ul class="mb-0">
+                                <li><code>fetch</code> = download updates only</li>
+                                <li><code>pull</code> = download + merge into your current branch</li>
+                                <li><code>push</code> = upload your commits to remote</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <hr class="my-4" />
+
+                    <!-- 10) Undo -->
+                    <section id="undo" class="itg-h">
+                        <h2 class="h4">10) Undo safely: <code>restore</code>, <code>revert</code>, <code>reset</code></h2>
+
+                        <div class="itg-warn mb-3">
+                            Undo commands can be risky. Use the safe order: <strong>restore → revert → reset</strong>.
+                        </div>
+
+                        <h3 class="h6">A) Undo working changes (not staged)</h3>
+                        <div class="itg-code mb-3"><code># Discard changes in a file
+git restore readme.txt</code></div>
+
+                        <h3 class="h6">B) Unstage file (remove from staging)</h3>
+                        <div class="itg-code mb-3"><code>git restore --staged readme.txt</code></div>
+
+                        <h3 class="h6">C) Revert a commit (safe for shared branches)</h3>
+                        <div class="itg-code mb-3"><code># Creates a NEW commit that reverses the changes
+git revert abc123</code></div>
+
+                        <h3 class="h6">D) Reset (use carefully)</h3>
+                        <div class="itg-code"><code># Move HEAD back, keep changes in working tree:
+git reset --soft abc123
+
+# Move HEAD back, keep changes unstaged:
+git reset --mixed abc123
+
+# DANGEROUS: delete changes
+git reset --hard abc123</code></div>
+
+                        <div class="itg-note mt-3">
+                            <strong>Best practice:</strong> For team/shared branches, prefer <code>git revert</code>.
+                        </div>
+                    </section>
+
+                    <hr class="my-4" />
+
+                    <!-- 11) Stash -->
+                    <section id="stash" class="itg-h">
+                        <h2 class="h4">11) Stash (Save work temporarily)</h2>
+
+                        <p>
+                            Use stash when you are working, but suddenly need to switch branches.
+                            Stash saves your changes in a temporary box.
+                        </p>
+
+                        <div class="itg-code mb-3"><code># Save changes
+git stash
+
+# Save with message
+git stash push -m "WIP: login validation"
+
+# List stashes
+git stash list
+
+# Apply last stash (keep it in stash list)
+git stash apply
+
+# Apply and remove from stash list
+git stash pop
+
+# Drop a stash
+git stash drop stash@{0}</code></div>
+
+                        <div class="itg-tip">
+                            <strong>Use case:</strong> You are halfway in a feature, but urgent bug fix needs to be done on main.
+                        </div>
+                    </section>
+
+                    <hr class="my-4" />
+
+                    <!-- 12) Tags -->
+                    <section id="tags" class="itg-h">
+                        <h2 class="h4">12) Tags + Releases</h2>
+
+                        <p>Tags are used to mark a version like <code>v1.0</code>.</p>
+
+                        <div class="itg-code mb-3"><code># List tags
+git tag
+
+# Create a tag
+git tag v1.0
+
+# Create annotated tag (recommended)
+git tag -a v1.0 -m "Release v1.0"
+
+# Push tags to remote
+git push origin v1.0
+git push --tags</code></div>
+
+                        <div class="itg-note">
+                            <strong>Real-world:</strong> Production releases are tagged. Later you can checkout that exact code.
+                        </div>
+                    </section>
+
+                    <hr class="my-4" />
+
+                    <!-- 13) Gitignore -->
+                    <section id="gitignore" class="itg-h">
+                        <h2 class="h4">13) <code>.gitignore</code> (Must know)</h2>
+
+                        <p>
+                            <code>.gitignore</code> tells Git: “Do not track these files”.
+                            Example: build folders, logs, secrets, node_modules, bin/obj, etc.
+                        </p>
+
+                        <h3 class="h6">Example .gitignore for .NET</h3>
+                        <div class="itg-code mb-3"><code>bin/
+obj/
+*.user
+*.suo
+*.log
+appsettings.*.json</code></div>
+
+                        <div class="itg-warn">
+                            <strong>Important:</strong> If a file is already tracked, adding it to .gitignore will NOT remove it automatically.
+                            You must untrack it:
+                            <div class="itg-code mt-2"><code>git rm --cached appsettings.Production.json
+git commit -m "Stop tracking secrets"</code></div>
+                        </div>
+                    </section>
+
+                    <hr class="my-4" />
+
+                    <!-- 14) Workflows -->
+                    <section id="workflows" class="itg-h">
+                        <h2 class="h4">14) Real-world Workflow (Team Standard)</h2>
+
+                        <div class="itg-note mb-3">
+                            This is the safest workflow used in companies for GitHub/Azure Repos.
+                        </div>
+
+                        <ol class="mb-3">
+                            <li><strong>Pull latest main</strong></li>
+                            <li><strong>Create a feature branch</strong></li>
+                            <li><strong>Commit small commits</strong> (each commit should represent 1 logical change)</li>
+                            <li><strong>Push branch</strong> to remote</li>
+                            <li><strong>Create Pull Request (PR)</strong></li>
+                            <li><strong>Review + Fix</strong></li>
+                            <li><strong>Merge PR</strong></li>
+                        </ol>
+
+                        <div class="itg-code mb-3"><code># 1) Get latest main
+git switch main
+git pull
+
+# 2) Create feature branch
+git switch -c feature-profile-page
+
+# 3) Work + commit
+git add .
+git commit -m "Added profile page UI"
+
+# 4) Push branch
+git push -u origin feature-profile-page</code></div>
+
+                        <h3 class="h6">Diagram: PR workflow</h3>
+                        <div class="itg-code"><code>Developer Branch   →   Pull Request   →   main branch
+(feature-xyz)          (review)           (stable)</code></div>
+                    </section>
+
+                    <hr class="my-4" />
+
+                    <!-- 15) Cheatsheet -->
+                    <section id="cheatsheet" class="itg-h">
+                        <h2 class="h4">15) Cheatsheet (Copy/Paste Ready)</h2>
+                        <div class="itg-code"><code># Check changes
+git status
+
+# Stage
+git add .
+git add file.txt
+
+# Commit
+git commit -m "message"
+
+# History
+git log --oneline --graph --decorate --all
+
+# Branch
+git branch
+git switch -c feature-x
+git switch main
+
+# Merge
+git merge feature-x
+
+# Remote
+git remote -v
+git push -u origin feature-x
+git pull
+git fetch
+
+# Undo
+git restore file.txt
+git restore --staged file.txt
+git revert &lt;commit&gt;
+git reset --hard &lt;commit&gt;   # careful
+
+# Stash
+git stash
+git stash pop</code></div>
+                    </section>
+
+                    <hr class="my-4" />
+
+                    <!-- 16) Practice -->
+                    <section id="practice" class="itg-h">
+                        <h2 class="h4">16) Practice Tasks (Hands-on)</h2>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-lg-6">
+                                <div class="card itg-card h-100">
+                                    <div class="card-body">
+                                        <h3 class="h6">Task 1: Create repo + 2 commits</h3>
+                                        <ol class="mb-0">
+                                            <li>Create folder <code>practice1</code></li>
+                                            <li><code>git init</code></li>
+                                            <li>Create <code>note.txt</code> and commit</li>
+                                            <li>Edit <code>note.txt</code> and commit again</li>
+                                            <li>Show history using <code>git log --oneline</code></li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <div class="card itg-card h-100">
+                                    <div class="card-body">
+                                        <h3 class="h6">Task 2: Branch + Merge</h3>
+                                        <ol class="mb-0">
+                                            <li>Create branch <code>feature-a</code></li>
+                                            <li>Change file and commit on <code>feature-a</code></li>
+                                            <li>Switch to <code>main</code></li>
+                                            <li>Merge <code>feature-a</code></li>
+                                            <li>View graph: <code>git log --graph --oneline</code></li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="card itg-card">
+                                    <div class="card-body">
+                                        <h3 class="h6">Task 3: Create a conflict and resolve it</h3>
+                                        <ol class="mb-3">
+                                            <li>Create branch <code>feature-conflict</code></li>
+                                            <li>Change same line in <code>note.txt</code> in main and commit</li>
+                                            <li>Change same line in <code>feature-conflict</code> and commit</li>
+                                            <li>Try merge and resolve conflict</li>
+                                        </ol>
+                                        <div class="itg-tip mb-0">
+                                            Don’t fear conflicts — every developer faces them. Just fix the file and commit.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <hr class="my-4" />
+
+                    <!-- 17) FAQ -->
+                    <section id="faq" class="itg-h">
+                        <h2 class="h4">17) FAQ + Common Errors</h2>
+
+                        <div class="accordion" id="gitFaq">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="q1">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#a1" aria-expanded="true" aria-controls="a1">
+                                        I typed <code>git commit</code> but it says “nothing to commit”
+                                    </button>
+                                </h2>
+                                <div id="a1" class="accordion-collapse collapse show" aria-labelledby="q1" data-bs-parent="#gitFaq">
+                                    <div class="accordion-body">
+                                        You likely forgot <code>git add</code>.
+                                        Steps:
+                                        <div class="itg-code mt-2"><code>git status
+git add .
+git commit -m "your message"</code></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="q2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a2" aria-expanded="false" aria-controls="a2">
+                                        “fatal: not a git repository”
+                                    </button>
+                                </h2>
+                                <div id="a2" class="accordion-collapse collapse" aria-labelledby="q2" data-bs-parent="#gitFaq">
+                                    <div class="accordion-body">
+                                        You are running git command outside a repo folder.
+                                        Solution:
+                                        <ul>
+                                            <li>Go to correct folder: <code>cd your-folder</code></li>
+                                            <li>Or initialize: <code>git init</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="q3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a3" aria-expanded="false" aria-controls="a3">
+                                        “rejected: non-fast-forward” while push
+                                    </button>
+                                </h2>
+                                <div id="a3" class="accordion-collapse collapse" aria-labelledby="q3" data-bs-parent="#gitFaq">
+                                    <div class="accordion-body">
+                                        Remote has changes you don’t have. Pull first, then push.
+                                        <div class="itg-code mt-2"><code>git pull
+git push</code></div>
+                                        If conflict occurs, resolve it and commit.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="q4">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a4" aria-expanded="false" aria-controls="a4">
+                                        Should I use <code>merge</code> or <code>rebase</code>?
+                                    </button>
+                                </h2>
+                                <div id="a4" class="accordion-collapse collapse" aria-labelledby="q4" data-bs-parent="#gitFaq">
+                                    <div class="accordion-body">
+                                        For beginners and teams: use <strong>merge</strong>. It is safer and keeps full history.
+                                        Use rebase only when your team policy allows and you understand it.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <hr class="my-4" />
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="text-muted small">
+                            © @DateTime.Now.Year ItTechGenie — Git Tutorials
+                        </div>
+                        <a class="btn btn-outline-primary btn-sm" href="#intro">
+                            <i class="fa-solid fa-arrow-up me-1"></i>Back to Top
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+
+    </div>
+</div>
