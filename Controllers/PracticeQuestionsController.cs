@@ -1512,11 +1512,48 @@ class Program {
             return LoadPracticePage("ProgrammingQuestions");
         }
 
+        public IActionResult CSharpStringToNumberQuestions()
+        {
+            return LoadProgramQuestionsPage("CSharpStringToNumberQuestions");
+        }
+
+        public IActionResult CSharpStringToNumberAnswers()
+        {
+            return LoadProgramQuestionsPage("CSharpStringToNumberAnswers");
+        }
+
+        public IActionResult CSharpChar52Questions()
+        {
+            return LoadProgramQuestionsPage("CSharpChar52Questions");
+        }
+
+        public IActionResult CSharpStringBuilder36Questions()
+        {
+            return LoadProgramQuestionsPage("CSharpStringBuilder36Questions");
+        }
+
+        public IActionResult CSharpString64Questions()
+        {
+            return LoadProgramQuestionsPage("CSharpString64Questions");
+        }
+
+        public IActionResult CSharpStringCharStringBuilder25Questions()
+        {
+            return LoadProgramQuestionsPage("CSharpStringCharStringBuilder25Questions");
+        }
+
         private IActionResult LoadPracticePage(string pageName)
         {
             ViewData["ActiveMenu"] = "PracticeQuestions";
             ViewData["ActivePage"] = pageName;
             ViewBag.Questions = _questionSets.ContainsKey(pageName) ? _questionSets[pageName] : new List<QuestionModel>();
+            return View(pageName);
+        }
+
+        private IActionResult LoadProgramQuestionsPage(string pageName)
+        {
+            ViewData["ActiveMenu"] = "PracticeQuestions";
+            ViewData["ActivePage"] = pageName;
             return View(pageName);
         }
 
