@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
+using System.Text.RegularExpressions;
 
 public class CoursesController : Controller
 {
@@ -24,9 +25,31 @@ public class CoursesController : Controller
 
         if (!System.IO.File.Exists(filePath))
         {
+            var normalizedRequestedName = NormalizeFileName(Path.GetFileNameWithoutExtension(safeFileName));
+            var matchedFile = Directory
+                .EnumerateFiles(basePath)
+                .FirstOrDefault(path =>
+                {
+                    var existingName = Path.GetFileNameWithoutExtension(path);
+                    return NormalizeFileName(existingName) == normalizedRequestedName;
+                });
+
+            if (!string.IsNullOrWhiteSpace(matchedFile))
+            {
+                filePath = matchedFile;
+            }
+        }
+
+        if (!System.IO.File.Exists(filePath))
+        {
             return NotFound();
         }
 
         return PhysicalFile(filePath, "text/html");
+    }
+
+    private static string NormalizeFileName(string value)
+    {
+        return Regex.Replace(value, "[^a-zA-Z0-9]", string.Empty).ToLowerInvariant();
     }
 }
