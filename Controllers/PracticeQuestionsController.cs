@@ -1542,6 +1542,11 @@ class Program {
             return LoadProgramQuestionsPage("CSharpStringCharStringBuilder25Questions");
         }
 
+        public IActionResult CSharpDictionaryM1Mock20Questions()
+        {
+            return LoadProgramQuestionsPage("CSharpDictionaryM1Mock20Questions");
+        }
+
         private IActionResult LoadPracticePage(string pageName)
         {
             ViewData["ActiveMenu"] = "PracticeQuestions";
