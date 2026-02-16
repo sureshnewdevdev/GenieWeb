@@ -11,6 +11,13 @@ public class CoursesController : Controller
         return View();
     }
 
+    public IActionResult AutomatedTestSelenium()
+    {
+        ViewData["ActiveMenu"] = "AutomatedTestSelenium";
+        ViewData["Title"] = "Automated Test Selenium";
+        return View("AutomationSeleniumCSharp/M1_IntroAutomationTesting");
+    }
+
     [HttpGet]
     public IActionResult Syllabus(string fileName)
     {
