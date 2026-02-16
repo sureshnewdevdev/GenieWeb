@@ -1,0 +1,216 @@
+@* File: Views/Courses/AutomationSeleniumCSharp/M1_IntroAutomationTesting.cshtml *@
+@{
+    Layout = "_SliderLeft";
+    ViewData["Title"] = "Automation Testing with Selenium and C#";
+    ViewData["HeroTitle"] = "Introduction to Automation Testing";
+    ViewData["HeroIntroHtml"] = "<p>Learn why teams automate UI validation, where Selenium fits in the testing pyramid, and how C# plus NUnit helps build fast, repeatable browser checks.</p>";
+    ViewData["HeroTags"] = "Automation Testing,Selenium WebDriver,C#,NUnit,QA";
+}
+
+@section CourseData {
+<script>
+window.COURSE_DATA = [
+  {
+    id: "m1",
+    badge: "1",
+    title: "Module 1: Foundations of Automation Testing",
+    desc: "Understand automation basics, Selenium tooling, and environment setup in Visual Studio.",
+    topics: [
+      {
+        id: "m1-a1",
+        title: "Introduction to Automation Testing",
+        tags: ["Automation Basics", "Testing Strategy"],
+        intro: "Understand what automation testing solves and how to decide when to automate.",
+        blocks: [
+          {
+            heading: "Key Concepts",
+            html: `
+<div class="card">
+  <ul>
+    <li><span class="tt" data-tip="The confidence that software behaves as expected after a change.">Regression testing</span> is a prime target for automation because it is repetitive and high-volume.</li>
+    <li><span class="tt" data-tip="A strategy that balances unit, API, and UI tests to optimize speed and reliability.">Testing pyramid</span> recommends fewer UI tests and more lower-level tests.</li>
+    <li><span class="tt" data-tip="A characteristic of stable tests that produce the same result across runs.">Determinism</span> is essential to avoid flaky builds and false failures.</li>
+    <li><span class="tt" data-tip="A test smell where scripts fail intermittently due to timing, data, or environment instability.">Flaky tests</span> should be fixed quickly because they reduce trust in automation.</li>
+    <li><span class="tt" data-tip="A process that runs builds and tests automatically when code changes are pushed.">Continuous Integration</span> makes automation valuable by providing immediate feedback.</li>
+  </ul>
+</div>`
+          },
+          {
+            heading: "Step-by-step: Evaluate What to Automate First",
+            html: `
+<ol>
+  <li>List critical user journeys such as login, checkout, and profile updates.</li>
+  <li>Mark scenarios that are run frequently in every release.</li>
+  <li>Exclude volatile UI areas until selectors and behavior are stable.</li>
+  <li>Estimate data/setup complexity and execution time.</li>
+  <li>Prioritize high-risk, repetitive, and business-critical tests for sprint one.</li>
+  <li>Define pass/fail criteria clearly before writing scripts.</li>
+</ol>`
+          },
+          {
+            heading: "Code Example: First Selenium + NUnit Smoke Test",
+            html: `
+<p>This sample shows a minimal browser check using C#, Selenium WebDriver, and NUnit.</p>
+<button class="btn btn-sm btn-outline-primary" onclick="(function(btn){const code=btn.nextElementSibling?.innerText||'';navigator.clipboard.writeText(code);btn.innerText='Copied';setTimeout(()=>btn.innerText='Copy',1200);})(this)">Copy</button>
+<pre><code>using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+
+namespace ItTechGenie.Tests
+{
+    public class HomePageSmokeTests
+    {
+        private IWebDriver _driver;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _driver = new ChromeDriver();
+            _driver.Manage().Window.Maximize();
+        }
+
+        [Test]
+        public void HomePage_Title_ShouldContain_AppName()
+        {
+            _driver.Navigate().GoToUrl("https://example-app.test/");
+            Assert.That(_driver.Title, Does.Contain("Example App"));
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _driver.Quit();
+        }
+    }
+}</code></pre>`
+          },
+          {
+            heading: "Common Mistakes & Fixes",
+            html: `
+<table class="table">
+  <thead><tr><th>Mistake</th><th>Impact</th><th>Fix</th></tr></thead>
+  <tbody>
+    <tr><td>Automating unstable UI too early</td><td>Frequent script breakage</td><td>Start with stable, high-value workflows and version selectors carefully.</td></tr>
+    <tr><td>Using only Thread.Sleep</td><td>Slow and flaky tests</td><td>Use explicit waits tied to expected conditions.</td></tr>
+    <tr><td>No teardown strategy</td><td>Leaked browser sessions</td><td>Use NUnit [TearDown] to close the driver reliably.</td></tr>
+    <tr><td>Ignoring test data design</td><td>Non-repeatable outcomes</td><td>Create deterministic seed data and reset after execution.</td></tr>
+  </tbody>
+</table>`
+          },
+          {
+            heading: "Practice: MCQs + Interview Q&A",
+            html: `
+<h4>MCQs (8)</h4>
+<ol>
+  <li>Which scenario is best to automate first in a web product?
+    <ul><li>A. A one-time migration script</li><li>B. A frequently executed checkout flow</li><li>C. A feature still in wireframe stage</li><li>D. A UI color preference check</li></ul>
+    <details><summary>Show Answer</summary><p><b>Answer: B.</b> High-frequency business flows deliver immediate ROI and regression confidence.</p></details>
+  </li>
+  <li>What is the main reason flaky tests are harmful?
+    <ul><li>A. They run too quickly</li><li>B. They increase code coverage</li><li>C. They reduce trust in automation results</li><li>D. They always fail on compile</li></ul>
+    <details><summary>Show Answer</summary><p><b>Answer: C.</b> Intermittent failures hide real defects and cause teams to ignore pipelines.</p></details>
+  </li>
+  <li>In the testing pyramid, UI tests should usually be:
+    <ul><li>A. The majority</li><li>B. Fewer than API/unit tests</li><li>C. Replaced by manual only</li><li>D. Run without assertions</li></ul>
+    <details><summary>Show Answer</summary><p><b>Answer: B.</b> UI tests are slower and more brittle, so keep them focused on critical journeys.</p></details>
+  </li>
+  <li>Which NUnit attribute runs before every test method?
+    <ul><li>A. [OneTimeTearDown]</li><li>B. [SetUp]</li><li>C. [TestFixture]</li><li>D. [Category]</li></ul>
+    <details><summary>Show Answer</summary><p><b>Answer: B.</b> [SetUp] is used for per-test initialization such as launching a driver.</p></details>
+  </li>
+  <li>Why is deterministic test data important?
+    <ul><li>A. It makes selectors shorter</li><li>B. It avoids random pass/fail outcomes</li><li>C. It disables CI runs</li><li>D. It removes the need for assertions</li></ul>
+    <details><summary>Show Answer</summary><p><b>Answer: B.</b> Predictable state ensures tests fail only for real application issues.</p></details>
+  </li>
+  <li>What is a direct benefit of CI for automation suites?
+    <ul><li>A. Manual execution only</li><li>B. Delayed defect discovery</li><li>C. Fast feedback on each commit</li><li>D. Fewer logs generated</li></ul>
+    <details><summary>Show Answer</summary><p><b>Answer: C.</b> CI continuously validates code changes and catches regression early.</p></details>
+  </li>
+  <li>When should a script use explicit wait?
+    <ul><li>A. Waiting for dynamic elements to be clickable</li><li>B. Loading static CSS files</li><li>C. During C# compilation</li><li>D. After test teardown</li></ul>
+    <details><summary>Show Answer</summary><p><b>Answer: A.</b> Explicit waits synchronize test steps with real UI readiness.</p></details>
+  </li>
+  <li>What is the best description of automation ROI?
+    <ul><li>A. Number of test files created</li><li>B. Saved execution effort plus reduced escaped defects</li><li>C. Browser count used in one run</li><li>D. Build server CPU usage</li></ul>
+    <details><summary>Show Answer</summary><p><b>Answer: B.</b> ROI depends on speed, repeatability, and quality gains over manual cycles.</p></details>
+  </li>
+</ol>
+
+<h4>Interview Questions (5)</h4>
+<ol>
+  <li><b>How do you decide whether a test case should be automated?</b><br/>Automate scenarios that are repeatable, stable, and business-critical, especially those executed in every release.</li>
+  <li><b>Why should UI automation not be the only test layer?</b><br/>UI tests are slower and fragile; combine them with unit/API tests for faster and more reliable coverage.</li>
+  <li><b>What causes flaky Selenium tests most often?</b><br/>Timing issues, weak selectors, shared mutable test data, and environment instability.</li>
+  <li><b>How does NUnit help in Selenium projects?</b><br/>It provides test structure, setup/teardown lifecycle hooks, assertions, and integration with CI runners.</li>
+  <li><b>What metrics do you track for automation health?</b><br/>Pass rate trend, flaky test rate, average runtime, defect leakage, and mean time to fix failed tests.</li>
+</ol>`
+          },
+          {
+            heading: "Quick Glossary",
+            html: `
+<p>
+  <span class="tt" data-tip="The process of validating software behavior using scripts rather than manual execution.">Automation Testing</span>,
+  <span class="tt" data-tip="An open-source API used to drive browsers programmatically for end-to-end testing.">Selenium WebDriver</span>,
+  <span class="tt" data-tip="A .NET testing framework used to structure and execute C# automated tests.">NUnit</span>,
+  <span class="tt" data-tip="A condition where tests pass and fail unpredictably without application code changes.">Flaky Test</span>,
+  <span class="tt" data-tip="A development practice where code is built and tested automatically on each commit.">CI Pipeline</span>
+</p>`
+          }
+        ]
+      },
+      {
+        id: "m1-a2",
+        title: "Selenium and IDE Overview",
+        tags: ["Selenium Suite", "IDE"],
+        intro: "Understand Selenium tools and development workflow in modern IDEs.",
+        blocks: [{ heading: "Overview", html: `<p>This topic is covered in the dedicated subtopic page.</p>` }]
+      },
+      {
+        id: "m1-a3",
+        title: "Setting Up Visual Studio for Selenium",
+        tags: ["Visual Studio", "NuGet"],
+        intro: "Install prerequisites, WebDriver binaries, and NUnit packages.",
+        blocks: [{ heading: "Overview", html: `<p>This topic is covered in the dedicated subtopic page.</p>` }]
+      }
+    ]
+  },
+  {
+    id: "m2",
+    badge: "2",
+    title: "Module 2: Selenium WebDriver Essentials",
+    desc: "Work with browser drivers, locators, and robust synchronization.",
+    topics: [
+      { id: "m2-a1", title: "WebDriver Introduction", tags: ["Driver Lifecycle"], intro: "Driver creation and browser control basics.", blocks: [{ heading: "Overview", html: `<p>This topic is covered in the dedicated subtopic page.</p>` }] },
+      { id: "m2-a2", title: "Finding Elements with Locators", tags: ["XPath", "CSS"], intro: "Select reliable locators for maintainable scripts.", blocks: [{ heading: "Overview", html: `<p>This topic is covered in the dedicated subtopic page.</p>` }] },
+      { id: "m2-a3", title: "Implicit and Explicit Waits", tags: ["Synchronization", "Stability"], intro: "Handle dynamic pages without flaky timing logic.", blocks: [{ heading: "Overview", html: `<p>This topic is covered in the dedicated subtopic page.</p>` }] }
+    ]
+  },
+  {
+    id: "m3",
+    badge: "3",
+    title: "Module 3: Test Design with NUnit",
+    desc: "Build maintainable frameworks with assertions, data, and page objects.",
+    topics: [
+      { id: "m3-a1", title: "NUnit Integration and Assertions", tags: ["Assertions", "Fixtures"], intro: "Structure and validate automated tests effectively.", blocks: [{ heading: "Overview", html: `<p>This topic is covered in the dedicated subtopic page.</p>` }] },
+      { id: "m3-a2", title: "Page Object Model", tags: ["Design Pattern", "Maintainability"], intro: "Separate page behavior from test intent.", blocks: [{ heading: "Overview", html: `<p>This topic is covered in the dedicated subtopic page.</p>` }] },
+      { id: "m3-a3", title: "Data-Driven Testing", tags: ["TestCase", "External Data"], intro: "Run the same workflow with multiple datasets.", blocks: [{ heading: "Overview", html: `<p>This topic is covered in the dedicated subtopic page.</p>` }] }
+    ]
+  },
+  {
+    id: "m4",
+    badge: "4",
+    title: "Module 4: Execution, Reporting, and Best Practices",
+    desc: "Scale execution through CI, reporting, and production-grade patterns.",
+    topics: [
+      { id: "m4-a1", title: "Parallel Execution in CI", tags: ["CI/CD", "Performance"], intro: "Run suites in parallel pipelines for faster feedback.", blocks: [{ heading: "Overview", html: `<p>This topic is covered in the dedicated subtopic page.</p>` }] },
+      { id: "m4-a2", title: "Reporting and Debugging", tags: ["Logs", "Screenshots"], intro: "Capture evidence and diagnose failures quickly.", blocks: [{ heading: "Overview", html: `<p>This topic is covered in the dedicated subtopic page.</p>` }] },
+      { id: "m4-a3", title: "Framework Best Practices", tags: ["Architecture", "Reliability"], intro: "Apply conventions for long-term automation success.", blocks: [{ heading: "Overview", html: `<p>This topic is covered in the dedicated subtopic page.</p>` }] }
+    ]
+  }
+];
+
+if (!location.hash || location.hash === "#home") {
+  location.hash = "#m1-a1";
+}
+</script>
+}
