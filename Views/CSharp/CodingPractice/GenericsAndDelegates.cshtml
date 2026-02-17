@@ -1,299 +1,174 @@
 @{
-    ViewData["Title"] = "Generics and Delegates";
+    ViewData["Title"] = "Capgemini M1 - Generics and Delegates";
 }
 
 <div class="container py-4 coding-practice-page">
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
-            <h1 class="h3 mb-2">C# Coding Practice</h1>
+            <h1 class="h3 mb-2">Capgemini M1 - C# Coding Practice</h1>
             <p class="mb-1"><strong>Subject:</strong> Generics and Delegates</p>
             <p class="mb-1"><strong>Questions:</strong> 10 (7 Moderate, 3 High)</p>
-            <p class="mb-0 text-muted">Scenario-based practice questions with boilerplate snippets. Answers are available at the bottom of this page.</p>
+            <p class="mb-0 text-muted">Click a question to view its answer at the bottom of the page.</p>
         </div>
     </div>
 
-    <h2 class="h4 mb-3">Practical Questions</h2>
     <div class="row g-3" id="questionList">
-        <div class="col-12">
-            <div class="question-card question-moderate">
-                <h3 class="h6">Q1: Inventory Swap Utility</h3>
-                <p>You are building an internal tool where admins can swap two values (IDs, names, prices) without writing separate methods for each type.</p>
-                <pre><code>public static class Utility
-{
-    public static void Swap&lt;T&gt;(ref T first, ref T second)
-    {
-        // TODO: Implement generic swap logic.
-    }
-}</code></pre>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <div class="question-card question-moderate">
-                <h3 class="h6">Q2: Generic Pair for API Response</h3>
-                <p>An API returns <code>StatusCode</code> and <code>Payload</code> with different payload types. Create a reusable generic model.</p>
-                <pre><code>public class ApiResult&lt;TStatus, TPayload&gt;
-{
-    public TStatus StatusCode { get; set; }
-    public TPayload Payload { get; set; }
-
-    public void PrintResult()
-    {
-        // TODO: Print both fields clearly.
-    }
-}</code></pre>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <div class="question-card question-moderate">
-                <h3 class="h6">Q3: Repository Constraint Rule</h3>
-                <p>Your team wants to restrict a generic repository to only reference types (entity classes).</p>
-                <pre><code>public class Repository&lt;T&gt; /* TODO: Add constraint */
-{
-    private readonly List&lt;T&gt; _entities = new();
-
-    public void Add(T entity)
-    {
-        // TODO: Add entity into list.
-    }
-}</code></pre>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <div class="question-card question-moderate">
-                <h3 class="h6">Q4: Runtime Math Strategy via Delegate</h3>
-                <p>A billing module must apply either addition or multiplication based on runtime selection.</p>
-                <pre><code>public delegate int Operation(int x, int y);
-
-public static int Add(int x, int y) => 0; // TODO
-public static int Multiply(int x, int y) => 0; // TODO
-
-// TODO: Assign and invoke delegate for both methods.</code></pre>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <div class="question-card question-moderate">
-                <h3 class="h6">Q5: Audit with Multicast Delegate</h3>
-                <p>For each transaction, send logs to both console and file sink using a single delegate invocation.</p>
-                <pre><code>public delegate void AuditLogger(string message);
-
-public static void LogToConsole(string message)
-{
-    // TODO
-}
-
-public static void LogToFile(string message)
-{
-    // TODO
-}
-
-// TODO: Create multicast delegate and invoke once.</code></pre>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <div class="question-card question-moderate">
-                <h3 class="h6">Q6: Reusable Calculation with Func and Action</h3>
-                <p>Build a small pipeline where <code>Func</code> calculates discount and <code>Action</code> prints final message.</p>
-                <pre><code>// TODO: Create Func&lt;decimal, decimal, decimal&gt; to calculate discounted price.
-// TODO: Create Action&lt;string&gt; to print output.
-// TODO: Execute and print result.</code></pre>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <div class="question-card question-moderate">
-                <h3 class="h6">Q7: Generic Filtering Layer</h3>
-                <p>Your service layer should filter any list using rules passed at runtime.</p>
-                <pre><code>public static List&lt;T&gt; Filter&lt;T&gt;(List&lt;T&gt; source, Predicate&lt;T&gt; rule)
-{
-    // TODO: Return filtered records.
-}</code></pre>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <div class="question-card question-high">
-                <h3 class="h6">Q8: Type-Safe Notification Dispatcher</h3>
-                <p>Design an event dispatcher that can publish strongly typed payloads (like <code>OrderCreated</code>, <code>PaymentFailed</code>).</p>
-                <pre><code>public class EventBus&lt;TPayload&gt;
-{
-    private event Action&lt;TPayload&gt;? Handlers;
-
-    public void Subscribe(Action&lt;TPayload&gt; handler)
-    {
-        // TODO
-    }
-
-    public void Publish(TPayload payload)
-    {
-        // TODO
-    }
-}</code></pre>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <div class="question-card question-high">
-                <h3 class="h6">Q9: Delegate Variance in Plugin Contract</h3>
-                <p>You are integrating external plugins where returned and accepted types differ in inheritance hierarchy. Show covariance and contravariance with delegates.</p>
-                <pre><code>public class Animal { }
-public class Dog : Animal { }
-
-public delegate Animal AnimalFactory();
-public delegate void DogHandler(Dog dog);
-
-// TODO: Demonstrate valid covariance and contravariance assignments.</code></pre>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <div class="question-card question-high">
-                <h3 class="h6">Q10: Generic Retry Executor for Unstable APIs</h3>
-                <p>Write a reusable method that executes any operation and retries on failure up to a configured count.</p>
-                <pre><code>public static T ExecuteWithRetry&lt;T&gt;(Func&lt;T&gt; operation, int maxRetry)
-{
-    // TODO: Add retry loop and throw after final failure.
-}</code></pre>
-            </div>
-        </div>
+        <div class="col-12"><button class="question-card question-moderate" data-answer-id="answer1">Q1 (Moderate): Create a generic method that swaps two values of any type.</button></div>
+        <div class="col-12"><button class="question-card question-moderate" data-answer-id="answer2">Q2 (Moderate): Build a generic class to store and print two values of different types.</button></div>
+        <div class="col-12"><button class="question-card question-moderate" data-answer-id="answer3">Q3 (Moderate): Use generic constraints to allow only reference types in a repository class.</button></div>
+        <div class="col-12"><button class="question-card question-moderate" data-answer-id="answer4">Q4 (Moderate): Write a delegate that performs arithmetic operation based on method assignment.</button></div>
+        <div class="col-12"><button class="question-card question-moderate" data-answer-id="answer5">Q5 (Moderate): Demonstrate multicast delegate with two logging methods.</button></div>
+        <div class="col-12"><button class="question-card question-moderate" data-answer-id="answer6">Q6 (Moderate): Use Func and Action with generics for reusable operations.</button></div>
+        <div class="col-12"><button class="question-card question-moderate" data-answer-id="answer7">Q7 (Moderate): Create a generic list filter method using Predicate delegate.</button></div>
+        <div class="col-12"><button class="question-card question-high" data-answer-id="answer8">Q8 (High): Build a generic event dispatcher using delegates and a type-safe payload.</button></div>
+        <div class="col-12"><button class="question-card question-high" data-answer-id="answer9">Q9 (High): Implement covariance and contravariance using generic delegates.</button></div>
+        <div class="col-12"><button class="question-card question-high" data-answer-id="answer10">Q10 (High): Create a generic retry executor that accepts a delegate and retries failed operations.</button></div>
     </div>
 
-    <hr class="my-4" />
+    <div id="answerPanel" class="card border-primary shadow-sm mt-4 d-none">
+        <div class="card-header bg-primary text-white">
+            <strong>Answer Section</strong>
+        </div>
+        <div class="card-body" id="answerContent"></div>
+    </div>
 
-    <section id="answersSection">
-        <h2 class="h4 mb-3">Answers</h2>
-
-        <div class="answer-card" id="answer1">
-            <h3 class="h6">Answer 1 - Generic Swap Utility</h3>
-            <pre><code>public static class Utility // Defines a utility class to hold reusable helper methods.
+    <div id="allAnswers" class="d-none">
+        <div id="answer1">
+            <h4>Answer 1 - Generic Swap Method</h4>
+            <pre><code>public static void Swap&lt;T&gt;(ref T left, ref T right) // Declares a generic method with type parameter T.
 {
-    public static void Swap&lt;T&gt;(ref T first, ref T second) // Declares generic method to swap values of any type T.
+    T temp = left; // Stores left value temporarily to avoid data loss.
+    left = right; // Assigns right value to left variable.
+    right = temp; // Assigns stored original left value to right variable.
+}</code></pre>
+            <p><strong>Explanation:</strong> This method is reusable for any type (int, string, custom classes). The <code>ref</code> keyword passes variables by reference so the original values are swapped outside the method too.</p>
+        </div>
+
+        <div id="answer2">
+            <h4>Answer 2 - Generic Pair Class</h4>
+            <pre><code>public class Pair&lt;TFirst, TSecond&gt; // Defines a generic class with two independent type parameters.
+{
+    public TFirst First { get; set; } // Stores the first value in a strongly typed property.
+    public TSecond Second { get; set; } // Stores the second value in a strongly typed property.
+
+    public void Print() // Prints both values for verification.
     {
-        T temp = first; // Stores first value temporarily so it is not lost.
-        first = second; // Moves second value into first variable.
-        second = temp; // Places original first value into second variable.
+        Console.WriteLine($"First: {First}, Second: {Second}"); // Displays values using string interpolation.
     }
 }</code></pre>
+            <p><strong>Explanation:</strong> This class avoids duplicate classes for different combinations like int-string or string-double by using generics.</p>
         </div>
 
-        <div class="answer-card" id="answer2">
-            <h3 class="h6">Answer 2 - Generic API Result</h3>
-            <pre><code>public class ApiResult&lt;TStatus, TPayload&gt; // Creates generic result model with flexible status and payload types.
+        <div id="answer3">
+            <h4>Answer 3 - Generic Constraint with class</h4>
+            <pre><code>public class Repository&lt;T&gt; where T : class // Restricts T to reference types only.
 {
-    public TStatus StatusCode { get; set; } // Stores status code in a strongly typed property.
-    public TPayload Payload { get; set; } // Stores payload using the selected generic type.
+    private readonly List&lt;T&gt; _items = new(); // Creates storage for the generic type.
 
-    public void PrintResult() // Prints combined response information.
+    public void Add(T item) // Adds item safely because T is guaranteed to be a reference type.
     {
-        Console.WriteLine($"Status: {StatusCode}, Payload: {Payload}"); // Outputs both properties in one line.
+        _items.Add(item); // Appends item to list.
     }
 }</code></pre>
+            <p><strong>Explanation:</strong> Constraints improve safety and clarity by controlling what types can be used in generic classes.</p>
         </div>
 
-        <div class="answer-card" id="answer3">
-            <h3 class="h6">Answer 3 - Repository Constraint</h3>
-            <pre><code>public class Repository&lt;T&gt; where T : class // Restricts T so only reference types are allowed.
+        <div id="answer4">
+            <h4>Answer 4 - Arithmetic Delegate</h4>
+            <pre><code>public delegate int MathOperation(int a, int b); // Defines delegate signature for math methods.
+
+public static int Add(int x, int y) => x + y; // Implements addition.
+public static int Multiply(int x, int y) => x * y; // Implements multiplication.
+
+MathOperation operation = Add; // Assigns Add method to delegate instance.
+Console.WriteLine(operation(4, 5)); // Invokes delegate and prints 9.
+operation = Multiply; // Reassigns delegate to Multiply method.
+Console.WriteLine(operation(4, 5)); // Invokes delegate and prints 20.</code></pre>
+            <p><strong>Explanation:</strong> Delegates allow dynamic method assignment while keeping method signatures strongly typed.</p>
+        </div>
+
+        <div id="answer5">
+            <h4>Answer 5 - Multicast Delegate</h4>
+            <pre><code>public delegate void Logger(string message); // Creates delegate for log methods.
+
+public static void LogToConsole(string message) // First target method.
 {
-    private readonly List&lt;T&gt; _entities = new(); // Initializes in-memory generic entity store.
-
-    public void Add(T entity) // Accepts a single entity of type T.
-    {
-        _entities.Add(entity); // Adds incoming entity to repository list.
-    }
-}</code></pre>
-        </div>
-
-        <div class="answer-card" id="answer4">
-            <h3 class="h6">Answer 4 - Runtime Math Delegate</h3>
-            <pre><code>public delegate int Operation(int x, int y); // Declares delegate signature for math operations.
-
-public static int Add(int x, int y) => x + y; // Returns sum of two numbers.
-public static int Multiply(int x, int y) => x * y; // Returns product of two numbers.
-
-Operation action = Add; // Assigns Add method to delegate variable.
-Console.WriteLine(action(5, 4)); // Invokes delegate and prints addition result.
-action = Multiply; // Reassigns delegate to Multiply method.
-Console.WriteLine(action(5, 4)); // Invokes delegate and prints multiplication result.</code></pre>
-        </div>
-
-        <div class="answer-card" id="answer5">
-            <h3 class="h6">Answer 5 - Multicast Audit Logger</h3>
-            <pre><code>public delegate void AuditLogger(string message); // Declares delegate for audit log handlers.
-
-public static void LogToConsole(string message) // Defines console logging target.
-{
-    Console.WriteLine($"Console Log: {message}"); // Writes audit message to console output.
+    Console.WriteLine($"Console: {message}"); // Writes message to console.
 }
 
-public static void LogToFile(string message) // Defines file logging target (simulated).
+public static void LogToFile(string message) // Second target method.
 {
-    Console.WriteLine($"File Log: {message}"); // Simulates writing audit message to file sink.
+    Console.WriteLine($"File: {message}"); // Simulates file logging.
 }
 
-AuditLogger logger = LogToConsole; // Adds first log handler to delegate invocation list.
-logger += LogToFile; // Adds second log handler to same delegate.
-logger("Payment completed."); // Triggers both handlers using one delegate call.</code></pre>
+Logger logger = LogToConsole; // Adds first method to invocation list.
+logger += LogToFile; // Adds second method using multicast behavior.
+logger("Order processed"); // Calls both methods in sequence.</code></pre>
+            <p><strong>Explanation:</strong> Multicast delegates are useful for notifications where one event should trigger multiple handlers.</p>
         </div>
 
-        <div class="answer-card" id="answer6">
-            <h3 class="h6">Answer 6 - Func and Action Pipeline</h3>
-            <pre><code>Func&lt;decimal, decimal, decimal&gt; discount = (price, percent) => price - (price * percent / 100); // Calculates discounted price using Func.
-Action&lt;string&gt; print = message => Console.WriteLine(message); // Prints any message using Action.
+        <div id="answer6">
+            <h4>Answer 6 - Func and Action with Generics</h4>
+            <pre><code>Func&lt;int, int, int&gt; sum = (a, b) => a + b; // Func returns value and accepts two int inputs.
+Action&lt;string&gt; print = text => Console.WriteLine(text); // Action performs operation without return.
 
-decimal finalPrice = discount(1200m, 10m); // Applies 10 percent discount on base price.
-print($"Final discounted price: {finalPrice}"); // Displays computed final price in user-friendly format.</code></pre>
+int result = sum(10, 20); // Executes generic delegate and gets calculated result.
+print($"Total: {result}"); // Prints result using Action delegate.</code></pre>
+            <p><strong>Explanation:</strong> Built-in generic delegates reduce custom delegate creation and improve readability.</p>
         </div>
 
-        <div class="answer-card" id="answer7">
-            <h3 class="h6">Answer 7 - Generic Filter</h3>
-            <pre><code>public static List&lt;T&gt; Filter&lt;T&gt;(List&lt;T&gt; source, Predicate&lt;T&gt; rule) // Accepts generic source list and filter condition.
+        <div id="answer7">
+            <h4>Answer 7 - Generic Filter with Predicate</h4>
+            <pre><code>public static List&lt;T&gt; FilterList&lt;T&gt;(List&lt;T&gt; items, Predicate&lt;T&gt; condition) // Accepts generic list and condition.
 {
-    return source.FindAll(rule); // Returns list items that satisfy the predicate rule.
-}</code></pre>
+    return items.FindAll(condition); // Returns only matching items based on predicate.
+}
+
+List&lt;int&gt; numbers = new() { 1, 2, 3, 4, 5, 6 }; // Sample integer list.
+List&lt;int&gt; evenNumbers = FilterList(numbers, n => n % 2 == 0); // Filters only even values.</code></pre>
+            <p><strong>Explanation:</strong> Predicate-based generic filtering is reusable and keeps business logic clean.</p>
         </div>
 
-        <div class="answer-card" id="answer8">
-            <h3 class="h6">Answer 8 - Type-Safe EventBus</h3>
-            <pre><code>public class EventBus&lt;TPayload&gt; // Defines generic event bus for strongly typed payload events.
+        <div id="answer8">
+            <h4>Answer 8 - Generic Event Dispatcher (High)</h4>
+            <pre><code>public class EventDispatcher&lt;TEvent&gt; // Creates a type-safe generic dispatcher for any payload type.
 {
-    private event Action&lt;TPayload&gt;? Handlers; // Holds all subscribed handlers for this payload type.
+    private event Action&lt;TEvent&gt;? OnEventRaised; // Stores subscribed handlers for the generic event.
 
-    public void Subscribe(Action&lt;TPayload&gt; handler) // Registers a new listener for the event.
+    public void Subscribe(Action&lt;TEvent&gt; handler) // Registers a new handler.
     {
-        Handlers += handler; // Adds handler into event invocation list.
+        OnEventRaised += handler; // Adds handler to invocation list.
     }
 
-    public void Publish(TPayload payload) // Publishes event payload to all subscribers.
+    public void Publish(TEvent data) // Raises event with strongly typed data.
     {
-        Handlers?.Invoke(payload); // Invokes handlers if at least one subscriber exists.
+        OnEventRaised?.Invoke(data); // Invokes all subscribers if any are attached.
     }
 }</code></pre>
+            <p><strong>Explanation:</strong> This pattern is useful in modular applications where events carry different payload types safely.</p>
         </div>
 
-        <div class="answer-card" id="answer9">
-            <h3 class="h6">Answer 9 - Delegate Variance</h3>
-            <pre><code>public class Animal { } // Creates base class for shared behavior.
-public class Dog : Animal { } // Creates derived class that inherits from Animal.
+        <div id="answer9">
+            <h4>Answer 9 - Variance with Generic Delegates (High)</h4>
+            <pre><code>public class Animal { } // Base class type.
+public class Dog : Animal { } // Derived class type.
 
-public delegate Animal AnimalFactory(); // Delegate expects a method that returns Animal.
-public delegate void DogHandler(Dog dog); // Delegate expects a method that accepts Dog.
+public delegate Animal AnimalFactory(); // Delegate returning base type.
+public delegate void AnimalHandler(Dog dog); // Delegate accepting derived type.
 
-Animal BuildDogAsAnimal() => new Dog(); // Returns Dog instance as Animal (covariance).
-void HandleAnimal(Animal animal) { } // Accepts Animal, so it can also process Dog (contravariance).
+Animal CreateDogAsAnimal() => new Dog(); // Returns Dog as Animal (covariance use case).
+void HandleAnimal(Animal animal) { } // Accepts broader type for contravariance.
 
-AnimalFactory factory = BuildDogAsAnimal; // Valid covariance assignment for return type.
-DogHandler handler = HandleAnimal; // Valid contravariance assignment for parameter type.</code></pre>
+AnimalFactory factory = CreateDogAsAnimal; // Covariance: method returns derived where base expected.
+AnimalHandler handler = HandleAnimal; // Contravariance: method accepts base where derived expected.</code></pre>
+            <p><strong>Explanation:</strong> Variance improves flexibility in delegate assignments while maintaining type safety.</p>
         </div>
 
-        <div class="answer-card" id="answer10">
-            <h3 class="h6">Answer 10 - Generic Retry Executor</h3>
-            <pre><code>public static T ExecuteWithRetry&lt;T&gt;(Func&lt;T&gt; operation, int maxRetry) // Accepts generic operation and max retry count.
+        <div id="answer10">
+            <h4>Answer 10 - Generic Retry Executor (High)</h4>
+            <pre><code>public static T ExecuteWithRetry&lt;T&gt;(Func&lt;T&gt; operation, int retryCount) // Accepts generic operation and retry limit.
 {
-    for (int attempt = 1; attempt &lt;= maxRetry; attempt++) // Iterates through each retry attempt.
+    for (int attempt = 1; attempt &lt;= retryCount; attempt++) // Runs loop until retry limit is reached.
     {
         try
         {
@@ -301,17 +176,18 @@ DogHandler handler = HandleAnimal; // Valid contravariance assignment for parame
         }
         catch
         {
-            if (attempt == maxRetry) // Checks whether final attempt has already been used.
+            if (attempt == retryCount) // Checks whether this is the final attempt.
             {
-                throw; // Rethrows exception because all retries are exhausted.
+                throw; // Rethrows exception after all retries fail.
             }
         }
     }
 
-    throw new InvalidOperationException("Unreachable code path."); // Adds safety fallback for compiler completeness.
+    throw new InvalidOperationException("Unexpected execution path."); // Safety fallback.
 }</code></pre>
+            <p><strong>Explanation:</strong> This reusable pattern centralizes retry logic for API calls, database access, or unstable operations.</p>
         </div>
-    </section>
+    </div>
 </div>
 
 <style>
@@ -331,6 +207,11 @@ DogHandler handler = HandleAnimal; // Valid contravariance assignment for parame
         box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.25);
     }
 
+    .question-card.active {
+        background: #e7f1ff;
+        border-color: #0d6efd;
+    }
+
     .question-moderate::before {
         content: "Moderate • ";
         color: #0d6efd;
@@ -343,20 +224,37 @@ DogHandler handler = HandleAnimal; // Valid contravariance assignment for parame
         font-weight: 600;
     }
 
-    .answer-card {
-        border: 1px solid #e9ecef;
-        border-radius: 10px;
-        padding: 14px 16px;
-        margin-bottom: 12px;
-        background: #ffffff;
-    }
-
-    pre {
+    #answerContent pre {
         white-space: pre-wrap;
         background: #f8f9fa;
         border: 1px solid #e9ecef;
         padding: 12px;
         border-radius: 8px;
-        margin-bottom: 0;
     }
 </style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const questionCards = document.querySelectorAll(".question-card");
+        const answerPanel = document.getElementById("answerPanel");
+        const answerContent = document.getElementById("answerContent");
+
+        questionCards.forEach(card => {
+            card.addEventListener("click", function () {
+                questionCards.forEach(item => item.classList.remove("active"));
+                card.classList.add("active");
+
+                const answerId = card.getAttribute("data-answer-id");
+                const source = document.getElementById(answerId);
+
+                if (!source) {
+                    return;
+                }
+
+                answerContent.innerHTML = source.innerHTML;
+                answerPanel.classList.remove("d-none");
+                answerPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+            });
+        });
+    });
+</script>
