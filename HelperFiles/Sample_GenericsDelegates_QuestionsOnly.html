@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ItTechGenie-Subject - Generics & Delegates (Questions Only)</title>
+  <style>
+/* All styles prefixed with itq- to avoid conflicts */
+.itq-wrap{max-width:1100px;margin:0 auto;padding:18px 14px 110px 14px;}
+.itq-hero{border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:16px;background:linear-gradient(180deg, rgba(27,110,194,.08), rgba(255,255,255,.0));}
+.itq-hero h1{margin:0 0 6px 0;font-size:22px;}
+.itq-hero .itq-sub{color:#4b5563;font-size:13px;margin:0;}
+.itq-info{margin-top:12px;border:1px dashed rgba(27,110,194,.35);background:rgba(27,110,194,.06);border-radius:14px;padding:12px;font-size:13px;color:#374151;}
+.itq-pills{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;}
+.itq-pill{border:1px solid rgba(0,0,0,.10);background:#fff;border-radius:999px;padding:5px 10px;font-size:12px;color:#374151;}
+.itq-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:16px;}
+.itq-card{border:1px solid rgba(0,0,0,.12);border-radius:18px;background:#fff;box-shadow:0 .25rem .75rem rgba(0,0,0,.05);overflow:hidden;transition:transform .14s ease, border-color .14s ease, background .14s ease;}
+.itq-card:hover{transform:translateY(-2px);border-color:rgba(34,197,94,.55);background:rgba(34,197,94,.03);}
+.itq-head{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;}
+.itq-no{min-width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:rgba(27,110,194,.10);border:1px solid rgba(27,110,194,.25);font-weight:700;color:#1b6ec2;}
+.itq-title{margin:0;font-size:16px;}
+.itq-tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:#6b7280;}
+.itq-chip{padding:3px 8px;border-radius:999px;border:1px solid rgba(0,0,0,.10);background:rgba(0,0,0,.02);}
+.itq-level{font-weight:700;}
+.itq-level.mod{color:#b45309;}
+.itq-level.hi{color:#be123c;}
+.itq-body{padding:0 16px 16px 16px;}
+.itq-stmt{margin:0 0 10px 0;color:#374151;font-size:13px;line-height:1.55;}
+.itq-actions{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 10px 0;}
+.itq-btn{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:12px;padding:7px 10px;font-size:12px;cursor:pointer;transition:transform .12s ease, background .12s ease;}
+.itq-btn:hover{transform:translateY(-1px);background:rgba(0,0,0,.02);}
+.itq-btn.copy{border-color:rgba(27,110,194,.35);background:rgba(27,110,194,.06);}
+.itq-code{border:1px solid rgba(0,0,0,.10);border-radius:16px;overflow:hidden;background:#0b1220;}
+.itq-codeHead{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.10);color:#e5e7eb;font-size:12px;}
+.itq-codeHead .itq-kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:2px 6px;border-radius:8px;}
+.itq-pre{margin:0;padding:12px;overflow:auto;}
+.itq-pre code{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;font-size:12px;color:#e5e7eb;white-space:pre;}
+.itq-toast{position:fixed;right:14px;bottom:14px;z-index:9999;display:none;background:#111827;color:#fff;padding:10px 12px;border-radius:12px;font-size:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);}
+</style>
+</head>
+<body>
+  <div class="itq-wrap">
+    <section class="itq-hero">
+      <h1>C# Question Bank</h1>
+      <p class="itq-sub">Generics &amp; Delegates | 10 Questions (7 Moderate + 3 High)</p>
+      <div class="itq-info">
+        Students should implement <strong>ONLY</strong> the <strong>TODO</strong> methods inside each code block.
+        This is a standalone preview HTML (your real site uses _Layout.cshtml).
+      </div>
+      <div class="itq-pills">
+        <span class="itq-pill"><strong>Moderate:</strong> 7</span>
+        <span class="itq-pill"><strong>High:</strong> 3</span>
+        <span class="itq-pill"><strong>Focus:</strong> Generic methods/classes, constraints, Func/Predicate, multicast delegates, variance, events, retry utility</span>
+      </div>
+    </section>
+
+    <section class="itq-grid" aria-label="Generics and Delegates Questions">
+      <article class="itq-card" id="q1">
+      <header class="itq-head">
+        <div class="itq-no">1</div>
+        <div>
+          <h3 class="itq-title">Generic Swap Utility (Type-safe)</h3>
+          <div class="itq-tags">
+              <span class="itq-chip">Generics</span>
+              <span class="itq-chip">Generic Method</span>
+              <span class="itq-chip">ref</span>
+              <span class="itq-chip itq-level mod">Moderate</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="itq-body">
+        <p class="itq-stmt">You are building a small utility library for an internal console tool.
+Implement a **generic Swap&lt;T&gt;** method so any two variables of the same type can be swapped safely.
+
+✅ Student task:
+- Implement only the TODO method Swap&lt;T&gt;(ref T a, ref T b).
+- Do not change Main().</p>
+
+        <div class="itq-actions">
+          <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode1')">Copy code</button>
+        </div>
+
+        <div class="itq-code">
+          <div class="itq-codeHead">
+            <span>Boilerplate C# console program (students implement only TODO methods)</span>
+            <span class="itq-kbd">Ctrl+C</span>
+          </div>
+          <pre class="itq-pre"><code id="itqCode1">using System; // Console, basic types
+
+namespace ItTechGenie.M1.GenericsDelegates.Q1
+{
+    public class Program
+    {
+        public static void Main()
+        {
+            int a = 10;                   // first integer
+            int b = 20;                   // second integer
+            Console.WriteLine($&quot;Before: a={a}, b={b}&quot;); // print before swap
+
+            Utils.Swap(ref a, ref b);     // swap integers using generic method
+
+            Console.WriteLine($&quot;After : a={a}, b={b}&quot;); // print after swap
+
+            string x = &quot;Hello&quot;;           // first string
+            string y = &quot;World&quot;;           // second string
+            Console.WriteLine($&quot;Before: x={x}, y={y}&quot;); // print before swap
+
+            Utils.Swap(ref x, ref y);     // swap strings using same method
+
+            Console.WriteLine($&quot;After : x={x}, y={y}&quot;); // print after swap
+        }
+    }
+
+    public static class Utils
+    {
+        // ✅ TODO: Student must implement only this method
+        // Goal: swap two variables of type T using a temporary variable.
+        public static void Swap&lt;T&gt;(ref T a, ref T b)
+        {
+            // TODO: Write your code here
+            throw new NotImplementedException(); // remove after implementing
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+    </article>
+
+<article class="itq-card" id="q2">
+      <header class="itq-head">
+        <div class="itq-no">2</div>
+        <div>
+          <h3 class="itq-title">Generic Repository: Add &amp; GetAll</h3>
+          <div class="itq-tags">
+              <span class="itq-chip">Generics</span>
+              <span class="itq-chip">Generic Class</span>
+              <span class="itq-chip">List&lt;T&gt;</span>
+              <span class="itq-chip itq-level mod">Moderate</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="itq-body">
+        <p class="itq-stmt">A team needs a small in-memory repository during early development (before database integration).
+Create a **generic repository** that can store ANY entity type.
+
+✅ Student task:
+- Implement Add(T item) and GetAll() methods only.
+- Keep the internal list private and do not expose it directly.</p>
+
+        <div class="itq-actions">
+          <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode2')">Copy code</button>
+        </div>
+
+        <div class="itq-code">
+          <div class="itq-codeHead">
+            <span>Boilerplate C# console program (students implement only TODO methods)</span>
+            <span class="itq-kbd">Ctrl+C</span>
+          </div>
+          <pre class="itq-pre"><code id="itqCode2">using System; // Console
+using System.Collections.Generic; // List&lt;T&gt;, IReadOnlyList&lt;T&gt;
+
+namespace ItTechGenie.M1.GenericsDelegates.Q2
+{
+    public class Program
+    {
+        public static void Main()
+        {
+            var repo = new InMemoryRepository&lt;Product&gt;();    // repository for Product
+            repo.Add(new Product(1, &quot;Mouse&quot;, 699));          // add item
+            repo.Add(new Product(2, &quot;Keyboard&quot;, 1499));      // add item
+
+            foreach (var p in repo.GetAll())                 // iterate all products
+            {
+                Console.WriteLine($&quot;{p.Id} - {p.Name} - {p.Price}&quot;); // print each product
+            }
+        }
+    }
+
+    public record Product(int Id, string Name, int Price);   // simple model
+
+    public class InMemoryRepository&lt;T&gt;
+    {
+        private readonly List&lt;T&gt; _items = new();             // internal storage
+
+        // ✅ TODO: Student must implement only this method
+        public void Add(T item)
+        {
+            // TODO: Write your code here
+            throw new NotImplementedException();             // remove after implementing
+        }
+
+        // ✅ TODO: Student must implement only this method
+        public IReadOnlyList&lt;T&gt; GetAll()
+        {
+            // TODO: Write your code here
+            throw new NotImplementedException();             // remove after implementing
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+    </article>
+
+<article class="itq-card" id="q3">
+      <header class="itq-head">
+        <div class="itq-no">3</div>
+        <div>
+          <h3 class="itq-title">Generic Constraint: Cache for Reference Types</h3>
+          <div class="itq-tags">
+              <span class="itq-chip">Generics</span>
+              <span class="itq-chip">where T : class</span>
+              <span class="itq-chip">Dictionary</span>
+              <span class="itq-chip itq-level mod">Moderate</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="itq-body">
+        <p class="itq-stmt">You are building a small cache for expensive objects loaded from an API (like product details).
+The cache must store **reference types only** (class types), because null values should be handled.
+
+✅ Student task:
+- Implement Put and TryGet only.
+- Follow the method contracts and keep the dictionary usage safe.</p>
+
+        <div class="itq-actions">
+          <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode3')">Copy code</button>
+        </div>
+
+        <div class="itq-code">
+          <div class="itq-codeHead">
+            <span>Boilerplate C# console program (students implement only TODO methods)</span>
+            <span class="itq-kbd">Ctrl+C</span>
+          </div>
+          <pre class="itq-pre"><code id="itqCode3">using System; // Console
+using System.Collections.Generic; // Dictionary&lt;K,V&gt;
+
+namespace ItTechGenie.M1.GenericsDelegates.Q3
+{
+    public class Program
+    {
+        public static void Main()
+        {
+            var cache = new SimpleCache&lt;Product&gt;();               // cache stores Product (class)
+            cache.Put(&quot;P100&quot;, new Product(&quot;P100&quot;, &quot;Pen&quot;));        // add to cache
+
+            if (cache.TryGet(&quot;P100&quot;, out var found))              // attempt read
+            {
+                Console.WriteLine($&quot;Found: {found.Code} - {found.Name}&quot;); // print
+            }
+        }
+    }
+
+    public class Product
+    {
+        public string Code { get; }                               // product code
+        public string Name { get; }                               // product name
+
+        public Product(string code, string name)
+        {
+            Code = code;                                          // assign
+            Name = name;                                          // assign
+        }
+    }
+
+    // Note: `where T : class` means only reference types are allowed here.
+    public class SimpleCache&lt;T&gt; where T : class
+    {
+        private readonly Dictionary&lt;string, T&gt; _store = new();    // key-value store
+
+        // ✅ TODO: Student must implement only this method
+        public void Put(string key, T value)
+        {
+            // TODO: Write your code here
+            throw new NotImplementedException();                  // remove after implementing
+        }
+
+        // ✅ TODO: Student must implement only this method
+        public bool TryGet(string key, out T? value)
+        {
+            value = null;                                         // default output
+            // TODO: Write your code here
+            throw new NotImplementedException();                  // remove after implementing
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+    </article>
+
+<article class="itq-card" id="q4">
+      <header class="itq-head">
+        <div class="itq-no">4</div>
+        <div>
+          <h3 class="itq-title">Func&lt;T,T,T&gt;: Generic Calculator</h3>
+          <div class="itq-tags">
+              <span class="itq-chip">Delegates</span>
+              <span class="itq-chip">Func</span>
+              <span class="itq-chip">Generics</span>
+              <span class="itq-chip itq-level mod">Moderate</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="itq-body">
+        <p class="itq-stmt">A pricing engine wants to plug different operations (add, max, discount logic).
+Use **Func&lt;T,T,T&gt;** to represent the operation and apply it via a generic calculator.
+
+✅ Student task:
+- Implement Apply&lt;T&gt;(T a, T b, Func&lt;T,T,T&gt; op) only.
+- Ensure null op throws ArgumentNullException.</p>
+
+        <div class="itq-actions">
+          <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode4')">Copy code</button>
+        </div>
+
+        <div class="itq-code">
+          <div class="itq-codeHead">
+            <span>Boilerplate C# console program (students implement only TODO methods)</span>
+            <span class="itq-kbd">Ctrl+C</span>
+          </div>
+          <pre class="itq-pre"><code id="itqCode4">using System; // Console, ArgumentNullException
+
+namespace ItTechGenie.M1.GenericsDelegates.Q4
+{
+    public class Program
+    {
+        public static void Main()
+        {
+            int sum = GenericCalculator.Apply(10, 20, (x, y) =&gt; x + y);        // addition
+            Console.WriteLine($&quot;Sum = {sum}&quot;);                                 // print
+
+            decimal max = GenericCalculator.Apply(12.5m, 9.2m, (x, y) =&gt; x &gt; y ? x : y); // max
+            Console.WriteLine($&quot;Max = {max}&quot;);                                 // print
+        }
+    }
+
+    public static class GenericCalculator
+    {
+        // ✅ TODO: Student must implement only this method
+        public static T Apply&lt;T&gt;(T a, T b, Func&lt;T, T, T&gt; op)
+        {
+            // TODO: Validate op is not null, then return op(a, b)
+            throw new NotImplementedException(); // remove after implementing
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+    </article>
+
+<article class="itq-card" id="q5">
+      <header class="itq-head">
+        <div class="itq-no">5</div>
+        <div>
+          <h3 class="itq-title">Predicate&lt;T&gt;: Filter a List</h3>
+          <div class="itq-tags">
+              <span class="itq-chip">Delegates</span>
+              <span class="itq-chip">Predicate</span>
+              <span class="itq-chip">Collections</span>
+              <span class="itq-chip itq-level mod">Moderate</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="itq-body">
+        <p class="itq-stmt">A log-monitoring tool needs to filter events quickly.
+Use **Predicate&lt;T&gt;** to filter values from a list and return a new list.
+
+✅ Student task:
+- Implement Filter&lt;T&gt;(IEnumerable&lt;T&gt; items, Predicate&lt;T&gt; predicate) only.
+- Validate arguments and return filtered results.</p>
+
+        <div class="itq-actions">
+          <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode5')">Copy code</button>
+        </div>
+
+        <div class="itq-code">
+          <div class="itq-codeHead">
+            <span>Boilerplate C# console program (students implement only TODO methods)</span>
+            <span class="itq-kbd">Ctrl+C</span>
+          </div>
+          <pre class="itq-pre"><code id="itqCode5">using System; // Console
+using System.Collections.Generic; // List&lt;T&gt;, IEnumerable&lt;T&gt;
+
+namespace ItTechGenie.M1.GenericsDelegates.Q5
+{
+    public class Program
+    {
+        public static void Main()
+        {
+            var numbers = new List&lt;int&gt; { 5, 10, 15, 20, 25 };                // sample data
+            var filtered = FilterUtil.Filter(numbers, n =&gt; n &gt;= 15);          // keep &gt;= 15
+
+            foreach (var n in filtered)                                       // print result
+            {
+                Console.WriteLine(n);                                         // output each
+            }
+        }
+    }
+
+    public static class FilterUtil
+    {
+        // ✅ TODO: Student must implement only this method
+        public static List&lt;T&gt; Filter&lt;T&gt;(IEnumerable&lt;T&gt; items, Predicate&lt;T&gt; predicate)
+        {
+            // TODO: Validate inputs, iterate items, apply predicate, build output list
+            throw new NotImplementedException(); // remove after implementing
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+    </article>
+
+<article class="itq-card" id="q6">
+      <header class="itq-head">
+        <div class="itq-no">6</div>
+        <div>
+          <h3 class="itq-title">Multicast Delegate: Notification Pipeline</h3>
+          <div class="itq-tags">
+              <span class="itq-chip">Delegates</span>
+              <span class="itq-chip">Multicast</span>
+              <span class="itq-chip">Error Handling</span>
+              <span class="itq-chip itq-level mod">Moderate</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="itq-body">
+        <p class="itq-stmt">An order system must notify multiple channels (email, SMS, audit).
+Implement a multicast delegate pipeline so multiple handlers can be registered.
+
+✅ Student task:
+- Implement Publish(string message) only.
+- Ensure one failing handler does NOT stop others (use try/catch per handler).</p>
+
+        <div class="itq-actions">
+          <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode6')">Copy code</button>
+        </div>
+
+        <div class="itq-code">
+          <div class="itq-codeHead">
+            <span>Boilerplate C# console program (students implement only TODO methods)</span>
+            <span class="itq-kbd">Ctrl+C</span>
+          </div>
+          <pre class="itq-pre"><code id="itqCode6">using System; // Console
+
+namespace ItTechGenie.M1.GenericsDelegates.Q6
+{
+    public delegate void Notify(string message); // delegate type for notifications
+
+    public class Program
+    {
+        public static void Main()
+        {
+            var hub = new NotificationHub();                         // central hub
+
+            hub.Register(EmailSender.Send);                          // add email handler
+            hub.Register(SmsSender.Send);                            // add sms handler
+            hub.Register(AuditLogger.Log);                           // add audit handler
+
+            hub.Publish(&quot;Order #5001 placed successfully.&quot;);          // trigger notification
+        }
+    }
+
+    public class NotificationHub
+    {
+        private Notify? _pipeline;                                   // multicast chain
+
+        public void Register(Notify handler) =&gt; _pipeline += handler;   // add handler
+        public void Unregister(Notify handler) =&gt; _pipeline -= handler; // remove handler
+
+        // ✅ TODO: Student must implement only this method
+        public void Publish(string message)
+        {
+            // TODO:
+            // 1) If _pipeline is null, do nothing.
+            // 2) Invoke each delegate safely so one exception doesn&#x27;t break others.
+            throw new NotImplementedException(); // remove after implementing
+        }
+    }
+
+    public static class EmailSender
+    {
+        public static void Send(string message) =&gt; Console.WriteLine($&quot;EMAIL: {message}&quot;); // simulate email
+    }
+
+    public static class SmsSender
+    {
+        public static void Send(string message) =&gt; Console.WriteLine($&quot;SMS  : {message}&quot;); // simulate sms
+    }
+
+    public static class AuditLogger
+    {
+        public static void Log(string message) =&gt; Console.WriteLine($&quot;AUDIT: {message}&quot;); // simulate audit log
+    }
+}</code></pre>
+        </div>
+      </div>
+    </article>
+
+<article class="itq-card" id="q7">
+      <header class="itq-head">
+        <div class="itq-no">7</div>
+        <div>
+          <h3 class="itq-title">where T : struct: Sum of Numeric Values</h3>
+          <div class="itq-tags">
+              <span class="itq-chip">Generics</span>
+              <span class="itq-chip">where T : struct</span>
+              <span class="itq-chip">dynamic</span>
+              <span class="itq-chip itq-level mod">Moderate</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="itq-body">
+        <p class="itq-stmt">A reporting job needs to sum numeric values without writing separate methods for int/decimal/double.
+Create a generic sum method for value types (struct).
+
+✅ Student task:
+- Implement Sum&lt;T&gt;(IEnumerable&lt;T&gt; values) only.
+- Use the &quot;safe dynamic pattern&quot; described in the TODO comments.</p>
+
+        <div class="itq-actions">
+          <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode7')">Copy code</button>
+        </div>
+
+        <div class="itq-code">
+          <div class="itq-codeHead">
+            <span>Boilerplate C# console program (students implement only TODO methods)</span>
+            <span class="itq-kbd">Ctrl+C</span>
+          </div>
+          <pre class="itq-pre"><code id="itqCode7">using System; // Console
+using System.Collections.Generic; // List&lt;T&gt;, IEnumerable&lt;T&gt;
+
+namespace ItTechGenie.M1.GenericsDelegates.Q7
+{
+    public class Program
+    {
+        public static void Main()
+        {
+            var ints = new List&lt;int&gt; { 1, 2, 3, 4 };                 // integer list
+            Console.WriteLine(SumUtil.Sum(ints));                    // expected 10
+
+            var decimals = new List&lt;decimal&gt; { 1.5m, 2.5m, 3.0m };    // decimal list
+            Console.WriteLine(SumUtil.Sum(decimals));                // expected 7.0
+        }
+    }
+
+    public static class SumUtil
+    {
+        // Note: This constraint allows only value types.
+        public static T Sum&lt;T&gt;(IEnumerable&lt;T&gt; values) where T : struct
+        {
+            // ✅ TODO: Student must implement only this method
+            // Hint (pattern):
+            //   dynamic total = default(T);
+            //   foreach (var v in values) total += (dynamic)v;
+            //   return (T)total;
+            throw new NotImplementedException(); // remove after implementing
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+    </article>
+
+<article class="itq-card" id="q8">
+      <header class="itq-head">
+        <div class="itq-no">8</div>
+        <div>
+          <h3 class="itq-title">Variance (in/out): Producer → Consumer Transfer</h3>
+          <div class="itq-tags">
+              <span class="itq-chip">Generics</span>
+              <span class="itq-chip">Variance</span>
+              <span class="itq-chip">Delegates/Interfaces</span>
+              <span class="itq-chip itq-level hi">High</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="itq-body">
+        <p class="itq-stmt">You are designing a message pipeline.
+- Producers create messages.
+- Consumers handle messages.
+Use **out** and **in** variance to allow safe assignment between base/derived types.
+
+✅ Student task:
+- Implement Transfer&lt;T&gt;(IProducer&lt;T&gt; producer, IConsumer&lt;T&gt; consumer) only.
+- Transfer should: produce one item and send it to consumer.</p>
+
+        <div class="itq-actions">
+          <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode8')">Copy code</button>
+        </div>
+
+        <div class="itq-code">
+          <div class="itq-codeHead">
+            <span>Boilerplate C# console program (students implement only TODO methods)</span>
+            <span class="itq-kbd">Ctrl+C</span>
+          </div>
+          <pre class="itq-pre"><code id="itqCode8">using System; // Console
+
+namespace ItTechGenie.M1.GenericsDelegates.Q8
+{
+    // `out T` means Producer is covariant (can be used as base type producer).
+    public interface IProducer&lt;out T&gt;
+    {
+        T Produce(); // produce an item
+    }
+
+    // `in T` means Consumer is contravariant (can consume derived items).
+    public interface IConsumer&lt;in T&gt;
+    {
+        void Consume(T item); // consume an item
+    }
+
+    public class Program
+    {
+        public static void Main()
+        {
+            IProducer&lt;EmailMessage&gt; emailProducer = new EmailMessageProducer(); // produces EmailMessage
+            IProducer&lt;Message&gt; messageProducer = emailProducer;                 // ✅ covariance works (EmailMessage -&gt; Message)
+
+            IConsumer&lt;Message&gt; messageConsumer = new MessageConsoleConsumer();  // consumes Message
+            IConsumer&lt;EmailMessage&gt; emailConsumer = messageConsumer;            // ✅ contravariance works (Message consumer can consume EmailMessage)
+
+            Pipeline.Transfer(messageProducer, emailConsumer);                  // transfer 1 item
+        }
+    }
+
+    public static class Pipeline
+    {
+        // ✅ TODO: Student must implement only this method
+        public static void Transfer&lt;T&gt;(IProducer&lt;T&gt; producer, IConsumer&lt;T&gt; consumer)
+        {
+            // TODO:
+            // 1) produce item using producer.Produce()
+            // 2) pass it to consumer.Consume(item)
+            throw new NotImplementedException(); // remove after implementing
+        }
+    }
+
+    public class Message
+    {
+        public string Text { get; }
+        public Message(string text) =&gt; Text = text; // assign text
+    }
+
+    public class EmailMessage : Message
+    {
+        public string To { get; }
+        public EmailMessage(string to, string text) : base(text) =&gt; To = to; // assign
+    }
+
+    public class EmailMessageProducer : IProducer&lt;EmailMessage&gt;
+    {
+        public EmailMessage Produce() =&gt; new EmailMessage(&quot;team@ittechgenie.com&quot;, &quot;Welcome email&quot;); // sample
+    }
+
+    public class MessageConsoleConsumer : IConsumer&lt;Message&gt;
+    {
+        public void Consume(Message item) =&gt; Console.WriteLine($&quot;Consumed: {item.Text}&quot;); // output
+    }
+}</code></pre>
+        </div>
+      </div>
+    </article>
+
+<article class="itq-card" id="q9">
+      <header class="itq-head">
+        <div class="itq-no">9</div>
+        <div>
+          <h3 class="itq-title">Generic Event: Threshold Monitor (IComparable&lt;T&gt;)</h3>
+          <div class="itq-tags">
+              <span class="itq-chip">Delegates</span>
+              <span class="itq-chip">event</span>
+              <span class="itq-chip">IComparable&lt;T&gt;</span>
+              <span class="itq-chip itq-level hi">High</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="itq-body">
+        <p class="itq-stmt">A monitoring system checks values and raises an alert when a threshold is crossed.
+Make the monitor generic using **IComparable&lt;T&gt;** so it works for int/decimal/date etc.
+
+✅ Student task:
+- Implement AddSample(T value) only.
+- If value &gt;= threshold, raise the event with the value.</p>
+
+        <div class="itq-actions">
+          <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode9')">Copy code</button>
+        </div>
+
+        <div class="itq-code">
+          <div class="itq-codeHead">
+            <span>Boilerplate C# console program (students implement only TODO methods)</span>
+            <span class="itq-kbd">Ctrl+C</span>
+          </div>
+          <pre class="itq-pre"><code id="itqCode9">using System; // Console
+
+namespace ItTechGenie.M1.GenericsDelegates.Q9
+{
+    public class Program
+    {
+        public static void Main()
+        {
+            var monitor = new ThresholdMonitor&lt;int&gt;(threshold: 80);              // threshold 80
+
+            monitor.ThresholdReached += v =&gt; Console.WriteLine($&quot;ALERT: {v}&quot;);    // subscribe
+
+            monitor.AddSample(60);                                               // no alert
+            monitor.AddSample(90);                                               // should alert
+        }
+    }
+
+    public class ThresholdMonitor&lt;T&gt; where T : IComparable&lt;T&gt;
+    {
+        private readonly T _threshold;                                           // threshold value
+        public event Action&lt;T&gt;? ThresholdReached;                                // event callback
+
+        public ThresholdMonitor(T threshold)
+        {
+            _threshold = threshold;                                              // store threshold
+        }
+
+        // ✅ TODO: Student must implement only this method
+        public void AddSample(T value)
+        {
+            // TODO:
+            // 1) Compare value with _threshold using CompareTo
+            // 2) If value &gt;= _threshold, invoke ThresholdReached (if not null)
+            throw new NotImplementedException(); // remove after implementing
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+    </article>
+
+<article class="itq-card" id="q10">
+      <header class="itq-head">
+        <div class="itq-no">10</div>
+        <div>
+          <h3 class="itq-title">ExecuteWithRetry&lt;T&gt;: Generic Utility with Func&lt;T&gt;</h3>
+          <div class="itq-tags">
+              <span class="itq-chip">Delegates</span>
+              <span class="itq-chip">Func&lt;T&gt;</span>
+              <span class="itq-chip">Exception Handling</span>
+              <span class="itq-chip itq-level hi">High</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="itq-body">
+        <p class="itq-stmt">A service call sometimes fails (network issues). You want a reusable retry utility.
+
+✅ Student task:
+- Implement ExecuteWithRetry&lt;T&gt;() only.
+- Retry up to maxAttempts.
+- Use shouldRetry(exception) to decide whether to retry.
+- If no more retries, rethrow the last exception.</p>
+
+        <div class="itq-actions">
+          <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode10')">Copy code</button>
+        </div>
+
+        <div class="itq-code">
+          <div class="itq-codeHead">
+            <span>Boilerplate C# console program (students implement only TODO methods)</span>
+            <span class="itq-kbd">Ctrl+C</span>
+          </div>
+          <pre class="itq-pre"><code id="itqCode10">using System; // Console, Exception
+
+namespace ItTechGenie.M1.GenericsDelegates.Q10
+{
+    public class Program
+    {
+        public static void Main()
+        {
+            int attempts = 0;                                                    // track attempts
+
+            // A sample operation that fails twice, succeeds third time.
+            int result = RetryUtil.ExecuteWithRetry(
+                action: () =&gt;
+                {
+                    attempts++;                                                  // increment
+                    if (attempts &lt; 3) throw new InvalidOperationException(&quot;Temporary failure&quot;); // simulate failure
+                    return 200;                                                  // success value
+                },
+                maxAttempts: 5,                                                  // max tries
+                shouldRetry: ex =&gt; ex is InvalidOperationException                // retry only for this type
+            );
+
+            Console.WriteLine($&quot;Result = {result}&quot;);                              // print
+        }
+    }
+
+    public static class RetryUtil
+    {
+        // ✅ TODO: Student must implement only this method
+        public static T ExecuteWithRetry&lt;T&gt;(Func&lt;T&gt; action, int maxAttempts, Func&lt;Exception, bool&gt; shouldRetry)
+        {
+            // TODO:
+            // 1) Validate inputs (action, shouldRetry, maxAttempts &gt;= 1)
+            // 2) Loop attempts:
+            //    - try: return action()
+            //    - catch Exception ex:
+            //        - if attempts reached OR shouldRetry(ex) is false =&gt; throw
+            //        - else continue to next attempt
+            throw new NotImplementedException(); // remove after implementing
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+    </article>
+    </section>
+  </div>
+
+  <div id="itqToast" class="itq-toast" aria-live="polite"></div>
+  <script>
+(function(){
+  function showToast(text){
+    var t = document.getElementById("itqToast");
+    if(!t) return;
+    t.textContent = text;
+    t.style.display = "block";
+    clearTimeout(t._hide);
+    t._hide = setTimeout(function(){ t.style.display = "none"; }, 1400);
+  }
+
+  window.itqCopy = function(codeId){
+    var el = document.getElementById(codeId);
+    if(!el) return;
+    var text = el.innerText || el.textContent || "";
+    navigator.clipboard.writeText(text).then(function(){
+      showToast("Code copied");
+    }).catch(function(){
+      showToast("Copy failed (browser blocked)");
+    });
+  };
+})();
+</script>
+</body>
+</html>
