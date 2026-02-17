@@ -153,6 +153,7 @@ namespace GenieWeb.Controllers
         }
 
         public IActionResult GenericsAndDelegates() => GenerateView("CodingPractice/GenericsAndDelegates");
+        public IActionResult Oops() => GenerateView("CodingPractice/Oops");
 
         public IActionResult CSharpAdvanced()
         {
