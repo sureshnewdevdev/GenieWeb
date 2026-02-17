@@ -152,6 +152,8 @@ namespace GenieWeb.Controllers
             return View("PracticalQuestions/CSharpCodingQuestionsQA");
         }
 
+        public IActionResult GenericsAndDelegates() => GenerateView("CodingPractice/GenericsAndDelegates");
+
         public IActionResult CSharpAdvanced()
         {
             ViewData["ActiveMenu"] = "CSharpAdvanced";
