@@ -1,0 +1,1247 @@
+@{
+    ViewData["Title"] = "ItTechGenie-Subject - DSA with C# (Warm-up + 10 Questions)";
+    ViewData["ActiveMenu"] = "CSharp";
+}
+
+<style>
+.itq-wrap{max-width:1120px;margin:0 auto;padding:18px 14px 120px 14px;font-family:Arial, Helvetica, sans-serif;}
+.itq-hero{border:1px solid rgba(0,0,0,.10);border-radius:18px;padding:16px 16px 14px 16px;background:linear-gradient(180deg, rgba(27,110,194,.10), rgba(255,255,255,0));}
+.itq-hero h1{margin:0 0 6px 0;font-size:22px;letter-spacing:.2px;}
+.itq-hero .itq-sub{color:#4b5563;font-size:13px;margin:0;}
+.itq-info{margin-top:12px;border:1px dashed rgba(27,110,194,.35);background:rgba(27,110,194,.06);border-radius:14px;padding:12px;font-size:13px;color:#374151;line-height:1.55;}
+.itq-pills{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;}
+.itq-pill{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:999px;padding:5px 10px;font-size:12px;color:#374151;}
+.itq-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:16px;}
+.itq-card{border:1px solid rgba(0,0,0,.12);border-radius:18px;background:#fff;box-shadow:0 .25rem .75rem rgba(0,0,0,.05);overflow:hidden;transition:transform .14s ease,border-color .14s ease,background .14s ease;}
+.itq-card:hover{transform:translateY(-2px);border-color:rgba(34,197,94,.55);background:rgba(34,197,94,.03);}
+.itq-head{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;}
+.itq-no{min-width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:rgba(27,110,194,.10);border:1px solid rgba(27,110,194,.25);font-weight:700;color:#1b6ec2;}
+.itq-title{margin:0;font-size:16px;}
+.itq-tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:#6b7280;}
+.itq-chip{padding:3px 8px;border-radius:999px;border:1px solid rgba(0,0,0,.10);background:rgba(0,0,0,.02);}
+.itq-level{font-weight:700;}
+.itq-level.warm{color:#0f766e;}
+.itq-level.mod{color:#b45309;}
+.itq-level.cx{color:#be123c;}
+.itq-body{padding:0 16px 16px 16px;}
+.itq-stmt{margin:0 0 10px 0;color:#374151;font-size:13px;line-height:1.55;white-space:pre-line;}
+.itq-actions{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 10px 0;}
+.itq-btn{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:12px;padding:7px 10px;font-size:12px;cursor:pointer;transition:transform .12s ease,background .12s ease;}
+.itq-btn:hover{transform:translateY(-1px);background:rgba(0,0,0,.02);}
+.itq-btn.copy{border-color:rgba(27,110,194,.35);background:rgba(27,110,194,.06);}
+.itq-btn.ans{border-color:rgba(15,118,110,.35);background:rgba(15,118,110,.06);}
+.itq-io{display:grid;gap:8px;margin:10px 0 12px 0;}
+.itq-io label{font-size:12px;color:#6b7280;font-weight:700;}
+.itq-io textarea{width:100%;min-height:92px;border-radius:14px;border:1px solid rgba(0,0,0,.12);padding:10px 12px;font-size:12px;line-height:1.45;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;background:#fff;}
+.itq-io .hint{font-size:12px;color:#6b7280;line-height:1.4;}
+.itq-code{border:1px solid rgba(0,0,0,.10);border-radius:16px;overflow:hidden;background:#0b1220;}
+.itq-codeHead{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.10);color:#e5e7eb;font-size:12px;}
+.itq-codeHead .itq-kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:2px 6px;border-radius:8px;}
+.itq-pre{margin:0;padding:12px;overflow:auto;}
+.itq-pre code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:12px;color:#e5e7eb;white-space:pre;}
+.itq-answer{margin-top:10px;border:1px solid rgba(15,118,110,.25);background:rgba(15,118,110,.06);border-radius:14px;padding:10px 12px;display:none;}
+.itq-answer h4{margin:0 0 6px 0;font-size:13px;color:#0f766e;}
+.itq-answer p{margin:0;color:#374151;font-size:12px;line-height:1.55;white-space:pre-line;}
+.itq-answer pre{margin:8px 0 0 0;background:rgba(17,24,39,.06);border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:10px;overflow:auto;}
+.itq-answer code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:12px;}
+.itq-toast{position:fixed;right:14px;bottom:14px;z-index:9999;display:none;background:#111827;color:#fff;padding:10px 12px;border-radius:12px;font-size:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);}
+</style>
+
+<div class="itq-wrap">
+    <section class="itq-hero">
+      <h1>C# Question Bank</h1>
+      <p class="itq-sub">DSA with C# | Q0 Warm‑up (Show/Hide Answer) + Q1–Q10 Scenario Questions (5 Moderate + 5 Complex) — With Answers</p>
+
+      <div class="itq-info">
+        <strong>Instruction:</strong> Full boilerplate is visible by default. Students implement <strong>ONLY</strong> methods marked <strong>// ✅ TODO</strong>.<br/>
+        <strong>Answers:</strong> Q0 and Q1–Q10 include answers (logic + code) behind <strong>Show/Hide Answer</strong>.
+      </div>
+
+      <div class="itq-pills">
+        <span class="itq-pill"><strong>Warm‑up:</strong> 1 (Q0)</span>
+        <span class="itq-pill"><strong>Moderate:</strong> 5 (Q1–Q5)</span>
+        <span class="itq-pill"><strong>Complex:</strong> 5 (Q6–Q10)</span>
+        <span class="itq-pill"><strong>Sample Inputs:</strong> spaces + quotes + unicode α/β + emoji ✅ + special chars</span>
+      </div>
+    </section>
+
+    <section class="itq-grid" aria-label="DSA with C# scenario questions">
+      <article class="itq-card" id="q0">
+  <header class="itq-head">
+    <div class="itq-no">0</div>
+    <div>
+      <h3 class="itq-title">Warm‑up: Choose the Right Data Structure + Big‑O (with answer)</h3>
+      <div class="itq-tags"><span class="itq-chip">Big‑O</span><span class="itq-chip">HashSet</span><span class="itq-chip">Dictionary</span><span class="itq-chip">LinkedList</span><span class="itq-chip">LRU pattern</span><span class="itq-chip itq-level warm">Warm-up</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Warm‑up (with answer):
+Given operations from an &quot;Order-Search&quot; screen, choose the best data structure and explain time complexity.
+
+Operations:
+1) Add orderId
+2) Check if orderId exists
+3) Retrieve most-recent N orderIds quickly
+4) Remove an orderId
+
+✅ Warm-up answer covers: HashSet/Dictionary for existence, LinkedList/Queue/Stack for recency,
+and typical Big‑O reasoning.</p>
+
+    <div class="itq-io">
+      <label for="itqInput0">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput0">Order IDs (one per line):
+&quot;ORD- 90 01 ✅&quot;
+&quot;ORD-α12 !@@#&quot;
+&quot;ORD-β77 &quot;return&quot;&quot;
+&quot;ORD- 001   space&quot;
+Query:
+exists=&quot;ORD-α12 !@@#&quot;
+recentN=2
+remove=&quot;ORD-β77 &quot;return&quot;&quot;
+</textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput0')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode0')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns0')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>DSA scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode0">using System;                                                     // Console
+using System.Collections.Generic;                                    // HashSet, LinkedList
+
+namespace ItTechGenie.M1.DSA.WarmUp
+{
+    public static class Warmup
+    {
+        // ✅ Warm-up TODO: Student must implement only this method
+        public static void ChooseDsAndExplain()
+        {
+            // TODO:
+            // - Write short explanation in Console about:
+            //   a) HashSet&lt;string&gt; for Exists / Remove (avg O(1))
+            //   b) LinkedList&lt;string&gt; to keep recency (O(1) add to front, O(1) remove if node known)
+            //   c) Combine with Dictionary&lt;string, LinkedListNode&lt;string&gt;&gt; for O(1) remove in LRU style
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            Warmup.ChooseDsAndExplain();                               // prints explanation
+        }
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns0">
+      <h4>Warm‑up Answer (Reasoning + Big‑O)</h4>
+      <p>Best practical combination:
+- For fast existence &amp; delete: HashSet&lt;string&gt; or Dictionary&lt;string, ...&gt; (average O(1)).
+- For &quot;most recent N&quot;: LinkedList&lt;string&gt; (add to front O(1); take first N by traversal).
+- For remove by id in O(1): Dictionary&lt;string, LinkedListNode&lt;string&gt;&gt; + LinkedList (classic LRU pattern).
+
+Complexities (average):
+- Add: O(1)
+- Exists: O(1)
+- Get recent N: O(N) to read N nodes
+- Remove: O(1) if you have node reference; otherwise O(N) to search list.</p>
+      <pre><code>// One valid printed explanation:
+Console.WriteLine(&quot;Use Dictionary&lt;string, LinkedListNode&lt;string&gt;&gt; + LinkedList&lt;string&gt; (LRU pattern).&quot;);
+Console.WriteLine(&quot;Exists/Remove/Move-to-front are avg O(1), get recent N is O(N).&quot;);</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q1">
+  <header class="itq-head">
+    <div class="itq-no">1</div>
+    <div>
+      <h3 class="itq-title">Two Sum Detector — Dictionary (Hash Map)</h3>
+      <div class="itq-tags"><span class="itq-chip">Arrays</span><span class="itq-chip">Hash Map</span><span class="itq-chip">Two Sum</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+You process a list of transaction amounts and must detect if any pair sums to a target.
+Amounts may be negative and can repeat.
+
+Implement:
+- TwoSumSolver.FindPairIndices(int[] amounts, int target) -&gt; (i,j) or (-1,-1)
+
+Rules:
+- Return first pair found scanning left-to-right (stable)
+- Use O(n) average time using dictionary
+- Handle duplicates correctly
+
+✅ Students implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput1">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput1">Amounts:
+&quot; 12 , -3 , 7 , 7 , 15 , 0 ,  5 ✅ &quot;
+Target:
+&quot; 14 &quot;
+Notes:
+Includes spaces, duplicate 7, unicode ✅ marker in line.</textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput1')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode1')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns1')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>DSA scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode1">using System;                                                     // Console
+using System.Collections.Generic;                                    // Dictionary
+
+namespace ItTechGenie.M1.DSA.Q1
+{
+    public static class TwoSumSolver
+    {
+        // ✅ TODO: Student must implement only this method
+        public static (int i, int j) FindPairIndices(int[] amounts, int target)
+        {
+            // TODO:
+            // - dictionary: value -&gt; index
+            // - for each index i:
+            //   need = target - amounts[i]
+            //   if need exists =&gt; return (storedIndex, i)
+            //   else store amounts[i] if not already stored (to keep first occurrence)
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            int[] amounts = { 12, -3, 7, 7, 15, 0, 5 };                // sample amounts
+            int target = 14;                                           // target sum
+
+            var pair = TwoSumSolver.FindPairIndices(amounts, target);  // compute
+            Console.WriteLine($&quot;{pair.i},{pair.j}&quot;);                   // sample output
+        }
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns1">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Approach (O(n) average):
+Maintain a dictionary of amount -&gt; first index where it appeared.
+Scan i from 0..n-1:
+- need = target - amounts[i]
+- if need is already in dictionary, you&#x27;ve found the earliest pair for this scan.
+- otherwise store amounts[i] only if not present (keeps earliest index for duplicates).</p>
+      <pre><code>public static (int i, int j) FindPairIndices(int[] amounts, int target)
+{
+    var seen = new Dictionary&lt;int, int&gt;();                            // amount -&gt; first index
+    for (int i = 0; i &lt; amounts.Length; i++)                          // scan left-to-right
+    {
+        int need = target - amounts[i];                               // complement
+        if (seen.TryGetValue(need, out int j))                        // found earlier complement
+            return (j, i);                                            // return stable pair
+
+        if (!seen.ContainsKey(amounts[i]))                            // store first occurrence only
+            seen[amounts[i]] = i;                                     // remember index
+    }
+    return (-1, -1);                                                  // not found
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q2">
+  <header class="itq-head">
+    <div class="itq-no">2</div>
+    <div>
+      <h3 class="itq-title">Balanced Brackets Validator — Stack</h3>
+      <div class="itq-tags"><span class="itq-chip">Strings</span><span class="itq-chip">Stack</span><span class="itq-chip">Parsing</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A templating engine receives strings containing (), {}, [] and must validate balanced brackets.
+Ignore all non-bracket characters (letters, spaces, emoji).
+
+Implement:
+- BracketValidator.IsValid(string text) -&gt; bool
+
+Rules:
+- Use Stack&lt;char&gt;
+- &#x27;)&#x27; matches &#x27;(&#x27; etc.
+- Return true only if fully balanced
+
+✅ Students implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput2">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput2">Text:
+&quot;Hello (World ✅) {items:[1,2,(3)]} -&gt; OK&quot;
+Text2:
+&quot;Bad ( [ ) ] !@@#&quot;
+(contains spaces + special chars)</textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput2')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode2')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns2')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>DSA scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode2">using System;                                                     // Console
+using System.Collections.Generic;                                    // Stack
+
+namespace ItTechGenie.M1.DSA.Q2
+{
+    public static class BracketValidator
+    {
+        // ✅ TODO: Student must implement only this method
+        public static bool IsValid(string text)
+        {
+            // TODO:
+            // - create stack
+            // - push opening brackets
+            // - when closing bracket appears:
+            //   - if stack empty =&gt; false
+            //   - pop and verify matching pair
+            // - ignore other characters
+            // - at end, stack must be empty
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            Console.WriteLine(BracketValidator.IsValid(&quot;Hello (World ✅) {items:[1,2,(3)]}&quot;));
+            Console.WriteLine(BracketValidator.IsValid(&quot;Bad ( [ ) ] !@@#&quot;));
+        }
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns2">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Use a stack: push openings, pop on closings, validate pairs, ignore others, stack must end empty.</p>
+      <pre><code>public static bool IsValid(string text)
+{
+    var st = new Stack&lt;char&gt;();                                       // holds openings
+    foreach (char ch in text)                                         // scan chars
+    {
+        if (ch is &#x27;(&#x27; or &#x27;{&#x27; or &#x27;[&#x27;)                                  // opening
+            st.Push(ch);                                              // push
+        else if (ch is &#x27;)&#x27; or &#x27;}&#x27; or &#x27;]&#x27;)                             // closing
+        {
+            if (st.Count == 0) return false;                          // nothing to match
+            char open = st.Pop();                                     // last opening
+            if ((ch == &#x27;)&#x27; &amp;&amp; open != &#x27;(&#x27;) ||
+                (ch == &#x27;}&#x27; &amp;&amp; open != &#x27;{&#x27;) ||
+                (ch == &#x27;]&#x27; &amp;&amp; open != &#x27;[&#x27;))
+                return false;                                         // mismatch
+        }
+    }
+    return st.Count == 0;                                             // all matched
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q3">
+  <header class="itq-head">
+    <div class="itq-no">3</div>
+    <div>
+      <h3 class="itq-title">Max Sum in K‑Window — Sliding Window</h3>
+      <div class="itq-tags"><span class="itq-chip">Arrays</span><span class="itq-chip">Two pointers</span><span class="itq-chip">Sliding window</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+You receive per-minute CPU usage values and must find the maximum sum in any window of size K.
+
+Implement:
+- WindowAnalytics.MaxWindowSum(int[] values, int k) -&gt; int
+
+Rules:
+- Use sliding window O(n)
+- Validate k (1..n)
+- Works with negative numbers too
+
+✅ Students implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput3">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput3">Values:
+&quot; 5, -2, 3, 10, -1, 4, 2 ✅ &quot;
+k:
+&quot; 3 &quot;
+Special: spaces, negative numbers.</textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput3')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode3')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns3')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>DSA scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode3">using System;                                                     // Console
+
+namespace ItTechGenie.M1.DSA.Q3
+{
+    public static class WindowAnalytics
+    {
+        // ✅ TODO: Student must implement only this method
+        public static int MaxWindowSum(int[] values, int k)
+        {
+            // TODO:
+            // - validate inputs
+            // - compute initial window sum (0..k-1)
+            // - slide: add values[i], remove values[i-k]
+            // - track max
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            int[] v = { 5, -2, 3, 10, -1, 4, 2 };
+            Console.WriteLine(WindowAnalytics.MaxWindowSum(v, 3));
+        }
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns3">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Sliding window: keep running sum for last k items and update max; O(n).</p>
+      <pre><code>public static int MaxWindowSum(int[] values, int k)
+{
+    if (values == null) throw new ArgumentNullException(nameof(values));
+    if (k &lt;= 0 || k &gt; values.Length) throw new ArgumentOutOfRangeException(nameof(k));
+
+    int sum = 0;                                                      // current window sum
+    for (int i = 0; i &lt; k; i++) sum += values[i];                     // initial sum
+    int max = sum;                                                    // best so far
+
+    for (int i = k; i &lt; values.Length; i++)                           // slide window
+    {
+        sum += values[i];                                             // add new element
+        sum -= values[i - k];                                         // remove old element
+        if (sum &gt; max) max = sum;                                     // update best
+    }
+    return max;
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q4">
+  <header class="itq-head">
+    <div class="itq-no">4</div>
+    <div>
+      <h3 class="itq-title">Merge Two Sorted Arrays — Two Pointers</h3>
+      <div class="itq-tags"><span class="itq-chip">Arrays</span><span class="itq-chip">Merging</span><span class="itq-chip">Two pointers</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A reporting module receives two sorted lists of order amounts and must merge them into a single sorted list.
+
+Implement:
+- MergeUtil.MergeSorted(int[] a, int[] b) -&gt; int[]
+
+Rules:
+- Use two pointers (i,j)
+- Stable merge
+- O(n+m)
+
+✅ Students implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput4">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput4">A:
+&quot; -3, 0, 7, 7, 15 ✅ &quot;
+B:
+&quot; -2, 7, 10, 20 !@@# &quot;
+Note: duplicates and negatives.</textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput4')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode4')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns4')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>DSA scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode4">using System;                                                     // Console
+
+namespace ItTechGenie.M1.DSA.Q4
+{
+    public static class MergeUtil
+    {
+        // ✅ TODO: Student must implement only this method
+        public static int[] MergeSorted(int[] a, int[] b)
+        {
+            // TODO:
+            // - allocate result length a+b
+            // - use i, j, k pointers
+            // - copy remaining items
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            int[] a = { -3, 0, 7, 7, 15 };
+            int[] b = { -2, 7, 10, 20 };
+            var m = MergeUtil.MergeSorted(a, b);
+            Console.WriteLine(string.Join(&quot;, &quot;, m));
+        }
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns4">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Two pointers merge: take smaller each step (stable on tie), append remaining tail.</p>
+      <pre><code>public static int[] MergeSorted(int[] a, int[] b)
+{
+    if (a == null) throw new ArgumentNullException(nameof(a));
+    if (b == null) throw new ArgumentNullException(nameof(b));
+
+    int[] r = new int[a.Length + b.Length];
+    int i = 0, j = 0, k = 0;
+
+    while (i &lt; a.Length &amp;&amp; j &lt; b.Length)
+    {
+        if (a[i] &lt;= b[j]) r[k++] = a[i++];                             // stable on tie
+        else r[k++] = b[j++];
+    }
+    while (i &lt; a.Length) r[k++] = a[i++];
+    while (j &lt; b.Length) r[k++] = b[j++];
+    return r;
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q5">
+  <header class="itq-head">
+    <div class="itq-no">5</div>
+    <div>
+      <h3 class="itq-title">Shortest Connection Hops — BFS (Queue)</h3>
+      <div class="itq-tags"><span class="itq-chip">Graphs</span><span class="itq-chip">BFS</span><span class="itq-chip">Queue</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A social feature needs to find the shortest number of hops between two users.
+Graph is unweighted (friend connections).
+
+Implement:
+- SocialGraph.ShortestHops(string start, string end) -&gt; int (or -1)
+
+Rules:
+- Use BFS (Queue)
+- Case-insensitive user ids (normalize trim)
+- Return 0 if start==end
+- Return -1 if unreachable
+
+✅ Students implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput5">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput5">Users:
+&quot; u-α12 ✅ &quot;
+&quot;u-β77&quot;
+&quot;u- 001 &quot;
+Edges:
+&quot;u-α12 ✅ -&gt; u-β77&quot;
+&quot;u-β77 -&gt; u- 001 &quot;
+Query:
+start=&quot;u-α12 ✅&quot; end=&quot;u- 001 &quot;
+(special: spaces + unicode + emoji)</textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput5')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode5')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns5')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>DSA scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode5">using System;                                                     // Console
+using System.Collections.Generic;                                    // Dictionary, List, Queue
+
+namespace ItTechGenie.M1.DSA.Q5
+{
+    public class SocialGraph
+    {
+        private readonly Dictionary&lt;string, List&lt;string&gt;&gt; _adj =
+            new(StringComparer.OrdinalIgnoreCase);
+
+        public void AddEdge(string a, string b)
+        {
+            if (!_adj.ContainsKey(a)) _adj[a] = new List&lt;string&gt;();
+            if (!_adj.ContainsKey(b)) _adj[b] = new List&lt;string&gt;();
+            _adj[a].Add(b);
+            _adj[b].Add(a);
+        }
+
+        // ✅ TODO: Student must implement only this method
+        public int ShortestHops(string start, string end)
+        {
+            // TODO:
+            // - normalize start/end (trim)
+            // - BFS using Queue&lt;(node, depth)&gt;
+            // - visited HashSet
+            // - return depth when end found
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var g = new SocialGraph();
+            g.AddEdge(&quot;u-α12 ✅&quot;, &quot;u-β77&quot;);
+            g.AddEdge(&quot;u-β77&quot;, &quot;u- 001 &quot;);
+
+            Console.WriteLine(g.ShortestHops(&quot; u-α12 ✅ &quot;, &quot;u- 001 &quot;));
+        }
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns5">
+      <h4>Answer (Logic + Code)</h4>
+      <p>BFS explores level-by-level; first time you reach end is shortest distance.</p>
+      <pre><code>public int ShortestHops(string start, string end)
+{
+    start = start?.Trim() ?? &quot;&quot;;
+    end   = end?.Trim() ?? &quot;&quot;;
+    if (start.Length == 0 || end.Length == 0) throw new ArgumentException(&quot;Empty id&quot;);
+    if (start.Equals(end, StringComparison.OrdinalIgnoreCase)) return 0;
+
+    var q = new Queue&lt;(string node, int depth)&gt;();
+    var vis = new HashSet&lt;string&gt;(StringComparer.OrdinalIgnoreCase);
+
+    q.Enqueue((start, 0));
+    vis.Add(start);
+
+    while (q.Count &gt; 0)
+    {
+        var (node, d) = q.Dequeue();
+        if (!_adj.TryGetValue(node, out var nbrs)) continue;
+
+        foreach (var nb in nbrs)
+        {
+            var n = nb.Trim();
+            if (vis.Contains(n)) continue;
+            if (n.Equals(end, StringComparison.OrdinalIgnoreCase)) return d + 1;
+            vis.Add(n);
+            q.Enqueue((n, d + 1));
+        }
+    }
+    return -1;
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q6">
+  <header class="itq-head">
+    <div class="itq-no">6</div>
+    <div>
+      <h3 class="itq-title">Top‑K Frequent Keywords — Dictionary + Sorting</h3>
+      <div class="itq-tags"><span class="itq-chip">Hash Map</span><span class="itq-chip">Sorting</span><span class="itq-chip">Frequency</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A support chatbot logs tags/keywords from tickets. You must return the Top-K frequent keywords.
+
+Implement:
+- KeywordAnalytics.TopK(string[] words, int k) -&gt; List&lt;string&gt;
+
+Rules:
+- Normalize words: trim + case-insensitive
+- Ignore empty words
+- If tie in frequency: sort lexicographically (ordinal)
+- Use Dictionary for counts
+- Final result should be in descending frequency order
+
+✅ Students implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput6">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput6">Words:
+&quot; login ✅ &quot;, &quot;Login&quot;, &quot;  refund !@@# &quot;, &quot;Refund&quot;, &quot;refund&quot;, &quot;shipping&quot;, &quot;Shipping&quot;, &quot;α/β&quot;, &quot;α/β&quot;, &quot;α/β&quot;
+k=&quot; 3 &quot; </textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput6')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode6')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns6')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>DSA scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode6">using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace ItTechGenie.M1.DSA.Q6
+{
+    public static class KeywordAnalytics
+    {
+        // ✅ TODO: Student must implement only this method
+        public static List&lt;string&gt; TopK(string[] words, int k)
+        {
+            // TODO:
+            // - count normalized words
+            // - sort by count desc, word asc
+            // - return first k
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var words = new[] { &quot; login ✅ &quot;, &quot;Login&quot;, &quot;  refund !@@# &quot;, &quot;Refund&quot;, &quot;refund&quot;, &quot;shipping&quot;, &quot;Shipping&quot;, &quot;α/β&quot;, &quot;α/β&quot;, &quot;α/β&quot; };
+            var top = KeywordAnalytics.TopK(words, 3);
+            Console.WriteLine(string.Join(&quot; | &quot;, top));
+        }
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns6">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Count using Dictionary, then sort pairs by count descending and word ascending, take k.</p>
+      <pre><code>public static List&lt;string&gt; TopK(string[] words, int k)
+{
+    if (words == null) throw new ArgumentNullException(nameof(words));
+    if (k &lt;= 0) throw new ArgumentOutOfRangeException(nameof(k));
+
+    var freq = new Dictionary&lt;string, int&gt;(StringComparer.OrdinalIgnoreCase);
+    foreach (var w in words)
+    {
+        var key = (w ?? &quot;&quot;).Trim();
+        if (key.Length == 0) continue;
+        freq[key] = freq.TryGetValue(key, out var c) ? c + 1 : 1;
+    }
+
+    return freq
+        .OrderByDescending(p =&gt; p.Value)
+        .ThenBy(p =&gt; p.Key, StringComparer.Ordinal)
+        .Take(k)
+        .Select(p =&gt; p.Key)
+        .ToList();
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q7">
+  <header class="itq-head">
+    <div class="itq-no">7</div>
+    <div>
+      <h3 class="itq-title">Search in Rotated Sorted Array — Modified Binary Search</h3>
+      <div class="itq-tags"><span class="itq-chip">Binary search</span><span class="itq-chip">Arrays</span><span class="itq-chip">Log n</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A search index stores sorted IDs but the array is rotated due to sharding.
+Find the index of a target in a rotated sorted array (no duplicates).
+
+Implement:
+- RotatedSearch.Find(int[] arr, int target) -&gt; index or -1
+
+Rules:
+- O(log n) using modified binary search
+
+✅ Students implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput7">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput7">Array:
+&quot; 10, 15, 20, -3, 0, 7, 9 ✅ &quot;
+Target:
+&quot; -3 &quot; </textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput7')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode7')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns7')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>DSA scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode7">using System;
+
+namespace ItTechGenie.M1.DSA.Q7
+{
+    public static class RotatedSearch
+    {
+        // ✅ TODO: Student must implement only this method
+        public static int Find(int[] arr, int target)
+        {
+            // TODO:
+            // - identify sorted half each iteration
+            // - decide which side to search
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            int[] a = { 10, 15, 20, -3, 0, 7, 9 };
+            Console.WriteLine(RotatedSearch.Find(a, -3));
+        }
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns7">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Modified binary search: one half is sorted; decide which half contains target.</p>
+      <pre><code>public static int Find(int[] arr, int target)
+{
+    if (arr == null) throw new ArgumentNullException(nameof(arr));
+    int lo = 0, hi = arr.Length - 1;
+
+    while (lo &lt;= hi)
+    {
+        int mid = lo + (hi - lo) / 2;
+        if (arr[mid] == target) return mid;
+
+        if (arr[lo] &lt;= arr[mid]) // left sorted
+        {
+            if (arr[lo] &lt;= target &amp;&amp; target &lt; arr[mid]) hi = mid - 1;
+            else lo = mid + 1;
+        }
+        else // right sorted
+        {
+            if (arr[mid] &lt; target &amp;&amp; target &lt;= arr[hi]) lo = mid + 1;
+            else hi = mid - 1;
+        }
+    }
+    return -1;
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q8">
+  <header class="itq-head">
+    <div class="itq-no">8</div>
+    <div>
+      <h3 class="itq-title">Cycle Detection in Linked List — Floyd’s Algorithm</h3>
+      <div class="itq-tags"><span class="itq-chip">Linked list</span><span class="itq-chip">Two pointers</span><span class="itq-chip">Cycle</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A workflow engine maintains a linked list of steps.
+Bad configuration may introduce a cycle. Detect if a cycle exists.
+
+Implement:
+- LinkedListUtil.HasCycle(Node head) -&gt; bool
+
+Rules:
+- Floyd&#x27;s tortoise-hare (O(1) memory)
+
+✅ Students implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput8">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput8">Steps (conceptual):
+&quot;A ✅&quot; -&gt; &quot;B !@@#&quot; -&gt; &quot;C α/β&quot; -&gt; back to &quot;B !@@#&quot;
+</textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput8')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode8')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns8')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>DSA scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode8">using System;
+
+namespace ItTechGenie.M1.DSA.Q8
+{
+    public class Node
+    {
+        public string Label;
+        public Node? Next;
+        public Node(string label) { Label = label; }
+    }
+
+    public static class LinkedListUtil
+    {
+        // ✅ TODO: Student must implement only this method
+        public static bool HasCycle(Node? head)
+        {
+            // TODO:
+            // - slow=head, fast=head
+            // - move slow 1 step, fast 2 steps
+            // - if meet =&gt; cycle
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var a = new Node(&quot;A ✅&quot;);
+            var b = new Node(&quot;B !@@#&quot;);
+            var c = new Node(&quot;C α/β&quot;);
+
+            a.Next = b; b.Next = c; c.Next = b;                       // create cycle
+
+            Console.WriteLine(LinkedListUtil.HasCycle(a));
+        }
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns8">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Two pointers: if fast pointer catches slow pointer, a cycle exists.</p>
+      <pre><code>public static bool HasCycle(Node? head)
+{
+    Node? slow = head, fast = head;
+    while (fast != null &amp;&amp; fast.Next != null)
+    {
+        slow = slow!.Next;
+        fast = fast.Next.Next;
+        if (slow == fast) return true;
+    }
+    return false;
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q9">
+  <header class="itq-head">
+    <div class="itq-no">9</div>
+    <div>
+      <h3 class="itq-title">Minimum Coupons to Reach Target — Dynamic Programming</h3>
+      <div class="itq-tags"><span class="itq-chip">DP</span><span class="itq-chip">Optimization</span><span class="itq-chip">Unbounded knapsack</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A checkout system must return the minimum number of coupons to reach a discount target.
+Coupons can be reused (unbounded).
+
+Implement:
+- CouponDp.MinCoupons(int[] coupons, int target) -&gt; min count or -1
+
+Rules:
+- Bottom-up DP
+
+✅ Students implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput9">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput9">Coupons:
+&quot; 1, 3, 4 ✅ &quot;
+Target:
+&quot; 6 &quot;
+Also test:
+Target2=&quot; 11 !@@# &quot; </textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput9')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode9')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns9')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>DSA scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode9">using System;
+
+namespace ItTechGenie.M1.DSA.Q9
+{
+    public static class CouponDp
+    {
+        // ✅ TODO: Student must implement only this method
+        public static int MinCoupons(int[] coupons, int target)
+        {
+            // TODO:
+            // - dp[0]=0, dp[others]=INF
+            // - dp[x]=min(dp[x], dp[x-coin]+1)
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            int[] c = { 1, 3, 4 };
+            Console.WriteLine(CouponDp.MinCoupons(c, 6));
+        }
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns9">
+      <h4>Answer (Logic + Code)</h4>
+      <p>DP over sums: dp[x] = minimum coupons to make x; return dp[target] or -1 if INF.</p>
+      <pre><code>public static int MinCoupons(int[] coupons, int target)
+{
+    if (coupons == null) throw new ArgumentNullException(nameof(coupons));
+    if (target &lt; 0) throw new ArgumentOutOfRangeException(nameof(target));
+
+    const int INF = 1_000_000;
+    int[] dp = new int[target + 1];
+    for (int i = 1; i &lt;= target; i++) dp[i] = INF;
+    dp[0] = 0;
+
+    for (int x = 1; x &lt;= target; x++)
+    {
+        foreach (var coin in coupons)
+        {
+            if (coin &lt;= 0) continue;
+            if (x - coin &gt;= 0 &amp;&amp; dp[x - coin] != INF)
+                dp[x] = Math.Min(dp[x], dp[x - coin] + 1);
+        }
+    }
+    return dp[target] == INF ? -1 : dp[target];
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q10">
+  <header class="itq-head">
+    <div class="itq-no">10</div>
+    <div>
+      <h3 class="itq-title">Merge Overlapping Intervals — Sorting + Scan</h3>
+      <div class="itq-tags"><span class="itq-chip">Sorting</span><span class="itq-chip">Intervals</span><span class="itq-chip">Greedy</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+You receive booking intervals (start,end) and must merge overlaps to compute occupied time blocks.
+
+Implement:
+- IntervalUtil.Merge(List&lt;Interval&gt; items) -&gt; List&lt;Interval&gt;
+
+Rules:
+- Sort by start then end
+- Merge if next.Start &lt;= current.End
+
+✅ Students implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput10">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput10">Intervals:
+&quot;[1,3] label=&#x27;Room A ✅&#x27;&quot;
+&quot;[2,6] label=&#x27;Room A !@@#&#x27;&quot;
+&quot;[8,10] label=&#x27;Room α/β&#x27;&quot;
+&quot;[9,12] label=&#x27;Room α/β ✅&#x27;&quot;
+</textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput10')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode10')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns10')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>DSA scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode10">using System;
+using System.Collections.Generic;
+
+namespace ItTechGenie.M1.DSA.Q10
+{
+    public record Interval(int Start, int End, string Label);
+
+    public static class IntervalUtil
+    {
+        // ✅ TODO: Student must implement only this method
+        public static List&lt;Interval&gt; Merge(List&lt;Interval&gt; items)
+        {
+            // TODO:
+            // - sort
+            // - scan and merge overlaps
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var list = new List&lt;Interval&gt;
+            {
+                new Interval(1,3,&quot;Room A ✅&quot;),
+                new Interval(2,6,&quot;Room A !@@#&quot;),
+                new Interval(8,10,&quot;Room α/β&quot;),
+                new Interval(9,12,&quot;Room α/β ✅&quot;),
+            };
+
+            var merged = IntervalUtil.Merge(list);
+            foreach (var i in merged) Console.WriteLine($&quot;[{i.Start},{i.End}] {i.Label}&quot;);
+        }
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns10">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Sort then scan; extend current interval when overlap, else push to result and start new.</p>
+      <pre><code>public static List&lt;Interval&gt; Merge(List&lt;Interval&gt; items)
+{
+    if (items == null) throw new ArgumentNullException(nameof(items));
+    if (items.Count == 0) return new List&lt;Interval&gt;();
+
+    items.Sort((a,b) =&gt; a.Start != b.Start ? a.Start.CompareTo(b.Start) : a.End.CompareTo(b.End));
+
+    var res = new List&lt;Interval&gt;();
+    var cur = items[0] with { Label = (items[0].Label ?? &quot;&quot;).Trim() };
+
+    for (int idx = 1; idx &lt; items.Count; idx++)
+    {
+        var nxt = items[idx] with { Label = (items[idx].Label ?? &quot;&quot;).Trim() };
+        if (nxt.Start &lt;= cur.End)
+            cur = cur with { End = Math.Max(cur.End, nxt.End) };
+        else
+        {
+            res.Add(cur);
+            cur = nxt;
+        }
+    }
+    res.Add(cur);
+    return res;
+}</code></pre>
+    </div>
+  </div>
+</article>
+    </section>
+  </div>
+
+  <div id="itqToast" class="itq-toast" aria-live="polite"></div>
+  <script>
+(function(){
+  function showToast(text){
+    var t = document.getElementById("itqToast");
+    if(!t) return;
+    t.textContent = text;
+    t.style.display = "block";
+    clearTimeout(t._hide);
+    t._hide = setTimeout(function(){ t.style.display = "none"; }, 1400);
+  }
+  window.itqCopy = function(codeId){
+    var el = document.getElementById(codeId);
+    if(!el) return;
+    var text = el.innerText || el.textContent || "";
+    navigator.clipboard.writeText(text).then(function(){ showToast("Code copied"); })
+      .catch(function(){ showToast("Copy failed (browser blocked)"); });
+  };
+  window.itqCopyInput = function(textareaId){
+    var el = document.getElementById(textareaId);
+    if(!el) return;
+    navigator.clipboard.writeText(el.value || "").then(function(){ showToast("Input copied"); })
+      .catch(function(){ showToast("Copy failed"); });
+  };
+  window.itqToggle = function(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.style.display = (el.style.display === "block") ? "none" : "block";
+  };
+})();
+</script>
