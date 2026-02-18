@@ -159,12 +159,6 @@ namespace GenieWeb.Controllers
         public IActionResult IComparableScenarioQuestions() => GenerateView("CodingPractice/IComparableScenarioQuestions");
         public IActionResult ThreadSafetyScenarioQuestions() => GenerateView("CodingPractice/ThreadSafetyScenarioQuestions");
         public IActionResult LinqScenarioQuestions() => GenerateView("CodingPractice/LinqScenarioQuestions");
-        public IActionResult StringFunctions64Questions() => GenerateView("CodingPractice/StringFunctions64Questions");
-        public IActionResult Char52Questions() => GenerateView("CodingPractice/Char52Questions");
-        public IActionResult StringBuilder36Questions() => GenerateView("CodingPractice/StringBuilder36Questions");
-        public IActionResult StringCharStringBuilder25Questions() => GenerateView("CodingPractice/StringCharStringBuilder25Questions");
-        public IActionResult StringToNumberQuestions() => GenerateView("CodingPractice/StringToNumberQuestions");
-        public IActionResult StringToNumberAnswers() => GenerateView("CodingPractice/StringToNumberAnswers");
 
         public IActionResult CSharpAdvanced()
         {
