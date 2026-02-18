@@ -1,0 +1,1243 @@
+@{
+    ViewData["Title"] = "IComparableScenarioQuestions";
+    ViewData["ActiveMenu"] = "CSharp";
+    ViewData["ActivePage"] = "IComparableScenarioQuestions";
+}
+
+<style>
+.itq-wrap{max-width:1120px;margin:0 auto;padding:18px 14px 120px 14px;font-family:Arial, Helvetica, sans-serif;}
+.itq-hero{border:1px solid rgba(0,0,0,.10);border-radius:18px;padding:16px 16px 14px 16px;background:linear-gradient(180deg, rgba(27,110,194,.10), rgba(255,255,255,0));}
+.itq-hero h1{margin:0 0 6px 0;font-size:22px;letter-spacing:.2px;}
+.itq-hero .itq-sub{color:#4b5563;font-size:13px;margin:0;}
+.itq-info{margin-top:12px;border:1px dashed rgba(27,110,194,.35);background:rgba(27,110,194,.06);border-radius:14px;padding:12px;font-size:13px;color:#374151;line-height:1.55;}
+.itq-pills{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;}
+.itq-pill{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:999px;padding:5px 10px;font-size:12px;color:#374151;}
+.itq-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:16px;}
+.itq-card{border:1px solid rgba(0,0,0,.12);border-radius:18px;background:#fff;box-shadow:0 .25rem .75rem rgba(0,0,0,.05);overflow:hidden;transition:transform .14s ease,border-color .14s ease,background .14s ease;}
+.itq-card:hover{transform:translateY(-2px);border-color:rgba(34,197,94,.55);background:rgba(34,197,94,.03);}
+.itq-head{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;}
+.itq-no{min-width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:rgba(27,110,194,.10);border:1px solid rgba(27,110,194,.25);font-weight:700;color:#1b6ec2;}
+.itq-title{margin:0;font-size:16px;}
+.itq-tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:#6b7280;}
+.itq-chip{padding:3px 8px;border-radius:999px;border:1px solid rgba(0,0,0,.10);background:rgba(0,0,0,.02);}
+.itq-level{font-weight:700;}
+.itq-level.warm{color:#0f766e;}
+.itq-level.mod{color:#b45309;}
+.itq-level.cx{color:#be123c;}
+.itq-body{padding:0 16px 16px 16px;}
+.itq-stmt{margin:0 0 10px 0;color:#374151;font-size:13px;line-height:1.55;white-space:pre-line;}
+.itq-actions{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 10px 0;}
+.itq-btn{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:12px;padding:7px 10px;font-size:12px;cursor:pointer;transition:transform .12s ease,background .12s ease;}
+.itq-btn:hover{transform:translateY(-1px);background:rgba(0,0,0,.02);}
+.itq-btn.copy{border-color:rgba(27,110,194,.35);background:rgba(27,110,194,.06);}
+.itq-btn.ans{border-color:rgba(15,118,110,.35);background:rgba(15,118,110,.06);}
+.itq-io{display:grid;gap:8px;margin:10px 0 12px 0;}
+.itq-io label{font-size:12px;color:#6b7280;font-weight:700;}
+.itq-io textarea{width:100%;min-height:88px;border-radius:14px;border:1px solid rgba(0,0,0,.12);padding:10px 12px;font-size:12px;line-height:1.45;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;background:#fff;}
+.itq-io .hint{font-size:12px;color:#6b7280;line-height:1.4;}
+.itq-code{border:1px solid rgba(0,0,0,.10);border-radius:16px;overflow:hidden;background:#0b1220;}
+.itq-codeHead{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.10);color:#e5e7eb;font-size:12px;}
+.itq-codeHead .itq-kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:2px 6px;border-radius:8px;}
+.itq-pre{margin:0;padding:12px;overflow:auto;}
+.itq-pre code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:12px;color:#e5e7eb;white-space:pre;}
+.itq-answer{margin-top:10px;border:1px solid rgba(15,118,110,.25);background:rgba(15,118,110,.06);border-radius:14px;padding:10px 12px;display:none;}
+.itq-answer h4{margin:0 0 6px 0;font-size:13px;color:#0f766e;}
+.itq-answer p{margin:0;color:#374151;font-size:12px;line-height:1.5;white-space:pre-line;}
+.itq-toast{position:fixed;right:14px;bottom:14px;z-index:9999;display:none;background:#111827;color:#fff;padding:10px 12px;border-radius:12px;font-size:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);}
+</style>
+
+<div class="itq-wrap">
+    <section class="itq-hero">
+      <h1>C# Question Bank</h1>
+      <p class="itq-sub">C# IComparable | Warm‑up (with hidden reference answer) + 10 Scenario Questions (5 Moderate + 5 Complex) — Questions Only</p>
+
+      <div class="itq-info">
+        <strong>Instruction:</strong> Students should implement <strong>ONLY</strong> the methods marked with <strong>// ✅ TODO</strong> in Q2–Q11.<br/>
+        <strong>Warm‑up:</strong> Q1 includes a <em>reference answer</em> behind a button to cover key options of <strong>IComparable</strong> (contract, null handling, multi-field compare, default Sort, custom ordering).<br/>
+        All other questions contain <strong>NO answers</strong> and remain fully visible by default (boilerplate + scenario + code).
+      </div>
+
+      <div class="itq-pills">
+        <span class="itq-pill"><strong>Warm‑up:</strong> 1</span>
+        <span class="itq-pill"><strong>Moderate:</strong> 5</span>
+        <span class="itq-pill"><strong>Complex:</strong> 5</span>
+        <span class="itq-pill"><strong>Coverage:</strong> CompareTo contract, null handling, multi-field sort, generic constraints, semantic versioning, natural sort, top‑K, overlaps, SortedSet determinism, custom comparer fallback</span>
+      </div>
+    </section>
+
+    <section class="itq-grid" aria-label="C# IComparable scenario questions">
+      <article class="itq-card" id="q1">
+  <header class="itq-head">
+    <div class="itq-no">1</div>
+    <div>
+      <h3 class="itq-title">Warm‑up: Implement IComparable&lt;T&gt; for Support Tickets (with reference answer)</h3>
+      <div class="itq-tags"><span class="itq-chip">IComparable&lt;T&gt;</span><span class="itq-chip">CompareTo</span><span class="itq-chip">Multi-field sort</span><span class="itq-chip">Null handling</span><span class="itq-chip">Sort()</span><span class="itq-chip itq-level warm">Warm-up</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Warm‑up (with answer):
+You will implement IComparable&lt;T&gt; for a custom type and verify sorting behavior.
+
+This warm-up covers:
+- CompareTo contract: return -1 / 0 / +1
+- Multi-field comparison (Primary: Priority, Secondary: CreatedAt, Tertiary: TicketId)
+- Null handling
+- Ascending order vs custom descending sort using Comparer
+- Using List&lt;T&gt;.Sort() (default uses IComparable&lt;T&gt;)
+- Using OrderBy(...) and ThenBy(...)
+
+✅ The warm-up includes a reference answer (hidden behind a button).</p>
+
+    <div class="itq-io">
+      <label for="itqInput1">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput1">Tickets (each line):
+&quot;TKT- 001 ✅ | priority=2 | created=2026-02-18 10:05:02 | title=&quot;Login fail!@@#&quot;&quot;
+&quot;TKT-α12 | priority=1 | created=2026-02-18 10:04:59 | title=&quot;Payment ₹ 1,999.25&quot;&quot;
+&quot;TKT-β77 | priority=2 | created=2026-02-18 10:05:02 | title=&quot;Timeout α/β&quot;&quot;
+&quot;TKT- 001 ✅ | priority=2 | created=2026-02-18 10:05:02 | title=&quot;Duplicate id&quot;&quot;
+Note: spaces + unicode in IDs.</textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and comparison edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput1')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode1')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>IComparable / Sorting scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode1">using System;                                                     // Console, DateTime
+using System.Collections.Generic;                                    // List, Comparer
+using System.Globalization;                                         // parsing
+using System.Linq;                                                  // LINQ
+
+namespace ItTechGenie.M1.IComparable.WarmUp
+{
+    // Ticket model that can be sorted (default) using IComparable&lt;Ticket&gt;
+    public class SupportTicket : IComparable&lt;SupportTicket&gt;          // IComparable&lt;T&gt; enables Sort()
+    {
+        public string TicketId { get; }                              // unique id (may contain spaces/unicode)
+        public int Priority { get; }                                 // lower number =&gt; higher priority
+        public DateTime CreatedAt { get; }                            // created time
+        public string Title { get; }                                  // message/title
+
+        public SupportTicket(string ticketId, int priority, DateTime createdAt, string title) // constructor
+        {
+            TicketId = ticketId;                                     // assign id
+            Priority = priority;                                     // assign priority
+            CreatedAt = createdAt;                                   // assign time
+            Title = title;                                           // assign title
+        }
+
+        // ✅ Warm-up TODO: Student can compare with the reference answer (below)
+        public int CompareTo(SupportTicket? other)                    // contract: -1/0/+1
+        {
+            // TODO:
+            // 1) null other =&gt; current is &quot;greater&quot; or &quot;after&quot; (return 1)
+            // 2) Primary: Priority ascending (1 before 2)
+            // 3) Secondary: CreatedAt ascending (earlier first)
+            // 4) Tertiary: TicketId ordinal (string compare)
+            throw new NotImplementedException();
+        }
+
+        public override string ToString()                             // print
+            =&gt; $&quot;{Priority} | {CreatedAt:HH:mm:ss} | {TicketId} | {Title}&quot;;
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            // sample tickets (hard-coded for warm-up)
+            var tickets = new List&lt;SupportTicket&gt;                     // list of comparable tickets
+            {
+                new SupportTicket(&quot;TKT- 001 ✅&quot;, 2, DateTime.Parse(&quot;2026-02-18 10:05:02&quot;), &quot;Login fail!@@#&quot;),
+                new SupportTicket(&quot;TKT-α12&quot;, 1, DateTime.Parse(&quot;2026-02-18 10:04:59&quot;), &quot;Payment ₹ 1,999.25&quot;),
+                new SupportTicket(&quot;TKT-β77&quot;, 2, DateTime.Parse(&quot;2026-02-18 10:05:02&quot;), &quot;Timeout α/β&quot;),
+                new SupportTicket(&quot;TKT- 001 ✅&quot;, 2, DateTime.Parse(&quot;2026-02-18 10:05:02&quot;), &quot;Duplicate id&quot;)
+            };
+
+            // 1) Default sort uses IComparable&lt;T&gt; (CompareTo)
+            tickets.Sort();                                           // relies on CompareTo
+
+            Console.WriteLine(&quot;Default Sort (Priority, CreatedAt, TicketId):&quot;);
+            tickets.ForEach(t =&gt; Console.WriteLine(t));               // print sorted list
+
+            // 2) Descending sort example using Comparer (not IComparable)
+            var desc = tickets.OrderByDescending(t =&gt; t.Priority)      // higher priority number first
+                              .ThenBy(t =&gt; t.CreatedAt)               // then by time
+                              .ToList();
+
+            Console.WriteLine(&quot;\nCustom Sort (Priority DESC, CreatedAt ASC):&quot;);
+            desc.ForEach(t =&gt; Console.WriteLine(t));
+        }
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-actions">
+          <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns1')">Show/Hide Warm‑up Answer</button>
+        </div>
+        <div class="itq-answer" id="itqAns1">
+          <h4>Warm‑up Reference Answer (Conceptual)</h4>
+          <p>Reference CompareTo implementation (key points):
+- If other is null: return 1 (current comes after null).
+- Compare Priority first (ascending): Priority.CompareTo(other.Priority).
+- If equal: compare CreatedAt (ascending): CreatedAt.CompareTo(other.CreatedAt).
+- If equal: compare TicketId (ordinal): string.Compare(TicketId, other.TicketId, StringComparison.Ordinal).
+- Return first non-zero result; otherwise return 0.
+
+This ensures deterministic sorting when multiple fields are equal.</p>
+        </div>
+  </div>
+</article><article class="itq-card" id="q2">
+  <header class="itq-head">
+    <div class="itq-no">2</div>
+    <div>
+      <h3 class="itq-title">Sort Product Catalog — IComparable&lt;Product&gt; (SKU then Price)</h3>
+      <div class="itq-tags"><span class="itq-chip">IComparable&lt;T&gt;</span><span class="itq-chip">Sort</span><span class="itq-chip">StringComparison</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Your e-commerce catalog must sort products consistently for display and caching.
+
+What to implement:
+- Product.CompareTo(Product? other)
+
+Rules:
+- Null other: current comes after (return 1)
+- Primary: SKU (ordinal, trim spaces)
+- Secondary: Price ascending
+- Tertiary: Name (case-insensitive)
+
+✅ Implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput2">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput2">Products (each line):
+&quot;SKU= SKU-β77  | name=&quot;Headphones ✅&quot; | price=₹ 7999.00&quot;
+&quot;SKU=SKU-α12| name=&quot;Laptop Stand&quot; | price=₹ 1299.50&quot;
+&quot;SKU=SKU-α12| name=&quot;Laptop stand&quot; | price=₹ 1299.50&quot;
+&quot;SKU=SKU-!@@#| name=&quot;Cable 2m&quot; | price=₹ 499.00&quot; </textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and comparison edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput2')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode2')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>IComparable / Sorting scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode2">using System;                                                     // Console
+using System.Collections.Generic;                                    // List
+
+namespace ItTechGenie.M1.IComparable.Q2
+{
+    public class Product : IComparable&lt;Product&gt;                      // comparable for Sort()
+    {
+        public string Sku { get; }                                   // key (may contain spaces)
+        public string Name { get; }                                  // display name
+        public decimal Price { get; }                                // price
+
+        public Product(string sku, string name, decimal price)        // constructor
+        {
+            Sku = sku;                                               // assign
+            Name = name;                                             // assign
+            Price = price;                                           // assign
+        }
+
+        // ✅ TODO: Student must implement only this method
+        public int CompareTo(Product? other)
+        {
+            // TODO:
+            // - handle null
+            // - compare Sku.Trim() using StringComparison.Ordinal
+            // - then Price
+            // - then Name (ignore case)
+            throw new NotImplementedException();
+        }
+
+        public override string ToString() =&gt; $&quot;{Sku} | {Name} | ₹{Price}&quot;;
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var list = new List&lt;Product&gt;
+            {
+                new Product(&quot; SKU-β77  &quot;, &quot;Headphones ✅&quot;, 7999m),
+                new Product(&quot;SKU-α12&quot;, &quot;Laptop Stand&quot;, 1299.50m),
+                new Product(&quot;SKU-α12&quot;, &quot;Laptop stand&quot;, 1299.50m),
+                new Product(&quot;SKU-!@@#&quot;, &quot;Cable 2m&quot;, 499m),
+            };
+
+            list.Sort();                                             // uses CompareTo
+            list.ForEach(p =&gt; Console.WriteLine(p));
+        }
+    }
+}</code></pre>
+    </div>
+
+    
+  </div>
+</article><article class="itq-card" id="q3">
+  <header class="itq-head">
+    <div class="itq-no">3</div>
+    <div>
+      <h3 class="itq-title">Generic Min/Max Utility — where T : IComparable&lt;T&gt;</h3>
+      <div class="itq-tags"><span class="itq-chip">Generics</span><span class="itq-chip">IComparable&lt;T&gt;</span><span class="itq-chip">Constraints</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A reusable utility must find min and max values safely for any comparable type.
+
+What to implement:
+- RangeUtil.GetMinMax&lt;T&gt;(IEnumerable&lt;T&gt; items) -&gt; (T min, T max)
+
+Rules:
+- Generic constraint: where T : IComparable&lt;T&gt;
+- Throw ArgumentException if items empty
+- Must work for int, DateTime, and custom types implementing IComparable&lt;T&gt;
+
+✅ Implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput3">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput3">items:
+ints:  [ 5, 1, 9, 2, 2 ]
+dates: [ &quot;2026-02-18&quot;, &quot;2026-01-01&quot;, &quot;2026-12-31&quot; ]
+custom: ids [&quot;A- 01 ✅&quot;,&quot;A-02&quot;,&quot;A-α3&quot;] (custom IComparable)</textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and comparison edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput3')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode3')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>IComparable / Sorting scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode3">using System;                                                     // Console
+using System.Collections.Generic;                                    // IEnumerable, List
+
+namespace ItTechGenie.M1.IComparable.Q3
+{
+    public static class RangeUtil
+    {
+        // ✅ TODO: Student must implement only this method
+        public static (T min, T max) GetMinMax&lt;T&gt;(IEnumerable&lt;T&gt; items) where T : IComparable&lt;T&gt;
+        {
+            // TODO:
+            // - validate items not null
+            // - iterate once
+            // - initialize min/max from first element
+            // - use CompareTo to update
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var ints = new List&lt;int&gt; { 5, 1, 9, 2, 2 };
+            var mm1 = RangeUtil.GetMinMax(ints);
+            Console.WriteLine($&quot;Int Min={mm1.min}, Max={mm1.max}&quot;);
+
+            var dates = new List&lt;DateTime&gt; { DateTime.Parse(&quot;2026-02-18&quot;), DateTime.Parse(&quot;2026-01-01&quot;), DateTime.Parse(&quot;2026-12-31&quot;) };
+            var mm2 = RangeUtil.GetMinMax(dates);
+            Console.WriteLine($&quot;Date Min={mm2.min:yyyy-MM-dd}, Max={mm2.max:yyyy-MM-dd}&quot;);
+        }
+    }
+}</code></pre>
+    </div>
+
+    
+  </div>
+</article><article class="itq-card" id="q4">
+  <header class="itq-head">
+    <div class="itq-no">4</div>
+    <div>
+      <h3 class="itq-title">Normalize &amp; Sort Usernames — Comparisons with Null/Whitespace</h3>
+      <div class="itq-tags"><span class="itq-chip">IComparable</span><span class="itq-chip">String normalization</span><span class="itq-chip">Edge cases</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A user export file contains usernames with extra spaces and mixed casing.
+You must sort users consistently and safely.
+
+What to implement:
+- User.CompareTo(User? other)
+
+Rules:
+- Null user: current after (return 1)
+- Normalize username: Trim, collapse multiple spaces, treat null/empty as &quot;&quot; (empty)
+- Primary: normalized username (case-insensitive)
+- Secondary: CreatedAt ascending
+
+✅ Implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput4">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput4">users:
+&quot; username=&#x27;  Sana   Suresh ✅  &#x27; created=&#x27;2026-02-18 10:05&#x27; &quot;
+&quot; username=&#x27;ravi#1&#x27; created=&#x27;2026-02-18 10:01&#x27; &quot;
+&quot; username=&#x27;&#x27; created=&#x27;2026-02-18 10:02&#x27; &quot;
+&quot; username=&#x27;Arjun α/β&#x27; created=&#x27;2026-02-18 10:03&#x27; &quot; </textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and comparison edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput4')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode4')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>IComparable / Sorting scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode4">using System;                                                     // Console, DateTime
+using System.Collections.Generic;                                    // List
+using System.Text.RegularExpressions;                                // Regex
+
+namespace ItTechGenie.M1.IComparable.Q4
+{
+    public class User : IComparable&lt;User&gt;                            // comparable user
+    {
+        public string? Username { get; }                              // may be null/empty
+        public DateTime CreatedAt { get; }                             // timestamp
+
+        public User(string? username, DateTime createdAt)
+        {
+            Username = username;
+            CreatedAt = createdAt;
+        }
+
+        private static string Normalize(string? s)                    // helper normalize
+        {
+            // simple normalization (can be used inside CompareTo)
+            if (string.IsNullOrWhiteSpace(s)) return &quot;&quot;;              // treat null/empty
+            s = s.Trim();                                             // trim ends
+            s = Regex.Replace(s, @@&quot;\s+&quot;, &quot; &quot;);                        // collapse spaces
+            return s;
+        }
+
+        // ✅ TODO: Student must implement only this method
+        public int CompareTo(User? other)
+        {
+            // TODO:
+            // - handle null other
+            // - compare normalized username ignoring case
+            // - then CreatedAt ascending
+            throw new NotImplementedException();
+        }
+
+        public override string ToString() =&gt; $&quot;{Normalize(Username)} | {CreatedAt:HH:mm}&quot;;
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var list = new List&lt;User&gt;
+            {
+                new User(&quot;  Sana   Suresh ✅  &quot;, DateTime.Parse(&quot;2026-02-18 10:05&quot;)),
+                new User(&quot;ravi#1&quot;, DateTime.Parse(&quot;2026-02-18 10:01&quot;)),
+                new User(&quot;&quot;, DateTime.Parse(&quot;2026-02-18 10:02&quot;)),
+                new User(&quot;Arjun α/β&quot;, DateTime.Parse(&quot;2026-02-18 10:03&quot;)),
+            };
+
+            list.Sort();                                              // uses CompareTo
+            list.ForEach(u =&gt; Console.WriteLine(u));
+        }
+    }
+}</code></pre>
+    </div>
+
+    
+  </div>
+</article><article class="itq-card" id="q5">
+  <header class="itq-head">
+    <div class="itq-no">5</div>
+    <div>
+      <h3 class="itq-title">Compare Semantic Versions — IComparable&lt;SemVer&gt;</h3>
+      <div class="itq-tags"><span class="itq-chip">IComparable&lt;T&gt;</span><span class="itq-chip">Versioning</span><span class="itq-chip">Parsing</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Your deployment system sorts build versions like: MAJOR.MINOR.PATCH (optional -label).
+You must implement semantic version ordering.
+
+What to implement:
+- SemVer.CompareTo(SemVer? other)
+
+Rules:
+- Compare Major, then Minor, then Patch (ascending)
+- Pre-release label: versions WITHOUT label are greater than WITH label (release &gt; prerelease)
+- If both have labels: compare label ordinal-ignore-case
+
+✅ Implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput5">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput5">versions:
+&quot;1.2.10&quot;
+&quot;1.2.2&quot;
+&quot;1.2.2-alpha ✅&quot;
+&quot;1.2.2-beta&quot;
+&quot;2.0.0&quot; </textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and comparison edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput5')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode5')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>IComparable / Sorting scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode5">using System;                                                     // Console
+using System.Collections.Generic;                                    // List
+
+namespace ItTechGenie.M1.IComparable.Q5
+{
+    public class SemVer : IComparable&lt;SemVer&gt;
+    {
+        public int Major { get; }
+        public int Minor { get; }
+        public int Patch { get; }
+        public string? Label { get; }                                 // e.g., alpha/beta/rc
+
+        public SemVer(int major, int minor, int patch, string? label)
+        {
+            Major = major; Minor = minor; Patch = patch; Label = label;
+        }
+
+        // ✅ TODO: Student must implement only this method
+        public int CompareTo(SemVer? other)
+        {
+            // TODO:
+            // - handle null other
+            // - compare Major, Minor, Patch
+            // - release (Label null/empty) &gt; prerelease (Label set)
+            // - label compare if both have
+            throw new NotImplementedException();
+        }
+
+        public override string ToString()
+            =&gt; $&quot;{Major}.{Minor}.{Patch}&quot; + (string.IsNullOrWhiteSpace(Label) ? &quot;&quot; : &quot;-&quot; + Label);
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var list = new List&lt;SemVer&gt;
+            {
+                new SemVer(1,2,10,null),
+                new SemVer(1,2,2,null),
+                new SemVer(1,2,2,&quot;alpha ✅&quot;),
+                new SemVer(1,2,2,&quot;beta&quot;),
+                new SemVer(2,0,0,null)
+            };
+
+            list.Sort();
+            list.ForEach(v =&gt; Console.WriteLine(v));
+        }
+    }
+}</code></pre>
+    </div>
+
+    
+  </div>
+</article><article class="itq-card" id="q6">
+  <header class="itq-head">
+    <div class="itq-no">6</div>
+    <div>
+      <h3 class="itq-title">Leaderboard Ranking — Compare by Score DESC then Name ASC</h3>
+      <div class="itq-tags"><span class="itq-chip">IComparable&lt;T&gt;</span><span class="itq-chip">Sorting</span><span class="itq-chip">Business rule</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A game leaderboard must rank players:
+- Higher score should come first
+- If score equal: name ascending (ignore case)
+- If still equal: userId ascending ordinal
+
+What to implement:
+- PlayerRank.CompareTo(PlayerRank? other)
+
+✅ Implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput6">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput6">players:
+&quot;id=&#x27;u-α12&#x27; name=&#x27;Sana ✅&#x27; score=1200&quot;
+&quot;id=&#x27;u-β77&#x27; name=&#x27;ravi#1&#x27; score=1200&quot;
+&quot;id=&#x27;u- 001 &#x27; name=&#x27;Arjun α/β&#x27; score=1500&quot;
+&quot;id=&#x27;u-zzz&#x27; name=&#x27;Sana ✅&#x27; score=1200&quot; </textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and comparison edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput6')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode6')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>IComparable / Sorting scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode6">using System;                                                     // Console
+using System.Collections.Generic;                                    // List
+
+namespace ItTechGenie.M1.IComparable.Q6
+{
+    public class PlayerRank : IComparable&lt;PlayerRank&gt;
+    {
+        public string UserId { get; }
+        public string Name { get; }
+        public int Score { get; }
+
+        public PlayerRank(string userId, string name, int score)
+        {
+            UserId = userId;
+            Name = name;
+            Score = score;
+        }
+
+        // ✅ TODO: Student must implement only this method
+        public int CompareTo(PlayerRank? other)
+        {
+            // TODO:
+            // - null handling
+            // - Score DESC (invert compare)
+            // - Name ASC ignore case
+            // - UserId ASC ordinal
+            throw new NotImplementedException();
+        }
+
+        public override string ToString() =&gt; $&quot;{Score} | {Name} | {UserId}&quot;;
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var list = new List&lt;PlayerRank&gt;
+            {
+                new PlayerRank(&quot;u-α12&quot;, &quot;Sana ✅&quot;, 1200),
+                new PlayerRank(&quot;u-β77&quot;, &quot;ravi#1&quot;, 1200),
+                new PlayerRank(&quot;u- 001 &quot;, &quot;Arjun α/β&quot;, 1500),
+                new PlayerRank(&quot;u-zzz&quot;, &quot;Sana ✅&quot;, 1200),
+            };
+
+            list.Sort();
+            list.ForEach(x =&gt; Console.WriteLine(x));
+        }
+    }
+}</code></pre>
+    </div>
+
+    
+  </div>
+</article><article class="itq-card" id="q7">
+  <header class="itq-head">
+    <div class="itq-no">7</div>
+    <div>
+      <h3 class="itq-title">Natural Sort for File Names — IComparable with Numeric Segments</h3>
+      <div class="itq-tags"><span class="itq-chip">IComparable&lt;T&gt;</span><span class="itq-chip">Natural sort</span><span class="itq-chip">Parsing</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A download center lists files:
+&quot;lesson 2.txt&quot; should come before &quot;lesson 10.txt&quot;.
+Implement natural ordering based on numeric segments inside the name.
+
+What to implement:
+- FileEntry.CompareTo(FileEntry? other)
+
+Rules:
+- Split into alternating text and number tokens
+- Compare token-by-token:
+  - text: case-insensitive
+  - number: numeric compare
+- If one ends earlier: shorter token list first
+
+✅ Implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput7">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput7">files:
+&quot;lesson 2 ✅.txt&quot;
+&quot;lesson 10.txt&quot;
+&quot;lesson 1.txt&quot;
+&quot;Lesson 02.txt&quot;
+&quot;lesson α.txt&quot; </textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and comparison edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput7')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode7')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>IComparable / Sorting scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode7">using System;                                                     // Console
+using System.Collections.Generic;                                    // List
+using System.Text.RegularExpressions;                                // Regex
+
+namespace ItTechGenie.M1.IComparable.Q7
+{
+    public class FileEntry : IComparable&lt;FileEntry&gt;
+    {
+        public string Name { get; }
+        public FileEntry(string name) =&gt; Name = name;
+
+        // ✅ TODO: Student must implement only this method
+        public int CompareTo(FileEntry? other)
+        {
+            // TODO:
+            // - handle null
+            // - tokenize using regex for numbers
+            // - compare tokens (text ignore-case, number numeric)
+            // - fallback to ordinal when needed
+            throw new NotImplementedException();
+        }
+
+        public override string ToString() =&gt; Name;
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var list = new List&lt;FileEntry&gt;
+            {
+                new FileEntry(&quot;lesson 2 ✅.txt&quot;),
+                new FileEntry(&quot;lesson 10.txt&quot;),
+                new FileEntry(&quot;lesson 1.txt&quot;),
+                new FileEntry(&quot;Lesson 02.txt&quot;),
+                new FileEntry(&quot;lesson α.txt&quot;),
+            };
+
+            list.Sort();
+            list.ForEach(f =&gt; Console.WriteLine(f));
+        }
+    }
+}</code></pre>
+    </div>
+
+    
+  </div>
+</article><article class="itq-card" id="q8">
+  <header class="itq-head">
+    <div class="itq-no">8</div>
+    <div>
+      <h3 class="itq-title">Top‑K Selector — Generic Heapless Selection using IComparable&lt;T&gt;</h3>
+      <div class="itq-tags"><span class="itq-chip">Generics</span><span class="itq-chip">IComparable&lt;T&gt;</span><span class="itq-chip">Top-K</span><span class="itq-chip">Performance</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+You need top K highest values from a large list without sorting the entire list.
+Implement a simple top-K selection.
+
+What to implement:
+- TopK.SelectTopK&lt;T&gt;(IEnumerable&lt;T&gt; items, int k) -&gt; List&lt;T&gt;
+
+Rules:
+- where T : IComparable&lt;T&gt;
+- Keep a list of size at most K
+- Insert item and remove smallest when size &gt; K
+- Return result sorted descending
+
+✅ Implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput8">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput8">k=3
+values:
+&quot;99&quot;
+&quot;100 ✅&quot;
+&quot;5&quot;
+&quot;100&quot;
+&quot;42&quot;
+&quot;7&quot;
+&quot;α (ignore as invalid for int list)</textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and comparison edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput8')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode8')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>IComparable / Sorting scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode8">using System;                                                     // Console
+using System.Collections.Generic;                                    // List, IEnumerable
+using System.Linq;                                                  // LINQ
+
+namespace ItTechGenie.M1.IComparable.Q8
+{
+    public static class TopK
+    {
+        // ✅ TODO: Student must implement only this method
+        public static List&lt;T&gt; SelectTopK&lt;T&gt;(IEnumerable&lt;T&gt; items, int k) where T : IComparable&lt;T&gt;
+        {
+            // TODO:
+            // - validate inputs and k &gt; 0
+            // - keep a list top
+            // - for each item: add; if count &gt; k remove smallest
+            // - finally sort descending and return
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var nums = new List&lt;int&gt; { 99, 100, 5, 100, 42, 7 };
+            var top3 = TopK.SelectTopK(nums, 3);
+
+            Console.WriteLine(&quot;Top 3:&quot;);
+            top3.ForEach(Console.WriteLine);
+        }
+    }
+}</code></pre>
+    </div>
+
+    
+  </div>
+</article><article class="itq-card" id="q9">
+  <header class="itq-head">
+    <div class="itq-no">9</div>
+    <div>
+      <h3 class="itq-title">Schedule Conflict Detector — Sort by Time using IComparable&lt;Slot&gt;</h3>
+      <div class="itq-tags"><span class="itq-chip">IComparable&lt;T&gt;</span><span class="itq-chip">Sorting</span><span class="itq-chip">Conflict detection</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A meeting scheduler must detect overlaps.
+First, sort slots by StartTime, then EndTime.
+
+What to implement:
+- Slot.CompareTo(Slot? other)
+- Scheduler.HasOverlap(List&lt;Slot&gt; slots) -&gt; bool
+
+Rules:
+- CompareTo: Start ascending then End ascending then Title ordinal
+- HasOverlap: sort list, then check if slot[i].Start &lt; slot[i-1].End
+
+✅ Implement ONLY the TODO methods.</p>
+
+    <div class="itq-io">
+      <label for="itqInput9">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput9">slots:
+&quot;10:00-10:30 | &quot;Standup ✅&quot;&quot;
+&quot;10:20-11:00 | &quot;Client call α/β&quot;&quot;
+&quot;11:00-11:15 | &quot;Break&quot;&quot;
+&quot;11:10-11:30 | &quot;Review!@@#&quot;&quot; </textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and comparison edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput9')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode9')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>IComparable / Sorting scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode9">using System;                                                     // Console, TimeSpan
+using System.Collections.Generic;                                    // List
+
+namespace ItTechGenie.M1.IComparable.Q9
+{
+    public class Slot : IComparable&lt;Slot&gt;
+    {
+        public TimeSpan Start { get; }
+        public TimeSpan End { get; }
+        public string Title { get; }
+
+        public Slot(TimeSpan start, TimeSpan end, string title)
+        {
+            Start = start; End = end; Title = title;
+        }
+
+        // ✅ TODO: Student must implement only this method
+        public int CompareTo(Slot? other)
+        {
+            // TODO:
+            // - null handling
+            // - compare Start then End then Title ordinal
+            throw new NotImplementedException();
+        }
+
+        public override string ToString() =&gt; $&quot;{Start}-{End} | {Title}&quot;;
+    }
+
+    public static class Scheduler
+    {
+        // ✅ TODO: Student must implement only this method
+        public static bool HasOverlap(List&lt;Slot&gt; slots)
+        {
+            // TODO:
+            // - validate input
+            // - sort (uses Slot.CompareTo)
+            // - scan and check overlap
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var slots = new List&lt;Slot&gt;
+            {
+                new Slot(TimeSpan.Parse(&quot;10:00&quot;), TimeSpan.Parse(&quot;10:30&quot;), &quot;Standup ✅&quot;),
+                new Slot(TimeSpan.Parse(&quot;10:20&quot;), TimeSpan.Parse(&quot;11:00&quot;), &quot;Client call α/β&quot;),
+                new Slot(TimeSpan.Parse(&quot;11:00&quot;), TimeSpan.Parse(&quot;11:15&quot;), &quot;Break&quot;),
+                new Slot(TimeSpan.Parse(&quot;11:10&quot;), TimeSpan.Parse(&quot;11:30&quot;), &quot;Review!@@#&quot;),
+            };
+
+            Console.WriteLine(&quot;Overlap? &quot; + Scheduler.HasOverlap(slots));
+        }
+    }
+}</code></pre>
+    </div>
+
+    
+  </div>
+</article><article class="itq-card" id="q10">
+  <header class="itq-head">
+    <div class="itq-no">10</div>
+    <div>
+      <h3 class="itq-title">Deterministic Ordering for Audit Events — IComparable + SortedSet</h3>
+      <div class="itq-tags"><span class="itq-chip">IComparable&lt;T&gt;</span><span class="itq-chip">SortedSet</span><span class="itq-chip">Determinism</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A security system stores audit events in a SortedSet so duplicates are removed.
+But duplicates are determined by CompareTo returning 0.
+You need deterministic ordering and correct duplicate detection.
+
+What to implement:
+- AuditEvent.CompareTo(AuditEvent? other)
+
+Rules:
+- If CompareTo returns 0 =&gt; SortedSet treats them equal (one removed)
+- Decide uniqueness by EventId first (ordinal), then Timestamp, then Severity, then Message
+- Severity order: INFO &lt; WARN &lt; ERROR &lt; CRITICAL
+- Ensure CompareTo never returns 0 for truly different EventId
+
+✅ Implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput10">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput10">events:
+&quot;id=&#x27;EVT-α12&#x27; time=&#x27;10:05:02&#x27; sev=&#x27;WARN&#x27; msg=&#x27;Login fail ✅&#x27;&quot;
+&quot;id=&#x27;EVT-α12&#x27; time=&#x27;10:05:02&#x27; sev=&#x27;WARN&#x27; msg=&#x27;Login fail ✅&#x27; (duplicate)&quot;
+&quot;id=&#x27;EVT-β77&#x27; time=&#x27;10:05:02&#x27; sev=&#x27;ERROR&#x27; msg=&#x27;Timeout!@@#&#x27;&quot;
+&quot;id=&#x27;EVT- 001 &#x27; time=&#x27;10:05:01&#x27; sev=&#x27;INFO&#x27; msg=&#x27;View page /c#?x=αβ&#x27;&quot; </textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and comparison edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput10')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode10')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>IComparable / Sorting scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode10">using System;                                                     // Console
+using System.Collections.Generic;                                    // SortedSet
+
+namespace ItTechGenie.M1.IComparable.Q10
+{
+    public class AuditEvent : IComparable&lt;AuditEvent&gt;
+    {
+        public string EventId { get; }
+        public TimeSpan Time { get; }
+        public string Severity { get; }
+        public string Message { get; }
+
+        public AuditEvent(string eventId, TimeSpan time, string severity, string message)
+        {
+            EventId = eventId; Time = time; Severity = severity; Message = message;
+        }
+
+        private static int SevRank(string sev)                         // map severity to rank
+        {
+            // INFO &lt; WARN &lt; ERROR &lt; CRITICAL (lowest first)
+            return sev?.ToUpperInvariant() switch
+            {
+                &quot;INFO&quot; =&gt; 1,
+                &quot;WARN&quot; =&gt; 2,
+                &quot;ERROR&quot; =&gt; 3,
+                &quot;CRITICAL&quot; =&gt; 4,
+                _ =&gt; 99
+            };
+        }
+
+        // ✅ TODO: Student must implement only this method
+        public int CompareTo(AuditEvent? other)
+        {
+            // TODO:
+            // - null handling
+            // - EventId ordinal (Trim not required but allowed)
+            // - then Time
+            // - then severity rank
+            // - then Message ordinal
+            // - ensure different EventId cannot return 0
+            throw new NotImplementedException();
+        }
+
+        public override string ToString() =&gt; $&quot;{EventId} | {Time} | {Severity} | {Message}&quot;;
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var set = new SortedSet&lt;AuditEvent&gt;();                     // uses CompareTo for ordering + uniqueness
+
+            set.Add(new AuditEvent(&quot;EVT-α12&quot;, TimeSpan.Parse(&quot;10:05:02&quot;), &quot;WARN&quot;, &quot;Login fail ✅&quot;));
+            set.Add(new AuditEvent(&quot;EVT-α12&quot;, TimeSpan.Parse(&quot;10:05:02&quot;), &quot;WARN&quot;, &quot;Login fail ✅&quot;)); // duplicate
+            set.Add(new AuditEvent(&quot;EVT-β77&quot;, TimeSpan.Parse(&quot;10:05:02&quot;), &quot;ERROR&quot;, &quot;Timeout!@@#&quot;));
+            set.Add(new AuditEvent(&quot;EVT- 001 &quot;, TimeSpan.Parse(&quot;10:05:01&quot;), &quot;INFO&quot;, &quot;View page /c#?x=αβ&quot;));
+
+            foreach (var e in set) Console.WriteLine(e);
+        }
+    }
+}</code></pre>
+    </div>
+
+    
+  </div>
+</article><article class="itq-card" id="q11">
+  <header class="itq-head">
+    <div class="itq-no">11</div>
+    <div>
+      <h3 class="itq-title">Order Processing Rules — Fallback to IComparable and Custom Tie‑Breaker</h3>
+      <div class="itq-tags"><span class="itq-chip">IComparable&lt;T&gt;</span><span class="itq-chip">Custom comparer</span><span class="itq-chip">Business ordering</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Order processing pipeline must sort orders for picking:
+- Urgent orders first
+- Then earliest delivery date
+- Then higher total amount first
+- If still tie: orderNumber ascending
+
+Your domain type implements IComparable&lt;Order&gt; for default sort.
+But for one screen, you need an alternate tie-breaker: by CustomerName.
+
+What to implement:
+- Order.CompareTo(Order? other) (default sorting)
+- OrderComparers.ByCustomerNameThenDefault() -&gt; IComparer&lt;Order&gt;
+
+Rules:
+- CompareTo implements default rule (Urgent DESC, DeliveryDate ASC, Amount DESC, OrderNo ASC)
+- Custom comparer sorts CustomerName ASC (ignore case) then falls back to CompareTo for rest
+- Use Comparer&lt;Order&gt;.Create(...) or implement IComparer&lt;Order&gt;
+
+✅ Implement ONLY the TODO methods.</p>
+
+    <div class="itq-io">
+      <label for="itqInput11">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput11">orders:
+&quot;no=&#x27;O- 90 01 ✅&#x27; urgent=Y delivery=&#x27;2026-02-18&#x27; amount=₹ 1999.25 customer=&#x27;Sana Suresh&#x27;&quot;
+&quot;no=&#x27;O-β77&#x27; urgent=N delivery=&#x27;2026-02-18&#x27; amount=₹ 7999 customer=&#x27;ravi#1&#x27;&quot;
+&quot;no=&#x27;O-α12&#x27; urgent=Y delivery=&#x27;2026-02-17&#x27; amount=₹ 1299.50 customer=&#x27;Arjun α/β&#x27;&quot; </textarea>
+      <div class="hint">✅ Sample input includes spaces, quotes, unicode α/β, emoji ✅, and special chars to test parsing and comparison edge cases.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput11')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode11')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>IComparable / Sorting scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode11">using System;                                                     // Console, DateTime
+using System.Collections.Generic;                                    // IComparer, List
+
+namespace ItTechGenie.M1.IComparable.Q11
+{
+    public class Order : IComparable&lt;Order&gt;
+    {
+        public string OrderNo { get; }
+        public bool Urgent { get; }
+        public DateTime DeliveryDate { get; }
+        public decimal Amount { get; }
+        public string CustomerName { get; }
+
+        public Order(string orderNo, bool urgent, DateTime deliveryDate, decimal amount, string customerName)
+        {
+            OrderNo = orderNo; Urgent = urgent; DeliveryDate = deliveryDate; Amount = amount; CustomerName = customerName;
+        }
+
+        // ✅ TODO: Student must implement only this method
+        public int CompareTo(Order? other)
+        {
+            // TODO:
+            // - null handling
+            // - Urgent DESC (true first)
+            // - DeliveryDate ASC
+            // - Amount DESC
+            // - OrderNo ASC ordinal
+            throw new NotImplementedException();
+        }
+
+        public override string ToString() =&gt; $&quot;{(Urgent ? &quot;URGENT&quot; : &quot;normal&quot;)} | {DeliveryDate:yyyy-MM-dd} | ₹{Amount} | {OrderNo} | {CustomerName}&quot;;
+    }
+
+    public static class OrderComparers
+    {
+        // ✅ TODO: Student must implement only this method
+        public static IComparer&lt;Order&gt; ByCustomerNameThenDefault()
+        {
+            // TODO:
+            // - compare CustomerName ignore-case
+            // - if equal, fallback to x.CompareTo(y)
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var list = new List&lt;Order&gt;
+            {
+                new Order(&quot;O- 90 01 ✅&quot;, true,  DateTime.Parse(&quot;2026-02-18&quot;), 1999.25m, &quot;Sana Suresh&quot;),
+                new Order(&quot;O-β77&quot;,      false, DateTime.Parse(&quot;2026-02-18&quot;), 7999m,     &quot;ravi#1&quot;),
+                new Order(&quot;O-α12&quot;,      true,  DateTime.Parse(&quot;2026-02-17&quot;), 1299.50m,  &quot;Arjun α/β&quot;),
+            };
+
+            Console.WriteLine(&quot;Default sort (CompareTo):&quot;);
+            list.Sort();                                             // uses CompareTo
+            list.ForEach(o =&gt; Console.WriteLine(o));
+
+            Console.WriteLine(&quot;\nCustom screen sort (CustomerName, then default):&quot;);
+            list.Sort(OrderComparers.ByCustomerNameThenDefault());    // custom comparer
+            list.ForEach(o =&gt; Console.WriteLine(o));
+        }
+    }
+}</code></pre>
+    </div>
+
+    
+  </div>
+</article>
+    </section>
+  </div>
+
+  <div id="itqToast" class="itq-toast" aria-live="polite"></div>
+  <script>
+(function(){
+  function showToast(text){
+    var t = document.getElementById("itqToast");
+    if(!t) return;
+    t.textContent = text;
+    t.style.display = "block";
+    clearTimeout(t._hide);
+    t._hide = setTimeout(function(){ t.style.display = "none"; }, 1400);
+  }
+  window.itqCopy = function(codeId){
+    var el = document.getElementById(codeId);
+    if(!el) return;
+    var text = el.innerText || el.textContent || "";
+    navigator.clipboard.writeText(text).then(function(){ showToast("Code copied"); })
+      .catch(function(){ showToast("Copy failed (browser blocked)"); });
+  };
+  window.itqCopyInput = function(textareaId){
+    var el = document.getElementById(textareaId);
+    if(!el) return;
+    navigator.clipboard.writeText(el.value || "").then(function(){ showToast("Input copied"); })
+      .catch(function(){ showToast("Copy failed"); });
+  };
+  window.itqToggle = function(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.style.display = (el.style.display === "block") ? "none" : "block";
+  };
+})();
+</script>

@@ -154,6 +154,11 @@ namespace GenieWeb.Controllers
 
         public IActionResult GenericsAndDelegates() => GenerateView("CodingPractice/GenericsAndDelegates");
         public IActionResult Oops() => GenerateView("CodingPractice/Oops");
+        public IActionResult AsyncAwaitScenarioQuestions() => GenerateView("CodingPractice/AsyncAwaitScenarioQuestions");
+        public IActionResult FileIOSerializationScenarioQuestions() => GenerateView("CodingPractice/FileIOSerializationScenarioQuestions");
+        public IActionResult IComparableScenarioQuestions() => GenerateView("CodingPractice/IComparableScenarioQuestions");
+        public IActionResult ThreadSafetyScenarioQuestions() => GenerateView("CodingPractice/ThreadSafetyScenarioQuestions");
+        public IActionResult LinqScenarioQuestions() => GenerateView("CodingPractice/LinqScenarioQuestions");
 
         public IActionResult CSharpAdvanced()
         {
