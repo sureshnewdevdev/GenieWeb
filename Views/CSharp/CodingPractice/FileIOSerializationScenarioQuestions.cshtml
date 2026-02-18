@@ -1,0 +1,975 @@
+@{
+    ViewData["Title"] = "FileIOSerializationScenarioQuestions";
+    ViewData["ActiveMenu"] = "CSharp";
+    ViewData["ActivePage"] = "FileIOSerializationScenarioQuestions";
+}
+
+<style>
+.itq-wrap{max-width:1120px;margin:0 auto;padding:18px 14px 120px 14px;font-family:Arial, Helvetica, sans-serif;}
+.itq-hero{border:1px solid rgba(0,0,0,.10);border-radius:18px;padding:16px 16px 14px 16px;background:linear-gradient(180deg, rgba(27,110,194,.10), rgba(255,255,255,0));}
+.itq-hero h1{margin:0 0 6px 0;font-size:22px;letter-spacing:.2px;}
+.itq-hero .itq-sub{color:#4b5563;font-size:13px;margin:0;}
+.itq-info{margin-top:12px;border:1px dashed rgba(27,110,194,.35);background:rgba(27,110,194,.06);border-radius:14px;padding:12px;font-size:13px;color:#374151;line-height:1.55;}
+.itq-pills{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;}
+.itq-pill{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:999px;padding:5px 10px;font-size:12px;color:#374151;}
+.itq-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:16px;}
+.itq-card{border:1px solid rgba(0,0,0,.12);border-radius:18px;background:#fff;box-shadow:0 .25rem .75rem rgba(0,0,0,.05);overflow:hidden;transition:transform .14s ease,border-color .14s ease,background .14s ease;}
+.itq-card:hover{transform:translateY(-2px);border-color:rgba(34,197,94,.55);background:rgba(34,197,94,.03);}
+.itq-head{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;}
+.itq-no{min-width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:rgba(27,110,194,.10);border:1px solid rgba(27,110,194,.25);font-weight:700;color:#1b6ec2;}
+.itq-title{margin:0;font-size:16px;}
+.itq-tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:#6b7280;}
+.itq-chip{padding:3px 8px;border-radius:999px;border:1px solid rgba(0,0,0,.10);background:rgba(0,0,0,.02);}
+.itq-level{font-weight:700;}
+.itq-level.mod{color:#b45309;}
+.itq-level.cx{color:#be123c;}
+.itq-body{padding:0 16px 16px 16px;}
+.itq-stmt{margin:0 0 10px 0;color:#374151;font-size:13px;line-height:1.55;white-space:pre-line;}
+.itq-actions{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 10px 0;}
+.itq-btn{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:12px;padding:7px 10px;font-size:12px;cursor:pointer;transition:transform .12s ease,background .12s ease;}
+.itq-btn:hover{transform:translateY(-1px);background:rgba(0,0,0,.02);}
+.itq-btn.copy{border-color:rgba(27,110,194,.35);background:rgba(27,110,194,.06);}
+.itq-io{display:grid;gap:8px;margin:10px 0 12px 0;}
+.itq-io label{font-size:12px;color:#6b7280;font-weight:700;}
+.itq-io textarea{width:100%;min-height:92px;border-radius:14px;border:1px solid rgba(0,0,0,.12);padding:10px 12px;font-size:12px;line-height:1.45;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;background:#fff;}
+.itq-io .hint{font-size:12px;color:#6b7280;line-height:1.4;}
+.itq-code{border:1px solid rgba(0,0,0,.10);border-radius:16px;overflow:hidden;background:#0b1220;}
+.itq-codeHead{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.10);color:#e5e7eb;font-size:12px;}
+.itq-codeHead .itq-kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:2px 6px;border-radius:8px;}
+.itq-pre{margin:0;padding:12px;overflow:auto;}
+.itq-pre code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:12px;color:#e5e7eb;white-space:pre;}
+.itq-toast{position:fixed;right:14px;bottom:14px;z-index:9999;display:none;background:#111827;color:#fff;padding:10px 12px;border-radius:12px;font-size:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);}
+</style>
+
+<div class="itq-wrap">
+    <section class="itq-hero">
+      <h1>C# Question Bank</h1>
+      <p class="itq-sub">C# File IO &amp; Serialization | 10 Scenario Questions (5 Moderate + 5 Complex) — Questions Only</p>
+
+      <div class="itq-info">
+        <strong>Instruction:</strong> Students should implement <strong>ONLY</strong> the methods marked with <strong>// ✅ TODO</strong>.<br/>
+        Each question includes complex sample input (spaces, quotes, unicode α/β, emoji ✅, special chars, currency ₹, tricky file names). Replace it with your own as required.<br/>
+        Do not add answers in this page.
+      </div>
+
+      <div class="itq-pills">
+        <span class="itq-pill"><strong>Moderate:</strong> 5</span>
+        <span class="itq-pill"><strong>Complex:</strong> 5</span>
+        <span class="itq-pill"><strong>Coverage:</strong> StreamWriter append, ReadAllLines parse, JSON serialize/deserialize, file filtering copy, atomic save, NDJSON streaming, CSV→JSON export, binary versioning header, GZip JSON</span>
+      </div>
+    </section>
+
+    <section class="itq-grid" aria-label="C# File IO and Serialization Scenario Questions">
+      <article class="itq-card" id="q1">
+  <header class="itq-head">
+    <div class="itq-no">1</div>
+    <div>
+      <h3 class="itq-title">Write Cleaned Audit Lines — StreamWriter + Append</h3>
+      <div class="itq-tags"><span class="itq-chip">File IO</span><span class="itq-chip">StreamWriter</span><span class="itq-chip">Append</span><span class="itq-chip">Validation</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+You receive audit lines (login/create) that include extra spaces and noisy symbols.
+You must clean them and append to a log file.
+
+What to implement:
+- AuditFile.AppendCleanLines(string filePath, List&lt;string&gt; lines)
+
+Rules:
+- Validate filePath not empty
+- For each line: trim; skip empty
+- Replace multiple spaces with single space
+- Append each cleaned line + newline to the file
+
+✅ Implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput1">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput1">filePath:
+&quot; .\data\audit log ✅.txt &quot;
+lines:
+&quot;[2026-02-18 10:05]   USER=&#x27;Sana @@ Chennai&#x27;   ACTION=&#x27;LOGIN&#x27;   IP=&#x27;10.0.0.5&#x27; &quot;
+&quot;   &quot;
+&quot;[2026-02-18 10:06] USER=&#x27;Ravi&#x27;   ACTION=&#x27;CREATE&#x27;   SKU=&#x27;SKU-β77&#x27;  &quot; </textarea>
+      <div class="hint">✅ Sample input intentionally contains spaces, quotes, unicode α/β, emoji ✅, special chars, currency ₹, and tricky file names.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput1')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode1')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>File IO + Serialization scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode1">using System;                                         // Console
+using System.Collections.Generic;                        // List
+using System.IO;                                        // File IO
+using System.Text.RegularExpressions;                   // Regex
+
+namespace ItTechGenie.M1.FileIO.Q1
+{
+    public static class AuditFile
+    {
+        // ✅ TODO: Student must implement only this method
+        public static void AppendCleanLines(string filePath, List&lt;string&gt; lines)
+        {
+            // TODO:
+            // - validate inputs
+            // - ensure directory exists
+            // - open StreamWriter in append mode
+            // - clean each line and write
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var path = @@&quot;.\data\audit log ✅.txt&quot;;
+            var lines = new List&lt;string&gt;
+            {
+                &quot;[2026-02-18 10:05]   USER=&#x27;Sana @@ Chennai&#x27;   ACTION=&#x27;LOGIN&#x27;   IP=&#x27;10.0.0.5&#x27; &quot;,
+                &quot;   &quot;,
+                &quot;[2026-02-18 10:06] USER=&#x27;Ravi&#x27;   ACTION=&#x27;CREATE&#x27;   SKU=&#x27;SKU-β77&#x27;  &quot;
+            };
+
+            AuditFile.AppendCleanLines(path, lines);
+            Console.WriteLine(&quot;Done ✅&quot;);
+        }
+    }
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q2">
+  <header class="itq-head">
+    <div class="itq-no">2</div>
+    <div>
+      <h3 class="itq-title">Read CSV &amp; Parse Records — File.ReadAllLines + Split</h3>
+      <div class="itq-tags"><span class="itq-chip">File IO</span><span class="itq-chip">ReadAllLines</span><span class="itq-chip">Parsing</span><span class="itq-chip">CSV</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A small CSV file contains product records with delimiter &#x27;;&#x27;.
+You must read the file and parse valid rows into objects.
+
+What to implement:
+- ProductCsv.Load(string filePath)
+
+Rules:
+- First line is header: &quot;Sku;Name;Qty;Price&quot;
+- Ignore invalid rows (wrong column count or qty not int or price not decimal)
+- Trim each field
+- Keep unicode SKU values
+
+✅ Implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput2">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput2">filePath:
+&quot;.\data\products;special ✅.csv&quot;
+fileContent:
+&quot;Sku;Name;Qty;Price
+SKU-α12;Laptop Stand;15;₹ 1299.50
+SKU-β77;Headphones;Noise-Cancel;4;₹ 7999   # invalid column count
+SKU-!@@#;Cable;2;499.00&quot; </textarea>
+      <div class="hint">✅ Sample input intentionally contains spaces, quotes, unicode α/β, emoji ✅, special chars, currency ₹, and tricky file names.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput2')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode2')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>File IO + Serialization scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode2">using System;                                         // Console
+using System.Collections.Generic;                        // List
+using System.Globalization;                             // parsing
+using System.IO;                                        // File IO
+using System.Linq;                                      // LINQ
+
+namespace ItTechGenie.M1.FileIO.Q2
+{
+    public record Product(string Sku, string Name, int Qty, decimal Price);
+
+    public static class ProductCsv
+    {
+        // ✅ TODO: Student must implement only this method
+        public static List&lt;Product&gt; Load(string filePath)
+        {
+            // TODO:
+            // - validate path
+            // - read all lines
+            // - skip header
+            // - split by &#x27;;&#x27;
+            // - parse Qty and Price (remove ₹ and commas)
+            // - ignore invalid rows
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var path = @@&quot;.\data\products;special ✅.csv&quot;;
+            var products = ProductCsv.Load(path);
+
+            foreach (var p in products)
+                Console.WriteLine($&quot;{p.Sku} | {p.Name} | {p.Qty} | ₹ {p.Price}&quot;);
+        }
+    }
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q3">
+  <header class="itq-head">
+    <div class="itq-no">3</div>
+    <div>
+      <h3 class="itq-title">Serialize Settings to JSON — System.Text.Json</h3>
+      <div class="itq-tags"><span class="itq-chip">Serialization</span><span class="itq-chip">JSON</span><span class="itq-chip">System.Text.Json</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Save app settings to a JSON file.
+The setting values may include spaces, quotes and unicode.
+
+What to implement:
+- SettingsStore.Save(string filePath, AppSettings settings)
+
+Rules:
+- Validate inputs
+- Ensure directory exists
+- Use System.Text.Json to serialize with indented output
+- Write UTF-8 text
+
+✅ Implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput3">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput3">filePath:
+&quot;.\data\settings ✅.json&quot;
+settings:
+AppName=&quot;ItTechGenie - Practice&quot;
+AdminEmail=&quot;admin+test@@ittechgenie.com&quot;
+BannerText=&quot;Welcome &quot;Learner&quot; ✅ α/β&quot; </textarea>
+      <div class="hint">✅ Sample input intentionally contains spaces, quotes, unicode α/β, emoji ✅, special chars, currency ₹, and tricky file names.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput3')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode3')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>File IO + Serialization scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode3">using System;                                         // Console
+using System.IO;                                        // File IO
+using System.Text.Json;                                 // JSON
+
+namespace ItTechGenie.M1.Serialization.Q3
+{
+    public record AppSettings(string AppName, string AdminEmail, string BannerText);
+
+    public static class SettingsStore
+    {
+        // ✅ TODO: Student must implement only this method
+        public static void Save(string filePath, AppSettings settings)
+        {
+            // TODO:
+            // - validate inputs
+            // - create directory
+            // - serialize with JsonSerializerOptions(WriteIndented=true)
+            // - File.WriteAllText with UTF-8
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var settings = new AppSettings(&quot;ItTechGenie - Practice&quot;, &quot;admin+test@@ittechgenie.com&quot;, &quot;Welcome &quot;Learner&quot; ✅ α/β&quot;);
+            SettingsStore.Save(@@&quot;.\data\settings ✅.json&quot;, settings);
+            Console.WriteLine(&quot;Saved ✅&quot;);
+        }
+    }
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q4">
+  <header class="itq-head">
+    <div class="itq-no">4</div>
+    <div>
+      <h3 class="itq-title">Deserialize JSON &amp; Validate — Throw on Missing Fields</h3>
+      <div class="itq-tags"><span class="itq-chip">Serialization</span><span class="itq-chip">JSON</span><span class="itq-chip">Validation</span><span class="itq-chip">Exceptions</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Load settings from JSON and validate mandatory fields.
+If AppName or AdminEmail is missing/empty -&gt; throw FormatException.
+
+What to implement:
+- SettingsStore.Load(string filePath)
+
+Rules:
+- Read file
+- Deserialize JSON
+- Validate required fields
+- Return settings object
+
+✅ Implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput4">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput4">filePath:
+&quot;.\data\settings ✅.json&quot;
+invalidJsonExample:
+{ &quot;AppName&quot;: &quot;  &quot;, &quot;AdminEmail&quot;: &quot;&quot;, &quot;BannerText&quot;:&quot;Hi ✅&quot; }</textarea>
+      <div class="hint">✅ Sample input intentionally contains spaces, quotes, unicode α/β, emoji ✅, special chars, currency ₹, and tricky file names.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput4')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode4')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>File IO + Serialization scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode4">using System;                                         // FormatException
+using System.IO;                                        // File IO
+using System.Text.Json;                                 // JSON
+
+namespace ItTechGenie.M1.Serialization.Q4
+{
+    public record AppSettings(string AppName, string AdminEmail, string BannerText);
+
+    public static class SettingsStore
+    {
+        // ✅ TODO: Student must implement only this method
+        public static AppSettings Load(string filePath)
+        {
+            // TODO:
+            // - validate path
+            // - read text
+            // - deserialize
+            // - validate fields and throw FormatException if invalid
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var s = SettingsStore.Load(@@&quot;.\data\settings ✅.json&quot;);
+            Console.WriteLine($&quot;{s.AppName} | {s.AdminEmail} | {s.BannerText}&quot;);
+        }
+    }
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q5">
+  <header class="itq-head">
+    <div class="itq-no">5</div>
+    <div>
+      <h3 class="itq-title">Copy Files With Filtering — Directory.EnumerateFiles</h3>
+      <div class="itq-tags"><span class="itq-chip">File IO</span><span class="itq-chip">Directory</span><span class="itq-chip">Filtering</span><span class="itq-chip">Paths</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A backup tool must copy only specific files from a source folder to destination:
+- include extensions: .txt, .json
+- ignore files that contain the word &quot;temp&quot; (case-insensitive)
+
+What to implement:
+- BackupTool.CopySelected(string srcDir, string destDir)
+
+Rules:
+- Create destination directory if missing
+- Copy should overwrite existing files
+- Return count of copied files
+
+✅ Implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput5">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput5">srcDir:
+&quot;.\data\source files ✅&quot;
+destDir:
+&quot;.\data\backup 2026-02-18&quot;
+files example:
+&quot;notes.txt&quot;
+&quot;settings ✅.json&quot;
+&quot;temp_dump.txt&quot;  # must ignore</textarea>
+      <div class="hint">✅ Sample input intentionally contains spaces, quotes, unicode α/β, emoji ✅, special chars, currency ₹, and tricky file names.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput5')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode5')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>File IO + Serialization scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode5">using System;                                         // Console
+using System.IO;                                        // File IO
+using System.Linq;                                      // LINQ
+
+namespace ItTechGenie.M1.FileIO.Q5
+{
+    public static class BackupTool
+    {
+        // ✅ TODO: Student must implement only this method
+        public static int CopySelected(string srcDir, string destDir)
+        {
+            // TODO:
+            // - validate dirs
+            // - create dest
+            // - enumerate files
+            // - filter by extension and not containing &#x27;temp&#x27;
+            // - copy with overwrite
+            // - return count
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var copied = BackupTool.CopySelected(@@&quot;.\data\source files ✅&quot;, @@&quot;.\data\backup 2026-02-18&quot;);
+            Console.WriteLine($&quot;Copied: {copied}&quot;);
+        }
+    }
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q6">
+  <header class="itq-head">
+    <div class="itq-no">6</div>
+    <div>
+      <h3 class="itq-title">Atomic Save — Write to Temp Then Replace</h3>
+      <div class="itq-tags"><span class="itq-chip">File IO</span><span class="itq-chip">Atomic Replace</span><span class="itq-chip">Robustness</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+You must update a JSON file safely. If the application crashes mid-write,
+the file must not become partially written.
+
+What to implement:
+- AtomicWriter.SaveAtomic(string finalPath, string content)
+
+Rules:
+- Write to temp file in same directory (finalPath + &quot;.tmp&quot;)
+- Flush and close writer
+- Replace original with temp (File.Replace or move strategy)
+- Cleanup temp on failure
+
+✅ Implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput6">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput6">finalPath:
+&quot;.\data\orders\order-O-90 01 ✅.json&quot;
+content:
+&quot;{ \&quot;orderId\&quot;: \&quot;O-90 01\&quot;, \&quot;amount\&quot;: \&quot;₹ 1,999.25\&quot;, \&quot;note\&quot;: \&quot;paid ✅\&quot; }&quot; </textarea>
+      <div class="hint">✅ Sample input intentionally contains spaces, quotes, unicode α/β, emoji ✅, special chars, currency ₹, and tricky file names.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput6')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode6')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>File IO + Serialization scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode6">using System;                                         // Exception
+using System.IO;                                        // File IO
+using System.Text;                                      // Encoding
+
+namespace ItTechGenie.M1.FileIO.Q6
+{
+    public static class AtomicWriter
+    {
+        // ✅ TODO: Student must implement only this method
+        public static void SaveAtomic(string finalPath, string content)
+        {
+            // TODO:
+            // - validate inputs
+            // - ensure directory exists
+            // - write temp file
+            // - replace final file atomically
+            // - cleanup temp on error
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var path = @@&quot;.\data\orders\order-O-90 01 ✅.json&quot;;
+            var json = &quot;{ \&quot;orderId\&quot;: \&quot;O-90 01\&quot;, \&quot;amount\&quot;: \&quot;₹ 1,999.25\&quot;, \&quot;note\&quot;: \&quot;paid ✅\&quot; }&quot;;
+            AtomicWriter.SaveAtomic(path, json);
+            Console.WriteLine(&quot;Atomic save done ✅&quot;);
+        }
+    }
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q7">
+  <header class="itq-head">
+    <div class="itq-no">7</div>
+    <div>
+      <h3 class="itq-title">JSON Lines (NDJSON) — Stream Read + Yield Parse</h3>
+      <div class="itq-tags"><span class="itq-chip">File IO</span><span class="itq-chip">Streaming</span><span class="itq-chip">NDJSON</span><span class="itq-chip">Serialization</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A log file is stored as NDJSON (one JSON object per line).
+You must stream the file and parse only valid lines.
+
+What to implement:
+- NdjsonReader.ReadValid(string filePath)
+
+Rules:
+- Use StreamReader to read line by line
+- Each line is JSON: {&quot;id&quot;:&quot;...&quot;, &quot;level&quot;:&quot;INFO&quot;, &quot;msg&quot;:&quot;...&quot;}
+- Ignore invalid JSON lines
+- Return list of LogEvent
+
+✅ Implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput7">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput7">filePath:
+&quot;.\data\ndjson\app-log ✅.ndjson&quot;
+lines:
+{&quot;id&quot;:&quot;EVT-α12&quot;,&quot;level&quot;:&quot;INFO&quot;,&quot;msg&quot;:&quot;Login ok ✅&quot;}
+{bad json line}
+{&quot;id&quot;:&quot;EVT-β77&quot;,&quot;level&quot;:&quot;ERROR&quot;,&quot;msg&quot;:&quot;Timeout @@ 10:30 PM&quot;}</textarea>
+      <div class="hint">✅ Sample input intentionally contains spaces, quotes, unicode α/β, emoji ✅, special chars, currency ₹, and tricky file names.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput7')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode7')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>File IO + Serialization scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode7">using System;                                         // Console
+using System.Collections.Generic;                        // List
+using System.IO;                                        // StreamReader
+using System.Text.Json;                                 // JSON
+
+namespace ItTechGenie.M1.Serialization.Q7
+{
+    public record LogEvent(string Id, string Level, string Msg);
+
+    public static class NdjsonReader
+    {
+        // ✅ TODO: Student must implement only this method
+        public static List&lt;LogEvent&gt; ReadValid(string filePath)
+        {
+            // TODO:
+            // - validate path
+            // - stream read lines
+            // - try deserialize each line
+            // - ignore invalid JSON lines
+            // - return list
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var events = NdjsonReader.ReadValid(@@&quot;.\data\ndjson\app-log ✅.ndjson&quot;);
+            foreach (var e in events)
+                Console.WriteLine($&quot;{e.Level} | {e.Id} | {e.Msg}&quot;);
+        }
+    }
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q8">
+  <header class="itq-head">
+    <div class="itq-no">8</div>
+    <div>
+      <h3 class="itq-title">CSV to JSON Export — Serialize With Custom Property Names</h3>
+      <div class="itq-tags"><span class="itq-chip">File IO</span><span class="itq-chip">CSV</span><span class="itq-chip">JSON Export</span><span class="itq-chip">Mapping</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+A CSV file has columns: sku;name;qty;price
+You must convert it to a JSON array and save to output file.
+
+What to implement:
+- Exporter.CsvToJson(string csvPath, string jsonOutPath)
+
+Rules:
+- Parse price: remove ₹ and commas
+- Output JSON should use property names: sku, displayName, quantity, unitPrice
+- Write indented JSON
+- Ignore invalid rows but still export valid ones
+
+✅ Implement ONLY the TODO method.</p>
+
+    <div class="itq-io">
+      <label for="itqInput8">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput8">csvPath: &quot;.\data\export\in ✅.csv&quot;
+jsonOutPath: &quot;.\data\export\out ✅.json&quot;
+sample rows:
+&quot;SKU-α12;Laptop Stand;15;₹ 1299.50&quot;
+&quot;SKU-β77;Headphones;Noise-Cancel;4;₹ 7999&quot;  # invalid because ; in name -&gt; columns mismatch</textarea>
+      <div class="hint">✅ Sample input intentionally contains spaces, quotes, unicode α/β, emoji ✅, special chars, currency ₹, and tricky file names.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput8')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode8')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>File IO + Serialization scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode8">using System;                                         // Console
+using System.Collections.Generic;                        // List
+using System.Globalization;                             // parsing
+using System.IO;                                        // File IO
+using System.Text.Json;                                 // JSON
+
+namespace ItTechGenie.M1.FileIO.Q8
+{
+    public record ExportRow(string sku, string displayName, int quantity, decimal unitPrice);
+
+    public static class Exporter
+    {
+        // ✅ TODO: Student must implement only this method
+        public static void CsvToJson(string csvPath, string jsonOutPath)
+        {
+            // TODO:
+            // - validate paths
+            // - read csv lines, skip header if present
+            // - parse fields with delimiter &#x27;;&#x27;
+            // - map to ExportRow
+            // - serialize list to jsonOutPath (indented)
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            Exporter.CsvToJson(@@&quot;.\data\export\in ✅.csv&quot;, @@&quot;.\data\export\out ✅.json&quot;);
+            Console.WriteLine(&quot;Exported ✅&quot;);
+        }
+    }
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q9">
+  <header class="itq-head">
+    <div class="itq-no">9</div>
+    <div>
+      <h3 class="itq-title">Versioned Binary Serialization — Save/Load With Header</h3>
+      <div class="itq-tags"><span class="itq-chip">Serialization</span><span class="itq-chip">Binary</span><span class="itq-chip">Versioning</span><span class="itq-chip">Streams</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Store a small cache file in binary format with a header:
+- 4 bytes magic: &#x27;ITQ1&#x27;
+- int version (1)
+- int recordCount
+Then for each record:
+- string key (length-prefixed)
+- decimal value (as string invariant)
+
+What to implement:
+- CacheBin.Save(string path, Dictionary&lt;string, decimal&gt; data)
+- CacheBin.Load(string path) -&gt; Dictionary&lt;string, decimal&gt;
+
+Rules:
+- Keys may contain spaces/special chars/unicode
+- Validate magic and version on load; if invalid throw InvalidDataException
+
+✅ Implement ONLY the TODO methods.</p>
+
+    <div class="itq-io">
+      <label for="itqInput9">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput9">path:
+&quot;.\data\cache\price cache ✅.bin&quot;
+data:
+&quot;SKU-α12&quot; =&gt; 1299.50
+&quot;User: Sana @@ Chennai ✅&quot; =&gt; 1999.25</textarea>
+      <div class="hint">✅ Sample input intentionally contains spaces, quotes, unicode α/β, emoji ✅, special chars, currency ₹, and tricky file names.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput9')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode9')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>File IO + Serialization scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode9">using System;                                         // Console
+using System.Collections.Generic;                        // Dictionary
+using System.Globalization;                             // InvariantCulture
+using System.IO;                                        // Stream
+using System.Text;                                      // Encoding
+
+namespace ItTechGenie.M1.Serialization.Q9
+{
+    public static class CacheBin
+    {
+        private static readonly byte[] Magic = Encoding.ASCII.GetBytes(&quot;ITQ1&quot;); // 4-byte magic
+
+        // ✅ TODO: Student must implement only this method
+        public static void Save(string path, Dictionary&lt;string, decimal&gt; data)
+        {
+            // TODO:
+            // - validate inputs
+            // - create directory
+            // - write magic, version=1, count
+            // - for each entry: write key length + key bytes; write decimal as invariant string length + bytes
+            throw new NotImplementedException();
+        }
+
+        // ✅ TODO: Student must implement only this method
+        public static Dictionary&lt;string, decimal&gt; Load(string path)
+        {
+            // TODO:
+            // - validate path exists
+            // - read and validate magic + version
+            // - read count
+            // - read each record and return dictionary
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var data = new Dictionary&lt;string, decimal&gt;
+            {
+                [&quot;SKU-α12&quot;] = 1299.50m,
+                [&quot;User: Sana @@ Chennai ✅&quot;] = 1999.25m
+            };
+
+            var path = @@&quot;.\data\cache\price cache ✅.bin&quot;;
+            CacheBin.Save(path, data);
+
+            var loaded = CacheBin.Load(path);
+
+            foreach (var kv in loaded)
+                Console.WriteLine($&quot;{kv.Key} =&gt; ₹ {kv.Value}&quot;);
+        }
+    }
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q10">
+  <header class="itq-head">
+    <div class="itq-no">10</div>
+    <div>
+      <h3 class="itq-title">Compression + JSON — GZip Serialize/Deserialize</h3>
+      <div class="itq-tags"><span class="itq-chip">Serialization</span><span class="itq-chip">JSON</span><span class="itq-chip">GZip</span><span class="itq-chip">Streams</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+You must store a list of orders as compressed JSON to reduce disk usage.
+File format: GZip-compressed UTF-8 JSON.
+
+What to implement:
+- OrderZip.SaveGz(string path, List&lt;Order&gt; orders)
+- OrderZip.LoadGz(string path) -&gt; List&lt;Order&gt;
+
+Rules:
+- Use GZipStream
+- JSON must be indented when writing (even if compressed)
+- Orders can contain special chars/unicode
+- Validate file exists on load; throw FileNotFoundException if missing
+
+✅ Implement ONLY the TODO methods.</p>
+
+    <div class="itq-io">
+      <label for="itqInput10">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput10">path:
+&quot;.\data\gz\orders ✅.json.gz&quot;
+orders:
+Id=&quot;O-90 01&quot;, Customer=&quot;Sana @@ Chennai ✅&quot;, Amount=1999.25
+Id=&quot;O-β77&quot;, Customer=&quot;Ravi#QA&quot;, Amount=7999</textarea>
+      <div class="hint">✅ Sample input intentionally contains spaces, quotes, unicode α/β, emoji ✅, special chars, currency ₹, and tricky file names.</div>
+      <div class="itq-actions">
+        <button type="button" class="itq-btn" onclick="itqCopyInput('itqInput10')">Copy input</button>
+      </div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode10')">Copy code</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead">
+        <span>File IO + Serialization scenario (students implement ONLY TODO methods)</span>
+        <span class="itq-kbd">Ctrl+C</span>
+      </div>
+      <pre class="itq-pre"><code id="itqCode10">using System;                                         // Console
+using System.Collections.Generic;                        // List
+using System.IO;                                        // File streams
+using System.IO.Compression;                             // GZipStream
+using System.Text;                                      // Encoding
+using System.Text.Json;                                 // JSON
+
+namespace ItTechGenie.M1.Serialization.Q10
+{
+    public record Order(string Id, string Customer, decimal Amount);
+
+    public static class OrderZip
+    {
+        // ✅ TODO: Student must implement only this method
+        public static void SaveGz(string path, List&lt;Order&gt; orders)
+        {
+            // TODO:
+            // - validate inputs
+            // - create directory
+            // - create FileStream
+            // - wrap with GZipStream (Compress)
+            // - serialize JSON into stream (WriteIndented)
+            throw new NotImplementedException();
+        }
+
+        // ✅ TODO: Student must implement only this method
+        public static List&lt;Order&gt; LoadGz(string path)
+        {
+            // TODO:
+            // - validate file exists
+            // - open FileStream
+            // - wrap with GZipStream (Decompress)
+            // - deserialize JSON from stream
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class Program
+    {
+        static void Main()
+        {
+            var orders = new List&lt;Order&gt;
+            {
+                new Order(&quot;O-90 01&quot;, &quot;Sana @@ Chennai ✅&quot;, 1999.25m),
+                new Order(&quot;O-β77&quot;, &quot;Ravi#QA&quot;, 7999m)
+            };
+
+            var path = @@&quot;.\data\gz\orders ✅.json.gz&quot;;
+            OrderZip.SaveGz(path, orders);
+
+            var loaded = OrderZip.LoadGz(path);
+
+            foreach (var o in loaded)
+                Console.WriteLine($&quot;{o.Id} | {o.Customer} | ₹ {o.Amount}&quot;);
+        }
+    }
+}</code></pre>
+    </div>
+  </div>
+</article>
+    </section>
+  </div>
+
+  <div id="itqToast" class="itq-toast" aria-live="polite"></div>
+  <script>
+(function(){
+  function showToast(text){
+    var t = document.getElementById("itqToast");
+    if(!t) return;
+    t.textContent = text;
+    t.style.display = "block";
+    clearTimeout(t._hide);
+    t._hide = setTimeout(function(){ t.style.display = "none"; }, 1400);
+  }
+  window.itqCopy = function(codeId){
+    var el = document.getElementById(codeId);
+    if(!el) return;
+    var text = el.innerText || el.textContent || "";
+    navigator.clipboard.writeText(text).then(function(){ showToast("Code copied"); })
+      .catch(function(){ showToast("Copy failed (browser blocked)"); });
+  };
+  window.itqCopyInput = function(textareaId){
+    var el = document.getElementById(textareaId);
+    if(!el) return;
+    navigator.clipboard.writeText(el.value || "").then(function(){ showToast("Input copied"); })
+      .catch(function(){ showToast("Copy failed"); });
+  };
+})();
+</script>
