@@ -4,6 +4,8 @@ namespace GenieWeb.Controllers
 {
     public class JavaController : Controller
     {
+        public IActionResult Index() => RedirectToAction(nameof(JavaStrings));
+
         private IActionResult GenerateView(string pageName)
         {
             ViewData["ActiveMenu"] = "Java";
