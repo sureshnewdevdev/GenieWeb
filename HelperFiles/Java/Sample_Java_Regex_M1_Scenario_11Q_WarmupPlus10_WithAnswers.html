@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ItTechGenie-Subject - Java Regex (Warm-up + 10 Questions)</title>
+  
+<style>
+.itq-wrap{max-width:1120px;margin:0 auto;padding:18px 14px 120px 14px;font-family:Arial,Helvetica,sans-serif;}
+.itq-hero{border:1px solid rgba(0,0,0,.10);border-radius:18px;padding:16px;background:linear-gradient(180deg,rgba(27,110,194,.10),rgba(255,255,255,0));}
+.itq-hero h1{margin:0 0 6px 0;font-size:22px}
+.itq-sub{margin:0;color:#4b5563;font-size:13px}
+.itq-info{margin-top:12px;border:1px dashed rgba(27,110,194,.35);background:rgba(27,110,194,.06);border-radius:14px;padding:12px;font-size:13px;color:#374151;line-height:1.55}
+.itq-pills{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.itq-pill{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:999px;padding:5px 10px;font-size:12px;color:#374151}
+.itq-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:16px}
+.itq-card{border:1px solid rgba(0,0,0,.12);border-radius:18px;background:#fff;box-shadow:0 .25rem .75rem rgba(0,0,0,.05);overflow:hidden;transition:transform .14s ease,border-color .14s ease,background .14s ease}
+.itq-card:hover{transform:translateY(-2px);border-color:rgba(34,197,94,.55);background:rgba(34,197,94,.03)}
+.itq-head{display:flex;gap:12px;align-items:flex-start;padding:14px 16px}
+.itq-no{min-width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:rgba(27,110,194,.10);border:1px solid rgba(27,110,194,.25);font-weight:700;color:#1b6ec2}
+.itq-title{margin:0;font-size:16px}
+.itq-tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:#6b7280}
+.itq-chip{padding:3px 8px;border-radius:999px;border:1px solid rgba(0,0,0,.10);background:rgba(0,0,0,.02)}
+.itq-level{font-weight:700}
+.itq-level.warm{color:#0f766e}
+.itq-level.mod{color:#b45309}
+.itq-level.cx{color:#be123c}
+.itq-body{padding:0 16px 16px 16px}
+.itq-stmt{margin:0 0 10px 0;color:#374151;font-size:13px;line-height:1.55;white-space:pre-line}
+.itq-actions{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 10px 0}
+.itq-btn{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:12px;padding:7px 10px;font-size:12px;cursor:pointer;transition:transform .12s ease,background .12s ease}
+.itq-btn:hover{transform:translateY(-1px);background:rgba(0,0,0,.02)}
+.itq-btn.copy{border-color:rgba(27,110,194,.35);background:rgba(27,110,194,.06)}
+.itq-btn.ans{border-color:rgba(15,118,110,.35);background:rgba(15,118,110,.06)}
+.itq-io{display:grid;gap:8px;margin:10px 0 12px 0}
+.itq-io label{font-size:12px;color:#6b7280;font-weight:700}
+.itq-io textarea{width:100%;min-height:92px;border-radius:14px;border:1px solid rgba(0,0,0,.12);padding:10px 12px;font-size:12px;line-height:1.45;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;background:#fff}
+.itq-io .hint{font-size:12px;color:#6b7280;line-height:1.4}
+.itq-code{border:1px solid rgba(0,0,0,.10);border-radius:16px;overflow:hidden;background:#0b1220}
+.itq-codeHead{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.10);color:#e5e7eb;font-size:12px}
+.itq-codeHead .itq-kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:2px 6px;border-radius:8px}
+.itq-pre{margin:0;padding:12px;overflow:auto}
+.itq-pre code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:12px;color:#e5e7eb;white-space:pre}
+.itq-answer{margin-top:10px;border:1px solid rgba(15,118,110,.25);background:rgba(15,118,110,.06);border-radius:14px;padding:10px 12px;display:none}
+.itq-answer h4{margin:0 0 6px 0;font-size:13px;color:#0f766e}
+.itq-answer p{margin:0;color:#374151;font-size:12px;line-height:1.55;white-space:pre-line}
+.itq-answer pre{margin:8px 0 0 0;background:rgba(17,24,39,.06);border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:10px;overflow:auto}
+.itq-answer code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:12px}
+.itq-toast{position:fixed;right:14px;bottom:14px;z-index:9999;display:none;background:#111827;color:#fff;padding:10px 12px;border-radius:12px;font-size:12px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+</style>
+
+</head>
+<body>
+  <div class="itq-wrap">
+    <section class="itq-hero">
+      <h1>Java Question Bank</h1>
+      <p class="itq-sub">Java Regex | Q0 Warm‑up (Show/Hide Answer) + Q1–Q10 Scenario Questions (5 Moderate + 5 Complex) — With Answers</p>
+      <div class="itq-info">
+        <strong>Instruction:</strong> Boilerplate is visible by default. Students implement <strong>ONLY</strong> methods marked <strong>// ✅ TODO</strong>.<br/>
+        <strong>Answers:</strong> Available via <strong>Show/Hide Answer</strong>.
+      </div>
+      <div class="itq-pills">
+        <span class="itq-pill"><strong>Warm‑up:</strong> 1 (Q0)</span>
+        <span class="itq-pill"><strong>Moderate:</strong> 5 (Q1–Q5)</span>
+        <span class="itq-pill"><strong>Complex:</strong> 5 (Q6–Q10)</span>
+        <span class="itq-pill"><strong>Inputs:</strong> spaces + quotes + unicode α/β + emoji ✅ + special chars</span>
+      </div>
+    </section>
+
+    <section class="itq-grid" aria-label="Java Regex scenario questions">
+      <article class="itq-card" id="q0">
+  <header class="itq-head">
+    <div class="itq-no">0</div>
+    <div>
+      <h3 class="itq-title">Warm‑up: Extract orderId + amount using capturing groups (with answer)</h3>
+      <div class="itq-tags"><span class="itq-chip">Pattern</span><span class="itq-chip">Matcher</span><span class="itq-chip">groups</span><span class="itq-chip itq-level warm">Warm-up</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Warm‑up:
+Input is a single log line:
+&quot;Order[ORD-α1✅] paid ₹1200.50 by user=&#x27;Gopi Suresh&#x27;&quot;
+
+Task:
+1) Use a regex with capturing groups to extract:
+   - orderId (inside Order[...])
+   - amount (number with optional decimal)
+2) Print both values.
+
+Implement ONLY: warmUp()</p>
+
+    <div class="itq-io">
+      <label for="itqInput0">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput0">log = &quot;Order[ORD-α1✅] paid ₹1200.50 by user=&#x27;Gopi Suresh&#x27;&quot; </textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput0')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode0')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns0')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Regex scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode0">import java.util.regex.*;
+
+public class Main {
+
+    // ✅ TODO: Student must implement only this method
+    static void warmUp() {
+        // TODO:
+        // - define log line
+        // - build Pattern with groups: Order\[(...)] and amount
+        // - use Matcher.find()
+        // - print orderId and amount
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+
+    public static void main(String[] args) {
+        warmUp();
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns0">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Logic:
+- Pattern compiles the regex.
+- Matcher scans the input.
+- Parentheses (...) create capturing groups accessible via group(1), group(2).</p>
+      <pre><code>static void warmUp() {
+    String log = &quot;Order[ORD-α1✅] paid ₹1200.50 by user=&#x27;Gopi Suresh&#x27;&quot;;
+
+    Pattern p = Pattern.compile(&quot;Order\[(.+?)]\s+paid\s+[^0-9]*([0-9]+(?:\.[0-9]+)?)&quot;);
+    Matcher m = p.matcher(log);
+
+    if (m.find()) {
+        String orderId = m.group(1);   // group1 = inside Order[...]
+        String amount  = m.group(2);   // group2 = numeric amount
+        System.out.println(orderId);
+        System.out.println(amount);
+    } else {
+        System.out.println(&quot;No match&quot;);
+    }
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q1">
+  <header class="itq-head">
+    <div class="itq-no">1</div>
+    <div>
+      <h3 class="itq-title">Validate username — letters/digits/underscore + unicode α/β allowed</h3>
+      <div class="itq-tags"><span class="itq-chip">matches</span><span class="itq-chip">character classes</span><span class="itq-chip">anchors</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Registration requires username rules:
+- 3 to 20 chars
+- allowed: letters, digits, underscore
+- additionally allow greek α and β
+- no spaces
+Return true/false.
+
+Implement ONLY: UserRules.isValid(username)
+
+Print result for multiple test usernames.</p>
+
+    <div class="itq-io">
+      <label for="itqInput1">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput1">usernames = [&quot;gopi_suresh&quot;, &quot;go&quot;, &quot;Gopi✅&quot;, &quot;αβ_user&quot;, &quot;user name&quot;, &quot;__ok__&quot;]</textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput1')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode1')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns1')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Regex scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode1">import java.util.*;
+import java.util.regex.*;
+
+class UserRules {
+    // ✅ TODO: Student must implement only this method
+    static boolean isValid(String username) {
+        // TODO:
+        // - build regex with anchors ^ $
+        // - length 3..20
+        // - allowed set: [A-Za-z0-9_αβ]
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;String&gt; u = Arrays.asList(&quot;gopi_suresh&quot;, &quot;go&quot;, &quot;Gopi✅&quot;, &quot;αβ_user&quot;, &quot;user name&quot;, &quot;__ok__&quot;);
+        for (String x : u) {
+            System.out.println(x + &quot; =&gt; &quot; + UserRules.isValid(x));
+        }
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns1">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Use ^[A-Za-z0-9_αβ]{3,20}$ and Pattern.matches or string.matches().</p>
+      <pre><code>static boolean isValid(String username) {
+    if (username == null) return false;
+    String s = username.trim();
+    return s.matches(&quot;^[A-Za-z0-9_αβ]{3,20}$&quot;);
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q2">
+  <header class="itq-head">
+    <div class="itq-no">2</div>
+    <div>
+      <h3 class="itq-title">Extract all emails from text — find() in loop</h3>
+      <div class="itq-tags"><span class="itq-chip">find</span><span class="itq-chip">Matcher loop</span><span class="itq-chip">groups</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Support chat contains multiple emails mixed with text and emojis.
+Task:
+- Extract all email addresses into a List&lt;String&gt;
+- Preserve order
+- Trim around punctuation if needed
+
+Implement ONLY: EmailExtractor.extract(text)
+
+Print list.</p>
+
+    <div class="itq-io">
+      <label for="itqInput2">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput2">text = &quot;Mail gopi@ittechgenie.com, cc: suresh✅@mail.com; alt: α/β@x.io !!!&quot; </textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput2')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode2')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns2')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Regex scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode2">import java.util.*;
+import java.util.regex.*;
+
+class EmailExtractor {
+    // ✅ TODO: Student must implement only this method
+    static List&lt;String&gt; extract(String text) {
+        // TODO:
+        // - create Pattern
+        // - loop matcher.find()
+        // - add matcher.group()
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        String text = &quot;Mail gopi@ittechgenie.com, cc: suresh✅@mail.com; alt: α/β@x.io !!!&quot;;
+        System.out.println(EmailExtractor.extract(text));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns2">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Pattern like [^\s,;]+@[^\s,;]+\.[^\s,;]+ then find() repeatedly.</p>
+      <pre><code>static List&lt;String&gt; extract(String text) {
+    List&lt;String&gt; out = new ArrayList&lt;&gt;();
+    if (text == null) return out;
+
+    Pattern p = Pattern.compile(&quot;[^\s,;]+@[^\s,;]+\.[^\s,;]+&quot;);
+    Matcher m = p.matcher(text);
+
+    while (m.find()) {
+        out.add(m.group());
+    }
+    return out;
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q3">
+  <header class="itq-head">
+    <div class="itq-no">3</div>
+    <div>
+      <h3 class="itq-title">Normalize whitespace — replaceAll(\s+) + trim</h3>
+      <div class="itq-tags"><span class="itq-chip">replaceAll</span><span class="itq-chip">\s+</span><span class="itq-chip">trim</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Imported addresses contain random tabs/newlines and extra spaces.
+Task:
+- Replace any whitespace run (spaces/tabs/newlines) with one space
+- Trim edges
+Implement ONLY: TextNorm.clean(s)
+
+Print cleaned string.</p>
+
+    <div class="itq-io">
+      <label for="itqInput3">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput3">addr = &quot;  12\tMG  Road\nBengaluru   ✅   α/β   &quot; </textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput3')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode3')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns3')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Regex scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode3">class TextNorm {
+    // ✅ TODO: Student must implement only this method
+    static String clean(String s) {
+        // TODO:
+        // - replaceAll(&quot;\\s+&quot;,&quot; &quot;)
+        // - trim
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        System.out.println(TextNorm.clean(&quot;  12\tMG  Road\nBengaluru   ✅   α/β   &quot;));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns3">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Use s.replaceAll(&quot;\\s+&quot;,&quot; &quot;).trim();</p>
+      <pre><code>static String clean(String s) {
+    if (s == null) return &quot;&quot;;
+    return s.replaceAll(&quot;\\s+&quot;, &quot; &quot;).trim();
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q4">
+  <header class="itq-head">
+    <div class="itq-no">4</div>
+    <div>
+      <h3 class="itq-title">Validate strong password — lookaheads</h3>
+      <div class="itq-tags"><span class="itq-chip">lookahead</span><span class="itq-chip">security</span><span class="itq-chip">matches</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Password policy:
+- min 8 chars
+- at least 1 uppercase
+- at least 1 lowercase
+- at least 1 digit
+- at least 1 special char from: !@#$
+- no spaces
+Return true/false.
+
+Implement ONLY: PasswordRules.isStrong(pwd)</p>
+
+    <div class="itq-io">
+      <label for="itqInput4">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput4">pwds = [&quot;Abc123!@&quot;, &quot;abc123!@&quot;, &quot;ABC123!@&quot;, &quot;Abcdefgh&quot;, &quot;Abc 123!@&quot;, &quot;A1b2c3d4$✅&quot;]</textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput4')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode4')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns4')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Regex scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode4">import java.util.*;
+
+class PasswordRules {
+    // ✅ TODO: Student must implement only this method
+    static boolean isStrong(String pwd) {
+        // TODO:
+        // - use regex lookaheads:
+        //   (?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$])\S{8,}
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;String&gt; p = Arrays.asList(&quot;Abc123!@&quot;, &quot;abc123!@&quot;, &quot;ABC123!@&quot;, &quot;Abcdefgh&quot;, &quot;Abc 123!@&quot;, &quot;A1b2c3d4$✅&quot;);
+        for (String x : p) System.out.println(x + &quot; =&gt; &quot; + PasswordRules.isStrong(x));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns4">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Use lookaheads to assert presence without consuming characters; \S ensures no spaces.</p>
+      <pre><code>static boolean isStrong(String pwd) {
+    if (pwd == null) return false;
+    return pwd.matches(&quot;^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$])\\S{8,}$&quot;);
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q5">
+  <header class="itq-head">
+    <div class="itq-no">5</div>
+    <div>
+      <h3 class="itq-title">Parse key=value pairs — quoted values with spaces</h3>
+      <div class="itq-tags"><span class="itq-chip">groups</span><span class="itq-chip">non-greedy</span><span class="itq-chip">alternation</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Command line:
+PAY amount=&quot;1200&quot; currency=INR note=&quot;alpha β ✅&quot; ref=TXN-001!@#
+Task:
+Extract all pairs into Map&lt;String,String&gt;.
+Values can be:
+- &quot;quoted with spaces&quot;
+- or plain without spaces
+
+Implement ONLY: KVParser.parse(cmd)
+
+Print map.</p>
+
+    <div class="itq-io">
+      <label for="itqInput5">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput5">cmd = &quot;PAY amount=\&quot;1200\&quot; currency=INR note=\&quot;alpha β ✅\&quot; ref=TXN-001!@#&quot; </textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput5')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode5')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns5')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Regex scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode5">import java.util.*;
+import java.util.regex.*;
+
+class KVParser {
+    // ✅ TODO: Student must implement only this method
+    static Map&lt;String,String&gt; parse(String cmd) {
+        // TODO:
+        // - Pattern: (\w+)=(&quot;.*?&quot;|\S+)
+        // - remove quotes if present
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        String cmd = &quot;PAY amount=\&quot;1200\&quot; currency=INR note=\&quot;alpha β ✅\&quot; ref=TXN-001!@#&quot;;
+        System.out.println(KVParser.parse(cmd));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns5">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Use Matcher.find() to capture key group(1) and value group(2); strip outer quotes.</p>
+      <pre><code>static Map&lt;String,String&gt; parse(String cmd) {
+    Map&lt;String,String&gt; out = new LinkedHashMap&lt;&gt;();
+    if (cmd == null) return out;
+
+    Pattern p = Pattern.compile(&quot;(\\w+)=(\&quot;.*?\&quot;|\S+)&quot;);
+    Matcher m = p.matcher(cmd);
+
+    while (m.find()) {
+        String key = m.group(1);
+        String val = m.group(2);
+        if (val.startsWith(&quot;&quot;&quot;) &amp;&amp; val.endsWith(&quot;&quot;&quot;) &amp;&amp; val.length() &gt;= 2) {
+            val = val.substring(1, val.length() - 1);
+        }
+        out.put(key, val);
+    }
+    return out;
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q6">
+  <header class="itq-head">
+    <div class="itq-no">6</div>
+    <div>
+      <h3 class="itq-title">Validate IPv4 address — regex + range check (0–255)</h3>
+      <div class="itq-tags"><span class="itq-chip">regex + logic</span><span class="itq-chip">groups</span><span class="itq-chip">validation</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Network config accepts IPv4 only.
+Task:
+- Validate format: ddd.ddd.ddd.ddd (1-3 digits each)
+- Then ensure each octet is between 0 and 255
+Return true/false.
+
+Implement ONLY: NetRules.isValidIPv4(ip)
+
+Print results for a list.</p>
+
+    <div class="itq-io">
+      <label for="itqInput6">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput6">ips = [&quot;192.168.0.1&quot;, &quot;256.1.1.1&quot;, &quot;1.2.3&quot;, &quot;01.02.03.004&quot;, &quot;10.0.0.✅&quot;, &quot;0.0.0.0&quot;]</textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput6')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode6')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns6')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Regex scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode6">import java.util.*;
+import java.util.regex.*;
+
+class NetRules {
+    // ✅ TODO: Student must implement only this method
+    static boolean isValidIPv4(String ip) {
+        // TODO:
+        // - regex with 4 groups: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})
+        // - parse each group as int and check 0..255
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;String&gt; ips = Arrays.asList(&quot;192.168.0.1&quot;, &quot;256.1.1.1&quot;, &quot;1.2.3&quot;, &quot;01.02.03.004&quot;, &quot;10.0.0.✅&quot;, &quot;0.0.0.0&quot;);
+        for (String x : ips) System.out.println(x + &quot; =&gt; &quot; + NetRules.isValidIPv4(x));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns6">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Regex checks shape; then integer range checks ensure correctness.</p>
+      <pre><code>static boolean isValidIPv4(String ip) {
+    if (ip == null) return false;
+
+    Pattern p = Pattern.compile(&quot;^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$&quot;);
+    Matcher m = p.matcher(ip.trim());
+    if (!m.matches()) return false;
+
+    for (int i = 1; i &lt;= 4; i++) {
+        int v = Integer.parseInt(m.group(i));
+        if (v &lt; 0 || v &gt; 255) return false;
+    }
+    return true;
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q7">
+  <header class="itq-head">
+    <div class="itq-no">7</div>
+    <div>
+      <h3 class="itq-title">Redact phone numbers — replaceAll with groups</h3>
+      <div class="itq-tags"><span class="itq-chip">replaceAll</span><span class="itq-chip">groups</span><span class="itq-chip">PII</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Logs may contain phone numbers:
+- formats: 10 digits, or +91-XXXXXXXXXX, or (080)XXXXXXX (ignore)
+Task:
+- Mask 10-digit mobile numbers by keeping last 2 digits:
+  98******12
+- Should work inside larger text
+Implement ONLY: PiiRedactor.maskPhones(text)
+
+Print masked text.</p>
+
+    <div class="itq-io">
+      <label for="itqInput7">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput7">text = &quot;Call +91-9876543212 or 9876543212. Backup: &#x27;98765 43212&#x27; ✅&quot; </textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput7')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode7')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns7')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Regex scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode7">import java.util.regex.*;
+
+class PiiRedactor {
+    // ✅ TODO: Student must implement only this method
+    static String maskPhones(String text) {
+        // TODO:
+        // - normalize separators (optional)
+        // - regex to capture 10 digits possibly with +91- prefix
+        // - replace using groups: first2 + ****** + last2
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        String text = &quot;Call +91-9876543212 or 9876543212. Backup: &#x27;98765 43212&#x27; ✅&quot;;
+        System.out.println(PiiRedactor.maskPhones(text));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns7">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Use a regex that captures 10 digits even if split by space; use replaceAll with backreferences.</p>
+      <pre><code>static String maskPhones(String text) {
+    if (text == null) return &quot;&quot;;
+
+    // normalize common split format: 98765 43212 -&gt; 9876543212
+    String s = text.replaceAll(&quot;(\d{5})\s+(\d{5})&quot;, &quot;$1$2&quot;);
+
+    // capture optional +91- then 10 digits; capture first2 and last2
+    Pattern p = Pattern.compile(&quot;(?:\+91-)?(\d{2})\d{6}(\d{2})&quot;);
+    Matcher m = p.matcher(s);
+
+    StringBuffer sb = new StringBuffer();
+    while (m.find()) {
+        String rep = m.group(1) + &quot;******&quot; + m.group(2);
+        m.appendReplacement(sb, rep);
+    }
+    m.appendTail(sb);
+    return sb.toString();
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q8">
+  <header class="itq-head">
+    <div class="itq-no">8</div>
+    <div>
+      <h3 class="itq-title">Split CSV line respecting quoted commas — Matcher find groups</h3>
+      <div class="itq-tags"><span class="itq-chip">CSV</span><span class="itq-chip">quoted fields</span><span class="itq-chip">Matcher</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+CSV line:
+P-1,&quot;Phone, 6.5\&quot; ✅&quot;,2,&quot;Bengaluru, KA&quot;
+Task:
+Split into fields where commas inside quotes do NOT split.
+Return List&lt;String&gt; fields (quotes removed, inner quotes unescaped).
+
+Implement ONLY: CsvSmart.split(line)
+
+Print list.</p>
+
+    <div class="itq-io">
+      <label for="itqInput8">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput8">line = &quot;P-1,\&quot;Phone, 6.5\\\&quot; ✅\&quot;,2,\&quot;Bengaluru, KA\&quot;&quot; </textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput8')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode8')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns8')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Regex scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode8">import java.util.*;
+import java.util.regex.*;
+
+class CsvSmart {
+    // ✅ TODO: Student must implement only this method
+    static List&lt;String&gt; split(String line) {
+        // TODO:
+        // - regex that matches either quoted field or unquoted token:
+        //   &quot;((?:[^&quot;]|&quot;&quot;)*)&quot;|([^,]+)
+        // - iterate Matcher.find()
+        // - unescape &quot;&quot; -&gt; &quot;
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        String line = &quot;P-1,\&quot;Phone, 6.5\\\&quot; ✅\&quot;,2,\&quot;Bengaluru, KA\&quot;&quot;;
+        System.out.println(CsvSmart.split(line));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns8">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Use a token regex that alternates quoted and unquoted fields; process groups.</p>
+      <pre><code>static List&lt;String&gt; split(String line) {
+    List&lt;String&gt; out = new ArrayList&lt;&gt;();
+    if (line == null) return out;
+
+    // Match: quoted field (group1) OR unquoted field (group2) OR empty
+    Pattern p = Pattern.compile(&quot;\\G(?:\&quot;((?:[^\&quot;]|\\\&quot;)*)\&quot;|([^,]*))(?:,|$)&quot;);
+    Matcher m = p.matcher(line);
+
+    while (m.find()) {
+        String q = m.group(1);
+        String u = m.group(2);
+
+        String val = (q != null) ? q : (u != null ? u : &quot;&quot;);
+        // unescape &quot; -&gt; &quot;
+        val = val.replace(&quot;\\&quot;&quot;, &quot;&quot;&quot;);
+        out.add(val);
+    }
+    return out;
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q9">
+  <header class="itq-head">
+    <div class="itq-no">9</div>
+    <div>
+      <h3 class="itq-title">Parse dates in multiple formats — alternation + named groups style</h3>
+      <div class="itq-tags"><span class="itq-chip">alternation</span><span class="itq-chip">groups</span><span class="itq-chip">normalization</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Invoice dates arrive in multiple formats:
+- 2026-02-18
+- 18/02/2026
+- Feb 18, 2026
+Task:
+Convert any supported date into ISO: yyyy-MM-dd.
+Return empty string if unsupported.
+
+Implement ONLY: DateNorm.toIso(text)
+
+Print conversions.</p>
+
+    <div class="itq-io">
+      <label for="itqInput9">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput9">dates = [&quot;2026-02-18&quot;, &quot;18/02/2026&quot;, &quot;Feb 18, 2026&quot;, &quot;18-Feb-2026✅&quot;]</textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput9')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode9')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns9')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Regex scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode9">import java.util.*;
+import java.util.regex.*;
+
+class DateNorm {
+    // ✅ TODO: Student must implement only this method
+    static String toIso(String text) {
+        // TODO:
+        // - use 3 patterns or one alternation
+        // - extract day/month/year
+        // - map month name to number
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;String&gt; d = Arrays.asList(&quot;2026-02-18&quot;, &quot;18/02/2026&quot;, &quot;Feb 18, 2026&quot;, &quot;18-Feb-2026✅&quot;);
+        for (String x : d) System.out.println(x + &quot; =&gt; &quot; + DateNorm.toIso(x));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns9">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Try patterns in order; for month names build a lookup map; format using String.format.</p>
+      <pre><code>static String toIso(String text) {
+    if (text == null) return &quot;&quot;;
+    String s = text.trim();
+
+    // 1) yyyy-MM-dd
+    Matcher m1 = Pattern.compile(&quot;^(\d{4})-(\d{2})-(\d{2})$&quot;).matcher(s);
+    if (m1.matches()) return m1.group(1) + &quot;-&quot; + m1.group(2) + &quot;-&quot; + m1.group(3);
+
+    // 2) dd/MM/yyyy
+    Matcher m2 = Pattern.compile(&quot;^(\d{2})/(\d{2})/(\d{4})$&quot;).matcher(s);
+    if (m2.matches()) return m2.group(3) + &quot;-&quot; + m2.group(2) + &quot;-&quot; + m2.group(1);
+
+    // 3) Mon dd, yyyy  (e.g., Feb 18, 2026)
+    Matcher m3 = Pattern.compile(&quot;^([A-Za-z]{3})\s+(\d{1,2}),\s*(\d{4})$&quot;).matcher(s);
+    if (m3.matches()) {
+        String mon = m3.group(1).toLowerCase();
+        Map&lt;String,String&gt; mm = new HashMap&lt;&gt;();
+        mm.put(&quot;jan&quot;,&quot;01&quot;); mm.put(&quot;feb&quot;,&quot;02&quot;); mm.put(&quot;mar&quot;,&quot;03&quot;); mm.put(&quot;apr&quot;,&quot;04&quot;);
+        mm.put(&quot;may&quot;,&quot;05&quot;); mm.put(&quot;jun&quot;,&quot;06&quot;); mm.put(&quot;jul&quot;,&quot;07&quot;); mm.put(&quot;aug&quot;,&quot;08&quot;);
+        mm.put(&quot;sep&quot;,&quot;09&quot;); mm.put(&quot;oct&quot;,&quot;10&quot;); mm.put(&quot;nov&quot;,&quot;11&quot;); mm.put(&quot;dec&quot;,&quot;12&quot;);
+        String month = mm.get(mon);
+        if (month == null) return &quot;&quot;;
+        String day = String.format(&quot;%02d&quot;, Integer.parseInt(m3.group(2)));
+        return m3.group(3) + &quot;-&quot; + month + &quot;-&quot; + day;
+    }
+
+    return &quot;&quot;;
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q10">
+  <header class="itq-head">
+    <div class="itq-no">10</div>
+    <div>
+      <h3 class="itq-title">Content moderation — block forbidden words using word boundaries</h3>
+      <div class="itq-tags"><span class="itq-chip">\b boundaries</span><span class="itq-chip">CASE_INSENSITIVE</span><span class="itq-chip">sanitize</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Chat moderation must block messages containing forbidden words:
+[&quot;refund&quot;, &quot;scam&quot;, &quot;hack&quot;]
+Rules:
+- case-insensitive
+- whole-word only (&quot;refunded&quot; should NOT match)
+- message may contain unicode α/β and emoji ✅
+Return true if message is allowed (no forbidden words), else false.
+
+Implement ONLY: Moderation.isAllowed(msg)
+
+Print results.</p>
+
+    <div class="itq-io">
+      <label for="itqInput10">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput10">msgs = [
+ &quot;Need a REFUND ✅ now!&quot;,
+ &quot;This is refunded already&quot;, 
+ &quot;No scam here α/β&quot;,
+ &quot;Safe message&quot;
+]</textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput10')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode10')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns10')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Regex scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode10">import java.util.*;
+import java.util.regex.*;
+
+class Moderation {
+    // ✅ TODO: Student must implement only this method
+    static boolean isAllowed(String msg) {
+        // TODO:
+        // - build one regex like \b(refund|scam|hack)\b with CASE_INSENSITIVE
+        // - return !matcher.find()
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;String&gt; msgs = Arrays.asList(
+            &quot;Need a REFUND ✅ now!&quot;,
+            &quot;This is refunded already&quot;,
+            &quot;No scam here α/β&quot;,
+            &quot;Safe message&quot;
+        );
+        for (String x : msgs) System.out.println(x + &quot; =&gt; allowed=&quot; + Moderation.isAllowed(x));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns10">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Word boundaries ensure whole words only; matcher.find() detects presence anywhere.</p>
+      <pre><code>static boolean isAllowed(String msg) {
+    if (msg == null) return true;
+    Pattern p = Pattern.compile(&quot;\\b(refund|scam|hack)\\b&quot;, Pattern.CASE_INSENSITIVE);
+    return !p.matcher(msg).find();
+}</code></pre>
+    </div>
+  </div>
+</article>
+    </section>
+  </div>
+
+  <div id="itqToast" class="itq-toast" aria-live="polite"></div>
+  
+<script>
+(function(){
+  function toast(msg){
+    var t=document.getElementById("itqToast"); if(!t) return;
+    t.textContent=msg; t.style.display="block";
+    clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none",1400);
+  }
+  window.itqCopy=function(id){
+    var el=document.getElementById(id); if(!el) return;
+    var txt=el.innerText||el.textContent||"";
+    navigator.clipboard.writeText(txt).then(()=>toast("Code copied")).catch(()=>toast("Copy failed"));
+  };
+  window.itqCopyInput=function(id){
+    var el=document.getElementById(id); if(!el) return;
+    navigator.clipboard.writeText(el.value||"").then(()=>toast("Input copied")).catch(()=>toast("Copy failed"));
+  };
+  window.itqToggle=function(id){
+    var el=document.getElementById(id); if(!el) return;
+    el.style.display=(el.style.display==="block")?"none":"block";
+  };
+})();
+</script>
+
+</body>
+</html>
