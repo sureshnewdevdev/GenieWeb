@@ -1,0 +1,998 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "ItTechGenie-Subject - Java Stream API (Warm-up + 10 Questions)";
+    ViewData["ActiveMenu"] = "Java";
+    ViewData["ActivePage"] = "JavaStreamApi";
+}
+
+<style>
+.itq-wrap{max-width:1120px;margin:0 auto;padding:18px 14px 120px 14px;font-family:Arial,Helvetica,sans-serif;}
+.itq-hero{border:1px solid rgba(0,0,0,.10);border-radius:18px;padding:16px;background:linear-gradient(180deg,rgba(27,110,194,.10),rgba(255,255,255,0));}
+.itq-hero h1{margin:0 0 6px 0;font-size:22px}
+.itq-sub{margin:0;color:#4b5563;font-size:13px}
+.itq-info{margin-top:12px;border:1px dashed rgba(27,110,194,.35);background:rgba(27,110,194,.06);border-radius:14px;padding:12px;font-size:13px;color:#374151;line-height:1.55}
+.itq-pills{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.itq-pill{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:999px;padding:5px 10px;font-size:12px;color:#374151}
+.itq-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:16px}
+.itq-card{border:1px solid rgba(0,0,0,.12);border-radius:18px;background:#fff;box-shadow:0 .25rem .75rem rgba(0,0,0,.05);overflow:hidden;transition:transform .14s ease,border-color .14s ease,background .14s ease}
+.itq-card:hover{transform:translateY(-2px);border-color:rgba(34,197,94,.55);background:rgba(34,197,94,.03)}
+.itq-head{display:flex;gap:12px;align-items:flex-start;padding:14px 16px}
+.itq-no{min-width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:rgba(27,110,194,.10);border:1px solid rgba(27,110,194,.25);font-weight:700;color:#1b6ec2}
+.itq-title{margin:0;font-size:16px}
+.itq-tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:#6b7280}
+.itq-chip{padding:3px 8px;border-radius:999px;border:1px solid rgba(0,0,0,.10);background:rgba(0,0,0,.02)}
+.itq-level{font-weight:700}
+.itq-level.warm{color:#0f766e}
+.itq-level.mod{color:#b45309}
+.itq-level.cx{color:#be123c}
+.itq-body{padding:0 16px 16px 16px}
+.itq-stmt{margin:0 0 10px 0;color:#374151;font-size:13px;line-height:1.55;white-space:pre-line}
+.itq-actions{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 10px 0}
+.itq-btn{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:12px;padding:7px 10px;font-size:12px;cursor:pointer;transition:transform .12s ease,background .12s ease}
+.itq-btn:hover{transform:translateY(-1px);background:rgba(0,0,0,.02)}
+.itq-btn.copy{border-color:rgba(27,110,194,.35);background:rgba(27,110,194,.06)}
+.itq-btn.ans{border-color:rgba(15,118,110,.35);background:rgba(15,118,110,.06)}
+.itq-io{display:grid;gap:8px;margin:10px 0 12px 0}
+.itq-io label{font-size:12px;color:#6b7280;font-weight:700}
+.itq-io textarea{width:100%;min-height:92px;border-radius:14px;border:1px solid rgba(0,0,0,.12);padding:10px 12px;font-size:12px;line-height:1.45;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;background:#fff}
+.itq-io .hint{font-size:12px;color:#6b7280;line-height:1.4}
+.itq-code{border:1px solid rgba(0,0,0,.10);border-radius:16px;overflow:hidden;background:#0b1220}
+.itq-codeHead{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.10);color:#e5e7eb;font-size:12px}
+.itq-codeHead .itq-kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:2px 6px;border-radius:8px}
+.itq-pre{margin:0;padding:12px;overflow:auto}
+.itq-pre code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:12px;color:#e5e7eb;white-space:pre}
+.itq-answer{margin-top:10px;border:1px solid rgba(15,118,110,.25);background:rgba(15,118,110,.06);border-radius:14px;padding:10px 12px;display:none}
+.itq-answer h4{margin:0 0 6px 0;font-size:13px;color:#0f766e}
+.itq-answer p{margin:0;color:#374151;font-size:12px;line-height:1.55;white-space:pre-line}
+.itq-answer pre{margin:8px 0 0 0;background:rgba(17,24,39,.06);border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:10px;overflow:auto}
+.itq-answer code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:12px}
+.itq-toast{position:fixed;right:14px;bottom:14px;z-index:9999;display:none;background:#111827;color:#fff;padding:10px 12px;border-radius:12px;font-size:12px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+</style>
+
+<div class="itq-wrap">
+    <section class="itq-hero">
+      <h1>Java Question Bank</h1>
+      <p class="itq-sub">Java Stream API | Q0 Warm‑up (Show/Hide Answer) + Q1–Q10 Scenario Questions (5 Moderate + 5 Complex) — With Answers</p>
+      <div class="itq-info">
+        <strong>Instruction:</strong> Boilerplate is visible by default. Students implement <strong>ONLY</strong> methods marked <strong>// ✅ TODO</strong>.<br/>
+        <strong>Answers:</strong> Available via <strong>Show/Hide Answer</strong>.
+      </div>
+      <div class="itq-pills">
+        <span class="itq-pill"><strong>Warm‑up:</strong> 1 (Q0)</span>
+        <span class="itq-pill"><strong>Moderate:</strong> 5 (Q1–Q5)</span>
+        <span class="itq-pill"><strong>Complex:</strong> 5 (Q6–Q10)</span>
+        <span class="itq-pill"><strong>Inputs:</strong> spaces + quotes + unicode α/β + emoji ✅ + special chars</span>
+      </div>
+    </section>
+
+    <section class="itq-grid" aria-label="Java Stream API scenario questions">
+      <article class="itq-card" id="q0">
+  <header class="itq-head">
+    <div class="itq-no">0</div>
+    <div>
+      <h3 class="itq-title">Warm‑up: stream() + filter/map/collect (with answer)</h3>
+      <div class="itq-tags"><span class="itq-chip">stream()</span><span class="itq-chip">filter</span><span class="itq-chip">map</span><span class="itq-chip">collect</span><span class="itq-chip itq-level warm">Warm-up</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Warm‑up:
+Given a list of prices as strings (may contain spaces and currency symbols),
+create a stream pipeline that:
+1) trims each value
+2) removes currency symbols like ₹, $
+3) converts to Integer
+4) keeps only values &gt;= 100
+5) collects to List&lt;Integer&gt;
+
+Implement ONLY: warmUp() to print the final list.</p>
+
+    <div class="itq-io">
+      <label for="itqInput0">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput0">prices = [&quot;  ₹99  &quot;, &quot; $120 &quot;, &quot;  250✅ &quot;, &quot;  80 &quot;, &quot;  ₹150  &quot;]</textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput0')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode0')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns0')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Stream API scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode0">import java.util.*;
+import java.util.stream.*;
+
+public class Main {
+
+    // ✅ TODO: Student must implement only this method
+    static void warmUp() {
+        // TODO:
+        // - create list of strings
+        // - build stream pipeline: trim -&gt; remove symbols -&gt; parse -&gt; filter &gt;=100 -&gt; collect
+        // - print the result list
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+
+    public static void main(String[] args) {
+        warmUp();
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns0">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Logic:
+- stream(): processes a collection in a pipeline
+- map(): transforms each element
+- filter(): keeps elements that match a condition
+- collect(toList()): turns stream back into a List</p>
+      <pre><code>static void warmUp() {
+    List&lt;String&gt; prices = Arrays.asList(&quot;  ₹99  &quot;, &quot; $120 &quot;, &quot;  250✅ &quot;, &quot;  80 &quot;, &quot;  ₹150  &quot;);
+
+    List&lt;Integer&gt; out = prices.stream()
+            .map(s -&gt; s.trim())                                  // remove surrounding spaces
+            .map(s -&gt; s.replaceAll(&quot;[^0-9]&quot;, &quot;&quot;))                // keep digits only
+            .filter(s -&gt; !s.isEmpty())                           // safety
+            .map(Integer::parseInt)                              // to integer
+            .filter(v -&gt; v &gt;= 100)                               // business rule
+            .collect(Collectors.toList());                       // back to list
+
+    System.out.println(out);
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q1">
+  <header class="itq-head">
+    <div class="itq-no">1</div>
+    <div>
+      <h3 class="itq-title">Distinct normalized usernames — trim + lowercase + distinct</h3>
+      <div class="itq-tags"><span class="itq-chip">map</span><span class="itq-chip">distinct</span><span class="itq-chip">collect</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Your login audit sends usernames with random casing and extra spaces.
+Task:
+- trim each username
+- convert to lowercase
+- remove empty values
+- return distinct usernames (preserve encounter order)
+
+Implement ONLY: UserOps.distinctUsers(List&lt;String&gt; raw)
+
+Print result.</p>
+
+    <div class="itq-io">
+      <label for="itqInput1">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput1">raw = [&quot;  Gopi  &quot;, &quot;gopi&quot;, &quot; GOPI &quot;, &quot;Suresh✅&quot;, &quot;  suresh✅  &quot;, &quot;  &quot;, &quot;α/β&quot;]</textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput1')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode1')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns1')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Stream API scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode1">import java.util.*;
+import java.util.stream.*;
+import java.util.function.*;
+import java.util.regex.*;
+
+class UserOps {
+    // ✅ TODO: Student must implement only this method
+    static List&lt;String&gt; distinctUsers(List&lt;String&gt; raw) {
+        // TODO:
+        // - null safe
+        // - stream -&gt; trim -&gt; lowercase -&gt; filter non-empty -&gt; distinct -&gt; collect
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;String&gt; raw = Arrays.asList(&quot;  Gopi  &quot;, &quot;gopi&quot;, &quot; GOPI &quot;, &quot;Suresh✅&quot;, &quot;  suresh✅  &quot;, &quot;  &quot;, &quot;α/β&quot;);
+        System.out.println(UserOps.distinctUsers(raw));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns1">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Use stream() + map(String::trim) + map(String::toLowerCase) + filter(s -&gt; !s.isBlank()) + distinct() + collect(toList()).</p>
+      <pre><code>static List&lt;String&gt; distinctUsers(List&lt;String&gt; raw) {
+    if (raw == null) return java.util.Collections.emptyList();
+    return raw.stream()
+            .map(s -&gt; s == null ? &quot;&quot; : s.trim())         // null-safe trim
+            .map(String::toLowerCase)                    // normalize
+            .filter(s -&gt; !s.isBlank())                   // remove blanks
+            .distinct()                                  // unique in encounter order
+            .collect(java.util.stream.Collectors.toList());
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q2">
+  <header class="itq-head">
+    <div class="itq-no">2</div>
+    <div>
+      <h3 class="itq-title">Top‑N expensive orders — sort + limit + map</h3>
+      <div class="itq-tags"><span class="itq-chip">sorted</span><span class="itq-chip">Comparator</span><span class="itq-chip">limit</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+You have orders with totalAmount (may include currency symbols).
+Task:
+- parse totals as double
+- sort descending by amount
+- take top N (N given)
+- return List&lt;String&gt; of orderIds
+
+Implement ONLY: OrderOps.topNOrderIds(List&lt;Order&gt; orders, int n)
+
+Print result.</p>
+
+    <div class="itq-io">
+      <label for="itqInput2">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput2">orders = [
+  (&quot;ORD 1&quot;, &quot;₹1200.50&quot;), (&quot;ORD-α2&quot;, &quot;  $ 999.99 &quot;), (&quot;ORD✅3&quot;, &quot;₹1200.50&quot;),
+  (&quot;ORD 4&quot;, &quot;₹10&quot;), (&quot;ORD 5&quot;, &quot;₹2500&quot;)
+], n=3</textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput2')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode2')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns2')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Stream API scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode2">import java.util.*;
+import java.util.stream.*;
+
+class Order {
+    final String id;            // order id (may include spaces/special chars)
+    final String total;         // amount as text (may include symbols/spaces)
+    Order(String id, String total){ this.id=id; this.total=total; }
+}
+
+class OrderOps {
+    // ✅ TODO: Student must implement only this method
+    static List&lt;String&gt; topNOrderIds(List&lt;Order&gt; orders, int n) {
+        // TODO:
+        // - parse numeric value from total
+        // - sort desc by numeric amount
+        // - limit n
+        // - map to id
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+
+    // helper (you may call this from stream)
+    static double parseAmount(String s){
+        String t = (s==null?&quot;&quot;:s).trim().replaceAll(&quot;[^0-9.]&quot;, &quot;&quot;);
+        return t.isEmpty()?0.0:Double.parseDouble(t);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;Order&gt; orders = Arrays.asList(
+            new Order(&quot;ORD 1&quot;,&quot;₹1200.50&quot;),
+            new Order(&quot;ORD-α2&quot;,&quot;  $ 999.99 &quot;),
+            new Order(&quot;ORD✅3&quot;,&quot;₹1200.50&quot;),
+            new Order(&quot;ORD 4&quot;,&quot;₹10&quot;),
+            new Order(&quot;ORD 5&quot;,&quot;₹2500&quot;)
+        );
+        System.out.println(OrderOps.topNOrderIds(orders, 3));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns2">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Use Comparator.comparingDouble(o -&gt; parseAmount(o.total)) then reversed(), limit(n), map(o -&gt; o.id).</p>
+      <pre><code>static List&lt;String&gt; topNOrderIds(List&lt;Order&gt; orders, int n) {
+    if (orders == null || n &lt;= 0) return java.util.Collections.emptyList();
+
+    return orders.stream()
+            .sorted(java.util.Comparator.comparingDouble(o -&gt; parseAmount(o.total)).reversed())
+            .limit(n)
+            .map(o -&gt; o.id)
+            .collect(java.util.stream.Collectors.toList());
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q3">
+  <header class="itq-head">
+    <div class="itq-no">3</div>
+    <div>
+      <h3 class="itq-title">Group purchases by category — groupingBy + summingInt</h3>
+      <div class="itq-tags"><span class="itq-chip">groupingBy</span><span class="itq-chip">summingInt</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+You are building a dashboard: total quantity sold per category.
+Task:
+- group items by category (case-insensitive, trim)
+- sum quantities per category
+- return Map&lt;String,Integer&gt;
+
+Implement ONLY: SalesOps.qtyByCategory(List&lt;Item&gt; items)
+
+Print map.</p>
+
+    <div class="itq-io">
+      <label for="itqInput3">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput3">items = [
+ (&quot;Phone&quot;, &quot; Electronics &quot;, 2), (&quot;Cable&quot;, &quot;electronics&quot;, 3),
+ (&quot;Tea&quot;, &quot; Grocery✅ &quot;, 5), (&quot;Rice&quot;, &quot;grocery✅&quot;, 1), (&quot;Pen&quot;, &quot;Stationery&quot;, 10)
+]</textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput3')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode3')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns3')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Stream API scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode3">import java.util.*;
+import java.util.stream.*;
+
+class Item {
+    final String name;     // item name
+    final String category; // category (messy text)
+    final int qty;         // quantity
+    Item(String name, String category, int qty){ this.name=name; this.category=category; this.qty=qty; }
+}
+
+class SalesOps {
+    // ✅ TODO: Student must implement only this method
+    static Map&lt;String,Integer&gt; qtyByCategory(List&lt;Item&gt; items) {
+        // TODO:
+        // - normalize category: trim + lowercase
+        // - groupingBy(category, summingInt(qty))
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;Item&gt; items = Arrays.asList(
+            new Item(&quot;Phone&quot;,&quot; Electronics &quot;,2),
+            new Item(&quot;Cable&quot;,&quot;electronics&quot;,3),
+            new Item(&quot;Tea&quot;,&quot; Grocery✅ &quot;,5),
+            new Item(&quot;Rice&quot;,&quot;grocery✅&quot;,1),
+            new Item(&quot;Pen&quot;,&quot;Stationery&quot;,10)
+        );
+        System.out.println(SalesOps.qtyByCategory(items));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns3">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Collectors.groupingBy(normalizedCategory, Collectors.summingInt(i -&gt; i.qty))</p>
+      <pre><code>static Map&lt;String,Integer&gt; qtyByCategory(List&lt;Item&gt; items) {
+    if (items == null) return java.util.Collections.emptyMap();
+
+    return items.stream()
+            .collect(java.util.stream.Collectors.groupingBy(
+                    i -&gt; (i.category == null ? &quot;&quot; : i.category.trim().toLowerCase()),
+                    java.util.stream.Collectors.summingInt(i -&gt; i.qty)
+            ));
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q4">
+  <header class="itq-head">
+    <div class="itq-no">4</div>
+    <div>
+      <h3 class="itq-title">Partition emails — partitioningBy(valid?)</h3>
+      <div class="itq-tags"><span class="itq-chip">partitioningBy</span><span class="itq-chip">regex</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Support team collects emails from a CSV import.
+Task:
+- partition into valid and invalid buckets
+- return Map&lt;Boolean, List&lt;String&gt;&gt;
+Rules:
+- trim each email
+- valid if matches basic pattern: something@@something.something
+Implement ONLY: EmailOps.partitionValid(List&lt;String&gt; emails)
+
+Print map.</p>
+
+    <div class="itq-io">
+      <label for="itqInput4">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput4">emails = [&quot; gopi@@ittechgenie.com &quot;, &quot;bad@@@@mail&quot;, &quot;suresh✅@@mail.com&quot;, &quot; α/β@@x.io &quot;, &quot;no-domain@@x&quot;, &quot;&quot;]</textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput4')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode4')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns4')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Stream API scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode4">import java.util.*;
+import java.util.regex.*;
+import java.util.stream.*;
+
+class EmailOps {
+    static final Pattern P = Pattern.compile(&quot;^[^@@\s]+@@[^@@\s]+\.[^@@\s]+$&quot;);
+
+    // ✅ TODO: Student must implement only this method
+    static Map&lt;Boolean, List&lt;String&gt;&gt; partitionValid(List&lt;String&gt; emails) {
+        // TODO:
+        // - trim
+        // - partitioningBy(email -&gt; P.matcher(email).matches())
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;String&gt; emails = Arrays.asList(&quot; gopi@@ittechgenie.com &quot;, &quot;bad@@@@mail&quot;, &quot;suresh✅@@mail.com&quot;, &quot; α/β@@x.io &quot;, &quot;no-domain@@x&quot;, &quot;&quot;);
+        System.out.println(EmailOps.partitionValid(emails));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns4">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Use stream().map(trim).collect(partitioningBy(predicate)).</p>
+      <pre><code>static Map&lt;Boolean, List&lt;String&gt;&gt; partitionValid(List&lt;String&gt; emails) {
+    if (emails == null) return java.util.Collections.emptyMap();
+
+    return emails.stream()
+            .map(s -&gt; s == null ? &quot;&quot; : s.trim())
+            .collect(java.util.stream.Collectors.partitioningBy(s -&gt; P.matcher(s).matches()));
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q5">
+  <header class="itq-head">
+    <div class="itq-no">5</div>
+    <div>
+      <h3 class="itq-title">Flatten tags + count frequency — flatMap + groupingBy(counting)</h3>
+      <div class="itq-tags"><span class="itq-chip">flatMap</span><span class="itq-chip">counting</span><span class="itq-chip">frequency</span><span class="itq-chip itq-level mod">Moderate</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Each product has a tags string separated by &#x27;|&#x27;.
+Task:
+- split tags
+- trim + lowercase
+- ignore blanks
+- count frequency of each tag
+Return Map&lt;String,Long&gt;
+
+Implement ONLY: TagOps.countTags(List&lt;String&gt; tagLines)
+
+Print map.</p>
+
+    <div class="itq-io">
+      <label for="itqInput5">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput5">tagLines = [&quot; fast | eco | ✅ &quot;, &quot;Eco| durable|fast&quot;, &quot; α/β | eco | &quot;, &quot;durable|&quot;]</textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput5')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode5')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns5')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Stream API scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode5">import java.util.*;
+import java.util.stream.*;
+
+class TagOps {
+    // ✅ TODO: Student must implement only this method
+    static Map&lt;String,Long&gt; countTags(List&lt;String&gt; tagLines) {
+        // TODO:
+        // - flatMap split by \|
+        // - normalize
+        // - groupingBy(tag, counting())
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;String&gt; tagLines = Arrays.asList(&quot; fast | eco | ✅ &quot;, &quot;Eco| durable|fast&quot;, &quot; α/β | eco | &quot;, &quot;durable|&quot;);
+        System.out.println(TagOps.countTags(tagLines));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns5">
+      <h4>Answer (Logic + Code)</h4>
+      <p>flatMap(line -&gt; Arrays.stream(line.split(&quot;\\|&quot;))) then normalize, groupingBy(identity, counting).</p>
+      <pre><code>static Map&lt;String,Long&gt; countTags(List&lt;String&gt; tagLines) {
+    if (tagLines == null) return java.util.Collections.emptyMap();
+
+    return tagLines.stream()
+            .filter(Objects::nonNull)
+            .flatMap(line -&gt; java.util.Arrays.stream(line.split(&quot;\\|&quot;)))
+            .map(s -&gt; s.trim().toLowerCase())
+            .filter(s -&gt; !s.isBlank())
+            .collect(java.util.stream.Collectors.groupingBy(
+                    s -&gt; s,
+                    java.util.LinkedHashMap::new,
+                    java.util.stream.Collectors.counting()
+            ));
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q6">
+  <header class="itq-head">
+    <div class="itq-no">6</div>
+    <div>
+      <h3 class="itq-title">Build report with custom Collector — join lines with numbering</h3>
+      <div class="itq-tags"><span class="itq-chip">Collector</span><span class="itq-chip">StringBuilder</span><span class="itq-chip">joining</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+You must build a human-readable multi-line report from errors:
+Example output:
+1) ERR-01 | message
+2) ERR-α2 | message ✅
+Rules:
+- keep order
+- add numbering starting from 1
+- join with &#x27;\n&#x27;
+Implement ONLY: ReportOps.build(List&lt;Err&gt; errs)
+
+Print report.</p>
+
+    <div class="itq-io">
+      <label for="itqInput6">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput6">errs = [(&quot;ERR-01&quot;,&quot;Invalid  pin  &quot;123&quot;&quot;), (&quot;ERR-α2&quot;,&quot;Payment failed ✅&quot;), (&quot;ERR-03&quot;,&quot;City=Ben@@luru!&quot;)]</textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput6')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode6')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns6')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Stream API scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode6">import java.util.*;
+import java.util.stream.*;
+
+class Err {
+    final String code;
+    final String msg;
+    Err(String code, String msg){ this.code=code; this.msg=msg; }
+}
+
+class ReportOps {
+    // ✅ TODO: Student must implement only this method
+    static String build(List&lt;Err&gt; errs) {
+        // TODO:
+        // - use IntStream range to number lines
+        // - or use stream with mutable counter (AtomicInteger)
+        // - build one multi-line string
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;Err&gt; errs = Arrays.asList(
+            new Err(&quot;ERR-01&quot;,&quot;Invalid  pin  \&quot;123\&quot;&quot;),
+            new Err(&quot;ERR-α2&quot;,&quot;Payment failed ✅&quot;),
+            new Err(&quot;ERR-03&quot;,&quot;City=Ben@@luru!&quot;)
+        );
+        System.out.println(ReportOps.build(errs));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns6">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Use IntStream.range(0, list.size()) to preserve order and add numbering deterministically.</p>
+      <pre><code>static String build(List&lt;Err&gt; errs) {
+    if (errs == null || errs.isEmpty()) return &quot;&quot;;
+
+    return java.util.stream.IntStream.range(0, errs.size())
+            .mapToObj(i -&gt; {
+                Err e = errs.get(i);
+                String code = e.code == null ? &quot;&quot; : e.code.trim();
+                String msg  = e.msg  == null ? &quot;&quot; : e.msg.trim().replaceAll(&quot;\\s+&quot;, &quot; &quot;);
+                return (i + 1) + &quot;) &quot; + code + &quot; | &quot; + msg;
+            })
+            .collect(java.util.stream.Collectors.joining(&quot;\n&quot;));
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q7">
+  <header class="itq-head">
+    <div class="itq-no">7</div>
+    <div>
+      <h3 class="itq-title">Compute median amount — mapToDouble + sorted + skip/limit</h3>
+      <div class="itq-tags"><span class="itq-chip">mapToDouble</span><span class="itq-chip">sorted</span><span class="itq-chip">median</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+For analytics, compute the median transaction amount.
+Rules:
+- parse amount from messy strings (₹, $, spaces)
+- sort numeric values
+- if odd =&gt; middle element
+- if even =&gt; average of two middle elements
+Implement ONLY: StatsOps.median(List&lt;String&gt; amounts)
+
+Print median.</p>
+
+    <div class="itq-io">
+      <label for="itqInput7">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput7">amounts = [&quot;₹10&quot;, &quot; $ 20 &quot;, &quot;₹30✅&quot;, &quot; 40 &quot;, &quot;₹100&quot;, &quot;₹200&quot;]</textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput7')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode7')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns7')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Stream API scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode7">import java.util.*;
+import java.util.stream.*;
+
+class StatsOps {
+    static double parseAmount(String s){
+        String t = (s==null?&quot;&quot;:s).trim().replaceAll(&quot;[^0-9.]&quot;, &quot;&quot;);
+        return t.isEmpty()?0.0:Double.parseDouble(t);
+    }
+
+    // ✅ TODO: Student must implement only this method
+    static double median(List&lt;String&gt; amounts) {
+        // TODO:
+        // - map to double
+        // - sort
+        // - compute median for odd/even size
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;String&gt; a = Arrays.asList(&quot;₹10&quot;, &quot; $ 20 &quot;, &quot;₹30✅&quot;, &quot; 40 &quot;, &quot;₹100&quot;, &quot;₹200&quot;);
+        System.out.println(StatsOps.median(a));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns7">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Collect sorted doubles into a list/array, then compute median by index.</p>
+      <pre><code>static double median(List&lt;String&gt; amounts) {
+    if (amounts == null || amounts.isEmpty()) return 0.0;
+
+    double[] arr = amounts.stream()
+            .mapToDouble(StatsOps::parseAmount)
+            .sorted()
+            .toArray();
+
+    int n = arr.length;
+    if (n % 2 == 1) return arr[n / 2];
+    return (arr[n / 2 - 1] + arr[n / 2]) / 2.0;
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q8">
+  <header class="itq-head">
+    <div class="itq-no">8</div>
+    <div>
+      <h3 class="itq-title">Parallel stream: count unique cities safely (normalize + concurrent set)</h3>
+      <div class="itq-tags"><span class="itq-chip">parallelStream</span><span class="itq-chip">thread-safety</span><span class="itq-chip">collect</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+You process a huge list of city strings and want count of unique normalized cities.
+Rule:
+- normalize (trim + lowercase)
+- ignore blanks
+- must be safe with parallelStream()
+Implement ONLY: CityOps.uniqueCount(List&lt;String&gt; cities)
+
+Print count.</p>
+
+    <div class="itq-io">
+      <label for="itqInput8">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput8">cities = [&quot; Bengaluru &quot;, &quot;bengaluru&quot;, &quot;Chennai✅&quot;, &quot;  &quot;, &quot;BENGALURU&quot;, &quot;α/β City&quot;, &quot;α/β city&quot;]</textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput8')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode8')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns8')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Stream API scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode8">import java.util.*;
+import java.util.stream.*;
+import java.util.concurrent.*;
+
+class CityOps {
+    // ✅ TODO: Student must implement only this method
+    static long uniqueCount(List&lt;String&gt; cities) {
+        // TODO:
+        // - parallel stream
+        // - normalize
+        // - collect into a concurrent set OR use distinct() (works, but explain)
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;String&gt; cities = Arrays.asList(&quot; Bengaluru &quot;, &quot;bengaluru&quot;, &quot;Chennai✅&quot;, &quot;  &quot;, &quot;BENGALURU&quot;, &quot;α/β City&quot;, &quot;α/β city&quot;);
+        System.out.println(CityOps.uniqueCount(cities));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns8">
+      <h4>Answer (Logic + Code)</h4>
+      <p>distinct() is safe for parallel streams; alternatively collect into ConcurrentHashMap.newKeySet().</p>
+      <pre><code>static long uniqueCount(List&lt;String&gt; cities) {
+    if (cities == null) return 0;
+
+    return cities.parallelStream()
+            .map(s -&gt; s == null ? &quot;&quot; : s.trim().toLowerCase())
+            .filter(s -&gt; !s.isBlank())
+            .distinct()
+            .count();
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q9">
+  <header class="itq-head">
+    <div class="itq-no">9</div>
+    <div>
+      <h3 class="itq-title">Running total (cumulative sum) — stream with mutable state (careful)</h3>
+      <div class="itq-tags"><span class="itq-chip">running total</span><span class="itq-chip">state</span><span class="itq-chip">Sequential stream</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+Generate a running total of daily sales for a chart.
+Input is list of integers as strings (may include spaces and emoji).
+Rules:
+- parse ints
+- produce List&lt;Integer&gt; runningTotals (same length)
+Important:
+- This must be done in a SEQUENTIAL stream (stateful operation)
+Implement ONLY: Running.total(List&lt;String&gt; daily)
+
+Print list.</p>
+
+    <div class="itq-io">
+      <label for="itqInput9">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput9">daily = [&quot; 10 &quot;, &quot;20✅&quot;, &quot;  5&quot;, &quot;15&quot;, &quot;α/β 30&quot;]</textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput9')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode9')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns9')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Stream API scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode9">import java.util.*;
+import java.util.stream.*;
+
+class Running {
+    static int parseIntSafe(String s){
+        String t = (s==null?&quot;&quot;:s).replaceAll(&quot;[^0-9-]&quot;, &quot;&quot;).trim();
+        return t.isEmpty()?0:Integer.parseInt(t);
+    }
+
+    // ✅ TODO: Student must implement only this method
+    static List&lt;Integer&gt; total(List&lt;String&gt; daily) {
+        // TODO:
+        // - sequential stream only
+        // - build running totals
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;String&gt; daily = Arrays.asList(&quot; 10 &quot;, &quot;20✅&quot;, &quot;  5&quot;, &quot;15&quot;, &quot;α/β 30&quot;);
+        System.out.println(Running.total(daily));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns9">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Use an int[1] accumulator (or AtomicInteger) in a sequential stream; do NOT use this with parallel streams.</p>
+      <pre><code>static List&lt;Integer&gt; total(List&lt;String&gt; daily) {
+    if (daily == null) return java.util.Collections.emptyList();
+
+    final int[] sum = new int[]{0}; // mutable holder
+    return daily.stream()                                   // sequential by default
+            .map(Running::parseIntSafe)
+            .map(v -&gt; sum[0] += v)                           // running total
+            .collect(java.util.stream.Collectors.toList());
+}</code></pre>
+    </div>
+  </div>
+</article><article class="itq-card" id="q10">
+  <header class="itq-head">
+    <div class="itq-no">10</div>
+    <div>
+      <h3 class="itq-title">Top product per category — groupingBy + maxBy + collectingAndThen</h3>
+      <div class="itq-tags"><span class="itq-chip">groupingBy</span><span class="itq-chip">maxBy</span><span class="itq-chip">Optional</span><span class="itq-chip itq-level cx">Complex</span></div>
+    </div>
+  </header>
+  <div class="itq-body">
+    <p class="itq-stmt">Scenario:
+For each category, find the product with maximum revenue.
+Revenue = price * qty.
+Rules:
+- category normalization: trim + lowercase
+- return Map&lt;String, Product&gt; (one top product per category)
+Implement ONLY: ProductOps.topByCategory(List&lt;Product&gt; products)
+
+Print map (category -&gt; productId).</p>
+
+    <div class="itq-io">
+      <label for="itqInput10">Sample Input (student: edit/replace with your own complex input)</label>
+      <textarea id="itqInput10">products = [
+ (&quot;P1&quot;,&quot;Electronics &quot;, 999.0, 2),
+ (&quot;P2&quot;,&quot;electronics&quot;, 1200.0, 1),
+ (&quot;P3&quot;,&quot;Grocery✅&quot;, 50.0, 20),
+ (&quot;P4&quot;,&quot;grocery✅ &quot;, 80.0, 5),
+ (&quot;P5&quot;,&quot;Stationery&quot;, 10.0, 100)
+]</textarea>
+      <div class="hint">✅ Includes spaces + quotes + unicode α/β + emoji ✅ + special chars.</div>
+      <div class="itq-actions"><button type="button" class="itq-btn" onclick="itqCopyInput('itqInput10')">Copy input</button></div>
+    </div>
+
+    <div class="itq-actions">
+      <button type="button" class="itq-btn copy" onclick="itqCopy('itqCode10')">Copy code</button>
+      <button type="button" class="itq-btn ans" onclick="itqToggle('itqAns10')">Show/Hide Answer</button>
+    </div>
+
+    <div class="itq-code">
+      <div class="itq-codeHead"><span>Java Stream API scenario (students implement ONLY // ✅ TODO)</span><span class="itq-kbd">Ctrl+C</span></div>
+      <pre class="itq-pre"><code id="itqCode10">import java.util.*;
+import java.util.stream.*;
+
+class Product {
+    final String id;
+    final String category;
+    final double price;
+    final int qty;
+    Product(String id, String category, double price, int qty){
+        this.id=id; this.category=category; this.price=price; this.qty=qty;
+    }
+    double revenue(){ return price * qty; }
+}
+
+class ProductOps {
+    // ✅ TODO: Student must implement only this method
+    static Map&lt;String, Product&gt; topByCategory(List&lt;Product&gt; products) {
+        // TODO:
+        // - group by normalized category
+        // - pick max revenue product per category
+        // - unwrap Optional
+        throw new UnsupportedOperationException(&quot;TODO&quot;);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;Product&gt; p = Arrays.asList(
+            new Product(&quot;P1&quot;,&quot;Electronics &quot;, 999.0, 2),
+            new Product(&quot;P2&quot;,&quot;electronics&quot;, 1200.0, 1),
+            new Product(&quot;P3&quot;,&quot;Grocery✅&quot;, 50.0, 20),
+            new Product(&quot;P4&quot;,&quot;grocery✅ &quot;, 80.0, 5),
+            new Product(&quot;P5&quot;,&quot;Stationery&quot;, 10.0, 100)
+        );
+
+        Map&lt;String, Product&gt; out = ProductOps.topByCategory(p);
+        out.forEach((k,v) -&gt; System.out.println(k + &quot; -&gt; &quot; + (v==null? &quot;null&quot; : v.id)));
+    }
+}</code></pre>
+    </div>
+
+    <div class="itq-answer" id="itqAns10">
+      <h4>Answer (Logic + Code)</h4>
+      <p>Use groupingBy + collectingAndThen(maxBy(comparingDouble(Product::revenue)), opt -&gt; opt.orElse(null)).</p>
+      <pre><code>static Map&lt;String, Product&gt; topByCategory(List&lt;Product&gt; products) {
+    if (products == null) return java.util.Collections.emptyMap();
+
+    return products.stream()
+            .collect(java.util.stream.Collectors.groupingBy(
+                    pr -&gt; (pr.category == null ? &quot;&quot; : pr.category.trim().toLowerCase()),
+                    java.util.stream.Collectors.collectingAndThen(
+                            java.util.stream.Collectors.maxBy(java.util.Comparator.comparingDouble(Product::revenue)),
+                            opt -&gt; opt.orElse(null)
+                    )
+            ));
+}</code></pre>
+    </div>
+  </div>
+</article>
+    </section>
+  </div>
+
+  <div id="itqToast" class="itq-toast" aria-live="polite"></div>
+  
+<script>
+(function(){
+  function toast(msg){
+    var t=document.getElementById("itqToast"); if(!t) return;
+    t.textContent=msg; t.style.display="block";
+    clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none",1400);
+  }
+  window.itqCopy=function(id){
+    var el=document.getElementById(id); if(!el) return;
+    var txt=el.innerText||el.textContent||"";
+    navigator.clipboard.writeText(txt).then(()=>toast("Code copied")).catch(()=>toast("Copy failed"));
+  };
+  window.itqCopyInput=function(id){
+    var el=document.getElementById(id); if(!el) return;
+    navigator.clipboard.writeText(el.value||"").then(()=>toast("Input copied")).catch(()=>toast("Copy failed"));
+  };
+  window.itqToggle=function(id){
+    var el=document.getElementById(id); if(!el) return;
+    el.style.display=(el.style.display==="block")?"none":"block";
+  };
+})();
+</script>
+
+<script>
+(function(){
+  function toast(msg){
+    var t=document.getElementById("itqToast"); if(!t) return;
+    t.textContent=msg; t.style.display="block";
+    clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none",1400);
+  }
+  window.itqCopy=function(id){
+    var el=document.getElementById(id); if(!el) return;
+    var txt=el.innerText||el.textContent||"";
+    navigator.clipboard.writeText(txt).then(()=>toast("Code copied")).catch(()=>toast("Copy failed"));
+  };
+  window.itqCopyInput=function(id){
+    var el=document.getElementById(id); if(!el) return;
+    navigator.clipboard.writeText(el.value||"").then(()=>toast("Input copied")).catch(()=>toast("Copy failed"));
+  };
+  window.itqToggle=function(id){
+    var el=document.getElementById(id); if(!el) return;
+    el.style.display=(el.style.display==="block")?"none":"block";
+  };
+})();
+</script>
