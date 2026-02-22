@@ -37,7 +37,7 @@ public class HomeController : Controller
     {
         ViewData["ActivePage"] = "Azure";
         ViewData["ActiveMenu"] = "Azure";
-        return View("Azure");
+        return View("azure");
     }
 
     public IActionResult AzureDevops()
