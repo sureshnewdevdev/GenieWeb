@@ -18,6 +18,13 @@ public class CoursesController : Controller
         return View("AutomationSeleniumCSharp/M1_IntroAutomationTesting");
     }
 
+    public IActionResult AspNetMvc()
+    {
+        ViewData["ActiveMenu"] = "AspNetMvc";
+        ViewData["Title"] = "ASP.NET MVC";
+        return View("AspNetMvc/Index");
+    }
+
     [HttpGet]
     public IActionResult Syllabus(string fileName)
     {
