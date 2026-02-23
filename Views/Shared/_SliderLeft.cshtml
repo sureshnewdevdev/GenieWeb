@@ -24,6 +24,8 @@
   @* Optional extra head items (page-specific CSS etc.) *@
   @RenderSection("HeadExtras", required: false)
 
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2270827713894017" crossorigin="anonymous"></script>
+
   <style>
     :root{
       --bg:#f6f7fb;
@@ -663,12 +665,29 @@
     function renderInContentAd(){
       return `
         <div class="ad-inline">
-          <b>In-content Ad</b>
-          <p class="muted" style="margin:6px 0 12px 0;">Place this between content blocks.</p>
-          <!-- Replace placeholder with your AdSense <ins> -->
-          <div class="ad-box">IN-CONTENT AD (responsive)</div>
+          <b>Sponsored</b>
+          <p class="muted" style="margin:6px 0 12px 0;">Advertisement</p>
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="ca-pub-2270827713894017"
+               data-ad-slot="1234567890"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
         </div>
       `;
+    }
+
+    function initializeInlineAds(){
+      if(!window.adsbygoogle) return;
+      document.querySelectorAll('.ad-inline .adsbygoogle').forEach(ad=>{
+        if(ad.getAttribute('data-ad-initialized') === 'true') return;
+        try{
+          (adsbygoogle = window.adsbygoogle || []).push({});
+          ad.setAttribute('data-ad-initialized', 'true');
+        }catch(_err){
+          // no-op for local/dev render where ads cannot be served
+        }
+      });
     }
 
     function renderHome(){
@@ -699,6 +718,7 @@
         </article>
       `;
       ensureSidebarAdVisibility();
+      initializeInlineAds();
       clearActive();
     }
 
@@ -727,6 +747,7 @@
 
       contentArea.innerHTML = blocks.join("");
       ensureSidebarAdVisibility();
+      initializeInlineAds();
       activateItem(topic.id);
     }
 
