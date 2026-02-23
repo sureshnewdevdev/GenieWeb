@@ -742,7 +742,7 @@
     function renderMenu(){
       menu.innerHTML = COURSE.map(m=>{
         const topicLinks = (m.topics || []).map(t=>`
-          <a class="item" href="#${t.id}" data-moduleid="${m.id}" data-topicid="${t.id}">
+          <a class="item" href="#${t.id}" data-moduleid="${m.id}" data-topicid="${t.id}" data-url="${t.url || ""}">
             <span class="dot"></span><span class="label">${t.title}</span>
           </a>
         `).join("");
@@ -836,6 +836,11 @@
       menu.querySelectorAll("a.item").forEach(a=>{
         a.addEventListener("click", (e)=>{
           e.preventDefault();
+          const topicUrl = a.getAttribute("data-url");
+          if(topicUrl){
+            location.href = topicUrl;
+            return;
+          }
           const topicId = a.getAttribute("data-topicid");
           location.hash = topicId;
           document.body.classList.remove("mobile-open");
