@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using GenieWeb.Models;
+using Microsoft.Extensions.Logging;
 
 namespace GenieWeb.Services
 {
@@ -12,11 +13,13 @@ namespace GenieWeb.Services
     public class MicroservicesSyllabusService : IMicroservicesSyllabusService
     {
         private readonly IWebHostEnvironment _environment;
+        private readonly ILogger<MicroservicesSyllabusService> _logger;
         private readonly Lazy<IReadOnlyList<MicroservicesSection>> _cachedSyllabus;
 
-        public MicroservicesSyllabusService(IWebHostEnvironment environment)
+        public MicroservicesSyllabusService(IWebHostEnvironment environment, ILogger<MicroservicesSyllabusService> logger)
         {
             _environment = environment;
+            _logger = logger;
             _cachedSyllabus = new Lazy<IReadOnlyList<MicroservicesSection>>(LoadSyllabus);
         }
 
@@ -34,9 +37,10 @@ namespace GenieWeb.Services
 
         private IReadOnlyList<MicroservicesSection> LoadSyllabus()
         {
-            var filePath = Path.Combine(_environment.ContentRootPath, "HelperFiles", "MicroServices", "MicroservicesSyllabus.txt");
-            if (!File.Exists(filePath))
+            var filePath = ResolveSyllabusPath();
+            if (string.IsNullOrWhiteSpace(filePath))
             {
+                _logger.LogWarning("Microservices syllabus file was not found under content root {ContentRootPath}.", _environment.ContentRootPath);
                 return Array.Empty<MicroservicesSection>();
             }
 
@@ -80,6 +84,27 @@ namespace GenieWeb.Services
             }
 
             return sections;
+        }
+
+        private string? ResolveSyllabusPath()
+        {
+            var directPath = Path.Combine(_environment.ContentRootPath, "HelperFiles", "MicroServices", "MicroservicesSyllabus.txt");
+            if (File.Exists(directPath))
+            {
+                return directPath;
+            }
+
+            var helperFilesDirectory = Path.Combine(_environment.ContentRootPath, "HelperFiles");
+            if (!Directory.Exists(helperFilesDirectory))
+            {
+                return null;
+            }
+
+            var discoveredPath = Directory
+                .EnumerateFiles(helperFilesDirectory, "MicroservicesSyllabus.txt", SearchOption.AllDirectories)
+                .FirstOrDefault();
+
+            return string.IsNullOrWhiteSpace(discoveredPath) ? null : discoveredPath;
         }
 
         private static string ToSlug(string title)
