@@ -82,48 +82,4 @@
     }
 </style>
 
-<div class="ms-layout">
-    <aside class="ms-sidebar">
-        <h3>Microservices Syllabus Navigation</h3>
-        @foreach (var section in Model.Sections)
-        {
-            <div class="ms-section">
-                <a class="ms-section-link @(Model.ActiveSection?.Slug == section.Slug ? "active" : string.Empty)"
-                   href="@Url.Action("Section", "Microservices", new { slug = section.Slug })">
-                    @(section.Number). @(section.Title)
-                </a>
-            </div>
-        }
-    </aside>
 
-    <section class="ms-main">
-        @if (Model.ActiveSection != null)
-        {
-            <span class="badge-chip">Section @Model.ActiveSection.Number</span>
-        }
-        <h2>@Model.PageTitle</h2>
-
-        @if (!string.IsNullOrWhiteSpace(Model.TopicViewName))
-        {
-            @await Html.PartialAsync($"~/Views/Microservices/Topics/{Model.TopicViewName}.cshtml")
-        }
-        else if (!string.IsNullOrWhiteSpace(Model.IntroHtml))
-        {
-            @Html.Raw(Model.IntroHtml)
-        }
-        else
-        {
-            <div class="section">
-                <h3>Learning Outcomes for @Model.ActiveSection?.Title</h3>
-                <p>
-                    This section page is ready for topic-wise content. Use the syllabus navigation to add dedicated views for each
-                    subtopic as your course grows.
-                </p>
-                <div class="note-box">
-                    <strong>Extend easily:</strong> Create topic-specific actions and render content blocks based on
-                    <code>@Model.ActiveSection?.Slug</code> and selected topic slug.
-                </div>
-            </div>
-        }
-    </section>
-</div>
