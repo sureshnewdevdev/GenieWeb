@@ -80,7 +80,7 @@ namespace GenieWeb.Controllers
         {
             if (section.Number == "1" && topic.Number == "1.1")
             {
-                return "~/HelperFiles/MicroServices/WhatIsSoftwareArchitecture.cshtml";
+                return "~/Views/Microservices/Topics/WhatIsSoftwareArchitecture.cshtml";
             }
 
             return null;
