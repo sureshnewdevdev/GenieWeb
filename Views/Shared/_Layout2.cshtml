@@ -1,0 +1,183 @@
+@{
+    // _Layout.cshtml (ASP.NET MVC 5 / System.Web)
+    // Sliding Left Sidebar (Offcanvas) + Top Navbar + Right Sticky Ad Area
+    // Uses Bootstrap 5 Offcanvas. Ensure bootstrap JS is loaded (bundle).
+    var title = ViewData["Title"] as string ?? "ItTechGenie";
+    var activeTopic = ViewData["ActiveTopic"] as string ?? "";
+    var activePage = ViewData["ActivePage"] as string ?? ""; // Optional: set in views to highlight current page
+    Func<string, string> isActive = (pageKey) => string.Equals(activePage, pageKey, System.StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@title</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Your site CSS (example path) -->
+    @* Update this path to your real css if different *@
+    <link href="~/Content/_Layout.cshtml.css" rel="stylesheet" />
+
+    <style>
+        /* Minimal layout-only CSS (keep most in _Layout.cshtml.css) */
+        .itg-shell { min-height: 100vh; }
+        .itg-main { max-width: 1180px; }
+        .itg-sidebar { width: 320px; }
+        .itg-menu .list-group-item {
+            border-radius: 10px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(0,0,0,.08);
+            transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+        }
+        .itg-menu .list-group-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 .35rem 1rem rgba(0,0,0,.08);
+            border-color: rgba(13,110,253,.35);
+        }
+        .itg-menu .list-group-item.active {
+            background: rgba(13,110,253,.12);
+            color: #0d6efd;
+            border-color: rgba(13,110,253,.35);
+            font-weight: 700;
+        }
+        .ad-right {
+            position: sticky;
+            top: 90px;
+            border: 1px solid rgba(0,0,0,.12);
+            border-radius: 14px;
+            padding: 14px;
+            background: rgba(255,193,7,.10);
+            min-height: 280px;
+        }
+        .ad-incontent {
+            border: 1px solid rgba(0,0,0,.12);
+            border-radius: 14px;
+            padding: 14px;
+            background: rgba(13,110,253,.06);
+            text-align: center;
+            font-weight: 800;
+            color: rgba(0,0,0,.7);
+        }
+    </style>
+
+    @RenderSection("Styles", required: false)
+</head>
+<body class="bg-light">
+    <div class="itg-shell d-flex flex-column">
+
+        <!-- TOP NAVBAR -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+            <div class="container-fluid">
+                <!-- Sidebar Toggle -->
+                <button class="btn btn-outline-primary me-2" type="button"
+                        data-bs-toggle="offcanvas" data-bs-target="#leftSidebar"
+                        aria-controls="leftSidebar">
+                    ☰ Menu
+                </button>
+
+                <a class="navbar-brand fw-bold" href="/">ItTechGenie</a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNav"
+                        aria-controls="topNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="topNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link @(activeTopic == "AspNetMvc" ? "fw-bold text-primary" : "")" href="/AspNetMvc/Index">ASP.NET MVC</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Practice/Index">Practice</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Interview/Index">Interview Q&A</a>
+                        </li>
+                    </ul>
+
+                    <div class="d-flex gap-2">
+                        <a class="btn btn-sm btn-outline-secondary" href="/Account/Login">Login</a>
+                        <a class="btn btn-sm btn-primary" href="/Account/Register">Register</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- OFFCANVAS LEFT SIDEBAR -->
+        <div class="offcanvas offcanvas-start itg-sidebar" tabindex="-1" id="leftSidebar" aria-labelledby="leftSidebarLabel">
+            <div class="offcanvas-header border-bottom">
+                <h5 class="offcanvas-title" id="leftSidebarLabel">Course Menu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+
+            <div class="offcanvas-body p-0">
+                <div class="p-3">
+                    <div class="small text-muted mb-2">ASP.NET MVC</div>
+
+                    <div class="list-group itg-menu">
+                        <a class="list-group-item list-group-item-action @isActive("Index")" href="/AspNetMvc/Index">ASP.NET MVC - Home</a>
+                        <a class="list-group-item list-group-item-action @isActive("WhatIsWebApplication")" href="/AspNetMvc/WhatIsWebApplication">What is Web application?</a>
+                        <a class="list-group-item list-group-item-action @isActive("WhatIsAspNetWebApplication")" href="/AspNetMvc/WhatIsAspNetWebApplication">What is ASP.NET Web Application?</a>
+                        <a class="list-group-item list-group-item-action @isActive("WhyAspNetMvc")" href="/AspNetMvc/WhyAspNetMvc">Why ASP.NET MVC?</a>
+                        <a class="list-group-item list-group-item-action @isActive("OverviewOfMvcArchitecture")" href="/AspNetMvc/OverviewOfMvcArchitecture">Overview of MVC Architecture</a>
+                        <a class="list-group-item list-group-item-action @isActive("Prerequisites")" href="/AspNetMvc/Prerequisites">Prerequisites</a>
+                        <a class="list-group-item list-group-item-action @isActive("CreateFirstMvcApp")" href="/AspNetMvc/CreateFirstMvcApp">Create First MVC App</a>
+                        <a class="list-group-item list-group-item-action @isActive("MvcFolderStructure")" href="/AspNetMvc/MvcFolderStructure">MVC Folder Structure</a>
+                        <a class="list-group-item list-group-item-action @isActive("Routing")" href="/AspNetMvc/Routing">Routing in ASP.NET MVC</a>
+                        <a class="list-group-item list-group-item-action @isActive("Filters")" href="/AspNetMvc/Filters">Filters in ASP.NET MVC</a>
+                        <a class="list-group-item list-group-item-action @isActive("ActionFilterAttributes")" href="/AspNetMvc/ActionFilterAttributes">ActionFilter Attributes</a>
+                        <a class="list-group-item list-group-item-action @isActive("Bundling")" href="/AspNetMvc/Bundling">Bundling in ASP.NET MVC</a>
+                        <a class="list-group-item list-group-item-action @isActive("Area")" href="/AspNetMvc/Area">Area in ASP.NET MVC</a>
+                    </div>
+
+                    <!-- Sidebar Ad -->
+                    <div class="mt-3 p-3 border rounded bg-light">
+                        [Ad Placeholder - Sidebar]
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE LAYOUT: Content + Right Sticky Ad -->
+        <div class="container-fluid flex-grow-1">
+            <div class="row g-3">
+                <main class="col-lg-9">
+                    <div class="container itg-main py-3">
+                        @RenderBody()
+                    </div>
+                </main>
+
+                <aside class="col-lg-3 d-none d-lg-block">
+                    <div class="ad-right mt-3">
+                        [Ad Placeholder - Right Sticky]
+                    </div>
+                </aside>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="border-top bg-white py-3 mt-auto">
+            <div class="container-fluid">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="small text-muted">© @DateTime.Now.Year ItTechGenie</div>
+                    <div class="small">
+                        <a href="/Home/Privacy" class="text-decoration-none">Privacy</a>
+                        <span class="text-muted mx-2">|</span>
+                        <a href="/Home/Terms" class="text-decoration-none">Terms</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

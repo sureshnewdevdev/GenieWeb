@@ -1,0 +1,611 @@
+@{
+    Layout = null; /* Change to your site layout if needed */
+    var pageTitle = ViewData["Title"] as string ?? "ItTechGenie";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@pageTitle</title>
+    <style>
+        :root {
+            --brand: #04AA6D;
+            --brand-dark: #038857;
+            --accent: #1f2937;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --bg: #f7f8fa;
+            --card: #ffffff;
+            --border: #e5e7eb;
+            --shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+            --topbar-h: 64px;
+            --nav-h: 52px;
+            --total-top: calc(var(--topbar-h) + var(--nav-h));
+            --right-rail: 300px;
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            line-height: 1.6;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 1200;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        .topbar {
+            height: var(--topbar-h);
+            background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 0 18px;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        .brand-block {
+            min-width: 0;
+        }
+
+        .brand-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            min-width: 0;
+        }
+
+        .menu-btn {
+            border: none;
+            background: rgba(255,255,255,0.16);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .brand-title {
+            margin: 0;
+            font-size: 1.25rem;
+            line-height: 1.15;
+            white-space: nowrap;
+        }
+
+        .brand-sub {
+            font-size: 0.92rem;
+            opacity: 0.96;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .header-breadcrumb {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            padding-bottom: 2px;
+        }
+
+        .header-breadcrumb a,
+        .header-breadcrumb span {
+            white-space: nowrap;
+        }
+
+        .header-breadcrumb a {
+            color: rgba(255,255,255,0.96);
+            font-size: 0.92rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.16);
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .header-breadcrumb a:hover {
+            background: rgba(255,255,255,0.22);
+            transform: translateY(-1px);
+        }
+
+        .header-breadcrumb .crumb-sep {
+            color: rgba(255,255,255,0.72);
+            font-weight: 700;
+        }
+
+        .header-breadcrumb .current {
+            color: #ffffff;
+            font-size: 0.92rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.18);
+            border: 1px solid rgba(255,255,255,0.14);
+        }
+
+        .top-cta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            flex: 0 0 auto;
+        }
+
+        .pill {
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.18);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .top-nav {
+            height: var(--nav-h);
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 14px;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: thin;
+        }
+
+        .top-nav a {
+            display: inline-flex;
+            align-items: center;
+            height: 36px;
+            padding: 0 14px;
+            border-radius: 999px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .top-nav a:hover,
+        .top-nav a.active {
+            background: #e8fff5;
+            color: var(--brand-dark);
+        }
+
+        .layout-shell {
+            max-width: 1480px;
+            margin: 0 auto;
+            padding: 18px;
+        }
+
+        .top-ad {
+            background: linear-gradient(90deg, #fff7ed, #fefce8);
+            border: 1px dashed #f59e0b;
+            border-radius: 16px;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #92400e;
+            font-weight: 700;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) var(--right-rail);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .main-column {
+            min-width: 0;
+        }
+
+        .page-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #effcf6, #ecfeff);
+            border: 1px solid #d1fae5;
+            border-radius: 18px;
+            padding: 24px;
+            margin-bottom: 22px;
+        }
+
+        .hero h2 {
+            margin: 0 0 10px;
+            font-size: 2rem;
+            line-height: 1.2;
+            color: #065f46;
+        }
+
+        .hero p {
+            margin: 0;
+            color: #37566b;
+            max-width: 900px;
+        }
+
+        .section {
+            margin-top: 24px;
+        }
+
+        .section h3 {
+            margin: 0 0 10px;
+            font-size: 1.35rem;
+        }
+
+        .note-box {
+            background: #f0fdf4;
+            border-left: 5px solid var(--brand);
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin: 14px 0;
+        }
+
+        .code-box {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 14px;
+            padding: 18px;
+            overflow: auto;
+            font-family: Consolas, monospace;
+            font-size: 0.95rem;
+        }
+
+        .mid-ad {
+            margin: 24px 0;
+            min-height: 120px;
+            background: linear-gradient(90deg, #eef2ff, #fdf2f8);
+            border: 1px dashed #8b5cf6;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 16px;
+            color: #5b21b6;
+            font-weight: 700;
+        }
+
+        .right-rail {
+            position: sticky;
+            top: calc(var(--total-top) + 18px);
+        }
+
+        .ad-card, .promo-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: var(--shadow);
+            margin-bottom: 18px;
+        }
+
+        .ad-slot {
+            min-height: 250px;
+            border: 1px dashed #fb7185;
+            border-radius: 14px;
+            background: #fff1f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: 700;
+            color: #be123c;
+            padding: 12px;
+        }
+
+        .promo-card ul {
+            padding-left: 18px;
+            margin: 10px 0 0;
+        }
+
+        .site-footer {
+            margin-top: 24px;
+            background: #111827;
+            color: #f9fafb;
+            border-radius: 18px;
+            padding: 22px;
+        }
+
+        .footer-ad {
+            margin-top: 16px;
+            min-height: 90px;
+            border: 1px dashed rgba(255,255,255,0.45);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #d1d5db;
+            padding: 14px;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s ease;
+            z-index: 1390;
+        }
+
+        .sidebar-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 340px;
+            max-width: 88vw;
+            height: 100vh;
+            background: #ffffff;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+            transform: translateX(-100%);
+            transition: transform 0.25s ease;
+            z-index: 1400;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.open { transform: translateX(0); }
+
+        .sidebar-head {
+            background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+            color: white;
+            padding: 18px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .sidebar-close {
+            border: none;
+            background: rgba(255,255,255,0.18);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-body {
+            padding: 14px 16px 24px;
+            overflow: auto;
+        }
+
+        .menu-group {
+            margin-bottom: 16px;
+        }
+
+        .menu-title {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            margin: 0 0 8px;
+        }
+
+        .menu-link {
+            display: block;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .menu-link:hover {
+            background: #f3f4f6;
+            color: var(--brand-dark);
+        }
+
+        @@media (max-width: 1100px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .right-rail { position: static; }
+        }
+
+        @@media (max-width: 768px) {
+            .topbar {
+                height: auto;
+                padding: 12px 14px;
+                flex-wrap: wrap;
+            }
+            .brand-row { align-items: flex-start; gap: 8px; }
+            .brand-title { font-size: 1.05rem; }
+            .brand-sub,
+            .header-breadcrumb a,
+            .header-breadcrumb .current { font-size: 0.82rem; }
+            .top-cta { width: 100%; justify-content: flex-start; }
+            .layout-shell { padding: 12px; }
+            .page-card { padding: 18px; }
+            .hero h2 { font-size: 1.45rem; }
+        }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <aside class="sidebar" id="tutorialSidebar" aria-hidden="true">
+        <div class="sidebar-head">
+            <div>
+                <strong>Contents</strong><br />
+                <small>Browse all tutorial topics</small>
+            </div>
+            <button class="sidebar-close" id="closeSidebar" type="button">×</button>
+        </div>
+        <div class="sidebar-body">
+            <div class="menu-group">
+                <p class="menu-title">ASP.NET MVC</p>
+                <a class="menu-link" href="#">What is Web Application?</a>
+                <a class="menu-link" href="#">Why ASP.NET MVC?</a>
+                <a class="menu-link" href="#">MVC Architecture</a>
+                <a class="menu-link" href="#">Routing</a>
+                <a class="menu-link" href="#">Filters</a>
+            </div>
+            <div class="menu-group">
+                <p class="menu-title">.NET Core</p>
+                <a class="menu-link" href="#">Middleware</a>
+                <a class="menu-link" href="#">Dependency Injection</a>
+                <a class="menu-link" href="#">Authentication</a>
+            </div>
+            <div class="menu-group">
+                <p class="menu-title">Practice</p>
+                <a class="menu-link" href="#">MCQs</a>
+                <a class="menu-link" href="#">Interview Q&A</a>
+                <a class="menu-link" href="#">Assignments</a>
+            </div>
+        </div>
+    </aside>
+
+    <header class="site-header">
+        <div class="topbar">
+            <div class="brand-wrap">
+                <button class="menu-btn" id="openSidebar" type="button">☰ Contents</button>
+                <div class="brand-block">
+                    <h1 class="brand-title">ItTechGenie</h1>
+                    <div class="brand-row">
+                        <span class="brand-sub">Learn Better Than W3Schools</span>
+                        <nav class="header-breadcrumb" aria-label="Course navigation path">
+                            <a href="#">ASP.NET MVC</a>
+                            <span class="crumb-sep">›</span>
+                            <a href="#">Routing</a>
+                            <span class="crumb-sep">›</span>
+                            <a href="#">Attribute Routing</a>
+                            <span class="crumb-sep">›</span>
+                            <span class="current">Examples</span>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <div class="top-cta">
+                <span class="pill">Tutorials</span>
+                <span class="pill">Interview Q&amp;A</span>
+                <span class="pill">Practice Labs</span>
+            </div>
+        </div>
+
+        <nav class="top-nav" aria-label="Main navigation">
+            <a class="active" href="#">Home</a>
+            <a href="#">All Tutorials</a>
+            <a href="#">C#</a>
+            <a href="#">ASP.NET MVC</a>
+            <a href="#">ASP.NET Core</a>
+            <a href="#">SQL</a>
+            <a href="#">Azure</a>
+            <a href="#">DevOps</a>
+            <a href="#">Practice</a>
+            <a href="#">Interview Questions</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
+
+    <main class="layout-shell">
+        <div class="top-ad">Top Advertisement Banner / AdSense Leaderboard / Sponsored Course Banner</div>
+
+        <div class="content-grid">
+            <div class="main-column">
+                <div class="page-card">
+                    <div class="hero">
+                        <h2>@(ViewData["PageHeading"] ?? "Tutorial Page Title")</h2>
+                        <p>
+                            Use this shared master layout for all tutorial pages. The main navigation stays visible at the top,
+                            the left contents panel slides in only when needed, and the tutorial area remains wide and readable.
+                        </p>
+                    </div>
+
+                    @RenderBody()
+
+                    <div class="mid-ad">Mid-Content Advertisement Zone / In-Article Ad / Course Promotion</div>
+                </div>
+            </div>
+
+            <aside class="right-rail">
+                <div class="ad-card">
+                    <h3 style="margin-top:0;">Advertisement</h3>
+                    <div class="ad-slot">Sticky Right Rail Ad<br />300 × 250 / 300 × 600</div>
+                </div>
+                <div class="promo-card">
+                    <h3 style="margin-top:0;">Promoted Learning</h3>
+                    <ul>
+                        <li>Featured course banner</li>
+                        <li>Corporate training promo</li>
+                        <li>Upcoming workshop slot</li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+
+        <footer class="site-footer">
+            <div><strong>ItTechGenie</strong> — structured tutorials, practical examples, and interview-ready explanations.</div>
+            <div class="footer-ad">Footer Sponsor Banner / Wide Responsive Ad</div>
+        </footer>
+    </main>
+
+    <script>
+        (function () {
+            const sidebar = document.getElementById('tutorialSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const openBtn = document.getElementById('openSidebar');
+            const closeBtn = document.getElementById('closeSidebar');
+
+            function openSidebar() {
+                sidebar.classList.add('open');
+                overlay.classList.add('show');
+                sidebar.setAttribute('aria-hidden', 'false');
+            }
+
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('show');
+                sidebar.setAttribute('aria-hidden', 'true');
+            }
+
+            openBtn.addEventListener('click', openSidebar);
+            closeBtn.addEventListener('click', closeSidebar);
+            overlay.addEventListener('click', closeSidebar);
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') closeSidebar();
+            });
+        })();
+    </script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
