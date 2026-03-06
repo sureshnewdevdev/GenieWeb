@@ -22,6 +22,7 @@ namespace GenieWeb
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<EmailService>();
             builder.Services.AddSingleton<QuizService>(); // Or use AddScoped if needed
+            builder.Services.AddSingleton<IMicroservicesSyllabusService, MicroservicesSyllabusService>();
 
             builder.Services.AddSession(options =>
             {

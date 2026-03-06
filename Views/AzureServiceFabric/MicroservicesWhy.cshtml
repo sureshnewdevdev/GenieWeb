@@ -69,22 +69,43 @@
     <h4 class="text-success mt-4">📊 Simple Visual Comparison</h4>
 
     <pre class="bg-light p-3">
-    Monolithic App
-    +--------------------------+
-    | User Interface            |
-    | Business Logic (all-in-one)|
-    | Data Access Layer         |
-    +--------------------------+
-    | Single deployment, tightly coupled |
+Monolithic App
+──────────────
+Users
+  │
+  ▼
+┌─────────────────────────────┐
+│ Single Deployable App       │
+│ UI + Business + Data Access │
+└─────────────────────────────┘
+  │
+  ▼
+┌─────────────────────────────┐
+│ Single Database             │
+└─────────────────────────────┘
+
+Result: tightly coupled release and scale model.
     </pre>
 
     <pre class="bg-light p-3">
-    Microservices App
-    +--------------------+ +------------------+ +-------------------+
-    | UI Service          | | Auth Service     | | Recommendation    |
-    | (frontend)          | | (login, signup)  | | (suggest shows)   |
-    +--------------------+ +------------------+ +-------------------+
-    | Independent deployment & scaling |
+Microservices App
+─────────────────
+Users
+  │
+  ▼
+┌─────────────────────────────┐
+│ API Gateway / Edge          │
+└─────────────────────────────┘
+  │           │            │
+  ▼           ▼            ▼
+┌──────────┐ ┌──────────┐ ┌────────────────┐
+│ Auth Svc │ │ Profile  │ │ Recommendation │
+│          │ │ Svc      │ │ Svc            │
+└────┬─────┘ └────┬─────┘ └──────┬─────────┘
+     ▼            ▼              ▼
+  Auth DB      Profile DB     Reco DB
+
+Result: independent deployment, scaling, and fault isolation.
     </pre>
 
     <h4 class="text-success mt-4">🔍 When Should You Use Microservices?</h4>

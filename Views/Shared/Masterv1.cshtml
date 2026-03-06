@@ -1,6 +1,9 @@
+@using GenieWeb.Models
 @{
     Layout = null; /* Change to your site layout if needed */
     var pageTitle = ViewData["Title"] as string ?? "ItTechGenie";
+    var microservicesModel = Model as MicroservicesPageViewModel;
+    var hasMicroservicesMenu = microservicesModel?.Sections?.Any() == true;
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -8,6 +11,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@pageTitle</title>
+    <meta name="google-adsense-account" content="ca-pub-2270827713894017" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2270827713894017"
+            crossorigin="anonymous"></script>
     <style>
         :root {
             --brand: #04AA6D;
@@ -436,6 +442,44 @@
             color: var(--brand-dark);
         }
 
+        .menu-sub-list {
+            list-style: none;
+            margin: 6px 0 0;
+            padding: 0 0 0 12px;
+            border-left: 2px solid #e2e8f0;
+        }
+
+        .menu-sub-link {
+            display: block;
+            font-size: 0.88rem;
+            color: #475569;
+            border-radius: 8px;
+            padding: 6px 10px;
+            margin-bottom: 2px;
+        }
+
+        .menu-sub-link:hover {
+            background: #f8fafc;
+            color: var(--brand-dark);
+        }
+
+        .menu-link.active,
+        .menu-sub-link.active {
+            background: #e8fff5;
+            color: var(--brand-dark);
+            font-weight: 700;
+        }
+
+        .ad-ins {
+            display: block;
+            width: 100%;
+            min-height: 90px;
+        }
+
+        .ad-ins.rail {
+            min-height: 250px;
+        }
+
         @@media (max-width: 1100px) {
             .content-grid { grid-template-columns: 1fr; }
             .right-rail { position: static; }
@@ -466,39 +510,53 @@
     <aside class="sidebar" id="tutorialSidebar" aria-hidden="true">
         <div class="sidebar-head">
             <div>
-                <strong>Contents</strong><br />
+                <strong>Context</strong><br />
                 <small>Browse all tutorial topics</small>
             </div>
             <button class="sidebar-close" id="closeSidebar" type="button">×</button>
         </div>
         <div class="sidebar-body">
-            <div class="menu-group">
-                <p class="menu-title">ASP.NET MVC</p>
-                <a class="menu-link" href="#">What is Web Application?</a>
-                <a class="menu-link" href="#">Why ASP.NET MVC?</a>
-                <a class="menu-link" href="#">MVC Architecture</a>
-                <a class="menu-link" href="#">Routing</a>
-                <a class="menu-link" href="#">Filters</a>
-            </div>
-            <div class="menu-group">
-                <p class="menu-title">.NET Core</p>
-                <a class="menu-link" href="#">Middleware</a>
-                <a class="menu-link" href="#">Dependency Injection</a>
-                <a class="menu-link" href="#">Authentication</a>
-            </div>
-            <div class="menu-group">
-                <p class="menu-title">Practice</p>
-                <a class="menu-link" href="#">MCQs</a>
-                <a class="menu-link" href="#">Interview Q&A</a>
-                <a class="menu-link" href="#">Assignments</a>
-            </div>
+            @if (hasMicroservicesMenu)
+            {
+                @foreach (var section in microservicesModel!.Sections)
+                {
+                    <div class="menu-group">
+                        <p class="menu-title">Section @(section.Number)</p>
+                        <a class="menu-link @(microservicesModel.ActiveSection?.Slug == section.Slug ? "active" : string.Empty)"
+                           href="@Url.Action("Section", "Microservices", new { slug = section.Slug })">
+                            @(section.Title)
+                        </a>
+                        @if (section.Topics.Any())
+                        {
+                            <ul class="menu-sub-list">
+                                @foreach (var topic in section.Topics)
+                                {
+                                    <li>
+                                        <a class="menu-sub-link @(microservicesModel.ActiveTopic?.Slug == topic.Slug ? "active" : string.Empty)"
+                                           href="@Url.Action("Section", "Microservices", new { slug = section.Slug, topicSlug = topic.Slug })">
+                                            @topic.Number @topic.Title
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="menu-group">
+                    <p class="menu-title">Contents</p>
+                    <a class="menu-link" href="#">No section menu available for this page.</a>
+                </div>
+            }
         </div>
     </aside>
 
     <header class="site-header">
         <div class="topbar">
             <div class="brand-wrap">
-                <button class="menu-btn" id="openSidebar" type="button">☰ Contents</button>
+                <button class="menu-btn" id="openSidebar" type="button">☰ Context</button>
                 <div class="brand-block">
                     <h1 class="brand-title">ItTechGenie</h1>
                     <div class="brand-row">
@@ -522,7 +580,7 @@
             </div>
         </div>
 
-        <nav class="top-nav" aria-label="Main navigation">
+       @*  <nav class="top-nav" aria-label="Main navigation">
             <a class="active" href="#">Home</a>
             <a href="#">All Tutorials</a>
             <a href="#">C#</a>
@@ -534,33 +592,48 @@
             <a href="#">Practice</a>
             <a href="#">Interview Questions</a>
             <a href="#">Contact</a>
-        </nav>
+        </nav> *@
     </header>
 
     <main class="layout-shell">
-        <div class="top-ad">Top Advertisement Banner / AdSense Leaderboard / Sponsored Course Banner</div>
+        <div class="top-ad">
+            <ins class="adsbygoogle ad-ins"
+                 data-ad-client="ca-pub-2270827713894017"
+                 data-ad-slot="8472074274"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+        </div>
 
         <div class="content-grid">
             <div class="main-column">
                 <div class="page-card">
                     <div class="hero">
                         <h2>@(ViewData["PageHeading"] ?? "Tutorial Page Title")</h2>
-                        <p>
-                            Use this shared master layout for all tutorial pages. The main navigation stays visible at the top,
-                            the left contents panel slides in only when needed, and the tutorial area remains wide and readable.
-                        </p>
+                        
                     </div>
 
                     @RenderBody()
 
-                    <div class="mid-ad">Mid-Content Advertisement Zone / In-Article Ad / Course Promotion</div>
+                    <div class="mid-ad">
+                        <ins class="adsbygoogle ad-ins"
+                             data-ad-client="ca-pub-2270827713894017"
+                             data-ad-slot="9007244980"
+                             data-ad-format="auto"
+                             data-full-width-responsive="true"></ins>
+                    </div>
                 </div>
             </div>
 
             <aside class="right-rail">
                 <div class="ad-card">
                     <h3 style="margin-top:0;">Advertisement</h3>
-                    <div class="ad-slot">Sticky Right Rail Ad<br />300 × 250 / 300 × 600</div>
+                    <div class="ad-slot">
+                        <ins class="adsbygoogle ad-ins rail"
+                             data-ad-client="ca-pub-2270827713894017"
+                             data-ad-slot="1283766278"
+                             data-ad-format="auto"
+                             data-full-width-responsive="true"></ins>
+                    </div>
                 </div>
                 <div class="promo-card">
                     <h3 style="margin-top:0;">Promoted Learning</h3>
@@ -575,7 +648,13 @@
 
         <footer class="site-footer">
             <div><strong>ItTechGenie</strong> — structured tutorials, practical examples, and interview-ready explanations.</div>
-            <div class="footer-ad">Footer Sponsor Banner / Wide Responsive Ad</div>
+            <div class="footer-ad">
+                <ins class="adsbygoogle ad-ins"
+                     data-ad-client="ca-pub-2270827713894017"
+                     data-ad-slot="8472074274"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+            </div>
         </footer>
     </main>
 
@@ -603,6 +682,10 @@
             overlay.addEventListener('click', closeSidebar);
             document.addEventListener('keydown', function (e) {
                 if (e.key === 'Escape') closeSidebar();
+            });
+
+            document.querySelectorAll('ins.adsbygoogle').forEach(function () {
+                (adsbygoogle = window.adsbygoogle || []).push({});
             });
         })();
     </script>
