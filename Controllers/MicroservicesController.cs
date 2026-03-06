@@ -35,7 +35,7 @@ namespace GenieWeb.Controllers
             return View("Index", model);
         }
 
-        public IActionResult Section(string slug)
+        public IActionResult Section(string slug, string? topicSlug = null)
         {
             var sections = _syllabusService.GetSyllabus().ToList();
             var activeSection = _syllabusService.GetSectionBySlug(slug) ?? sections.FirstOrDefault();
@@ -49,16 +49,41 @@ namespace GenieWeb.Controllers
             ViewData["PageHeading"] = "Asp.net Micro Services";
             ViewData["ActiveMenu"] = "Microservices";
 
+            var activeTopic = ResolveTopic(activeSection, topicSlug);
+
             var model = new MicroservicesPageViewModel
             {
                 Sections = sections,
                 ActiveSection = activeSection,
-                ActiveTopic = activeSection.Topics.FirstOrDefault(),
-                PageTitle = activeSection.Title,
-                IntroHtml = activeSection.Number == "1" ? BuildIntroductionContent() : null
+                ActiveTopic = activeTopic,
+                PageTitle = activeTopic?.Title ?? activeSection.Title,
+                IntroHtml = activeSection.Number == "1" && activeTopic == null ? BuildIntroductionContent() : null,
+                TopicViewName = activeTopic == null ? null : ResolveTopicViewName(activeSection, activeTopic)
             };
 
             return View("Index", model);
+        }
+
+
+
+        private static MicroservicesTopic? ResolveTopic(MicroservicesSection activeSection, string? topicSlug)
+        {
+            if (string.IsNullOrWhiteSpace(topicSlug))
+            {
+                return null;
+            }
+
+            return activeSection.Topics.FirstOrDefault(x => x.Slug.Equals(topicSlug, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static string? ResolveTopicViewName(MicroservicesSection section, MicroservicesTopic topic)
+        {
+            if (section.Number == "1" && topic.Number == "1.1")
+            {
+                return "WhatIsSoftwareArchitecture";
+            }
+
+            return null;
         }
 
         private static string BuildIntroductionContent()

@@ -25,5 +25,6 @@ namespace GenieWeb.Models
         public MicroservicesTopic? ActiveTopic { get; set; }
         public string PageTitle { get; set; } = string.Empty;
         public string? IntroHtml { get; set; }
+        public string? TopicViewName { get; set; }
     }
 }
