@@ -180,26 +180,45 @@
 
         <div class="col-12">
             <div class="topic-card p-4">
-                <h2 class="h4 section-title">Layered Architecture Diagram (ASCII)</h2>
-<pre class="diagram-box">+-----------------------------------------------------+
-|                Presentation Layer                   |
-|            (MVC/Razor Views, API Endpoints)         |
-+------------------------------+----------------------+
-                               |
-+-----------------------------------------------------+
-|                Application/Business Layer           |
-|        (Use Cases, Domain Logic, Validation)        |
-+------------------------------+----------------------+
-                               |
-+-----------------------------------------------------+
-|                 Infrastructure Layer                |
-| (Repositories, External Services, Message Brokers)  |
-+------------------------------+----------------------+
-                               |
-+-----------------------------------------------------+
-|                      Data Layer                     |
-|          (SQL/NoSQL Databases, Storage)             |
-+-----------------------------------------------------+</pre>
+                <h2 class="h4 section-title">Layered Architecture Diagram</h2>
+<pre class="diagram-box">Users
+  │
+  ▼
+┌───────────────────────────────────────────────────────────────┐
+│ Frontend / UI Layer                                           │
+│ Razor Views, SPA screens, client-side validation              │
+└───────────────────────────────────────────────────────────────┘
+  │
+  ▼
+┌───────────────────────────────────────────────────────────────┐
+│ API Layer / Controllers                                       │
+│ Routing, request mapping, auth checks, response contracts     │
+└───────────────────────────────────────────────────────────────┘
+  │
+  ▼
+┌───────────────────────────────────────────────────────────────┐
+│ Business Layer / Services                                     │
+│ Use cases, orchestration, domain rules, transactions          │
+└───────────────────────────────────────────────────────────────┘
+  │
+  ├────────────► External Services (Payment / Email / SMS / Maps)
+  │
+  ▼
+┌───────────────────────────────────────────────────────────────┐
+│ Data Access Layer / Repositories                              │
+│ EF Core, SQL queries, cache access, persistence abstractions  │
+└───────────────────────────────────────────────────────────────┘
+  │
+  ▼
+┌───────────────────────────────────────────────────────────────┐
+│ Database / Storage                                            │
+│ SQL / NoSQL / Blob / Queue                                    │
+└───────────────────────────────────────────────────────────────┘
+
+Architecture defines:
+• where each responsibility should live
+• how each layer communicates
+• what engineering rules the team must follow</pre>
             </div>
         </div>
 
@@ -218,22 +237,39 @@
 
         <div class="col-lg-6">
             <div class="topic-card h-100 p-4">
-                <h2 class="h4 section-title">Monolith vs Microservices (Mermaid)</h2>
-<pre class="diagram-box">flowchart LR
-    subgraph Monolith
-      UI1[UI] --> APP[Single App]
-      APP --> DB1[(Single DB)]
-    end
+                <h2 class="h4 section-title">Monolith vs Microservices</h2>
+<pre class="diagram-box">Monolith
+────────
+Users
+  │
+  ▼
+┌───────────────┐
+│  Single App   │  UI + Business + Data access in one deployable
+└───────────────┘
+  │
+  ▼
+┌───────────────┐
+│   Single DB   │
+└───────────────┘
 
-    subgraph Microservices
-      UI2[Web/Mobile] --> APIGW[API Gateway]
-      APIGW --> P[Product Service]
-      APIGW --> O[Order Service]
-      APIGW --> PAY[Payment Service]
-      P --> DBP[(Product DB)]
-      O --> DBO[(Order DB)]
-      PAY --> DBY[(Payment DB)]
-    end</pre>
+Microservices
+─────────────
+Users
+  │
+  ▼
+┌───────────────┐
+│  API Gateway  │
+└───────────────┘
+  │        │         │
+  ▼        ▼         ▼
+┌────────┐ ┌───────┐ ┌──────────┐
+│Product │ │Order  │ │Payment   │
+│Service │ │Service│ │Service   │
+└────┬───┘ └───┬───┘ └────┬─────┘
+     ▼         ▼          ▼
+  ProductDB  OrderDB   PaymentDB
+
+Each service can be deployed and scaled independently.</pre>
             </div>
         </div>
 
