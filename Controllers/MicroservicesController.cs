@@ -83,6 +83,11 @@ namespace GenieWeb.Controllers
                 return "~/Views/Microservices/Topics/WhatIsSoftwareArchitecture.cshtml";
             }
 
+            if (section.Number == "1" && topic.Number == "1.2")
+            {
+                return "~/Views/Microservices/Topics/MonolithicVsLayeredVsDistributedSystems.cshtml";
+            }
+
             return null;
         }
 
