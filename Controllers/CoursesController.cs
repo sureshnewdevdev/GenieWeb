@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 public class CoursesController : Controller
@@ -42,38 +43,40 @@ public class CoursesController : Controller
         }
 
         var safeFileName = Path.GetFileName(fileName);
-        var basePath = Path.Combine(_environment.ContentRootPath, "Views", "TrainedCourse");
-
-        if (!Directory.Exists(basePath))
+        var syllabusRoots = new[]
         {
-            return NotFound();
-        }
+            Path.Combine(_environment.ContentRootPath, "Views", "TrainedCourse"),
+            Path.Combine(_environment.WebRootPath ?? string.Empty, "syllabus")
+        };
 
-        var filePath = Path.Combine(basePath, safeFileName);
-
-        if (!System.IO.File.Exists(filePath))
+        foreach (var root in syllabusRoots.Where(Directory.Exists))
         {
-            var normalizedRequestedName = NormalizeFileName(Path.GetFileNameWithoutExtension(safeFileName));
-            var matchedFile = Directory
-                .EnumerateFiles(basePath)
-                .FirstOrDefault(path =>
-                {
-                    var existingName = Path.GetFileNameWithoutExtension(path);
-                    return NormalizeFileName(existingName) == normalizedRequestedName;
-                });
-
-            if (!string.IsNullOrWhiteSpace(matchedFile))
+            var filePath = ResolveSyllabusPath(root, safeFileName);
+            if (!string.IsNullOrWhiteSpace(filePath) && System.IO.File.Exists(filePath))
             {
-                filePath = matchedFile;
+                return PhysicalFile(filePath, "text/html");
             }
         }
 
-        if (!System.IO.File.Exists(filePath))
+        return NotFound();
+    }
+
+    private static string? ResolveSyllabusPath(string basePath, string safeFileName)
+    {
+        var directPath = Path.Combine(basePath, safeFileName);
+        if (System.IO.File.Exists(directPath))
         {
-            return NotFound();
+            return directPath;
         }
 
-        return PhysicalFile(filePath, "text/html");
+        var normalizedRequestedName = NormalizeFileName(Path.GetFileNameWithoutExtension(safeFileName));
+        return Directory
+            .EnumerateFiles(basePath)
+            .FirstOrDefault(path =>
+            {
+                var existingName = Path.GetFileNameWithoutExtension(path);
+                return NormalizeFileName(existingName) == normalizedRequestedName;
+            });
     }
 
     private static string NormalizeFileName(string value)
