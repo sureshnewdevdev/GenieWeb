@@ -1,9 +1,17 @@
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 using System.Text.RegularExpressions;
 
 public class CoursesController : Controller
 {
+    private readonly IWebHostEnvironment _environment;
+
+    public CoursesController(IWebHostEnvironment environment)
+    {
+        _environment = environment;
+    }
+
     public IActionResult Index()
     {
         ViewData["ActiveMenu"] = "Courses";
@@ -34,7 +42,13 @@ public class CoursesController : Controller
         }
 
         var safeFileName = Path.GetFileName(fileName);
-        var basePath = Path.Combine(Directory.GetCurrentDirectory(), "Views", "TrainedCourse");
+        var basePath = Path.Combine(_environment.ContentRootPath, "Views", "TrainedCourse");
+
+        if (!Directory.Exists(basePath))
+        {
+            return NotFound();
+        }
+
         var filePath = Path.Combine(basePath, safeFileName);
 
         if (!System.IO.File.Exists(filePath))
