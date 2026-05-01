@@ -4,8 +4,8 @@
 }
 
 <div class="container-fluid py-4 bg-light min-vh-100">
-    <div class="row">
-        <main class="col-12">
+    <div class="row g-4">
+        <main class="col-12 col-xl-9">
             <section class="card border-0 shadow mb-4 overflow-hidden">
                 <div class="card-body p-4 text-white" style="background:linear-gradient(135deg,#111827,#1d4ed8,#7c3aed);">
                     <span class="badge text-bg-warning mb-2">Company MCQs · C#/.NET Expert Track</span>
@@ -50,16 +50,54 @@
                 </div>
             </section>
         </main>
+
+        <aside class="col-12 col-xl-3">
+            <section class="card border-0 shadow-sm sticky-top" style="top:90px;">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="h6 mb-0">Sponsored Learning</h3>
+                </div>
+                <div class="card-body">
+                    <div class="border rounded p-3 mb-3">
+                        <p class="fw-semibold mb-1">Mock Interview Bundle</p>
+                        <p class="small text-muted mb-2">Practice HR + Technical interview rounds with instant scoring.</p>
+                        <a href="#" class="btn btn-sm btn-outline-primary w-100">Explore Now</a>
+                    </div>
+                    <div class="border rounded p-3 mb-3">
+                        <p class="fw-semibold mb-1">C# Enterprise Case Studies</p>
+                        <p class="small text-muted mb-2">Production-style bug fixing and architecture scenarios.</p>
+                        <a href="#" class="btn btn-sm btn-outline-primary w-100">View Course</a>
+                    </div>
+                    <div class="border rounded p-3">
+                        <p class="fw-semibold mb-1">.NET Resume Booster</p>
+                        <p class="small text-muted mb-2">Get recruiter-ready profile feedback from senior mentors.</p>
+                        <a href="#" class="btn btn-sm btn-outline-primary w-100">Start Free Audit</a>
+                    </div>
+                </div>
+            </section>
+        </aside>
     </div>
 </div>
 
+<style>
+    .snippet-block {
+        background: #000;
+        color: #f8f9fa;
+        border-radius: .5rem;
+        padding: .85rem 1rem;
+        font-family: Consolas, Monaco, "Courier New", monospace;
+        font-size: .9rem;
+        margin-top: .75rem;
+        white-space: pre-wrap;
+    }
+</style>
+
 <script>
 const questions = [
-{ qType:"normal", q:"What does the `var` keyword do in C#?", o:["Creates dynamic typing at runtime","Infers the compile-time type from assigned value","Makes variable nullable","Creates global variable"], a:1, e:"`var` is compile-time type inference; the variable still has a strong static type." },
-{ qType:"normal", q:"Which interface enables `foreach` iteration in custom collections?", o:["IComparable","ICloneable","IEnumerable","IDisposable"], a:2, e:"`IEnumerable` exposes `GetEnumerator`, enabling `foreach` support." },
-{ qType:"normal", q:"What is the best reason to use `using` statement with `IDisposable` objects?", o:["To avoid null references","To force garbage collection","To ensure deterministic resource cleanup","To improve LINQ performance"], a:2, e:"`using` guarantees `Dispose` is called, usually for unmanaged resources like streams or DB connections." },
-{ qType:"normal", q:"Which keyword prevents a class from being inherited?", o:["sealed","readonly","static","partial"], a:0, e:"`sealed` blocks further inheritance from that class." },
-{ qType:"normal", q:"What happens when an exception is not caught in a console app?", o:["It is silently ignored","The process terminates after stack unwinding","CLR auto-retries operation","Only warning is logged"], a:1, e:"Unhandled exceptions propagate and terminate the process." },
+{ qType:"normal", q:"In a payroll microservice, a developer uses `var salary = 25000m;`. What is true in this real project scenario?", o:["`salary` becomes dynamic at runtime","`salary` is inferred as decimal at compile time","`salary` can later become string automatically","`var` makes the variable globally scoped"], a:1, e:"In production code, `var` only asks the compiler to infer the type from the right-hand side. Here `25000m` makes the variable `decimal`, which remains strongly typed and safe for financial operations." },
+{ qType:"normal", q:"Your team built a custom `EmployeeBatch` class and `foreach` is required in audit processing. Which interface is mandatory?", o:["IComparable","ICloneable","IEnumerable","IDisposable"], a:2, e:"`foreach` requires an enumerator contract. In corporate projects, implementing `IEnumerable` (or `IEnumerable<T>`) gives predictable iteration and integration with LINQ pipelines." },
+{ qType:"normal", q:"A high-traffic API opens SQL connections per request. Why should you wrap connections in `using`?", o:["To avoid null references","To force garbage collection immediately","To guarantee deterministic release of connection resources","To make queries faster automatically"], a:2, e:"Enterprise systems must release scarce resources quickly. `using` ensures `Dispose` runs even during exceptions, preventing pool exhaustion and random production outages." },
+{ qType:"normal", q:"Your platform team wants to stop inheritance of a security-sensitive class. Which keyword fits this governance policy?", o:["sealed","readonly","static","partial"], a:0, e:"`sealed` prevents subclassing. This is common in enterprise libraries where behavior must not be overridden for compliance, stability, or security reasons." },
+{ qType:"normal", q:"In a console-based deployment utility, an exception escapes all handlers. What should you expect in production?", o:["It is silently ignored","Process terminates after stack unwinding","CLR retries the operation automatically","Only a warning log appears and app continues"], a:1, e:"Unhandled exceptions bubble up and terminate the process. Mature teams add global exception handling plus structured logging to capture root cause before termination." },
 
 { qType:"snippet", q:"What is the output?\n\nint x = 5;\nint y = x++;\nConsole.WriteLine($\"x={x}, y={y}\");", o:["x=5, y=6","x=6, y=5","x=6, y=6","Compilation error"], a:1, e:"Post-increment returns old value then increments `x`." },
 { qType:"snippet", q:"What is printed?\n\nstring s = null;\nConsole.WriteLine(s?.Length ?? -1);", o:["0","null","-1","Throws NullReferenceException"], a:2, e:"Null-conditional returns null, then null-coalescing picks -1." },
@@ -120,9 +158,13 @@ function updateProgress(){
 
 function renderQuestion(){
     const q = questions[currentIndex];
+    const questionText = q.q.replace(/\n/g, '<br>');
+    const questionHtml = q.qType === 'snippet'
+        ? `<h4 class="h6 mb-3">Q${currentIndex + 1}. ${questionText.split('<br><br>')[0]}</h4><pre class="snippet-block">${questionText.split('<br><br>')[1] || ''}</pre>`
+        : `<h4 class="h6 mb-3">Q${currentIndex + 1}. ${questionText}</h4>`;
     const html = `
     <p class="mb-2 text-secondary"><span class="badge text-bg-secondary">${q.qType === 'normal' ? 'Conceptual' : 'Code Scenario'}</span></p>
-    <h4 class="h6 mb-3">Q${currentIndex + 1}. ${q.q.replace(/\n/g, '<br>')}</h4>
+    ${questionHtml}
     <div class="d-grid gap-2">
         ${q.o.map((opt, i) => `
             <label class="btn btn-outline-dark text-start ${selected[currentIndex] === i ? 'active' : ''}">
@@ -174,7 +216,7 @@ function submitQuiz(){
             <div class="fw-semibold">Q${i + 1}: ${r.q}</div>
             <div>Your answer: <span class="${r.ok ? 'text-success' : 'text-danger'}">${r.your}</span></div>
             <div>Correct answer: <b>${r.ans}</b></div>
-            <div class="small text-muted">Explanation: ${r.exp}</div>
+            <div class="small text-muted">Trainer Note: ${r.exp}</div>
         </div>
     `).join('');
 
