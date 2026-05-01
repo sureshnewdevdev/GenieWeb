@@ -19,6 +19,12 @@ namespace GenieWeb.Controllers
             return View("CompanyMcqs");
         }
 
+        public IActionResult CompanyCSharpFundamentalsMcqPromptPreview()
+        {
+            return View("CompanyCSharpFundamentalsMcqPromptPreview");
+        }
+
+
         public IActionResult AzureSubtopics()
         {
             return View("AzureSubtopics");

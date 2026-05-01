@@ -1,0 +1,113 @@
+@{
+    ViewData["Title"] = "C# Fundamentals MCQ Prompt + Preview";
+}
+
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h2 class="h4 mb-2">Company MCQs - C# Fundamentals Prompt</h2>
+                    <p class="text-muted">Prompt file created for generating 20-question tests (5 normal + 15 scenario-based), with result-time audio logic.</p>
+                    <p class="mb-0"><strong>Prompt file:</strong> <code>HelperFiles/Prompts/Prompt_Company_CSharpFundamentals_MCQGenerator.txt</code></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card border-0 shadow bg-dark text-light">
+                <div class="card-body p-4">
+                    <h3 class="h5 mb-3">Preview - Fun Sounds (5 seconds each)</h3>
+                    <p class="small text-light-emphasis">Click any button to preview a 5-second sound style. Same logic can be used after result calculation.</p>
+
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <button class="btn btn-danger" onclick="playPreview('fail')">Fail (&lt;50%)</button>
+                        <button class="btn btn-warning text-dark" onclick="playPreview('good')">Good (50-75%)</button>
+                        <button class="btn btn-info text-dark" onclick="playPreview('distinct')">Distinct (75-100%)</button>
+                        <button class="btn btn-success" onclick="playPreview('special')">Special (100%)</button>
+                        <button class="btn btn-outline-light" onclick="stopSound()">Stop</button>
+                    </div>
+
+                    <div class="progress" role="progressbar" aria-label="Sound playback progress" style="height: 8px;">
+                        <div id="soundBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                    </div>
+                    <p id="soundLabel" class="small mt-2 mb-0 text-light-emphasis">No sound playing.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let audioCtx;
+    let activeNodes = [];
+    let timerId;
+    let progressId;
+
+    function ensureAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    function stopSound() {
+        activeNodes.forEach(n => {
+            try { n.stop(); } catch {}
+            try { n.disconnect(); } catch {}
+        });
+        activeNodes = [];
+        clearTimeout(timerId);
+        clearInterval(progressId);
+        document.getElementById('soundBar').style.width = '0%';
+        document.getElementById('soundLabel').textContent = 'No sound playing.';
+    }
+
+    function playTone(freq, type, gainValue, start, duration) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(gainValue, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(start);
+        osc.stop(start + duration);
+        activeNodes.push(osc, gain);
+    }
+
+    function playPreview(style) {
+        ensureAudio();
+        stopSound();
+        const now = audioCtx.currentTime;
+        const total = 5;
+
+        if (style === 'fail') {
+            for (let i = 0; i < 10; i++) playTone(180 - i * 8, 'sawtooth', 0.06, now + i * 0.45, 0.4);
+            document.getElementById('soundLabel').textContent = 'Fail style playing for 5 seconds...';
+        } else if (style === 'good') {
+            [261.63, 329.63, 392.0, 523.25].forEach((f, i) => playTone(f, 'triangle', 0.06, now + i * 0.5, 0.45));
+            for (let i = 0; i < 4; i++) playTone(523.25, 'triangle', 0.04, now + 2.2 + i * 0.6, 0.5);
+            document.getElementById('soundLabel').textContent = 'Good style playing for 5 seconds...';
+        } else if (style === 'distinct') {
+            const seq = [392, 494, 587, 784, 659, 784, 988];
+            seq.forEach((f, i) => playTone(f, 'square', 0.05, now + i * 0.4, 0.35));
+            document.getElementById('soundLabel').textContent = 'Distinct style playing for 5 seconds...';
+        } else if (style === 'special') {
+            const seq = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+            seq.forEach((f, i) => playTone(f, 'sine', 0.07, now + i * 0.35, 0.5));
+            for (let i = 0; i < 5; i++) playTone(1567.98, 'triangle', 0.03, now + 1.8 + i * 0.55, 0.45);
+            document.getElementById('soundLabel').textContent = 'Special victory style playing for 5 seconds...';
+        }
+
+        const bar = document.getElementById('soundBar');
+        let elapsed = 0;
+        progressId = setInterval(() => {
+            elapsed += 0.1;
+            bar.style.width = `${Math.min(100, (elapsed / total) * 100)}%`;
+        }, 100);
+
+        timerId = setTimeout(() => {
+            stopSound();
+        }, total * 1000);
+    }
+</script>
