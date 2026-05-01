@@ -9,6 +9,16 @@ namespace GenieWeb.Controllers
             return View();
         }
 
+        public IActionResult McqEntry()
+        {
+            return View("McqEntry");
+        }
+
+        public IActionResult CompanyMcqs()
+        {
+            return View("CompanyMcqs");
+        }
+
         public IActionResult AzureSubtopics()
         {
             return View("AzureSubtopics");
