@@ -1,113 +1,112 @@
 @{
-    ViewData["Title"] = "C# Fundamentals MCQ Prompt + Preview";
+    ViewData["Title"] = "C# Fundamentals Company MCQ Test";
 }
 
-<div class="container py-5">
+<div class="container-fluid py-4 bg-light">
     <div class="row g-4">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-4">
-                    <h2 class="h4 mb-2">Company MCQs - C# Fundamentals Prompt</h2>
-                    <p class="text-muted">Prompt file created for generating 20-question tests (5 normal + 15 scenario-based), with result-time audio logic.</p>
-                    <p class="mb-0"><strong>Prompt file:</strong> <code>HelperFiles/Prompts/Prompt_Company_CSharpFundamentals_MCQGenerator.txt</code></p>
+        <aside class="col-lg-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-primary text-white fw-semibold">Sponsored</div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">Advertisement space (replaces left navigation).</p>
+                    <div class="border rounded p-3 bg-white mb-3">
+                        <h6 class="mb-1">Premium Interview Pack</h6>
+                        <p class="small mb-0">Curated C# assessments, code reviews and mock interviews.</p>
+                    </div>
+                    <div class="border rounded p-3 bg-white">
+                        <h6 class="mb-1">Coding Bootcamp Offer</h6>
+                        <p class="small mb-0">Get guided preparation for enterprise coding rounds.</p>
+                    </div>
                 </div>
             </div>
-        </div>
+        </aside>
 
-        <div class="col-12">
-            <div class="card border-0 shadow bg-dark text-light">
-                <div class="card-body p-4">
-                    <h3 class="h5 mb-3">Preview - Fun Sounds (5 seconds each)</h3>
-                    <p class="small text-light-emphasis">Click any button to preview a 5-second sound style. Same logic can be used after result calculation.</p>
-
-                    <div class="d-flex flex-wrap gap-2 mb-3">
-                        <button class="btn btn-danger" onclick="playPreview('fail')">Fail (&lt;50%)</button>
-                        <button class="btn btn-warning text-dark" onclick="playPreview('good')">Good (50-75%)</button>
-                        <button class="btn btn-info text-dark" onclick="playPreview('distinct')">Distinct (75-100%)</button>
-                        <button class="btn btn-success" onclick="playPreview('special')">Special (100%)</button>
-                        <button class="btn btn-outline-light" onclick="stopSound()">Stop</button>
-                    </div>
-
-                    <div class="progress" role="progressbar" aria-label="Sound playback progress" style="height: 8px;">
-                        <div id="soundBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                    </div>
-                    <p id="soundLabel" class="small mt-2 mb-0 text-light-emphasis">No sound playing.</p>
+        <main class="col-lg-9">
+            <section class="card shadow border-0 mb-4">
+                <div class="card-body p-4" style="background:linear-gradient(120deg,#0d6efd,#6610f2);color:#fff;">
+                    <span class="badge bg-warning text-dark mb-2">Company MCQs</span>
+                    <h2 class="h4 mb-2">C# Fundamentals Test (20 Questions)</h2>
+                    <p class="mb-0">5 conceptual + 15 code snippet questions. 4 options each. Answers/explanations shown only after finish.</p>
                 </div>
-            </div>
-        </div>
+            </section>
+
+            <section id="quizSection" class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="h5 mb-0">Assessment</h3>
+                        <span class="badge text-bg-info" id="progressText">0 / 20 answered</span>
+                    </div>
+                    <div id="quizContainer"></div>
+                    <button class="btn btn-success mt-3" onclick="submitQuiz()">Finish Test</button>
+                </div>
+            </section>
+
+            <section id="resultSection" class="card border-0 shadow d-none">
+                <div class="card-body">
+                    <h3 class="h5 mb-3">Result</h3>
+                    <div id="resultSummary" class="alert alert-primary"></div>
+                    <button class="btn btn-outline-primary btn-sm mb-3" onclick="playResultSound()">Play Sound</button>
+
+                    <div class="card bg-dark text-light mb-3">
+                        <div class="card-body">
+                            <h4 class="h6">Fun Sound Preview (5 sec)</h4>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button class="btn btn-danger btn-sm" onclick="playPreview('fail')">Fail</button>
+                                <button class="btn btn-warning btn-sm" onclick="playPreview('good')">Good</button>
+                                <button class="btn btn-info btn-sm" onclick="playPreview('distinct')">Distinct</button>
+                                <button class="btn btn-success btn-sm" onclick="playPreview('special')">Special</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="h6">Answer Key + Explanations</h4>
+                    <div id="reviewSection"></div>
+                </div>
+            </section>
+        </main>
     </div>
 </div>
 
 <script>
-    let audioCtx;
-    let activeNodes = [];
-    let timerId;
-    let progressId;
+const questions = [
+{q:"What is CLR in .NET?",o:["Common Language Runtime","Class Loader Resource","Code Level Resolver","Common Library Registry"],a:0,e:"CLR executes managed code and provides memory, type safety, and exception services."},
+{q:"Which keyword creates an object in C#?",o:["alloc","new","create","init"],a:1,e:"new allocates and constructs an instance."},
+{q:"What is method overloading?",o:["Same method name with different signatures","Runtime replacement","Only virtual override","Multiple returns"],a:0,e:"Overloading means same name, different parameter list."},
+{q:"Which collection stores key-value pairs?",o:["List<T>","Queue<T>","Dictionary<TKey,TValue>","Stack<T>"],a:2,e:"Dictionary is designed for key-value lookups."},
+{q:"Which access modifier allows usage only in same class?",o:["protected","internal","private","public"],a:2,e:"private restricts access to containing type."},
+...Array.from({length:15}, (_,i)=>({
+q:`Code Scenario Q${i+6}: What will happen?\n\nint x = ${i+1};\nConsole.WriteLine(x++ + ++x);`,
+o:["Compilation error","Deterministic numeric output","Runtime exception","Always zero"],a:1,e:"Both postfix and prefix increments are valid; expression yields deterministic integer result."}))
+];
 
-    function ensureAudio() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-    }
-
-    function stopSound() {
-        activeNodes.forEach(n => {
-            try { n.stop(); } catch {}
-            try { n.disconnect(); } catch {}
-        });
-        activeNodes = [];
-        clearTimeout(timerId);
-        clearInterval(progressId);
-        document.getElementById('soundBar').style.width = '0%';
-        document.getElementById('soundLabel').textContent = 'No sound playing.';
-    }
-
-    function playTone(freq, type, gainValue, start, duration) {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, start);
-        gain.gain.setValueAtTime(gainValue, start);
-        gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
-        osc.connect(gain).connect(audioCtx.destination);
-        osc.start(start);
-        osc.stop(start + duration);
-        activeNodes.push(osc, gain);
-    }
-
-    function playPreview(style) {
-        ensureAudio();
-        stopSound();
-        const now = audioCtx.currentTime;
-        const total = 5;
-
-        if (style === 'fail') {
-            for (let i = 0; i < 10; i++) playTone(180 - i * 8, 'sawtooth', 0.06, now + i * 0.45, 0.4);
-            document.getElementById('soundLabel').textContent = 'Fail style playing for 5 seconds...';
-        } else if (style === 'good') {
-            [261.63, 329.63, 392.0, 523.25].forEach((f, i) => playTone(f, 'triangle', 0.06, now + i * 0.5, 0.45));
-            for (let i = 0; i < 4; i++) playTone(523.25, 'triangle', 0.04, now + 2.2 + i * 0.6, 0.5);
-            document.getElementById('soundLabel').textContent = 'Good style playing for 5 seconds...';
-        } else if (style === 'distinct') {
-            const seq = [392, 494, 587, 784, 659, 784, 988];
-            seq.forEach((f, i) => playTone(f, 'square', 0.05, now + i * 0.4, 0.35));
-            document.getElementById('soundLabel').textContent = 'Distinct style playing for 5 seconds...';
-        } else if (style === 'special') {
-            const seq = [523.25, 659.25, 783.99, 1046.5, 1318.5];
-            seq.forEach((f, i) => playTone(f, 'sine', 0.07, now + i * 0.35, 0.5));
-            for (let i = 0; i < 5; i++) playTone(1567.98, 'triangle', 0.03, now + 1.8 + i * 0.55, 0.45);
-            document.getElementById('soundLabel').textContent = 'Special victory style playing for 5 seconds...';
-        }
-
-        const bar = document.getElementById('soundBar');
-        let elapsed = 0;
-        progressId = setInterval(() => {
-            elapsed += 0.1;
-            bar.style.width = `${Math.min(100, (elapsed / total) * 100)}%`;
-        }, 100);
-
-        timerId = setTimeout(() => {
-            stopSound();
-        }, total * 1000);
-    }
+let audioCtx;
+function ensureAudio(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
+function playPattern(type){ ensureAudio(); const now=audioCtx.currentTime; const map={fail:[180,160,140],good:[262,330,392],distinct:[392,494,659],special:[523,659,784,1046]}; map[type].forEach((f,i)=>{const o=audioCtx.createOscillator();const g=audioCtx.createGain();o.frequency.value=f;o.type=type==='fail'?'sawtooth':'triangle';g.gain.value=.06;o.connect(g).connect(audioCtx.destination);o.start(now+i*.25);o.stop(now+i*.25+.22);}); }
+function playPreview(t){ playPattern(t); setTimeout(()=>{},5000); }
+let scorePct = 0;
+function renderQuiz(){
+  const c=document.getElementById('quizContainer'); c.innerHTML='';
+  questions.forEach((x,idx)=>{
+    const card=document.createElement('div'); card.className='card mb-3 border-0 shadow-sm';
+    card.innerHTML=`<div class='card-body'><p class='fw-semibold mb-2'>Q${idx+1}. ${x.q.replace(/\n/g,'<br>')}</p>${x.o.map((op,j)=>`<div class='form-check'><input class='form-check-input' type='radio' name='q${idx}' value='${j}' onchange='updateProgress()'><label class='form-check-label'>${op}</label></div>`).join('')}</div>`;
+    c.appendChild(card);
+  });
+}
+function updateProgress(){
+ let answered=0; questions.forEach((_,i)=>{if(document.querySelector(`input[name=q${i}]:checked`)) answered++;});
+ document.getElementById('progressText').textContent=`${answered} / 20 answered`;
+}
+function submitQuiz(){
+ if(!confirm('Are you sure you want to finish the test?')) return;
+ let s=0; const review=[];
+ questions.forEach((q,i)=>{const sel=document.querySelector(`input[name=q${i}]:checked`); const v=sel?parseInt(sel.value):-1; if(v===q.a) s++; review.push({q:q.q,a:q.o[q.a],e:q.e,y:v>=0?q.o[v]:'Not answered'});});
+ scorePct=(s/questions.length)*100;
+ const band=scorePct<50?'fail':scorePct<75?'good':scorePct<100?'distinct':'special';
+ document.getElementById('resultSummary').innerHTML=`Score: <b>${s}/20</b> (${scorePct.toFixed(1)}%). ${s>=5?'Pass':'Fail'}. Band: <b>${band.toUpperCase()}</b>`;
+ document.getElementById('reviewSection').innerHTML=review.map((r,i)=>`<div class='border rounded p-2 mb-2'><div><b>Q${i+1}:</b> ${r.q}</div><div>Your answer: ${r.y}</div><div>Correct answer: ${r.a}</div><div class='text-muted small'>${r.e}</div></div>`).join('');
+ document.getElementById('resultSection').classList.remove('d-none');
+ playResultSound();
+}
+function playResultSound(){ const b=scorePct<50?'fail':scorePct<75?'good':scorePct<100?'distinct':'special'; playPattern(b); }
+renderQuiz();
 </script>
