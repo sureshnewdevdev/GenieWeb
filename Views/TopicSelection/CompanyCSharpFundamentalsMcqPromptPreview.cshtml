@@ -2,64 +2,80 @@
     ViewData["Title"] = "C# Fundamentals Company MCQ Test";
 }
 
-<div class="container-fluid py-4 bg-light">
+<div class="container-fluid py-4 bg-light min-vh-100">
     <div class="row g-4">
         <aside class="col-lg-3">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-primary text-white fw-semibold">Sponsored</div>
-                <div class="card-body">
-                    <p class="small text-muted mb-2">Advertisement space (replaces left navigation).</p>
-                    <div class="border rounded p-3 bg-white mb-3">
-                        <h6 class="mb-1">Premium Interview Pack</h6>
-                        <p class="small mb-0">Curated C# assessments, code reviews and mock interviews.</p>
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header text-bg-dark fw-semibold">Advertisement</div>
+                <div class="card-body d-flex flex-column gap-3">
+                    <div class="p-3 rounded bg-white border">
+                        <h6 class="mb-1">Interview Accelerator</h6>
+                        <p class="small text-muted mb-0">Mock C# coding rounds, recruiter feedback and curated exam packs.</p>
                     </div>
-                    <div class="border rounded p-3 bg-white">
-                        <h6 class="mb-1">Coding Bootcamp Offer</h6>
-                        <p class="small mb-0">Get guided preparation for enterprise coding rounds.</p>
+                    <div class="p-3 rounded bg-white border">
+                        <h6 class="mb-1">Enterprise .NET Bootcamp</h6>
+                        <p class="small text-muted mb-0">Upgrade your .NET architecture, APIs, async, and debugging skills.</p>
+                    </div>
+                    <div class="p-3 rounded bg-white border">
+                        <h6 class="mb-1">Sponsored Space</h6>
+                        <p class="small text-muted mb-0">Your ad can appear here for candidate preparation campaigns.</p>
                     </div>
                 </div>
             </div>
         </aside>
 
         <main class="col-lg-9">
-            <section class="card shadow border-0 mb-4">
-                <div class="card-body p-4" style="background:linear-gradient(120deg,#0d6efd,#6610f2);color:#fff;">
-                    <span class="badge bg-warning text-dark mb-2">Company MCQs</span>
-                    <h2 class="h4 mb-2">C# Fundamentals Test (20 Questions)</h2>
-                    <p class="mb-0">5 conceptual + 15 code snippet questions. 4 options each. Answers/explanations shown only after finish.</p>
+            <section class="card border-0 shadow mb-4 overflow-hidden">
+                <div class="card-body p-4 text-white" style="background:linear-gradient(135deg,#111827,#1d4ed8,#7c3aed);">
+                    <span class="badge text-bg-warning mb-2">Company MCQs · C#/.NET Expert Track</span>
+                    <h1 class="h4 mb-2">C# Fundamentals - 20 Question Test</h1>
+                    <p class="mb-0">Professional one-by-one assessment with <b>5 normal questions</b> and <b>15 scenario-based code snippet questions</b>. Each question has 4 options. Answers and explanations are revealed only at the end.</p>
                 </div>
             </section>
 
-            <section id="quizSection" class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3 class="h5 mb-0">Assessment</h3>
-                        <span class="badge text-bg-info" id="progressText">0 / 20 answered</span>
+            <section id="quizSection" class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                        <div>
+                            <h2 class="h5 mb-1">MCQ Test</h2>
+                            <p class="text-muted small mb-0">Question shown one by one for focused evaluation.</p>
+                        </div>
+                        <span class="badge text-bg-info" id="progressText">Question 1 of 20</span>
                     </div>
-                    <div id="quizContainer"></div>
-                    <button class="btn btn-success mt-3" onclick="submitQuiz()">Finish Test</button>
+                    <div class="progress mb-3" style="height:8px;">
+                        <div id="progressBar" class="progress-bar" role="progressbar" style="width:5%"></div>
+                    </div>
+
+                    <div id="questionCard" class="card border-0 bg-body-tertiary">
+                        <div class="card-body" id="questionBody"></div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <button class="btn btn-outline-secondary" id="prevBtn" onclick="prevQuestion()">Previous</button>
+                        <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Next</button>
+                        <button class="btn btn-success d-none" id="finishBtn" onclick="submitQuiz()">Finish Test</button>
+                    </div>
                 </div>
             </section>
 
-            <section id="resultSection" class="card border-0 shadow d-none">
-                <div class="card-body">
-                    <h3 class="h5 mb-3">Result</h3>
+            <section id="resultSection" class="card border-0 shadow mt-4 d-none">
+                <div class="card-body p-4">
+                    <h3 class="h5 mb-3">Final Result</h3>
                     <div id="resultSummary" class="alert alert-primary"></div>
-                    <button class="btn btn-outline-primary btn-sm mb-3" onclick="playResultSound()">Play Sound</button>
 
                     <div class="card bg-dark text-light mb-3">
                         <div class="card-body">
-                            <h4 class="h6">Fun Sound Preview (5 sec)</h4>
-                            <div class="d-flex gap-2 flex-wrap">
-                                <button class="btn btn-danger btn-sm" onclick="playPreview('fail')">Fail</button>
-                                <button class="btn btn-warning btn-sm" onclick="playPreview('good')">Good</button>
-                                <button class="btn btn-info btn-sm" onclick="playPreview('distinct')">Distinct</button>
-                                <button class="btn btn-success btn-sm" onclick="playPreview('special')">Special</button>
+                            <h4 class="h6">Preview Fun Sounds (5 seconds)</h4>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button class="btn btn-danger btn-sm" onclick="playPreview('fail')">Fail (&lt;50)</button>
+                                <button class="btn btn-warning btn-sm" onclick="playPreview('good')">Good (50-75)</button>
+                                <button class="btn btn-info btn-sm" onclick="playPreview('distinct')">Distinct (75-99)</button>
+                                <button class="btn btn-success btn-sm" onclick="playPreview('special')">Special (100)</button>
                             </div>
                         </div>
                     </div>
 
-                    <h4 class="h6">Answer Key + Explanations</h4>
+                    <h4 class="h6">Correct Answers with Explanations</h4>
                     <div id="reviewSection"></div>
                 </div>
             </section>
@@ -69,44 +85,137 @@
 
 <script>
 const questions = [
-{q:"What is CLR in .NET?",o:["Common Language Runtime","Class Loader Resource","Code Level Resolver","Common Library Registry"],a:0,e:"CLR executes managed code and provides memory, type safety, and exception services."},
-{q:"Which keyword creates an object in C#?",o:["alloc","new","create","init"],a:1,e:"new allocates and constructs an instance."},
-{q:"What is method overloading?",o:["Same method name with different signatures","Runtime replacement","Only virtual override","Multiple returns"],a:0,e:"Overloading means same name, different parameter list."},
-{q:"Which collection stores key-value pairs?",o:["List<T>","Queue<T>","Dictionary<TKey,TValue>","Stack<T>"],a:2,e:"Dictionary is designed for key-value lookups."},
-{q:"Which access modifier allows usage only in same class?",o:["protected","internal","private","public"],a:2,e:"private restricts access to containing type."},
-...Array.from({length:15}, (_,i)=>({
-q:`Code Scenario Q${i+6}: What will happen?\n\nint x = ${i+1};\nConsole.WriteLine(x++ + ++x);`,
-o:["Compilation error","Deterministic numeric output","Runtime exception","Always zero"],a:1,e:"Both postfix and prefix increments are valid; expression yields deterministic integer result."}))
+{ qType:"normal", q:"What does the `var` keyword do in C#?", o:["Creates dynamic typing at runtime","Infers the compile-time type from assigned value","Makes variable nullable","Creates global variable"], a:1, e:"`var` is compile-time type inference; the variable still has a strong static type." },
+{ qType:"normal", q:"Which interface enables `foreach` iteration in custom collections?", o:["IComparable","ICloneable","IEnumerable","IDisposable"], a:2, e:"`IEnumerable` exposes `GetEnumerator`, enabling `foreach` support." },
+{ qType:"normal", q:"What is the best reason to use `using` statement with `IDisposable` objects?", o:["To avoid null references","To force garbage collection","To ensure deterministic resource cleanup","To improve LINQ performance"], a:2, e:"`using` guarantees `Dispose` is called, usually for unmanaged resources like streams or DB connections." },
+{ qType:"normal", q:"Which keyword prevents a class from being inherited?", o:["sealed","readonly","static","partial"], a:0, e:"`sealed` blocks further inheritance from that class." },
+{ qType:"normal", q:"What happens when an exception is not caught in a console app?", o:["It is silently ignored","The process terminates after stack unwinding","CLR auto-retries operation","Only warning is logged"], a:1, e:"Unhandled exceptions propagate and terminate the process." },
+
+{ qType:"snippet", q:"What is the output?\n\nint x = 5;\nint y = x++;\nConsole.WriteLine($\"x={x}, y={y}\");", o:["x=5, y=6","x=6, y=5","x=6, y=6","Compilation error"], a:1, e:"Post-increment returns old value then increments `x`." },
+{ qType:"snippet", q:"What is printed?\n\nstring s = null;\nConsole.WriteLine(s?.Length ?? -1);", o:["0","null","-1","Throws NullReferenceException"], a:2, e:"Null-conditional returns null, then null-coalescing picks -1." },
+{ qType:"snippet", q:"Choose the output:\n\nvar nums = new List<int>{1,2,3};\nnums.ForEach(n => n *= 2);\nConsole.WriteLine(string.Join(\",\", nums));", o:["2,4,6","1,2,3","Runtime error","Compilation error"], a:1, e:"Lambda parameter `n` is a copy; list values are unchanged." },
+{ qType:"snippet", q:"What happens?\n\nobject o = \"42\";\nint n = (int)o;", o:["n becomes 42","Compilation error","InvalidCastException at runtime","n becomes 0"], a:2, e:"Direct cast from boxed string to int is invalid and throws at runtime." },
+{ qType:"snippet", q:"Output?\n\nint[] a = {1,2,3};\nvar q = a.Where(x => x > 1);\na[1] = 10;\nConsole.WriteLine(string.Join(\",\", q));", o:["2,3","10,3","1,10,3","Compilation error"], a:1, e:"LINQ query is deferred; after mutation it evaluates as 10 and 3." },
+{ qType:"snippet", q:"Result?\n\nConsole.WriteLine(10 / 4);\nConsole.WriteLine(10 / 4.0);", o:["2 and 2","2 and 2.5","2.5 and 2.5","Compilation error"], a:1, e:"Integer division truncates; double division preserves fraction." },
+{ qType:"snippet", q:"What is output?\n\nvar set = new HashSet<int>{1,1,2,3};\nConsole.WriteLine(set.Count);", o:["2","3","4","Compilation error"], a:1, e:"HashSet stores unique values only." },
+{ qType:"snippet", q:"What is printed?\n\nstring text = \"DotNet\";\nConsole.WriteLine(text[^1]);", o:["D","t","N","Runtime error"], a:1, e:"`^1` indexes from end, so last character is `t`." },
+{ qType:"snippet", q:"Output?\n\nint? n = null;\nConsole.WriteLine(n.GetValueOrDefault(99));", o:["0","99","null","InvalidOperationException"], a:1, e:"GetValueOrDefault returns provided fallback when nullable is null." },
+{ qType:"snippet", q:"What is output?\n\nvar dict = new Dictionary<string,int>{{\"a\",1}};\nConsole.WriteLine(dict.ContainsKey(\"A\"));", o:["True","False","Compilation error","KeyNotFoundException"], a:1, e:"Default string comparer is case-sensitive." },
+{ qType:"snippet", q:"What is printed?\n\nTask<int> t = Task.FromResult(7);\nConsole.WriteLine(t.Result);", o:["0","7","Compilation error","Deadlock always"], a:1, e:"FromResult creates completed task; Result is immediately 7." },
+{ qType:"snippet", q:"Choose output:\n\nvar arr = new[] {\"a\", \"b\"};\nConsole.WriteLine(string.Join(\"-\", arr.Select(x => x.ToUpper())));", o:["a-b","A-B","AB","Compilation error"], a:1, e:"Select transforms both items to uppercase before join." },
+{ qType:"snippet", q:"Output?\n\nint x = 1;\nvoid Inc(ref int v) => v++;\nInc(ref x);\nConsole.WriteLine(x);", o:["0","1","2","Compilation error"], a:2, e:"`ref` passes variable by reference so increment updates original value." },
+{ qType:"snippet", q:"What happens here?\n\nSpan<int> s = stackalloc int[3] {1,2,3};\nConsole.WriteLine(s[2]);", o:["1","2","3","Compilation error"], a:2, e:"Valid stack allocation for Span; third element is 3." },
+{ qType:"snippet", q:"Output?\n\nvar people = new[]{ new {Name=\"Ana\",Age=20}, new {Name=\"Ben\",Age=30} };\nConsole.WriteLine(people.OrderByDescending(p=>p.Age).First().Name);", o:["Ana","Ben","Compilation error","Null"], a:1, e:"Descending by age puts Ben first." },
+{ qType:"snippet", q:"What is printed?\n\nint total = Enumerable.Range(1,4).Aggregate((acc, n) => acc + n);\nConsole.WriteLine(total);", o:["9","10","11","Compilation error"], a:1, e:"Aggregate sums 1+2+3+4 = 10." }
 ];
 
-let audioCtx;
-function ensureAudio(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
-function playPattern(type){ ensureAudio(); const now=audioCtx.currentTime; const map={fail:[180,160,140],good:[262,330,392],distinct:[392,494,659],special:[523,659,784,1046]}; map[type].forEach((f,i)=>{const o=audioCtx.createOscillator();const g=audioCtx.createGain();o.frequency.value=f;o.type=type==='fail'?'sawtooth':'triangle';g.gain.value=.06;o.connect(g).connect(audioCtx.destination);o.start(now+i*.25);o.stop(now+i*.25+.22);}); }
-function playPreview(t){ playPattern(t); setTimeout(()=>{},5000); }
+let currentIndex = 0;
+const selected = new Array(questions.length).fill(-1);
 let scorePct = 0;
-function renderQuiz(){
-  const c=document.getElementById('quizContainer'); c.innerHTML='';
-  questions.forEach((x,idx)=>{
-    const card=document.createElement('div'); card.className='card mb-3 border-0 shadow-sm';
-    card.innerHTML=`<div class='card-body'><p class='fw-semibold mb-2'>Q${idx+1}. ${x.q.replace(/\n/g,'<br>')}</p>${x.o.map((op,j)=>`<div class='form-check'><input class='form-check-input' type='radio' name='q${idx}' value='${j}' onchange='updateProgress()'><label class='form-check-label'>${op}</label></div>`).join('')}</div>`;
-    c.appendChild(card);
-  });
+let audioCtx;
+
+function ensureAudio(){ if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+function stopAllAudio(){ if(audioCtx && audioCtx.state !== 'closed'){ audioCtx.close(); audioCtx = null; } }
+
+function playPattern(type, seconds = 2){
+    ensureAudio();
+    const now = audioCtx.currentTime;
+    const duration = Math.max(1, seconds);
+    const patterns = {
+        fail: [196,174,155,130],
+        good: [262,330,392,330],
+        distinct: [392,494,659,784],
+        special: [523,659,784,1046,1318]
+    };
+    const notes = patterns[type] || patterns.good;
+    const step = duration / notes.length;
+    notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type === 'fail' ? 'sawtooth' : 'triangle';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, now + i * step);
+        gain.gain.exponentialRampToValueAtTime(0.06, now + i * step + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + (i + 1) * step);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(now + i * step);
+        osc.stop(now + (i + 1) * step);
+    });
 }
+
+function playPreview(type){
+    stopAllAudio();
+    playPattern(type, 5);
+}
+
 function updateProgress(){
- let answered=0; questions.forEach((_,i)=>{if(document.querySelector(`input[name=q${i}]:checked`)) answered++;});
- document.getElementById('progressText').textContent=`${answered} / 20 answered`;
+    document.getElementById('progressText').textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+    document.getElementById('progressBar').style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
 }
+
+function renderQuestion(){
+    const q = questions[currentIndex];
+    const html = `
+    <p class="mb-2 text-secondary"><span class="badge text-bg-secondary">${q.qType === 'normal' ? 'Conceptual' : 'Code Scenario'}</span></p>
+    <h4 class="h6 mb-3">Q${currentIndex + 1}. ${q.q.replace(/\n/g, '<br>')}</h4>
+    <div class="d-grid gap-2">
+        ${q.o.map((opt, i) => `
+            <label class="btn btn-outline-dark text-start ${selected[currentIndex] === i ? 'active' : ''}">
+                <input class="d-none" type="radio" name="opt" value="${i}" ${selected[currentIndex] === i ? 'checked' : ''} onchange="selectOption(${i})">
+                <strong>${String.fromCharCode(65 + i)}.</strong> ${opt}
+            </label>
+        `).join('')}
+    </div>`;
+
+    document.getElementById('questionBody').innerHTML = html;
+    document.getElementById('prevBtn').disabled = currentIndex === 0;
+    document.getElementById('nextBtn').classList.toggle('d-none', currentIndex === questions.length - 1);
+    document.getElementById('finishBtn').classList.toggle('d-none', currentIndex !== questions.length - 1);
+    updateProgress();
+}
+
+function selectOption(i){ selected[currentIndex] = i; renderQuestion(); }
+function nextQuestion(){ if(currentIndex < questions.length - 1){ currentIndex++; renderQuestion(); } }
+function prevQuestion(){ if(currentIndex > 0){ currentIndex--; renderQuestion(); } }
+
 function submitQuiz(){
- if(!confirm('Are you sure you want to finish the test?')) return;
- let s=0; const review=[];
- questions.forEach((q,i)=>{const sel=document.querySelector(`input[name=q${i}]:checked`); const v=sel?parseInt(sel.value):-1; if(v===q.a) s++; review.push({q:q.q,a:q.o[q.a],e:q.e,y:v>=0?q.o[v]:'Not answered'});});
- scorePct=(s/questions.length)*100;
- const band=scorePct<50?'fail':scorePct<75?'good':scorePct<100?'distinct':'special';
- document.getElementById('resultSummary').innerHTML=`Score: <b>${s}/20</b> (${scorePct.toFixed(1)}%). ${s>=5?'Pass':'Fail'}. Band: <b>${band.toUpperCase()}</b>`;
- document.getElementById('reviewSection').innerHTML=review.map((r,i)=>`<div class='border rounded p-2 mb-2'><div><b>Q${i+1}:</b> ${r.q}</div><div>Your answer: ${r.y}</div><div>Correct answer: ${r.a}</div><div class='text-muted small'>${r.e}</div></div>`).join('');
- document.getElementById('resultSection').classList.remove('d-none');
- playResultSound();
+    if(!confirm('Are you sure you want to finish this test and submit your answers?')) return;
+
+    let score = 0;
+    const review = questions.map((q, i) => {
+        const yourIndex = selected[i];
+        const correct = q.a === yourIndex;
+        if (correct) score++;
+        return {
+            q: q.q,
+            your: yourIndex >= 0 ? q.o[yourIndex] : 'Not Answered',
+            ans: q.o[q.a],
+            exp: q.e,
+            ok: correct
+        };
+    });
+
+    scorePct = (score / questions.length) * 100;
+    const band = scorePct < 50 ? 'fail' : scorePct < 75 ? 'good' : scorePct < 100 ? 'distinct' : 'special';
+    const performance = scorePct < 50 ? 'Needs improvement' : scorePct < 75 ? 'Good effort' : scorePct < 100 ? 'Distinct performance' : 'Perfect score';
+
+    document.getElementById('resultSummary').innerHTML = `
+        <div><strong>Score:</strong> ${score}/${questions.length} (${scorePct.toFixed(1)}%)</div>
+        <div><strong>Performance:</strong> ${performance}</div>
+        <div><strong>Sound Theme:</strong> ${band.toUpperCase()}</div>`;
+
+    document.getElementById('reviewSection').innerHTML = review.map((r, i) => `
+        <div class="border rounded p-3 mb-2 ${r.ok ? 'border-success' : 'border-danger'}">
+            <div class="fw-semibold">Q${i + 1}: ${r.q}</div>
+            <div>Your answer: <span class="${r.ok ? 'text-success' : 'text-danger'}">${r.your}</span></div>
+            <div>Correct answer: <b>${r.ans}</b></div>
+            <div class="small text-muted">Explanation: ${r.exp}</div>
+        </div>
+    `).join('');
+
+    document.getElementById('resultSection').classList.remove('d-none');
+    playPattern(band, 5);
 }
-function playResultSound(){ const b=scorePct<50?'fail':scorePct<75?'good':scorePct<100?'distinct':'special'; playPattern(b); }
-renderQuiz();
+
+renderQuestion();
 </script>
