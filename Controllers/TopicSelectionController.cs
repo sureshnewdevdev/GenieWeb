@@ -21,6 +21,7 @@ namespace GenieWeb.Controllers
 
         public IActionResult CompanyCSharpFundamentalsMcqPromptPreview()
         {
+            ViewData["FullWidthContent"] = true;
             return View("CompanyCSharpFundamentalsMcqPromptPreview");
         }
 
