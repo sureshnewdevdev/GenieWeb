@@ -1,16 +1,71 @@
+using GenieWeb.Models;
 using Microsoft.AspNetCore.Mvc;
 
 public class HomeController : Controller
 {
-    public IActionResult Index()
+    private readonly IConfiguration _config;
+
+    public HomeController(IConfiguration config)
     {
-        //ViewData["Title"] = "Start your better Learning from here";
-        return View("Index");
+        _config = config;
     }
+
+    // Home hub: five business areas, AI Consultant is the default landing area.
+    public IActionResult Index() => View("AIConsultant", BuildHubModel("AIConsultant"));
+
+    [Route("AIConsultant")]
+    public IActionResult AIConsultant() => View(BuildHubModel("AIConsultant"));
+
+    [Route("CorporateTraining")]
+    public IActionResult CorporateTraining() => View(BuildHubModel("CorporateTraining"));
+
+    [Route("Learners")]
+    public IActionResult Learners() => View(BuildHubModel("Learners"));
+
+    [Route("SocialMessages")]
+    public IActionResult SocialMessages() => View(BuildHubModel("SocialMessages"));
+
+    [Route("ProductGallery")]
+    public IActionResult ProductGallery() => View(BuildHubModel("ProductGallery"));
+
+    private HubAreaViewModel BuildHubModel(string activeArea)
+    {
+        var model = new HubAreaViewModel { ActiveArea = activeArea };
+
+        var publisherId = _config["AdSettings:PublisherId"];
+
+        // TODO: replace the *Slot values in appsettings.json's AdSettings section with real AdSense ad-slot IDs.
+        switch (activeArea)
+        {
+            case "Learners":
+                model.AdsEnabled = true;
+                model.TopAd = new AdUnitViewModel(publisherId, _config["AdSettings:LearnersTopSlot"]);
+                model.BottomAd = new AdUnitViewModel(publisherId, _config["AdSettings:LearnersBottomSlot"]);
+                break;
+            case "SocialMessages":
+                model.AdsEnabled = true;
+                model.TopAd = new AdUnitViewModel(publisherId, _config["AdSettings:SocialMessagesTopSlot"]);
+                model.BottomAd = new AdUnitViewModel(publisherId, _config["AdSettings:SocialMessagesBottomSlot"]);
+                break;
+            case "ProductGallery":
+                model.AdsEnabled = true;
+                model.TopAd = new AdUnitViewModel(publisherId, _config["AdSettings:ProductGalleryTopSlot"]);
+                model.BottomAd = new AdUnitViewModel(publisherId, _config["AdSettings:ProductGalleryBottomSlot"]);
+                break;
+            default:
+                // AIConsultant and CorporateTraining are ad-free by design: no AdsEnabled, no ad units.
+                break;
+        }
+
+        return model;
+    }
+
+    public IActionResult CourseCatalog() => View("CourseCatalog");
+
     public IActionResult CSharp()
     {
         ViewData["ActiveMenu"] = "CSharp";
-        return View("Index");
+        return View("CourseCatalog");
     }
 
     public IActionResult SeleniumTesting()
