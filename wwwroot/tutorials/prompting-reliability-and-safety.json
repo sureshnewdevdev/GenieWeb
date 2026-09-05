@@ -1,0 +1,516 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Reliability, Safety and Best Practices in Prompting",
+  "slug": "prompting-reliability-and-safety",
+  "level": "Beginner to Intermediate",
+  "codeLanguage": "C#",
+  "tutorialNumber": 6,
+  "totalTutorials": 27,
+  "prev": "prompting-for-testing-and-docs",
+  "next": "prompting-for-learning-productivity",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Reliability, Safety and Best Practices in Prompting"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "Common beginner mistakes in prompt engineering",
+    "Techniques to reduce incorrect output",
+    "Asking the AI to verify its own answer",
+    "Asking for assumptions explicitly",
+    "Data-privacy considerations when prompting",
+    "When NOT to trust AI outputs"
+  ],
+  "tooltips": {
+    "hallucination": "Confident, fluent output that is factually wrong or invented — the central reliability risk of language models.",
+    "beginner mistakes": "The recurring early-adopter habits — trusting the first answer, vague prompts, confidence-as-correctness — that account for most AI misuse.",
+    "grounding": "Supplying authoritative facts (documents, code, data) in the prompt and instructing the model to use only them.",
+    "output validation": "Checking model output in deterministic code — parsing, schema, allowed values — before the application acts on it.",
+    "temperature": "The randomness setting: low values give focused, repeatable output for factual tasks; high values give creative variety.",
+    "self-verification": "Asking the model to check its own answer against stated criteria before you do — a pre-filter, never the final check.",
+    "explicit assumptions": "Requiring the model to list the assumptions it made, so silent gap-filling becomes visible and reviewable.",
+    "data privacy": "The discipline of controlling what information enters prompts: secrets never, personal data minimized, policies respected.",
+    "PII": "Personally identifiable information — names, emails, addresses, IDs — which should be redacted or minimized before prompting.",
+    "redaction": "Replacing sensitive values with placeholders before sending text to a model, and restoring them after the response.",
+    "prompt injection": "An attack where instructions hidden inside data trick the model into ignoring your rules — why data must be delimited and never trusted.",
+    "knowledge cutoff": "The date a model's training data ends; it knows nothing after it and nothing about your private systems unless supplied.",
+    "non-determinism": "The property that the same prompt can produce different outputs across runs, because generation samples probabilities.",
+    "honesty rule": "A prompt instruction permitting uncertainty — 'if you are not sure, say so; answer unknown rather than guessing'.",
+    "human-in-the-loop": "A workflow where a person reviews model output before it takes effect — the safest shape for consequential tasks.",
+    "defense in depth": "Layering multiple imperfect protections — grounding, constraints, validation, review — so no single failure is fatal.",
+    "confidence": "The model's fluent, assured tone — which is a writing style, not a reliability signal; wrong answers sound exactly as sure as right ones.",
+    "knowledge boundary": "The edge of what a model can actually know: beyond its training data, your context, and general reasoning lies guesswork.",
+    "acceptance criteria": "Pre-written conditions an output must meet — the yardstick that turns review into a check instead of an impression.",
+    "few-shot prompting": "Including worked examples in the prompt so the model imitates a demonstrated pattern — also a reliability tool for format control.",
+    "verification prompt": "A follow-up prompt that asks the model to re-examine its previous answer against explicit criteria or evidence."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview",
+      "content": [
+        { "type": "paragraph", "text": "Everything you have learned so far makes model output better. This tutorial is about the other half of the job: what to do because output can still be wrong. Language models are probabilistic text generators with a gift for sounding right — and building reliably on such a component requires habits that no amount of clever prompting replaces." },
+        { "type": "paragraph", "text": "You will learn the beginner mistakes that account for most AI misuse, the techniques that measurably reduce incorrect output, how to use self-verification and explicit assumptions as cheap safety nets, what data may and may not enter a prompt, and — the judgment skill that ties it together — recognizing the situations where AI output should not be trusted at all without independent verification." },
+        { "type": "paragraph", "text": "The theme is defense in depth: no single technique makes model output safe, but grounding plus constraints plus verification plus validation plus human review, layered, makes failures rare, visible, and recoverable. That layered mindset is what separates teams that ship AI features from teams that ship AI incidents." },
+        { "type": "note", "style": "info", "text": "This is tutorial 6 of 27 and completes the core prompting module. It draws on hallucination and validation concepts from tutorials 1–2 and the review discipline of tutorials 3–5." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "paragraph", "text": "After completing this tutorial, you will be able to:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Recognize and avoid the common beginner mistakes in prompt engineering.",
+          "Apply the techniques that reduce incorrect output: grounding, honesty rules, constraints, examples, and low temperature for factual tasks.",
+          "Use self-verification prompts effectively — and know exactly what they cannot catch.",
+          "Make the model surface its assumptions explicitly, turning silent gap-filling into reviewable statements.",
+          "Apply data-privacy discipline: what never enters a prompt, what gets redacted, and how enterprise platforms change the calculus.",
+          "Identify the situations where AI output must not be trusted without independent verification.",
+          "Layer these techniques into defense in depth for any AI-assisted workflow."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorials 1–2: hallucination, non-determinism, tokens, prompt anatomy, and output validation basics.",
+          "Tutorials 3–5 helpful but not required: the patterns and review habits deepen everything here.",
+          "No code prerequisites beyond basic C# reading; the examples are small and self-contained."
+        ] }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "Why Reliability Is a Discipline, Not a Feature",
+      "content": [
+        { "type": "paragraph", "text": "A language model optimizes for plausible continuation, not truth. Most of the time plausible and true coincide — that is why the technology is useful. When they diverge, you get a hallucination delivered in the same fluent, assured tone as every correct answer. This is the fact that shapes everything in this tutorial: confidence is a writing style, not a reliability signal. Wrong answers do not sound wrong." },
+        { "type": "paragraph", "text": "Three boundaries define where wrongness concentrates. The knowledge cutoff: anything after training data ends is invisible — the model will discuss it anyway if asked. The knowledge boundary: your codebase, your data, your organization are unknown unless supplied in the prompt. And non-determinism: the same question can get different answers on different runs, so a correct answer once is not a correct answer always." },
+        { "type": "paragraph", "text": "Because no single defense is complete, reliability engineering for prompts is defense in depth: reduce errors at the source (better prompts, grounding), catch them in flight (self-verification, explicit assumptions), block them at the exit (output validation in code), and keep a human in the loop where consequences warrant it. Each layer is leaky; the stack is strong." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Common Beginner Mistakes in Prompt Engineering",
+      "content": [
+        { "type": "paragraph", "text": "Most AI trouble is not exotic — it is a handful of habits that every beginner exhibits and every practitioner has to unlearn:" },
+        { "type": "table", "headers": ["Mistake", "What it looks like", "The fix"], "rows": [
+          ["Trusting the first answer", "Copy, paste, ship — it sounded right", "Ask → Review → Improve against written acceptance criteria; the first draft is a draft"],
+          ["Vague prompts", "'Fix this', 'make it better', 'summarize'", "Full anatomy: instruction, context, input data, constraints"],
+          ["Treating confidence as correctness", "'It sounded so sure' as a review standard", "Verify claims; confident tone is free, facts are not"],
+          ["Asking beyond the knowledge boundary", "Current events, your private systems, post-cutoff APIs", "Supply the context or don't ask"],
+          ["One giant prompt", "Whole feature, whole file, every question at once", "Decompose; small prompts with verified boundaries"],
+          ["Ignoring non-determinism", "Testing once, assuming stability", "Run variable tasks multiple times; validate outputs in code"],
+          ["Pasting secrets and personal data", "Connection strings, customer records in prompts", "Privacy discipline — section 8"],
+          ["Arguing instead of re-prompting", "Long corrective back-and-forth in one thread", "Fix the prompt and restart; context pollution compounds"]
+        ] },
+        { "type": "paragraph", "text": "The last row deserves a note: when a conversation goes wrong, the wrong turns stay in the conversation history and keep conditioning later answers. Beginners argue with the model; practitioners take what they learned, improve the prompt, and start a clean session. Ten minutes of arguing loses to thirty seconds of re-prompting almost every time." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Techniques to Reduce Incorrect Output",
+      "content": [
+        { "type": "paragraph", "text": "Error reduction starts at the source — the prompt — with five techniques that compound:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Grounding: supply the authoritative material (docs, code, data) and instruct 'use only the information provided'. The single biggest hallucination reducer — the model answers from your facts instead of its statistical memory.",
+          "Honesty rule: explicitly permit uncertainty — 'if the information is not present, answer unknown; do not guess'. Without permission to say 'I don't know', the model fills gaps with plausible inventions.",
+          "Tight output constraints: restrict answers to checkable shapes and allowed values. A response forced into { \"severity\": \"low|medium|high\" } cannot hallucinate a severity of 'catastrophic-ish'.",
+          "Few-shot prompting for format-sensitive tasks: worked examples pin the pattern and reduce format drift across runs.",
+          "Low temperature for factual and extraction work: sampling randomness is a feature for brainstorming and a defect for facts — turn it down where correctness matters."
+        ] },
+        { "type": "animation", "title": "Defense in depth: where each layer catches errors", "intro": "Follow a request through the layers — each one leaky, the stack strong.", "nodes": [
+          { "id": "prompt", "label": "Better prompt", "sub": "grounding + rules" },
+          { "id": "gen", "label": "Generation", "sub": "still fallible" },
+          { "id": "verify", "label": "Self-verify", "sub": "model re-checks" },
+          { "id": "valid", "label": "Code validation", "sub": "schema, values" },
+          { "id": "human", "label": "Human review", "sub": "where it matters" }
+        ], "steps": [
+          { "highlight": ["prompt"], "caption": "Layer 1 — the prompt: grounding, honesty rule, constraints, examples, low temperature. Most errors never happen." },
+          { "highlight": ["gen"], "caption": "Generation still samples probabilities — some wrong or malformed output gets through layer 1. Expected." },
+          { "highlight": ["verify"], "caption": "Layer 2 — self-verification catches mechanical slips: contradictions, missed constraints, arithmetic." },
+          { "highlight": ["valid"], "caption": "Layer 3 — deterministic validation: parse, schema-check, allowed values. Malformed output becomes a handled failure, not a bug." },
+          { "highlight": ["human"], "caption": "Layer 4 — human review where consequences warrant it. The stack makes failures rare, visible, and recoverable." },
+          { "highlight": ["prompt", "verify", "valid", "human"], "caption": "No layer is sufficient alone; every layer is cheap. Reliability is the stack, not any single trick." }
+        ] },
+        { "type": "note", "style": "tip", "text": "Order matters economically: prompt-level fixes cost nothing per request, self-verification costs one extra call, validation costs code once, human review costs attention forever. Push as much reliability as possible into the cheap early layers." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Self-Verification and Explicit Assumptions",
+      "content": [
+        { "type": "paragraph", "text": "Self-verification is asking the model to check its own answer before you do: 'Review your answer above. Verify each claim against the provided context, re-check any calculations, and confirm every requirement in my request was addressed. List anything questionable.' It works because verification is a different task than generation — reading a draft against criteria has a different error profile than producing the draft — so the model catches real mistakes: dropped requirements, internal contradictions, arithmetic slips, constraint violations." },
+        { "type": "animation", "title": "The self-verification loop", "intro": "One extra turn, surprisingly many catches — but note where it goes blind.", "nodes": [
+          { "id": "ans", "label": "First answer", "sub": "fluent draft" },
+          { "id": "vprompt", "label": "Verify prompt", "sub": "explicit criteria" },
+          { "id": "issues", "label": "Issues found", "sub": "mechanical slips" },
+          { "id": "fix", "label": "Revised answer", "sub": "corrected" },
+          { "id": "you", "label": "Your review", "sub": "still required" }
+        ], "steps": [
+          { "highlight": ["ans"], "caption": "The model produces its answer — fluent, confident, and unreviewed." },
+          { "highlight": ["vprompt"], "caption": "You ask for verification against explicit criteria: claims vs context, calculations, requirements coverage." },
+          { "highlight": ["issues"], "caption": "Checking is a different task than generating — dropped requirements, contradictions, and arithmetic slips surface." },
+          { "highlight": ["fix"], "caption": "The model corrects what it caught. Quality is now measurably higher for one cheap extra turn." },
+          { "highlight": ["you"], "caption": "But the model verified with the same blind spots that wrote the draft — a wrong belief stays wrong. Your review remains the final layer." }
+        ] },
+        { "type": "paragraph", "text": "The technique's hard limit: the verifier shares the generator's blind spots. If the model believes a wrong fact, it verifies the wrong fact as true. Self-verification is a pre-filter that raises average quality — it is never evidence of correctness. Treat 'I have verified my answer' with exactly the same skepticism as the original answer." },
+        { "type": "paragraph", "text": "Explicit assumptions attack a quieter failure: for every detail your prompt leaves open, the model decides silently — and its silent choices look identical to your requirements in the output. The fix is one line: 'Before answering, list every assumption you are making about anything I did not specify.' Now the gap-filling is visible: 'Assuming amounts are decimal; assuming UTC timestamps; assuming duplicates should be removed.' Each assumption is a decision you get to confirm or correct before it hardens into code — and a wrong assumption caught at this stage costs one sentence to fix." },
+        { "type": "note", "style": "tip", "text": "Power combo for consequential asks: 'List your assumptions first. Then answer. Then verify your answer against the requirements and your stated assumptions.' Three safety nets, one prompt." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Data-Privacy Considerations When Prompting",
+      "content": [
+        { "type": "paragraph", "text": "Every prompt is data leaving your control toward someone's servers. Data privacy in prompting reduces to three questions: what is this data, where is it going, and what happens to it there — with different answers for a consumer chat tool, GitHub Copilot under a business plan, and an Azure OpenAI deployment inside your own subscription." },
+        { "type": "table", "headers": ["Data class", "Examples", "Rule of thumb"], "rows": [
+          ["Secrets", "API keys, connection strings, passwords, certificates", "Never in a prompt. No exceptions. A pasted secret is a rotated secret."],
+          ["Personal data (PII)", "Names, emails, addresses, national IDs, health/financial records", "Minimize or redact; real records only where the platform and your policies explicitly allow"],
+          ["Proprietary code & docs", "Source code, internal designs, contracts", "Follow organizational policy; enterprise platforms with no-training guarantees change the answer"],
+          ["Public/synthetic data", "Open-source code, made-up examples, anonymized structures", "Safe — and usually all the model actually needs"]
+        ] },
+        { "type": "paragraph", "text": "Two working practices carry most of the weight. Redaction: replace sensitive values with placeholders before prompting — 'CUSTOMER_1 (email EMAIL_1) reported...' — and map them back afterward; the model reasons about structure identically well. Synthetic substitution: for debugging and code questions, invented data with the same shape works perfectly — the model needs your schema, not your customers. Platform choice does the rest: Azure OpenAI processes prompts inside your Azure tenant boundary and does not use them to train foundation models, which is precisely why enterprises route AI workloads through it rather than consumer tools." },
+        { "type": "note", "style": "warning", "text": "Prompt injection is the privacy risk in reverse: when your application pastes untrusted content (user messages, web pages, documents) into prompts, that content may contain instructions the model follows — including 'reveal your system prompt' or 'ignore your rules'. Delimit untrusted data clearly, never grant prompts more capability than the task needs, and treat this as a standing threat — tutorial 24 covers defenses in depth." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Platform Safety Nets in the Microsoft Ecosystem",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Azure OpenAI data handling: prompts and completions stay within your Azure boundary, are not used to train foundation models, and inherit your tenant's compliance posture — the platform-level answer to most proprietary-data questions.",
+          "Azure AI Content Safety and built-in content filtering: classify and block harmful content in prompts and responses — a platform layer beneath your application's own validation.",
+          "Microsoft Entra ID + private endpoints: who can call your deployments, over which network paths — reliability includes controlling who can prompt at all.",
+          "GitHub Copilot business/enterprise controls: policy settings for code-suggestion privacy and telemetry — the organizational answer for editor-side prompting.",
+          "Your own layer: output validation code, redaction helpers, prompt templates with honesty rules baked in — the application-level defenses this tutorial teaches, which no platform supplies for you."
+        ] },
+        { "type": "paragraph", "text": "The division of labor is clean: the platform secures where data goes and filters egregious content; your prompts and code secure whether outputs are correct and what data enters. Teams get into trouble when they assume the platform layer covers the application layer — no Azure setting can make a hallucinated discount rate false." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "When NOT to Trust AI Outputs",
+      "content": [
+        { "type": "paragraph", "text": "The judgment skill that caps this module: recognizing the task types where model output must be independently verified before use — or not solicited at all. The pattern behind the list: trust falls as consequences rise and as verifiability drops." },
+        { "type": "table", "headers": ["Situation", "Why trust fails", "Required discipline"], "rows": [
+          ["Facts after the knowledge cutoff", "The model cannot know them; it answers anyway", "Current sources; treat any post-cutoff claim as invention"],
+          ["Citations, references, quotes", "Plausible-looking sources are routinely invented", "Verify every citation exists and says what's claimed"],
+          ["Exact numbers: prices, limits, versions, dosages", "Statistical recall of specifics is unreliable", "Authoritative source, always"],
+          ["Legal, medical, financial advice", "High consequence + jurisdiction/context specificity", "Qualified professional; model output as background at most"],
+          ["Security-critical code and configs", "Subtle wrongness with severe blast radius", "Expert review + testing; never paste-and-deploy"],
+          ["Anything about YOUR systems not in the prompt", "Knowledge boundary — it's guessing from patterns", "Supply the context or distrust the answer"],
+          ["Claims the model 'verified' itself", "Verifier shares generator's blind spots", "Independent verification for anything consequential"],
+          ["Output feeding irreversible actions", "Errors can't be caught after the fact", "Human-in-the-loop approval before the action fires"]
+        ] },
+        { "type": "paragraph", "text": "Notice what is NOT on the list: drafting, summarizing reviewed by a reader, brainstorming, code that faces tests and review, explanations you can check against source. That is the calibration — AI output is a first-rate input to verification processes and a poor terminal authority. Position it accordingly and almost every use is safe; position it as an oracle and every use is a gamble." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples in C#",
+      "content": [
+        { "type": "paragraph", "text": "A prompt-builder that bakes the reliability rules — grounding, honesty rule, constraints — into every factual query:" },
+        { "type": "code", "language": "csharp", "title": "Reliability-hardened prompt template", "code": [
+          "public static class ReliablePrompts",
+          "{",
+          "    // v2: added assumptions + verification clauses (2026-09).",
+          "    public static string BuildGroundedQuery(string question, string context) => $\"\"\"",
+          "        Answer the question using ONLY the reference material below.",
+          "        Rules:",
+          "        - If the material does not contain the answer, reply exactly: UNKNOWN.",
+          "        - Do not use outside knowledge. Do not guess.",
+          "        - Before answering, list any assumptions you are making.",
+          "        - After answering, verify: does every claim trace to the material?",
+          "",
+          "        Question: {question}",
+          "",
+          "        Reference material:",
+          "        \\\"\\\"\\\"",
+          "        {context}",
+          "        \\\"\\\"\\\"",
+          "        \"\"\";",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "A minimal redaction helper — placeholders out, real values back in after the response:" },
+        { "type": "code", "language": "csharp", "title": "PII redaction before prompting (illustrative patterns)", "code": [
+          "using System.Text.RegularExpressions;",
+          "",
+          "public sealed class PromptRedactor",
+          "{",
+          "    private readonly Dictionary<string, string> _map = new();",
+          "    private int _counter;",
+          "",
+          "    public string Redact(string text)",
+          "    {",
+          "        // Illustrative: real systems use vetted PII-detection libraries/services.",
+          "        text = Regex.Replace(text, @\"[\\w.+-]+@[\\w-]+\\.[\\w.]+\", m => Placeholder(\"EMAIL\", m.Value));",
+          "        text = Regex.Replace(text, @\"\\b\\d{3}[- ]?\\d{3}[- ]?\\d{4}\\b\", m => Placeholder(\"PHONE\", m.Value));",
+          "        return text;",
+          "    }",
+          "",
+          "    public string Restore(string text)",
+          "    {",
+          "        foreach (var (placeholder, original) in _map)",
+          "            text = text.Replace(placeholder, original);",
+          "        return text;",
+          "    }",
+          "",
+          "    private string Placeholder(string kind, string original)",
+          "    {",
+          "        var token = $\"{kind}_{++_counter}\";",
+          "        _map[token] = original;",
+          "        return token;",
+          "    }",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "And the exit layer — validation that turns bad output into a handled failure path instead of a production bug (the pattern from tutorial 2, now with an explicit UNKNOWN branch):" },
+        { "type": "code", "language": "csharp", "title": "Validation with an honest-uncertainty branch", "code": [
+          "public enum AnswerStatus { Answered, Unknown, Invalid }",
+          "",
+          "public static (AnswerStatus Status, string? Answer) ValidateGroundedAnswer(string raw)",
+          "{",
+          "    var trimmed = raw.Trim();",
+          "",
+          "    if (trimmed.Equals(\"UNKNOWN\", StringComparison.OrdinalIgnoreCase))",
+          "        return (AnswerStatus.Unknown, null);   // honest gap — route to human/fallback",
+          "",
+          "    if (string.IsNullOrWhiteSpace(trimmed) || trimmed.Length > 2000)",
+          "        return (AnswerStatus.Invalid, null);   // malformed — retry or fail loudly",
+          "",
+          "    return (AnswerStatus.Answered, trimmed);   // still subject to any schema checks",
+          "}"
+        ] }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step-by-Step: Hardening a Prompt from Naive to Production",
+      "content": [
+        { "type": "paragraph", "text": "Take one realistic feature — answering customer questions from your product documentation — and walk it through every layer of this tutorial." },
+        { "type": "list", "style": "numbered", "items": [
+          "Naive baseline: 'Answer this customer question: {question}'. Test it with a question your docs don't cover — watch it confidently invent product behavior. This is the failure you are engineering away.",
+          "Add grounding: paste the relevant documentation section and require 'using ONLY the reference material'. Re-test the uncovered question — better, but it may still stretch.",
+          "Add the honesty rule: 'If the material does not contain the answer, reply exactly UNKNOWN.' Re-test — the uncovered question now returns UNKNOWN. Verify the covered questions still answer correctly.",
+          "Add explicit assumptions: 'List any assumptions before answering.' Test with an ambiguous question ('does it work offline?' — which product tier?) and watch the ambiguity surface instead of being silently resolved.",
+          "Add self-verification: 'After answering, confirm every claim traces to the material.' Spot-check: it catches a stretched claim in one of your test answers.",
+          "Privacy pass: questions may contain customer PII — wire the redactor from section 11 before the prompt, restore after. Confirm placeholders survive the round trip.",
+          "Exit validation: handle the UNKNOWN branch (route to support), length-check, and log every UNKNOWN — those are your documentation gaps, gift-wrapped.",
+          "Set temperature low, run your test set of 10 questions (covered, uncovered, ambiguous, PII-bearing) three times each, and record results. This regression set is now the feature's safety harness for every future prompt or model change."
+        ] },
+        { "type": "note", "style": "tip", "text": "Total added engineering: perhaps an hour. The naive version and the hardened version cost the same per API call — reliability here is mostly thinking, not spending." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Every technique here reduces error rates; none reaches zero. Grounded models still occasionally stretch beyond the material; honesty rules are followed probabilistically, not contractually.",
+          "Self-verification shares the generator's blind spots: it catches mechanical slips, never wrong beliefs. 'Verified' output is unverified output with better grooming.",
+          "Assumption listing depends on the model recognizing its assumptions — the deepest ones (interpretations so natural the model doesn't see them as choices) stay silent.",
+          "Redaction by regex is illustrative: production PII detection needs vetted libraries or services, and redaction can subtly change what the model infers (a placeholder carries less context than a real value).",
+          "Platform guarantees have scopes — read them: 'not used to train foundation models' is not the same as 'never logged', and content filters block categories of harm, not factual errors.",
+          "The when-not-to-trust list is a floor, not a ceiling: your domain adds its own entries (regulated industries especially).",
+          "All settings and platform behaviors described (temperature, content filtering, data handling) evolve — verify against current documentation when you build."
+        ] },
+        { "type": "note", "style": "warning", "text": "API-accuracy disclosure: the C# in section 11 is standard, version-safe C# (raw string literals require C# 11+; the regex patterns are deliberately simplistic illustrations, not production PII detection). Azure OpenAI data-handling and content-filtering descriptions reflect the platform's documented design; confirm specifics against current Microsoft documentation before relying on them in compliance contexts." }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices and Common Mistakes",
+      "content": [
+        { "type": "paragraph", "text": "The reliability habit set, condensed:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Ground factual tasks in supplied material with 'use only' + an honesty rule permitting UNKNOWN.",
+          "Constrain outputs to checkable shapes; validate them in code; design the failure path before shipping.",
+          "Ask for assumptions on anything ambiguous; ask for self-verification on anything consequential — and still review.",
+          "Low temperature for facts and extraction; multiple runs before trusting stability; a regression set per prompt.",
+          "Secrets never enter prompts; PII gets redacted or synthesized; proprietary data follows platform + policy.",
+          "Route enterprise workloads through platforms with contractual data handling (Azure OpenAI) rather than consumer tools.",
+          "Keep humans in the loop wherever actions are irreversible or consequences are high."
+        ] },
+        { "type": "paragraph", "text": "The mistakes that undo it all:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Equating confident tone with correctness — the original sin of AI adoption.",
+          "Accepting 'I have verified my answer' as verification.",
+          "Letting the model resolve ambiguity silently instead of demanding its assumptions.",
+          "Trusting citations, numbers, and post-cutoff claims without checking.",
+          "Pasting a connection string 'just this once'.",
+          "Treating platform compliance as application correctness.",
+          "Skipping the UNKNOWN branch — forcing the model to answer is forcing it to hallucinate.",
+          "Arguing with a polluted conversation instead of restarting with a better prompt."
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz",
+      "items": [
+        { "number": 1, "question": "Why is a model's confident tone not a reliability signal?", "options": { "A": "Models are trained to sound uncertain", "B": "Fluent assurance is a writing style the model applies to right and wrong answers equally", "C": "Confidence correlates with correctness above temperature 0.5", "D": "It is — confident answers are more likely correct" }, "correctAnswer": "B", "explanation": "The model optimizes plausible continuation, and plausible text sounds assured. Hallucinations arrive in exactly the same register as facts — which is why review checks claims, never vibes." },
+        { "number": 2, "question": "Which mistake does 'Ask → Review → Improve' most directly correct?", "options": { "A": "Pasting secrets", "B": "Trusting and shipping the first answer", "C": "Using low temperature", "D": "Decomposing tasks too much" }, "correctAnswer": "B", "explanation": "The most common beginner failure is treating draft one as final. The quality loop institutionalizes the review step that turns probabilistic output into dependable output." },
+        { "number": 3, "question": "What is the single most effective technique for reducing hallucinations on factual tasks?", "options": { "A": "Longer prompts", "B": "Higher temperature", "C": "Grounding: supply authoritative material and instruct 'use only the information provided'", "D": "Asking twice" }, "correctAnswer": "C", "explanation": "Grounding replaces statistical recall with reading comprehension — the model answers from your supplied facts. Paired with an honesty rule, it converts most inventions into honest UNKNOWNs." },
+        { "number": 4, "question": "What does an honesty rule like 'answer UNKNOWN if not in the material' actually prevent?", "options": { "A": "Slow responses", "B": "The forced-answer failure: without permission to admit gaps, the model fills them with plausible inventions", "C": "Token overuse", "D": "Prompt injection" }, "correctAnswer": "B", "explanation": "Models complete text; a question demands an answer-shaped completion. Explicitly permitting uncertainty makes 'UNKNOWN' an acceptable completion — and your validation code can route it to a fallback instead of shipping a guess." },
+        { "number": 5, "question": "When should temperature be set low?", "options": { "A": "Brainstorming product names", "B": "Creative writing", "C": "Factual answers, extraction, and anything parsed by code", "D": "Never — low temperature causes hallucinations" }, "correctAnswer": "C", "explanation": "Sampling randomness adds variety — a defect where correctness and consistency matter. Facts, extraction, classification: low. Ideation: higher. Temperature doesn't cause or cure hallucination; it trades consistency for variety." },
+        { "number": 6, "question": "What does self-verification reliably catch?", "options": { "A": "The model's wrong beliefs", "B": "Mechanical slips: dropped requirements, contradictions, arithmetic errors, constraint violations", "C": "Everything — that's why it's called verification", "D": "Prompt injection attacks" }, "correctAnswer": "B", "explanation": "Checking is a different task than generating, so re-reading against criteria catches real mistakes. But the verifier shares the generator's blind spots — a wrong belief verifies as true. Pre-filter, never proof." },
+        { "number": 7, "question": "Why does 'I have verified my answer' deserve the same skepticism as the answer itself?", "options": { "A": "Verification costs extra tokens", "B": "The same model with the same blind spots did the verifying — wrong beliefs pass their own checks", "C": "Verification is disabled by default", "D": "It doesn't — verified answers are trustworthy" }, "correctAnswer": "B", "explanation": "Self-verification raises average quality but is not evidence of correctness. For consequential output, verification must be independent: your review, tests, authoritative sources." },
+        { "number": 8, "question": "What does 'list your assumptions before answering' accomplish?", "options": { "A": "Longer answers", "B": "It makes silent gap-filling visible — each unstated decision becomes a reviewable, correctable statement", "C": "It prevents all errors", "D": "It reduces token usage" }, "correctAnswer": "B", "explanation": "Every ambiguity in your prompt gets resolved somehow; by default, silently and invisibly. Surfaced assumptions ('assuming UTC', 'assuming duplicates removed') cost one sentence to correct — before they harden into wrong output." },
+        { "number": 9, "question": "Which item must NEVER appear in a prompt, on any platform?", "options": { "A": "Public open-source code", "B": "Synthetic test data", "C": "Secrets: API keys, connection strings, passwords", "D": "Your code's class names" }, "correctAnswer": "C", "explanation": "Secrets in prompts leave your control and enter logs and histories you don't govern. The operational rule is absolute: a pasted secret is a compromised secret — rotate it. PII and proprietary code have policy-dependent answers; secrets don't." },
+        { "number": 10, "question": "What is redaction in the prompting context?", "options": { "A": "Deleting the conversation after use", "B": "Replacing sensitive values with placeholders before sending, and mapping them back after the response", "C": "Encrypting the API connection", "D": "Blocking the model's output" }, "correctAnswer": "B", "explanation": "'CUSTOMER_1 (EMAIL_1) reported...' preserves the structure the model needs while the real values never leave. Synthetic substitution is the sibling technique: invented data with the real shape." },
+        { "number": 11, "question": "Which Azure OpenAI property answers most enterprise proprietary-data concerns?", "options": { "A": "It runs on faster GPUs", "B": "Prompts stay within your Azure boundary and are not used to train the foundation models", "C": "It is free for enterprises", "D": "It disables hallucinations" }, "correctAnswer": "B", "explanation": "The data-handling contract — tenant boundary, no foundation-model training on your prompts, your compliance posture — is why enterprises route AI workloads through Azure OpenAI instead of consumer tools. Note what it doesn't do: make outputs correct." },
+        { "number": 12, "question": "A model provides a perfectly formatted citation for a claim. What do you know?", "options": { "A": "The source exists and supports the claim", "B": "Nothing yet — plausible-looking citations are routinely invented; verify existence and content", "C": "The claim is peer-reviewed", "D": "The citation is real if the DOI looks valid" }, "correctAnswer": "B", "explanation": "Citations are exactly the kind of specific, structured text models generate fluently from patterns. Real-looking is the default; real requires checking. Citations, quotes, exact numbers, and versions all share this rule." },
+        { "number": 13, "question": "Which situation most demands a human-in-the-loop before the output acts?", "options": { "A": "Drafting a summary a reader will review", "B": "Brainstorming feature names", "C": "Output that triggers an irreversible action — a sent email, a deleted record, a deployed config", "D": "Explaining a LINQ query" }, "correctAnswer": "C", "explanation": "Trust calibrates to consequence and reversibility. Reviewed drafts fail safely; irreversible actions amplify any error. The approval gate belongs exactly where mistakes can't be recalled." },
+        { "number": 14, "question": "Why is asking about your own systems (not described in the prompt) untrustworthy?", "options": { "A": "It violates terms of service", "B": "The knowledge boundary: the model has never seen your systems and answers from generic patterns that resemble them", "C": "It costs more tokens", "D": "Models refuse such questions" }, "correctAnswer": "B", "explanation": "The model will answer fluently about 'your' architecture — pattern-matched from every system it has read about. Without your context in the prompt, that's polished guesswork. Supply the context or discount the answer." },
+        { "number": 15, "question": "What is the core claim of defense in depth for prompting?", "options": { "A": "One perfect technique exists and should be found", "B": "Each layer (prompt rules, self-verification, validation, human review) is leaky, but stacked they make failures rare, visible, and recoverable", "C": "Validation code makes prompts unnecessary", "D": "Human review replaces all other layers" }, "correctAnswer": "B", "explanation": "No single defense reaches zero errors. Cheap early layers (grounding, honesty rules) prevent most; verification catches some; validation converts the rest to handled failures; humans gate what matters. Reliability is the stack." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam Questions",
+      "items": [
+        { "number": 1, "question": "Explain why 'confidence is a writing style, not a reliability signal' and derive its practical consequences for review.", "modelAnswer": "Models optimize plausible continuation; assured, fluent prose is the register of most training text, so it is applied uniformly to correct and incorrect content. There is no internal fact-checker modulating tone. Consequences: review must check claims against sources, never assess tone; 'it sounded right' is disqualified as a review standard; specific, checkable elements (numbers, citations, API names) get verified first since fluent specificity is exactly what generation fakes best; and teams train members explicitly that hallucinations arrive confident — the expectation itself is a defense." },
+        { "number": 2, "question": "Catalog five common beginner mistakes in prompt engineering, and for each give the practitioner correction.", "modelAnswer": "(1) Trusting the first answer → Ask → Review → Improve with acceptance criteria; drafts are drafts. (2) Vague prompts ('fix this') → full anatomy: instruction, context, input data, output constraints. (3) Asking beyond the knowledge boundary (current events, private systems) → supply context or don't ask; treat boundary-crossing answers as guesses. (4) Ignoring non-determinism (testing once) → multiple runs, regression sets, validation in code. (5) Arguing with a polluted conversation → take the lesson, improve the prompt, restart clean; history conditions future answers, so wrong turns compound. (Also worthy: giant undecomposed prompts; secrets/PII pasted; confidence equated with correctness.)" },
+        { "number": 3, "question": "Present the five prompt-level techniques for reducing incorrect output and explain the mechanism of each.", "modelAnswer": "(1) Grounding — supply authoritative material + 'use only the information provided': replaces statistical recall with reading comprehension over your facts. (2) Honesty rule — 'if not present, answer UNKNOWN': makes uncertainty an acceptable completion, removing the pressure to fill gaps with plausible inventions. (3) Tight output constraints — allowed values and shapes: shrinks the space where errors can live and makes violations machine-detectable. (4) Few-shot examples — demonstrated patterns pin format and boundary judgments, reducing drift across runs. (5) Low temperature for factual work — reduces sampling randomness, trading unneeded variety for consistency. They compound: each closes a different door." },
+        { "number": 4, "question": "Describe self-verification: why it works, what it catches, its hard limit, and its correct position in a workflow.", "modelAnswer": "Mechanism: verification is a different task than generation — re-reading a draft against explicit criteria (claims vs context, calculations, requirements coverage) has a different error profile than producing it, so real defects surface: dropped requirements, internal contradictions, arithmetic slips, constraint violations. Hard limit: the verifier is the same model with the same blind spots — a wrongly believed fact verifies as true, so 'I have verified' is grooming, not evidence. Position: a cheap pre-filter after generation and before human review; it raises average quality for one extra turn but never substitutes for independent verification on consequential output. Best combined: assumptions first, answer, then self-verify — three nets in one prompt." },
+        { "number": 5, "question": "Explain the silent-assumption problem and how explicit assumption elicitation changes the economics of ambiguity.", "modelAnswer": "Every detail a prompt leaves open gets resolved by the model somewhere — currency, timezone, duplicate handling, tier of product — and by default the resolution is silent and invisible: the output reads identically whether the choice matched your intent or not. Elicitation ('list every assumption you are making about anything I did not specify') converts each silent choice into a reviewable statement. Economics: a wrong assumption caught at the list stage costs one corrective sentence; embedded in generated code it costs debugging something that looks right; in production it costs an incident. The technique also feeds back into requirements: recurring assumptions mark chronic ambiguities your specs should close. Limit: the deepest interpretations may not register as assumptions to the model — elicitation reduces, not eliminates." },
+        { "number": 6, "question": "Construct the data-classification rules for prompting: four data classes, their rules, and the two working techniques that make compliance practical.", "modelAnswer": "Classes: (1) Secrets — keys, connection strings, passwords: never in prompts, no exceptions; a pasted secret is rotated. (2) PII — names, emails, IDs, health/financial data: minimize or redact; real records only where platform guarantees and organizational policy explicitly allow. (3) Proprietary code/docs: policy-dependent; enterprise platforms with contractual no-training guarantees (Azure OpenAI) typically permit what consumer tools don't. (4) Public/synthetic: safe, and usually sufficient. Techniques: redaction — placeholder substitution (EMAIL_1) with post-response restoration, preserving structure while values never leave; synthetic substitution — invented data with the real schema, because the model needs your shapes, not your customers. Together they make the default workflow compliant instead of making compliance an exception process." },
+        { "number": 7, "question": "Compare what the Azure platform layer does and does not provide for prompting reliability and safety.", "modelAnswer": "Provides: data handling — prompts within your tenant boundary, not used to train foundation models, inheriting your compliance posture; content filtering / Azure AI Content Safety — classification and blocking of harmful content categories both directions; access control — Entra ID and private endpoints governing who can call deployments over which paths; auditability through Azure's operational surface. Does not provide: factual correctness — no setting makes a hallucinated discount rate false; output validation — your schemas, your code; prompt quality — grounding, honesty rules, constraints are your craft; task-level trust decisions — when a human must gate. The failure mode is assuming platform compliance covers application correctness; the two layers secure different things and both are required." },
+        { "number": 8, "question": "Give the 'when not to trust' taxonomy with the underlying principle, and state what correctly calibrated trust looks like.", "modelAnswer": "Principle: trust falls as consequence rises and verifiability drops. Taxonomy: post-cutoff facts (unknowable, answered anyway); citations/quotes/exact numbers (fluent specificity is the top hallucination genre); legal/medical/financial advice (consequence + jurisdictional specificity); security-critical code/configs (subtle wrongness, severe blast radius); claims about your systems absent from the prompt (knowledge boundary guesswork); self-verified claims (shared blind spots); anything feeding irreversible actions (uncatchable after the fact). Calibrated trust: AI as first-rate input to verification processes — drafts humans review, code that faces tests, explanations checked against source — and never as terminal authority. Positioned so, nearly every use is safe; positioned as oracle, every use gambles." },
+        { "number": 9, "question": "Design the complete reliability hardening for a docs-Q&A feature (as in section 12), naming each layer and what failure it addresses.", "modelAnswer": "(1) Grounding with retrieved doc sections + 'use only' — addresses invention of product behavior. (2) Honesty rule with exact-token UNKNOWN — addresses forced answers on uncovered questions; validation can branch on it. (3) Assumption elicitation — addresses silent resolution of ambiguous questions (which tier? which version?). (4) Self-verification clause — catches stretched claims and dropped question parts. (5) Redaction of customer PII in questions, restoration after — addresses privacy egress. (6) Exit validation: UNKNOWN branch routed to support, length/shape checks, logging of UNKNOWNs as documentation-gap telemetry. (7) Low temperature; regression set of covered/uncovered/ambiguous/PII questions run multiply, re-run on any prompt or model change. Each layer leaky, the stack strong; cost is mostly one hour of thinking, not per-call spend." },
+        { "number": 10, "question": "Why does forcing a model to answer (no honesty rule) directly manufacture hallucinations? Explain via the completion mechanism.", "modelAnswer": "Generation continues text plausibly. A question sets up an answer-shaped continuation; if the model's context and knowledge don't contain the answer, the most plausible continuation is still an answer — so it produces one, synthesized from patterns resembling the question's domain. Refusal or 'I don't know' is a less likely continuation unless the prompt makes it explicitly acceptable and specified ('reply exactly UNKNOWN'). The honesty rule thus doesn't just permit honesty; it creates a high-probability, well-defined completion path for the no-answer case, which validation code can then detect and route. Absent that path, every gap in coverage converts to a confident invention — the feature's worst possible behavior, delivered in its most convincing tone." },
+        { "number": 11, "question": "A junior developer says 'the model verified its own answer, so we can skip review.' Correct them with the full argument.", "modelAnswer": "Self-verification is one model checking work produced by the same weights, same context, same blind spots. It genuinely helps: reading-against-criteria is a different task from generating, so mechanical defects — dropped requirements, contradictions, arithmetic — get caught, and average quality rises for one cheap turn. But wrong beliefs pass their own checks by definition: if the model 'knows' a wrong API signature, verification confirms it enthusiastically. So the verified answer is an unverified answer with better grooming. Review economics remain unchanged: independent checks — human review, tests, authoritative sources — for anything consequential. Analogy that lands: a developer re-reading their own PR catches typos, not their own misunderstandings; that's why we have reviewers." },
+        { "number": 12, "question": "Explain conversation pollution and the restart discipline, including why arguing with a model is anti-productive.", "modelAnswer": "Chat models are stateless; every turn replays the conversation history as context. When a session goes wrong — a misunderstanding, a wrong frame, hallucinated 'facts' introduced — those turns remain in history and condition every subsequent generation: the model keeps consistency with its own errors, and corrections fight against accumulated context weight. Arguing adds more polluted turns, often entrenching the frame. The discipline: extract the lesson (what context was missing? which constraint was unstated?), then start a clean session with an improved prompt embodying it. Thirty seconds of re-prompting beats ten minutes of correction. In application code the same principle: purpose-built calls with curated context rather than ever-growing chats; summarize-and-restart when sessions age." },
+        { "number": 13, "question": "Your team wants to paste production customer records into prompts 'because the bug only reproduces with real data.' Provide the governed path.", "modelAnswer": "First interrogate the premise: bugs reproduce with data of the right shape and values, not the right identities — synthetic substitution (invented records matching the schema, including the pathological values that trigger the bug) resolves most cases outright. Where realistic distributions matter, redaction: placeholder substitution for names/emails/IDs with mapping kept locally, restoring after. If neither suffices (rare), the question becomes platform and policy: an Azure OpenAI deployment inside the tenant boundary with its no-training data handling, under an explicit policy decision by whoever owns data protection — not an engineer's judgment call in the moment. And regardless of path: secrets in the records (tokens, connection strings) never go; logs of what was sent are kept; the exception is documented. The default answer stays 'synthetic first' because it's also the faster path — no approvals needed." },
+        { "number": 14, "question": "Argue the economics of the defense-in-depth stack: why push reliability into early layers, and what does each layer cost?", "modelAnswer": "Costs: prompt-level techniques (grounding, honesty rules, constraints, temperature) are free per request — engineering once, zero marginal cost. Self-verification costs one extra model call per request. Output validation costs code once plus negligible runtime. Human review costs scarce attention on every item, forever. Effectiveness is roughly inverse to cost at the margin: good prompts prevent the majority of failures; verification catches a meaningful slice of the rest; validation converts residual bad output into handled failures; humans catch what only judgment can. Therefore: maximize prevention in the free layers, reserve the expensive human layer for consequence-gated decisions, and never let human review become the compensating control for lazy prompts — that inverts the economics, burning the costliest resource on failures the cheapest layer should have prevented." },
+        { "number": 15, "question": "Scenario: an AI feature will draft responses to customer complaints, with an agent clicking send. A stakeholder asks 'how do we know it won't say something wrong or leak data?' Write the reliability case.", "modelAnswer": "Structure the answer as layers. Wrongness: drafts are grounded in the customer's ticket plus our policy documents with 'use only' + UNKNOWN honesty rule, so product claims trace to sources; assumptions are surfaced for ambiguous complaints; self-verification flags unsupported claims; and the terminal control is architectural — a human agent reviews and edits every draft before send, so the failure mode is 'agent edits a bad draft', not 'customer receives one'. Data: PII in tickets is redacted before prompting and restored after; the workload runs on Azure OpenAI inside our tenant with contractual no-training data handling; secrets never enter prompts by policy and tooling. Evidence: a regression set of real (anonymized) complaint scenarios run before any prompt or model change; UNKNOWN and edit-rate metrics monitored — rising agent edits is our early-warning signal. Residual risk stated honestly: no layer is perfect; the human gate is sized exactly because of that." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Confidence ≠ correctness", "back": "Fluent assurance is a writing style applied equally to right and wrong answers. Review checks claims against sources — never tone." },
+        { "number": 2, "front": "Top beginner mistakes", "back": "Trusting draft one; vague prompts; confidence as correctness; asking beyond the knowledge boundary; one giant prompt; testing once; pasting secrets; arguing instead of re-prompting." },
+        { "number": 3, "front": "Grounding", "back": "Supply authoritative material + 'use ONLY the information provided'. The #1 hallucination reducer — recall becomes reading comprehension." },
+        { "number": 4, "front": "Honesty rule", "back": "'If not in the material, reply exactly UNKNOWN — do not guess.' Creates a legal completion path for uncertainty; validation can branch on it." },
+        { "number": 5, "front": "Temperature discipline", "back": "Low for facts, extraction, anything code-parsed. Higher only when variety is the point. Randomness is a feature for ideation, a defect for facts." },
+        { "number": 6, "front": "Self-verification", "back": "'Verify your answer against the context/requirements; list issues.' Catches mechanical slips (dropped requirements, contradictions, arithmetic). Cheap pre-filter." },
+        { "number": 7, "front": "Self-verification's hard limit", "back": "Same model, same blind spots — wrong beliefs verify as true. 'I have verified' is grooming, not evidence. Independent checks for anything consequential." },
+        { "number": 8, "front": "Explicit assumptions", "back": "'List every assumption about anything I didn't specify.' Silent gap-filling becomes reviewable statements — corrected for one sentence each." },
+        { "number": 9, "front": "Secrets rule", "back": "API keys, connection strings, passwords: NEVER in a prompt, any platform. A pasted secret is a compromised secret — rotate it." },
+        { "number": 10, "front": "Redaction + synthetic substitution", "back": "Placeholders (EMAIL_1) out, restore after — structure survives, values never leave. Or invent data with the real schema: the model needs shapes, not customers." },
+        { "number": 11, "front": "Azure OpenAI data handling", "back": "Prompts stay in your tenant boundary; not used to train foundation models; your compliance posture applies. Note: governs where data goes — not whether output is correct." },
+        { "number": 12, "front": "Never trust without checking", "back": "Post-cutoff facts, citations/quotes, exact numbers/versions, legal-medical-financial advice, security-critical code, claims about your undescribed systems." },
+        { "number": 13, "front": "Human-in-the-loop placement", "back": "Wherever output feeds irreversible actions or high consequences. Reviewed drafts fail safely; auto-fired actions amplify every error." },
+        { "number": 14, "front": "Conversation pollution", "back": "Wrong turns stay in history and condition later answers. Don't argue — extract the lesson, improve the prompt, restart clean." },
+        { "number": 15, "front": "Defense in depth", "back": "Prompt rules → self-verify → code validation → human gate. Every layer leaky; the stack makes failures rare, visible, recoverable." },
+        { "number": 16, "front": "Layer economics", "back": "Prompt fixes: free per call. Self-verify: one call. Validation: code once. Human review: attention forever. Push reliability into the cheap early layers." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions & Answers",
+      "items": [
+        { "number": 1, "question": "What's your mental model for when AI output can be trusted?", "answer": "Trust scales inversely with consequence and directly with verifiability. Output feeding a verification process — a draft a human reviews, code that faces tests and review, an explanation I can check against source — gets used freely, because the process catches failures. Output that would act as terminal authority — exact numbers, citations, legal implications, anything triggering irreversible actions — gets independent verification or doesn't get used. And two hard boundaries where trust drops to zero without supplied context: anything after the knowledge cutoff, and anything about our systems the prompt didn't describe. The model answers both fluently; that fluency is the trap." },
+        { "number": 2, "question": "What are the most common mistakes you see people make with AI tools?", "answer": "Three account for most damage. Trusting the first answer — shipping draft one because it sounded right; the fix is treating every output as a draft entering review. Equating confidence with correctness — hallucinations arrive in exactly the tone of facts, so 'it sounded sure' means nothing. And asking beyond what the model can know — current events, our internal systems — where it pattern-matches an answer from generic resemblance. Honorable mentions: vague prompts that outsource decisions invisibly, pasting secrets, and arguing with a polluted conversation instead of restarting with a better prompt." },
+        { "number": 3, "question": "How do you reduce hallucinations in practice?", "answer": "Layered, starting free. Grounding first: supply the authoritative material and instruct 'use only the information provided' — recall becomes reading comprehension. Honesty rule second: 'if it's not in the material, reply exactly UNKNOWN' — without a legal path to uncertainty, the model fills gaps with inventions; with it, my validation code branches on UNKNOWN and routes to fallback. Then tight output constraints so answers live in checkable shapes, few-shot examples where format drifts, and low temperature for factual work. None reaches zero — which is why validation code and review sit behind the prompt layer. But those five prompt techniques prevent the majority of failures at zero marginal cost." },
+        { "number": 4, "question": "Is asking the model to verify its own answer worth anything?", "answer": "Worth one extra call, yes — as long as you know what you bought. Verification is a different task than generation: re-reading a draft against explicit criteria catches dropped requirements, internal contradictions, arithmetic slips, constraint violations — mechanical defects, caught cheaply. What it cannot catch is wrong beliefs: the verifier is the same weights with the same blind spots, so a wrongly-known API signature verifies as correct with full confidence. My rule: self-verification raises average quality and goes in every consequential prompt — and 'the model verified it' carries zero evidentiary weight in review. Independent checks — my review, tests, sources — remain the actual verification." },
+        { "number": 5, "question": "Tell me about the assumptions technique and why you use it.", "answer": "Every ambiguity in a prompt gets resolved by the model somewhere, and by default silently — the output looks identical whether its choices matched my intent or not. So on anything ambiguous I add one line: 'Before answering, list every assumption you're making about anything I didn't specify.' Suddenly the invisible becomes reviewable: 'assuming UTC, assuming decimal currency, assuming duplicates removed.' Each wrong assumption costs one sentence to correct at that stage; embedded in generated code, it costs debugging something that looks right. Bonus signal: assumptions that recur across sessions mark chronic holes in our specs — the technique doubles as requirements discovery." },
+        { "number": 6, "question": "What data are you comfortable putting in a prompt?", "answer": "Classified, not vibes-based. Secrets — keys, connection strings, passwords — never, on any platform; a pasted secret is a rotated secret. PII — minimized or redacted: placeholder substitution preserves the structure the model needs while real values never leave, and for most debugging synthetic data with the right schema works perfectly, because the model needs shapes, not identities. Proprietary code and docs — policy plus platform: on Azure OpenAI inside our tenant with its no-training data handling, our policy permits what it forbids on consumer tools. Public and synthetic data — freely. The habit that makes it sustainable: synthetic-first as the default, so compliance isn't an exception process." },
+        { "number": 7, "question": "Does using Azure OpenAI mean you don't have to worry about AI risks?", "answer": "It solves a specific class: data governance. Prompts stay inside our tenant boundary, aren't used to train foundation models, inherit our compliance posture, and access runs through Entra ID and private endpoints — that's why enterprise workloads route there rather than consumer tools. What it doesn't touch: correctness. No platform setting makes a hallucinated discount rate false, validates my output schemas, writes my honesty rules, or decides where humans must gate actions. Content filtering blocks categories of harm, not factual errors. The division of labor is clean — platform secures where data goes; my prompts and code secure whether outputs are right — and confusing the two layers is how teams ship compliant incorrectness." },
+        { "number": 8, "question": "When would you flatly refuse to use AI output without verification?", "answer": "Citations and quotes — invented ones are indistinguishable from real ones until checked; exact numbers, prices, limits, versions — statistical recall of specifics is unreliable; anything after the knowledge cutoff — unknowable but answered anyway; legal, medical, financial conclusions — consequence plus jurisdiction-specificity; security-critical code and configuration — subtle wrongness with severe blast radius; and claims about our own systems that weren't in the prompt — that's pattern-matched guesswork wearing our vocabulary. Plus the meta-case: anything the model 'verified itself'. Note these share a shape — high consequence, or specificity the model fakes fluently. Drafts, brainstorms, and explanations I can check don't make the list; they enter verification processes by design." },
+        { "number": 9, "question": "How do you handle a conversation where the model has gone off the rails?", "answer": "I stop investing in it. Chat history is replayed context — every wrong turn keeps conditioning subsequent answers, so the model maintains consistency with its own errors and corrections fight accumulated weight. Arguing adds more polluted turns. Instead: extract the lesson — what context was missing, which constraint went unstated, where did the frame go wrong — fold it into an improved prompt, and start a clean session. Thirty seconds of re-prompting reliably beats ten minutes of correction. Same principle in application code: purpose-built calls with curated context over ever-growing chats, and summarize-and-restart when sessions age past usefulness." },
+        { "number": 10, "question": "Describe defense in depth for an AI feature you'd ship.", "answer": "Four layers, cheapest first. Prompt layer: grounding in retrieved authoritative content, 'use only', exact-token UNKNOWN honesty rule, output constrained to a checkable schema, assumptions surfaced, low temperature — free per call, prevents most failures. Verification layer: a self-check clause catching mechanical slips — one extra call. Validation layer: deterministic code parsing the response, branching on UNKNOWN to fallback, schema and allowed-value checks, failures routed to retry or human — code once. Human layer: review gates exactly where consequences are high or actions irreversible. Plus the harness around it all: a regression set run before any prompt or model change, and telemetry — UNKNOWN rates, validation failures, edit rates — as the early-warning system. Every layer leaks; the stack holds." },
+        { "number": 11, "question": "Your teammate pasted a connection string into a chat tool to debug faster. Walk me through your response.", "answer": "Immediate: rotate the credential — the operational rule is that a pasted secret is a compromised secret, because it now lives in logs and histories we don't govern; speed of rotation matters more than blame. Short-term: check whether that class of secret appears anywhere else in prompt history, and whether the tool retains data. Systemic: make the right path easier than the wrong one — a redaction helper in the debugging toolkit, synthetic connection-string patterns for asking structural questions, and the one-line policy everyone can recite: secrets never, PII redacted, proprietary per platform policy. And blameless framing: the person was optimizing for the team's velocity; the failure was ours for not making the safe path the fast path. That's how you get the next incident reported instead of hidden." },
+        { "number": 12, "question": "How does temperature relate to reliability?", "answer": "Temperature scales sampling randomness — how sharply generation favors the most likely next token. For factual answers, extraction, classification, anything parsed by code: low, because variety there is just inconsistency, and inconsistency is failed runs and flaky behavior. For brainstorming and phrasing alternatives: higher, because variety is the deliverable. Two clarifications I make to teams: temperature doesn't cause or cure hallucination — a grounded prompt at low temperature can still stretch, an ungrounded one at zero still invents; and low temperature isn't determinism — runs converge but aren't guaranteed identical, so validation code stays regardless. It's one dial in the stack, not a reliability strategy." },
+        { "number": 13, "question": "What telemetry would you attach to a production AI feature?", "answer": "Signals that catch degradation before users do. UNKNOWN rate — rising means coverage gaps or retrieval problems; it's also free requirements telemetry. Validation-failure rate — malformed outputs per thousand; a jump usually means model drift or a prompt regression. Human edit rate where there's a review gate — agents editing more means quality sliding; it's the best proxy for correctness we can measure continuously. Token usage per request — cost regression detection. Latency percentiles. And on any prompt or model change: the regression set runs first, so changes are gated by evidence, not hope. The philosophy: models change under you — telemetry is how a probabilistic dependency stays operable." },
+        { "number": 14, "question": "Where do humans belong in AI workflows, and how do you decide?", "answer": "At the points where consequence is high and reversibility is low — decided per action, not per feature. A draft reply: the agent's review is the gate, and the failure mode is 'human edits a bad draft', which is fine. A record deletion, a sent notification, a deployed config: approval before the action fires, because no downstream layer can recall it. Two disciplines keep the gates honest: don't dilute them — if humans approve two hundred items an hour, that's rubber-stamping wearing a control's costume, so scope gates to what genuinely needs judgment; and instrument them — edit rates and rejection rates at the gate are your live quality metrics. The goal state: automation earns wider scope gradually, by evidence from the gates, not by optimism." },
+        { "number": 15, "question": "Sum up your prompting reliability philosophy in a minute.", "answer": "The model is a brilliant, tireless collaborator that is confidently wrong at unpredictable moments — and it never signals which moments. So I never rely on any single defense. I make errors less likely at the source: grounded prompts, honesty rules, constraints, low temperature for facts. I make errors visible in flight: assumptions surfaced, self-verification for mechanical slips. I make errors survivable at the exit: validation code with an UNKNOWN branch and designed failure paths. And I put human judgment exactly where consequences demand it — no wider, so the gates stay real. Data discipline runs underneath: secrets never, PII redacted, enterprise workloads on platforms with contractual data handling. Every layer is leaky; the stack is strong. That's the whole philosophy: defense in depth, with the cheap layers doing the heavy lifting." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "Hallucination", "definition": "Fluent, confident output that is factually wrong or invented; delivered in the same tone as correct answers, hence the review discipline." },
+        { "term": "Beginner mistakes (prompting)", "definition": "The recurring early habits behind most AI misuse: trusting draft one, vague prompts, confidence-as-correctness, boundary-crossing questions, single tests, pasted secrets, arguing with polluted conversations." },
+        { "term": "Confidence miscalibration", "definition": "The gap between a model's assured tone and its actual reliability — tone is style, not signal." },
+        { "term": "Knowledge cutoff", "definition": "The end date of training data; post-cutoff questions get pattern-matched inventions, not knowledge." },
+        { "term": "Knowledge boundary", "definition": "The limit of what a model can know: training data plus supplied context; beyond it, answers are guesswork resembling knowledge." },
+        { "term": "Non-determinism", "definition": "Same prompt, different outputs across runs; why single tests prove nothing and validation code is permanent." },
+        { "term": "Grounding", "definition": "Supplying authoritative material and restricting the model to it — the strongest single hallucination reducer." },
+        { "term": "Honesty rule", "definition": "An instruction making uncertainty a legal completion ('reply exactly UNKNOWN'), preventing forced-answer inventions and enabling validation branching." },
+        { "term": "Output validation", "definition": "Deterministic post-checks — parse, schema, allowed values, UNKNOWN branch — converting bad output into handled failure." },
+        { "term": "Temperature", "definition": "Sampling-randomness dial: low for facts/extraction/parsed output, higher only where variety is the deliverable." },
+        { "term": "Self-verification", "definition": "A follow-up asking the model to check its answer against criteria; catches mechanical slips, shares the generator's blind spots." },
+        { "term": "Verification prompt", "definition": "The concrete instrument of self-verification: 'verify each claim against the material; re-check calculations; confirm all requirements addressed.'" },
+        { "term": "Explicit assumptions", "definition": "Elicited statements of how the model resolved unspecified details — turning silent gap-filling into reviewable, cheaply correctable decisions." },
+        { "term": "Conversation pollution", "definition": "Wrong turns persisting in replayed history and conditioning later answers; cured by restarting clean with an improved prompt." },
+        { "term": "Data privacy (prompting)", "definition": "Controlling what enters prompts: secrets never, PII minimized/redacted, proprietary data per platform and policy." },
+        { "term": "PII", "definition": "Personally identifiable information; redacted or replaced with synthetic equivalents before prompting." },
+        { "term": "Redaction", "definition": "Placeholder substitution before sending (EMAIL_1), with local mapping and post-response restoration." },
+        { "term": "Synthetic substitution", "definition": "Invented data with the real schema — sufficient for most debugging, because models need shapes, not identities." },
+        { "term": "Prompt injection", "definition": "Instructions hidden in untrusted data that the model may follow; why data is delimited and prompts get least capability." },
+        { "term": "Human-in-the-loop", "definition": "A person gating output before it takes effect — placed exactly where consequence is high and reversibility low." },
+        { "term": "Defense in depth", "definition": "Stacked leaky layers — prompt rules, self-verification, validation, human gates — making failures rare, visible, recoverable." },
+        { "term": "Regression set (prompt)", "definition": "Saved test inputs run before any prompt or model change; the evidence gate for a probabilistic dependency." },
+        { "term": "UNKNOWN branch", "definition": "The validation path handling honest uncertainty — routing to fallback or human, and logging coverage gaps as telemetry." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary & Key Takeaways",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Confidence is a writing style: hallucinations sound exactly like facts, so review checks claims, never tone.",
+          "The beginner mistakes are few and fixable: trusting draft one, vague prompts, boundary-crossing questions, single tests, polluted conversations, pasted secrets.",
+          "Reduce errors at the source: grounding + honesty rule + constraints + examples + low temperature — free per call, prevents the majority.",
+          "Catch errors in flight: explicit assumptions make silent choices reviewable; self-verification catches mechanical slips — and shares the generator's blind spots.",
+          "Privacy is classification plus technique: secrets never; PII redacted or synthesized; proprietary data per platform contract and policy; Azure OpenAI answers the enterprise where-does-data-go question.",
+          "Know when not to trust: post-cutoff facts, citations, exact numbers, high-consequence advice, security-critical code, your undescribed systems, self-verified claims, irreversible actions.",
+          "Defense in depth is the strategy: every layer leaks, the stack holds — and the cheap early layers should do the heavy lifting.",
+          "Instrument everything: UNKNOWN rates, validation failures, edit rates, and a regression set gate every prompt and model change."
+        ] },
+        { "type": "paragraph", "text": "This completes the core prompting module: you can now craft prompts, apply patterns, generate code, tests, and docs — and wrap all of it in the reliability discipline that makes it shippable. The next tutorial turns the lens on yourself: prompting as a learning and productivity multiplier for your own growth as a developer." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Continue with the next tutorial in the path: Prompt Engineering for Learning & Productivity — using models to learn technologies faster, build personal workflows, and multiply your day-to-day output as a developer." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: run section 12's hardening walkthrough on any Q&A-style prompt you use — measure the before/after on a question the source material doesn't cover.",
+          "Practice: add 'list your assumptions first' to your next three ambiguous prompts and count how many surfaced assumptions you needed to correct.",
+          "Practice: build the PromptRedactor from section 11 into a small console tool and run it over a sample support ticket.",
+          "Audit: search your recent AI conversations for the beginner mistakes table — most practitioners find at least two.",
+          "Reading: Microsoft Learn on Azure OpenAI data privacy and content filtering; your organization's AI usage policy (read it before you need it)."
+        ] },
+        { "type": "note", "style": "info", "text": "Path position: tutorial 6 of 27 · Previous: prompting-for-testing-and-docs · Next: prompting-for-learning-productivity" }
+      ]
+    }
+  ]
+}

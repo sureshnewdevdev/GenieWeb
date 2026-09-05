@@ -1,0 +1,496 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "GitHub Copilot for .NET Development",
+  "slug": "github-copilot-for-dotnet",
+  "level": "Beginner to Intermediate",
+  "codeLanguage": "C#",
+  "tutorialNumber": 8,
+  "totalTutorials": 27,
+  "prev": "prompting-for-learning-productivity",
+  "next": "advanced-copilot-usage",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "GitHub Copilot for .NET Development"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "Writing C# code with GitHub Copilot",
+    "Generating unit tests with NUnit",
+    "Improving code quality and refactoring with AI",
+    "Creating documentation with Copilot",
+    "Generating service classes",
+    "Using Copilot Chat effectively"
+  ],
+  "tooltips": {
+    "GitHub Copilot": "An AI pair programmer inside your editor: inline code completions plus a chat assistant, powered by large language models.",
+    "pair programmer": "The working metaphor for Copilot — a tireless collaborator who suggests; you remain the driver who decides.",
+    "code completion": "Copilot's core feature: context-aware suggestions that appear as you type, from line fragments to whole methods.",
+    "ghost text": "The gray inline preview of a Copilot suggestion — press Tab to accept, keep typing to ignore.",
+    "inline suggestion": "A completion offered directly in the code editor at your cursor, based on surrounding context.",
+    "Copilot Chat": "The conversational side of Copilot: a chat panel (and inline chat) that answers questions and edits code with your workspace as context.",
+    "inline chat": "Chat invoked directly at a location in your code — ask for a change and see the proposed diff in place.",
+    "slash command": "Chat shortcuts like /explain, /tests, /fix, /doc that run a purpose-built prompt against your selection or file.",
+    "intent comment": "A comment written to steer the next completion — describing what the following code should do before Copilot writes it.",
+    "context": "What Copilot can see when suggesting: your current file, open editor tabs, and (in chat) selections and workspace references.",
+    "NUnit": "The .NET test framework used in this course: [TestFixture] classes, [Test] methods, [TestCase] rows, Assert.That assertions.",
+    "unit test": "An automated test of one behavior in isolation — Copilot generates them well, but the review discipline from tutorial 5 still applies.",
+    "refactoring": "Restructuring code without changing its observable behavior — with Copilot, always stated explicitly as a constraint.",
+    "behavior-preserving": "The refactoring contract: identical observable behavior, signatures, and side effects — proven by tests, not by the suggestion looking right.",
+    "service class": "A class encapsulating a unit of business logic behind an interface, wired via dependency injection — a natural Copilot generation target.",
+    "dependency injection": "Supplying a class's dependencies through its constructor — the ASP.NET Core convention Copilot follows when your codebase shows it.",
+    "XML documentation comments": "C# /// comments powering IntelliSense and doc tools — generated en masse via the /doc slash command or chat.",
+    "hallucinated API": "A plausible-looking method or package that doesn't exist — Copilot's signature failure; the compiler is your first gate.",
+    "exemplar": "An existing class kept open in a tab so Copilot imitates its conventions — the editor-native form of few-shot prompting.",
+    "prompt engineering": "The craft from tutorials 2–7 — in Copilot, expressed through names, comments, open files, and chat questions."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview",
+      "content": [
+        { "type": "paragraph", "text": "Everything in Module 1 assumed you were typing prompts into a chat box. GitHub Copilot moves the model into your editor, where your code becomes the prompt: it reads the file you're editing, your open tabs, and your comments, then suggests code inline as you type — plus a chat assistant that can explain, test, refactor, and document with your workspace as context." },
+        { "type": "paragraph", "text": "For .NET developers, Copilot is where prompting skill pays off most often, because you use it hundreds of times a day. The developers who get spectacular results from it are doing the same things you learned in Module 1 — supplying context, writing clear intent, reviewing everything — just expressed through editor-native mechanics: names, comments, open files, and chat." },
+        { "type": "paragraph", "text": "This tutorial covers the daily craft: writing C# with completions, generating NUnit unit tests, refactoring and quality improvement, documentation generation, building service classes, and using Copilot Chat effectively. The next tutorial goes deeper into advanced usage." },
+        { "type": "note", "style": "info", "text": "This is tutorial 8 of 27 and opens Module 2 (Developer Productivity with Copilot). It assumes the prompting fundamentals and review discipline of tutorials 2–6." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "paragraph", "text": "After completing this tutorial, you will be able to:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Explain how Copilot builds context from your editor and steer it deliberately.",
+          "Write C# with completions efficiently: intent comments, descriptive names, and rhythm of accept/reject.",
+          "Generate NUnit test suites with Copilot and review them with tutorial 5's honesty discipline.",
+          "Drive behavior-preserving refactorings and quality improvements through Copilot Chat.",
+          "Generate XML documentation comments and higher-level docs from your code.",
+          "Scaffold service classes that fit your codebase's dependency injection and conventions.",
+          "Use Copilot Chat's slash commands, selections, and inline chat where each fits best.",
+          "Apply the unchanged review bar: Copilot suggestions are drafts, not decisions."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "A GitHub account with Copilot access (individual, business, or trial) and Visual Studio 2022 or VS Code with the Copilot extensions installed.",
+          "Module 1's prompting fundamentals — especially context supply (tutorial 4) and generated-test review (tutorial 5).",
+          "Comfortable C#: classes, interfaces, async/await, and a working .NET project to practice in."
+        ] },
+        { "type": "note", "style": "tip", "text": "Practice in a real project, not an empty file — Copilot's quality scales with the context around your cursor, and an empty file gives it nothing to work with." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "How Copilot Thinks: Context Is Everything",
+      "content": [
+        { "type": "paragraph", "text": "GitHub Copilot — the archetypal AI pair programmer — has two faces. Code completion offers ghost text at your cursor: each inline suggestion is a gray preview you accept with Tab or ignore by typing on, ranging from finishing a line to writing a whole method. Copilot Chat is a conversation panel (plus inline chat at your cursor) for multi-step work: explain this, test this, refactor this, with your code attached as context. Completions keep you in flow; chat handles anything needing instructions or discussion." },
+        { "type": "paragraph", "text": "Both faces run on the same fuel: context. Copilot does not magically know your repository — for completions it primarily sees the current file and your other open editor tabs; for chat, your selection, the file, and whatever workspace context you explicitly reference. This single fact explains most quality variance between users. The developer with the relevant interface open in a tab, descriptive names, and a clear intent comment gets eerily accurate suggestions; the developer in an empty file with vague names gets tutorial-grade filler." },
+        { "type": "animation", "title": "How Copilot builds a suggestion", "intro": "Watch what flows into one Tab-press worth of ghost text.", "nodes": [
+          { "id": "cursor", "label": "Your cursor", "sub": "the ask" },
+          { "id": "file", "label": "Current file", "sub": "names, code, comments" },
+          { "id": "tabs", "label": "Open tabs", "sub": "exemplars, interfaces" },
+          { "id": "model", "label": "Model", "sub": "pattern completion" },
+          { "id": "ghost", "label": "Ghost text", "sub": "Tab or ignore" }
+        ], "steps": [
+          { "highlight": ["cursor"], "caption": "You pause mid-code. Copilot treats everything around the cursor as an implicit prompt." },
+          { "highlight": ["file"], "caption": "The current file contributes the most: your method names, types, comments, and the code above the cursor." },
+          { "highlight": ["tabs"], "caption": "Open editor tabs add more — the interface you're implementing, an exemplar service, your test conventions. Curate them like prompt context." },
+          { "highlight": ["model"], "caption": "The model completes the pattern: your context in, the statistically fitting continuation out. Same machinery as Module 1, new packaging." },
+          { "highlight": ["ghost"], "caption": "Ghost text appears. Tab accepts, typing ignores, and a shortcut cycles alternative suggestions. Every acceptance is a review decision." }
+        ] },
+        { "type": "paragraph", "text": "Hold on to the Module 1 mapping: intent comments are instructions; open tabs are grounding and few-shot examples; descriptive names are context; chat questions are full prompts; and every suggestion is a draft entering Ask → Review → Improve. Copilot is prompt engineering with the prompt assembled from your workspace." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Writing C# Code with Copilot",
+      "content": [
+        { "type": "paragraph", "text": "Daily completion craft comes down to three steering inputs and one rhythm. Steering input one: names. `ProcessData(object input)` invites junk; `CalculateLoyaltyDiscount(Order order, CustomerTier tier)` practically writes its own body, because descriptive names collapse the space of plausible completions. Write the signature you actually want before pausing for the suggestion." },
+        { "type": "paragraph", "text": "Steering input two: the intent comment. A one-line comment above the cursor describing what comes next is a mini-prompt: '// validate the request, returning all failures rather than stopping at the first' produces materially different (and better) code than no comment. For anything non-obvious, state edge cases in the comment — '// treat null and empty as no discount' — exactly like output constraints in Module 1. Delete or compress scaffolding comments after acceptance; keep the ones that still document intent." },
+        { "type": "paragraph", "text": "Steering input three: open tabs. Implementing `IInvoiceExporter`? Open the interface in a tab. Writing your fourth repository? Keep the best existing one open as an exemplar — Copilot imitates its structure, naming, and error handling with startling fidelity. This is the editor-native version of tutorial 4's context pack: contracts plus exemplar, supplied by tab management instead of pasting." },
+        { "type": "code", "language": "csharp", "title": "Intent comments steering a completion", "code": [
+          "// Parse a quantity string: range 1-999, whitespace tolerated,",
+          "// null/empty/non-numeric throws ArgumentException,",
+          "// out of range throws ArgumentOutOfRangeException.",
+          "public static int ParseQuantity(string input)",
+          "{",
+          "    // <- pausing here, Copilot proposes a body honoring the comment's rules.",
+          "    //    The comment IS the prompt: instruction + constraints in one place.",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "The rhythm: accept small, review always. Line-sized and block-sized acceptances stay reviewable in real time; whole-method acceptances get read before Tab, exactly as you'd review a colleague's paste. When a suggestion is close-but-wrong, accept then immediately correct — or reject and improve the steering (better name, sharper comment) rather than Tab-ing and hoping. Rejecting bad ghost text is one keystroke; debugging accepted bad ghost text is an afternoon." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Generating NUnit Tests and Documentation",
+      "content": [
+        { "type": "paragraph", "text": "Test generation is Copilot's most-loved workflow, and everything from tutorial 5 transfers. The chat route: select a method (or open its file) and use the /tests slash command — or better, a full chat instruction: 'Generate NUnit tests for ParseQuantity. Cases: happy paths, both sides of every boundary (0/1, 999/1000), null/empty/whitespace, non-numeric. [TestFixture], MethodName_Scenario_ExpectedResult names, Assert.That syntax, [TestCase] rows for boundaries.' The richer instruction is tutorial 5's context pack, typed into chat." },
+        { "type": "paragraph", "text": "The completion route is quieter but powerful: open your test file beside the code under test, write the fixture shell and one exemplar test in your style, then write just the name of the next test — `Calculate_NegativeTotal_ThrowsArgumentOutOfRange` — and let ghost text supply the body. Because your exemplar and the code under test are both in context, the generated bodies match your conventions and the real API. The oracle discipline is unchanged: behavior expectations should come from a spec (your test names encode it), and every generated suite faces the honesty review — read the assertions, sabotage the code, demand red." },
+        { "type": "paragraph", "text": "Documentation is the fastest win in the whole tool. Select a member and use /doc for XML documentation comments — or chat: 'Write /// docs for every public member: summary as purpose (not mechanism), params with meaning and units, returns, and each exception condition. Do not invent defaults or thread-safety claims.' The anti-invention clause survives from tutorial 5 because the failure mode survives: fluent docs stating behavior the code doesn't have. Fact-check every specific; then enjoy that documenting a class now takes minutes." },
+        { "type": "note", "style": "tip", "text": "Docs-from-tests works in the editor too: with a well-named test suite open in a tab, /doc output gets noticeably more precise about edge behavior — the tests are grounding it." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Refactoring, Quality, and Service Classes",
+      "content": [
+        { "type": "paragraph", "text": "Refactoring with Copilot runs through chat (or inline chat) on a selection, and tutorial 4's iron rule comes with it: say behavior-preserving, explicitly, every time. 'Refactor this method: extract the duplicated validation into a private helper. Behavior-preserving — identical outputs, exceptions, and side effects. Output only the changed code.' Small, named steps; tests green before and after; 'also fixed a bug I noticed' gets rejected and split into its own reviewed change. The /fix command handles the reverse case — diagnosing and correcting an actual defect — and its output gets the same scrutiny as any diagnosis from tutorial 3's debugging pattern." },
+        { "type": "paragraph", "text": "For quality improvement, replace adjectives with criteria, exactly as in tutorial 4: 'Improve readability: guard clauses instead of nested ifs, max two nesting levels, intention-revealing names, no boolean parameters. Keep behavior identical.' Copilot Chat applies named criteria well; 'make this better' produces churn. A strong habit is the review prompt: select a method you just wrote (with or without Copilot) and ask 'Review this against [criteria]; list issues with line references before changing anything' — the model as first-pass reviewer, findings before edits." },
+        { "type": "paragraph", "text": "Service classes are Copilot's natural scaffolding unit because your codebase already demonstrates the pattern. The workflow: open the interface to implement plus one exemplar service in tabs; write an intent comment block naming the service's responsibility and dependencies; write the class declaration and constructor signature; then let completions drive member by member, or ask chat to scaffold the skeleton first (tutorial 4's skeleton-first discipline, editor edition). With constructor injection visible in your exemplar, Copilot wires dependency injection idiomatically — including the registration line when you ask for it." },
+        { "type": "code", "language": "csharp", "title": "Steering a service class scaffold", "code": [
+          "// OrderArchiveService: moves closed orders older than a retention window",
+          "// to cold storage. Dependencies: IOrderRepository, IColdStorageClient,",
+          "// TimeProvider. Async throughout, CancellationToken on public methods,",
+          "// no exceptions swallowed. Follow the structure of CustomerExportService.",
+          "public sealed class OrderArchiveService : IOrderArchiveService",
+          "{",
+          "    // <- with the interface and CustomerExportService open in tabs,",
+          "    //    completions now propose constructor, fields, and members",
+          "    //    matching your codebase's conventions.",
+          "}"
+        ] }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Using Copilot Chat Effectively",
+      "content": [
+        { "type": "paragraph", "text": "Chat is where Module 1 skills transfer most directly — a chat message is just a prompt with your workspace attached. Effectiveness comes from three mechanics: scope (what code the question is about — a selection beats a file, a file beats vague reference), instruction quality (full anatomy: what to do, constraints, output form), and the right entry point for the job:" },
+        { "type": "table", "headers": ["Entry point", "Best for", "Example"], "rows": [
+          ["Slash commands (/explain, /tests, /fix, /doc)", "The four standard jobs, fast — purpose-built prompts under the hood", "Select method → /explain before modifying legacy code"],
+          ["Chat panel with instructions", "Anything needing constraints, criteria, or multi-step discussion", "The NUnit instruction from section 6; refactor requests with rules"],
+          ["Inline chat (at cursor)", "Localized edits where you want a diff in place", "'Add null checks for both parameters, throwing ArgumentNullException'"],
+          ["Follow-up turns", "Ask → Review → Improve inside the editor", "'Now handle the empty-list case; keep everything else unchanged'"]
+        ] },
+        { "type": "animation", "title": "A Copilot Chat working session", "intro": "The Module 1 patterns, running inside the editor.", "nodes": [
+          { "id": "sel", "label": "Select code", "sub": "scope the ask" },
+          { "id": "explain", "label": "/explain", "sub": "verify understanding" },
+          { "id": "ask", "label": "Instruct", "sub": "full anatomy" },
+          { "id": "review", "label": "Review diff", "sub": "before applying" },
+          { "id": "improve", "label": "Follow-up", "sub": "targeted fixes" }
+        ], "steps": [
+          { "highlight": ["sel"], "caption": "Select the exact code your question concerns — precise scope is the cheapest quality upgrade in chat." },
+          { "highlight": ["explain"], "caption": "Unfamiliar code? /explain first and verify the explanation — Explain → Generate → Refine, editor edition." },
+          { "highlight": ["ask"], "caption": "Instruct with full anatomy: task, constraints ('behavior-preserving', 'NUnit', criteria), and output form." },
+          { "highlight": ["review"], "caption": "Review the proposed change as a diff before applying — chat output is a draft, identical in status to any Module 1 output." },
+          { "highlight": ["improve"], "caption": "Follow up with targeted improvements, not re-rolls: 'also cover the negative case; don't touch the rest.' The loop, in your editor." }
+        ] },
+        { "type": "paragraph", "text": "Chat's underrated superpower is explanation-first work on legacy code: /explain on a selection, verify against the source, then modify — the tutorial 3 pattern with zero copy-paste friction. Its equally underrated trap is scope creep: long chat sessions accumulate stale context just like any conversation (tutorial 6's pollution), so start fresh threads per task and re-select code rather than assuming the chat remembers your current state." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Setup and the Surrounding Toolchain",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Visual Studio 2022: Copilot ships integrated in current versions — sign in with your GitHub account; completions and chat appear natively in the IDE.",
+          "VS Code: install the GitHub Copilot and Copilot Chat extensions; same sign-in, same two faces.",
+          "Plans: individual, business, and enterprise tiers differ in policy controls (telemetry, suggestion filtering, model options) — teams should review business-tier settings deliberately.",
+          "The deterministic gate is unchanged: compiler, Roslyn analyzers, .editorconfig, tests, and CI judge every accepted suggestion exactly as they judge typed code (tutorial 4's enforcement truth).",
+          "Keyboard essentials worth learning day one: accept (Tab), dismiss (Esc), cycle alternative suggestions, and the inline-chat shortcut — check your IDE's current keybindings, as they evolve.",
+          "Public-code filtering and IP settings exist at the organization level — know your team's policy before you rely on defaults."
+        ] },
+        { "type": "paragraph", "text": "One habit upgrades everything else: treat tab management as context management. Before a work session, open the interfaces and exemplar classes the task involves; close noise files. You are literally assembling Copilot's prompt — the developers who do this consciously stop being surprised by suggestion quality." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "The Daily Copilot Catalog",
+      "content": [
+        { "type": "table", "headers": ["Task", "Best mechanism", "Discipline that keeps it safe"], "rows": [
+          ["New method, clear intent", "Signature + intent comment → completion", "Review before Tab on anything block-sized"],
+          ["NUnit suite for a method", "Chat with the full instruction (cases, conventions)", "Tutorial 5 honesty review: assertions + sabotage"],
+          ["Understand unfamiliar code", "/explain on selection, then targeted questions", "Verify the explanation against source"],
+          ["Behavior-preserving refactor", "Chat/inline chat with explicit constraint", "Tests green before and after"],
+          ["XML documentation comments", "/doc or chat with anti-invention clause", "Fact-check every stated specific"],
+          ["Service class scaffold", "Tabs (interface + exemplar) + comment block + skeleton-first", "Review skeleton before filling members"],
+          ["Fix a diagnosed bug", "/fix or chat with the error + minimal context", "Confirm the diagnosis before applying (tutorial 3)"],
+          ["Boilerplate: DTOs, mappers, builders", "Completions with one exemplar open", "Spot-check field mappings — the classic silent error"]
+        ] },
+        { "type": "paragraph", "text": "The catalog's common thread: Copilot compresses the typing, never the judgment. Each row pairs a generation mechanism with the Module 1 discipline that makes it safe — and the pairs are not optional garnish; they are why some teams report large quality-neutral speedups while others report speed with a defect tax." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples in C#",
+      "content": [
+        { "type": "paragraph", "text": "A realistic completion session: the test-file pattern from section 6. You write the shell and one exemplar; Copilot writes the rest from names." },
+        { "type": "code", "language": "csharp", "title": "Test generation via completions — you write names, Copilot writes bodies", "code": [
+          "[TestFixture]",
+          "public class ParseQuantityTests",
+          "{",
+          "    // Exemplar test - handwritten, sets the style:",
+          "    [Test]",
+          "    public void Parse_ValidNumber_ReturnsValue()",
+          "    {",
+          "        int result = QuantityParser.ParseQuantity(\"42\");",
+          "        Assert.That(result, Is.EqualTo(42));",
+          "    }",
+          "",
+          "    // Now write ONLY the next test's name and pause:",
+          "    [Test]",
+          "    public void Parse_ValueBelowMinimum_ThrowsArgumentOutOfRange()",
+          "    {",
+          "        // <- ghost text proposes the body: correct exception type,",
+          "        //    boundary value \"0\", Assert.Throws pattern matching your exemplar.",
+          "    }",
+          "",
+          "    // Boundary table? Write the attribute rows and pause after the signature:",
+          "    [TestCase(\"1\", 1)]",
+          "    [TestCase(\"999\", 999)]",
+          "    public void Parse_BoundaryValues_ReturnsParsed(string input, int expected)",
+          "    {",
+          "        // <- body follows from the rows + exemplar.",
+          "    }",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "And the chat-side instruction that produces a compliant service skeleton — note it is tutorial 4's scaffolding template, typed where the workspace supplies the contracts:" },
+        { "type": "code", "language": "csharp", "title": "A chat instruction for skeleton-first service scaffolding", "code": [
+          "/*  Paste into Copilot Chat with IOrderArchiveService and",
+          "    CustomerExportService open in editor tabs:",
+          "",
+          "    Scaffold OrderArchiveService implementing IOrderArchiveService.",
+          "    Skeleton ONLY: fields, constructor (constructor injection),",
+          "    method stubs with XML docs and TODO comments - no logic yet.",
+          "    Conventions: async suffix, CancellationToken on public methods,",
+          "    match the structure of CustomerExportService.",
+          "    Then wait - I will review before we fill any method.       */"
+        ] },
+        { "type": "note", "style": "info", "text": "Both examples show the same principle from opposite sides: completions are steered by what you write and open; chat is steered by what you instruct and select. Both are prompts; both outputs are drafts." }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step-by-Step: A Service Class, End to End, with Copilot",
+      "content": [
+        { "type": "paragraph", "text": "One complete feature — an EmailDigestService that summarizes a user's weekly activity — built with every mechanism in this tutorial. Replay it in your own project." },
+        { "type": "list", "style": "numbered", "items": [
+          "Stage the context: open IEmailDigestService (the interface), your cleanest existing service (exemplar), and the entities it touches. Close unrelated tabs. This is prompt assembly.",
+          "Skeleton via chat: the section-11 instruction — skeleton only, constructor injection, conventions named, 'wait for my review'. Review the skeleton: naming, dependencies, cancellation. Fix with one follow-up.",
+          "Fill member by member with completions: intent comment above each method stating rules and edge cases, then let ghost text propose; accept block by block, reviewing each. Close-but-wrong suggestions get corrected immediately, not Tab-ed past.",
+          "Quality pass via chat: select the completed class — 'Review against: guard clauses, max 2 nesting levels, no swallowed exceptions, intention-revealing names. List issues with line references first.' Apply the fixes you agree with.",
+          "Tests: new test file, exemplar test handwritten, then names-only generation for the case list you designed (boundaries, empty activity, null user). Run them — investigate failures in both directions.",
+          "Honesty check: sabotage the digest date-range logic; demand red; restore. The suite has earned its green (tutorial 5, unchanged).",
+          "Documentation: /doc on the public surface with the anti-invention clause; fact-check the specifics; commit code, tests, and docs together.",
+          "Retrospective (30 seconds): which steering worked, which suggestions misfired, and one library entry if a chat instruction proved reusable (tutorial 7's capture habit)."
+        ] },
+        { "type": "note", "style": "tip", "text": "Elapsed time for an experienced Copilot user: roughly half of hand-typing it — with identical review coverage. The saved half came from typing, not thinking. That's the deal, and it's a good one." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Suggestions inherit every Module 1 failure mode: hallucinated APIs (the compiler catches the loud ones; review catches the wrong-overload quiet ones), stale idioms from training-data lag, and confident wrong logic. The review bar does not move because the code appeared in your editor.",
+          "Context limits are real: Copilot sees your open editor surface, not your whole repository or your architecture docs. Suggestions touching systems it can't see (your auth flow, your conventions in unopened files) are pattern guesses.",
+          "Quality varies with codebase circumstance: strong conventions and exemplars → strong suggestions; chaotic legacy → chaotic suggestions. Copilot amplifies what it sees.",
+          "Autocomplete-acceptance drift is the tool-specific risk: hundreds of small Tab decisions a day erode review vigilance. Counter it structurally — small acceptances, tests, analyzers, and PR review unchanged.",
+          "Chat sessions accumulate stale context like any conversation — fresh thread per task, re-select code explicitly.",
+          "Organizational policies (telemetry, public-code filtering, IP settings) vary by plan — know yours before relying on defaults, especially for proprietary code.",
+          "Understanding debt applies doubly: accepting code you couldn't have written is borrowing (tutorial 7) — use /explain on anything you accept but don't fully own."
+        ] },
+        { "type": "note", "style": "warning", "text": "API-accuracy disclosure: Copilot's features, UI surfaces, slash commands, and keybindings evolve quickly across Visual Studio and VS Code versions — the workflows described (completions, chat, /explain, /tests, /fix, /doc, inline chat) are stable in concept, but verify current mechanics against the official GitHub Copilot documentation. All C# shown is standard NUnit/C# with no version-sensitive APIs." }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices and Common Mistakes",
+      "content": [
+        { "type": "paragraph", "text": "The habits of high-quality Copilot use:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Manage tabs as context: interfaces and exemplars open, noise closed — before you start typing.",
+          "Steer with names and intent comments; state edge cases where you'd state output constraints.",
+          "Accept small and review always; reject-and-resteer beats accept-and-debug.",
+          "Say behavior-preserving on every refactor; keep tests green across each step.",
+          "Give tests the full instruction (cases + conventions) and the honesty review after.",
+          "Use /explain before modifying anything unfamiliar — and on anything you accepted but couldn't have written.",
+          "Fresh chat thread per task; select exactly the code your question concerns.",
+          "Let the deterministic gate (compiler, analyzers, tests, CI) judge everything — unchanged."
+        ] },
+        { "type": "paragraph", "text": "The mistakes that turn a multiplier into a liability:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Tab-ing through block after block unread — speed now, defect tax later.",
+          "Working with vague names and no comments, then blaming the suggestions.",
+          "Asking chat to 'make it better' instead of naming criteria.",
+          "Accepting refactors that 'also fixed' something — unreviewed behavior change.",
+          "Trusting generated tests because they're green, skipping assertions-and-sabotage.",
+          "Treating /doc output as fact without checking stated defaults and exceptions.",
+          "One eternal chat thread carrying stale context across unrelated tasks.",
+          "Letting Copilot code merge on a lighter review than human code — the bar is the point (tutorial 4, always)."
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz",
+      "items": [
+        { "number": 1, "question": "What are GitHub Copilot's two main modes?", "options": { "A": "Compiler and debugger", "B": "Inline code completions (ghost text) and Copilot Chat (panel + inline chat)", "C": "Terminal and browser", "D": "Test runner and profiler" }, "correctAnswer": "B", "explanation": "Completions keep you in flow — gray ghost text at the cursor, Tab to accept. Chat handles multi-step, instruction-heavy work with your code as context. Same model family underneath; different ergonomics for different jobs." },
+        { "number": 2, "question": "What context does Copilot primarily use for inline completions?", "options": { "A": "Your entire git repository and its history", "B": "The internet in real time", "C": "The current file and your other open editor tabs", "D": "Only the current line" }, "correctAnswer": "C", "explanation": "Copilot's implicit prompt is your visible editor surface — current file most heavily, plus open tabs. This is why tab management IS context management: the interface and an exemplar open in tabs measurably change suggestion quality." },
+        { "number": 3, "question": "Why does 'CalculateLoyaltyDiscount(Order order, CustomerTier tier)' get better completions than 'ProcessData(object input)'?", "options": { "A": "Longer names use more tokens", "B": "Descriptive names collapse the space of plausible completions — the signature itself is context", "C": "Copilot prefers camelCase", "D": "It doesn't; names are irrelevant" }, "correctAnswer": "B", "explanation": "The model completes patterns from context, and names are the densest context you write. A precise signature makes the intended body statistically obvious; a vague one invites generic filler. Good naming got a productivity payoff." },
+        { "number": 4, "question": "What is an intent comment?", "options": { "A": "A comment explaining old code", "B": "A TODO marker", "C": "A comment written above the cursor describing what the next code should do — a mini-prompt steering the completion", "D": "A licensing header" }, "correctAnswer": "C", "explanation": "'// validate the request, returning all failures rather than stopping at the first' is instruction + constraints, Module 1 style. State edge cases there exactly as you'd state output constraints. Compress or delete pure scaffolding comments after acceptance." },
+        { "number": 5, "question": "What's the recommended rhythm for accepting completions?", "options": { "A": "Accept everything; fix at code review", "B": "Accept small (line/block), review always; read whole-method suggestions before Tab; reject-and-resteer when close-but-wrong", "C": "Never accept anything", "D": "Accept only on Fridays" }, "correctAnswer": "B", "explanation": "Small acceptances stay reviewable in real time. Rejecting bad ghost text costs one keystroke; debugging accepted bad ghost text costs an afternoon. Every Tab is a review decision — the discipline that separates multiplier from liability." },
+        { "number": 6, "question": "Which slash command generates tests for selected code?", "options": { "A": "/explain", "B": "/tests", "C": "/doc", "D": "/fix" }, "correctAnswer": "B", "explanation": "/tests runs a purpose-built test-generation prompt. For serious suites, a full chat instruction (cases, boundaries, NUnit conventions, naming) beats the bare command — it's tutorial 5's context pack typed into chat." },
+        { "number": 7, "question": "In the names-only test generation pattern, why does writing 'Parse_ValueBelowMinimum_ThrowsArgumentOutOfRange' produce a correct body?", "options": { "A": "Copilot runs the code first", "B": "The name encodes the spec, and the exemplar test plus code under test are in context — the body follows the demonstrated pattern", "C": "NUnit requires it", "D": "It's random luck" }, "correctAnswer": "B", "explanation": "The test name is a one-line behavior spec; the exemplar sets style; the open code under test grounds the API. Name-driven generation is the completion-side version of the two-turn protocol — you design cases, Copilot types bodies." },
+        { "number": 8, "question": "Generated NUnit tests are all green on first run. Per tutorials 5 and 8, what's their status?", "options": { "A": "Done — green is green", "B": "Drafts pending the honesty review: read assertions against the spec, sabotage the code, demand red", "C": "Automatically correct because Copilot saw the code", "D": "Invalid — generated tests can't be trusted ever" }, "correctAnswer": "B", "explanation": "Copilot changes where tests come from, not what earns trust. Assertion-free and tautological tests look identical to good ones while green. The sabotage check — break the code, watch the right tests fail — is unchanged." },
+        { "number": 9, "question": "What must every Copilot refactoring request state explicitly?", "options": { "A": "The programming language", "B": "That the change must be behavior-preserving — identical observable behavior, exceptions, and side effects", "C": "A politeness marker", "D": "The file's creation date" }, "correctAnswer": "B", "explanation": "Unconstrained, models 'improve' behavior while restructuring — silent bug 'fixes' that are unreviewed behavior changes. State the constraint, refactor in small named steps, and let tests green-before/green-after prove it held." },
+        { "number": 10, "question": "What is the /doc command's output, and what discipline applies to it?", "options": { "A": "A README; no review needed", "B": "XML documentation comments — with fact-checking of every stated default, range, and exception, plus an anti-invention clause in richer requests", "C": "External wiki pages", "D": "Test documentation only" }, "correctAnswer": "B", "explanation": "/doc drafts /// docs fast; the tutorial 5 failure mode (fluent docs stating behavior the code doesn't have) rides along. 'Do not invent defaults or thread-safety claims' plus verification keeps your API docs honest." },
+        { "number": 11, "question": "What's the recommended setup before scaffolding a service class with Copilot?", "options": { "A": "Close all files for a clean slate", "B": "Open the interface to implement and one exemplar service in tabs; write an intent comment block; skeleton first", "C": "Disable the compiler", "D": "Write the tests afterward only" }, "correctAnswer": "B", "explanation": "Tabs supply the contracts and conventions (tutorial 4's context pack, editor edition); the comment block states responsibility and rules; skeleton-first gives you a cheap review checkpoint before any logic exists." },
+        { "number": 12, "question": "When is Copilot Chat the right tool over inline completions?", "options": { "A": "Never — completions are strictly better", "B": "For instruction-heavy or multi-step work: explanations, refactors with constraints, test suites with case lists, discussions", "C": "Only for Python", "D": "Only when completions are disabled" }, "correctAnswer": "B", "explanation": "Completions excel in-flow; chat excels when the task needs full prompt anatomy — constraints, criteria, follow-up turns. The skill split: steer completions with names/comments/tabs; steer chat with selections and instructions." },
+        { "number": 13, "question": "Why start a fresh chat thread per task?", "options": { "A": "Threads have a message limit", "B": "Long sessions accumulate stale context that conditions later answers — conversation pollution, editor edition", "C": "It resets your Copilot quota", "D": "Old threads are deleted anyway" }, "correctAnswer": "B", "explanation": "Tutorial 6's pollution principle transfers: earlier turns (including wrong ones and outdated code states) keep influencing responses. Fresh thread per task, re-select the current code explicitly." },
+        { "number": 14, "question": "A completion calls 'repository.FindByIdOrDefault()' which doesn't exist. What happened and what's the right response?", "options": { "A": "NUnit removed the method", "B": "A hallucinated API — pattern completion invented a plausible member. Reject it, and open the real repository type in a tab so the actual API is in context", "C": "You must implement that method now", "D": "Copilot accessed a newer version of your code" }, "correctAnswer": "B", "explanation": "Hallucinated members usually signal missing context: the real type wasn't visible. The compiler catches loud ones; the fix is steering — get the actual contract into the editor surface. (Quiet variants — real method, wrong semantics — need review.)" },
+        { "number": 15, "question": "What is the correct review bar for Copilot-generated code at merge time?", "options": { "A": "Lighter — a machine wrote it, so style issues don't apply", "B": "None — the compiler is enough", "C": "Identical to human code: review, tests, analyzers, CI — the bar is the point", "D": "Heavier by mandate: three reviewers minimum" }, "correctAnswer": "C", "explanation": "The moment 'the AI wrote it' lightens review, quality compounds downward — generation volume is high and errors are systematically plausible-looking. Attention shifts (edge cases, invented APIs, convention drift) but the bar does not move." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam Questions",
+      "items": [
+        { "number": 1, "question": "Describe Copilot's two modes and map each to the Module 1 concepts it embodies.", "modelAnswer": "Inline completions offer ghost text at the cursor from the implicit prompt of your editor surface — current file, open tabs, names, comments. Module 1 mapping: intent comments are instructions; descriptive names and open contracts are context/grounding; an exemplar in a tab is few-shot prompting; each acceptance is the review step of Ask → Review → Improve. Copilot Chat is explicit prompting with workspace attachment: slash commands are purpose-built prompt templates; a good chat message carries full anatomy (instruction, constraints, output form); follow-up turns are targeted improvement; /explain-first on legacy code is Explain → Generate → Refine. Same machinery as Module 1 — the prompt is simply assembled from the workspace instead of typed into a box." },
+        { "number": 2, "question": "Explain 'tab management is context management' and its practical protocol.", "modelAnswer": "Copilot's completion context is dominated by the current file and open editor tabs — it does not see your whole repository. Therefore the tab set IS the prompt's context section, and curating it is the highest-leverage steering act. Protocol: before a task, open the interface(s) being implemented, one exemplar class demonstrating house conventions, and the types the new code touches; close unrelated noisy files (their patterns leak into suggestions); for test writing, open the code under test beside the test file; when a hallucinated member appears, treat it as a context smell — the real contract wasn't visible — and open it. The result is the tutorial 4 context pack (contracts + exemplar + constraints) supplied through the editor instead of pasted into a prompt." },
+        { "number": 3, "question": "Detail the three steering inputs for completions with examples, and the acceptance rhythm that keeps quality high.", "modelAnswer": "(1) Names: signatures are dense context — CalculateLoyaltyDiscount(Order, CustomerTier) makes the intended body statistically obvious where ProcessData(object) invites filler; write the real signature before pausing. (2) Intent comments: a line above the cursor stating what comes next plus edge rules — '// treat null and empty as no discount' — is instruction + output constraints in editor form; compress scaffolding comments after acceptance. (3) Open tabs: contracts and exemplars in view ground the API and conventions. Rhythm: accept line/block-sized pieces with real-time review; read whole-method proposals fully before Tab; when close-but-wrong, either accept-and-correct immediately or reject-and-resteer (better name, sharper comment) — never Tab-and-hope, because rejecting costs a keystroke and debugging costs an afternoon." },
+        { "number": 4, "question": "Present both Copilot test-generation workflows (chat and completion-driven) and the unchanged review discipline.", "modelAnswer": "Chat route: select the method or open its file; either /tests for speed or, better, a full instruction carrying tutorial 5's context pack — required cases (happy, both sides of each boundary, null/empty, failure paths), NUnit conventions ([TestFixture], MethodName_Scenario_ExpectedResult, Assert.That, [TestCase] rows). Completion route: test file open beside code under test; handwrite the fixture shell and one exemplar test setting style; then write only each next test's name — the name encodes the spec, and ghost text supplies a body matching exemplar and real API; boundary tables via [TestCase] rows then the signature. Review unchanged from tutorial 5: expectations must trace to spec (names carry it), assertions read against that spec, sabotage the code and demand red, coverage as gap-map only. Green from Copilot has exactly the trust of green from anywhere: none until earned." },
+        { "number": 5, "question": "How do refactoring and quality-improvement requests work in Copilot Chat, and which tutorial 4 rules ride along?", "modelAnswer": "Mechanics: select the code, instruct via chat or inline chat (diff in place), review the proposed change before applying, follow up with targeted turns. Riding rules from tutorial 4: the iron rule — state 'behavior-preserving: identical outputs, exceptions, side effects' every time, since models silently 'fix' perceived bugs while restructuring; small named steps — one smell per request ('extract the duplicated validation'), not 'clean this up'; diff-sized output — 'only the changed code'; tests green before and after each step as the proof; 'also fixed' improvements rejected and split into reviewed changes. Quality requests replace adjectives with named criteria (guard clauses, nesting ≤2, no boolean parameters), and the review-first variant — 'list issues with line references before changing anything' — turns Copilot into a findings-first reviewer." },
+        { "number": 6, "question": "Design the full service-class scaffolding workflow with Copilot, from context staging to filled implementation.", "modelAnswer": "(1) Stage context: open the interface to implement, one exemplar service (best current conventions), and touched entity types; close noise. (2) Intent comment block above the class: responsibility, dependencies, rules (async suffix, CancellationToken, no swallowed exceptions), 'follow the structure of {exemplar}'. (3) Skeleton first via chat: fields, constructor with dependency injection, stubs with XML docs and TODOs, no logic, 'wait for my review' — the tutorial 4 checkpoint before behavior exists. (4) Review the skeleton: naming, dependency set, cancellation plumbing; fix via one follow-up. (5) Fill member-by-member with completions, each method preceded by an intent comment with its rules and edge cases; accept block-wise with review. (6) Quality pass via criteria-based chat review; (7) tests via the names-only pattern plus honesty check; (8) /doc with anti-invention clause, fact-checked. DI registration line generated on request at the end." },
+        { "number": 7, "question": "Compare the four chat entry points (slash commands, chat panel, inline chat, follow-ups) and give the selection logic.", "modelAnswer": "Slash commands (/explain, /tests, /fix, /doc): purpose-built prompts for the four standard jobs — fastest path when the default framing suffices. Chat panel with full instructions: anything needing constraints, criteria, case lists, or discussion — the richer the requirements, the more the panel wins over the bare command. Inline chat: localized edits where seeing the diff in place matters ('add null checks throwing ArgumentNullException') — lowest friction for surgical changes. Follow-up turns: the improvement loop — targeted fixes ('also cover the empty case; touch nothing else') rather than re-rolls. Selection logic: default to the slash command; upgrade to instructed chat when you'd need to add constraints; use inline for point edits; and always continue via follow-ups instead of restarting, until the thread's context goes stale — then fresh thread." },
+        { "number": 8, "question": "Explain the /explain-first discipline for legacy code and for accepted-but-not-understood suggestions.", "modelAnswer": "Legacy: before modifying unfamiliar code, select it and /explain; verify the explanation against the source (spot-check specific claims); then request changes grounded in that verified understanding — Explain → Generate → Refine with zero copy-paste friction. A model that just traced the code correctly is markedly less likely to break it. Accepted suggestions: tutorial 7's understanding-debt rule applies doubly in the editor, where accepting is one keystroke — any code you accepted but couldn't have written yourself gets /explain until you can walk it unaided; otherwise you're borrowing capability you'll be asked to repay at debugging time, in review, or in an incident. The habit also counteracts acceptance drift: explaining what you accept keeps the review muscle engaged." },
+        { "number": 9, "question": "Catalog the Copilot-specific failure modes beyond the standard Module 1 set, with mitigations.", "modelAnswer": "(1) Acceptance drift: hundreds of daily Tab decisions erode vigilance — mitigate structurally (small acceptances, analyzers, tests, unchanged PR review), not by willpower. (2) Context blindness: suggestions about systems outside the editor surface (auth flow, conventions in unopened files) are pattern guesses wearing your naming — open the real code or distrust. (3) Codebase amplification: Copilot imitates what it sees; chaotic legacy in tabs yields chaotic suggestions — curate exemplars deliberately. (4) Stale chat context: threads accumulate outdated code states — fresh thread per task, re-select. (5) Editor-embedded overtrust: code appearing in your IDE feels vetted in a way pasted chat output doesn't — the bar is identical. Plus the inherited set: hallucinated APIs (compiler + tabs with real contracts), stale idioms (pin versions in comments, modern exemplars), quiet wrong logic (review + tests, always)." },
+        { "number": 10, "question": "A team adopts Copilot and velocity rises while defect rates also rise. Diagnose likely causes and prescribe the recovery.", "modelAnswer": "Diagnosis: speed harvested without the paired disciplines — the catalog's rows used without their safety column. Likely specifics: block-level Tab-ing without reading (acceptance drift); generated tests trusted on green without assertion/sabotage review (theatrical coverage); refactors accepted with silent behavior changes ('also fixed'); /doc output shipped unfact-checked; review bar quietly lowered for 'AI code'. Prescription: (1) re-anchor the review bar publicly — identical for all code; (2) small-acceptance norm plus /explain-what-you-accept for anything non-trivial; (3) tutorial 5 honesty checks required before generated suites merge; (4) behavior-preserving phrasing and green-before/after as refactor policy; (5) analyzers/CI tightened to catch convention drift mechanically; (6) measure recovery by escaped-defect rate and review findings, not velocity. Frame: Copilot compresses typing, never judgment — the defect tax is the judgment shortfall, and it's recoverable by process." },
+        { "number": 11, "question": "Explain how the names-only test pattern constitutes a spec-driven workflow, and where its oracle comes from.", "modelAnswer": "In the pattern, the human writes the case list as test names — Parse_ValueBelowMinimum_ThrowsArgumentOutOfRange encodes scenario and expected outcome — before any body exists. That name list is the behavior specification: it is authored from intent (what the method should do), not derived from the implementation, so the oracle is spec-side even though Copilot generates the bodies with the implementation in view. The exemplar test contributes conventions, not expectations. Residual risk: a generated body can still assert implementation-derived values within a correctly-named test (e.g., wrong boundary constant), which is why assertion reading and the sabotage check remain — the name says what should be tested; review confirms the body actually tests it. The pattern is tutorial 5's two-turn protocol compressed: turn one is your name list, turn two is ghost text." },
+        { "number": 12, "question": "What organizational settings and policies should a team review before rolling out Copilot, and why?", "modelAnswer": "(1) Plan tier and its controls: business/enterprise tiers expose policy management absent from individual plans. (2) Telemetry and data handling: what prompt/suggestion data leaves the org and under what retention — align with the company's AI usage policy (tutorial 6's discipline at org scale). (3) Public-code filtering: settings governing suggestions matching public code — an IP-risk decision to make consciously, not by default. (4) Scope of enablement: which repos/projects — proprietary-sensitive areas may need explicit decisions. (5) The complement policy: statement that Copilot output faces unchanged review/tests/CI, so the tool arrives welded to the discipline. (6) Training expectation: the Module 1 skills (context, review, honesty checks) determine whether the rollout yields speedup or defect tax — budget the enablement, not just the licenses. Settings evolve with the product; review against current documentation at rollout and periodically." },
+        { "number": 13, "question": "Argue why documentation generation is 'the fastest win in the whole tool', and the discipline that keeps it honest.", "modelAnswer": "Why fastest: XML documentation is high-volume, rigidly structured, fully grounded (the member is right there), and chronically unwritten — the perfect generation profile (tutorial 5's argument, minus even the copy-paste friction: /doc on a selection). A class's public surface gets IntelliSense-quality docs in minutes, and the same comments feed DocFX and package docs downstream — one artifact, three surfaces. The discipline: the hallucination profile is unchanged — fluent docs stating invented defaults, ranges, or thread-safety claims read identically to true ones and carry your API's authority. So richer requests include the anti-invention clause ('document only visible or stated behavior'), every stated specific gets fact-checked against the code, and docs-from-tests (test suite open in a tab) grounds edge-behavior claims in verified examples. Regeneration binds to the PR that changes the member, or drift resumes." },
+        { "number": 14, "question": "How should a developer allocate work between Copilot completions, Copilot Chat, and a standalone chat model? Give the decision framework.", "modelAnswer": "Completions: in-flow typing where context is the workspace — method bodies, boilerplate, tests-by-name; steering is names/comments/tabs; wins on friction. Copilot Chat: code-anchored tasks needing instructions — explain/refactor/test/doc with selections, constraints, and follow-ups; wins whenever the task references 'this code here'. Standalone chat: work where the codebase isn't the context — architecture reasoning, learning (tutorial 7's ladder), prompt drafting for application templates, long-form analysis; also anything needing conversation shapes Copilot's UX doesn't fit (multi-artifact sequences). Decision shortcuts: if you'd paste code into the standalone chat, use Copilot Chat instead (it has the code); if you'd open no code at all, standalone; if you're mid-keystroke, completions. All three share one review bar and one privacy rule set — the surface changes, the discipline doesn't." },
+        { "number": 15, "question": "Scenario: you must add a feature to an unfamiliar legacy module by Friday, with Copilot as your only AI tool. Prescribe the complete workflow.", "modelAnswer": "Day 1 — understand: open the module's key files; /explain on each central class, verifying claims against source (layered explanation, tutorial 4); targeted chat questions for the paths your feature touches ('what happens when X is null here?'); risk inventory request ('list anything fragile or order-dependent'). Day 2 — pin behavior: characterization tests via the names-only pattern on the methods you'll modify (names from observed current behavior), honesty-checked, labeled as stability protection. Day 3 — design + skeleton: intent comment block for the change; skeleton-first via chat with the module's least-bad class as exemplar; review the skeleton against the module's conventions. Day 4 — implement: member-by-member completions with edge-case intent comments; behavior-preserving phrasing on any touched existing code; tests green after every step; spec-derived tests for the new behavior. Day 5 — harden: criteria-based review pass via chat; /doc on changed public surface, fact-checked; full suite + analyzers; PR with unchanged review bar, flagging the characterization suite for reviewers. Throughout: /explain anything accepted-but-not-owned; fresh chat threads per phase; the compiler and tests as continuous judges." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Copilot's two faces", "back": "Completions: ghost text at the cursor, Tab to accept — in-flow. Chat: panel + inline chat with your code as context — instruction-heavy work." },
+        { "number": 2, "front": "Completion context", "back": "Current file (heaviest) + open editor tabs. NOT your whole repo. Tab management IS context management — open contracts and exemplars, close noise." },
+        { "number": 3, "front": "Three completion steering inputs", "back": "1) Descriptive names (signatures are dense context). 2) Intent comments (instruction + edge rules above the cursor). 3) Open tabs (contracts + exemplar)." },
+        { "number": 4, "front": "Intent comment", "back": "'// validate request, return ALL failures, treat null as empty' — a mini-prompt above the cursor. Output constraints, editor edition." },
+        { "number": 5, "front": "Acceptance rhythm", "back": "Accept small, review always. Read whole-method proposals before Tab. Close-but-wrong → correct immediately or reject-and-resteer. Never Tab-and-hope." },
+        { "number": 6, "front": "The four slash commands", "back": "/explain (understand), /tests (generate tests), /fix (diagnose + correct), /doc (XML docs). Purpose-built prompts; upgrade to full chat instructions when you need constraints." },
+        { "number": 7, "front": "Names-only test pattern", "back": "Exemplar test handwritten → write only the next test's NAME → ghost text supplies the body. The name list is your spec; tutorial 5's two-turn protocol, compressed." },
+        { "number": 8, "front": "Generated test trust", "back": "Unchanged from tutorial 5: read assertions against spec, sabotage the code, demand red. Green from Copilot earns exactly nothing until checked." },
+        { "number": 9, "front": "Copilot refactor rules", "back": "Say 'behavior-preserving' explicitly, every time. One named smell per request. Diff-sized output. Tests green before and after. Reject 'also fixed' extras." },
+        { "number": 10, "front": "Service class scaffold setup", "back": "Tabs: interface + exemplar service. Intent comment block: responsibility, dependencies, rules. Skeleton-first via chat, review, then fill member-by-member." },
+        { "number": 11, "front": "/doc discipline", "back": "Fast /// docs — with tutorial 5's rules: anti-invention clause, fact-check every default/range/exception, docs-from-tests for edge precision." },
+        { "number": 12, "front": "Chat effectiveness trio", "back": "Scope (select exactly the code), instruction quality (full anatomy), right entry point (slash / panel / inline / follow-ups)." },
+        { "number": 13, "front": "Fresh thread per task", "back": "Chat sessions accumulate stale code states and wrong turns — conversation pollution, editor edition. New task, new thread, re-select code." },
+        { "number": 14, "front": "Hallucinated API in a suggestion", "back": "Pattern completion invented a plausible member — usually means the real contract wasn't in context. Reject; open the actual type in a tab; compiler catches the loud ones." },
+        { "number": 15, "front": "Acceptance drift", "back": "The tool-specific risk: hundreds of Tab decisions erode review vigilance. Counter structurally: small acceptances, /explain-what-you-accept, analyzers, unchanged PR bar." },
+        { "number": 16, "front": "The Copilot deal", "back": "It compresses typing, never judgment. Half the time, identical review coverage — that's the win. Speed without the paired disciplines = defect tax." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions & Answers",
+      "items": [
+        { "number": 1, "question": "How do you get consistently good suggestions out of GitHub Copilot?", "answer": "By treating my editor state as a prompt. Three steering inputs do most of the work: descriptive names — a precise signature collapses the space of plausible completions; intent comments — a line above the cursor stating what comes next and its edge rules; and tab management — the interface I'm implementing and one exemplar class open, noise closed, because Copilot's context is the visible editor surface, not the repo. With those three, suggestions go from tutorial-grade filler to code that fits our conventions. It's Module 1 prompt engineering — context, instruction, constraints — expressed through editor mechanics." },
+        { "number": 2, "question": "Walk me through your acceptance discipline for completions.", "answer": "Accept small, review always. Line and block-sized suggestions I can review in real time as I accept; whole-method ghost text gets read fully before Tab, same as reviewing a colleague's paste. When a suggestion is close-but-wrong, I either accept and immediately correct, or reject and improve my steering — sharper name, better comment — because rejecting costs one keystroke while debugging accepted junk costs an afternoon. And anything I accept that I couldn't have written myself gets /explain until I can walk it unaided — that's the understanding-debt rule; the editor's low-friction accept makes it easier to borrow than anywhere else." },
+        { "number": 3, "question": "How do you use Copilot for unit testing?", "answer": "Two routes, one discipline. Chat route for full suites: an instruction carrying the case list — happy paths, both sides of every boundary, null and empty, failure paths — plus NUnit conventions and naming. Completion route for flow: test file open beside the code under test, one handwritten exemplar test setting style, then I write only each next test's name — the name encodes the spec — and ghost text supplies bodies matching my conventions and the real API. The discipline is tutorial-5 unchanged: expectations trace to intent, I read the assertions, and I sabotage the code to watch the right tests fail before the suite earns its green. Copilot changes where tests come from, not what makes them trustworthy." },
+        { "number": 4, "question": "What's your refactoring workflow with Copilot?", "answer": "Selection plus chat, under the iron rule: every request says 'behavior-preserving — identical outputs, exceptions, side effects' explicitly, because unconstrained models fix perceived bugs mid-refactor, which is an unreviewed behavior change. One named smell per request — 'extract the duplicated validation' — with diff-sized output so review stays tractable, and 'don't fix anything else; list observations separately'. Tests green before and after every step; on legacy code, characterization tests first if coverage is thin. Inline chat when I want the diff in place for surgical edits. The suggestion restructures; the tests prove nothing else moved." },
+        { "number": 5, "question": "Copilot suggests an API call that doesn't exist. What's happening and what do you do?", "answer": "That's a hallucinated API — pattern completion filling a gap with a statistically plausible member, and it's usually my fault in a specific way: the real contract wasn't in Copilot's context. So beyond rejecting the suggestion, I fix the steering — open the actual repository or client type in a tab so the true API surface is visible, and suggestions snap to reality. The compiler catches the loud variants; the quiet ones — a real method used with wrong semantic assumptions, or a wrong overload — are why review and tests don't relax. I treat every invented member as a context smell first, a model failure second." },
+        { "number": 6, "question": "How do you decide between Copilot completions, Copilot Chat, and a separate chat model?", "answer": "By where the context lives and how much instruction the task needs. Mid-keystroke with workspace context — completions, steered by names, comments, tabs. Task about specific code needing constraints or discussion — Copilot Chat with a precise selection: explain, refactor with rules, test suites with case lists; the shortcut is, if I'd be pasting code into a chat window, Copilot Chat already has the code. No code context at all — architecture thinking, learning, drafting application prompt templates — a standalone chat fits better. One constant across all three: identical review bar, identical privacy rules. The surface changes; the discipline doesn't." },
+        { "number": 7, "question": "How does Copilot change code review on your team?", "answer": "The bar doesn't move; the attention shifts. Generated code fails in characteristic ways — plausible invented APIs, edge cases the steering never mentioned, silent convention drift, refactors that 'also fixed' something — so reviewers probe those specifically. What we refuse to do is lighten review because 'the AI wrote it': generation volume is high and its errors are systematically plausible-looking, so a lighter bar compounds quality downward exactly when throughput rises. We also lean harder on the deterministic gate — analyzers and CI tightened to catch drift mechanically — and generated tests carry proof of the honesty check before they count as coverage. Copilot compresses typing; review remains where judgment lives." },
+        { "number": 8, "question": "What's the /explain command's role in your daily work?", "answer": "It's my highest-frequency command, in two roles. Legacy-first: before modifying unfamiliar code, /explain on the selection, verify the claims against source, then request changes — Explain-Generate-Refine with zero friction, and a model that just traced the code correctly is far less likely to break it. Debt control: anything I accepted but couldn't have written gets /explain until I own it — otherwise I'm borrowing capability that gets margin-called at debugging time or in design discussions. There's a third, smaller role: onboarding — walking a new teammate through a subsystem with /explain as the first draft of the tour, verified as we go. It's the cheapest understanding money can't buy." },
+        { "number": 9, "question": "Does Copilot make junior developers better or worse?", "answer": "It amplifies the direction they're already pointed. A junior with active habits — reading every acceptance, /explain-ing what they don't own, writing intent comments that force them to articulate the spec — learns faster than any previous generation, because they see idiomatic patterns constantly with instant feedback. A junior in passive mode — Tab-ing through blocks under deadline pressure — accumulates understanding debt at unprecedented speed while their ticket velocity looks great, and the debt surfaces brutally in incidents and design discussions. So the tool isn't the variable; the usage mode is. Team-side, we make the active mode structural: explain-before-merge norms, small-acceptance culture, and mentoring that treats Copilot fluency plus code ownership as one skill, not a tradeoff." },
+        { "number": 10, "question": "How do you scaffold a new service class with Copilot?", "answer": "Context first: the interface to implement and our best exemplar service open in tabs, noise closed — that's the contract and the conventions in Copilot's view. Then an intent comment block above the class: responsibility, dependencies, rules like async suffixes and cancellation tokens, 'follow the structure of CustomerExportService'. Skeleton-first via chat: fields, constructor injection, stubs with docs and TODOs, no logic, wait for review — cheap checkpoint before behavior exists. After I approve the skeleton, member-by-member fills via completions, each with its own edge-case comment; then a criteria-based quality pass, tests via names-only generation with the honesty check, and /doc fact-checked. It's tutorial 4's scaffolding workflow with the context pack supplied by tabs instead of pasting." },
+        { "number": 11, "question": "What privacy or policy considerations come with Copilot at work?", "answer": "The tutorial 6 rules, plus org-level settings. Personal discipline: secrets never appear in code I'm editing while suggestions flow — connection strings live in user-secrets anyway, which conveniently keeps them out of both git and context; and I follow our policy on which repos have Copilot enabled. Org-level: plan tier determines policy controls — telemetry and data retention settings, public-code filtering for IP posture, enablement scope per repo. Those are decisions to make consciously at rollout, not defaults to inherit, and they evolve with the product so someone owns re-reviewing them. The framing I give teams: the license is the cheap part; the policy review and the training on paired disciplines are the actual rollout." },
+        { "number": 12, "question": "Chat or completions for documentation, and what's the catch?", "answer": "Either — /doc on a selection for speed, or a chat instruction when I want control: summaries as purpose rather than mechanism, params with units, every exception condition, and crucially the anti-invention clause — 'document only behavior visible in the code; no invented defaults or thread-safety claims'. The catch is that documentation hallucinates gorgeously: fluent /// docs asserting behavior the code doesn't have, indistinguishable from true docs until checked, published with your API's authority. So every stated specific gets fact-checked, and for edge-behavior precision I keep the test suite open in a tab — docs grounded in verified tests state boundaries exactly instead of hedging. With that discipline, documenting a class drops from an hour to minutes honestly." },
+        { "number": 13, "question": "How do you avoid Copilot Chat sessions degrading over time?", "answer": "Same pollution physics as any conversation — the thread replays its history, including outdated code states and wrong turns, so long sessions condition later answers on stale context. My rules: fresh thread per task, not per day; re-select the code explicitly for each request rather than assuming the chat tracks my edits; and when a thread has accumulated a useful decision trail I want to keep, I extract the conclusions into the code as comments or into my notes, then still start clean. The editor twist that bites people: you edit the file after asking, the chat's mental model is now three edits old, and its next suggestion 'helpfully' reverts something. Re-selection after every meaningful edit prevents it." },
+        { "number": 14, "question": "What would you tell a team lead deciding whether Copilot is worth the licenses?", "answer": "The ROI is real and conditional. Real: for typing-heavy, pattern-rich work — boilerplate, tests, docs, scaffolds — experienced users report on the order of a third to half the time at identical quality, and the docs/tests that chronically didn't get written now do. Conditional: the gains assume the paired disciplines — context steering, small acceptances, unchanged review bar, honesty checks on generated tests. Teams that buy licenses without building those habits harvest speed with a defect tax and conclude the tool is overhyped. So budget the rollout as licenses plus enablement: policy review at the org level, Module 1-style training on steering and review, and metrics that watch escaped defects alongside velocity. Bought as a tool, it disappoints; adopted as a practice, it compounds." },
+        { "number": 15, "question": "Sum up your philosophy of working with Copilot.", "answer": "Copilot moves the model into my editor and makes my workspace the prompt — so I steer it the way I steer any model: context deliberately assembled (tabs as grounding, exemplars as few-shot), intent stated explicitly (names and comments as instructions), and every output treated as a draft entering review. It compresses typing, never judgment: the acceptance is mine, the tests and analyzers judge everything, the review bar never moves for machine-written code, and anything I accept, I own — meaning I can explain it unaided. Done this way, it's the best productivity tool of my career: the mechanical half of coding at half cost, with all the thinking left exactly where it belongs. Done passively, it's a debt machine with great ergonomics. The difference is nothing in the tool and everything in the practice." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "GitHub Copilot", "definition": "The AI pair programmer in Visual Studio and VS Code: inline completions plus chat, with your editor surface as context." },
+        { "term": "Code completion", "definition": "Context-aware inline suggestions at the cursor, from line fragments to whole methods; accepted with Tab, ignored by typing." },
+        { "term": "Ghost text", "definition": "The gray inline preview of a pending suggestion — a draft awaiting your one-keystroke review decision." },
+        { "term": "Copilot Chat", "definition": "The conversational mode: panel and inline chat that explain, test, refactor, and document with selections and workspace as context." },
+        { "term": "Inline chat", "definition": "Chat invoked at a code location, showing proposed changes as an in-place diff — ideal for surgical edits." },
+        { "term": "Slash command", "definition": "Purpose-built chat prompts: /explain, /tests, /fix, /doc — fast defaults, upgraded to full instructions when constraints matter." },
+        { "term": "Intent comment", "definition": "A comment above the cursor stating what the next code should do, including edge rules — instruction and constraints in editor form." },
+        { "term": "Context (Copilot)", "definition": "What the model sees: current file, open tabs, and (in chat) selections and referenced workspace items — not the whole repository." },
+        { "term": "Tab management", "definition": "Curating open editor tabs as prompt context: contracts and exemplars open, noise closed — the highest-leverage steering habit." },
+        { "term": "Exemplar (editor)", "definition": "An existing class kept open so Copilot imitates its conventions — few-shot prompting via tab." },
+        { "term": "NUnit", "definition": "The .NET test framework used throughout this course: [TestFixture] classes, [Test] methods, [TestCase] rows, Assert.That — named explicitly in every test-generation request." },
+        { "term": "XML documentation comments", "definition": "C# /// comments generated via /doc or chat; fact-checked per tutorial 5 because invented specifics read exactly like real ones." },
+        { "term": "Names-only test pattern", "definition": "Handwrite one exemplar test, then write only each next test's name; ghost text supplies bodies — the two-turn protocol compressed." },
+        { "term": "Acceptance rhythm", "definition": "Accept small, review always; read whole-method proposals before Tab; reject-and-resteer close-but-wrong suggestions." },
+        { "term": "Acceptance drift", "definition": "Erosion of review vigilance across hundreds of daily Tab decisions — countered structurally, not by willpower." },
+        { "term": "Behavior-preserving (Copilot)", "definition": "The explicit constraint on every refactor request; proven by tests green before and after, never by the diff looking right." },
+        { "term": "Service class scaffolding", "definition": "Interface + exemplar in tabs, intent comment block, skeleton-first via chat, member-by-member fills — tutorial 4's workflow, editor edition." },
+        { "term": "Dependency injection (Copilot)", "definition": "Constructor-injection wiring Copilot reproduces idiomatically when your exemplars demonstrate it — including registration lines on request." },
+        { "term": "/explain-first", "definition": "Explaining and verifying before modifying unfamiliar code — and before owning anything accepted-but-not-understood." },
+        { "term": "Hallucinated API (editor)", "definition": "An invented member in a suggestion — usually signaling the real contract wasn't in context; fixed by steering, caught by the compiler." },
+        { "term": "Conversation pollution (chat)", "definition": "Stale code states and wrong turns conditioning later chat answers — cured by fresh threads per task and explicit re-selection." },
+        { "term": "The deterministic gate", "definition": "Compiler, analyzers, tests, CI — judging accepted suggestions exactly as typed code; unchanged by the tool." },
+        { "term": "Review bar", "definition": "The unmoved standard: Copilot output merges under the same review, tests, and CI as human code — attention shifts, the bar doesn't." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary & Key Takeaways",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Copilot is Module 1 in your editor: your workspace is the prompt — names are context, comments are instructions, tabs are grounding and few-shot examples.",
+          "Two faces, two skills: steer completions with names/intent comments/tab management; steer chat with precise selections and full-anatomy instructions.",
+          "Accept small, review always; reject-and-resteer beats accept-and-debug; /explain anything you accept but couldn't have written.",
+          "Tests via chat instructions or the names-only pattern — with tutorial 5's honesty review unchanged: assertions, sabotage, earned green.",
+          "Refactors say behavior-preserving explicitly, move in small named steps, and prove themselves with tests green before and after.",
+          "Service classes: contracts and exemplar in tabs, intent comment block, skeleton-first, member-by-member fills.",
+          "/doc makes documentation minutes-cheap; the anti-invention clause and fact-checking keep it honest.",
+          "The deal: Copilot compresses typing, never judgment — the review bar, the deterministic gate, and the privacy rules do not move."
+        ] },
+        { "type": "paragraph", "text": "You now have the daily Copilot craft. The next tutorial goes further: advanced steering, workspace-scale features, custom instructions, and the workflows that separate power users from everyone else." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Continue with the next tutorial in the path: Advanced GitHub Copilot Usage — custom instructions, workspace context features, multi-file workflows, and the advanced patterns that compound the basics you just learned." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: run the section 12 walkthrough on a small service in your own codebase — staging tabs deliberately at every step.",
+          "Practice: for one day, write an intent comment before every non-trivial method and note the suggestion quality difference.",
+          "Practice: generate one NUnit suite via the names-only pattern, then run the full honesty check on it.",
+          "Practice: /explain three pieces of code you accepted this week; if any explanation surprises you, that was understanding debt.",
+          "Reading: the official GitHub Copilot documentation for your IDE — features and keybindings current as of today, which this tutorial deliberately doesn't freeze."
+        ] },
+        { "type": "note", "style": "info", "text": "Path position: tutorial 8 of 27 · Previous: prompting-for-learning-productivity · Next: advanced-copilot-usage" }
+      ]
+    }
+  ]
+}

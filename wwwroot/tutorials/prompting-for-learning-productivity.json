@@ -1,0 +1,504 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Prompt Engineering for Learning and Productivity",
+  "slug": "prompting-for-learning-productivity",
+  "level": "Beginner",
+  "codeLanguage": "C#",
+  "tutorialNumber": 7,
+  "totalTutorials": 27,
+  "prev": "prompting-reliability-and-safety",
+  "next": "github-copilot-for-dotnet",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Prompt Engineering for Learning and Productivity"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "Prompts for learning new frameworks",
+    "Prompts for understanding errors and stack traces",
+    "Prompts for interview preparation",
+    "Building a personal prompt library for productivity"
+  ],
+  "tooltips": {
+    "active learning": "Learning by doing and retrieving — being quizzed, building, explaining back — instead of passively reading answers.",
+    "understanding debt": "The accumulating risk of using AI-produced code or answers you don't actually understand; it comes due at debugging time.",
+    "learning path": "A tailored sequence of topics from your current knowledge to your goal — the first thing to ask a model for when learning something new.",
+    "analogy prompt": "Asking for a new concept explained in terms of one you already know ('explain middleware like ASP.NET filters').",
+    "stack trace": "The list of method calls active when an exception occurred, top frame nearest the failure — the highest-signal input for error prompts.",
+    "inner exception": "The original exception wrapped inside another; often the real cause, so always include it when prompting about errors.",
+    "minimal example": "The smallest code that shows what you're asking about — better answers, fewer tokens, no proprietary context leaked.",
+    "spaced repetition": "Reviewing material at growing intervals to move it into long-term memory — flashcards are its natural vehicle.",
+    "flashcard": "A question/answer pair for self-testing — models generate excellent decks from any topic or your own mistakes.",
+    "Feynman technique": "Testing understanding by explaining a topic simply in your own words — the model plays critic and finds your gaps.",
+    "mock interview": "A role-played practice interview — the model asks, you answer, it critiques; the closest thing to rehearsal on demand.",
+    "STAR method": "Situation, Task, Action, Result — the standard structure for behavioral interview answers.",
+    "prompt library": "Your personal collection of proven, refined prompts with notes on when and how to use each — productivity that compounds.",
+    "prompt template": "A saved prompt with placeholder slots you fill per use — the reusable unit of a prompt library.",
+    "knowledge cutoff": "The date a model's training data ends; newer framework versions may be unknown to it — verify against current docs.",
+    "hallucination": "Confident but wrong output — in learning contexts, plausible-sounding explanations or APIs that don't exist.",
+    "grounding": "Pasting real material (docs, code, the actual error) into the prompt so answers come from facts, not memory.",
+    "role-based prompt": "Assigning the model a persona ('you are a patient C# tutor') to shape depth, tone, and teaching style.",
+    "chain-of-thought": "Asking for step-by-step reasoning — as a learner, the steps are often more valuable than the answer.",
+    "few-shot prompting": "Showing an example of the output you want (e.g. one good flashcard) so the rest match it."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview",
+      "content": [
+        { "type": "paragraph", "text": "The previous six tutorials taught you to direct models at code. This one points the same skills at a different target: yourself. A language model is the most patient tutor, the fastest error-explainer, the most available interview coach, and — once you build a personal prompt library — a productivity system that compounds week over week." },
+        { "type": "paragraph", "text": "The difference between developers who get a little value from AI and those who get transformative value is rarely talent — it is that the second group uses AI actively (being quizzed, building, explaining back) rather than passively (reading generated answers), and they keep what works. This tutorial teaches both habits." },
+        { "type": "paragraph", "text": "You will learn the prompts that make learning a new framework fast and durable, how to turn every confusing error and stack trace into a lesson, how to prepare for technical interviews with a tireless mock interviewer, and how to build the prompt library that turns one-off wins into permanent workflow." },
+        { "type": "note", "style": "info", "text": "This is tutorial 7 of 27 and closes the prompting module. Next, the course moves into tools: GitHub Copilot for .NET development." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "paragraph", "text": "After completing this tutorial, you will be able to:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Use a model to build a personalized learning path for any new framework, anchored to what you already know.",
+          "Apply active learning prompts — quizzing, guided building, teach-back — instead of passively consuming explanations.",
+          "Prompt about errors and stack traces so you understand the why, not just the fix.",
+          "Run realistic mock interviews for technical and behavioral rounds, with useful critique.",
+          "Generate spaced-repetition flashcards from any topic, including your own mistakes.",
+          "Build, organize, and maintain a personal prompt library that makes good prompting your default.",
+          "Recognize the traps: understanding debt, outdated framework knowledge, and over-reliance."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorial 2's prompt anatomy and tutorial 6's reliability habits (grounding, honesty rules) — both are used throughout.",
+          "Any chat model to practice with — every technique here works in a plain chat window.",
+          "No advanced C# needed; this is a beginner tutorial about workflow, not syntax."
+        ] },
+        { "type": "note", "style": "tip", "text": "Pick a framework you genuinely want to learn (maybe Blazor, or Entity Framework Core) and use it as your test subject while reading — the techniques stick when applied immediately." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "Active Learning Beats Passive Answers",
+      "content": [
+        { "type": "paragraph", "text": "The core insight of AI-assisted learning is decades old: retrieval beats re-reading. You learn by producing — answering questions, writing code, explaining concepts — far more than by consuming explanations. A model can serve either mode. Passively, it is an answer machine that makes you feel productive while your skills stall. Actively, it is the ideal practice partner: it quizzes you, sets exercises, critiques your explanations, and adapts instantly to your level." },
+        { "type": "paragraph", "text": "The passive trap has a name worth remembering: understanding debt. Every time you paste AI-generated code you don't understand, or accept an explanation you couldn't reproduce, you borrow against future you — and the debt comes due at debugging time, in interviews, and in design discussions. The active-learning prompts in this tutorial are structured to keep the debt at zero: they make you do the work while the model does the guiding." },
+        { "type": "table", "headers": ["Passive prompt (answer machine)", "Active prompt (practice partner)"], "rows": [
+          ["Explain dependency injection", "Quiz me with 5 questions on dependency injection, one at a time; critique each answer before the next"],
+          ["Write a LINQ query that groups orders by customer", "Set me an exercise requiring GroupBy; I'll attempt it; review my solution before showing yours"],
+          ["Summarize how middleware works", "I'll explain middleware in my own words; identify what I got wrong or missed (the Feynman technique)"],
+          ["What are the features of Blazor?", "Build me a learning path for Blazor given that I know ASP.NET MVC and JavaScript basics"]
+        ] },
+        { "type": "paragraph", "text": "One reliability note carried over from tutorial 6: learning contexts are hallucination-sensitive, because you can't yet spot wrong answers in a domain you're learning. Ground framework questions in current documentation where precision matters, remember the knowledge cutoff for anything new, and treat surprising claims as things to verify — the habit itself is part of becoming senior." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Prompts for Learning New Frameworks",
+      "content": [
+        { "type": "paragraph", "text": "Learning a framework with a model follows a ladder — each rung an active prompt pattern, each anchored to what you already know:" },
+        { "type": "animation", "title": "The framework learning ladder", "intro": "Five rungs from stranger to practitioner — every one an active prompt.", "nodes": [
+          { "id": "map", "label": "Map it", "sub": "learning path" },
+          { "id": "core", "label": "Core concepts", "sub": "via analogies" },
+          { "id": "build", "label": "Guided build", "sub": "you type" },
+          { "id": "err", "label": "Error-driven", "sub": "break & learn" },
+          { "id": "teach", "label": "Teach back", "sub": "Feynman check" }
+        ], "steps": [
+          { "highlight": ["map"], "caption": "Ask for a learning path tailored to you: 'I know ASP.NET MVC and SQL; map a 2-week path to productive Blazor, ordered by dependency.'" },
+          { "highlight": ["core"], "caption": "Learn each concept through analogy prompts to your existing knowledge: 'Explain Blazor components in terms of the MVC partial views I know — and where the analogy breaks.'" },
+          { "highlight": ["build"], "caption": "Guided build: 'Set me a small exercise using components and binding. I will write the code. Review mine before showing yours.' You type every line." },
+          { "highlight": ["err"], "caption": "Error-driven deepening: when your build breaks, prompt for the why behind each error — broken code teaches more than working samples." },
+          { "highlight": ["teach"], "caption": "Teach back: 'Here is my explanation of the render cycle, in my own words. What did I get wrong or miss?' Gaps found here are gaps that never reach production." }
+        ] },
+        { "type": "paragraph", "text": "Two prompts make the ladder personal. The anchor prompt: always state what you already know — 'I know X and Y' turns generic tutorials into custom bridges, and analogies to familiar ground are the fastest route to intuition (with 'tell me where the analogy breaks' keeping them honest). And the calibration prompt: 'Ask me 5 questions to find my level, then adjust' — which replaces guessing at 'beginner/intermediate' with evidence." },
+        { "type": "note", "style": "warning", "text": "Framework knowledge is where the knowledge cutoff bites hardest: APIs move fast, and the model's version of a framework may be one or two majors behind. Keep the official docs open beside the chat; when the model's API differs from the docs, the docs win. The model teaches concepts durably; docs carry current syntax." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Prompts for Understanding Errors and Stack Traces",
+      "content": [
+        { "type": "paragraph", "text": "Every error is a free lesson wearing an unpleasant costume. The beginner move is prompting for the fix; the compounding move is prompting for the understanding: 'Explain what this error means, why it happened in my code, and how the fix works — teach me, don't just patch me.' Same effort, but one version leaves you stronger." },
+        { "type": "paragraph", "text": "The mechanics follow tutorial 3's debugging pattern, scaled to learning. Paste the error message and stack trace verbatim — never paraphrased, because exact wording carries the signal. Include the inner exception if present; it is usually the real cause wrapped in a generic wrapper. Add the relevant code as a minimal example, and say what you expected to happen. Then ask in layers:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Layer 1 — decode: 'Translate this error into plain language. What is the runtime telling me?'",
+          "Layer 2 — locate: 'Walk the stack trace from top to bottom; which frame is the first one in MY code, and what was it doing?'",
+          "Layer 3 — explain: 'Why does this specific code produce this specific error? Step by step.' (Chain-of-thought is for learners too — the steps ARE the lesson.)",
+          "Layer 4 — generalize: 'What class of mistake is this, and how do I recognize it earlier next time?'",
+          "Layer 5 — verify: apply the fix yourself, re-run, and confirm your new explanation of why it works."
+        ] },
+        { "type": "paragraph", "text": "The generalize layer is the one beginners skip and seniors swear by: 'NullReferenceException in a LINQ chain' becomes 'I now understand deferred execution touches the source later than I thought' — one error converted into a permanent upgrade. Keep a running list of these generalizations; in section 8 they become flashcards." },
+        { "type": "note", "style": "tip", "text": "Recurring habit from tutorial 6: paste errors with secrets and personal data removed. Stack traces can embed connection strings and file paths — glance before you paste." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Prompts for Interview Preparation",
+      "content": [
+        { "type": "paragraph", "text": "Interview prep is rehearsal, and a model is the only rehearsal partner available at 11pm the night you need it. The centerpiece is a role-based prompt that turns the model into your mock interview partner: 'You are a senior .NET interviewer at a product company. Interview me for a mid-level C# role: one question at a time, wait for my answer, then critique it — what was strong, what was missing, what a great answer includes — before the next question. Mix conceptual and scenario questions. Start now.'" },
+        { "type": "list", "style": "bullet", "items": [
+          "Technical rounds: request question sets by topic and difficulty ('5 async/await questions, increasing difficulty'), answer aloud or in writing BEFORE reading any model answer, then ask for the critique.",
+          "Coding rounds: 'Give me a whiteboard-style problem solvable in 20 minutes with LINQ and dictionaries. I'll paste my solution; review it like an interviewer — correctness, complexity, edge cases, communication.'",
+          "Behavioral rounds: draft your stories, then: 'Here is my answer about a production incident; restructure it with the STAR method and point out where I undersold the Result.'",
+          "Weak-spot loops: 'Quiz me on Entity Framework Core until I get three in a row right; make each question target whatever my last wrong answer revealed.'",
+          "Reverse prep: 'What questions should I ask the interviewer about team practices, given I care about code review culture and testing?'"
+        ] },
+        { "type": "paragraph", "text": "The rules that keep prep honest: answer first, always — reading model answers before attempting your own is passive learning in its most seductive form; make the model critique rather than praise ('be a tough but fair interviewer; do not soften'); and rehearse out loud for the real thing, because knowing and articulating are different skills. Ethics are simple: AI for preparation is exactly what practice is for; AI secretly answering during a live interview is misrepresentation — and transparently useless, since the job follows." },
+        { "type": "note", "style": "info", "text": "The interview Q&A sections of this very course (every tutorial has one) pair naturally with this technique: read a question, answer aloud, then compare against the provided answer — and ask your model to grade the difference." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Building a Personal Prompt Library",
+      "content": [
+        { "type": "paragraph", "text": "Every technique in this course produces, at some point, a prompt that worked unusually well. Without a system, that prompt evaporates into chat history; with one, it compounds. A personal prompt library is the developer's spellbook: your proven prompts, refined over time, organized for instant reuse. Teams keep template libraries for code; you keep one for prompts." },
+        { "type": "animation", "title": "The prompt library flywheel", "intro": "Why productivity compounds: every good prompt you keep makes the next use better.", "nodes": [
+          { "id": "craft", "label": "Craft", "sub": "a prompt works well" },
+          { "id": "save", "label": "Save", "sub": "with notes" },
+          { "id": "reuse", "label": "Reuse", "sub": "next occasion" },
+          { "id": "refine", "label": "Refine", "sub": "small improvements" },
+          { "id": "default", "label": "New default", "sub": "your baseline rises" }
+        ], "steps": [
+          { "highlight": ["craft"], "caption": "During real work, a prompt produces a notably good result — that's the trigger. Most people move on; you capture." },
+          { "highlight": ["save"], "caption": "Save it with three notes: what it's for, an example of its output, and any placeholder slots — 30 seconds, tops." },
+          { "highlight": ["reuse"], "caption": "Next similar task: start from the library, not from scratch. Consistency plus zero cold-start cost." },
+          { "highlight": ["refine"], "caption": "Each reuse teaches a small improvement — a constraint added, an example swapped. Version notes keep the history." },
+          { "highlight": ["default"], "caption": "The refined prompt becomes your default. Your worst prompting day is now better than last month's best. That's compounding." }
+        ] },
+        { "type": "paragraph", "text": "Structure it simply — a markdown file per category in a git repository is genuinely enough: learning/ (the ladder prompts, calibration quiz), debugging/ (the layered error prompt), code/ (your scaffolding and refactor templates from tutorial 4), review/ (self-review checklists), interview/ (the mock interviewer), writing/ (commit messages, PR descriptions, status updates). Each entry: the prompt with {placeholder} slots, when to use it, one example output (which doubles as few-shot prompting material when you want the model to match a past result), and a version note. The test of a good entry: three months from now, you can use it in thirty seconds without remembering writing it." },
+        { "type": "paragraph", "text": "Seed it today with the five prompts every developer reuses weekly: the error-explainer (section 6), the concept-quizzer (section 4), the framework path-builder (section 5), the code-review checklist prompt, and the 'summarize this long thread into decisions and actions' prompt. Add nothing else until real work earns an entry — libraries curated by actual reuse stay useful; libraries filled aspirationally become one more unread notes file." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Where These Habits Live in the .NET World",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Any chat model: everything in this tutorial works in a plain chat window — no infrastructure required.",
+          "GitHub Copilot Chat (next two tutorials): the error-explanation and learning prompts work with your actual code in context — 'explain this error' with the file already open is the low-friction version.",
+          "Microsoft Learn + official docs: the grounding source for framework learning; paste doc sections into prompts when precision matters, and let docs win any conflict with model memory.",
+          "Your prompt library: a git repo of markdown files beats every fancy tool until proven otherwise — versioned, searchable, diffable, and yours.",
+          "This course's own structure: each tutorial's flashcards feed spaced repetition, and each interview Q&A section is a ready-made mock-interview question bank."
+        ] },
+        { "type": "paragraph", "text": "A note on tooling restraint: the productivity win is the habit (capture, reuse, refine), not the software. Developers who spend a weekend building a prompt-management app usually needed a markdown file and the discipline to open it. Start embarrassingly simple; upgrade only when reuse volume demands it." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "The Daily Productivity Catalog",
+      "content": [
+        { "type": "paragraph", "text": "Beyond the four core skills, these are the everyday prompts that quietly return an hour a day once they're in your library:" },
+        { "type": "table", "headers": ["Situation", "Library prompt shape", "Payoff"], "rows": [
+          ["Unfamiliar codebase, first day", "Layered explanation (tutorial 4): overview → key paths → risks, one file at a time", "Days of orientation compressed to hours"],
+          ["Long email/meeting-notes thread", "'Extract: decisions made, open questions, actions with owners. Table.'", "Five minutes of reading becomes thirty seconds"],
+          ["Writing commit messages / PR descriptions", "'From this diff: conventional commit message + 3-bullet PR description; factual, no adjectives.'", "Better history, zero friction"],
+          ["Regex, cron expressions, SQL you write twice a year", "'Build and explain piece by piece; include test cases I can verify.'", "Rare-skill tasks stop costing 40 minutes"],
+          ["Daily standup / status updates", "'Turn these raw notes into a 3-line update: done, doing, blocked.'", "Communication polish for free"],
+          ["Choosing between two approaches", "'Steelman both options against my constraints, then recommend with reasoning I can check.'", "Faster, better-argued decisions"],
+          ["Documenting a decision", "'Write an ADR from these notes: context, decision, consequences.'", "Records that actually get written"]
+        ] },
+        { "type": "paragraph", "text": "Each row obeys the course's standing rules — outputs get reviewed, facts get verified, nothing sensitive gets pasted — and each earns a library entry the second time you use it. That second use is the signal: once is a task, twice is a template." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples in C#",
+      "content": [
+        { "type": "paragraph", "text": "A prompt library needs no framework — but if you live in C#, a tiny console helper makes your library executable: pick an entry, fill the slots, copy to clipboard." },
+        { "type": "code", "language": "csharp", "title": "A minimal personal prompt library in C#", "code": [
+          "public sealed record PromptEntry(",
+          "    string Name,",
+          "    string Category,",
+          "    string WhenToUse,",
+          "    string Template);   // {placeholders} in braces",
+          "",
+          "public static class MyPromptLibrary",
+          "{",
+          "    public static readonly List<PromptEntry> Entries =",
+          "    [",
+          "        new(\"error-explainer\", \"debugging\",",
+          "            \"Any exception I don't fully understand\",",
+          "            \"\"\"",
+          "            Explain this .NET error to me in layers:",
+          "            1) plain-language meaning, 2) first frame in MY code and what it was doing,",
+          "            3) why my code causes it (step by step), 4) what CLASS of mistake this is",
+          "            and how I spot it earlier next time. Teach me - don't just give the fix.",
+          "",
+          "            Error and stack trace (verbatim):",
+          "            {stacktrace}",
+          "",
+          "            Minimal code:",
+          "            {code}",
+          "",
+          "            I expected: {expected}",
+          "            \"\"\"),",
+          "",
+          "        new(\"framework-path\", \"learning\",",
+          "            \"Starting any new framework or library\",",
+          "            \"\"\"",
+          "            I want to learn {framework}. I already know {known}.",
+          "            Build a {weeks}-week learning path ordered by dependency,",
+          "            with a small build exercise per step. Then ask me 5 questions",
+          "            to calibrate my starting level before we begin.",
+          "            \"\"\"),",
+          "",
+          "        new(\"mock-interviewer\", \"interview\",",
+          "            \"Interview prep sessions\",",
+          "            \"\"\"",
+          "            You are a tough but fair senior .NET interviewer.",
+          "            Interview me for a {level} {role} role: one question at a time,",
+          "            wait for my answer, critique it honestly (strong / missing /",
+          "            what a great answer adds), then continue. Mix concepts and",
+          "            scenarios on {topics}. Start now.",
+          "            \"\"\")",
+          "    ];",
+          "",
+          "    public static string Fill(PromptEntry entry, Dictionary<string, string> slots) =>",
+          "        slots.Aggregate(entry.Template,",
+          "            (text, slot) => text.Replace(\"{\" + slot.Key + \"}\", slot.Value));",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "Using it is two lines — and the same Fill pattern is exactly how application prompt templates worked in tutorials 4–6, which is the point: your personal library and your production templates are the same discipline at different scales." },
+        { "type": "code", "language": "csharp", "title": "Filling a template", "code": [
+          "var entry = MyPromptLibrary.Entries.First(e => e.Name == \"framework-path\");",
+          "",
+          "string prompt = MyPromptLibrary.Fill(entry, new()",
+          "{",
+          "    [\"framework\"] = \"Blazor\",",
+          "    [\"known\"] = \"ASP.NET MVC, C#, basic JavaScript\",",
+          "    [\"weeks\"] = \"2\"",
+          "});",
+          "",
+          "Console.WriteLine(prompt); // paste into any chat model"
+        ] }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step-by-Step: Two Weeks to a New Framework",
+      "content": [
+        { "type": "paragraph", "text": "The full method applied to a realistic goal: an ASP.NET MVC developer becoming productive in Blazor in two weeks of evenings. Substitute your own framework freely." },
+        { "type": "list", "style": "numbered", "items": [
+          "Day 1 — map and calibrate: run the framework-path prompt (anchored to MVC knowledge); take the 5-question calibration quiz; save the resulting path as your checklist. Open the official docs and bookmark the versions page — your cutoff insurance.",
+          "Days 2–4 — core concepts by analogy: for each concept on the path, the analogy prompt ('components vs partial views — and where the analogy breaks'), then immediately the quiz prompt: 5 questions, one at a time, critique each answer. Wrong answers become flashcards.",
+          "Days 5–8 — guided build: 'Set me an exercise using {concept}; I'll write the code; review mine before showing yours.' You type every line. When the model's API disagrees with the docs, docs win — note the discrepancy; it's a cutoff artifact.",
+          "Days 9–10 — error-driven deepening: build something slightly too ambitious; every error goes through the 5-layer prompt from section 6, and every 'generalize' answer joins the flashcard deck.",
+          "Day 11 — teach back: write your own explanation of the framework's core model (one page, your words); have the model critique it as a tough reviewer. The gaps it finds are days 12's agenda.",
+          "Day 12 — close the gaps: targeted quiz loops on exactly what teach-back exposed ('quiz me until 3 in a row right').",
+          "Day 13 — interview yourself: mock interview scoped to the new framework — it's the retention test and the confidence check in one.",
+          "Day 14 — harvest: move the prompts that worked into your library with notes; review the full flashcard deck; write the one-page 'what I'd tell myself on day 1'. That page is proof of understanding — and your team's next onboarding doc."
+        ] },
+        { "type": "note", "style": "tip", "text": "Notice what never happened: no passive tutorial-watching, no pasting generated code you couldn't explain. Every rung was active — which is why day 14's knowledge survives to day 60." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Understanding debt is the failure mode of this whole topic: AI can make you feel productive while your skills stall. The tell: you can't explain last week's code without asking again. The cure is structural — active prompts only.",
+          "Knowledge cutoff hits frameworks hardest: new majors, renamed APIs, changed defaults. The model teaches concepts durably; current syntax belongs to the docs. When they disagree, docs win.",
+          "Hallucinated APIs are more dangerous to learners than to seniors — you can't yet smell them. Compile early, ground in docs, and treat surprising claims as verification tasks.",
+          "Interview prep ethics: preparation yes, live assistance no — misrepresentation aside, the job that follows is the real test you'd be failing.",
+          "Model critique of your answers is calibrated to sound helpful; occasionally it praises wrong answers or nitpicks right ones. For high-stakes prep, cross-check against authoritative sources.",
+          "Prompt libraries rot like code: prompts tuned for one model may underperform on the next. Date your entries; re-test favorites after model changes (the tutorial-6 regression habit, personal edition).",
+          "Privacy rules don't relax for learning: stack traces carry paths and connection strings; interview stories carry employer specifics. Redact before pasting."
+        ] },
+        { "type": "note", "style": "warning", "text": "API-accuracy disclosure: all C# in this tutorial is standard, self-contained C# 12 (records, collection expressions, raw string literals) with no external dependencies — nothing version-sensitive beyond requiring a current .NET SDK. Framework names (Blazor, Entity Framework Core) appear as learning subjects; no claims about their current APIs are made." }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices and Common Mistakes",
+      "content": [
+        { "type": "paragraph", "text": "The habits that compound:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Default to active: be quizzed, build guided, teach back — reading answers is the exception, not the mode.",
+          "Anchor everything to what you know; demand analogies and where they break.",
+          "Prompt errors for understanding (the 5 layers), and harvest every 'generalize' into flashcards.",
+          "Answer before reading any model answer — in prep, in quizzes, always.",
+          "Capture on the second use: once is a task, twice is a library entry.",
+          "Keep docs open beside the chat for anything version-sensitive; docs win conflicts.",
+          "Re-test your library favorites when models change."
+        ] },
+        { "type": "paragraph", "text": "The mistakes that stall growth:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Answer-machine usage: explanations consumed, nothing retrieved, nothing built — motion without progress.",
+          "Pasting fixes you can't explain: understanding debt, compounding at interview rates.",
+          "Learning current-version syntax from a past-cutoff model instead of the docs.",
+          "Reading model answers first 'to save time' — the time saved is the learning skipped.",
+          "Building a prompt-management app instead of a markdown file and the habit.",
+          "Aspirationally filling a library no real work has earned.",
+          "Pasting stack traces with secrets, or interview stories with employer confidences."
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz",
+      "items": [
+        { "number": 1, "question": "What distinguishes active from passive AI-assisted learning?", "options": { "A": "Active uses a paid model", "B": "Active makes you produce — answer, build, explain — while the model guides; passive consumes generated explanations", "C": "Active means typing faster", "D": "Passive is always wrong" }, "correctAnswer": "B", "explanation": "Retrieval beats re-reading: you learn by producing. The same model is an answer machine or a practice partner depending entirely on your prompt — 'quiz me' beats 'explain' for retention every time." },
+        { "number": 2, "question": "What is understanding debt?", "options": { "A": "Money owed for API usage", "B": "The accumulated risk of using AI-produced code or answers you couldn't explain yourself", "C": "Technical debt in AI models", "D": "Unfinished tutorials" }, "correctAnswer": "B", "explanation": "Every unexplainable paste borrows against future you — payable at debugging time, in design discussions, and in interviews. The tell: needing to re-ask about last week's code. Active learning keeps the balance at zero." },
+        { "number": 3, "question": "What is the best FIRST prompt when learning a new framework?", "options": { "A": "'List all features of the framework'", "B": "'Write me a complete app in it'", "C": "A learning path request anchored to what you already know, ordered by dependency", "D": "'Is this framework good?'" }, "correctAnswer": "C", "explanation": "'I know ASP.NET MVC and SQL; build a 2-week path to productive Blazor' produces a personal bridge, not a generic tutorial. Anchoring to existing knowledge is the single highest-leverage learning prompt." },
+        { "number": 4, "question": "Why add 'and tell me where the analogy breaks' to analogy prompts?", "options": { "A": "It makes answers longer", "B": "Analogies transfer intuition fast but mislead at their edges — knowing the breaking point prevents false confidence", "C": "Models refuse plain analogies", "D": "It reduces token cost" }, "correctAnswer": "B", "explanation": "'Components are like partial views' gets you moving; knowing where that stops being true (state, lifecycle, rendering) is what stops the analogy from writing bugs for you later." },
+        { "number": 5, "question": "When prompting about an exception, the stack trace should be:", "options": { "A": "Summarized in your own words", "B": "Omitted — only the message matters", "C": "Pasted verbatim, including any inner exception", "D": "Translated to pseudocode" }, "correctAnswer": "C", "explanation": "Exact wording carries the signal — paraphrase corrupts it. And the inner exception is frequently the real cause wrapped in a generic wrapper; omitting it sends the model chasing the wrapper." },
+        { "number": 6, "question": "In a stack trace, which frame usually matters most for YOUR debugging?", "options": { "A": "The bottom frame", "B": "The topmost frame that is in your own code", "C": "Any framework frame", "D": "The longest one" }, "correctAnswer": "B", "explanation": "Frames above it are library internals reacting to what your code did. 'Walk the trace and find the first frame in MY code' is layer 2 of the error prompt — it locates where your responsibility begins." },
+        { "number": 7, "question": "What separates a learning-oriented error prompt from a fix-oriented one?", "options": { "A": "Length", "B": "It asks for the why (step-by-step cause, the class of mistake, how to spot it earlier) — not just the patch", "C": "It uses politer wording", "D": "It runs at lower temperature" }, "correctAnswer": "B", "explanation": "'Teach me, don't just patch me.' Same effort, but the generalize layer converts one error into a permanent upgrade — the habit seniors have and beginners skip." },
+        { "number": 8, "question": "What is the most effective structure for an AI mock interview?", "options": { "A": "Ask for 50 questions with answers to read", "B": "Role prompt: one question at a time, you answer first, honest critique after each, then the next", "C": "Have the model interview itself", "D": "Memorize the model's sample answers" }, "correctAnswer": "B", "explanation": "Rehearsal means producing answers under question-at-a-time pressure and getting critiqued — reading 50 Q&As is passive prep that collapses in the room. 'Tough but fair, don't soften' keeps the critique useful." },
+        { "number": 9, "question": "The STAR method structures behavioral answers as:", "options": { "A": "Skills, Tools, Achievements, References", "B": "Situation, Task, Action, Result", "C": "Summary, Technical, Analysis, Review", "D": "Start, Try, Adjust, Repeat" }, "correctAnswer": "B", "explanation": "Situation and Task set context, Action shows what YOU did, Result proves it mattered. Models are excellent at restructuring your raw stories into STAR — and at spotting when you undersold the Result." },
+        { "number": 10, "question": "Which use of AI in interviews is legitimate?", "options": { "A": "A hidden assistant answering during the live interview", "B": "Extensive preparation: mock interviews, critique, weak-spot drilling", "C": "Generating fake project stories", "D": "None — AI and interviews don't mix" }, "correctAnswer": "B", "explanation": "Preparation is what practice is for — rehearsal with a tireless partner is exactly legitimate. Live covert assistance is misrepresentation, and pointless: the job that follows is the test you'd have cheated on." },
+        { "number": 11, "question": "What is the trigger for adding a prompt to your personal library?", "options": { "A": "Reading about a prompt online", "B": "A prompt working notably well in real work — captured with notes on the spot (and confirmed by a second use)", "C": "Every prompt you ever type", "D": "Monthly brainstorming sessions" }, "correctAnswer": "B", "explanation": "Libraries curated by actual reuse stay useful; aspirationally filled ones become unread notes. 'Once is a task, twice is a template' — real work earns entries, and 30 seconds of capture beats reconstruction from chat history." },
+        { "number": 12, "question": "What makes a prompt library entry usable months later?", "options": { "A": "Clever naming alone", "B": "The prompt with {placeholder} slots, when-to-use notes, one example output, and a version note", "C": "Storing it in a database", "D": "Keeping it secret" }, "correctAnswer": "B", "explanation": "The test: usable in 30 seconds without remembering writing it. Slots make it fillable, when-to-use makes it findable, the example sets expectations, and version notes track refinements — same discipline as production templates, personal scale." },
+        { "number": 13, "question": "Why does the prompt library create COMPOUNDING productivity?", "options": { "A": "It reduces API prices over time", "B": "Each reuse refines the prompt, so your default baseline rises — your worst prompting day beats last month's best", "C": "Libraries run prompts automatically", "D": "It impresses colleagues" }, "correctAnswer": "B", "explanation": "The flywheel: craft → save → reuse → refine → new default. One-off wins evaporate in chat history; captured ones accumulate improvements forever. That delta, compounded weekly, is the transformation." },
+        { "number": 14, "question": "How does the Feynman technique work with a model?", "options": { "A": "The model explains everything simply to you", "B": "You explain the topic in your own words; the model critiques — finding the gaps and errors in YOUR understanding", "C": "You memorize the model's summary", "D": "It's a physics-only method" }, "correctAnswer": "B", "explanation": "Explaining simply is the test of understanding — and the model is a tireless critic of your explanation. Gaps found in teach-back are gaps that never reach production code or interview answers. Direction matters: you produce, it critiques." },
+        { "number": 15, "question": "The model teaches you a framework API that doesn't match the official docs. What happened, and what wins?", "options": { "A": "The docs are wrong; trust the model", "B": "Likely a knowledge-cutoff artifact — the framework moved after training. The docs win, always", "C": "Both are right", "D": "Restart the conversation to fix it" }, "correctAnswer": "B", "explanation": "Frameworks move fast; the model's version may trail by a major or two. Concepts from the model are durable; current syntax belongs to the docs — keep them open beside the chat, and note discrepancies as cutoff artifacts." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam Questions",
+      "items": [
+        { "number": 1, "question": "Explain the active-vs-passive distinction in AI-assisted learning, its cognitive basis, and the failure mode passive use creates.", "modelAnswer": "Passive use treats the model as an answer machine: explanations requested and consumed. Active use makes the learner produce — answering quizzes, writing exercise code, explaining back — while the model guides, critiques, and adapts. The cognitive basis is the retrieval effect: memory and skill form through production and retrieval, not re-reading; consuming fluent explanations creates familiarity that masquerades as knowledge. The failure mode is understanding debt: accumulated dependence on outputs you couldn't reproduce, invisible during progress, due in full at debugging time, design discussions, and interviews. The tell is needing to re-ask about your own last-week code. The cure is structural: prompts that put production on your side ('quiz me', 'review MY attempt first', 'critique my explanation')." },
+        { "number": 2, "question": "Design the complete prompt sequence for learning a new framework, naming each rung of the ladder and the prompt that drives it.", "modelAnswer": "(1) Map: 'I know {existing skills}; build a {timeframe} learning path to productive {framework}, ordered by dependency, with a build exercise per step' — personal bridge, not generic tutorial. (2) Calibrate: 'Ask me 5 questions to find my level, then adjust' — evidence over self-assessment. (3) Core concepts via analogy: 'Explain {concept} in terms of {known concept} — and where the analogy breaks' — fast intuition with guarded edges. (4) Guided build: 'Set me an exercise using {concept}; I write the code; review mine before showing yours' — production with feedback, zero pasted understanding debt. (5) Error-driven deepening: every failure through the layered error prompt, generalizations harvested to flashcards. (6) Teach back (Feynman): 'Critique my one-page explanation as a tough reviewer' — gap detection. Docs stay open throughout; they win any API conflict (cutoff insurance)." },
+        { "number": 3, "question": "Present the five-layer error prompt and argue which layer produces the most long-term value and why.", "modelAnswer": "Layer 1 decode: plain-language meaning of the error. Layer 2 locate: walk the stack trace; first frame in MY code and what it was doing. Layer 3 explain: why this code produces this error, step by step. Layer 4 generalize: what class of mistake this is and how to recognize it earlier. Layer 5 verify: apply the fix yourself, re-run, confirm your own explanation. Highest long-term value: layer 4. Layers 1–3 solve today's error; layer 4 converts it into a durable pattern ('deferred execution touches the source later than I assumed') that prevents whole families of future errors and compounds via flashcards. It is precisely the layer beginners skip — they stop at the fix — and its habitual use is a large part of what 'experience' actually is." },
+        { "number": 4, "question": "Why must error messages and stack traces be pasted verbatim, and what should be checked before pasting?", "modelAnswer": "Verbatim because exact tokens carry the diagnostic signal: error type names, parameter names, line numbers, and framework frame sequences let the model pattern-match precisely; paraphrase ('it says something about null') destroys exactly the information that distinguishes causes. The inner exception must be included — it is commonly the true cause wrapped in a generic outer exception, and omitting it redirects analysis to the wrapper. Before pasting, a privacy glance (tutorial 6's discipline): stack traces and error payloads can embed file paths, machine names, connection strings, and tokens — redact or genericize those; the diagnostic structure survives redaction, the secrets must not leave." },
+        { "number": 5, "question": "Construct a complete interview-preparation program using a model, covering technical, coding, and behavioral rounds, with the rules that keep it effective.", "modelAnswer": "Technical: topic-scoped question sets at rising difficulty; answer aloud/in writing first, then request critique ('strong / missing / what a great answer adds'). Coding: timed whiteboard-style problems; paste your solution for interviewer-style review — correctness, complexity, edge cases, communication. Behavioral: draft your own stories, then restructure via STAR with the model spotting undersold Results; rehearse delivery aloud. Weak-spot loops: adaptive quizzing ('until 3 in a row right, targeting my last wrong answer'). Reverse prep: questions to ask the interviewer, tuned to your priorities. Rules: answer-first always (reading answers first is passive prep that collapses under pressure); demand tough-but-fair critique, not praise; cross-check high-stakes facts against authoritative sources since model critique can miscalibrate; ethics line — preparation unlimited, live assistance never." },
+        { "number": 6, "question": "Argue the case for a personal prompt library: the flywheel mechanism, the capture discipline, and the minimal viable structure.", "modelAnswer": "Mechanism: good prompts normally evaporate into chat history, so every session restarts from zero; a library converts wins into assets. The flywheel — craft in real work, save with notes, reuse next occasion, refine on each use, adopt as new default — means your baseline rises permanently: the worst prompting day this month beats the best from last quarter. Capture discipline: trigger on real-work success ('once is a task, twice is a template'), 30-second capture (prompt with {slots}, when-to-use, one example output, version note), and refusal to fill aspirationally — unearned entries rot into an unread notes file. Minimal structure: markdown files by category (learning, debugging, code, review, interview, writing) in a git repo — versioned, searchable, diffable. The habit is the product; tooling beyond this must be earned by reuse volume." },
+        { "number": 7, "question": "Compare the personal prompt library with production prompt templates (tutorials 4–6): what transfers, what differs?", "modelAnswer": "Same discipline, different scale. Transfers: templates with placeholder slots; version notes recording refinements; the capture-refine loop; regression habit (re-test after model changes); and the insight that consistent wording produces consistent quality. The C# Fill pattern is literally identical. Differs: audience (you vs your application's unattended calls), validation (your judgment per use vs deterministic code gates), storage (markdown repo vs source-controlled application resources with review), and stakes (a stale personal prompt wastes minutes; a stale production template ships errors at volume). The career point: developers fluent with a personal library already think in templates, slots, and versioning — which is exactly the skill production prompt engineering requires. The library is practice for the profession." },
+        { "number": 8, "question": "Explain why the knowledge cutoff is more dangerous in learning contexts than in expert contexts, and give the complete mitigation protocol.", "modelAnswer": "An expert who sees a suspicious API smells the anachronism — wrong naming style, a pattern the framework abandoned — and verifies. A learner has no smell test yet: hallucinated or outdated APIs read exactly like current ones, and confident wrong syntax gets learned as truth, compounding into habits. Frameworks are the worst case because they move fastest: renamed APIs, changed defaults, new idioms per major version. Protocol: docs open beside the chat for anything version-sensitive; docs win every conflict, with discrepancies noted as cutoff artifacts (they're also learning moments about the framework's evolution); compile early and often — the compiler is the anti-hallucination gate a learner can always trust; ground precision-critical questions by pasting current doc sections; use the model for durable concepts (architecture, mental models) where cutoff matters least." },
+        { "number": 9, "question": "Design the two-week framework-learning plan (section 12) for a developer you manage, and justify its ordering.", "modelAnswer": "Days 1: map (path anchored to their known stack) + calibration quiz + docs bookmarked — orientation before content. Days 2–4: concepts via analogy with immediate quizzing — intuition first, verified by retrieval, wrong answers seeding flashcards. Days 5–8: guided build, learner typing every line, model reviewing their attempts first — production with feedback while concepts are fresh. Days 9–10: deliberately over-ambitious build for error-driven deepening via the 5-layer prompt — errors arrive exactly when foundations can absorb them. Day 11: Feynman teach-back — gap detection after enough material exists to have gaps. Day 12: targeted closure of exactly those gaps. Day 13: framework-scoped mock interview — retention test under pressure. Day 14: harvest — prompts to library, flashcard review, one-page 'day 1 letter' that doubles as team onboarding. Ordering logic: intuition → production → failure → articulation → verification, each phase generating the material the next one needs." },
+        { "number": 10, "question": "What is the Feynman technique, how is it operationalized with a model, and what makes the direction of explanation critical?", "modelAnswer": "The technique: understanding is tested by explaining simply — if you can't explain it plainly, you don't yet understand it. Operationalized: after studying, write your own explanation in your own words (a page or a paragraph), then prompt: 'Critique this explanation as a tough reviewer: what is wrong, what is missing, what would confuse a newcomer?' The model excels as critic — it has the reference knowledge to spot gaps and the patience to do it repeatedly. Direction is everything: model-explains-to-you is passive input that creates familiarity; you-explain-model-critiques forces retrieval and construction, which is where learning happens, and surfaces the specific holes ('you never mentioned when the render actually fires') that targeted study can close. Teach-back is the cheapest reliable self-assessment a learner has." },
+        { "number": 11, "question": "Catalog five daily-productivity prompt applications beyond learning/debugging/interviews, each with its library-entry shape and its verification rule.", "modelAnswer": "(1) Thread distillation: 'extract decisions, open questions, actions with owners — table' — verify against the thread before acting on it. (2) Commit/PR writing: 'from this diff: conventional commit + 3-bullet factual description' — check it names what actually changed. (3) Rare-skill artifacts (regex, cron, SQL): 'build and explain piece by piece, include test cases' — run the test cases; never trust an unexecuted regex. (4) Decision support: 'steelman both options against my constraints, then recommend with checkable reasoning' — verify the claimed facts, own the decision. (5) ADR writing: 'context, decision, consequences from these notes' — review for accuracy; it becomes the record. Common shape: raw input in, structured output out, human verification proportional to consequence, entry earned on second use. Aggregate payoff: roughly an hour a day of friction converted to review-only time." },
+        { "number": 12, "question": "How should a personal prompt library be maintained over time? Address rot, model changes, and growth discipline.", "modelAnswer": "Rot: prompts are tuned against a model's current behavior; entries decay silently as models update. Mitigation: date every entry; keep the example output as the expectation record; when a favorite underperforms, re-test deliberately rather than doubting yourself — it's usually the model that moved (personal edition of tutorial 6's regression sets). Model changes: after any major model switch, re-run your top five entries against their example outputs; refine or annotate ('needs explicit format demand on model X'). Growth discipline: entries enter only via the second-real-use rule; quarterly prune anything unused since last quarter (delete or archive — a searchable graveyard beats a cluttered library); refactor categories when a file exceeds comfortable scanning. The meta-rule: maintenance itself must cost minutes, or it stops happening — which is the argument for markdown over tooling." },
+        { "number": 13, "question": "A junior developer using AI heavily performs well on tickets but froze in a design discussion and can't explain their own recent code. Diagnose and prescribe.", "modelAnswer": "Diagnosis: understanding debt at dangerous levels — passive AI usage (generate, paste, ship) producing ticket velocity while skill formation stalled; the design freeze and the can't-explain-own-code tell are the debt coming due. Prescription, framed as upgrade not punishment: (1) explain-before-merge rule — they must be able to walk any AI-assisted change without notes; review enforces it kindly; (2) convert their AI usage to active mode — the error prompt's 5 layers instead of 'fix this', guided-build for new tech, teach-back on their own merged features weekly; (3) flashcards from their own error generalizations — personal, therefore sticky; (4) pair the debt down: an hour weekly re-deriving one of their own past changes; (5) measure recovery by explanation fluency, not ticket count. Timeline honesty: debt accumulated over months clears over months — but active habits stop new borrowing immediately." },
+        { "number": 14, "question": "Define the ethics and privacy boundaries for AI in learning and interview contexts, with the reasoning behind each line.", "modelAnswer": "Interview ethics: unlimited preparation (mock interviews, critique, drilling) — practice is what rehearsal partners are for and improves the true signal, your actual ability; zero live covert assistance — it misrepresents the product being sold (your unaided capability), and self-defeats since the job is the test that follows. Learning content: AI-generated study materials fine; presenting AI work as demonstration of personal skill (portfolio pieces you can't explain) is the same misrepresentation — and teach-back is the honest alternative that also builds the skill. Privacy (tutorial 6 unchanged by context): stack traces carry paths, machine names, connection strings — redact; interview stories carry employer specifics and possibly NDA'd details — genericize ('a payment system' not the client's name); personal learning notes with company code follow company AI policy. The unifying principle: AI amplifies your production honestly when what you claim as yours, you can reproduce and explain." },
+        { "number": 15, "question": "Scenario: you have three weeks to become interview-ready for a mid-level .NET role while working full-time. Design the complete AI-assisted program.", "modelAnswer": "Week 1 — audit and map: calibration quizzes per topic area (C#, async, LINQ, EF Core, ASP.NET, SQL, design basics) to locate real weak spots; build the study map from evidence, not anxiety; seed flashcards from every wrong answer; evenings 45–60 min, active only. Week 2 — depth on weaknesses: per weak topic, analogy-anchored concept work, guided mini-builds (typing, never pasting), 5-layer treatment of every error, adaptive quiz loops to 3-in-a-row; draft behavioral stories from real experience and STAR-structure them with critique; start daily flashcard review (spaced repetition doing its quiet work). Week 3 — simulation: full mock interviews on alternating days (technical/behavioral), tough-but-fair critique, out-loud answers; timed coding problems with interviewer-style review; reverse-prep questions for each target company; final days re-run week 1's calibration quizzes to measure movement and direct last polish. Throughout: docs verify anything version-sensitive; every session's best prompt lands in the library; sleep respected — retention needs it. The program's spine is production under increasing realism: quiz → build → articulate → simulate." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Active vs passive AI learning", "back": "Active: you produce (quizzed, building, explaining back) while the model guides. Passive: consuming explanations — familiarity masquerading as knowledge." },
+        { "number": 2, "front": "Understanding debt", "back": "Risk accumulated by shipping AI output you can't explain. Due at debugging, design discussions, interviews. Tell: re-asking about your own last-week code." },
+        { "number": 3, "front": "Framework learning ladder", "back": "Map (tailored path) → concepts via analogy → guided build (you type) → error-driven deepening → teach back (Feynman)." },
+        { "number": 4, "front": "Anchor prompt", "back": "'I already know X and Y' — turns generic tutorials into personal bridges. Add: 'and tell me where the analogy breaks.'" },
+        { "number": 5, "front": "Calibration prompt", "back": "'Ask me 5 questions to find my level, then adjust.' Evidence replaces guessing at beginner/intermediate." },
+        { "number": 6, "front": "Error prompt — 5 layers", "back": "Decode (plain language) → Locate (first frame in MY code) → Explain (step-by-step why) → Generalize (class of mistake) → Verify (apply, re-run, re-explain)." },
+        { "number": 7, "front": "The generalize layer", "back": "'What CLASS of mistake is this?' — converts one error into a permanent pattern. The layer beginners skip and seniors swear by. Harvest into flashcards." },
+        { "number": 8, "front": "Stack trace prompting rules", "back": "Verbatim, never paraphrased; include the inner exception (often the real cause); minimal code example; privacy glance first (paths, connection strings)." },
+        { "number": 9, "front": "Mock interview prompt", "back": "Role: tough-but-fair interviewer. One question at a time → you answer → honest critique (strong/missing/great adds) → next. Answer-first, always." },
+        { "number": 10, "front": "STAR method", "back": "Situation, Task, Action, Result — behavioral answer structure. Models excel at restructuring your raw stories and spotting undersold Results." },
+        { "number": 11, "front": "Interview AI ethics", "back": "Preparation: unlimited — that's what rehearsal is. Live covert assistance: never — misrepresentation, and the job that follows is the real test." },
+        { "number": 12, "front": "Prompt library flywheel", "back": "Craft → save (30s, with notes) → reuse → refine → new default. Your baseline rises permanently — that's compounding productivity." },
+        { "number": 13, "front": "Library entry anatomy", "back": "Prompt with {slots} + when-to-use + one example output + version note. Test: usable in 30 seconds, months later, without remembering writing it." },
+        { "number": 14, "front": "Capture discipline", "back": "'Once is a task, twice is a template.' Entries earned by real reuse; aspirational filling creates an unread notes file. Markdown + git is enough." },
+        { "number": 15, "front": "Feynman technique with AI", "back": "YOU explain in your own words → model critiques as tough reviewer → gaps found before they reach production. Direction matters: you produce, it critiques." },
+        { "number": 16, "front": "Cutoff rule for frameworks", "back": "Model teaches durable concepts; docs carry current syntax. Docs open beside chat; docs win every conflict; compile early — the compiler never hallucinates." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions & Answers",
+      "items": [
+        { "number": 1, "question": "How do you use AI in your own learning as a developer?", "answer": "Actively and structurally. When I pick up a new framework, my first prompt builds a learning path anchored to what I already know, and a calibration quiz sets my real starting level. Concepts come through analogies to my existing stack — with 'tell me where the analogy breaks' to keep them honest. Then guided builds where I type every line and the model reviews my attempt before showing its own, and teach-back sessions where I explain and it critiques. The principle underneath: I produce, it guides. Passive consumption of explanations feels productive but builds nothing — the retrieval has to be mine." },
+        { "number": 2, "question": "What's your process when you hit an error you don't understand?", "answer": "I prompt for understanding, not just the fix — five layers. Decode: plain-language meaning. Locate: walk the stack trace to the first frame in my code. Explain: why my specific code produces this specific error, step by step. Generalize: what class of mistake this is and how I'd spot it earlier — that's the layer that compounds, because one error becomes a permanent pattern. Verify: I apply the fix myself and confirm I can explain why it works. Mechanics: verbatim error and trace, inner exception included, minimal code example, and a privacy glance before pasting since traces can carry connection strings." },
+        { "number": 3, "question": "Someone says AI-assisted learning is shallow. Your response?", "answer": "It's shallow exactly when it's passive — reading generated explanations creates familiarity, not skill, and worse, it accumulates understanding debt: code shipped that you can't explain, due at debugging time. But the same model prompted actively is the best practice partner in history: it quizzes one question at a time, sets exercises calibrated to your level, critiques your explanations, and never gets tired at 11pm. The depth of AI learning is a function of prompt direction — who's doing the producing. My rule of thumb: if the session's transcript shows me mostly reading, it was shallow; if it shows me mostly answering, building, and being corrected, it was deep." },
+        { "number": 4, "question": "How would you prepare for a technical interview using AI?", "answer": "Three phases. Audit: calibration quizzes across topic areas to find real weak spots — evidence beats anxiety for directing effort — with every wrong answer becoming a flashcard. Depth: active work on the weak areas — analogy-anchored concepts, guided builds, adaptive quiz loops until three-in-a-row right; behavioral stories drafted from my real experience and STAR-restructured with critique. Simulation: full mock interviews with a tough-but-fair role prompt — one question at a time, answering out loud before any critique, timed coding problems reviewed like an interviewer would. The non-negotiable rule: answer first, always. Reading model answers before attempting mine is passive prep that collapses under real pressure." },
+        { "number": 5, "question": "What is a personal prompt library and why keep one?", "answer": "My collection of prompts that have proven themselves in real work — each saved with placeholder slots, when-to-use notes, an example output, and a version note. Why: good prompts otherwise evaporate into chat history, and every session restarts from zero. The library makes wins compound — craft, save, reuse, refine, and the refined version becomes my new default, so my baseline rises permanently. It's markdown files by category in a git repo; nothing fancier until reuse volume demands it. Entry rule: once is a task, twice is a template — real work earns entries, aspiration doesn't. It's also practice for production prompt engineering: same templates-slots-versioning discipline at personal scale." },
+        { "number": 6, "question": "How do you handle the fact that models may know outdated versions of frameworks?", "answer": "By splitting what I trust each source for. The model gets concepts — architecture, mental models, why the framework is shaped this way — which are durable across versions and where it excels. The docs get syntax — current APIs, defaults, idioms — because frameworks move faster than training data, and the model's version may trail by a major or two. Docs stay open beside the chat; any conflict, docs win, and I note the discrepancy as a cutoff artifact. And I compile early and often, because the compiler is the one anti-hallucination gate a learner can always trust. For precision-critical questions I paste the current doc section into the prompt — grounding beats memory." },
+        { "number": 7, "question": "What's understanding debt and how do you keep a team clear of it?", "answer": "The accumulated risk of shipping AI-produced code no one can explain — invisible while velocity looks great, due in full at debugging time, design discussions, and incidents. Symptoms: developers re-asking about their own recent code, freezing when asked 'why this approach'. Prevention is structural: an explain-before-merge norm — you walk your change without notes, enforced kindly in review; error prompts that demand the why, not just the fix; teach-back moments in team settings ('walk us through how this works') as culture, not gotcha. For someone already deep in debt: convert their usage to active mode, pair down the debt on their own past changes, and measure recovery by explanation fluency rather than ticket count. Velocity built on debt isn't velocity — it's borrowing." },
+        { "number": 8, "question": "Give me an example of a prompt from your library and why it earned its place.", "answer": "The error-explainer. Template: 'Explain this .NET error in layers: plain meaning; first frame in MY code and what it was doing; why my code causes it, step by step; what class of mistake this is and how I spot it earlier. Teach me, don't just give the fix' — with slots for the verbatim trace, minimal code, and expected behavior. It earned its place the second time an error I half-understood cost me an hour; now it's a 30-second paste. The 'class of mistake' layer is why it stays: those generalizations become flashcards, and several of them — deferred execution, captured loop variables — are bugs I simply don't write anymore. Version note says v3: added 'teach me' after v2 kept giving bare fixes." },
+        { "number": 9, "question": "How do you use the Feynman technique in your development work?", "answer": "As my standard understanding-check before I rely on knowledge. After learning something — a framework's render cycle, a teammate's subsystem, a new pattern — I write my own explanation in plain words, a paragraph to a page, then have the model critique it as a tough reviewer: what's wrong, what's missing, what would confuse a newcomer. The gaps it finds are precisely what I'd otherwise discover mid-incident or mid-interview. Direction is the whole trick — the model explaining to me is input; me explaining to the model is retrieval, and retrieval is where learning actually consolidates. Side benefit: the corrected explanations accumulate into genuinely good onboarding docs, because they were written by someone who just crossed the same gap." },
+        { "number": 10, "question": "What daily productivity wins do you get from prompting beyond coding itself?", "answer": "The unglamorous hour-a-day category. Thread distillation: decisions, open questions, actions-with-owners out of any long email or meeting-notes dump. Commit and PR writing from diffs — factual, conventional, frictionless. The twice-a-year skills — regex, cron expressions, gnarly SQL — built and explained piece by piece with test cases I actually run. Status updates from raw notes. Steelmanned option comparisons when choosing between approaches, where I verify the claimed facts and own the decision. Each one is a library template with slots; each obeys the standing rules — review the output, verify facts proportional to consequence, paste nothing sensitive. Individually they're minutes; compounded across a week they're the difference between busy and productive." },
+        { "number": 11, "question": "Where's the ethical line with AI in interviews and portfolios?", "answer": "The line is reproducibility: what I claim as my capability, I can reproduce and explain unaided. Preparation is unlimited — mock interviews, drilling, critique are exactly what rehearsal partners are for, and they improve the true signal rather than faking it. Live covert assistance fails the test — it sells capability I don't have, and self-defeats because the job that follows is the real exam. Same logic for portfolios: AI-assisted projects are legitimate when I can walk every design decision; a portfolio piece I can't explain is misrepresentation wearing my name. And privacy rides along: interview stories get genericized — 'a payment platform', not the client's name — and NDA'd specifics never enter a prompt." },
+        { "number": 12, "question": "How do you keep a prompt library from becoming another abandoned notes file?", "answer": "Three disciplines. Entry rule: only real reuse earns a slot — 'once is a task, twice is a template' — so everything in there has proven utility; aspirational collecting is what kills these systems. Usability bar: each entry must work in 30 seconds months later — prompt with slots, when-to-use line, example output — or it gets fixed or cut. Maintenance rhythm: date entries, re-test the favorites after model changes (they rot silently as models move), and a quarterly prune of anything untouched since last quarter. And structurally: markdown in git, because maintenance that costs more than minutes stops happening, and a library's value is exactly its maintenance. The habit is the product; the file is just where the habit lives." },
+        { "number": 13, "question": "A team member freezes without AI access — the tooling goes down and their productivity craters. What does that tell you and what do you do?", "answer": "It tells me the AI was load-bearing for capability, not just velocity — understanding debt made visible by an outage. That's a coaching signal, not a firing one: the habits were passive, probably 'generate, paste, ship' under deadline pressure, and the skills atrophied or never formed underneath. Response: normalize it (the incentives produced this, not laziness), then rebuild actively — their AI time shifts to guided builds and teach-backs, their error handling to the five-layer prompt, and we pair on re-deriving a few of their own shipped changes. I'd also check my own team's incentives: if ticket velocity is the only visible metric, I built the debt machine. Resilience test going forward: everyone should be able to work a degraded day at maybe 70% — AI as amplifier, not prosthetic." },
+        { "number": 14, "question": "How does personal prompt discipline translate to professional AI engineering?", "answer": "Almost one-to-one — the personal library is the training ground. Templates with placeholder slots become production prompt templates; version notes become real versioning with review; 're-test favorites after model changes' becomes regression sets gating model upgrades; the capture-refine flywheel becomes prompt iteration in a team repo; even the 30-second usability bar maps to the maintainability every shared artifact needs. The differences are stakes and validation — production templates run unattended at volume behind deterministic validation, so the discipline tightens rather than changes. When I interview people for AI-adjacent work, a genuine personal prompt library is one of my strongest signals: it means they already think in reusable, versioned, testable prompting — the profession's shape practiced at personal scale." },
+        { "number": 15, "question": "Sum up your philosophy of AI for learning and productivity.", "answer": "The model is an amplifier with a direction switch. Pointed passively — generating answers I consume — it amplifies output while quietly hollowing skill: understanding debt, due at the worst moments. Pointed actively — quizzing me, reviewing my attempts, critiquing my explanations — it amplifies learning itself: the most patient tutor, the most available rehearsal partner, the fastest error-explainer ever built. So my rules are few: I do the producing; errors get mined for their general lesson; interview prep is unlimited rehearsal with honest critique; everything that works twice goes in the library with slots and notes; docs beat model memory on anything versioned; and nothing ships that I can't explain unaided. Do that consistently and the compounding is real — not because the AI got smarter, but because I did, with the AI making every rep cheaper." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "Active learning", "definition": "Learning by producing — answering, building, explaining — with the model as guide and critic; the mode that builds durable skill." },
+        { "term": "Passive learning (AI)", "definition": "Consuming generated explanations; produces familiarity that masquerades as knowledge and accumulates understanding debt." },
+        { "term": "Understanding debt", "definition": "Accumulated dependence on AI output you cannot reproduce or explain; payable at debugging, design, and interview time." },
+        { "term": "Learning path", "definition": "A dependency-ordered topic sequence from your current knowledge to a goal — the first artifact to request when learning a framework." },
+        { "term": "Anchor prompt", "definition": "Stating what you already know so explanations become bridges from familiar ground ('I know MVC; explain components in those terms')." },
+        { "term": "Analogy prompt", "definition": "Requesting a concept mapped onto known territory, plus 'where the analogy breaks' to guard its edges." },
+        { "term": "Calibration quiz", "definition": "'Ask me 5 questions to find my level' — evidence-based placement replacing self-assessed labels." },
+        { "term": "Guided build", "definition": "Model sets exercises and reviews YOUR attempt first; you type every line — production without pasted understanding debt." },
+        { "term": "Teach back", "definition": "Explaining in your own words for model critique — the Feynman technique operationalized; gap-detection before gaps reach production." },
+        { "term": "Feynman technique", "definition": "Testing understanding by explaining simply; with AI, you produce the explanation and the model plays tough reviewer." },
+        { "term": "Stack trace", "definition": "The call chain at exception time; pasted verbatim with inner exceptions for error prompts — top-most own-code frame is the key landmark." },
+        { "term": "Inner exception", "definition": "The wrapped original exception that is frequently the true cause; omitting it misdirects analysis to the wrapper." },
+        { "term": "Five-layer error prompt", "definition": "Decode → locate → explain → generalize → verify; converts fixes into understanding and errors into permanent patterns." },
+        { "term": "Generalization (error)", "definition": "Naming the class of mistake behind an error and its early-warning signs — the layer that compounds into expertise." },
+        { "term": "Mock interview", "definition": "Role-prompted rehearsal: one question at a time, answer-first, honest critique per answer; the core interview-prep instrument." },
+        { "term": "STAR method", "definition": "Situation-Task-Action-Result structure for behavioral answers; models restructure raw stories and flag undersold Results." },
+        { "term": "Answer-first rule", "definition": "Producing your answer before reading any model answer — the line between rehearsal and passive prep." },
+        { "term": "Prompt library", "definition": "A curated, versioned collection of proven prompts with slots and usage notes; the compounding-productivity asset." },
+        { "term": "Prompt template (personal)", "definition": "A library entry with {placeholder} slots — same discipline as production templates at personal scale." },
+        { "term": "Capture discipline", "definition": "'Once is a task, twice is a template': entries earned by real reuse, captured in 30 seconds with notes." },
+        { "term": "Spaced repetition", "definition": "Expanding-interval review that moves knowledge to long-term memory; fed by flashcards harvested from quizzes and error generalizations." },
+        { "term": "Knowledge cutoff (learning)", "definition": "Why model framework knowledge trails reality; concepts from the model, syntax from the docs, docs win conflicts." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary & Key Takeaways",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "The model is an amplifier with a direction switch: passive use amplifies output while skills stall; active use — quizzing, guided builds, teach-back — amplifies learning itself.",
+          "Understanding debt is the failure mode: never ship what you can't explain; the active prompts exist to keep the balance at zero.",
+          "Framework learning is a ladder: tailored path → analogies (with breaking points) → guided builds where you type → error-driven deepening → Feynman teach-back. Docs beat model memory on syntax.",
+          "Errors are lessons in costume: five layers (decode, locate, explain, generalize, verify), with the generalize layer compounding into expertise via flashcards.",
+          "Interview prep is rehearsal: mock interviews with answer-first discipline and tough critique; STAR for behavioral; preparation unlimited, live assistance never.",
+          "The prompt library is the compounding asset: capture on second use, slots and notes, markdown in git, re-test after model changes — your baseline rises permanently.",
+          "Personal prompt discipline is professional practice: templates, versioning, and regression habits at personal scale are exactly the production skills of later modules."
+        ] },
+        { "type": "paragraph", "text": "This closes the prompting module: seven tutorials from 'what is a prompt' to a complete personal practice. Next, the course shifts from craft to tooling — GitHub Copilot, where these prompting skills meet your editor and your actual codebase." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Continue with the next tutorial in the path: GitHub Copilot for .NET Development — installing and configuring Copilot, completions and chat in Visual Studio and VS Code, and applying this module's prompting craft inside your editor." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: run the day-1 step of the two-week plan tonight — framework path plus calibration quiz for something you've been meaning to learn.",
+          "Practice: put the five-layer error prompt in a file now; use it verbatim on your next confusing exception.",
+          "Practice: run one 15-minute mock interview on this module's material ('interview me on prompt engineering fundamentals').",
+          "Build: create the prompt-library repo today with the three seed entries from section 11 — thirty minutes, permanent asset.",
+          "Review: this tutorial's flashcards tab, tomorrow and in three days — spaced repetition starts with scheduling it."
+        ] },
+        { "type": "note", "style": "info", "text": "Path position: tutorial 7 of 27 · Previous: prompting-reliability-and-safety · Next: github-copilot-for-dotnet" }
+      ]
+    }
+  ]
+}
