@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retrieval-Augmented Generation (RAG) Tutorial: Ground LLMs in Your Data | ITTechGenie</title>
+<meta name="description" content="Beginner-friendly RAG tutorial: how retrieval-augmented generation grounds LLMs in your own documents, with diagrams, code, a quiz, and a timed exam.">
+<link rel="canonical" href="[CANONICAL_URL]">
+<meta property="og:title" content="Retrieval-Augmented Generation (RAG) Tutorial | ITTechGenie">
+<meta property="og:description" content="Learn how RAG grounds LLMs in your own data — with explained diagrams, code, quiz and exam.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="[CANONICAL_URL]">
+<meta name="theme-color" content="#0f1b2d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&display=swap" rel="stylesheet">
+<script type="application/json" id="itg-page-meta">
+{"slug":"ai-rag","title":"Retrieval-Augmented Generation (RAG)","description":"How RAG grounds LLMs in your own data.","category":"AI / LLM","level":"Beginner","techVersion":"2025 practices","tags":["rag","llm","embeddings","vector-db","retrieval"],"lastUpdated":"2026-09-04","learningPath":"Applied LLMs","prev":"","next":"Vector Databases","language":"en"}
+</script>
+<style>
+:root{
+  --ink:#0f1b2d; --ink-2:#1b2a41; --paper:#f5f4ef; --paper-2:#ffffff;
+  --text:#1c2431; --muted:#5b6676; --line:#dcd8cd;
+  --retrieval:#c9861f; --retrieval-soft:#f3e2c2;
+  --generation:#0f8a86; --generation-soft:#cfeae8;
+  --note:#f2c94c; --ok:#1f8a4c; --bad:#c0392b;
+  --card:#ffffff; --shadow:0 1px 0 rgba(15,27,45,.06),0 8px 24px -18px rgba(15,27,45,.4);
+  --radius:10px; --maxw:1200px;
+}
+html[data-theme="dark"]{
+  --ink:#0a1420; --ink-2:#101d2e; --paper:#0d1622; --paper-2:#111e2e;
+  --text:#e7ecf3; --muted:#9aa7b8; --line:#243449;
+  --retrieval:#e6a33a; --retrieval-soft:#3a2f16;
+  --generation:#3fb7b2; --generation-soft:#123330;
+  --card:#111e2e; --shadow:0 8px 24px -18px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.65;font-size:17px;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"Fraunces",Georgia,serif;line-height:1.15;color:var(--text)}
+h1{font-size:2.35rem;font-weight:900;margin:.2em 0 .3em}
+h2{font-size:1.6rem;font-weight:600;margin:0 0 .4em}
+h3{font-size:1.2rem;font-weight:600}
+a{color:var(--generation)}
+code,pre,.mono{font-family:"SF Mono",ui-monospace,"Cascadia Code",Consolas,monospace}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+
+/* top bars */
+#progressbar{position:fixed;top:0;left:0;height:3px;width:0;background:var(--retrieval);z-index:61}
+header.top{position:sticky;top:0;z-index:50;background:var(--ink);color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.06)}
+.navrow{display:flex;align-items:center;gap:14px;height:56px}
+.navrow .brand{font-family:"Fraunces",serif;font-weight:900;font-size:1.1rem;color:#fff;text-decoration:none;letter-spacing:.2px}
+.navrow .brand span{color:var(--retrieval)}
+.sitenav{display:flex;gap:4px;margin-left:8px}
+.sitenav a{color:#c7d2e0;text-decoration:none;font-size:.9rem;padding:6px 11px;border-radius:7px}
+.sitenav a:hover,.sitenav a.here{background:rgba(255,255,255,.12);color:#fff}
+.navrow .spacer{flex:1}
+.toolbtn{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.14);
+  border-radius:8px;padding:7px 11px;cursor:pointer;font-size:.85rem}
+.toolbtn:hover{background:rgba(255,255,255,.16)}
+.xp{font-size:.82rem;color:#cdd6e2;display:flex;align-items:center;gap:6px}
+#hamburger{display:none}
+/* breadcrumbs */
+.crumbs{background:var(--ink-2);border-top:1px solid rgba(255,255,255,.06)}
+.crumbs .wrap{display:flex;align-items:center;gap:7px;height:38px;font-size:.82rem;color:#aebbcc;overflow:auto;white-space:nowrap}
+.crumbs a{color:#c7d2e0;text-decoration:none}
+.crumbs a:hover{color:#fff}
+.crumbs .sep{opacity:.5}
+.crumbs .cur{color:#fff;font-weight:600}
+.crumbs .here-sec{margin-left:auto;color:var(--retrieval);font-weight:600}
+
+/* hero */
+.hero{background:linear-gradient(180deg,var(--ink) 0%,var(--ink-2) 100%);color:#eef2f7;padding:38px 0 30px}
+.hero .wrap{max-width:var(--maxw)}
+.hero h1{color:#fff;max-width:16ch}
+.hero .lede{color:#c7d2e0;font-size:1.12rem;max-width:60ch}
+.metaline{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 6px}
+.chip{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);color:#e7edf5;
+  padding:4px 10px;border-radius:999px;font-size:.78rem}
+.chip.amber{background:var(--retrieval);color:#231502;border-color:transparent}
+.chip.teal{background:var(--generation);color:#022;border-color:transparent}
+
+/* hero pipeline */
+.pipe{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.pipe .node{flex:1;min-width:120px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);
+  border-radius:10px;padding:12px 12px;text-align:center}
+.pipe .node b{display:block;font-size:.95rem;color:#fff}
+.pipe .node small{color:#aebbcc;font-size:.72rem}
+.pipe .node.r{border-color:var(--retrieval)}
+.pipe .node.g{border-color:var(--generation)}
+
+/* layout: left menu | content | right ad column */
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr) 312px;gap:24px;align-items:start;padding:22px 0 70px;
+  transition:grid-template-columns .2s}
+.layout.menu-collapsed{grid-template-columns:0 minmax(0,1fr) 312px}
+.layout.menu-collapsed nav.toc{opacity:0;pointer-events:none;transform:translateX(-8px)}
+@media(max-width:1100px){.layout,.layout.menu-collapsed{grid-template-columns:250px minmax(0,1fr)}
+  .rightcol{display:none}}
+nav.toc{position:sticky;top:104px;max-height:calc(100vh - 120px);overflow:auto;transition:opacity .2s,transform .2s;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+nav.toc h4{margin:.2em 0 .6em;font-size:.78rem;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;
+  display:flex;align-items:center;justify-content:space-between}
+#menuCollapse{background:none;border:1px solid var(--line);border-radius:6px;color:var(--muted);cursor:pointer;padding:1px 7px;font-size:.8rem}
+nav.toc a{display:block;color:var(--text);text-decoration:none;font-size:.9rem;padding:5px 8px;border-radius:6px}
+nav.toc a:hover{background:var(--paper)}
+nav.toc a.active{background:var(--retrieval-soft);color:var(--text);font-weight:600}
+.toc-search{width:100%;padding:8px;border:1px solid var(--line);border-radius:7px;margin-bottom:10px;
+  background:var(--paper-2);color:var(--text)}
+/* right column */
+.rightcol{position:sticky;top:104px;display:flex;flex-direction:column;gap:14px}
+.rightcol .box{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+.rightcol h4{margin:0 0 8px;font-family:"Fraunces",serif;font-size:1rem}
+.related a{display:block;text-decoration:none;color:var(--text);padding:8px 6px;border-radius:7px;border-bottom:1px solid var(--line)}
+.related a:last-child{border-bottom:none}
+.related a:hover{background:var(--paper)}
+.related small{color:var(--muted);display:block;font-size:.75rem}
+/* floating collapse-reopen tab when menu hidden */
+#menuReopen{display:none;position:fixed;left:0;top:120px;z-index:41;background:var(--ink);color:#fff;border:none;
+  border-radius:0 8px 8px 0;padding:9px 8px;cursor:pointer;writing-mode:vertical-rl}
+.layout.menu-collapsed ~ #menuReopen{display:block}
+/* drawer overlay (mobile) */
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:44}
+#overlay.show{display:block}
+.progwrap{margin-top:12px;font-size:.8rem;color:var(--muted)}
+.bar{height:8px;background:var(--paper);border-radius:99px;overflow:hidden;border:1px solid var(--line);margin-top:5px}
+.bar>i{display:block;height:100%;width:0;background:var(--generation);transition:width .3s}
+
+/* sections */
+main{min-width:0}
+section.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:24px 26px;margin:0 0 22px;box-shadow:var(--shadow)}
+section.card:target{outline:2px solid var(--retrieval)}
+.sechead{display:flex;align-items:flex-start;gap:10px}
+.sechead .num{font-family:"Fraunces",serif;font-weight:900;color:var(--retrieval);font-size:1.5rem;line-height:1}
+.sechead .prep{margin-left:auto;font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+p{max-width:72ch}
+ul,ol{max-width:72ch}
+
+/* callouts */
+.callout{border-left:4px solid var(--muted);background:var(--paper);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0}
+.callout b{display:block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+.callout.key{border-color:var(--generation)} .callout.key b{color:var(--generation)}
+.callout.watch{border-color:var(--bad)} .callout.watch b{color:var(--bad)}
+.callout.tip{border-color:var(--retrieval)} .callout.tip b{color:var(--retrieval)}
+.callout.hook{border-color:#7c5cff} .callout.hook b{color:#7c5cff}
+
+/* diagram */
+.diagram{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:18px;margin:16px 0}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);margin:10px 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.swatch{width:13px;height:13px;border-radius:3px;display:inline-block}
+.howto{font-size:.85rem;color:var(--muted);font-style:italic;margin:6px 0 2px}
+.stepctrls{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.svgbox svg{width:100%;height:auto}
+.svg-node{transition:opacity .2s}
+.svg-node.dim{opacity:.28}
+.stepcap{margin-top:8px;background:var(--card);border:1px dashed var(--line);border-radius:8px;padding:8px 12px;font-size:.9rem}
+
+/* code */
+.codeblock{position:relative;margin:16px 0}
+pre{background:var(--ink);color:#e7edf5;border-radius:10px;padding:16px;overflow:auto;font-size:.86rem;line-height:1.55}
+pre .cm{color:#8aa0bd}
+.copybtn{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);
+  border-radius:6px;padding:4px 9px;font-size:.75rem;cursor:pointer}
+.copybtn:hover{background:rgba(255,255,255,.22)}
+
+/* table */
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+th{background:var(--paper);font-family:"Fraunces",serif}
+
+/* quiz + exam */
+.q{border:1px solid var(--line);border-radius:9px;padding:14px 16px;margin:12px 0;background:var(--paper-2)}
+.q .qt{font-weight:600;margin-bottom:8px}
+.q label{display:block;padding:8px 10px;border:1px solid var(--line);border-radius:7px;margin:6px 0;cursor:pointer;background:var(--card)}
+.q label:hover{border-color:var(--retrieval)}
+.q label.correct{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent)}
+.q label.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}
+.q .expl{margin-top:8px;font-size:.88rem;color:var(--muted);display:none}
+.q .expl.show{display:block}
+.q .tag{font-size:.68rem;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:1px 7px;margin-left:6px}
+.primary{background:var(--generation);color:#fff;border:none;border-radius:8px;padding:11px 20px;font-size:1rem;font-weight:600;cursor:pointer}
+.primary:hover{filter:brightness(1.06)}
+.ghost{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:10px 16px;cursor:pointer}
+.result{display:none;margin:16px 0;padding:16px;border-radius:10px;border:1px solid var(--line);background:var(--paper);text-align:center}
+.result.show{display:block}
+.result .emoji{font-size:2.6rem}
+.result .pct{font-size:1.5rem;font-weight:700;font-family:"Fraunces",serif}
+.pass{color:var(--ok);font-weight:700} .fail{color:var(--bad);font-weight:700}
+.weak{text-align:left;margin-top:12px;font-size:.9rem}
+.weak a{display:inline-block;margin:2px 0}
+.timer{font-family:"Fraunces",serif;font-weight:900;font-size:1.3rem}
+.timer.warn{color:var(--bad)}
+.exam-locked .q{filter:blur(4px);pointer-events:none;user-select:none}
+.hidden{display:none!important}
+
+/* notes */
+.noted-word{background:linear-gradient(180deg,transparent 60%,var(--note) 60%);border-bottom:2px solid var(--note);
+  cursor:pointer;border-radius:2px}
+#notePop{position:absolute;z-index:80;background:var(--card);border:1px solid var(--line);border-radius:10px;
+  box-shadow:var(--shadow);padding:12px;width:250px;display:none}
+#notePop textarea{width:100%;min-height:60px;border:1px solid var(--line);border-radius:7px;padding:7px;
+  background:var(--paper-2);color:var(--text);font-family:inherit;resize:vertical}
+#notePop .row{display:flex;gap:6px;margin-top:8px}
+#notePop button{flex:1;font-size:.82rem;padding:7px;border-radius:7px;cursor:pointer;border:1px solid var(--line);background:var(--paper);color:var(--text)}
+#notePop button.save{background:var(--generation);color:#fff;border:none}
+#notePop button.del{background:var(--bad);color:#fff;border:none}
+
+.sidepanel{position:fixed;top:0;right:0;height:100vh;width:340px;max-width:88vw;background:var(--card);
+  border-left:1px solid var(--line);box-shadow:var(--shadow);transform:translateX(100%);transition:transform .25s;z-index:70;
+  display:flex;flex-direction:column}
+.sidepanel.open{transform:translateX(0)}
+.sidepanel header{display:flex;align-items:center;gap:8px;padding:14px;border-bottom:1px solid var(--line)}
+.sidepanel header b{font-family:"Fraunces",serif}
+.sidepanel .body{overflow:auto;padding:12px;flex:1}
+.tabbtn{background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:6px 10px;cursor:pointer;font-size:.8rem;color:var(--text)}
+.tabbtn.active{background:var(--retrieval-soft);font-weight:600}
+.noterow{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;background:var(--paper-2)}
+.noterow .w{font-weight:600;color:var(--retrieval)}
+.noterow .meta{font-size:.72rem;color:var(--muted);margin-top:4px}
+.noterow .acts{display:flex;gap:6px;margin-top:6px}
+.noterow .acts button{font-size:.72rem;padding:4px 9px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer}
+.empty{color:var(--muted);font-size:.9rem;padding:8px}
+.notes-by-sec h4{margin:14px 0 6px;font-family:"Fraunces",serif;font-size:1rem}
+
+/* ads */
+.itg-ad{margin:18px 0;border:1px dashed var(--line);border-radius:8px;display:flex;align-items:center;
+  justify-content:center;color:var(--muted);font-size:.75rem;background:var(--paper)}
+.itg-ad::before{content:"Advertisement"}
+html[data-adfree="true"] .itg-ad{display:none}
+body.exam-active .itg-ad[data-slot="sidebar-sticky"],
+body.exam-active .itg-ad[data-slot="mobile-anchor"]{display:none}
+.itg-ad[data-slot="sidebar-sticky"]{margin:0}
+/* real ad unit container (AdSense) */
+.adbox{padding:8px}
+.adbox .adlabel{display:block;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:6px}
+.adbox ins{display:block;min-height:600px;background:var(--paper);border-radius:6px}
+html[data-adfree="true"] .adbox{display:none}
+.itg-ad[data-slot="mobile-anchor"]{position:fixed;left:0;bottom:0;width:100%;z-index:40;margin:0;background:var(--card)}
+@media(min-width:768px){.itg-ad[data-slot="mobile-anchor"]{display:none}}
+
+/* misc */
+.reveal{cursor:pointer;color:var(--generation);font-weight:600;font-size:.9rem}
+.revealbox{display:none;margin-top:6px;padding:8px 12px;background:var(--paper);border-radius:7px;font-size:.9rem}
+.revealbox.show{display:block}
+.objlist li{margin:4px 0}
+footer.foot{background:var(--ink);color:#c7d2e0;padding:26px 0;font-size:.85rem;text-align:center}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:11px 18px;border-radius:99px;font-size:.88rem;z-index:90;opacity:0;transition:opacity .3s;box-shadow:var(--shadow)}
+.toast.show{opacity:1}
+
+/* ===== v8: TERM TOOLTIPS ===== */
+.term{border-bottom:1px dotted var(--generation);cursor:help;text-decoration:none}
+html[data-theme="dark"] .term{border-bottom-color:var(--generation)}
+#termTip{position:absolute;z-index:85;max-width:260px;background:var(--ink);color:#eef2f7;
+  border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;font-size:.83rem;line-height:1.5;
+  box-shadow:var(--shadow);opacity:0;transform:translateY(4px) scale(.98);transition:opacity .16s,transform .16s;pointer-events:none}
+#termTip.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+#termTip b{color:var(--retrieval);display:block;margin-bottom:2px;font-family:"Fraunces",serif}
+#termTip a{color:var(--generation);font-size:.78rem}
+
+/* ===== v8: SCROLL-REVEAL (progressive enhancement — visible by default) ===== */
+.reveal{opacity:1;transform:none}
+body.anim .reveal{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+body.anim .reveal.in{opacity:1;transform:none}
+
+/* ===== v8: quiz/exam feedback + result animation ===== */
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.04)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+@keyframes emojiIn{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+body.anim .q label.correct{animation:pop .4s ease}
+body.anim .q label.wrong{animation:shake .4s ease}
+body.anim .result.show .emoji{animation:emojiIn .5s cubic-bezier(.2,1.3,.4,1)}
+/* diagram flow dots */
+.flow-dot{opacity:.9}
+body.reduce .flow-dot{display:none}
+
+/* ===== v10: FULL-SCREEN EXAM OVERLAY ===== */
+body.exam-open{overflow:hidden}
+#examOverlay{position:fixed;inset:0;z-index:100;background:var(--paper);display:none;flex-direction:column}
+#examOverlay.open{display:flex}
+body.anim #examOverlay.open{animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.exam-top{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--ink);color:#fff;flex-wrap:wrap}
+.exam-top .timer{color:#fff;margin-left:auto}
+.exam-top .timer.warn{color:#ff8a8a}
+.exam-counter{font-weight:600;font-family:"Fraunces",serif}
+.exam-dots{display:flex;gap:5px;flex-wrap:wrap;max-width:50%}
+.exam-dots i{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.28);display:block;transition:background .2s}
+.exam-dots i.answered{background:var(--generation)}
+.exam-dots i.flagged{background:var(--retrieval)}
+.exam-dots i.current{outline:2px solid #fff;outline-offset:1px}
+.exam-cancel{border-color:rgba(255,255,255,.4);color:#fff;background:rgba(255,255,255,.08)}
+.exam-stage{flex:1;overflow:auto;padding:26px 20px;max-width:820px;margin:0 auto;width:100%}
+.exam-nav{display:flex;gap:10px;padding:14px 16px;border-top:1px solid var(--line);
+  justify-content:space-between;max-width:820px;margin:0 auto;width:100%;background:var(--paper)}
+.exam-nav.hidden{display:none}
+.exam-q h3{font-size:1.35rem;margin:0 0 18px;line-height:1.3}
+.exam-opts label{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:10px;margin:10px 0;
+  cursor:pointer;background:var(--card);font-size:1.02rem;transition:border-color .15s,background .15s}
+.exam-opts label:hover{border-color:var(--retrieval)}
+.exam-opts label.chosen{border-color:var(--generation);background:var(--generation-soft)}
+.exam-flagline{margin-top:14px;font-size:.85rem;color:var(--retrieval)}
+/* review grid */
+.rev-wrap h3{font-family:"Fraunces",serif;margin:0 0 6px}
+.rev-counts{color:var(--muted);font-size:.9rem;margin-bottom:16px}
+.rev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:9px;margin-bottom:22px}
+.rev-grid button{padding:11px 0;border-radius:9px;border:1px solid var(--line);cursor:pointer;background:var(--card);
+  color:var(--text);font-weight:600;position:relative}
+.rev-grid button.answered{background:var(--generation-soft);border-color:var(--generation)}
+.rev-grid button.unanswered{opacity:.55}
+.rev-grid button.flagged::after{content:"⚑";position:absolute;top:-6px;right:-4px;font-size:.7rem;color:var(--retrieval)}
+.rev-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);margin-bottom:18px}
+/* result view */
+.exam-result-head{text-align:center;margin-bottom:8px}
+.exam-result-head .emoji{font-size:3rem}
+body.anim .exam-result-head .emoji{animation:emojiIn .5s cubic-bezier(.2,1.3,.4,1)}
+.exam-result-head .pct{font-size:1.8rem;font-weight:800;font-family:"Fraunces",serif}
+.reviewItem{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0;background:var(--card)}
+.reviewItem .rq{font-weight:600;margin-bottom:10px}
+.reviewItem .opt{padding:8px 12px;border:1px solid var(--line);border-radius:7px;margin:5px 0;font-size:.95rem}
+.reviewItem .opt.correct{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 13%,transparent)}
+.reviewItem .opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 13%,transparent)}
+.reviewItem .opt .mk{font-weight:700;margin-right:6px}
+.reviewItem .ans{font-size:.88rem;margin-top:8px}
+.reviewItem .rexpl{font-size:.88rem;color:var(--muted);margin-top:6px}
+.notans{color:var(--bad);font-size:.8rem;font-weight:600}
+/* proverb + confetti */
+.proverb{text-align:center;background:linear-gradient(180deg,var(--generation-soft),transparent);
+  border:1px solid var(--line);border-radius:14px;padding:22px 20px;margin-bottom:18px}
+.proverb .quote{font-family:"Fraunces",serif;font-size:1.35rem;font-weight:600;line-height:1.35;color:var(--text)}
+.proverb .sub{color:var(--muted);font-size:.85rem;margin-top:8px}
+body.anim .proverb .quote{animation:proverbIn .7s cubic-bezier(.2,1.2,.3,1) both}
+@keyframes proverbIn{0%{opacity:0;transform:translateY(10px) scale(.96)}100%{opacity:1;transform:none}}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:110;overflow:hidden;display:none}
+#confetti.go{display:block}
+.confetti-piece{position:absolute;top:-14px;width:9px;height:14px;opacity:.9;will-change:transform}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+body.reduce #confetti{display:none!important}
+@media(max-width:600px){.exam-stage{padding:20px 14px}.exam-q h3{font-size:1.15rem}}
+
+/* ===== FLASHCARDS (3D flip) ===== */
+.fcard{perspective:1200px;cursor:pointer;max-width:520px;margin:0 auto;height:220px}
+.fcard-inner{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d}
+body.reduce .fcard-inner{transition:none}
+.fcard.flipped .fcard-inner{transform:rotateY(180deg)}
+.fcard-face{position:absolute;inset:0;backface-visibility:hidden;border:1px solid var(--line);border-radius:14px;
+  padding:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:var(--card);box-shadow:var(--shadow)}
+.fcard-face .lbl{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);position:absolute;top:12px;left:16px}
+.fcard-front{font-family:"Fraunces",serif;font-size:1.35rem}
+.fcard-back{transform:rotateY(180deg);background:var(--generation-soft);font-size:1.05rem;line-height:1.5}
+.fc-rate{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.fc-rate button{border:1px solid var(--line);background:var(--paper);color:var(--text);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.85rem}
+.fc-rate button:hover{border-color:var(--retrieval)}
+.fc-rate button.again{border-color:var(--bad)} .fc-rate button.easy{border-color:var(--ok)}
+
+/* ===== v8: reduce-motion — the master off switch ===== */
+body.reduce .reveal{opacity:1!important;transform:none!important;transition:none!important}
+body.reduce *{animation:none!important}
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1!important;transform:none!important}
+  #termTip{transition:none}
+}
+/* mobile: left menu becomes a slide-out drawer */
+@media(max-width:820px){
+  .layout,.layout.menu-collapsed{grid-template-columns:1fr}
+  #hamburger{display:inline-block}
+  .sitenav{display:none}
+  #menuReopen{display:none!important}
+  nav.toc{position:fixed;top:0;left:0;height:100vh;width:270px;max-width:82vw;z-index:45;border-radius:0;
+    transform:translateX(-100%);opacity:1;transition:transform .25s;max-height:none}
+  .layout.menu-collapsed nav.toc{opacity:1;transform:translateX(-100%);pointer-events:auto}
+  body.drawer-open nav.toc{transform:translateX(0)}
+  #menuCollapse{display:none}
+}
+@media print{header.top,nav.toc,.itg-ad,.sidepanel,#notePop,.toolbtn,.hero .pipe,footer.foot{display:none!important}
+  .q .expl{display:block!important}section.card{box-shadow:none;border-color:#ccc}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div id="progressbar"></div>
+
+<header class="top">
+  <div class="wrap navrow">
+    <button class="toolbtn" id="hamburger" title="Menu" aria-label="Open menu">☰</button>
+    <a class="brand" href="#top">IT<span>Tech</span>Genie</a>
+    <nav class="sitenav" aria-label="Site">
+      <a href="#">Home</a>
+      <a href="#" class="here">Tutorials</a>
+      <a href="#">Categories</a>
+      <a href="#">About</a>
+    </nav>
+    <div class="spacer"></div>
+    <span class="xp" id="xpwrap" title="Experience points">⚡ <b id="xpval">0</b> XP · Lvl <b id="lvl">1</b></span>
+    <button class="toolbtn" id="notesBtn" title="Open notes & bookmarks">🗒 Notes</button>
+    <button class="toolbtn" id="muteBtn" title="Toggle sound">🔊</button>
+    <button class="toolbtn" id="motionBtn" title="Reduce motion">🌀</button>
+    <button class="toolbtn" id="themeBtn" title="Light / dark">🌗</button>
+  </div>
+  <div class="crumbs">
+    <div class="wrap">
+      <a href="#">Home</a><span class="sep">›</span>
+      <a href="#">Learners</a><span class="sep">›</span>
+      <a href="#">AI / LLM</a><span class="sep">›</span>
+      <span class="cur">RAG</span>
+      <span class="here-sec" id="hereSec"></span>
+    </div>
+  </div>
+</header>
+
+<div class="hero" id="top">
+  <div class="wrap">
+    <div class="metaline">
+      <span class="chip amber">AI / LLM</span>
+      <span class="chip">Beginner</span>
+      <span class="chip">Reviewed for: 2025 practices</span>
+      <span class="chip" id="readtime">~ min read</span>
+      <span class="chip">Updated: 4 Sep 2026</span>
+    </div>
+    <h1>Retrieval-Augmented Generation</h1>
+    <p class="lede">Give a language model an open-book exam instead of a closed-book one. RAG fetches the right facts from your own documents at question time and hands them to the model before it answers.</p>
+    <div class="pipe" aria-hidden="true">
+      <div class="node"><b>1 · Query</b><small>User asks a question</small></div>
+      <div class="node r"><b>2 · Retrieve</b><small>Find matching chunks</small></div>
+      <div class="node r"><b>3 · Augment</b><small>Stuff chunks into prompt</small></div>
+      <div class="node g"><b>4 · Generate</b><small>LLM answers from them</small></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap layout">
+  <!-- TOC -->
+  <nav class="toc" aria-label="Table of contents">
+    <h4>Contents <button id="menuCollapse" title="Hide menu">⟨ Hide</button></h4>
+    <input class="toc-search" id="tocSearch" placeholder="Filter sections…" aria-label="Filter sections">
+    <div id="tocLinks"></div>
+    <div class="progwrap">
+      <span id="progText">0 / 8 prepared</span>
+      <div class="bar"><i id="progFill"></i></div>
+      <button class="ghost" id="resetProg" style="margin-top:8px;width:100%;font-size:.8rem;padding:6px">Reset progress</button>
+    </div>
+  </nav>
+
+  <main id="content">
+    <div class="itg-ad" data-slot="top-leaderboard" style="min-height:90px"></div>
+
+    <!-- 1 Intro -->
+    <section class="card" id="intro" data-sec="What RAG is">
+      <div class="sechead"><span class="num">1</span><div><h2>What RAG is, and the problem it solves</h2></div>
+        <label class="prep"><input type="checkbox" class="prepbox"> Mark as prepared</label></div>
+      <p><b>Learning objectives:</b></p>
+      <ul class="objlist">
+        <li>Explain what Retrieval-Augmented Generation does in one sentence.</li>
+        <li>Describe why plain LLMs hallucinate on private or fresh data.</li>
+        <li>Name the four stages of a RAG pipeline.</li>
+      </ul>
+      <p>A large language model learns from a fixed snapshot of text taken before its training cutoff. It has no memory of your company wiki, last night's support tickets, or a PDF you uploaded a minute ago. Ask it about those and it will often <em>hallucinate</em> — produce a fluent, confident answer that is simply invented, because the model is built to predict plausible words, not to check facts.</p>
+      <p><b>Retrieval-Augmented Generation</b> fixes this by adding a lookup step. Before the model answers, the system <em>retrieves</em> the most relevant passages from a knowledge source you control, pastes them into the prompt, and asks the model to answer using those passages. The model still writes the sentence, but now it is reading from the right page while it does so.</p>
+      <div class="callout key"><b>Remember it as</b>Closed-book exam (plain LLM, guessing from memory) → open-book exam (RAG, answering with the source in front of it).</div>
+      <p><b>Without RAG:</b> the model guesses from stale training memory, cannot cite anything, and cannot see private data. <b>With RAG:</b> answers are grounded in current, specific documents, can quote sources, and update the moment you add a new file — no retraining required.</p>
+    </section>
+
+    <!-- 2 Beginner analogy -->
+    <section class="card" id="analogy" data-sec="Beginner analogy">
+      <div class="sechead"><span class="num">2</span><div><h2>The librarian analogy</h2></div>
+        <label class="prep"><input type="checkbox" class="prepbox"> Mark as prepared</label></div>
+      <p>Imagine you ask a brilliant but forgetful friend a detailed question about a book they read years ago. Answering from memory, they get the gist right but muddle the details. Now imagine a librarian who, before your friend speaks, dashes to the shelves, pulls the three exact pages that mention your topic, and lays them open in front of your friend. Same friend, far better answer.</p>
+      <ol>
+        <li><b>You (the query):</b> "What was the character's motive in chapter nine?"</li>
+        <li><b>The librarian (the retriever):</b> finds the passages that match your question, not by keyword alone but by <em>meaning</em>.</li>
+        <li><b>The open pages (the augmented prompt):</b> the retrieved text placed beside your question.</li>
+        <li><b>Your friend (the generator/LLM):</b> reads those pages and answers in natural language.</li>
+      </ol>
+      <div class="callout hook"><b>Memory hook</b>Retriever = librarian, vector store = the shelves, chunks = the pages pulled, LLM = the friend who talks. We reuse this cast for the rest of the tutorial.</div>
+      <p class="reveal" data-r>Check yourself: in this analogy, what plays the role of "the shelves"? ▸</p>
+      <div class="revealbox">The vector store / vector database — the organised collection the librarian searches through.</div>
+    </section>
+
+    <div class="itg-ad" data-slot="in-content-1" style="min-height:250px"></div>
+
+    <!-- 3 Technical + diagram -->
+    <section class="card" id="technical" data-sec="How it works">
+      <div class="sechead"><span class="num">3</span><div><h2>How it works, stage by stage</h2></div>
+        <label class="prep"><input type="checkbox" class="prepbox"> Mark as prepared</label></div>
+      <p><b>Precise definition:</b> RAG is an architecture that conditions an LLM's output on documents fetched at inference time from an external store, using vector similarity between the query and pre-computed document embeddings.</p>
+      <h3>Glossary of the moving parts</h3>
+      <ul>
+        <li><b>Embedding</b> — a list of numbers that captures the <em>meaning</em> of a piece of text, so similar meanings sit close together in vector space.</li>
+        <li><b>Chunk</b> — a document split into a bite-sized passage (often a few hundred tokens) that can be retrieved on its own.</li>
+        <li><b>Vector database</b> — a store built to find the nearest vectors to a query vector quickly.</li>
+        <li><b>Retriever</b> — the component that turns a query into a vector and pulls the top-k nearest chunks.</li>
+        <li><b>top-k</b> — how many chunks you fetch (e.g. the 4 closest).</li>
+        <li><b>Context window</b> — the maximum text the LLM can read at once; retrieved chunks must fit inside it.</li>
+      </ul>
+
+      <div class="diagram">
+        <div class="svgbox">
+          <svg viewBox="0 0 720 220" role="img" aria-label="RAG architecture diagram">
+            <g class="svg-node" data-step="1">
+              <rect x="8" y="86" width="110" height="48" rx="8" fill="var(--card)" stroke="var(--generation)"/>
+              <text x="63" y="107" text-anchor="middle" font-size="13" fill="var(--text)">Query</text>
+              <text x="63" y="123" text-anchor="middle" font-size="10" fill="var(--muted)">user question</text>
+            </g>
+            <g class="svg-node" data-step="2">
+              <rect x="150" y="86" width="120" height="48" rx="8" fill="var(--retrieval-soft)" stroke="var(--retrieval)"/>
+              <text x="210" y="107" text-anchor="middle" font-size="13" fill="var(--text)">Embed + search</text>
+              <text x="210" y="123" text-anchor="middle" font-size="10" fill="var(--muted)">retriever</text>
+            </g>
+            <g class="svg-node" data-step="2">
+              <rect x="150" y="10" width="120" height="46" rx="8" fill="var(--card)" stroke="var(--retrieval)" stroke-dasharray="4 3"/>
+              <text x="210" y="30" text-anchor="middle" font-size="12" fill="var(--text)">Vector DB</text>
+              <text x="210" y="46" text-anchor="middle" font-size="10" fill="var(--muted)">the shelves</text>
+            </g>
+            <g class="svg-node" data-step="3">
+              <rect x="302" y="86" width="120" height="48" rx="8" fill="var(--retrieval-soft)" stroke="var(--retrieval)"/>
+              <text x="362" y="107" text-anchor="middle" font-size="13" fill="var(--text)">Augment prompt</text>
+              <text x="362" y="123" text-anchor="middle" font-size="10" fill="var(--muted)">query + chunks</text>
+            </g>
+            <g class="svg-node" data-step="4">
+              <rect x="454" y="86" width="110" height="48" rx="8" fill="var(--generation-soft)" stroke="var(--generation)"/>
+              <text x="509" y="107" text-anchor="middle" font-size="13" fill="var(--text)">LLM</text>
+              <text x="509" y="123" text-anchor="middle" font-size="10" fill="var(--muted)">generator</text>
+            </g>
+            <g class="svg-node" data-step="4">
+              <rect x="596" y="86" width="116" height="48" rx="8" fill="var(--card)" stroke="var(--generation)"/>
+              <text x="654" y="107" text-anchor="middle" font-size="13" fill="var(--text)">Answer</text>
+              <text x="654" y="123" text-anchor="middle" font-size="10" fill="var(--muted)">grounded reply</text>
+            </g>
+            <g stroke="var(--muted)" stroke-width="1.6" fill="none" marker-end="url(#a)">
+              <path d="M118 110 H150"/><path d="M270 110 H302"/><path d="M210 56 V86"/>
+              <path d="M422 110 H454"/><path d="M564 110 H596"/>
+            </g>
+            <defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="var(--muted)"/></marker></defs>
+            <!-- animated data-flow tokens (pause under reduced motion) -->
+            <circle class="flow-dot" r="4" fill="var(--retrieval)"><animate attributeName="cx" values="118;150" dur="1.1s" repeatCount="indefinite"/><animate attributeName="cy" values="110;110" dur="1.1s" repeatCount="indefinite"/></circle>
+            <circle class="flow-dot" r="4" fill="var(--retrieval)"><animate attributeName="cx" values="210;210" dur="1.1s" begin="0.3s" repeatCount="indefinite"/><animate attributeName="cy" values="56;86" dur="1.1s" begin="0.3s" repeatCount="indefinite"/></circle>
+            <circle class="flow-dot" r="4" fill="var(--retrieval)"><animate attributeName="cx" values="270;302" dur="1.1s" begin="0.5s" repeatCount="indefinite"/><animate attributeName="cy" values="110;110" dur="1.1s" begin="0.5s" repeatCount="indefinite"/></circle>
+            <circle class="flow-dot" r="4" fill="var(--generation)"><animate attributeName="cx" values="422;454" dur="1.1s" begin="0.7s" repeatCount="indefinite"/><animate attributeName="cy" values="110;110" dur="1.1s" begin="0.7s" repeatCount="indefinite"/></circle>
+            <circle class="flow-dot" r="4" fill="var(--generation)"><animate attributeName="cx" values="564;596" dur="1.1s" begin="0.9s" repeatCount="indefinite"/><animate attributeName="cy" values="110;110" dur="1.1s" begin="0.9s" repeatCount="indefinite"/></circle>
+          </svg>
+        </div>
+        <p class="howto">How to read this: follow the arrows left to right; the box on top is the store the retriever reaches into.</p>
+        <div class="legend">
+          <span><span class="swatch" style="background:var(--retrieval)"></span> Retrieval stage</span>
+          <span><span class="swatch" style="background:var(--generation)"></span> Generation stage</span>
+        </div>
+        <div class="stepctrls">
+          <button class="ghost" id="dPrev">‹ Prev</button>
+          <button class="ghost" id="dNext">Next ›</button>
+          <button class="ghost" id="dPlay">▶ Play</button>
+        </div>
+        <div class="stepcap" id="dCap">Diagram 1. Press Next to walk each stage.</div>
+      </div>
+      <p><b>Component by component:</b> the <em>Query</em> box is the raw question. The <em>Embed + search</em> box (retriever) converts it to a vector and asks the <em>Vector DB</em> for the nearest chunks. <em>Augment prompt</em> glues those chunks onto the question. The <em>LLM</em> reads the combined text and writes the <em>Answer</em>. Every arrow is a hand-off of data to the next stage.</p>
+    </section>
+
+    <!-- 4 Simple example -->
+    <section class="card" id="example" data-sec="Simple example">
+      <div class="sechead"><span class="num">4</span><div><h2>A worked example, line by line</h2></div>
+        <label class="prep"><input type="checkbox" class="prepbox"> Mark as prepared</label></div>
+      <p>Say your knowledge base is a single sentence chunk: <em>"The Q3 refund policy allows returns within 45 days."</em> A user asks: <em>"How long do I have to return something?"</em></p>
+      <ol>
+        <li>The retriever embeds the question and finds that chunk is the closest match by meaning (note it never says "45 days" in the question).</li>
+        <li>The system builds a prompt: <span class="mono">"Using this context: [refund chunk]. Answer: How long do I have to return something?"</span></li>
+        <li>The LLM reads the chunk and answers: <em>"You have 45 days to return an item under the Q3 refund policy."</em></li>
+      </ol>
+      <p><b>Final result and why:</b> the answer is correct and specific because the fact came from your document, not the model's memory. Remove the retrieval step and the model would guess a generic number.</p>
+    </section>
+
+    <!-- 5 Industry example -->
+    <section class="card" id="industry" data-sec="Industry example">
+      <div class="sechead"><span class="num">5</span><div><h2>Real-world: a customer-support assistant</h2></div>
+        <label class="prep"><input type="checkbox" class="prepbox"> Mark as prepared</label></div>
+      <p>A SaaS company points a RAG assistant at its help-centre articles, changelog, and past resolved tickets. When a customer types "my export is stuck," the retriever surfaces the three most relevant troubleshooting passages, the LLM composes a tailored reply that cites the exact article, and a human agent approves it. Because the store is re-indexed nightly, a fix shipped yesterday is answerable today — with no model retraining and no engineer in the loop.</p>
+      <div class="callout tip"><b>Pro tip</b>Store a source link with every chunk. Then the generated answer can cite it, which is what turns a chatbot people distrust into one they do.</div>
+    </section>
+
+    <!-- 6 Code -->
+    <section class="card" id="code" data-sec="Code examples">
+      <div class="sechead"><span class="num">6</span><div><h2>Code: indexing, then answering</h2></div>
+        <label class="prep"><input type="checkbox" class="prepbox"> Mark as prepared</label></div>
+      <p>First you build the index once (offline). This splits documents into chunks, embeds them, and stores the vectors.</p>
+      <div class="codeblock">
+        <button class="copybtn">Copy</button>
+<pre><span class="cm"># 1. INDEXING — run once, or whenever documents change</span>
+chunks = split_into_chunks(load_documents("./docs"), size=400)
+vectors = embed(chunks)                 <span class="cm"># text -> meaning vectors</span>
+store = VectorDB()
+store.add(vectors, metadata=chunks)     <span class="cm"># keep the text + source link</span></pre>
+      </div>
+      <p><b>What & why:</b> chunking keeps each retrievable unit small enough to be specific and to fit the context window. Embedding happens now so that query time only needs one fast lookup, not a re-scan of every document.</p>
+      <p>Then you answer queries (online, per request):</p>
+      <div class="codeblock">
+        <button class="copybtn">Copy</button>
+<pre><span class="cm"># 2. ANSWERING — runs for every user question</span>
+def answer(question):
+    q_vec = embed([question])[0]
+    hits  = store.search(q_vec, top_k=4)      <span class="cm"># nearest chunks</span>
+    context = "\n\n".join(h.text for h in hits)
+    prompt = f"Use ONLY this context:\n{context}\n\nQ: {question}"
+    return llm(prompt)                         <span class="cm"># grounded answer</span></pre>
+      </div>
+      <p><b>What & why:</b> <span class="mono">top_k=4</span> balances coverage against noise — too few misses facts, too many drowns the model. "Use ONLY this context" is the instruction that discourages the model from falling back on its own guesses.</p>
+    </section>
+
+    <div class="itg-ad" data-slot="in-content-2" style="min-height:250px"></div>
+
+    <!-- 7 Comparison -->
+    <section class="card" id="compare" data-sec="RAG vs alternatives">
+      <div class="sechead"><span class="num">7</span><div><h2>RAG vs fine-tuning vs long context</h2></div>
+        <label class="prep"><input type="checkbox" class="prepbox"> Mark as prepared</label></div>
+      <table>
+        <tr><th>Approach</th><th>Best for</th><th>Freshness</th><th>Cost to update</th></tr>
+        <tr><td>RAG</td><td>Factual answers from a changing knowledge base</td><td>Instant (re-index)</td><td>Low</td></tr>
+        <tr><td>Fine-tuning</td><td>Teaching style, format, or a skill</td><td>Frozen at train time</td><td>High (retrain)</td></tr>
+        <tr><td>Long context (paste it all)</td><td>One-off over a small doc set</td><td>Per request</td><td>High token cost</td></tr>
+      </table>
+      <p><b>When to pick which:</b> reach for RAG when facts change or are private and you need citations. Fine-tune when you need the model to <em>behave</em> differently, not know different facts. Use raw long context only when the whole corpus comfortably fits the window and you won't repeat the query often.</p>
+    </section>
+
+    <!-- 8 Best practices + troubleshooting -->
+    <section class="card" id="practices" data-sec="Best practices">
+      <div class="sechead"><span class="num">8</span><div><h2>Best practices &amp; common errors</h2></div>
+        <label class="prep"><input type="checkbox" class="prepbox"> Mark as prepared</label></div>
+      <p><b>Do:</b></p>
+      <ul>
+        <li>Keep chunks semantically whole (a full paragraph or step). <em>Why:</em> a chunk cut mid-idea retrieves poorly.</li>
+        <li>Store a source link per chunk. <em>Why:</em> enables citations and human verification.</li>
+        <li>Evaluate retrieval separately from generation. <em>Why:</em> most bad answers are actually bad retrieval.</li>
+      </ul>
+      <p><b>Common mistakes:</b></p>
+      <ul>
+        <li>Chunks too large. <em>Why it hurts:</em> they blow the context budget and dilute the relevant sentence.</li>
+        <li>Trusting the model to say "I don't know." <em>Why:</em> without an instruction to refuse, it invents.</li>
+      </ul>
+      <div class="callout watch"><b>Watch out</b>If answers are wrong, inspect the retrieved chunks first. Nine times in ten the right passage never made it into the prompt — a retrieval bug, not a model bug.</div>
+      <table>
+        <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+        <tr><td>Answer ignores your docs</td><td>Retriever returned irrelevant chunks</td><td>Improve chunking / embedding model; check top-k</td></tr>
+        <tr><td>Answer is truncated</td><td>Chunks overflow the context window</td><td>Lower top_k or chunk size</td></tr>
+        <tr><td>Model still hallucinates</td><td>No "use only context" instruction</td><td>Add a grounding + refusal instruction</td></tr>
+      </table>
+    </section>
+
+    <!-- FLASHCARDS -->
+    <section class="card" id="flashcards" data-sec="Flashcards">
+      <div class="sechead"><span class="num">🃏</span><div><h2>Flashcards</h2></div></div>
+      <p style="color:var(--muted);font-size:.92rem">Click a card to flip it. Rate how well you knew it — cards you find hard come back sooner (saved in this browser).</p>
+      <div id="fcStat" style="font-size:.85rem;color:var(--muted);margin-bottom:10px"></div>
+      <div id="fcStage"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+        <button class="ghost" id="fcPrev">‹ Prev</button>
+        <button class="ghost" id="fcShuffle">🔀 Shuffle</button>
+        <button class="ghost" id="fcDue">Study due only</button>
+        <button class="ghost" id="fcNext">Next ›</button>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="card" id="quiz" data-sec="Practice quiz">
+      <div class="sechead"><span class="num">✓</span><div><h2>Practice quiz</h2></div></div>
+      <p style="color:var(--muted);font-size:.9rem">Answer all questions, then submit at the bottom. Explanations appear after submit.</p>
+      <div id="quizBox"></div>
+      <div class="result" id="quizResult"></div>
+      <div class="itg-ad hidden" data-slot="post-quiz" id="postQuizAd" style="min-height:250px"></div>
+      <button class="primary" id="quizSubmit">Submit quiz</button>
+      <button class="ghost" id="quizRetry" style="display:none">Retry</button>
+    </section>
+
+    <!-- EXAM -->
+    <section class="card" id="exam" data-sec="Timed exam">
+      <div class="sechead"><span class="num">★</span><div><h2>Timed exam</h2></div></div>
+      <p style="color:var(--muted);font-size:.92rem">15 questions · 10 minutes · one question at a time. The exam opens full-screen so you can't refer back to the tutorial — you can <b>Cancel</b> anytime to return here. Answers and explanations are shown after you submit.</p>
+      <button class="primary" id="startExam">Start test</button>
+      <div id="examDoneNote" style="display:none;margin-top:12px" class="callout key"><b>Exam complete</b>Reopen anytime to try again.</div>
+    </section>
+
+    <!-- MY NOTES (end of content) -->
+    <section class="card" id="mynotes" data-sec="My notes">
+      <div class="sechead"><span class="num">🗒</span><div><h2>My notes</h2></div></div>
+      <p style="color:var(--muted);font-size:.9rem" id="notesHint">Double-click any word in the tutorial above to save a note. Your notes are stored in this browser and collected here.</p>
+      <div id="endNotes"></div>
+    </section>
+
+    <div class="itg-ad" data-slot="mobile-anchor" style="min-height:50px"></div>
+  </main>
+
+  <!-- RIGHT COLUMN: sticky ad + related tutorials -->
+  <aside class="rightcol" aria-label="Sidebar">
+    <!-- REAL AD UNIT (Google AdSense). Replace the two IDs below with your own.
+         This only renders after your ads.txt authorizes the same publisher ID. -->
+    <div class="box adbox" data-slot="sidebar-sticky">
+      <span class="adlabel">Advertisement</span>
+      <ins class="adsbygoogle"
+           style="display:block;width:300px;height:600px"
+           data-ad-client="ca-pub-0000000000000000"
+           data-ad-slot="0000000000"></ins>
+    </div>
+    <div class="box related">
+      <h4>Related tutorials</h4>
+      <a href="#">Vector Databases explained<small>AI / LLM · Beginner</small></a>
+      <a href="#">Embeddings from scratch<small>AI / LLM · Beginner</small></a>
+      <a href="#">Chunking strategies for RAG<small>AI / LLM · Intermediate</small></a>
+      <a href="#">Evaluating RAG answers<small>AI / LLM · Intermediate</small></a>
+    </div>
+  </aside>
+</div>
+<button id="menuReopen" title="Show menu">☰ Menu</button>
+<div id="overlay"></div>
+
+<!-- side panel -->
+<aside class="sidepanel" id="sidePanel" aria-label="Notes and bookmarks">
+  <header>
+    <b>Your notes</b>
+    <div class="spacer" style="flex:1"></div>
+    <button class="ghost" id="closePanel" style="padding:5px 10px">✕</button>
+  </header>
+  <div class="body">
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <button class="ghost" id="exportNotes" style="flex:1;font-size:.8rem">Export .md</button>
+      <button class="ghost" id="clearNotes" style="flex:1;font-size:.8rem">Clear all</button>
+    </div>
+    <div id="panelNotes"></div>
+  </div>
+</aside>
+
+<!-- note popup -->
+<div id="notePop">
+  <textarea id="noteText" placeholder="Type your note…"></textarea>
+  <div class="row">
+    <button class="save" id="noteSave">Save</button>
+    <button class="del" id="noteDel">Delete</button>
+    <button id="noteCancel">Cancel</button>
+  </div>
+</div>
+
+<!-- FULL-SCREEN EXAM OVERLAY -->
+<div id="examOverlay" role="dialog" aria-modal="true" aria-label="Timed exam" tabindex="-1">
+  <div class="exam-top">
+    <span class="exam-counter" id="examCounter">Question 1 of 15</span>
+    <div class="exam-dots" id="examDots" aria-hidden="true"></div>
+    <span class="timer" id="examTimer">10:00</span>
+    <button class="ghost exam-cancel" id="examCancel">Cancel exam</button>
+  </div>
+  <div class="exam-stage" id="examStage"></div>
+  <div class="exam-nav" id="examNav">
+    <button class="ghost" id="examPrev">‹ Previous</button>
+    <button class="ghost" id="flagBtn">⚑ Flag for review</button>
+    <button class="primary" id="examNext">Next ›</button>
+  </div>
+</div>
+<div id="confetti" aria-hidden="true"></div>
+
+<div id="termTip" role="tooltip"></div>
+<div class="toast" id="toast"></div>
+<footer class="foot"><div class="wrap">ITTechGenie · Learners · A sample RAG tutorial page. Ads and analytics are placeholders.</div></footer>
+
+<script>
+"use strict";
+/* ---------- STORAGE (safe) ---------- */
+const store = (()=>{
+  let ok=false;
+  try{const k="__t";localStorage.setItem(k,"1");localStorage.removeItem(k);ok=true;}catch(e){ok=false;}
+  return {
+    ok,
+    get(k,d){ if(!ok) return d; try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;} },
+    set(k,v){ if(!ok) return; try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
+  };
+})();
+const KEY="itg:ai-rag:";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800);}
+function itgTrack(name,payload){ try{ (window.dataLayer=window.dataLayer||[]).push({event:name,...payload});
+  if(typeof window.plausible==="function") window.plausible(name,{props:payload}); }catch(e){} }
+
+/* ---------- THEME + reading time + progress bar ---------- */
+(function(){
+  const saved=store.get(KEY+"theme",null);
+  if(saved) document.documentElement.dataset.theme=saved;
+  $("#themeBtn").onclick=()=>{const d=document.documentElement.dataset.theme==="dark"?"light":"dark";
+    document.documentElement.dataset.theme=d;store.set(KEY+"theme",d);};
+  const words=$("#content").innerText.trim().split(/\s+/).length;
+  $("#readtime").textContent="~"+Math.max(1,Math.round(words/200))+" min read";
+  window.addEventListener("scroll",()=>{const h=document.documentElement;
+    const p=h.scrollTop/(h.scrollHeight-h.clientHeight)*100;$("#progressbar").style.width=p+"%";},{passive:true});
+})();
+
+/* ---------- TOC + active section + search ---------- */
+(function(){
+  const secs=$$("main section.card");
+  const links=secs.map(s=>{const a=document.createElement("a");a.href="#"+s.id;
+    a.textContent=s.dataset.sec;a.dataset.id=s.id;$("#tocLinks").appendChild(a);return a;});
+  const hereSec=$("#hereSec");
+  const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){
+    links.forEach(l=>l.classList.toggle("active",l.dataset.id===e.target.id));
+    if(hereSec) hereSec.textContent="• "+e.target.dataset.sec;
+    store.set(KEY+"last",e.target.id);}});},{rootMargin:"-40% 0px -55% 0px"});
+  secs.forEach(s=>io.observe(s));
+  $("#tocSearch").addEventListener("input",e=>{const q=e.target.value.toLowerCase();
+    links.forEach(l=>l.style.display=l.textContent.toLowerCase().includes(q)?"":"none");});
+
+  /* ---- menu: collapse (desktop) + drawer (mobile) ---- */
+  const layout=document.querySelector(".layout"), overlay=$("#overlay"), isMobile=()=>matchMedia("(max-width:820px)").matches;
+  // restore desktop collapsed state
+  if(store.get(KEY+"menuCollapsed",false) && !isMobile()) layout.classList.add("menu-collapsed");
+  function collapse(){ layout.classList.add("menu-collapsed"); store.set(KEY+"menuCollapsed",true); }
+  function expand(){ layout.classList.remove("menu-collapsed"); store.set(KEY+"menuCollapsed",false); }
+  $("#menuCollapse")?.addEventListener("click",collapse);
+  $("#menuReopen")?.addEventListener("click",expand);
+  function openDrawer(){ document.body.classList.add("drawer-open"); overlay.classList.add("show"); }
+  function closeDrawer(){ document.body.classList.remove("drawer-open"); overlay.classList.remove("show"); }
+  $("#hamburger")?.addEventListener("click",openDrawer);
+  overlay.addEventListener("click",closeDrawer);
+  // close drawer after picking a section on mobile
+  links.forEach(a=>a.addEventListener("click",()=>{ if(isMobile()) closeDrawer(); }));
+})();
+
+/* ---------- XP / level ---------- */
+const XP={
+  val:store.get(KEY+"xp",0),
+  add(n){this.val+=n;store.set(KEY+"xp",this.val);this.render();},
+  render(){$("#xpval").textContent=this.val;$("#lvl").textContent=Math.floor(this.val/100)+1;}
+};
+XP.render();
+
+/* ---------- PROGRESS checklist ---------- */
+(function(){
+  if(!store.ok){$("#progText").parentElement.style.display="none";}
+  const boxes=$$(".prepbox"); const N=boxes.length;
+  const saved=store.get(KEY+"prep",{});
+  boxes.forEach((b,i)=>{ b.checked=!!saved[i];
+    b.addEventListener("change",()=>{ const s=store.get(KEY+"prep",{}); s[i]=b.checked; store.set(KEY+"prep",s);
+      if(b.checked) XP.add(5); render();});});
+  function render(){const s=store.get(KEY+"prep",{}); const done=Object.values(s).filter(Boolean).length;
+    $("#progText").textContent=done+" / "+N+" prepared"; $("#progFill").style.width=(done/N*100)+"%";}
+  $("#resetProg").onclick=()=>{store.set(KEY+"prep",{});boxes.forEach(b=>b.checked=false);render();};
+  render();
+})();
+
+/* ---------- reveal micro-questions ---------- */
+$$("[data-r]").forEach(r=>r.addEventListener("click",()=>{r.nextElementSibling.classList.toggle("show");}));
+
+/* ---------- COPY buttons ---------- */
+$$(".copybtn").forEach(b=>b.addEventListener("click",()=>{
+  const code=b.parentElement.querySelector("pre").innerText;
+  navigator.clipboard?.writeText(code).then(()=>{b.textContent="Copied!";setTimeout(()=>b.textContent="Copy",1200);});
+}));
+
+/* ---------- SOUND (Web Audio) ---------- */
+const Sound=(()=>{
+  let muted=store.get(KEY+"muted",false), ctx=null;
+  $("#muteBtn").textContent=muted?"🔇":"🔊";
+  $("#muteBtn").onclick=()=>{muted=!muted;store.set(KEY+"muted",muted);$("#muteBtn").textContent=muted?"🔇":"🔊";};
+  function tone(freqs){ if(muted) return; try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();
+    let t=ctx.currentTime; freqs.forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();
+      o.frequency.value=f;o.type="sine";o.connect(g);g.connect(ctx.destination);
+      g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(.25,t+.02);
+      g.gain.exponentialRampToValueAtTime(.001,t+.28);o.start(t);o.stop(t+.3);t+=.18;});}catch(e){} }
+  return { win:()=>tone([523,659,784,1047]), good:()=>tone([523,659,784]), low:()=>tone([392,349]) };
+})();
+
+/* ---------- RESULT helper (emoji + weak topics) ---------- */
+function showResult(el,score,total,concepts,pass){
+  const pct=Math.round(score/total*100);
+  let e,msg;
+  if(pct===100){e="🤩🎉";msg="Perfect! Flawless run.";Sound.win();}
+  else if(pct>=90){e="😄";msg="Excellent — interview-ready!";Sound.good();}
+  else if(pct>=75){e="🙂";msg="Well done — solid grasp.";Sound.good();}
+  else if(pct>=60){e="😌";msg="Good — revise the misses.";Sound.good();}
+  else{e="💪";msg="Needs focus — review & retry.";Sound.low();}
+  let weak="";
+  const miss=Object.entries(concepts).filter(([k,v])=>v.wrong>0);
+  if(miss.length){weak='<div class="weak"><b>Revise:</b><br>'+miss.map(([k,v])=>
+    `${k} — ${v.wrong}/${v.total} missed · <a href="#${v.anchor}">jump to section</a>`).join("<br>")+'</div>';}
+  const passline = pass!=null ? `<div style="margin:6px 0">${pct>=60?'<span class="pass">PASS ✓</span>':'<span class="fail">FAIL ✗</span>'} (pass mark 60%)</div>`:"";
+  el.innerHTML=`<div class="emoji">${e}</div><div class="pct">${score} / ${total} · ${pct}%</div><div>${msg}</div>${passline}${weak}`;
+  el.classList.add("show");
+  return pct;
+}
+
+/* ---------- QUIZ DATA ---------- */
+const quizQs=[
+  {q:"In one line, what does RAG add to a plain LLM?",o:["A larger training set","A retrieval step that fetches relevant documents at query time","Faster GPUs","A spell checker"],a:1,c:"basics",anchor:"intro",e:"RAG inserts a retrieval step so the model answers with fetched, relevant text."},
+  {q:"Why do plain LLMs hallucinate on private data?",o:["They run out of memory","The data was never in their training snapshot","They are too small","They dislike PDFs"],a:1,c:"basics",anchor:"intro",e:"The model has no knowledge of data created after or outside its training cutoff."},
+  {q:"What is an embedding?",o:["A compressed image","Numbers capturing the meaning of text","A database index name","A prompt template"],a:1,c:"embeddings",anchor:"technical",e:"Embeddings place similar meanings close together in vector space."},
+  {q:"What is a 'chunk'?",o:["A GPU core","A bite-sized retrievable passage of a document","A type of vector DB","An LLM layer"],a:1,c:"chunking",anchor:"technical",e:"Documents are split into chunks so passages can be retrieved individually."},
+  {q:"What does the vector database do?",o:["Trains the model","Finds nearest vectors to a query vector quickly","Renders the UI","Stores GPU drivers"],a:1,c:"vector-db",anchor:"technical",e:"It is optimised for fast nearest-neighbour search over vectors."},
+  {q:"'top-k = 4' means:",o:["Use 4 GPUs","Fetch the 4 closest chunks","Train for 4 epochs","4-bit quantisation"],a:1,c:"retrieval",anchor:"code",e:"top-k is how many nearest chunks the retriever returns."},
+  {q:"In the librarian analogy, the LLM is the…",o:["Shelves","Librarian","Friend who answers","Library card"],a:2,c:"basics",anchor:"analogy",e:"The forgetful friend who speaks the answer is the generator/LLM."},
+  {q:"Why store a source link with each chunk?",o:["To slow retrieval","To enable citations and verification","To save disk","It is required by GPUs"],a:1,c:"retrieval",anchor:"practices",e:"Source links let the answer cite where a fact came from."},
+  {q:"Most wrong RAG answers are caused by…",o:["A bad LLM","Bad retrieval (wrong chunks)","Slow internet","Dark mode"],a:1,c:"retrieval",anchor:"practices",e:"Usually the right passage never reached the prompt — a retrieval issue."},
+  {q:"Chunks that are too large tend to…",o:["Improve accuracy always","Overflow the context and dilute the key sentence","Speed up embedding","Remove hallucinations"],a:1,c:"chunking",anchor:"practices",e:"Oversized chunks waste the context budget and bury the relevant text."},
+  {q:"When should you fine-tune instead of using RAG?",o:["When facts change often","When you need the model to behave/format differently","When data is private","Never"],a:1,c:"compare",anchor:"compare",e:"Fine-tuning teaches behaviour or style, not fresh facts."},
+  {q:"The 'augment' step specifically…",o:["Trains embeddings","Combines the query with retrieved chunks into a prompt","Deletes old data","Compresses the model"],a:1,c:"basics",anchor:"technical",e:"Augmentation stitches retrieved context onto the user's question."},
+  {q:"How do you make a model refuse when it lacks context?",o:["Buy more GPUs","Add a 'use only this context' instruction","Increase temperature","Remove the retriever"],a:1,c:"generation",anchor:"code",e:"An explicit grounding/refusal instruction curbs invented answers."},
+  {q:"A key advantage of RAG over retraining is…",o:["Lower answer quality","Instant updates by re-indexing","No need for documents","Smaller prompts"],a:1,c:"compare",anchor:"intro",e:"Add a document and it is answerable immediately — no retraining."},
+  {q:"The context window limits…",o:["How many users connect","How much text the LLM can read at once","Disk size","Embedding dimensions"],a:1,c:"embeddings",anchor:"technical",e:"Retrieved chunks plus the question must fit inside the context window."}
+];
+
+/* ---------- EXAM DATA (different set) ---------- */
+const examQs=[
+  {q:"Which stage turns the question into a vector?",o:["Generate","Retriever (embed + search)","Augment","Chunking"],a:1,c:"retrieval",anchor:"technical",e:"The retriever embeds the query before searching."},
+  {q:"Re-indexing the vector store nightly mainly improves…",o:["Model size","Data freshness","GPU speed","Font rendering"],a:1,c:"basics",anchor:"industry",e:"New documents become answerable without retraining."},
+  {q:"Which is NOT part of a RAG pipeline?",o:["Retriever","Vector DB","Gradient descent at query time","LLM"],a:2,c:"basics",anchor:"technical",e:"RAG does no training at query time; it retrieves and generates."},
+  {q:"Best chunking practice is to…",o:["Cut mid-sentence","Keep semantically whole passages","Use one giant chunk","Never chunk"],a:1,c:"chunking",anchor:"practices",e:"Whole ideas retrieve far better than fragments."},
+  {q:"If answers are truncated, first try…",o:["Bigger model","Lower top_k or chunk size","More GPUs","Disable dark mode"],a:1,c:"retrieval",anchor:"practices",e:"Reducing retrieved volume keeps the prompt within the window."},
+  {q:"Citations become possible when you store…",o:["GPU logs","A source link per chunk","User passwords","The full model"],a:1,c:"retrieval",anchor:"industry",e:"Per-chunk source metadata lets answers point to origins."},
+  {q:"Long-context 'paste it all' is worst on…",o:["Tiny doc sets","Repeated queries over a large corpus","One-off tasks","Short prompts"],a:1,c:"compare",anchor:"compare",e:"It re-sends everything each time, so token cost scales badly."},
+  {q:"Embeddings place similar meanings…",o:["Far apart","Close together in vector space","In alphabetical order","On separate GPUs"],a:1,c:"embeddings",anchor:"technical",e:"Proximity in vector space encodes semantic similarity."},
+  {q:"The generator's job is to…",o:["Search vectors","Write the answer from the augmented prompt","Split documents","Train embeddings"],a:1,c:"generation",anchor:"technical",e:"The LLM composes the natural-language reply."},
+  {q:"To debug a wrong answer, inspect first…",o:["The CSS","The retrieved chunks","The GPU temperature","The browser"],a:1,c:"retrieval",anchor:"practices",e:"Check whether the right passage was even retrieved."},
+  {q:"RAG is preferable to fine-tuning when…",o:["You need new behaviour","Facts change or are private and need citing","You have no data","You want a smaller model"],a:1,c:"compare",anchor:"compare",e:"RAG shines for changing, private, citable facts."},
+  {q:"'Use ONLY this context' primarily reduces…",o:["Latency","Hallucination","Disk usage","Embedding size"],a:1,c:"generation",anchor:"code",e:"It discourages the model from answering off its own memory."},
+  {q:"Indexing is typically done…",o:["Every keystroke","Once, or when documents change","Never","Only at midnight"],a:1,c:"basics",anchor:"code",e:"You embed and store once, then reuse at query time."},
+  {q:"Which balances coverage vs noise?",o:["Model temperature","Choosing top_k","Font size","Batch size"],a:1,c:"retrieval",anchor:"code",e:"top_k trades off missing facts against adding irrelevant text."},
+  {q:"A grounded answer means it is based on…",o:["The model's imagination","Retrieved source documents","Random sampling","The system clock"],a:1,c:"basics",anchor:"intro",e:"Grounding ties the answer to fetched evidence."}
+];
+
+/* ---------- render MCQ ---------- */
+function renderMCQ(box,data,name){
+  box.innerHTML=data.map((q,i)=>`<div class="q" data-i="${i}">
+    <div class="qt">${i+1}. ${q.q}<span class="tag">${q.c}</span></div>
+    ${q.o.map((o,j)=>`<label><input type="radio" name="${name}${i}" value="${j}"> ${o}</label>`).join("")}
+    <div class="expl"></div></div>`).join("");
+}
+function gradeMCQ(box,data,resultEl,pass){
+  const concepts={}; let score=0;
+  data.forEach((q,i)=>{
+    const qEl=box.querySelector(`.q[data-i="${i}"]`);
+    const chosen=qEl.querySelector("input:checked");
+    const labels=qEl.querySelectorAll("label");
+    concepts[q.c]=concepts[q.c]||{total:0,wrong:0,anchor:q.anchor}; concepts[q.c].total++;
+    const ci=q.a; const pick=chosen?+chosen.value:-1;
+    if(pick===ci){score++;} else {concepts[q.c].wrong++;}
+    labels[ci].classList.add("correct");
+    if(pick>-1&&pick!==ci) labels[pick].classList.add("wrong");
+    const ex=qEl.querySelector(".expl"); ex.textContent="Why: "+q.e; ex.classList.add("show");
+  });
+  return {score,concepts,pct:showResult(resultEl,score,data.length,concepts,pass)};
+}
+
+/* ---------- QUIZ wiring ---------- */
+renderMCQ($("#quizBox"),quizQs,"q");
+$("#quizSubmit").onclick=()=>{
+  const {score}=gradeMCQ($("#quizBox"),quizQs,$("#quizResult"),null);
+  XP.add(score);
+  $("#quizSubmit").style.display="none"; $("#quizRetry").style.display="inline-block";
+  $("#postQuizAd").classList.remove("hidden");
+  $("#quizResult").scrollIntoView({behavior:"smooth",block:"center"});
+};
+$("#quizRetry").onclick=()=>{ renderMCQ($("#quizBox"),quizQs,"q"); $("#quizResult").classList.remove("show");
+  $("#quizSubmit").style.display="inline-block"; $("#quizRetry").style.display="none"; $("#postQuizAd").classList.add("hidden");};
+
+/* ================= FLASHCARDS ================= */
+(function(){
+  const CARDS=[
+    {f:"What does RAG stand for?",b:"Retrieval-Augmented Generation — fetch relevant documents at query time and let the LLM answer using them."},
+    {f:"Why do plain LLMs hallucinate on your data?",b:"Their training snapshot never included it, so they predict plausible text instead of real facts."},
+    {f:"What is an embedding?",b:"A vector of numbers capturing meaning, so similar meanings sit close together."},
+    {f:"What is a chunk?",b:"A bite-sized passage a document is split into, so it can be retrieved on its own."},
+    {f:"What does the retriever do?",b:"Turns the query into a vector and pulls the top-k nearest chunks from the vector store."},
+    {f:"What is a vector database?",b:"A store optimised for fast nearest-neighbour search over meaning vectors."},
+    {f:"What does top-k control?",b:"How many nearest chunks to fetch — too few misses facts, too many adds noise."},
+    {f:"What is the 'augment' step?",b:"Stitching the retrieved chunks onto the user's question to form the prompt."},
+    {f:"What is the context window?",b:"The maximum text an LLM can read at once; retrieved chunks must fit inside it."},
+    {f:"RAG vs fine-tuning — when RAG?",b:"When facts change or are private and you need citations. Fine-tuning changes behaviour, not facts."},
+    {f:"How do you curb hallucination in RAG?",b:"Instruct the model to answer using ONLY the provided context."},
+    {f:"Why store a source link per chunk?",b:"So the answer can cite where each fact came from — building trust."},
+    {f:"Most wrong RAG answers come from…?",b:"Bad retrieval — the right passage never made it into the prompt."},
+    {f:"What does 'grounded' mean?",b:"The answer is based on retrieved source evidence, not the model's memory."},
+    {f:"When is indexing done?",b:"Once (offline), or whenever documents change — then reused at query time."}
+  ];
+  const stage=$("#fcStage"); if(!stage) return;
+  let order=CARDS.map((_,i)=>i), pos=0, dueOnly=false;
+  // SRS store: {i:{due,interval}}
+  let srs=store.get(KEY+"fcsrs",{});
+  const now=()=>Date.now();
+  function isDue(i){ const s=srs[i]; return !s || s.due<=now(); }
+  function stat(){ const due=CARDS.filter((_,i)=>isDue(i)).length;
+    $("#fcStat").textContent=`Card ${pos+1} of ${order.length}`+(store.ok?` · ${due} due today`:""); }
+  function render(){
+    if(!order.length){ stage.innerHTML='<p class="empty">No cards due — great job! Turn off "due only" to review all.</p>'; $("#fcStat").textContent=""; return; }
+    if(pos>=order.length) pos=0;
+    const i=order[pos], c=CARDS[i];
+    stage.innerHTML=`<div class="fcard" id="theCard"><div class="fcard-inner">
+      <div class="fcard-face fcard-front"><span class="lbl">Question</span>${c.f}</div>
+      <div class="fcard-face fcard-back"><span class="lbl">Answer</span><div>${c.b}</div></div>
+    </div>
+    <div class="fc-rate" id="fcRate" style="display:none">
+      <button class="again" data-q="0">Again</button>
+      <button data-q="1">Hard</button>
+      <button data-q="2">Good</button>
+      <button class="easy" data-q="3">Easy</button>
+    </div>`;
+    const card=$("#theCard");
+    card.onclick=()=>{ card.classList.toggle("flipped"); $("#fcRate").style.display=card.classList.contains("flipped")?"flex":"none"; };
+    stage.querySelectorAll("#fcRate button").forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); rate(i,+b.dataset.q); });
+    stat();
+  }
+  function rate(i,q){
+    if(store.ok){ const base=srs[i]?srs[i].interval:0;
+      const mult=[0,1,3,7][q]; // days
+      const interval=q===0?0:Math.max(1,Math.round((base||1)*(q===1?1.2:q===2?2.2:3.2)))||mult;
+      srs[i]={interval,due:now()+ (q===0?0.0007:interval)*86400000}; // Again ~1min
+      store.set(KEY+"fcsrs",srs); }
+    XP.add(2);
+    next();
+  }
+  function next(){ pos++; if(pos>=order.length){ pos=0; if(dueOnly) rebuildDue(); } render(); }
+  function prev(){ pos=(pos-1+order.length)%order.length; render(); }
+  function rebuildDue(){ order=CARDS.map((_,i)=>i).filter(isDue); if(!order.length&&dueOnly){/*all done*/} pos=0; }
+  $("#fcNext").onclick=next;
+  $("#fcPrev").onclick=prev;
+  $("#fcShuffle").onclick=()=>{ for(let k=order.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[order[k],order[j]]=[order[j],order[k]];} pos=0; render(); toast("Shuffled"); };
+  $("#fcDue").onclick=()=>{ dueOnly=!dueOnly; $("#fcDue").textContent=dueOnly?"Show all cards":"Study due only";
+    if(dueOnly){ rebuildDue(); if(!order.length){ order=CARDS.map((_,i)=>i); toast("Nothing due — showing all"); dueOnly=false; $("#fcDue").textContent="Study due only"; } }
+    else order=CARDS.map((_,i)=>i);
+    pos=0; render(); };
+  render();
+})();
+
+/* ================= FULL-SCREEN EXAM (v10) ================= */
+const Exam=(()=>{
+  const N=examQs.length, DUR=600;
+  let answers=[], flags=[], idx=0, left=DUR, timer=null, phase="q";
+  const ov=$("#examOverlay"), stage=$("#examStage"), nav=$("#examNav");
+  const elCounter=$("#examCounter"), elDots=$("#examDots"), elTimer=$("#examTimer");
+  let lastFocus=null;
+
+  function fmt(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");}
+
+  function open(){
+    answers=Array(N).fill(-1); flags=Array(N).fill(false); idx=0; left=DUR; phase="q";
+    lastFocus=document.activeElement;
+    ov.classList.add("open"); document.body.classList.add("exam-open","exam-active");
+    elTimer.textContent=fmt(left); elTimer.classList.remove("warn");
+    timer=setInterval(tick,1000);
+    itgTrack("exam_start",{});
+    renderQuestion(); ov.focus();
+    document.addEventListener("keydown",keyer);
+  }
+  function tick(){ left--; elTimer.textContent=fmt(left); elTimer.classList.toggle("warn",left<=60);
+    if(left<=0){ clearInterval(timer); grade(true); } }
+
+  function closeOverlay(){
+    clearInterval(timer);
+    ov.classList.remove("open"); document.body.classList.remove("exam-open","exam-active");
+    document.removeEventListener("keydown",keyer);
+    if(lastFocus) try{lastFocus.focus();}catch(e){}
+  }
+
+  function dots(){ elDots.innerHTML=examQs.map((_,i)=>{
+    let c="";(answers[i]>-1)&&(c+=" answered"); flags[i]&&(c+=" flagged"); (i===idx&&phase==="q")&&(c+=" current");
+    return `<i class="${c.trim()}"></i>`;}).join(""); }
+
+  function renderQuestion(){
+    phase="q"; nav.classList.remove("hidden");
+    const q=examQs[idx];
+    elCounter.textContent=`Question ${idx+1} of ${N}`;
+    dots();
+    stage.innerHTML=`<div class="exam-q"><h3>${q.q}</h3><div class="exam-opts">${
+      q.o.map((o,j)=>`<label class="${answers[idx]===j?'chosen':''}"><input type="radio" name="ex" value="${j}" ${answers[idx]===j?'checked':''}> ${o}</label>`).join("")
+    }</div><div class="exam-flagline">${flags[idx]?'⚑ Flagged for review':''}</div></div>`;
+    stage.querySelectorAll("input[name=ex]").forEach(inp=>inp.onchange=()=>{
+      answers[idx]=+inp.value;
+      stage.querySelectorAll(".exam-opts label").forEach((l,k)=>l.classList.toggle("chosen",k===+inp.value));
+      dots();
+    });
+    $("#examPrev").disabled = idx===0;
+    $("#examNext").textContent = idx===N-1 ? "Review ›" : "Next ›";
+    $("#flagBtn").textContent = flags[idx] ? "⚑ Unflag" : "⚑ Flag for review";
+    stage.scrollTop=0;
+  }
+
+  function renderReview(){
+    phase="review"; nav.classList.add("hidden");
+    elCounter.textContent="Review your answers";
+    const answered=answers.filter(a=>a>-1).length, un=N-answered, fl=flags.filter(Boolean).length;
+    dots();
+    stage.innerHTML=`<div class="rev-wrap">
+      <h3>Review before submitting</h3>
+      <div class="rev-counts">${answered} answered · <b>${un} unanswered</b> · ${fl} flagged. Tap a number to revisit.</div>
+      <div class="rev-legend"><span>🟩 answered</span><span>⚪ unanswered</span><span>⚑ flagged</span></div>
+      <div class="rev-grid" id="revGrid"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="ghost" id="backToQ">‹ Back to questions</button>
+        <button class="primary" id="finalSubmit">Submit exam</button>
+      </div></div>`;
+    const grid=$("#revGrid");
+    grid.innerHTML=examQs.map((_,i)=>{ let c=answers[i]>-1?"answered":"unanswered"; if(flags[i])c+=" flagged";
+      return `<button class="${c}" data-g="${i}">${i+1}</button>`;}).join("");
+    grid.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{ idx=+b.dataset.g; renderQuestion(); });
+    $("#backToQ").onclick=()=>{ idx=N-1; renderQuestion(); };
+    $("#finalSubmit").onclick=()=>grade(false);
+  }
+
+  /* ---- proverbs by tier ---- */
+  const PROVERBS={
+    high:["Excellence is a habit — and you showed it today.","Well earned. Skill is built one rep at a time.","You didn’t find luck; you built readiness."],
+    mid:["Great progress — one more pass and you’ve got it.","You’re closer than you think. Keep the momentum.","Steady effort beats sudden bursts. Nicely done."],
+    low:["Every expert was once a beginner. Keep going.","Little by little, a little becomes a lot.","Falling down is how we learn to climb. Try again."]
+  };
+  function pickProverb(pct){ const tier=pct>=75?"high":pct>=60?"mid":"low"; const a=PROVERBS[tier];
+    return a[Math.floor(Math.random()*a.length)]; }
+
+  function confetti(){
+    if(document.body.classList.contains("reduce")) return;
+    const box=$("#confetti"); box.classList.add("go"); box.innerHTML="";
+    const colors=["#c9861f","#0f8a86","#f2c94c","#7c5cff","#1f8a4c"];
+    for(let i=0;i<70;i++){ const p=document.createElement("div"); p.className="confetti-piece";
+      p.style.left=Math.random()*100+"vw";
+      p.style.background=colors[i%colors.length];
+      p.style.animation=`fall ${1.6+Math.random()*1.4}s ${Math.random()*0.4}s ease-in forwards`;
+      p.style.transform=`rotate(${Math.random()*360}deg)`;
+      box.appendChild(p); }
+    setTimeout(()=>{box.classList.remove("go");box.innerHTML="";},3200);
+  }
+
+  function grade(auto){
+    clearInterval(timer);
+    phase="result"; nav.classList.add("hidden");
+    let score=0; const concepts={};
+    examQs.forEach((q,i)=>{ concepts[q.c]=concepts[q.c]||{total:0,wrong:0,anchor:q.anchor}; concepts[q.c].total++;
+      if(answers[i]===q.a) score++; else concepts[q.c].wrong++; });
+    const pct=Math.round(score/N*100), pass=pct>=60;
+    XP.add(score*2); if(pass) XP.add(25); if(pct===100) XP.add(50);
+    const hist=store.get(KEY+"exam",[]); hist.push({pct,score,ts:Date.now()}); store.set(KEY+"exam",hist.slice(-20));
+    if(pass) Sound.win(); else Sound.low();
+
+    let emoji,msg;
+    if(pct===100){emoji="🤩🎉";msg="Perfect — flawless run.";}
+    else if(pct>=90){emoji="😄";msg="Excellent — interview-ready!";}
+    else if(pct>=75){emoji="🙂";msg="Well done — solid grasp.";}
+    else if(pct>=60){emoji="😌";msg="Good — revise the misses.";}
+    else{emoji="💪";msg="Needs focus — review & retry.";}
+
+    // weak topics
+    const miss=Object.entries(concepts).filter(([k,v])=>v.wrong>0);
+    const weak = miss.length ? `<div class="weak" style="max-width:640px;margin:10px auto 0"><b>Revise:</b><br>${
+      miss.map(([k,v])=>`${k} — ${v.wrong}/${v.total} missed`).join("<br>")}</div>` : "";
+
+    // full review of ALL questions
+    const review = examQs.map((q,i)=>{
+      const pick=answers[i];
+      const opts=q.o.map((o,j)=>{ let cls="opt",mk="";
+        if(j===q.a){cls+=" correct";mk="✓ ";}
+        else if(j===pick){cls+=" wrong";mk="✗ ";}
+        return `<div class="${cls}"><span class="mk">${mk}</span>${o}</div>`;}).join("");
+      const yourLine = pick===-1 ? `<span class="notans">You did not answer this.</span>`
+        : (pick===q.a ? `Your answer was correct.` : `Your answer: “${q.o[pick]}”.`);
+      return `<div class="reviewItem"><div class="rq">${i+1}. ${q.q}</div>${opts}
+        <div class="ans">${yourLine} <b>Correct: ${q.o[q.a]}</b></div>
+        <div class="rexpl">Why: ${q.e}</div></div>`;
+    }).join("");
+
+    elCounter.textContent="Result";
+    elTimer.classList.remove("warn");
+    stage.innerHTML=`
+      <div class="proverb"><div class="quote">“${pickProverb(pct)}”</div><div class="sub">Keep learning — every attempt makes the next one easier.</div></div>
+      <div class="exam-result-head">
+        <div class="emoji">${emoji}</div>
+        <div class="pct">${score} / ${N} · ${pct}%</div>
+        <div>${msg}</div>
+        <div style="margin:6px 0">${pass?'<span class="pass">PASS ✓</span>':'<span class="fail">FAIL ✗</span>'} (pass mark 60%)</div>
+        ${weak}
+      </div>
+      <div id="certHolder" style="max-width:640px;margin:14px auto 0"></div>
+      <h3 style="font-family:Fraunces,serif;margin:22px 0 4px">Answer review — all ${N} questions</h3>
+      <p style="color:var(--muted);font-size:.85rem;margin:0 0 10px">Correct answers are green; your wrong picks are red.</p>
+      ${review}
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin:22px 0 40px">
+        <button class="primary" id="examClose">Return to tutorial</button>
+        <button class="ghost" id="examRedo">Restart exam</button>
+      </div>`;
+    stage.scrollTop=0;
+    if(pass){ confetti(); renderCert(pct); }
+    itgTrack(auto?"exam_timeout":"exam_submit",{score,pct,pass});
+    $("#examClose").onclick=()=>{ closeOverlay(); $("#examDoneNote").style.display="block"; };
+    $("#examRedo").onclick=()=>{ answers=Array(N).fill(-1); flags=Array(N).fill(false); idx=0; left=DUR; phase="q";
+      elTimer.textContent=fmt(left); clearInterval(timer); timer=setInterval(tick,1000); renderQuestion(); };
+  }
+
+  function renderCert(pct){
+    const box=$("#certHolder"); if(!box) return;
+    box.innerHTML=`<div class="callout key" style="text-align:center">
+      <b>Certificate unlocked</b>
+      <div style="margin:8px 0">Enter your name for a printable certificate (${pct}%).</div>
+      <input id="certName" placeholder="Your name" style="padding:8px;border:1px solid var(--line);border-radius:7px;background:var(--paper-2);color:var(--text)">
+      <button class="primary" id="certPrint" style="margin-left:6px">Get certificate</button></div>`;
+    $("#certPrint").onclick=()=>{ const n=$("#certName").value.trim()||"Learner"; const w=window.open("","_blank");
+      w.document.write(`<html><head><title>ITTechGenie Certificate</title></head><body style="font-family:Georgia,serif;text-align:center;padding:56px 40px">
+        <div style="font-size:1.4rem;font-weight:bold;letter-spacing:1px;color:#0f1b2d">IT<span style="color:#c9861f">Tech</span>Genie</div>
+        <div style="color:#666;margin:2px 0 26px">Learners · Certification</div>
+        <h1 style="color:#c9861f;margin:0">Certificate of Completion</h1>
+        <p style="font-size:1.05rem;margin:4px 0 22px">Retrieval-Augmented Generation (RAG) — Exam</p>
+        <p>Awarded to</p><h2 style="margin:4px 0 18px">${n}</h2>
+        <p>for passing the <b>Retrieval-Augmented Generation</b> exam with a score of <b>${pct}%</b>.</p>
+        <p style="margin-top:24px">ITTechGenie · ${new Date().toLocaleDateString()}</p>
+        <p style="font-size:.7rem;color:#888">Verification code: ${btoa(n+pct).slice(0,10)}</p>
+        <script>print()<\/script></body></html>`); };
+  }
+
+  function cancel(){
+    if(!confirm("Cancel the exam? Your answers won't be saved.")) return;
+    itgTrack("exam_cancel",{answered:answers.filter(a=>a>-1).length});
+    closeOverlay(); toast("Exam cancelled — back to the tutorial");
+  }
+
+  function keyer(e){
+    if(phase!=="q") { if(e.key==="Escape") cancel(); return; }
+    if(e.key==="ArrowRight"){ $("#examNext").click(); }
+    else if(e.key==="ArrowLeft"){ if(idx>0){idx--;renderQuestion();} }
+    else if(e.key==="f"||e.key==="F"){ $("#flagBtn").click(); }
+    else if("1234".includes(e.key)){ const j=+e.key-1; const inp=stage.querySelectorAll("input[name=ex]")[j];
+      if(inp){ inp.checked=true; inp.dispatchEvent(new Event("change")); } }
+    else if(e.key==="Escape"){ cancel(); }
+  }
+
+  // wire controls
+  $("#startExam").onclick=open;
+  $("#examPrev").onclick=()=>{ if(idx>0){idx--;renderQuestion();} };
+  $("#examNext").onclick=()=>{ if(idx<N-1){idx++;renderQuestion();} else renderReview(); };
+  $("#flagBtn").onclick=()=>{ flags[idx]=!flags[idx]; renderQuestion(); };
+  $("#examCancel").onclick=cancel;
+
+  return {};
+})();
+
+/* ---------- DIAGRAM step-through ---------- */
+(function(){
+  const caps=["Diagram 1. Press Next to walk each stage.",
+    "Step 1 — Query: the user's raw question enters the pipeline.",
+    "Step 2 — Retrieve: the retriever embeds the query and pulls nearest chunks from the Vector DB.",
+    "Step 3 — Augment: retrieved chunks are joined onto the question to form the prompt.",
+    "Step 4 — Generate: the LLM reads the augmented prompt and writes the grounded answer."];
+  let step=0, play=null;
+  const nodes=$$(".svg-node");
+  function draw(){ $("#dCap").textContent=caps[step];
+    nodes.forEach(n=>n.classList.toggle("dim", step>0 && +n.dataset.step!==step)); }
+  $("#dNext").onclick=()=>{step=step>=4?1:step+1;draw();};
+  $("#dPrev").onclick=()=>{step=step<=1?4:step-1;draw();};
+  const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+  $("#dPlay").onclick=function(){ if(reduce){$("#dNext").click();return;}
+    if(play){clearInterval(play);play=null;this.textContent="▶ Play";return;}
+    this.textContent="⏸ Pause"; play=setInterval(()=>{step=step>=4?1:step+1;draw();},2500);};
+  draw();
+})();
+
+/* ================= NOTES ================= */
+const Notes=(()=>{
+  if(!store.ok){ $("#notesBtn").style.display="none"; $("#notesHint").textContent="Notes need browser storage, which is unavailable here."; return {refresh(){}}; }
+  let notes=store.get(KEY+"notes",[]);
+  let pending=null; // {range, word, sectionId, sectionTitle, occ, existingId}
+  const pop=$("#notePop"), ta=$("#noteText");
+
+  function save(){store.set(KEY+"notes",notes);}
+  function sectionOf(node){ return node.closest ? node.closest("section.card") : null; }
+  function occurrenceIndex(sectionEl,word,range){
+    // count matching words before this range within the section text nodes
+    let idx=0, found=-1, i=0;
+    const walker=document.createTreeWalker(sectionEl,NodeFilter.SHOW_TEXT);
+    let n; while((n=walker.nextNode())){ const re=new RegExp("\\b"+word.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b","g");
+      let m; while((m=re.exec(n.textContent))){ if(n===range.startContainer && m.index===range.startOffset){found=idx;} idx++; } }
+    return found<0?0:found;
+  }
+
+  document.addEventListener("dblclick",e=>{
+    if(e.target.closest("button,a,input,textarea,label,.q,.toc,.sidepanel,#notePop,.itg-ad,pre,.stepctrls,.diagram,.prep")) return;
+    const sel=window.getSelection(); const word=sel.toString().trim();
+    if(!word || /\s/.test(word)) return;
+    const sec=sectionOf(e.target); if(!sec) return;
+    const range=sel.getRangeAt(0);
+    const occ=occurrenceIndex(sec,word,range);
+    // wrap
+    let span;
+    try{ span=document.createElement("span"); span.className="noted-word"; range.surroundContents(span);}
+    catch(err){ return; } // spans across nodes — skip
+    pending={word,sectionId:sec.id,sectionTitle:sec.dataset.sec,occ,span,existingId:null};
+    openPop(span,"");
+    sel.removeAllRanges();
+  });
+
+  function openPop(anchor,text){
+    const r=anchor.getBoundingClientRect();
+    pop.style.display="block";
+    pop.style.left=Math.min(r.left+window.scrollX, window.scrollX+window.innerWidth-270)+"px";
+    pop.style.top=(r.bottom+window.scrollY+6)+"px";
+    ta.value=text; ta.focus();
+  }
+  function closePop(){pop.style.display="none";pending=null;}
+
+  $("#noteSave").onclick=()=>{
+    if(!pending) return;
+    const text=ta.value.trim();
+    if(!text){ // cancel empty -> unwrap
+      unwrap(pending.span); closePop(); return;
+    }
+    if(pending.existingId){
+      const nt=notes.find(n=>n.id===pending.existingId); nt.note=text; nt.timestamp=Date.now();
+    }else{
+      const id="n"+Date.now();
+      pending.span.dataset.id=id;
+      notes.push({id,word:pending.word,note:text,sectionId:pending.sectionId,
+        sectionTitle:pending.sectionTitle,occurrenceIndex:pending.occ,timestamp:Date.now()});
+      XP.add(3); toast("Note saved");
+    }
+    save(); refresh(); closePop();
+  };
+  $("#noteDel").onclick=()=>{ if(!pending) return;
+    if(pending.existingId){ notes=notes.filter(n=>n.id!==pending.existingId); save(); }
+    unwrap(pending.span); refresh(); closePop();
+  };
+  $("#noteCancel").onclick=()=>{ if(pending && !pending.existingId) unwrap(pending.span); closePop(); };
+
+  function unwrap(span){ if(span && span.parentNode){ const t=document.createTextNode(span.textContent);
+    span.parentNode.replaceChild(t,span); } }
+
+  // click existing highlight to edit
+  document.addEventListener("click",e=>{
+    const s=e.target.closest(".noted-word"); if(!s||!s.dataset.id) return;
+    const nt=notes.find(n=>n.id===s.dataset.id); if(!nt) return;
+    pending={word:nt.word,sectionId:nt.sectionId,sectionTitle:nt.sectionTitle,occ:nt.occurrenceIndex,span:s,existingId:nt.id};
+    openPop(s,nt.note);
+  });
+
+  // re-apply highlights on load
+  function reapply(){
+    notes.forEach(nt=>{
+      const sec=document.getElementById(nt.sectionId); if(!sec) return;
+      let idx=0, done=false;
+      const walker=document.createTreeWalker(sec,NodeFilter.SHOW_TEXT,{acceptNode:n=>
+        n.parentElement.closest(".noted-word,button,a,input,textarea,.q,pre")?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+      let n; while(!done && (n=walker.nextNode())){
+        const re=new RegExp("\\b"+nt.word.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b");
+        const m=re.exec(n.textContent);
+        if(m){ if(idx===nt.occurrenceIndex){
+            const range=document.createRange();
+            range.setStart(n,m.index); range.setEnd(n,m.index+nt.word.length);
+            const span=document.createElement("span"); span.className="noted-word"; span.dataset.id=nt.id;
+            try{range.surroundContents(span);}catch(e){}
+            done=true;
+          } idx++; }
+      }
+    });
+  }
+
+  // render lists (panel + end section)
+  function refresh(){
+    // panel
+    const pn=$("#panelNotes");
+    if(!notes.length){ pn.innerHTML='<div class="empty">No notes yet. Double-click a word in the tutorial to add one.</div>'; }
+    else pn.innerHTML=notes.map(rowHTML).join("");
+    // end section grouped by section
+    const en=$("#endNotes");
+    if(!notes.length){ en.innerHTML='<div class="empty">You have no notes yet.</div>'; }
+    else{
+      const groups={};
+      notes.forEach(n=>{(groups[n.sectionTitle]=groups[n.sectionTitle]||[]).push(n);});
+      en.innerHTML=`<p style="font-size:.85rem;color:var(--muted)">You have ${notes.length} note${notes.length>1?"s":""}.</p>`+
+        `<div class="notes-by-sec">`+Object.entries(groups).map(([sec,arr])=>
+          `<h4>${sec}</h4>`+arr.map(rowHTML).join("")).join("")+`</div>`;
+    }
+    bindRows();
+  }
+  function rowHTML(n){
+    return `<div class="noterow" data-id="${n.id}">
+      <div><span class="w">“${n.word}”</span></div>
+      <div>${n.note.replace(/</g,"&lt;")}</div>
+      <div class="meta">${n.sectionTitle} · ${new Date(n.timestamp).toLocaleString()}</div>
+      <div class="acts"><button data-act="jump">Jump to word</button>
+        <button data-act="edit">Edit</button><button data-act="del">Delete</button></div></div>`;
+  }
+  function bindRows(){
+    $$(".noterow").forEach(row=>{
+      const id=row.dataset.id;
+      row.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>{
+        const span=document.querySelector(`.noted-word[data-id="${id}"]`);
+        const nt=notes.find(n=>n.id===id);
+        if(b.dataset.act==="jump"&&span){ span.scrollIntoView({behavior:"smooth",block:"center"});
+          span.style.transition="background .3s"; const o=span.style.background; span.style.background="var(--retrieval)";
+          setTimeout(()=>span.style.background=o,700);}
+        if(b.dataset.act==="del"){ notes=notes.filter(n=>n.id!==id); save(); if(span) unwrap(span); refresh(); }
+        if(b.dataset.act==="edit"&&span){ pending={word:nt.word,sectionId:nt.sectionId,sectionTitle:nt.sectionTitle,
+          occ:nt.occurrenceIndex,span,existingId:id}; openPop(span,nt.note); }
+      });
+    });
+  }
+  $("#clearNotes").onclick=()=>{ if(!notes.length) return; if(!confirm("Delete all notes?"))return;
+    notes.forEach(n=>{const s=document.querySelector(`.noted-word[data-id="${n.id}"]`);if(s)unwrap(s);});
+    notes=[]; save(); refresh(); };
+  $("#exportNotes").onclick=()=>{
+    const md="# My RAG notes\n\n"+notes.map(n=>`- **${n.word}** (${n.sectionTitle}): ${n.note}`).join("\n");
+    const b=new Blob([md],{type:"text/markdown"}); const u=URL.createObjectURL(b);
+    const a=document.createElement("a"); a.href=u; a.download="rag-notes.md"; a.click(); URL.revokeObjectURL(u);
+  };
+
+  reapply(); refresh();
+  return {refresh};
+})();
+
+/* panel open/close */
+$("#notesBtn").onclick=()=>$("#sidePanel").classList.add("open");
+$("#closePanel").onclick=()=>$("#sidePanel").classList.remove("open");
+
+/* continue banner */
+(function(){ const last=store.get(KEY+"last",null);
+  if(last && last!=="intro"){ const sec=document.getElementById(last);
+    if(sec){ const b=document.createElement("div"); b.className="callout tip";
+      b.style.cssText="position:sticky;top:66px;z-index:30";
+      b.innerHTML=`<b>Welcome back</b>Continue from “${sec.dataset.sec}”. <a href="#${last}">Jump there ›</a> <button class="ghost" style="padding:2px 8px;margin-left:6px" onclick="this.parentElement.remove()">Dismiss</button>`;
+      $("#content").prepend(b);} } })();
+
+/* =================================================================
+   v8 ADDITIONS: reduce-motion · scroll-reveal · term tooltips · count-up
+   ================================================================= */
+
+/* ---- reduce-motion master switch (OS setting OR user toggle) ---- */
+const Motion=(()=>{
+  const osReduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+  let userReduce=store.get(KEY+"reduce", osReduce);
+  const svg=document.querySelector(".svgbox svg");
+  function apply(){
+    document.body.classList.toggle("reduce", userReduce);
+    document.body.classList.toggle("anim", !userReduce);
+    $("#motionBtn").textContent = userReduce ? "⏸" : "🌀";
+    $("#motionBtn").title = userReduce ? "Motion reduced — click to enable" : "Reduce motion";
+    if(svg){ try{ userReduce ? svg.pauseAnimations() : svg.unpauseAnimations(); }catch(e){} }
+  }
+  $("#motionBtn").onclick=()=>{ userReduce=!userReduce; store.set(KEY+"reduce",userReduce); apply(); };
+  apply();
+  return { get reduced(){return userReduce;} };
+})();
+
+/* ---- scroll-reveal (sections + cards). Visible by default; animate only if enabled ---- */
+(function(){
+  $$("main section.card").forEach(s=>s.classList.add("reveal"));
+  if(Motion.reduced) return; // stays visible, no animation
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } });},{rootMargin:"0px 0px -8% 0px"});
+  $$(".reveal").forEach(el=>io.observe(el));
+})();
+
+/* ---- count-up helper (used by XP + results) ---- */
+function countUp(el,to,ms){
+  if(Motion.reduced){ el.textContent=to; return; }
+  const from=+(el.textContent.replace(/[^\d]/g,""))||0; if(from===to){el.textContent=to;return;}
+  const t0=performance.now();
+  (function step(t){ const p=Math.min(1,(t-t0)/ms); el.textContent=Math.round(from+(to-from)*p);
+    if(p<1) requestAnimationFrame(step); })(t0);
+}
+/* upgrade XP.render to count up */
+(function(){ const orig=XP.render.bind(XP);
+  XP.render=function(){ countUp($("#xpval"),this.val,500); $("#lvl").textContent=Math.floor(this.val/100)+1; };
+})();
+
+/* ---- TERM TOOLTIPS: hover / focus / tap explanation for every important word ---- */
+(function(){
+  const TERMS={
+    "RAG":"Retrieval-Augmented Generation — fetch relevant documents at query time and let the LLM answer using them.",
+    "LLM":"Large Language Model — a model trained to predict text; it writes fluent answers but has no live knowledge of your data.",
+    "hallucinate":"When a model invents a fluent but false answer because it is predicting plausible words, not checking facts.",
+    "hallucinates":"Produces a fluent but invented answer not grounded in real sources.",
+    "embedding":"A list of numbers capturing the meaning of text, so similar meanings sit close together.",
+    "embeddings":"Numeric vectors capturing meaning; similar meanings land near each other in vector space.",
+    "embed":"Convert text into a meaning vector.",
+    "chunk":"A bite-sized passage a document is split into so it can be retrieved on its own.",
+    "chunks":"Bite-sized passages a document is split into for retrieval.",
+    "chunking":"Splitting documents into small, self-contained passages for retrieval.",
+    "vector":"An ordered list of numbers; here, the numeric form of a piece of text's meaning.",
+    "vector store":"A database built to find the nearest vectors to a query vector quickly.",
+    "vector database":"A store optimised for fast nearest-neighbour search over meaning vectors.",
+    "retriever":"The component that turns a query into a vector and pulls the top-k nearest chunks.",
+    "retrieval":"The lookup step that finds the most relevant chunks for a query.",
+    "top-k":"How many nearest chunks to fetch (e.g. the 4 closest).",
+    "context window":"The maximum amount of text an LLM can read at once; retrieved chunks must fit inside it.",
+    "prompt":"The full text sent to the LLM — here, the question plus the retrieved context.",
+    "augment":"To stitch retrieved chunks onto the user's question before sending it to the LLM.",
+    "generation":"The step where the LLM writes the natural-language answer.",
+    "generator":"The LLM that composes the final answer from the augmented prompt.",
+    "grounded":"An answer based on retrieved source evidence rather than the model's memory.",
+    "fine-tuning":"Further training a model to change its behaviour, style, or skills — not a way to add fresh facts.",
+    "inference":"Running the model to produce an answer (as opposed to training it).",
+    "index":"The prepared, embedded, stored form of your documents that the retriever searches.",
+    "indexing":"The one-time step of chunking, embedding, and storing documents.",
+    "nearest":"Closest in vector space — i.e. most similar in meaning.",
+    "CLS":"Cumulative Layout Shift — a Google metric penalising content that jumps around as the page loads.",
+    "API":"Application Programming Interface — a defined way for software to call a service."
+  };
+  const keys=Object.keys(TERMS).sort((a,b)=>b.length-a.length); // longest first
+  const tip=$("#termTip");
+  const SKIP="A,ABBR,BUTTON,INPUT,TEXTAREA,LABEL,PRE,CODE,SCRIPT,STYLE,H1,H2,H3,SVG";
+  // wrap up to 2 occurrences per section per term
+  $$("main section.card").forEach(sec=>{
+    const counts={};
+    const walker=document.createTreeWalker(sec,NodeFilter.SHOW_TEXT,{acceptNode(n){
+      if(!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      if(n.parentElement.closest(".noted-word,.term,"+SKIP.split(",").map(t=>t.toLowerCase()).join(","))) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }});
+    const texts=[]; let n; while((n=walker.nextNode())) texts.push(n);
+    texts.forEach(node=>{
+      let str=node.nodeValue, replaced=false, frag=document.createDocumentFragment(), last=0;
+      const re=new RegExp("\\b("+keys.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|")+")\\b","gi");
+      let m;
+      while((m=re.exec(str))){
+        const raw=m[0], key=keys.find(k=>k.toLowerCase()===raw.toLowerCase());
+        if(!key) continue;
+        counts[key]=counts[key]||0; if(counts[key]>=2) continue; counts[key]++;
+        frag.appendChild(document.createTextNode(str.slice(last,m.index)));
+        const ab=document.createElement("abbr"); ab.className="term"; ab.tabIndex=0;
+        ab.dataset.term=key; ab.textContent=raw; frag.appendChild(ab);
+        last=m.index+raw.length; replaced=true;
+      }
+      if(replaced){ frag.appendChild(document.createTextNode(str.slice(last))); node.parentNode.replaceChild(frag,node); }
+    });
+  });
+  // show/hide
+  let hideT;
+  function show(ab){
+    const key=ab.dataset.term, def=TERMS[key]; if(!def) return;
+    clearTimeout(hideT);
+    tip.innerHTML=`<b>${key}</b>${def} <a href="#glossary-jump" data-goto>Go to glossary ›</a>`;
+    tip.classList.add("show");
+    const r=ab.getBoundingClientRect();
+    let top=r.bottom+window.scrollY+8, left=r.left+window.scrollX;
+    tip.style.top="0"; tip.style.left="0"; // measure
+    const tw=tip.offsetWidth, th=tip.offsetHeight;
+    if(left+tw>window.scrollX+window.innerWidth-10) left=window.scrollX+window.innerWidth-tw-10;
+    if(r.bottom+th+16>window.innerHeight){ top=r.top+window.scrollY-th-8; } // flip up
+    tip.style.top=top+"px"; tip.style.left=Math.max(8,left)+"px";
+  }
+  function hide(){ hideT=setTimeout(()=>tip.classList.remove("show"),120); }
+  document.addEventListener("mouseover",e=>{ const ab=e.target.closest(".term"); if(ab) show(ab); });
+  document.addEventListener("mouseout",e=>{ if(e.target.closest(".term")) hide(); });
+  document.addEventListener("focusin",e=>{ const ab=e.target.closest(".term"); if(ab) show(ab); });
+  document.addEventListener("focusout",e=>{ if(e.target.closest(".term")) hide(); });
+  tip.addEventListener("mouseover",()=>clearTimeout(hideT));
+  tip.addEventListener("mouseout",hide);
+  // touch: tap term to toggle (does NOT create a note — notes are double-click)
+  document.addEventListener("click",e=>{
+    const ab=e.target.closest(".term");
+    if(ab){ if(matchMedia("(hover:none)").matches){ tip.classList.contains("show")?tip.classList.remove("show"):show(ab); } return; }
+    if(!e.target.closest("#termTip")) tip.classList.remove("show");
+    if(e.target.closest("[data-goto]")){ const g=document.getElementById("technical"); g&&g.scrollIntoView({behavior:Motion.reduced?"auto":"smooth"}); tip.classList.remove("show"); }
+  });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape") tip.classList.remove("show"); });
+})();
+</script>
+
+<!-- ========================================================================
+  GOOGLE ADSENSE LOADER  (consent-gated)
+  1) Put your publisher ID in PUB_ID below and in /ads.txt at your site root.
+  2) Create the ad unit in AdSense, put its slot ID in the <ins data-ad-slot>.
+  3) Ads load ONLY after the visitor accepts consent — call itgLoadAds() from
+     your consent banner's "Accept" handler. Nothing loads before that.
+======================================================================== -->
+<script>
+(function(){
+  var PUB_ID = "ca-pub-0000000000000000";   // <-- your AdSense publisher ID
+  window.itgLoadAds = function(){
+    if(window.__adsLoaded) return; window.__adsLoaded = true;
+    if(document.documentElement.getAttribute("data-adfree")==="true") return;
+    var s=document.createElement("script");
+    s.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client="+PUB_ID;
+    s.async=true; s.crossOrigin="anonymous";
+    s.onload=function(){ document.querySelectorAll("ins.adsbygoogle").forEach(function(){
+      try{ (window.adsbygoogle=window.adsbygoogle||[]).push({}); }catch(e){} }); };
+    s.onerror=function(){ /* offline / blocked: leave the labelled placeholder */ };
+    document.head.appendChild(s);
+  };
+  // DEMO ONLY: auto-load if a real publisher ID has been set. In production,
+  // delete this line and call itgLoadAds() from your consent-accept button.
+  if(PUB_ID.indexOf("0000")===-1) window.itgLoadAds();
+})();
+</script>
+</body>
+</html>
