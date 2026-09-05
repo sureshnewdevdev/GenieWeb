@@ -60,7 +60,14 @@ public class HomeController : Controller
         return model;
     }
 
-    public IActionResult CourseCatalog() => View("CourseCatalog");
+    public IActionResult CourseCatalog(string? id)
+    {
+        if (string.Equals(id, "AIDotnet", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToAction("Index", "Tutorials");
+        }
+        return View("CourseCatalog");
+    }
 
     public IActionResult CSharp()
     {
