@@ -1,4 +1,4 @@
-$path = "C:\Genie\GenieWeb\wwwroot\tutorials\enterprise-ai-integration-patterns.json"
+$path = "C:\Genie\GenieWeb\wwwroot\tutorials\ai-in-aspnet-web-apps.json"
 $raw = Get-Content $path -Raw -Encoding UTF8
 try { $j = $raw | ConvertFrom-Json } catch { "Valid JSON: NO - $($_.Exception.Message)"; exit 1 }
 
@@ -60,12 +60,11 @@ $glossText = (($j.sections | Where-Object key -eq "glossary").items | ForEach-Ob
 $ttText = ($j.tooltips.PSObject.Properties | ForEach-Object { "$($_.Name) $($_.Value)" }) -join " "
 
 $checks = [ordered]@{
-  "1 dependency injection     " = "(?i)dependency injection"
-  "2 structured logging       " = "(?i)structured logging"
-  "3 API keys and secrets     " = "(?i)Key Vault"
-  "4 service-layer abstraction" = "(?i)service layer"
-  "5 secure configuration     " = "(?i)options pattern"
-  "6 resilience retry/timeout " = "(?i)circuit breaker"
+  "1 UI+AI via REST APIs      " = "(?i)REST API"
+  "2 streaming to browser     " = "(?i)streaming"
+  "3 long-running operations  " = "(?i)long-running operation"
+  "4 loading + error handling " = "(?i)loading state"
+  "5 clean architecture       " = "(?i)clean architecture"
 }
 foreach ($k in $checks.Keys) {
   $t = $checks[$k]

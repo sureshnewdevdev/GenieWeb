@@ -1,0 +1,617 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Adding AI to ASP.NET Web Applications",
+  "slug": "ai-in-aspnet-web-apps",
+  "level": "Intermediate",
+  "codeLanguage": "C#",
+  "tutorialNumber": 14,
+  "totalTutorials": 27,
+  "prev": "enterprise-ai-integration-patterns",
+  "next": "rag-with-azure-ai-search",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Adding AI to ASP.NET Web Applications"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "UI + AI integration using REST APIs",
+    "Streaming responses to the browser",
+    "Handling long-running operations",
+    "Loading states and error handling",
+    "Clean architecture for AI-enabled web apps"
+  ],
+  "tooltips": {
+    "REST API": "An HTTP endpoint exposing operations over verbs and JSON; the browser calls it with fetch to reach server-side AI without ever touching the model directly.",
+    "minimal API": "ASP.NET Core's lightweight endpoint style (app.MapPost) that declares routes and handlers without controllers — a compact home for AI endpoints.",
+    "controller": "An MVC class grouping related HTTP endpoints as action methods; the alternative to minimal APIs for organizing an AI-enabled web app's server side.",
+    "DTO": "Data Transfer Object — a small class shaping exactly the JSON crossing the wire, decoupling the HTTP contract from internal domain and SDK types.",
+    "streaming": "Sending the response incrementally as it is produced, so the browser shows tokens as they arrive instead of waiting for the whole answer.",
+    "token": "A small chunk of text the model generates; streaming delivers the completion token by token as each is produced.",
+    "Server-Sent Events": "A one-way HTTP streaming standard (text/event-stream) where the server pushes a sequence of events to the browser over a single response.",
+    "IAsyncEnumerable": "A C# type for an asynchronous stream of values; the SDK returns completion updates as one, and the endpoint yields them to the client.",
+    "chunked transfer": "An HTTP mechanism for sending a response body in pieces without knowing its total length up front — what makes token-by-token streaming possible.",
+    "long-running operation": "Work that outlives a normal request; instead of holding the HTTP connection, you accept it, return an id, and let the client poll or subscribe for the result.",
+    "background service": "A hosted component (BackgroundService/IHostedService) that runs work outside the request thread — where long-running AI jobs belong.",
+    "polling": "The client repeatedly requesting a status endpoint (GET /jobs/{id}) until the long-running operation reports completion.",
+    "loading state": "The UI condition shown while an AI call is in flight — a spinner, streamed partial text, a disabled button — signalling the request is working.",
+    "cancellation token": "The signal (from HttpContext.RequestAborted) that flows into the AI call so a user who navigates away or clicks Stop actually cancels the work.",
+    "clean architecture": "Layering that keeps domain and application logic independent of frameworks and the AI SDK, with dependencies pointing inward toward the core.",
+    "problem details": "The RFC 9457 JSON format ASP.NET Core uses for error responses, giving the browser a consistent, typed shape to handle failures.",
+    "CORS": "Cross-Origin Resource Sharing — the browser rule governing whether a page may call an API on another origin; configured on the server for separate front ends.",
+    "debounce": "Delaying an action until input pauses, so keystrokes in a chat box do not each fire an expensive AI request."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview: The Model Meets the Browser",
+      "content": [
+        { "type": "paragraph", "text": "You have an enterprise-shaped AI service — IChatService behind dependency injection, resilient, logged, its secrets secured. This tutorial gives it a face. A browser cannot and must not call Azure OpenAI directly: the key would ship to every visitor, and there would be no place to apply auth, rate limits, or logging. So the server exposes a REST API, the page calls that endpoint with fetch, and your service layer does the model work behind it. That is the whole architecture in one sentence — and the rest is doing it well." },
+        { "type": "paragraph", "text": "Doing it well means four things the console app never had to face. First, latency is now visible to a human staring at a screen, so you need loading states and — better — streaming responses that show tokens as they arrive. Second, some AI work outruns a reasonable HTTP request, so you need a pattern for long-running operations that does not hold a connection open for minutes. Third, failures now reach a user, so error handling must be deliberate and typed. Fourth, all of this must sit inside a clean architecture that keeps the web framework and the AI SDK from bleeding into your domain." },
+        { "type": "note", "style": "info", "text": "The golden rule of this tutorial: the API key lives on the server, always. Any design where the browser holds the credential or calls the model endpoint directly is wrong before you write a line of it." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Expose AI features to a browser through a server-side REST API using DTOs, so the model, the key, and the SDK never leave the server.",
+          "Stream responses to the browser token by token with IAsyncEnumerable and Server-Sent Events, and consume the stream in JavaScript.",
+          "Handle long-running operations with an accept-and-poll pattern backed by a background service, instead of holding the request open.",
+          "Design loading states and typed error handling with Problem Details so users always know whether the AI is working, done, or failed.",
+          "Wire request cancellation from the browser through to the AI call, so abandoned work stops and stops billing.",
+          "Apply clean architecture so the ASP.NET Core layer and the AI SDK stay at the edges, with domain and application logic independent of both."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorial 13: an AI service behind IChatService, registered in DI, with options-bound configuration, structured logging, and resilience.",
+          "ASP.NET Core basics: Program.cs, the middleware pipeline, minimal APIs or controllers, and model binding of JSON request bodies.",
+          "Front-end fundamentals: HTML, and JavaScript's fetch API including reading a streamed response body.",
+          "Comfort with async/await, IAsyncEnumerable, and CancellationToken from earlier tutorials in this course."
+        ] },
+        { "type": "note", "style": "tip", "text": "You do not need a front-end framework. The examples use plain fetch and the DOM so the AI-integration concepts stay in focus; every pattern transfers unchanged to React, Blazor, or any SPA." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "Key Concepts: Server in the Middle",
+      "content": [
+        { "type": "paragraph", "text": "Every AI-enabled web feature has the same three-tier shape: a browser UI, your server, and the model. The browser never sees the model. It sends a plain request — 'here is the user's question' — to your REST API; the server, holding the key and the IChatService, calls Azure OpenAI and shapes a response the browser can render. The server is where auth, rate limiting, logging, and cost control live, precisely because it is the one place the browser cannot bypass." },
+        { "type": "table", "headers": ["Concern", "Belongs to the browser", "Belongs to the server"], "rows": [
+          ["The API key / credential", "Never", "Always"],
+          ["Prompt construction & system message", "No", "Yes — in the service layer"],
+          ["Calling the model", "No", "Yes"],
+          ["Rendering the answer, loading states", "Yes", "Provides the data"],
+          ["Auth, rate limits, logging, cost control", "No", "Yes"],
+          ["Deciding sync vs streaming vs long-running", "No", "Yes — by response shape"]
+        ] },
+        { "type": "paragraph", "text": "What differs between features is only the response shape, and that choice drives everything downstream. A short answer returns as one JSON body (a normal REST API call). A visible-latency answer streams token by token so the user sees progress. Work that may take minutes becomes a long-running operation: accept it, return an id, and let the client poll. The next four deep dives take these in turn, and the final one puts them inside a clean architecture so none of it contaminates your domain code." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Deep Dive 1: UI + AI Integration Using REST APIs",
+      "content": [
+        { "type": "paragraph", "text": "The simplest integration is a request/response REST API. The browser POSTs the user's input as JSON; a server endpoint binds it to a request DTO, calls IChatService, and returns a response DTO as JSON. DTOs matter more here than anywhere: they are the contract with the outside world, and they must not be your SDK types or even your raw domain entities. A request DTO carries exactly what the client may send (the question, maybe a conversation id) and nothing it may not (no temperature, no system prompt, no deployment name — those are server policy). A response DTO carries exactly what the client needs to render." },
+        { "type": "code", "language": "csharp", "title": "A minimal API endpoint wrapping the AI service", "code": [
+          "// Program.cs — the AI SDK is nowhere in sight here; only IChatService.",
+          "app.MapPost(\"/api/ask\", async (",
+          "    AskRequest request,",
+          "    IChatService chat,",
+          "    CancellationToken ct) =>",
+          "{",
+          "    if (string.IsNullOrWhiteSpace(request.Question))",
+          "        return Results.BadRequest(new { error = \"Question is required.\" });",
+          "",
+          "    OrderAnswer answer = await chat.AskAboutOrderAsync(request.Question, ct);",
+          "    return Results.Ok(new AskResponse(answer.Text, answer.Truncated));",
+          "})",
+          ".WithName(\"Ask\");",
+          "",
+          "// DTOs: the wire contract, deliberately separate from domain and SDK types.",
+          "public record AskRequest(string Question, string? ConversationId);",
+          "public record AskResponse(string Answer, bool Truncated);"
+        ] },
+        { "type": "code", "language": "javascript", "title": "The browser side: fetch, no key, no SDK", "code": [
+          "async function ask(question) {",
+          "  const res = await fetch('/api/ask', {",
+          "    method: 'POST',",
+          "    headers: { 'Content-Type': 'application/json' },",
+          "    body: JSON.stringify({ question })",
+          "  });",
+          "  if (!res.ok) {",
+          "    const problem = await res.json();          // Problem Details (deep dive 4)",
+          "    throw new Error(problem.detail ?? 'Request failed');",
+          "  }",
+          "  const data = await res.json();",
+          "  return data.answer;",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "Notice the cancellation token parameter on the endpoint: ASP.NET Core supplies HttpContext.RequestAborted automatically, so if the user navigates away the token trips and — because tutorial 13's service passes it all the way to the SDK — the model call actually stops. When the front end lives on a different origin than the API you must also configure CORS on the server; and any input box that fires on keystrokes should debounce so a user typing a sentence does not launch ten requests. Whether you write this endpoint as a minimal API or a controller action is style; the boundary discipline is identical." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Deep Dive 2: Streaming Responses to the Browser",
+      "content": [
+        { "type": "paragraph", "text": "A model may take many seconds to finish a long answer, and making the user watch a spinner for all of it feels broken even when it is working. Streaming fixes the perception and often the reality: the server forwards each token as the model produces it, and the browser paints words as they arrive — the familiar 'typing' effect. The mechanism is a chain of asynchronous streams. The SDK exposes completions as an IAsyncEnumerable of update objects (CompleteChatStreamingAsync); your service layer re-exposes that as an IAsyncEnumerable<string> of text fragments; and the endpoint writes each fragment to the response as it arrives using chunked transfer, so the browser can read partial output before the whole is done." },
+        { "type": "animation", "title": "A token's journey from model to screen", "intro": "Streaming is a pipeline of async streams; watch one fragment travel end to end.", "nodes": [
+          { "id": "model", "label": "Model", "sub": "emits tokens" },
+          { "id": "sdk", "label": "SDK stream", "sub": "IAsyncEnumerable" },
+          { "id": "svc", "label": "IChatService", "sub": "yields text" },
+          { "id": "sse", "label": "SSE endpoint", "sub": "writes chunks" },
+          { "id": "ui", "label": "Browser", "sub": "appends text" }
+        ], "steps": [
+          { "highlight": ["model"], "caption": "The model generates the answer one token at a time rather than all at once." },
+          { "highlight": ["sdk"], "caption": "The SDK surfaces those tokens as an IAsyncEnumerable of streaming updates the server can await in a foreach." },
+          { "highlight": ["svc"], "caption": "The service layer iterates the updates and yields just the text fragments — keeping SDK types off the boundary, exactly as in the non-streaming case." },
+          { "highlight": ["sse"], "caption": "The endpoint writes each fragment to the open response as a Server-Sent Events message, flushing so it leaves immediately via chunked transfer." },
+          { "highlight": ["ui"], "caption": "The browser reads the stream and appends each fragment to the DOM — the answer appears to type itself. A final event signals completion." }
+        ] },
+        { "type": "code", "language": "csharp", "title": "A streaming endpoint with Server-Sent Events", "code": [
+          "app.MapPost(\"/api/ask/stream\", async (",
+          "    AskRequest request,",
+          "    IChatService chat,",
+          "    HttpContext http,",
+          "    CancellationToken ct) =>",
+          "{",
+          "    http.Response.Headers.ContentType = \"text/event-stream\";",
+          "    http.Response.Headers.CacheControl = \"no-cache\";",
+          "",
+          "    // The service yields text fragments as an IAsyncEnumerable<string>.",
+          "    await foreach (string fragment in chat.StreamAnswerAsync(request.Question, ct))",
+          "    {",
+          "        // One SSE 'data:' line per fragment, then flush so it ships immediately.",
+          "        await http.Response.WriteAsync($\"data: {fragment}\\n\\n\", ct);",
+          "        await http.Response.Body.FlushAsync(ct);",
+          "    }",
+          "    await http.Response.WriteAsync(\"event: done\\ndata: end\\n\\n\", ct);",
+          "});"
+        ] },
+        { "type": "code", "language": "javascript", "title": "Consuming the stream in the browser", "code": [
+          "async function askStreaming(question, onFragment) {",
+          "  const res = await fetch('/api/ask/stream', {",
+          "    method: 'POST',",
+          "    headers: { 'Content-Type': 'application/json' },",
+          "    body: JSON.stringify({ question })",
+          "  });",
+          "  const reader = res.body.getReader();",
+          "  const decoder = new TextDecoder();",
+          "  while (true) {",
+          "    const { value, done } = await reader.read();",
+          "    if (done) break;",
+          "    const text = decoder.decode(value);",
+          "    for (const line of text.split('\\n')) {",
+          "      if (line.startsWith('data: ')) onFragment(line.slice(6));",
+          "    }",
+          "  }",
+          "}"
+        ] },
+        { "type": "note", "style": "warning", "text": "Streaming complicates error handling: once you have written a 200 status and started the body, you cannot change the status code to 500. Signal mid-stream failures as a dedicated SSE event (event: error) the client watches for, and always flush — buffered output defeats the entire purpose." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Deep Dive 3: Handling Long-Running Operations",
+      "content": [
+        { "type": "paragraph", "text": "Some AI work does not fit a request at all: a multi-step agent, a batch that summarizes fifty documents, a chain of tool calls that runs for minutes. Holding an HTTP request open that long is a mistake — it ties up a server connection, dies on any proxy or load-balancer idle timeout, and gives the browser nothing but a stalled spinner. The pattern for a long-running operation is to decouple the work from the request: accept the job, hand it to a background service, and return immediately with a job id and HTTP 202 Accepted. The client then polls a status endpoint until the job reports done, or subscribes for a push notification." },
+        { "type": "animation", "title": "The accept-and-poll pattern", "intro": "The request returns in milliseconds; the work continues behind it.", "nodes": [
+          { "id": "post", "label": "POST /jobs", "sub": "start work" },
+          { "id": "queue", "label": "Enqueue", "sub": "job id + 202" },
+          { "id": "bg", "label": "Background service", "sub": "runs the AI job" },
+          { "id": "poll", "label": "GET /jobs/{id}", "sub": "client polls" },
+          { "id": "result", "label": "Result", "sub": "200 + answer" }
+        ], "steps": [
+          { "highlight": ["post"], "caption": "The browser posts the job request — say, 'summarize these fifty documents'." },
+          { "highlight": ["queue"], "caption": "The server records a job, enqueues it, and immediately returns 202 Accepted with a job id. The HTTP request is already finished." },
+          { "highlight": ["bg"], "caption": "A background service picks up the job and does the slow AI work off the request thread, updating the job's status as it progresses." },
+          { "highlight": ["poll"], "caption": "The browser polls GET /jobs/{id} every couple of seconds; while running, it gets a 'pending' status the UI shows as progress." },
+          { "highlight": ["result"], "caption": "When the background service finishes, the status endpoint returns 'completed' with the result — the UI swaps the spinner for the answer." }
+        ] },
+        { "type": "code", "language": "csharp", "title": "Accept the job, return an id, poll for the result", "code": [
+          "// Start: enqueue and return 202 with a job id — the request ends here.",
+          "app.MapPost(\"/api/jobs/summarize\", (SummarizeRequest req, IJobQueue jobs) =>",
+          "{",
+          "    string jobId = jobs.Enqueue(req);          // hands work to a background service",
+          "    return Results.Accepted($\"/api/jobs/{jobId}\", new { jobId });",
+          "});",
+          "",
+          "// Status: the client polls this until Status is Completed or Failed.",
+          "app.MapGet(\"/api/jobs/{id}\", (string id, IJobStore store) =>",
+          "{",
+          "    JobRecord? job = store.Find(id);",
+          "    if (job is null) return Results.NotFound();",
+          "    return job.Status switch",
+          "    {",
+          "        JobStatus.Completed => Results.Ok(new { job.Status, job.Result }),",
+          "        JobStatus.Failed    => Results.Ok(new { job.Status, job.Error }),",
+          "        _                   => Results.Ok(new { job.Status })   // Pending / Running",
+          "    };",
+          "});"
+        ] },
+        { "type": "paragraph", "text": "The background service itself is a BackgroundService (a hosted IHostedService) that reads the queue, calls IChatService for each job, and writes results to a job store — in memory for a demo, but a database or distributed cache in production so a restart does not lose in-flight work. This is also where you decide on real-time push: for a nicer experience than polling, the server can notify the browser over a WebSocket-based channel when the job finishes, but polling is the simplest correct baseline and the right place to start." },
+        { "type": "note", "style": "tip", "text": "Rule of thumb: sub-second work returns synchronously; a few seconds of visible latency streams; anything that could exceed a request timeout (tens of seconds and up) becomes a long-running operation. Pick the shape from the expected duration, not from habit." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Deep Dive 4: Loading States, Error Handling, and Clean Architecture",
+      "content": [
+        { "type": "paragraph", "text": "Because AI calls are slow and fallible, the UI must always answer two questions: is it working, and did it fail? A loading state answers the first — a disabled submit button and a spinner at minimum, streamed partial text at best, so the user never wonders whether their click registered. Pair it with a visible Stop control wired to an AbortController on the fetch, which on the server surfaces as the cancellation token that halts the model call. Silence is the one unacceptable state: an AI feature that shows nothing for fifteen seconds reads as broken even when it is perfectly healthy." },
+        { "type": "paragraph", "text": "Error handling must be typed and consistent, not ad hoc. ASP.NET Core's Problem Details (RFC 9457) gives every failure a uniform JSON shape — type, title, status, detail — that the browser can handle in one code path. Map the failure classes deliberately: a 400 for bad input, a 429 the UI can turn into 'busy, try again shortly', a 503 when the circuit breaker from tutorial 13 is open, a generic 500 otherwise — and never leak a stack trace or a prompt to the client. Translate the server's status into human language in the UI; 'The assistant is busy right now' beats a raw 429." },
+        { "type": "animation", "title": "The states of one AI request in the UI", "intro": "Every AI interaction moves through these states — design all of them, not just success.", "nodes": [
+          { "id": "idle", "label": "Idle", "sub": "ready" },
+          { "id": "loading", "label": "Loading", "sub": "spinner / stream" },
+          { "id": "success", "label": "Success", "sub": "answer shown" },
+          { "id": "error", "label": "Error", "sub": "typed message" },
+          { "id": "cancel", "label": "Cancelled", "sub": "user stopped" }
+        ], "steps": [
+          { "highlight": ["idle"], "caption": "Idle: the form is ready, the submit button enabled, no request in flight." },
+          { "highlight": ["loading"], "caption": "On submit, the UI enters loading: button disabled, spinner or streamed text visible, a Stop button wired to an AbortController appears." },
+          { "highlight": ["success"], "caption": "The response arrives and renders; the UI returns to idle, ready for the next question." },
+          { "highlight": ["error"], "caption": "On failure, Problem Details is parsed and shown as a human message — 'busy, try again' for 429, 'temporarily unavailable' when the breaker is open — never a stack trace." },
+          { "highlight": ["cancel"], "caption": "If the user clicks Stop, the AbortController fires, the request's cancellation token trips, the model call halts, and the UI returns cleanly to idle." }
+        ] },
+        { "type": "paragraph", "text": "Clean architecture keeps all of this from rotting. Picture concentric layers with dependencies pointing inward: at the center, domain models and the IChatService interface, knowing nothing of HTTP or the AI SDK; around them, application logic (the orchestration, the job workflow); at the edges, two thin adapters — the ASP.NET Core layer (endpoints, DTOs, Problem Details, SSE plumbing) and the infrastructure layer (the AI SDK implementation of IChatService, the job store). The web framework and the SDK are details at the boundary, plugged in via DI. The reward is the same as tutorial 13's, now at application scale: you can test the core without a browser or a model, swap ASP.NET Core for a worker or the SDK for another provider by rewriting an edge, and read the domain without wading through framework noise." },
+        { "type": "note", "style": "warning", "text": "The anti-pattern to hunt for: an AI SDK type or a raw HttpContext appearing in a domain or application class. The moment it does, the core depends on a detail, and the testability and swappability you paid for are gone." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Ecosystem and Tools",
+      "content": [
+        { "type": "table", "headers": ["Technology", "Role in an AI-enabled web app"], "rows": [
+          ["ASP.NET Core minimal APIs / controllers", "The REST API surface the browser calls; either style hosts AI endpoints"],
+          ["IAsyncEnumerable<T> + CompleteChatStreamingAsync", "The async streams that carry tokens from SDK through the service layer to the response"],
+          ["Server-Sent Events (text/event-stream)", "Simple one-way streaming of tokens to the browser over a single HTTP response"],
+          ["BackgroundService / IHostedService", "Runs long-running AI jobs off the request thread; paired with a job store"],
+          ["ASP.NET Core Problem Details (RFC 9457)", "Uniform typed error responses the front end handles in one path"],
+          ["HttpContext.RequestAborted (CancellationToken)", "Propagates browser cancellation to the model call so abandoned work stops"],
+          ["SignalR (WebSockets)", "Optional real-time push to replace polling for job completion notifications"],
+          ["fetch + AbortController + ReadableStream", "The browser-side trio for calling, cancelling, and consuming streamed AI responses"]
+        ] },
+        { "type": "paragraph", "text": "None of these are AI-specific — they are the standard ASP.NET Core web toolkit. That is the recurring lesson of this part of the course: an AI feature is a web feature whose backend happens to call a model, so the mature primitives you already have (streaming, background work, typed errors, cancellation) are exactly the ones you reach for. The AI SDK stays where tutorial 13 put it: behind IChatService, at the infrastructure edge." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "Use Cases",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Support chat widget: a REST API endpoint per message, streaming the reply token by token so the assistant feels responsive on a help page.",
+          "Inline writing assistant: a debounced call as the user pauses typing, returning suggestions rendered beside the editor.",
+          "Document summarizer: an upload triggers a long-running operation; the user sees a progress state and gets the summary when the background job finishes.",
+          "Search-answer box: a question posts to the server, which (in later tutorials) retrieves context and streams a grounded answer back.",
+          "Form autofill from a description: a synchronous REST API call returns structured fields the page populates, with a loading state on the button.",
+          "Batch classification dashboard: hundreds of items enqueued as jobs, a table polling each job's status and filling in results as they complete.",
+          "Interactive tutor: a streamed conversation with a visible Stop button, so a learner can interrupt a long explanation and ask something else."
+        ] },
+        { "type": "paragraph", "text": "Read across the list and the same three response shapes recur: quick answers are synchronous REST, visible-latency answers stream, and minutes-long work becomes a background job. Choosing correctly among the three is the core design decision of every AI web feature." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples",
+      "content": [
+        { "type": "paragraph", "text": "These examples assume tutorial 13's IChatService is registered in DI, now extended with a streaming method. Together they show the synchronous endpoint, the streaming service method, and a typed error mapping — the three surfaces a real AI web feature needs." },
+        { "type": "code", "language": "csharp", "title": "Example 1 — Extending the service layer with a streaming method", "code": [
+          "// The interface gains a streaming method; SDK types stay inside the implementation.",
+          "public interface IChatService",
+          "{",
+          "    Task<OrderAnswer> AskAboutOrderAsync(string question, CancellationToken ct = default);",
+          "    IAsyncEnumerable<string> StreamAnswerAsync(string question, CancellationToken ct = default);",
+          "}",
+          "",
+          "// Implementation: iterate the SDK's streaming updates, yield plain text fragments.",
+          "public async IAsyncEnumerable<string> StreamAnswerAsync(",
+          "    string question, [EnumeratorCancellation] CancellationToken ct = default)",
+          "{",
+          "    var messages = new ChatMessage[]",
+          "    {",
+          "        new SystemChatMessage(\"You are an order-support assistant.\"),",
+          "        new UserChatMessage(question)",
+          "    };",
+          "",
+          "    await foreach (StreamingChatCompletionUpdate update in",
+          "        _chat.CompleteChatStreamingAsync(messages, cancellationToken: ct))",
+          "    {",
+          "        foreach (var part in update.ContentUpdate)",
+          "        {",
+          "            if (!string.IsNullOrEmpty(part.Text))",
+          "                yield return part.Text;      // one text fragment to the endpoint",
+          "        }",
+          "    }",
+          "}"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 2 — Global typed error handling with Problem Details", "code": [
+          "// Program.cs — one place turns exceptions into consistent Problem Details JSON.",
+          "builder.Services.AddProblemDetails();",
+          "",
+          "app.UseExceptionHandler(handler => handler.Run(async context =>",
+          "{",
+          "    var feature = context.Features.Get<IExceptionHandlerFeature>();",
+          "    var ex = feature?.Error;",
+          "",
+          "    (int status, string title) = ex switch",
+          "    {",
+          "        ClientResultException e when e.Status == 429",
+          "            => (StatusCodes.Status429TooManyRequests, \"The assistant is busy. Please retry shortly.\"),",
+          "        BrokenCircuitException",
+          "            => (StatusCodes.Status503ServiceUnavailable, \"The assistant is temporarily unavailable.\"),",
+          "        OperationCanceledException",
+          "            => (StatusCodes.Status499ClientClosedRequest, \"Request cancelled.\"),",
+          "        _   => (StatusCodes.Status500InternalServerError, \"Something went wrong.\")",
+          "    };",
+          "",
+          "    // No stack trace, no prompt text — only a safe, typed shape for the client.",
+          "    await Results.Problem(title: title, statusCode: status).ExecuteAsync(context);",
+          "}));"
+        ] },
+        { "type": "code", "language": "javascript", "title": "Example 3 — UI loading, cancellation, and typed error handling", "code": [
+          "const btn = document.querySelector('#ask');",
+          "const out = document.querySelector('#answer');",
+          "let controller = null;",
+          "",
+          "btn.addEventListener('click', async () => {",
+          "  controller = new AbortController();",
+          "  btn.disabled = true;                     // loading state",
+          "  out.textContent = '';",
+          "  showSpinner(true);",
+          "  try {",
+          "    const res = await fetch('/api/ask/stream', {",
+          "      method: 'POST',",
+          "      headers: { 'Content-Type': 'application/json' },",
+          "      body: JSON.stringify({ question: input.value }),",
+          "      signal: controller.signal          // Stop button aborts this",
+          "    });",
+          "    if (!res.ok) {",
+          "      const problem = await res.json();     // Problem Details",
+          "      throw new Error(problem.title ?? 'Request failed');",
+          "    }",
+          "    const reader = res.body.getReader();",
+          "    const decoder = new TextDecoder();",
+          "    for (;;) {",
+          "      const { value, done } = await reader.read();",
+          "      if (done) break;",
+          "      decoder.decode(value).split('\\n').forEach(l => {",
+          "        if (l.startsWith('data: ')) out.textContent += l.slice(6);",
+          "      });",
+          "    }",
+          "  } catch (e) {",
+          "    if (e.name === 'AbortError') out.textContent = '(cancelled)';",
+          "    else out.textContent = 'Error: ' + e.message;",
+          "  } finally {",
+          "    btn.disabled = false;                  // back to idle",
+          "    showSpinner(false);",
+          "  }",
+          "});"
+        ] }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step by Step: A Streaming Assistant Page",
+      "content": [
+        { "type": "paragraph", "text": "This walkthrough puts tutorial 13's order assistant behind a web page with a streaming answer, loading and error states, cancellation, and a clean layering that keeps the SDK at the edge." },
+        { "type": "list", "style": "numbered", "items": [
+          "Create the web project: 'dotnet new web -n OrderAssistantWeb' (minimal API host) and add the AI packages plus your tutorial-13 service-layer files.",
+          "Register the stack in Program.cs exactly as before — options with ValidateOnStart, the singleton AzureOpenAIClient, AddSingleton<IChatService, ChatService> — then add builder.Services.AddProblemDetails().",
+          "Confirm layering: put domain types and IChatService in a core project or folder with no ASP.NET Core or Azure references; keep the SDK implementation and DTOs at the edges. This is the clean architecture check.",
+          "Extend IChatService with StreamAnswerAsync (Example 1); keep every SDK type inside the implementation, yielding only strings across the boundary.",
+          "Add the synchronous POST /api/ask endpoint (deep dive 1) and the streaming POST /api/ask/stream endpoint (deep dive 2). Both take CancellationToken so RequestAborted flows to the model.",
+          "Add the global Problem Details exception handler (Example 2), mapping 429, breaker-open, cancellation, and the generic case — and asserting no stack trace or prompt reaches the client.",
+          "Build a minimal wwwroot/index.html: a text input, an Ask button, a Stop button, a spinner element, and an answer div.",
+          "Wire the front end (Example 3): AbortController on submit, disabled button and spinner during loading, streamed fragments appended live, typed error messages, and clean return to idle in finally.",
+          "Run 'dotnet run', open the page, ask about ORD-1042, and watch the answer stream in token by token instead of appearing all at once.",
+          "Test the states deliberately: click Stop mid-stream and confirm the model call cancels (watch the server log); force a 429 (or fake the breaker open) and confirm the UI shows the friendly typed message, not a stack trace.",
+          "Add a long-running path for practice: a POST /api/jobs/summarize returning 202 plus a job id, a BackgroundService that runs the work, and a GET /api/jobs/{id} the page polls — the accept-and-poll pattern from deep dive 3."
+        ] },
+        { "type": "note", "style": "tip", "text": "Do the streaming path first and demo it before anything else — the token-by-token effect is the single most convincing sign your integration is working, and it makes the remaining states easy to reason about." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "SDK naming caveat: streaming members (CompleteChatStreamingAsync, StreamingChatCompletionUpdate, ContentUpdate) target the Azure.AI.OpenAI 2.x / OpenAI .NET line and shift between versions. If a member does not compile, check the package's current streaming sample; the async-stream pattern holds regardless of exact names. [EnumeratorCancellation] on the token parameter of an async iterator is required for cancellation to flow.",
+          "Server-Sent Events is one-way (server to client) and its raw framing needs care: fragments containing newlines must be encoded, since a blank line terminates an SSE message. For bidirectional or higher-volume needs, consider WebSockets/SignalR.",
+          "Once a streamed response has started (200 + body), the status code cannot change — mid-stream failures must be signalled as an in-band event, and the client must handle a stream that ends early.",
+          "Streaming to the browser does not reduce token cost or total generation time; it improves perceived latency. A cancelled stream may still bill for tokens already produced.",
+          "The in-memory job store shown for long-running operations loses work on restart and does not scale across instances — production needs a durable store (database/cache) and idempotent job handling.",
+          "Polling has overhead and latency; tune the interval, add jitter, and cap total wait. Real-time push (SignalR) is nicer but adds a connection to manage.",
+          "Proxies, load balancers, and response buffering (including some reverse proxies and output-compression middleware) can defeat streaming by buffering the body — disable buffering on streaming routes and test through your real edge.",
+          "This tutorial's examples omit authentication and per-user rate limiting for focus; a public AI endpoint needs both, plus input size limits, or it is an open, billable proxy to your model."
+        ] }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Keep the key and the model call server-side without exception; the browser calls your REST API, never Azure OpenAI.",
+          "Shape the wire with DTOs, never expose SDK or domain types over HTTP, and never accept model parameters (temperature, system prompt) from the client — those are server policy.",
+          "Choose the response shape by expected duration: synchronous for quick answers, streaming for visible latency, long-running jobs for minutes-long work.",
+          "Always render a loading state and always offer a Stop control wired through AbortController to the server cancellation token — silence is a bug.",
+          "Return errors as Problem Details, map failure classes to human messages, and never leak stack traces or prompt text to the client.",
+          "Flow CancellationToken (HttpContext.RequestAborted) into every AI call so abandoned requests stop generating and stop billing.",
+          "Keep ASP.NET Core and the AI SDK at the architecture's edges; if an SDK type or HttpContext reaches a domain class, stop and refactor.",
+          "Protect public endpoints: authenticate, rate-limit per user, cap input size, and debounce client-side triggers so one user cannot storm the model."
+        ] },
+        { "type": "table", "headers": ["Common mistake", "Do this instead"], "rows": [
+          ["Calling the model endpoint directly from JavaScript", "Call your server's REST API; the key and SDK live server-side"],
+          ["Returning SDK types or entities as the JSON response", "Map to a response DTO shaped for the client's needs"],
+          ["A spinner that never resolves on error", "Design idle/loading/success/error/cancelled as five real states"],
+          ["Holding the request open for a minutes-long job", "Return 202 + job id, run it in a background service, poll for the result"],
+          ["Buffering the streamed body", "Flush after each fragment and disable buffering on streaming routes"],
+          ["Leaking a 429 or stack trace to the user", "Translate via Problem Details into 'the assistant is busy, try again shortly'"]
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz: Adding AI to ASP.NET Web Applications",
+      "items": [
+        { "number": 1, "question": "Why must a browser call a server-side REST API instead of Azure OpenAI directly?", "options": { "A": "Browsers cannot make HTTPS requests to Azure", "B": "The API key would be exposed to every visitor, and there would be nowhere to apply auth, rate limits, or logging", "C": "Azure OpenAI only accepts requests from .NET clients", "D": "JSON cannot be parsed in JavaScript" }, "correctAnswer": "B", "explanation": "Calling the model from the browser ships the credential to everyone and removes the one choke point — the server — where authentication, rate limiting, cost control, and logging can be enforced. The server holds the key and the SDK; the browser calls your API." },
+        { "number": 2, "question": "What is the role of a DTO in an AI web endpoint?", "options": { "A": "It stores the API key securely", "B": "It defines the exact JSON contract crossing the wire, decoupled from SDK and domain types", "C": "It streams tokens to the browser", "D": "It replaces the need for a service layer" }, "correctAnswer": "B", "explanation": "A request/response DTO shapes precisely what the client may send and needs to receive — and deliberately excludes server policy like temperature or system prompts and internal SDK/domain types. It is the boundary contract, kept separate on purpose." },
+        { "number": 3, "question": "Which client-provided value should an AI endpoint's request DTO NOT accept?", "options": { "A": "The user's question", "B": "A conversation id", "C": "The model temperature and system prompt", "D": "A boolean for whether to stream" }, "correctAnswer": "C", "explanation": "Temperature and the system prompt are server-side policy; accepting them from the client lets a caller alter behavior, cost, and safety. The DTO carries user intent (the question, a conversation id, maybe a stream flag), not model configuration." },
+        { "number": 4, "question": "What does streaming a response to the browser primarily improve?", "options": { "A": "Total token cost", "B": "Perceived latency — the user sees output as it is produced", "C": "Model accuracy", "D": "The number of concurrent requests the server can handle" }, "correctAnswer": "B", "explanation": "Streaming forwards each token as it is generated so the answer appears to type itself. Total generation time and token cost are unchanged; what improves is the experience — no long blank wait. It is a perception (and interruptibility) win." },
+        { "number": 5, "question": "Which .NET type does the SDK use to expose a streaming completion?", "options": { "A": "IEnumerable<string>", "B": "Task<string>", "C": "IAsyncEnumerable of streaming update objects", "D": "Stream" }, "correctAnswer": "C", "explanation": "Streaming completions arrive as an IAsyncEnumerable of update objects the server awaits in an await-foreach. The service layer re-exposes them as an IAsyncEnumerable<string> of text fragments, keeping SDK types off the boundary." },
+        { "number": 6, "question": "What is Server-Sent Events (SSE) used for here?", "options": { "A": "Bidirectional real-time chat between clients", "B": "One-way streaming of tokens from server to browser over a single HTTP response", "C": "Storing job results durably", "D": "Authenticating the AI request" }, "correctAnswer": "B", "explanation": "SSE (text/event-stream) is a simple one-way push: the server writes a sequence of 'data:' messages to an open response and the browser reads them incrementally via chunked transfer. It fits token streaming; WebSockets are for bidirectional needs." },
+        { "number": 7, "question": "Why can't you change the HTTP status code midway through a streamed response?", "options": { "A": "SSE forbids status codes", "B": "Once the 200 status and body have started sending, the headers are already committed", "C": "The browser ignores status codes on streams", "D": "You can — just call Response.StatusCode again" }, "correctAnswer": "B", "explanation": "Status and headers are sent before the body begins. After streaming starts you cannot switch to 500, so mid-stream failures must be signalled in-band — a dedicated SSE error event the client watches for — and the client must handle a stream ending early." },
+        { "number": 8, "question": "When should an AI operation be handled as a long-running operation rather than a normal or streaming request?", "options": { "A": "Whenever the answer is longer than one sentence", "B": "When the work could exceed a reasonable request timeout — tens of seconds or minutes", "C": "Only when streaming is unavailable", "D": "Never; all AI work fits in a request" }, "correctAnswer": "B", "explanation": "Sub-second work returns synchronously, visible-latency work streams, but minutes-long work (agents, big batches) must not hold a connection open — proxies time out and the connection is tied up. Accept it, return an id, and process it in the background." },
+        { "number": 9, "question": "In the accept-and-poll pattern, what does the initial POST return?", "options": { "A": "The final answer after waiting", "B": "HTTP 202 Accepted with a job id, immediately", "C": "A streamed response", "D": "HTTP 500 until the job is done" }, "correctAnswer": "B", "explanation": "The POST enqueues the work and returns 202 Accepted plus a job id right away, ending the request in milliseconds. A background service does the slow work, and the client polls GET /jobs/{id} until the status is Completed or Failed." },
+        { "number": 10, "question": "Where should a long-running AI job actually execute?", "options": { "A": "On the request thread, before returning the response", "B": "In the browser via JavaScript", "C": "In a background service (BackgroundService/IHostedService) off the request thread", "D": "Inside the Problem Details handler" }, "correctAnswer": "C", "explanation": "A hosted BackgroundService reads the job queue and runs the AI work independently of any HTTP request, writing progress and results to a job store. Running it on the request thread is exactly the connection-holding problem the pattern exists to avoid." },
+        { "number": 11, "question": "What are the essential UI states for an AI interaction?", "options": { "A": "Only success and error", "B": "Idle, loading, success, error, and cancelled", "C": "Loading and done", "D": "Just a spinner" }, "correctAnswer": "B", "explanation": "All five need designing: idle (ready), loading (spinner or streamed text plus a Stop control), success (rendered answer), error (typed human message), and cancelled (clean return to idle). Silence during a slow call reads as broken even when it is working." },
+        { "number": 12, "question": "What is Problem Details used for?", "options": { "A": "Streaming tokens to the browser", "B": "A uniform, typed JSON shape for error responses (RFC 9457) the client handles in one path", "C": "Storing configuration securely", "D": "Cancelling requests" }, "correctAnswer": "B", "explanation": "Problem Details gives every failure a consistent shape (type, title, status, detail), so the front end has one error-handling code path and the server never leaks stack traces or prompts. Failure classes map to human messages the UI shows." },
+        { "number": 13, "question": "How does clicking a Stop button in the browser actually halt the model call?", "options": { "A": "It closes the browser tab", "B": "An AbortController aborts the fetch, which surfaces server-side as HttpContext.RequestAborted and flows as a cancellation token into the AI call", "C": "It sends a second request telling Azure to stop", "D": "It cannot; model calls run to completion" }, "correctAnswer": "B", "explanation": "The fetch's AbortController signal cancels the HTTP request; ASP.NET Core exposes that as RequestAborted, and because the service passes the token all the way to the SDK, generation actually stops — freeing the thread and halting further billing." },
+        { "number": 14, "question": "What does clean architecture require of the AI SDK in a web app?", "options": { "A": "It should be referenced directly from controllers for speed", "B": "It stays at the infrastructure edge behind an interface; domain/application code never references it", "C": "It must be rewritten as domain code", "D": "It belongs in the browser" }, "correctAnswer": "B", "explanation": "Dependencies point inward: the core (domain models, IChatService) knows nothing of HTTP or the SDK, while the ASP.NET Core layer and the SDK implementation are edge adapters plugged in via DI. An SDK type or HttpContext in a domain class breaks the design." },
+        { "number": 15, "question": "Why should an input that triggers AI calls on keystrokes be debounced?", "options": { "A": "To encrypt the input", "B": "So typing a sentence does not fire a separate expensive model request per keystroke", "C": "To stream the response faster", "D": "To bypass CORS" }, "correctAnswer": "B", "explanation": "Debouncing waits for a pause in typing before firing, collapsing many keystrokes into one request. Without it, each character launches a billable AI call — wasteful and rate-limit-triggering. It is a basic guard on any as-you-type AI feature." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam: Written Questions",
+      "items": [
+        { "number": 1, "question": "Explain the three-tier shape of every AI-enabled web feature and why the server must sit in the middle.", "modelAnswer": "The three tiers are the browser UI, your server, and the model. The browser sends plain user intent (a question) to a server-side REST API; the server, holding the API key and the IChatService, constructs the prompt, calls the model, and returns a client-shaped response; the browser renders it. The server must be in the middle because it is the only tier the browser cannot bypass, and therefore the only place to keep the credential secret and to enforce authentication, rate limiting, input validation, cost control, and logging. A browser that called the model directly would leak the key to every visitor and surrender all of those controls. The server also decides the response shape — synchronous, streaming, or long-running — which the browser cannot and should not choose." },
+        { "number": 2, "question": "Describe DTOs at an AI endpoint: what they carry, what they exclude, and why the separation matters.", "modelAnswer": "A request DTO carries exactly what the client legitimately supplies — the user's question, perhaps a conversation id or a stream flag — and excludes anything that is server policy or internal: temperature, the system prompt, the deployment name, and any SDK or domain type. A response DTO carries exactly what the client needs to render — the answer text, a truncation flag — and not raw SDK objects or full domain entities. The separation matters for security (a client cannot alter model behavior or cost by injecting parameters), for stability (the wire contract can stay fixed while domain and SDK types evolve behind it), and for clarity (the DTO documents the API precisely). Letting SDK types serialize directly to the client couples your HTTP contract to a library version and leaks internals." },
+        { "number": 3, "question": "Walk through the full path of a single token in a streaming response, from model to screen.", "modelAnswer": "The model generates the answer token by token rather than all at once. The SDK surfaces these as an IAsyncEnumerable of streaming update objects, which the service layer awaits in an await-foreach and re-yields as plain text fragments (an IAsyncEnumerable<string>), keeping SDK types off the boundary just as in the non-streaming case. The streaming endpoint sets Content-Type text/event-stream and, for each fragment, writes a 'data:' SSE message to the open response and flushes it so it leaves immediately via chunked transfer. The browser reads the response body as a stream with a reader, decodes each chunk, splits out the 'data:' lines, and appends the text to the DOM — producing the typing effect. A final 'done' event tells the client the answer is complete. The token cost and total time are unchanged; perceived latency and interruptibility improve." },
+        { "number": 4, "question": "Why is error handling harder for streaming responses, and how do you handle mid-stream failures?", "modelAnswer": "The difficulty is that HTTP status and headers are committed before the body starts. Once you have written a 200 and begun streaming fragments, you cannot switch to 500 to report a failure that happens midway — the mechanism for reporting the error is gone. So mid-stream failures must be signalled in-band: write a dedicated SSE event (event: error with a safe message) that the client explicitly watches for, and end the stream. The client must be written to expect a stream that terminates early or carries an error event, and to surface it in the UI just like a pre-stream failure. Pre-stream failures (bad input, breaker open) still return normal status codes via Problem Details because the body has not started. Testing must cover a failure injected after the first fragment, not only before." },
+        { "number": 5, "question": "Present the accept-and-poll pattern for long-running AI operations end to end, and justify each part.", "modelAnswer": "The client POSTs the job; the endpoint records and enqueues it and immediately returns 202 Accepted with a job id, ending the HTTP request in milliseconds — this avoids holding a connection that proxies and load balancers will time out and that ties up server resources. A background service (BackgroundService/IHostedService) reads the queue and performs the slow AI work off the request thread, updating the job's status and, on completion, writing the result to a job store. The client polls GET /jobs/{id} on an interval; while running it receives a pending status the UI shows as progress, and on completion it receives the result and swaps the spinner for the answer. Each part earns its place: 202 + id decouples work from request; the background service isolates long work from the web thread; the job store persists status across polls (and, if durable, across restarts); polling is the simplest correct delivery, upgradable to SignalR push. The store must be durable and jobs idempotent in production." },
+        { "number": 6, "question": "How do you choose among synchronous, streaming, and long-running responses for a given AI feature?", "modelAnswer": "By expected duration and the experience it implies. Sub-second work returns synchronously as one JSON body — the simplest option, and adding streaming would be pointless overhead. Work with visible latency (a few seconds, a paragraph-length answer a user is reading) should stream, so the user sees progress and can interrupt; the extra plumbing pays for itself in perceived responsiveness. Work that could exceed a reasonable request timeout — tens of seconds to minutes, such as multi-document summarization or an agent loop — must be a long-running operation, because holding a request open that long fails on infrastructure timeouts and wastes connections. The decision is duration-driven, not habit-driven: measure or estimate the operation's time and pick the shape that fits, and revisit if the workload changes." },
+        { "number": 7, "question": "Describe the five UI states of an AI interaction and what each must do, including cancellation.", "modelAnswer": "Idle: the form is ready, submit enabled, nothing in flight. Loading: on submit, disable the button, show a spinner or — better — streamed partial text, and reveal a Stop control; this state must never be silent, because a slow-but-healthy call with no feedback reads as broken. Success: render the answer and return to idle. Error: parse the server's Problem Details and show a human message mapped from the failure class ('busy, try again shortly' for 429, 'temporarily unavailable' when the circuit breaker is open), never a stack trace or prompt. Cancelled: when the user clicks Stop, an AbortController aborts the fetch, which surfaces server-side as RequestAborted and flows as a cancellation token into the model call so generation actually halts; the UI then returns cleanly to idle. Designing all five — not just success — is what separates a robust AI UI from a demo." },
+        { "number": 8, "question": "Explain how browser cancellation reaches the model and what breaks if the token chain is incomplete.", "modelAnswer": "In the browser, a fetch is created with an AbortController's signal; calling controller.abort() (from a Stop button, or navigation) cancels the HTTP request. ASP.NET Core exposes that cancellation as HttpContext.RequestAborted, injected into the endpoint as a CancellationToken. The endpoint passes it to IChatService, whose implementation — following tutorial 13 — passes it into the SDK call (and links it with any per-attempt timeout). When every link is present, aborting in the browser propagates all the way to the model call, which stops generating; the thread frees and further token billing ends. If any link is missing — an endpoint that ignores the token, a service method without a token parameter, or a call site passing default — cancellation stops at that layer: the model keeps generating a reply nobody will read, the server keeps a thread busy, and quota is consumed for nothing. Cooperative cancellation only works if the whole chain cooperates." },
+        { "number": 9, "question": "Lay out a clean architecture for an AI-enabled web app: the layers, the dependency direction, and what lives where.", "modelAnswer": "Concentric layers with dependencies pointing inward. Core (center): domain models and abstractions like IChatService, plus pure domain rules — no reference to ASP.NET Core or the AI SDK. Application: use-case logic and workflows (orchestration, the job lifecycle), depending only on the core's abstractions. Edges (two adapters): the ASP.NET Core layer holds endpoints/controllers, DTOs, Problem Details, and SSE plumbing and depends inward; the infrastructure layer holds the AI SDK implementation of IChatService and the job store. DI wires the edge implementations to the core interfaces at composition time. The web framework and the SDK are thus interchangeable details at the boundary. The payoff: the core is testable without a browser or a model, ASP.NET Core could be swapped for a worker process or the SDK for another provider by rewriting only an edge, and the domain reads cleanly. The rule that guards it: no SDK type or HttpContext may appear inside core or application code." },
+        { "number": 10, "question": "What security and abuse concerns must a public AI web endpoint address that the tutorial's focused examples omit?", "modelAnswer": "Several, because an unguarded AI endpoint is an open, billable proxy to your model. Authentication and authorization: only permitted users should reach the endpoint, and per-user identity is needed for the next controls. Per-user rate limiting: cap requests and tokens per user per window so one caller cannot exhaust quota or run up cost — server-side, since client debouncing is only a courtesy. Input size limits: bound prompt length to control cost and block attempts to blow the context window. Content and injection handling: validate and constrain inputs, and treat prompt injection as a real threat (its own later tutorial). Cost controls and monitoring: budgets, alerts on spend and error spikes, and the structured logging from tutorial 13. CORS restricted to your own origins. And never trusting client-supplied model parameters. The examples omit these for focus, but shipping without authentication, rate limiting, and input caps is the difference between a feature and a liability." },
+        { "number": 11, "question": "Why are the tools used in this tutorial described as 'not AI-specific', and what follows from that framing?", "modelAnswer": "REST APIs, DTOs, IAsyncEnumerable streaming, Server-Sent Events, background services, Problem Details, and cancellation tokens are all standard ASP.NET Core web primitives that predate this course's AI focus and are used across ordinary web development. An AI feature is simply a web feature whose backend happens to call a model, so the mature patterns for slow, fallible remote work — stream it, background it, type its errors, make it cancellable — apply unchanged. What follows: teams do not need a special 'AI web stack', they need to apply patterns they already know, which lowers the barrier and improves quality; the AI SDK stays quarantined behind IChatService at the infrastructure edge; and reasoning about an AI endpoint reuses the same mental models as any other endpoint. The novelty is concentrated in the model call itself, not in how the web app is built around it." },
+        { "number": 12, "question": "A streamed response works locally but arrives all-at-once in production behind a reverse proxy. Diagnose and fix.", "modelAnswer": "The symptom is classic response buffering somewhere between the app and the browser: the tokens are produced and flushed by the app but held by an intermediary until the response completes, collapsing the stream into one delivery. Candidates: a reverse proxy or CDN buffering the response body, output-compression or other middleware buffering to compute length, or the app not actually flushing. Diagnose by testing the endpoint directly against the app (bypassing the proxy) to confirm the app streams, then reintroduce each layer. Fixes: ensure the endpoint sets text/event-stream and calls FlushAsync after every fragment; disable response buffering on the streaming route (and any IHttpResponseBodyFeature buffering); configure the reverse proxy to not buffer that path (e.g. proxy_buffering off / the platform's equivalent) and to leave SSE uncompressed; and verify no compression middleware wraps the streaming route. Always test streaming through the real production edge, since local runs skip the very layer that breaks it." },
+        { "number": 13, "question": "Compare polling and real-time push (SignalR) for delivering long-running AI results. When is each appropriate?", "modelAnswer": "Polling has the client repeatedly GET the status endpoint until the job completes. It is the simplest correct baseline: stateless, easy to reason about, resilient to disconnects (the next poll recovers), and needing no persistent connection — at the cost of some latency (bounded by the interval) and wasted requests while pending. It suits most cases, especially moderate job counts and tolerances of a second or two of delivery lag; tune the interval, add jitter, and cap total wait. Real-time push with SignalR (WebSockets) has the server notify the browser the instant a job finishes: lower latency, no wasted polls, and it scales better when many clients await many jobs — but it adds a connection to establish, authenticate, manage, and scale (backplane across instances), and reconnection logic. Choose polling first for simplicity and upgrade to push when delivery latency matters, poll volume becomes significant, or the UX demands instant updates. They can coexist: push as the fast path, polling as the fallback." },
+        { "number": 14, "question": "Justify keeping streaming logic out of the domain: where does each piece of the streaming feature belong in the layers?", "modelAnswer": "Streaming touches several layers, and each piece has a correct home. The abstraction — IChatService.StreamAnswerAsync returning IAsyncEnumerable<string> — belongs in the core, because 'produce an answer incrementally' is a domain-meaningful capability expressed without HTTP or SDK types. The SDK iteration (CompleteChatStreamingAsync, StreamingChatCompletionUpdate) belongs in the infrastructure implementation, the only place allowed to know the SDK. The SSE plumbing — setting text/event-stream, writing 'data:' lines, flushing, the done/error events — belongs in the ASP.NET Core edge, because it is HTTP transport detail. The browser consumption is front-end. Keeping it split this way means the core stays testable (you can assert on the fragment sequence without a socket), the transport can change (SSE to WebSockets) without touching the service, and the SDK can change without touching the endpoint. Collapsing these — yielding SDK update objects to the endpoint, or writing to HttpContext from a domain class — couples layers that should move independently and destroys the testability the architecture exists to provide." },
+        { "number": 15, "question": "Design the observable behavior and server handling for a Stop button on a streaming assistant, covering both UI and server.", "modelAnswer": "UI: while streaming, a Stop button is visible. Clicking it calls controller.abort() on the AbortController whose signal was passed to fetch. The fetch rejects with an AbortError, which the client catches specifically (distinguishing it from real errors) and renders as a clean cancelled state — the partial text can remain with a '(stopped)' marker — then returns the form to idle and re-enables submit. No error toast, because cancellation is a user action, not a failure. Server: aborting the fetch cancels the HTTP request, which ASP.NET Core surfaces as HttpContext.RequestAborted. That token was injected into the streaming endpoint and passed into IChatService.StreamAnswerAsync and onward to CompleteChatStreamingAsync, so the await-foreach over the SDK stream throws OperationCanceledException and stops iterating — generation halts, the thread unwinds, and no further tokens are produced or billed. The endpoint need not write a done event on cancellation since the client initiated it. Logging records a cancelled outcome (not an error) with the correlation id. The whole behavior depends on the unbroken token chain; a single layer ignoring the token would leave the model generating after the user has stopped watching." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Why not call the model from the browser?", "back": "It would ship the API key to every visitor and remove the server as the choke point for auth, rate limits, cost control, and logging. Browser → your REST API → server-side SDK." },
+        { "number": 2, "front": "DTO at an AI endpoint", "back": "The wire contract. Request DTO = what the client may send (question, conversation id) — never temperature/system prompt/SDK types. Response DTO = exactly what the client renders." },
+        { "number": 3, "front": "Streaming: what it improves", "back": "Perceived latency and interruptibility — the answer appears token by token. It does NOT reduce total time or token cost." },
+        { "number": 4, "front": "Streaming type chain", "back": "SDK IAsyncEnumerable of updates → service yields IAsyncEnumerable<string> fragments → endpoint writes SSE chunks → browser reads the stream and appends to the DOM." },
+        { "number": 5, "front": "Server-Sent Events (SSE)", "back": "One-way server→browser streaming over one HTTP response (text/event-stream), 'data:' lines via chunked transfer. Flush after each. WebSockets for bidirectional." },
+        { "number": 6, "front": "Streaming error handling gotcha", "back": "Status is committed once the 200 body starts — you can't switch to 500. Signal mid-stream failure as an in-band event: error event; client must handle an early-ending stream." },
+        { "number": 7, "front": "When to use a long-running operation", "back": "When work could exceed a request timeout (tens of seconds to minutes): agents, big batches. Don't hold the connection — proxies time out." },
+        { "number": 8, "front": "Accept-and-poll pattern", "back": "POST enqueues → returns 202 + job id immediately → BackgroundService runs the work → client polls GET /jobs/{id} until Completed/Failed." },
+        { "number": 9, "front": "Where long jobs run", "back": "A BackgroundService/IHostedService off the request thread, writing status/results to a (durable, in production) job store. Never on the request thread." },
+        { "number": 10, "front": "Five UI states", "back": "Idle, Loading (spinner/stream + Stop), Success, Error (typed message), Cancelled. Silence during a slow call reads as broken — design all five." },
+        { "number": 11, "front": "Problem Details (RFC 9457)", "back": "Uniform typed error JSON (type/title/status/detail). One client error path; map failure classes to human messages; never leak stack traces or prompts." },
+        { "number": 12, "front": "Browser → model cancellation", "back": "AbortController aborts fetch → HttpContext.RequestAborted → CancellationToken into IChatService → SDK call. Any broken link = model keeps generating and billing." },
+        { "number": 13, "front": "Clean architecture rule", "back": "Dependencies point inward. Core (domain + IChatService) knows no HTTP/SDK; ASP.NET Core and the SDK are edge adapters wired by DI. SDK type in a domain class = broken." },
+        { "number": 14, "front": "Debounce (as-you-type AI)", "back": "Wait for a typing pause before firing, so one sentence = one request, not one request per keystroke. Basic cost/rate-limit guard." },
+        { "number": 15, "front": "Public AI endpoint must add", "back": "Auth, per-user rate limiting, input size caps, CORS to your origins, monitoring. The focused examples omit these — an unguarded endpoint is an open billable proxy." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions and Answers",
+      "items": [
+        { "number": 1, "question": "How do you expose an AI feature to a web front end without leaking the key?", "answer": "The browser never touches the model. It calls a server-side REST API — a POST endpoint that binds a request DTO, calls IChatService, and returns a response DTO. The key and the SDK live on the server, which is also where I put auth, per-user rate limiting, input validation, cost control, and logging, because it's the one tier the client can't bypass. The DTOs are deliberately not my SDK or domain types: the request carries user intent only (never temperature or the system prompt — that's server policy), and the response carries just what the page renders. That single boundary is the whole security story: any design where JavaScript holds the credential or hits the model endpoint is wrong on arrival." },
+        { "number": 2, "question": "When would you stream a response, and how does it work in ASP.NET Core?", "answer": "I stream when latency is visible to the user — a paragraph-length answer that takes several seconds — because watching a spinner for all of it feels broken even when it's healthy. Streaming shows tokens as they're produced and lets the user interrupt. Mechanically it's a chain of async streams: the SDK exposes the completion as an IAsyncEnumerable of updates (CompleteChatStreamingAsync); my service layer re-yields text fragments as IAsyncEnumerable<string>, keeping SDK types off the boundary; and the endpoint sets Content-Type text/event-stream, writes each fragment as a 'data:' SSE message, and flushes so it ships immediately over chunked transfer. The browser reads the response body with a reader and appends fragments to the DOM. It doesn't reduce cost or total time — it's a perception and interruptibility win." },
+        { "number": 3, "question": "What's different about error handling once you're streaming?", "answer": "You lose the status code as an error channel. Headers and the 200 are committed the moment the body starts, so a failure after the first token can't become a 500. I handle it two ways: pre-stream failures — bad input, breaker open — still return normal codes via Problem Details because the body hasn't started; mid-stream failures get signalled in-band as a dedicated SSE error event the client explicitly watches for, and I end the stream. The client is written to expect a stream that terminates early or carries an error event and to surface it like any other failure. And I test the after-first-fragment failure specifically, because it's the case naive implementations miss." },
+        { "number": 4, "question": "A summarization job takes two minutes. How do you build that?", "answer": "Not as a held-open request — proxies and load balancers will kill it and it ties up a connection. I use accept-and-poll: the POST enqueues the job and returns 202 Accepted with a job id immediately, so the request ends in milliseconds. A BackgroundService reads the queue and does the AI work off the request thread, updating status and writing the result to a job store. The client polls GET /jobs/{id} every couple of seconds — pending while it runs, then the result. In production the store is durable (database or cache) so a restart doesn't lose in-flight work, and jobs are idempotent. If the UX needs instant delivery I add SignalR push on top, but polling is the simplest correct baseline and where I start." },
+        { "number": 5, "question": "Walk me through the UI states you design for an AI call.", "answer": "Five, not two. Idle: form ready, submit enabled. Loading: button disabled, spinner or — better — streamed partial text, and a Stop button visible; this state is never silent, because a slow healthy call with no feedback looks broken. Success: render and return to idle. Error: parse Problem Details and show a human message mapped from the failure class — 'the assistant is busy, try again shortly' for a 429, 'temporarily unavailable' when the circuit breaker is open — never a raw status or stack trace. Cancelled: Stop fires an AbortController, the request cancels, the model call halts through the token chain, and the UI returns cleanly to idle without an error toast, since cancellation is a user action. Designing all five is the difference between a robust feature and a demo." },
+        { "number": 6, "question": "How does a Stop button actually stop the model, technically?", "answer": "Cooperative cancellation down an unbroken chain. The fetch is created with an AbortController's signal; Stop calls abort(), cancelling the HTTP request. ASP.NET Core surfaces that as HttpContext.RequestAborted, which I inject as a CancellationToken into the endpoint. The endpoint passes it to IChatService, whose implementation passes it into the SDK call (linked with any per-attempt timeout). So the await-foreach over the SDK stream throws OperationCanceledException and stops — generation halts, the thread frees, billing for further tokens ends. The catch is that every layer must pass the token; one method that takes it but forwards default silently breaks cancellation, and the model keeps generating a reply nobody will read. So I treat the token parameter as mandatory on every async signature in the path." },
+        { "number": 7, "question": "How do you keep the AI SDK from spreading through a web codebase?", "answer": "Clean architecture with an inward dependency rule. The core — domain models and IChatService — has no reference to ASP.NET Core or the AI SDK. The application layer holds workflows and depends only on core abstractions. The SDK lives in an infrastructure implementation of IChatService at the edge, and the web framework lives in another edge adapter (endpoints, DTOs, Problem Details, SSE). DI wires the edges to the core at composition time. So the SDK is a swappable detail: moving to Semantic Kernel or another provider rewrites one class; swapping ASP.NET Core for a worker rewrites the other edge. The tripwire I watch for in review is any SDK type or HttpContext appearing in a domain or application class — the moment it does, the core depends on a detail and the testability we paid for is gone." },
+        { "number": 8, "question": "Streaming works on your machine but not in production. What's your first hypothesis?", "answer": "Response buffering between the app and the browser — the tokens are flushed by the app but an intermediary holds them until the response ends, so the stream collapses into one delivery. I confirm by hitting the app endpoint directly, bypassing the edge; if that streams, the app is fine and a layer in front is buffering. Usual suspects: a reverse proxy or CDN with proxy buffering on, output-compression middleware buffering to compute length, or a missing FlushAsync. Fixes: set text/event-stream and flush after every fragment, disable response buffering on the streaming route, turn off proxy buffering and compression for that path at the edge. The meta-lesson is to test streaming through the real production edge, because local runs skip exactly the layer that breaks it." },
+        { "number": 9, "question": "What must a public AI endpoint have that a tutorial example skips?", "answer": "Guardrails, because an open AI endpoint is a billable proxy to your model. Authentication and authorization so only permitted users reach it. Per-user rate limiting — server-side — on requests and tokens, so one caller can't exhaust quota or your budget; client debouncing is only a courtesy. Input size caps to bound cost and block context-window abuse. CORS locked to my origins. Monitoring and budget alerts on spend and error spikes, riding on the structured logging from earlier. And never trusting client-supplied model parameters. Prompt injection is a real threat with its own treatment later, but even before that, shipping without auth, rate limiting, and input caps turns a feature into a liability the first time someone finds the URL." },
+        { "number": 10, "question": "How do you decide synchronous vs streaming vs long-running for a feature?", "answer": "Expected duration drives it. Sub-second work returns as one JSON body — streaming would be pointless overhead. A few seconds of visible latency, with a human reading the output, streams — the plumbing pays for itself in responsiveness and interruptibility. Anything that could exceed a reasonable request timeout — tens of seconds to minutes, like an agent loop or a fifty-document batch — becomes a long-running operation, because holding the connection fails on infrastructure timeouts. I estimate or measure the operation's time and pick the shape to match, and I revisit the choice if the workload changes — a feature that grows from summarizing one page to summarizing a book crosses from streaming into background-job territory." },
+        { "number": 11, "question": "Why do you insist DTOs never accept temperature or the system prompt from the client?", "answer": "Because those are server policy, and the client is untrusted. Temperature affects cost, determinism, and safety; the system prompt defines the assistant's behavior and guardrails. If the wire contract accepts them, any caller can crank temperature, rewrite the system prompt to bypass instructions, or point at a different behavior — a direct injection and cost-abuse vector. So the request DTO carries intent only — the question, maybe a conversation id or a stream flag — and the service layer owns temperature, the system message, token caps, and the deployment. It's the same principle as never trusting a client-supplied price in a checkout API: parameters that determine behavior and cost belong to the server, full stop." },
+        { "number": 12, "question": "What's the role of IAsyncEnumerable in the streaming design, and the gotcha with cancellation?", "answer": "It's the type that lets tokens flow asynchronously through the layers without materializing the whole answer. The SDK returns streaming updates as an IAsyncEnumerable; my service method is an async iterator that awaits those and yields text fragments as an IAsyncEnumerable<string>; the endpoint awaits-foreach over that and writes each to the response. Lazy, backpressure-friendly, and it keeps SDK types behind the interface. The gotcha: for cancellation to actually flow into an async iterator, the CancellationToken parameter must be annotated [EnumeratorCancellation]; without it, the token the caller passes to the enumeration doesn't reach the iterator body, and cancellation silently doesn't work even though the code compiles and looks correct. It's a small annotation that's easy to omit and produces exactly the 'Stop doesn't stop' bug." },
+        { "number": 13, "question": "Compare polling and SignalR for long-running job results.", "answer": "Polling: the client GETs the status endpoint on an interval until done. Dead simple, stateless, disconnect-resilient (next poll recovers), no persistent connection — at the cost of delivery latency bounded by the interval and some wasted requests while pending. Great default; I tune the interval, add jitter, cap total wait. SignalR (WebSockets): the server pushes the moment the job finishes — lower latency, no wasted polls, better when many clients await many jobs — but it adds a connection to authenticate, manage, and scale with a backplane across instances, plus reconnection logic. I start with polling for simplicity and move to push when delivery latency genuinely matters or poll volume gets heavy. They compose well: push as the fast path, polling as the fallback when the socket drops." },
+        { "number": 14, "question": "Someone proposes returning the SDK's completion object directly as the endpoint's JSON. Why push back?", "answer": "It couples my public HTTP contract to a third-party library's shape and version. When the SDK updates its types — which it has, across versions — my API breaks for every client, or I'm frozen on an old SDK. It also leaks internals and often more data than the client needs (usage details, internal ids), and it invites the same leak on the request side, where a client could then supply SDK-shaped fields I don't want to accept. A thin response DTO — answer text, a truncated flag — is a stable, minimal, documented contract I control; mapping to it is a couple of lines. The DTO boundary is cheap insurance that lets the SDK and my API evolve independently, which is the entire reason the service layer and the edge adapters exist." },
+        { "number": 15, "question": "How does this tutorial's work build on tutorial 13 and set up tutorial 15 (RAG)?", "answer": "It's the same enterprise stack given a web face. Tutorial 13's IChatService, DI singleton client, options-bound config, resilience, and structured logging are assumed intact — this tutorial adds the ASP.NET Core edge: REST endpoints, DTOs, streaming, background jobs, Problem Details, and cancellation wired from the browser, all while keeping the SDK at the infrastructure boundary. The clean architecture is what makes that additive rather than a rewrite. For tutorial 15, the setup is the streaming answer endpoint: RAG changes what the server does before it calls the model — retrieve relevant context via embeddings and search, inject it into the prompt — but the delivery to the browser is exactly this streaming path. So the retrieval step slots into the service layer behind the same interface, and the whole web integration built here carries over unchanged. Each tutorial adds one layer to a stack the next one assumes." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "REST API", "definition": "An HTTP endpoint over verbs and JSON that the browser calls with fetch; the server-side home of AI work, keeping the model, key, and SDK off the client." },
+        { "term": "Minimal API", "definition": "ASP.NET Core's lightweight endpoint style (app.MapPost/MapGet) declaring routes and handlers without controllers; a compact host for AI endpoints." },
+        { "term": "Controller", "definition": "An MVC class grouping HTTP endpoints as action methods; the controller-based alternative to minimal APIs for organizing an AI web app's server side." },
+        { "term": "DTO", "definition": "Data Transfer Object — a small type shaping exactly the JSON on the wire, decoupling the HTTP contract from SDK and domain types. Carries intent, not model policy." },
+        { "term": "Streaming", "definition": "Sending the response incrementally as it is produced so the browser shows tokens as they arrive; improves perceived latency, not cost or total time." },
+        { "term": "Server-Sent Events", "definition": "A one-way HTTP streaming standard (text/event-stream) where the server pushes 'data:' messages to the browser over a single response via chunked transfer." },
+        { "term": "IAsyncEnumerable", "definition": "A C# asynchronous stream of values; the SDK exposes streaming completions as one, and the service yields text fragments as IAsyncEnumerable<string>." },
+        { "term": "Chunked transfer", "definition": "An HTTP mechanism for sending a response body in pieces without a known total length up front — what makes token-by-token streaming to the browser possible." },
+        { "term": "Long-running operation", "definition": "Work that outlives a normal request; handled by accepting it, returning a job id and 202, and letting the client poll or subscribe rather than holding the connection." },
+        { "term": "Background service", "definition": "A hosted component (BackgroundService/IHostedService) running work off the request thread — where long-running AI jobs execute, writing status to a job store." },
+        { "term": "Polling", "definition": "The client repeatedly requesting a status endpoint (GET /jobs/{id}) until a long-running operation reports Completed or Failed." },
+        { "term": "Loading state", "definition": "The UI condition during an in-flight AI call — spinner, streamed partial text, disabled button, Stop control — signalling the request is working." },
+        { "term": "Cancellation token", "definition": "The signal (HttpContext.RequestAborted) flowed into the AI call so a user who navigates away or clicks Stop actually halts generation and billing." },
+        { "term": "Problem Details", "definition": "The RFC 9457 JSON error format ASP.NET Core produces, giving the browser a uniform typed shape (type/title/status/detail) to handle failures in one path." },
+        { "term": "Clean architecture", "definition": "Layering with dependencies pointing inward: domain and IChatService at the core, ASP.NET Core and the AI SDK as edge adapters wired by DI." },
+        { "term": "CORS", "definition": "Cross-Origin Resource Sharing — the browser rule governing calls to another origin; configured server-side when the front end and API differ in origin." },
+        { "term": "AbortController", "definition": "The browser API whose signal cancels a fetch; wiring a Stop button to it propagates cancellation to the server's request and the model call." },
+        { "term": "Debounce", "definition": "Delaying an action until input pauses so as-you-type triggers collapse many keystrokes into one AI request, guarding cost and rate limits." },
+        { "term": "Token", "definition": "A small chunk of generated text; streaming delivers the completion token by token as each is produced by the model." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "The browser never calls the model: it calls a server-side REST API that holds the key and the SDK and shapes requests/responses with DTOs — the one boundary where auth, rate limiting, cost control, and logging live.",
+          "Choose the response shape by expected duration: synchronous JSON for quick answers, streaming for visible latency, and long-running accept-and-poll jobs for minutes-long work.",
+          "Streaming is a pipeline of async streams — SDK IAsyncEnumerable to service IAsyncEnumerable<string> to Server-Sent Events over chunked transfer — improving perceived latency, with in-band error events because the status code is already committed.",
+          "Long-running operations return 202 plus a job id, run in a background service off the request thread, and are polled (or pushed via SignalR) — never held open on the request.",
+          "Design all five UI states — idle, loading, success, error, cancelled — with typed Problem Details errors and a Stop button whose AbortController flows a cancellation token all the way to the model call.",
+          "Clean architecture keeps ASP.NET Core and the AI SDK at the edges with dependencies pointing inward, so the core stays testable and the framework and provider remain swappable details."
+        ] },
+        { "type": "paragraph", "text": "Your enterprise-shaped service now has a responsive, cancellable, gracefully-failing web face — built entirely from standard ASP.NET Core primitives, with the AI SDK still quarantined behind IChatService at the infrastructure edge. That is the recurring truth of this stretch of the course: an AI feature is a web feature whose backend calls a model, and the patterns that make it good are the ones your team already trusts. The next tutorial changes what the server does before it calls the model — retrieving real knowledge to ground the answer — while the streaming web delivery you built here carries straight over." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Next tutorial: RAG with Azure AI Search (rag-with-azure-ai-search). So far the assistant answers from the model plus whatever tools return. RAG (Retrieval-Augmented Generation) grounds it in your own documents: embed your content, index it in a search service, retrieve the most relevant passages for each question, and inject them into the prompt so the model answers from real knowledge. The retrieval step slots into the service layer behind the same IChatService, and the streaming web delivery you built in this tutorial carries it to the browser unchanged." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: build the full streaming assistant page from the walkthrough, then add a Stop button and confirm in the server log that clicking it cancels the model call mid-generation.",
+          "Practice: implement the accept-and-poll long-running path — a BackgroundService that summarizes several documents, a 202 + job id start, and a status endpoint the page polls with a progress indicator.",
+          "Practice: add the global Problem Details handler and deliberately trigger a 429 and a breaker-open 503, verifying the UI shows friendly typed messages with no stack traces.",
+          "Practice: run your streaming endpoint behind a reverse proxy and fix any buffering that collapses the stream, confirming tokens still arrive incrementally through the real edge.",
+          "Read: the official documentation for 'Minimal APIs in ASP.NET Core', 'Server-Sent Events / streaming responses', 'BackgroundService and hosted services', 'Problem Details (RFC 9457) in ASP.NET Core', and 'Handle request cancellation'."
+        ] },
+        { "type": "note", "style": "tip", "text": "Keep this web project — tutorial 15 adds retrieval behind the same IChatService, and you will watch a grounded, document-backed answer stream into the very page you built here without changing a line of the front end." }
+      ]
+    }
+  ]
+}
