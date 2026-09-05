@@ -1,0 +1,518 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Prompting for Testing and Documentation",
+  "slug": "prompting-for-testing-and-docs",
+  "level": "Intermediate",
+  "codeLanguage": "C#",
+  "tutorialNumber": 5,
+  "totalTutorials": 27,
+  "prev": "prompt-engineering-for-coding",
+  "next": "prompting-reliability-and-safety",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Prompting for Testing and Documentation"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "Prompts that generate unit tests (NUnit)",
+    "Generating test cases and edge scenarios",
+    "Generating API documentation from code",
+    "Reviewing generated tests for coverage and correctness"
+  ],
+  "tooltips": {
+    "unit test": "An automated test that verifies one small unit of behavior (typically a method) in isolation from the rest of the system.",
+    "NUnit": "A widely used .NET testing framework: [Test] methods inside [TestFixture] classes, with Assert.That-style assertions.",
+    "test fixture": "The class that groups related tests and their shared setup — in NUnit, marked with [TestFixture].",
+    "arrange-act-assert": "The three-part test structure: set up inputs, invoke the behavior, verify the outcome. One behavior per test.",
+    "assertion": "The line that actually verifies something — a test without a meaningful assertion passes no matter what the code does.",
+    "test case": "One specific input/expected-output combination that a test verifies.",
+    "parameterized test": "One test method run against many inputs — in NUnit via [TestCase(...)] rows — ideal for boundary tables.",
+    "edge case": "An input at the limits of validity — empty, null, zero, maximum, duplicates, unicode — where most bugs live.",
+    "boundary value": "The values on each side of a rule's limit (17/18 and 65/66 for an 18–65 rule) — the classic edge-case recipe.",
+    "code coverage": "The percentage of code lines/branches executed by tests. It measures execution, not verification — a necessary but weak signal.",
+    "tautological test": "A test that restates the implementation instead of the requirement, so it passes even when the behavior is wrong.",
+    "assertion-free test": "A generated-test failure mode: the test runs code but asserts nothing meaningful, inflating coverage while verifying nothing.",
+    "mutation testing": "Deliberately breaking the code (or letting a tool do it) to check that tests fail — the honest measure of test strength.",
+    "characterization test": "A test that pins down current actual behavior — invaluable for legacy code, dangerous when it silently enshrines a bug as 'correct'.",
+    "test oracle": "The source of truth a test checks against. Spec-derived oracles catch bugs; implementation-derived oracles reproduce them.",
+    "XML documentation comments": "The /// comments on C# members that power IntelliSense and feed documentation generators.",
+    "API documentation": "Human-readable reference for your public surface: what each type/endpoint does, parameters, returns, errors, examples.",
+    "OpenAPI": "The standard machine-readable description of HTTP APIs (formerly Swagger) that tools use to render and test endpoint docs.",
+    "doc drift": "Documentation rotting as code evolves — the default fate of docs that aren't regenerated or reviewed alongside code changes.",
+    "regression test": "A test that locks in a fixed bug or existing behavior so future changes cannot silently reintroduce the problem."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview",
+      "content": [
+        { "type": "paragraph", "text": "Tests and documentation are the two artifacts developers most consistently under-produce — not because they are hard, but because they are repetitive, and repetition is exactly what language models excel at. A model will happily write the fifteenth boundary test or the twentieth parameter description with the same care as the first. Used well, prompting turns 'we should really have tests for this' into an afternoon's reviewed reality." },
+        { "type": "paragraph", "text": "Used carelessly, it produces something worse than nothing: test suites that pass while verifying nothing, and documentation that states plausible falsehoods with authority. The difference — as everywhere in this course — is the prompt's context and your review discipline." },
+        { "type": "paragraph", "text": "This tutorial covers the four skills: generating NUnit unit tests that actually test behavior, systematically eliciting test cases and edge scenarios, generating API documentation from code, and — the load-bearing skill — reviewing generated tests for coverage and correctness so you can trust green." },
+        { "type": "note", "style": "info", "text": "This is tutorial 5 of 27. It builds on the coding-prompt craft of tutorial 4 (context packs, exemplars, review discipline) and precedes Reliability, Safety & Best Practices in Prompting." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "paragraph", "text": "After completing this tutorial, you will be able to:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Write test-generation prompts that produce NUnit suites grounded in the behavior spec, not just the implementation.",
+          "Elicit test cases and edge scenarios systematically — boundaries, empties, duplicates, and failure paths — before any test code exists.",
+          "Use parameterized tests to turn boundary tables into compact [TestCase] rows.",
+          "Generate XML documentation comments, endpoint docs, and READMEs from code, and verify their claims.",
+          "Review generated tests for the failure modes that matter: assertion-free tests, tautological tests, and bug-enshrining characterization.",
+          "Apply the break-the-code check (manual mutation testing) to prove a test can actually fail.",
+          "Read code coverage numbers for what they are — execution evidence, not verification evidence.",
+          "Keep documentation from drifting by regenerating and reviewing it alongside code changes."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorial 4 (Prompt Engineering for Coding Tasks) — context packs, exemplars, standards profiles, and the review bar.",
+          "Basic familiarity with a .NET test framework (NUnit examples are used; xUnit/MSTest knowledge transfers directly).",
+          "Comfortable C#: attributes, async, exceptions; ability to run `dotnet test`.",
+          "Optional but ideal: a real method of your own that lacks tests — the walkthrough lands best on real code."
+        ] }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "Why Tests and Docs Are Ideal — and Dangerous — GenAI Tasks",
+      "content": [
+        { "type": "paragraph", "text": "Test and documentation generation share three properties that make them model-friendly: the output is highly structured (a unit test has a fixed shape; a parameter description has a fixed shape), the input is complete (the code is right there in the prompt), and the volume is high (many cases, many members — exactly where human patience fails first). This is why test generation is consistently among the highest-satisfaction uses of AI coding tools." },
+        { "type": "paragraph", "text": "The danger is equally structural. A test is only as good as its test oracle — the source of truth it checks against. If your prompt offers only the implementation, the model derives expectations from the implementation, and the resulting tests verify that the code does what the code does: green today, green after you break it the same way, tautological forever. The fix is supplying the behavior specification — what the method should do, in rules and examples — so expectations derive from intent, not from code." },
+        { "type": "paragraph", "text": "Documentation inherits the same split. Docs generated purely from code describe mechanism ('sets the flag to true') and can only restate what the code says; docs generated from code plus intent describe purpose ('marks the invoice ready for the nightly export'). And both artifacts share one lifecycle risk — the code changes and they silently don't — which is why generation is never once-and-done but part of the change workflow." },
+        { "type": "note", "style": "info", "text": "The one-sentence version of this tutorial: give the model the spec, not just the source — and never trust a green test until you have seen it fail." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Prompts That Generate NUnit Unit Tests",
+      "content": [
+        { "type": "paragraph", "text": "A production-grade test-generation prompt packs four things: the code under test (the method plus the types it touches), the behavior spec (rules and expected outcomes in plain language — the oracle), an exemplar test (one existing test class, so naming and style match your suite), and the framework constraints (NUnit, one test fixture per class under test, naming convention like MethodName_Scenario_ExpectedResult, arrange-act-assert layout, one behavior per test)." },
+        { "type": "animation", "title": "From method to trustworthy NUnit suite", "intro": "Watch the four inputs produce tests — and where trust actually gets earned.", "nodes": [
+          { "id": "code", "label": "Code under test", "sub": "+ its types" },
+          { "id": "spec", "label": "Behavior spec", "sub": "the oracle" },
+          { "id": "ex", "label": "Exemplar test", "sub": "suite style" },
+          { "id": "gen", "label": "Generated tests", "sub": "NUnit draft" },
+          { "id": "run", "label": "Run + review", "sub": "earn the green" }
+        ], "steps": [
+          { "highlight": ["code"], "caption": "Paste the method and the types it depends on — real signatures prevent invented ones." },
+          { "highlight": ["spec"], "caption": "Add the behavior spec: the rules the method must satisfy, stated as intent — this is the test oracle." },
+          { "highlight": ["ex"], "caption": "Add one exemplar test class so the output matches your suite's naming, fixture setup, and assertion style." },
+          { "highlight": ["gen"], "caption": "The model drafts the suite: happy paths, edge cases, failure paths — structured, labeled, arrange-act-assert." },
+          { "highlight": ["run"], "caption": "Run them. Then review for honesty: does each test assert something the SPEC requires — and would it fail if the code broke?" }
+        ] },
+        { "type": "paragraph", "text": "Structure the ask in two turns for anything non-trivial: first 'list the test cases you would write — name, scenario, expected outcome — as a table; no code yet', then, after you've added the cases it missed and cut the redundant ones, 'now implement exactly this list as NUnit tests'. The case list is reviewable in a minute and turns test generation into spec review — the highest-value minute in this whole workflow." },
+        { "type": "code", "language": "csharp", "title": "What good generated NUnit output looks like", "code": [
+          "[TestFixture]",
+          "public class DiscountCalculatorTests",
+          "{",
+          "    [Test]",
+          "    public void Calculate_OrderBelowThreshold_ReturnsZeroDiscount()",
+          "    {",
+          "        // Arrange",
+          "        var calculator = new DiscountCalculator(threshold: 100m, rate: 0.1m);",
+          "",
+          "        // Act",
+          "        decimal discount = calculator.Calculate(orderTotal: 99.99m);",
+          "",
+          "        // Assert",
+          "        Assert.That(discount, Is.EqualTo(0m));",
+          "    }",
+          "",
+          "    [TestCase(-1)]",
+          "    [TestCase(-100.50)]",
+          "    public void Calculate_NegativeTotal_ThrowsArgumentOutOfRange(decimal total)",
+          "    {",
+          "        var calculator = new DiscountCalculator(threshold: 100m, rate: 0.1m);",
+          "",
+          "        Assert.Throws<ArgumentOutOfRangeException>(() => calculator.Calculate(total));",
+          "    }",
+          "}"
+        ] },
+        { "type": "note", "style": "tip", "text": "Demand the naming convention in the prompt — MethodName_Scenario_ExpectedResult — because well-named tests are self-reviewing: a scan of the test names IS the coverage review of scenarios." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Generating Test Cases and Edge Scenarios",
+      "content": [
+        { "type": "paragraph", "text": "Models are superb edge-case brainstormers — they have seen every category of input that has ever broken code. The technique is to ask for scenarios before tests, systematically: 'For this method, list test cases in these categories: happy paths, boundary values for every numeric/size rule, empty/null/whitespace inputs, duplicates and ordering, culture and encoding, concurrency if applicable, and failure paths for each dependency. Table format: case name, input, expected outcome.'" },
+        { "type": "paragraph", "text": "Boundary value analysis deserves explicit demand. For every rule with a limit — 'age must be 18 to 65' — the cases are the values on each side of each edge: 17, 18, 65, 66 (plus the extremes: 0, negative, int.MaxValue). Prompted for a boundary table, the model produces it mechanically and completely; unprompted, it samples a few boundaries and moves on. Boundary tables then map one-to-one onto NUnit parameterized tests — one test method, one [TestCase] row per boundary — keeping the suite compact." },
+        { "type": "table", "headers": ["Category", "Prompt cue", "Example cases for ParseQuantity(string s) → int (1–999)"], "rows": [
+          ["Happy path", "typical valid inputs", "\"1\" → 1, \"500\" → 500, \"999\" → 999"],
+          ["Boundaries", "each side of every limit", "\"0\" → throws, \"1\" → 1, \"999\" → 999, \"1000\" → throws"],
+          ["Empty/null", "the absent inputs", "null → throws ArgumentNullException, \"\" → throws, \"   \" → throws"],
+          ["Format", "almost-valid shapes", "\"12.5\" → throws, \"+12\" → ?, \" 12 \" → ? (spec decides!)"],
+          ["Culture/encoding", "locale-sensitive parses", "\"١٢\" (Arabic digits) → spec decides, \"1٢\" mixed → throws"],
+          ["Hostile", "adversarial inputs", "very long string, \"999999999999999999999\" → throws, not overflows"]
+        ] },
+        { "type": "paragraph", "text": "Notice the two 'spec decides!' cells — this is the second gift of case generation. When the model lists a case and you realize you don't know the expected outcome, you have found a hole in the specification, before the code ships. Feed the answer back into both the spec and the tests. Edge-scenario prompting is requirements discovery wearing a testing costume." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Generating API Documentation from Code",
+      "content": [
+        { "type": "paragraph", "text": "Documentation generation runs on the same grounding rule as everything else: code alone yields mechanical descriptions; code plus intent yields useful ones. The workable prompt shape: paste the type or endpoint, state the audience ('consumers of our NuGet package', 'frontend developers calling this API'), supply the intent context the code can't carry (units, invariants, why parameters exist), and fix the format (XML documentation comments, an OpenAPI-style endpoint description, or a README section)." },
+        { "type": "list", "style": "bullet", "items": [
+          "XML documentation comments: 'Write /// docs for every public member: summary (purpose, not mechanism), param (meaning, units, valid range), returns, exception (each condition), one example for non-obvious members.' These feed IntelliSense and doc generators, so they compound.",
+          "Endpoint documentation: paste the controller action plus DTOs; ask for description, parameter table, status codes with conditions, and a realistic request/response example pair. Feed the result into your OpenAPI annotations so rendered docs and code share one source.",
+          "README sections: give the model the public surface plus two working usage snippets and ask for a quick-start — models write excellent 'first five minutes' docs when given real, runnable examples to build around.",
+          "Explanatory docs from tests: pasting the test suite alongside the code is a power move — well-named tests are executable examples of intended behavior, and the docs inherit their precision."
+        ] },
+        { "type": "paragraph", "text": "Verification for docs means checking claims, not prose quality: every stated default, unit, range, exception condition, and status code must be confirmed against the code or a run. Models fluently document what code plausibly does, including behaviors it doesn't have. And schedule for doc drift: regenerate member docs in the same pull request that changes the member — a diff-sized doc update reviews in seconds, while 'update all the docs someday' never happens." },
+        { "type": "note", "style": "warning", "text": "Never let generated docs state behavior you haven't verified. A wrong code comment misleads one reader; wrong API documentation misleads every consumer, with your authority behind it." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Reviewing Generated Tests for Coverage and Correctness",
+      "content": [
+        { "type": "paragraph", "text": "Generated tests fail in ways human tests rarely do, because the model optimizes for looking like a test suite. The review targets three specific pathologies. Assertion-free tests: code runs, nothing meaningful is asserted (or only 'is not null') — coverage rises, verification doesn't. Tautological tests: expectations derived from the implementation, so the test proves the code equals itself — including its bugs. Bug-enshrining characterization: when generating tests for existing code, current wrong behavior gets pinned as 'expected'; that's a feature for refactoring safety but a trap when you believe the suite validates correctness." },
+        { "type": "animation", "title": "The honesty check: earning trust in a green test", "intro": "A test earns trust the day you watch it fail. Step through the check.", "nodes": [
+          { "id": "green", "label": "Green test", "sub": "passes today" },
+          { "id": "asrt", "label": "Assertion check", "sub": "spec-derived?" },
+          { "id": "mutate", "label": "Break the code", "sub": "one-line sabotage" },
+          { "id": "red", "label": "Test fails?", "sub": "the moment of truth" },
+          { "id": "trust", "label": "Trusted", "sub": "restore & keep" }
+        ], "steps": [
+          { "highlight": ["green"], "caption": "A generated test passes. Green means nothing yet — a test that cannot fail is decoration." },
+          { "highlight": ["asrt"], "caption": "Read the assertion: does it check something the SPEC requires? 'Is not null' and restated implementation don't count." },
+          { "highlight": ["mutate"], "caption": "Sabotage the code under test: flip a comparison, off-by-one a boundary, remove a validation line." },
+          { "highlight": ["red"], "caption": "Run the suite. The right tests must go red. If everything stays green, the tests verify nothing — fix them, not the code." },
+          { "highlight": ["trust"], "caption": "Restore the code. Tests that failed on sabotage have earned their green. This is mutation testing done by hand — tools can automate it." }
+        ] },
+        { "type": "paragraph", "text": "The coverage review is a different axis: not 'are these tests honest' but 'what behavior has no test at all'. Read the test names against your case list from section 6 — every category (boundaries, empties, failure paths) should be represented. A code coverage tool then finds unexecuted branches, but read its number correctly: coverage proves execution, not verification. An assertion-free suite can hit 95% coverage while catching zero bugs. Coverage tells you where tests are missing; only the honesty check tells you whether the existing ones matter." },
+        { "type": "note", "style": "tip", "text": "Efficient review order: (1) scan test names against the case list — spots missing scenarios in seconds; (2) read assertions on the riskiest five tests; (3) sabotage the code twice and demand red. Fifteen minutes, and green becomes meaningful." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "The .NET Testing and Docs Toolchain Around Your Prompts",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Test frameworks: NUnit (used here — [TestFixture], [Test], [TestCase], Assert.That), xUnit, MSTest. Every prompt shape in this tutorial transfers; only attributes and assertion syntax change — say which framework in every prompt.",
+          "Runner: `dotnet test` executes the generated suite; it is the first honesty gate (does it compile, does it pass) and the sabotage-check runner.",
+          "Coverage: Coverlet + report generators produce the line/branch numbers — the where-are-tests-missing map, never the quality score.",
+          "GitHub Copilot: generates tests inline from open code (tutorials 8–9); the review discipline here applies unchanged to its output.",
+          "XML docs pipeline: /// comments → compiler XML file → IntelliSense, DocFX sites, and NuGet package docs — one generated artifact, three surfaces.",
+          "OpenAPI pipeline: ASP.NET Core annotations + Swashbuckle render endpoint docs; generated endpoint descriptions belong in the annotations so docs live with code.",
+          "CI: run tests and (optionally) coverage thresholds on every PR — generated tests enter the same gate as human ones."
+        ] },
+        { "type": "paragraph", "text": "The toolchain's role mirrors tutorial 4's: prompts produce candidates; deterministic tools judge them. `dotnet test` proves the suite runs; your sabotage check proves it verifies; coverage maps the gaps; CI keeps all three honest over time." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "The Testing & Docs Task Catalog",
+      "content": [
+        { "type": "table", "headers": ["Task", "Prompt shape", "Non-negotiable ingredient"], "rows": [
+          ["New method needs tests", "Two-turn: case list first, then NUnit implementation of the approved list", "Behavior spec as the oracle"],
+          ["Legacy class, no tests", "Characterization tests: 'pin current behavior, flag anything that looks like a bug rather than intent'", "Knowing these prove stability, not correctness"],
+          ["Bug just fixed", "Regression test: failing input + fixed expectation, named after the bug", "Test fails on the pre-fix code"],
+          ["Boundary-heavy validation", "Boundary table → [TestCase] parameterized test", "Every limit's both sides"],
+          ["Public API surface", "XML documentation comments per member, purpose-not-mechanism", "Claims verified against code"],
+          ["HTTP endpoints", "Description + parameter table + status codes + example pair → OpenAPI annotations", "Realistic examples that actually run"],
+          ["Package/README", "Quick-start from public surface + two working snippets", "Snippets compile and run"],
+          ["PR with code changes", "Regenerate docs for changed members in the same PR", "Diff-sized doc review"]
+        ] },
+        { "type": "paragraph", "text": "One composite workflow ties the catalog together: when fixing a bug, generate the regression test first from the bug report (it must fail), fix the code (test goes green), then regenerate the affected member's docs — three generated artifacts, each verified by the one before it." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples in C#",
+      "content": [
+        { "type": "paragraph", "text": "The test-generation prompt template, packing oracle, style, and framework constraints:" },
+        { "type": "code", "language": "csharp", "title": "Two-turn NUnit test-generation template", "code": [
+          "public static class TestPrompts",
+          "{",
+          "    // Turn 1: cases only — reviewed before any code exists.",
+          "    public static string BuildCaseListPrompt(string codeUnderTest, string behaviorSpec) => $\"\"\"",
+          "        List the test cases you would write for the method below.",
+          "        Categories: happy paths, boundary values (both sides of every limit),",
+          "        empty/null/whitespace, format edge cases, failure paths per dependency.",
+          "        Output a table: CaseName | Input | ExpectedOutcome. NO test code yet.",
+          "",
+          "        Behavior specification (source of truth for expectations):",
+          "        {behaviorSpec}",
+          "",
+          "        Code under test:",
+          "        ```csharp",
+          "        {codeUnderTest}",
+          "        ```",
+          "        \"\"\";",
+          "",
+          "    // Turn 2: implement the human-approved list.",
+          "    public static string BuildTestImplPrompt(string approvedCases, string exemplarTest) => $\"\"\"",
+          "        Implement EXACTLY these approved test cases as NUnit tests:",
+          "        {approvedCases}",
+          "",
+          "        Rules: [TestFixture] class; MethodName_Scenario_ExpectedResult names;",
+          "        arrange-act-assert with comments; one behavior per [Test];",
+          "        use [TestCase] rows for the boundary table; Assert.That syntax.",
+          "        Match the style of this existing test class:",
+          "        ```csharp",
+          "        {exemplarTest}",
+          "        ```",
+          "        \"\"\";",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "The documentation prompt for a public member, with intent the code cannot carry:" },
+        { "type": "code", "language": "csharp", "title": "XML documentation generation prompt", "code": [
+          "public static string BuildXmlDocPrompt(string publicMembers, string intentNotes) => $\"\"\"",
+          "    Write XML documentation comments (///) for each public member below.",
+          "    - <summary>: the PURPOSE (why callers use it), not the mechanism.",
+          "    - <param>: meaning, units, valid range.",
+          "    - <returns> and <exception> for every documented throw condition.",
+          "    - <example> for any member whose use is not obvious.",
+          "    Document ONLY behavior visible in the code or stated in the notes —",
+          "    do not invent defaults, limits, or thread-safety claims.",
+          "",
+          "    Intent notes (context the code cannot express):",
+          "    {intentNotes}",
+          "",
+          "    Members:",
+          "    ```csharp",
+          "    {publicMembers}",
+          "    ```",
+          "    \"\"\";"
+        ] },
+        { "type": "note", "style": "info", "text": "Both templates are plain C# raw string literals (C# 11+), framework-free and version-safe. The 'do not invent' clause in the docs prompt is the anti-hallucination guard — keep it verbatim." }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step-by-Step: Test-Covering a Real Method",
+      "content": [
+        { "type": "paragraph", "text": "This walkthrough covers an untested `ParseQuantity(string input) → int` (valid range 1–999) with a trustworthy NUnit suite. Replay it on any method you own." },
+        { "type": "list", "style": "numbered", "items": [
+          "Write the behavior spec in five lines: valid range 1–999; leading/trailing whitespace tolerated; null/empty/non-numeric throws ArgumentException; out-of-range throws ArgumentOutOfRangeException; no culture-specific digits accepted.",
+          "Turn 1 — request the case list (template from section 11): the model returns ~18 cases across the categories. Review it: it missed the mixed-digit case ('1٢') and duplicated two happy paths. Add one, cut one.",
+          "Notice the spec holes the list exposed: what about '+12'? The spec didn't say. Decide (reject it), update the spec, add the case — requirements discovery, on schedule.",
+          "Turn 2 — request implementation of the approved list with your exemplar test class pasted; receive the [TestFixture] with parameterized boundary rows.",
+          "Run `dotnet test`: 17 pass, 1 fails — the whitespace case. Investigate: the test is right, the CODE never trimmed input. You just found a real bug with a generated test; fix the code, not the test.",
+          "Honesty check: sabotage the range check (999 → 998) — boundary tests go red ✓; remove the null guard — null test goes red ✓. Restore. The suite has earned its green.",
+          "Coverage pass: Coverlet shows the culture-digit branch unexecuted — the model implemented the case but a copy-paste error asserted on the wrong input. One targeted Improve turn fixes it.",
+          "Finish the artifact set: generate XML documentation comments for ParseQuantity from the now-verified spec — the docs and tests now tell the same story."
+        ] },
+        { "type": "note", "style": "tip", "text": "Count what the workflow caught: two case-list defects, one spec hole, one real production bug, one broken test — all before this method ships. That is what reviewed generation buys." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Implementation-derived expectations are the root failure: given only code, the model writes tests proving code == code. Always supply a behavior spec; when generating from legacy code deliberately (characterization), label the suite as stability protection, not correctness validation.",
+          "Assertion quality varies: watch for 'Is.Not.Null' where a value check belongs, and for asserting on the mock instead of the outcome. The sabotage check catches both.",
+          "Coverage numbers flatter generated suites: high execution with weak assertions is the signature pathology. Coverage locates missing tests; it cannot score existing ones.",
+          "Async, time, and randomness need explicit prompting: demand deterministic tests — injected clocks, seeded randomness, awaited assertions — or you'll inherit flaky tests that erode suite trust.",
+          "Mocking depth is a design signal: if generated tests need five mocks per test, the model is faithfully reflecting your coupling — fix the design, don't blame the tests.",
+          "Docs hallucinate specifics: invented defaults, ranges, and thread-safety claims read exactly like real ones. Verify every stated fact; keep the 'do not invent' clause in doc prompts.",
+          "Doc drift resumes the moment you stop: regenerate member docs in the same PR that changes the member, or accept that your docs describe a previous version."
+        ] },
+        { "type": "note", "style": "warning", "text": "API-accuracy disclosure: NUnit attribute and assertion usage shown ([TestFixture], [Test], [TestCase], Assert.That, Assert.Throws) is standard and stable across NUnit 3/4; verify version-specific details against current NUnit documentation. The prompt templates are plain C# (raw string literals, C# 11+) with no version-sensitive APIs." }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices and Common Mistakes",
+      "content": [
+        { "type": "paragraph", "text": "Practices that make generated tests and docs trustworthy:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Spec before suite: the behavior specification is the test oracle — write it first, even five lines of it.",
+          "Two turns, always: case list → human review → implementation. The list review is requirements discovery.",
+          "Demand the boundary table for every limit, and implement it as [TestCase] rows.",
+          "Sabotage twice before trusting: a test earns green the day you watch it fail.",
+          "Name tests MethodName_Scenario_ExpectedResult so the name list doubles as the coverage review.",
+          "Docs state purpose, not mechanism; every claimed default/range/exception is verified; 'do not invent' stays in the prompt.",
+          "Regenerate docs and add regression tests in the same PR as the change they concern."
+        ] },
+        { "type": "paragraph", "text": "Mistakes that produce theatrical green:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Generating tests from implementation only — the suite becomes a mirror, bugs included.",
+          "Accepting a 40-test suite wholesale because it's long — volume is the model's cheapest trick.",
+          "Reading 95% coverage as 95% verified — coverage measures execution.",
+          "Keeping a test that never goes red under sabotage 'because it documents intent' — it documents nothing.",
+          "Letting characterization tests of legacy bugs masquerade as correctness validation.",
+          "Publishing generated docs without fact-checking the specifics.",
+          "Treating tests and docs as generation targets once, instead of regeneration targets on every change."
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz",
+      "items": [
+        { "number": 1, "question": "Why are testing and documentation especially good fits for model generation?", "options": { "A": "They don't need review", "B": "Structured output, complete input (the code is in the prompt), and high repetitive volume — where human patience fails first", "C": "Models cannot write production code", "D": "They are low-risk artifacts" }, "correctAnswer": "B", "explanation": "Tests and docs have fixed shapes, full context, and many near-identical cases — exactly the profile models handle tirelessly. The risk isn't fit; it's trusting output that looks right without the review discipline this tutorial builds." },
+        { "number": 2, "question": "What is a test oracle, and why does it decide the value of generated tests?", "options": { "A": "The test runner executable", "B": "A database of past test results", "C": "The source of truth expectations derive from — spec-derived oracles catch bugs; implementation-derived oracles reproduce them", "D": "NUnit's assertion library" }, "correctAnswer": "C", "explanation": "If the prompt supplies only code, the model derives 'expected' from what the code does — producing tests that prove code equals itself, bugs included. Supplying the behavior spec as the oracle is the single highest-leverage act in test generation." },
+        { "number": 3, "question": "Which NUnit attribute marks a class containing tests?", "options": { "A": "[TestClass]", "B": "[TestFixture]", "C": "[Fact]", "D": "[TestSuite]" }, "correctAnswer": "B", "explanation": "NUnit uses [TestFixture] on the class and [Test] on methods. ([TestClass] is MSTest; [Fact] is xUnit.) State the framework in every prompt — the model will otherwise pick one for you." },
+        { "number": 4, "question": "What is the natural NUnit tool for implementing a boundary-value table?", "options": { "A": "One long test with many asserts", "B": "A parameterized test — one method with a [TestCase] row per boundary value", "C": "A separate fixture per value", "D": "Assert.Multiple only" }, "correctAnswer": "B", "explanation": "[TestCase(17, ...)], [TestCase(18, ...)] rows run one test body over the whole table — compact, readable, and each row reports independently. Boundary tables map onto parameterized tests one-to-one." },
+        { "number": 5, "question": "Why request a test-case list BEFORE any test code?", "options": { "A": "It saves tokens", "B": "The list is reviewable in a minute, missing/redundant cases get fixed cheaply, and unknown expected outcomes expose spec holes", "C": "NUnit requires a manifest", "D": "Models cannot write code and cases together" }, "correctAnswer": "B", "explanation": "The two-turn shape converts test generation into spec review: you approve scenarios before implementation exists, and every case whose expected outcome you can't answer is a requirements gap found before shipping." },
+        { "number": 6, "question": "For the rule 'quantity must be 1–999', which is the correct minimal boundary set?", "options": { "A": "1 and 999", "B": "0 and 1000", "C": "0, 1, 999, 1000", "D": "500 only" }, "correctAnswer": "C", "explanation": "Boundary value analysis takes both sides of every limit: the last invalid and first valid at the bottom (0, 1), the last valid and first invalid at the top (999, 1000). Testing only inside values misses exactly where off-by-one bugs live." },
+        { "number": 7, "question": "What is an assertion-free test?", "options": { "A": "A test using Assert.Multiple", "B": "A test that executes code but asserts nothing meaningful — inflating coverage while verifying nothing", "C": "A test with no arrange step", "D": "A parameterized test" }, "correctAnswer": "B", "explanation": "It's the signature generated-test pathology: the code runs (coverage rises), but no spec-relevant outcome is checked — or only 'Is.Not.Null'. It passes forever, broken code and all. The sabotage check exposes it instantly." },
+        { "number": 8, "question": "What is a tautological test?", "options": { "A": "A test with duplicate [TestCase] rows", "B": "A test whose expectations restate the implementation, proving the code equals itself — bugs included", "C": "A test that runs twice", "D": "Any failing test" }, "correctAnswer": "B", "explanation": "When expectations derive from the code under test rather than the spec, the test can only confirm current behavior — right or wrong. It stays green through the exact bugs it should catch. Root cause: no behavior spec in the prompt." },
+        { "number": 9, "question": "What is the 'break the code' honesty check?", "options": { "A": "Deleting tests to see if CI notices", "B": "Sabotaging the code under test (flip a comparison, remove a guard) and confirming the right tests go red — manual mutation testing", "C": "Running tests with a debugger", "D": "Renaming test methods" }, "correctAnswer": "B", "explanation": "A test earns trust the day you watch it fail. If sabotage leaves everything green, the tests verify nothing regardless of coverage. Mutation testing tools automate this; two manual sabotages catch most generated-suite dishonesty in minutes." },
+        { "number": 10, "question": "A generated suite reaches 95% code coverage. What do you now know?", "options": { "A": "95% of behavior is verified", "B": "The suite is production-ready", "C": "95% of lines were executed — verification depends entirely on assertion quality, which coverage cannot see", "D": "The remaining 5% is unreachable" }, "correctAnswer": "C", "explanation": "Coverage measures execution, not verification — an assertion-free suite can post 95% while catching zero bugs. Use coverage to find untested branches; use the honesty check to learn whether the executed tests mean anything." },
+        { "number": 11, "question": "When generating tests for legacy code with no spec, what are you actually creating?", "options": { "A": "Proof of correctness", "B": "Characterization tests that pin current behavior — including any bugs — as protection for refactoring, not validation of correctness", "C": "Useless output", "D": "Documentation" }, "correctAnswer": "B", "explanation": "With only the implementation as oracle, the suite locks in what the code does today. That's genuinely valuable for safe refactoring — and dangerous the moment anyone reads its green as 'the code is correct'. Label it; ask the model to flag suspicious behaviors it pinned." },
+        { "number": 12, "question": "What's the key grounding difference between mediocre and useful generated docs?", "options": { "A": "Longer summaries", "B": "Code alone yields mechanism descriptions; code plus intent notes yields purpose descriptions with units, invariants, and the 'why'", "C": "More HTML formatting", "D": "Generating docs before writing code" }, "correctAnswer": "B", "explanation": "'Sets the flag to true' is what code-only docs look like. Supplying intent — what it's for, valid ranges, units — produces docs a consumer can act on. Same rule as all coding prompts: the model documents your context, not your mind." },
+        { "number": 13, "question": "The riskiest defect in generated API documentation is:", "options": { "A": "Passive voice", "B": "Invented specifics — defaults, ranges, thread-safety claims — stated with the same authority as verified facts", "C": "Short summaries", "D": "Missing examples" }, "correctAnswer": "B", "explanation": "Hallucinated specifics read identically to real ones and mislead every consumer of the API. Defense: the 'document only visible or stated behavior — do not invent' prompt clause, plus fact-checking every claimed default, range, exception, and status code." },
+        { "number": 14, "question": "What is the best defense against doc drift?", "options": { "A": "Writing docs only at release time", "B": "Locking documentation files", "C": "Regenerating docs for changed members in the same PR that changes them — diff-sized updates that review in seconds", "D": "Longer docs" }, "correctAnswer": "C", "explanation": "Drift is the default fate of docs maintained on a separate cadence from code. Binding regeneration to the change PR keeps the delta tiny and reviewable, and the docs never describe a previous version of the code." },
+        { "number": 15, "question": "You fixed a bug. What's the correct generated-artifact sequence?", "options": { "A": "Fix code → write test → hope", "B": "Generate a regression test from the bug report (verify it FAILS on old code) → fix → test goes green → regenerate affected docs", "C": "Regenerate all docs first", "D": "Delete the failing characterization test" }, "correctAnswer": "B", "explanation": "The regression test must fail pre-fix — that failure proves it detects the bug. Green after the fix then means something, and the doc regeneration keeps the trio (code, tests, docs) telling one story. Each artifact verifies the previous one." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam Questions",
+      "items": [
+        { "number": 1, "question": "Explain why test generation is simultaneously one of the best and one of the riskiest uses of code-generation models.", "modelAnswer": "Best: tests are structured (fixed AAA shape), fully grounded (code in the prompt), and voluminous (many near-identical cases) — the exact profile where models outperform human patience, turning chronic under-testing into reviewable suites. Riskiest: the model optimizes for producing something shaped like a test suite, and the pathologies — assertion-free tests, tautological expectations derived from the implementation, bug-enshrining characterization — all present as green checkmarks and rising coverage. The value therefore depends entirely on two disciplines: supplying a behavior spec as the oracle, and the honesty review (assertion reading plus sabotage) that proves green can turn red." },
+        { "number": 2, "question": "Define 'test oracle' and trace how oracle choice determines whether a generated suite catches or reproduces bugs, with an example.", "modelAnswer": "The oracle is the source of truth expectations derive from. Spec-derived: prompt includes 'discount applies only at or above 100' — the model writes Calculate(99.99) expecting 0; if the code's comparison is >= 99, the test fails and catches the bug. Implementation-derived: prompt includes only the code — the model reads '>= 99', writes Calculate(99.50) expecting a discount, and the test passes, permanently certifying the off-by-one as intended. Identical generation machinery, opposite outcomes, decided entirely by what the prompt offered as truth. This is why 'paste the method, ask for tests' is the most common serious mistake in the whole practice." },
+        { "number": 3, "question": "Specify the complete context pack for an NUnit test-generation prompt and justify each element.", "modelAnswer": "(1) Code under test plus the types it touches — real signatures prevent invented members. (2) Behavior specification — rules and expected outcomes in plain language; the oracle, without which expectations mirror the implementation. (3) One exemplar test class — transmits fixture setup, naming, and assertion style so output drops into the suite without style debt. (4) Framework and convention constraints — NUnit explicitly (else the model picks), MethodName_Scenario_ExpectedResult naming (test names become the coverage review), arrange-act-assert with one behavior per test, [TestCase] for boundary tables, Assert.That syntax. Delivered in two turns: case list first for human review, then implementation of the approved list." },
+        { "number": 4, "question": "Describe the two-turn (case list → implementation) protocol and argue why the intermediate review is 'the highest-value minute in the workflow'.", "modelAnswer": "Turn one requests only a scenario table — name, input, expected outcome — across mandated categories (happy, boundaries, empty/null, format, failure paths). The human edits: adds missed cases, cuts redundant ones, and — crucially — hits cases whose expected outcome the spec doesn't answer. Turn two implements exactly the approved list. The intermediate minute is highest-value because it operates at maximum leverage: a defect fixed in the case list costs one table row; the same defect discovered in implemented tests costs debugging mysteriously wrong assertions; discovered in production, far more. And the 'spec decides?' moments are requirements discovery — holes in the specification surfaced before the code ships, which no amount of post-hoc test review provides." },
+        { "number": 5, "question": "Apply boundary value analysis to 'password length must be 8–64 characters' — derive the full case set and show how it becomes NUnit code.", "modelAnswer": "Boundaries: 7 (last invalid low), 8 (first valid), 64 (last valid), 65 (first invalid high). Extremes and structural cases: 0/empty string, null, whitespace-only at valid length, exactly-8 multibyte/unicode characters (length semantics!), and a very long string (e.g., 10,000) for robustness. The unicode case typically exposes a spec hole: is 'length' chars, bytes, or graphemes? Spec decides. As NUnit: one parameterized method — [TestCase(\"1234567\", false)], [TestCase(\"12345678\", true)], [TestCase(<64 chars>, true)], [TestCase(<65 chars>, false)] — with separate [Test] methods for null (Assert.Throws<ArgumentNullException>) and the unicode decision once the spec answers it." },
+        { "number": 6, "question": "Contrast the three generated-test pathologies — assertion-free, tautological, and bug-enshrining characterization — including detection for each.", "modelAnswer": "Assertion-free: code executes, nothing spec-relevant is asserted (or only Is.Not.Null); coverage rises, verification doesn't. Detect: read assertions; sabotage stays green. Tautological: expectations derived from the implementation; test proves code == code, so present bugs are certified. Detect: compare assertions to the spec rather than the code; sabotage of the mirrored logic stays green because the test agrees with the sabotage's parent logic — spec review is the reliable catch. Bug-enshrining characterization: legacy behavior pinned as expected, including defects; legitimate for refactoring protection, toxic when read as correctness. Detect: label the suite's purpose explicitly and ask the model to flag pinned behaviors that look like bugs rather than intent. All three present as green — which is why green must be earned via the honesty check." },
+        { "number": 7, "question": "Explain manual mutation testing (the sabotage check): protocol, what each outcome means, and its relation to tooling.", "modelAnswer": "Protocol: pick the riskiest behaviors; introduce one deliberate defect at a time in the code under test — flip a comparison, off-by-one a boundary constant, delete a validation line; run the suite; demand that the corresponding tests go red; restore and repeat once or twice elsewhere. Red = those tests genuinely verify that behavior — they've earned their green. All-green under sabotage = the covering tests are decoration (assertion-free or tautological); fix the tests, not the code. This is mutation testing performed by hand; tools (e.g., Stryker.NET) automate it by generating many mutants and scoring the kill rate — worth adopting once suites grow, but two manual sabotages catch most generated-suite dishonesty in minutes and cost nothing." },
+        { "number": 8, "question": "Argue precisely what code coverage does and does not tell you about a generated suite, and derive the correct workflow use of it.", "modelAnswer": "Coverage counts executed lines/branches. It does tell you: where no test reaches at all — unexecuted branches are guaranteed verification gaps, and for generated suites it catches implementation slips (a case implemented against the wrong input leaves its branch cold, as in the walkthrough). It does not tell you: whether executed code was verified — assertions are invisible to it, so an assertion-free suite posts high numbers while catching nothing; the pathology is common in generated suites precisely because volume is cheap. Correct use: coverage as the map of missing tests (investigate every cold branch), the honesty check as the measure of existing tests, and never as a quality score or a CI vanity target on its own." },
+        { "number": 9, "question": "Design the documentation-generation approach for a public NuGet library: inputs, prompt constraints, verification, and pipeline integration.", "modelAnswer": "Inputs: the public surface (signatures with existing partial docs), intent notes per area (units, invariants, valid ranges, why-parameters), and two runnable usage snippets for the quick-start. Constraints: XML documentation comments per member — summary as purpose not mechanism, param with meaning/units/range, returns, exception per condition, example where non-obvious; and the anti-hallucination clause: 'document only behavior visible in code or stated in notes; do not invent defaults, limits, or thread-safety claims'. Verification: fact-check every specific (defaults, ranges, exceptions) against code or a run; compile the snippets. Pipeline: /// comments flow to IntelliSense, DocFX site, and package docs from one source; README quick-start built from the verified snippets; regeneration bound to the PR that changes each member so drift never accumulates." },
+        { "number": 10, "question": "Why is 'docs from code + tests' stronger than 'docs from code alone'? Explain the mechanism.", "modelAnswer": "A well-named test suite is a machine-checked catalog of intended behaviors with concrete examples: Parse_NegativeInput_Throws tells the documenter (human or model) the exception contract; the arrange blocks are realistic usage snippets; the boundary rows enumerate valid ranges exactly. Pasting tests alongside code gives the model spec-grade grounding that the implementation alone cannot provide — the docs inherit the tests' precision about edge behavior instead of hedging or inventing. It also creates consistency pressure: docs, tests, and code drawn from one session tell one story, and a documented claim with no corresponding test is visible as a gap in either artifact. The prerequisite, of course, is that the tests passed the honesty review first." },
+        { "number": 11, "question": "A generated suite of 40 tests all pass on first run. Give a complete 15-minute review plan with the rationale for each step.", "modelAnswer": "(1) Two minutes: scan test names against the case-list categories — happy, boundaries both sides, empty/null, format, failure paths. Missing scenarios are visible instantly when names follow MethodName_Scenario_ExpectedResult. (2) Five minutes: read assertions on the five riskiest tests (money, boundaries, exception contracts) asking 'does this check what the SPEC requires?' — catches Is.Not.Null padding and implementation-mirroring. (3) Five minutes: two sabotage rounds — flip the core comparison, delete a guard — demand red, restore. All-green sabotage fails the suite regardless of its size. (4) Three minutes: run coverage; investigate any cold branch (usually a mis-implemented case). Only after all four does the suite's green mean anything; note the plan never includes 'read all 40' — review targets risk, not volume." },
+        { "number": 12, "question": "How should async code, time, and randomness be handled in generated tests? What must the prompt demand?", "modelAnswer": "These are the flakiness sources, and generated tests inherit them unless the prompt forbids it. Demand determinism explicitly: time via an injected clock abstraction (IClock/TimeProvider) with fixed values in arrange — never DateTime.Now in assertions; randomness seeded or injected; async tests as async Task with awaited results and Assert.ThrowsAsync for exception paths — never .Result/.Wait() (deadlock risk) and never fire-and-forget assertions; no Thread.Sleep for synchronization — use TaskCompletionSource or polling with timeout. If the code under test doesn't expose injection seams for time/randomness, the generated tests will reveal that as untestability — which is design feedback to act on, not to mock around. A flaky generated suite erodes trust in green faster than no suite at all." },
+        { "number": 13, "question": "Explain the regression-test workflow for a bug fix and why the pre-fix failure is non-negotiable.", "modelAnswer": "Sequence: reproduce the bug from the report; generate the regression test from the report's scenario (spec-derived oracle: what SHOULD happen), named after the bug; run it against the unfixed code and require failure; fix the code; the test goes green; regenerate the affected member's docs; commit all three together. The pre-fix failure is the test's only proof of detection power — it demonstrates the test observes the defective behavior and asserts the correct one. A regression test written (or generated) after the fix that never failed might pass for unrelated reasons — wrong input, wrong layer, assertion-free — and its green is unearned. The failure is to a regression test what sabotage is to a general suite: the moment trust is created." },
+        { "number": 14, "question": "Your team adopted AI test generation; coverage rose to 90% but production bugs didn't fall. Diagnose systematically and prescribe.", "modelAnswer": "Diagnosis: the signature symptom of volume-without-oracle generation. Likely findings on audit: prompts supplied implementation only (tautological suites reproducing bugs), assertion-free padding (coverage without verification), and characterization of legacy defects read as validation. Confirm cheaply: sample ten tests, read assertions against specs; run three sabotage rounds — if green survives, verified. Prescribe: (1) mandate the two-turn protocol with a written behavior spec as oracle — even five lines; (2) institute the honesty check in review: a suite ships only after demonstrated red; (3) reframe coverage as gap-map, remove it as a target; (4) adopt mutation testing tooling for a real strength metric; (5) label characterization suites explicitly. Re-measure by escaped-bug rate, not coverage — the metric that was supposed to move." },
+        { "number": 15, "question": "Scenario: an untested OrderTotalCalculator (money, discounts, tax rounding) must be test-covered and documented this sprint using AI assistance. Prescribe the complete workflow.", "modelAnswer": "Day one — spec: write the behavior rules (discount threshold and rate, tax rounding mode — banker's or away-from-zero, currency precision, negative/zero handling); every rule someone can't answer goes to the product owner now. Turn 1: case list across categories — money demands boundary tables at thresholds, rounding cases at half-cents, and culture-safety cases; review, extend, resolve 'spec decides' rows. Turn 2: NUnit implementation with exemplar test pasted; [TestCase] rows for boundaries; injected rounding/culture settings for determinism. Run: investigate failures both ways — walkthrough experience says some will be real code bugs. Honesty: sabotage the threshold comparison and a rounding constant; demand red; restore. Coverage: investigate cold branches. Docs: XML documentation comments from the verified spec plus tests (units, rounding mode, exception contracts — no invented claims), regenerated in this same PR. Exit criteria: sabotage-proven suite, no cold branches unexplained, docs fact-checked, and the spec document committed beside the code as the durable oracle for next time." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Why tests/docs suit model generation", "back": "Structured output, complete input (code in prompt), high repetitive volume — the exact profile where human patience fails and models don't." },
+        { "number": 2, "front": "Test oracle", "back": "The truth expectations derive from. Spec-derived → catches bugs. Implementation-derived → certifies bugs. Decided entirely by what your prompt supplies." },
+        { "number": 3, "front": "Test-gen context pack", "back": "Code under test + behavior spec (oracle) + exemplar test class + framework/naming constraints (NUnit, MethodName_Scenario_ExpectedResult, AAA)." },
+        { "number": 4, "front": "Two-turn protocol", "back": "Turn 1: case list as a table, no code. Human reviews (adds, cuts, resolves spec holes). Turn 2: implement exactly the approved list." },
+        { "number": 5, "front": "Boundary value analysis", "back": "Both sides of every limit: for 1–999 → 0, 1, 999, 1000 (+ null/empty/extremes). Maps 1:1 onto [TestCase] parameterized rows." },
+        { "number": 6, "front": "'Spec decides!' moments", "back": "Cases where you can't state the expected outcome = specification holes found before shipping. Edge-case prompting is requirements discovery." },
+        { "number": 7, "front": "Assertion-free test", "back": "Runs code, asserts nothing meaningful (or Is.Not.Null only). Coverage up, verification zero. Exposed instantly by the sabotage check." },
+        { "number": 8, "front": "Tautological test", "back": "Expectations mirror the implementation → proves code == code, bugs included. Root cause: no behavior spec in the prompt." },
+        { "number": 9, "front": "Sabotage (honesty) check", "back": "Break the code deliberately (flip comparison, remove guard) → the right tests MUST go red → restore. A test earns green the day you watch it fail." },
+        { "number": 10, "front": "Code coverage — honest reading", "back": "Measures execution, not verification. Use as the map of missing tests (cold branches); never as a quality score for existing ones." },
+        { "number": 11, "front": "Characterization tests", "back": "Pin current behavior of legacy code — bugs included. Gold for refactoring safety; poison when read as proof of correctness. Label them." },
+        { "number": 12, "front": "NUnit essentials", "back": "[TestFixture] class, [Test] method, [TestCase(...)] parameterized rows, Assert.That / Assert.Throws. Name the framework in every prompt." },
+        { "number": 13, "front": "Docs grounding rule", "back": "Code alone → mechanism ('sets flag'). Code + intent notes → purpose, units, ranges. Plus the clause: 'do not invent defaults/limits/thread-safety'." },
+        { "number": 14, "front": "Doc drift defense", "back": "Regenerate docs for changed members in the SAME PR — diff-sized review in seconds. Separate doc cadences always rot." },
+        { "number": 15, "front": "Regression test rule", "back": "Generated from the bug report, it must FAIL on pre-fix code — that failure is its proof of detection power. Then fix → green → docs updated together." },
+        { "number": 16, "front": "15-minute suite review", "back": "Scan names vs case list → read assertions on 5 riskiest → sabotage twice, demand red → coverage for cold branches. Target risk, not volume." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions & Answers",
+      "items": [
+        { "number": 1, "question": "How do you use AI for unit testing without ending up with a suite that verifies nothing?", "answer": "Two disciplines. First, the oracle: I always supply a behavior spec — even five lines of rules — so expectations derive from intent; a prompt with only the implementation produces tests that prove the code equals itself, bugs included. Second, earned green: before trusting a generated suite I read the assertions on the riskiest tests and run the sabotage check — break the code deliberately and demand red. Coverage numbers don't enter into trust at all; they just tell me where tests are missing entirely. With those two habits, generated suites are a massive accelerant; without them, they're green-colored decoration." },
+        { "number": 2, "question": "Walk me through your actual workflow for getting tests generated for a method.", "answer": "Two turns, never one. Turn one asks for a case list only — a table of scenario, input, expected outcome across mandated categories: happy paths, both sides of every boundary, empty/null/whitespace, format oddities, failure paths per dependency. I review that table: add what's missed, cut duplicates, and — the best part — resolve the cases where I realize the spec doesn't say what should happen. Turn two implements exactly the approved list, with an exemplar test class pasted so style matches our suite, NUnit and naming conventions stated explicitly. Then dotnet test, investigate failures in both directions — sometimes the test is wrong, sometimes it just found a real bug — and the sabotage check before the suite earns its green." },
+        { "number": 3, "question": "What's the most common mistake teams make with AI test generation?", "answer": "Pasting the method and saying 'write tests for this' — implementation-only prompting. The model has no truth source except the code, so it derives expectations from what the code does: every current bug gets certified as intended behavior, and the suite becomes a mirror that stays green through exactly the defects it should catch. The fix costs five minutes: write the behavior rules down first and put them in the prompt as the source of truth for expectations. Closely behind it: accepting a 40-test suite because it's long and green — volume is the model's cheapest trick, and review must target risk, not count." },
+        { "number": 4, "question": "How do you review a generated test suite efficiently?", "answer": "Fifteen minutes, four passes, targeting risk over volume. Pass one: scan the test names against my case-list categories — with MethodName_Scenario_ExpectedResult naming, missing scenarios are visible in a scan. Pass two: read the actual assertions on the five riskiest tests, asking whether each checks something the spec requires — this catches Is.Not.Null padding and implementation mirroring. Pass three: two rounds of sabotage — flip the core comparison, delete a guard — run, demand red, restore; if green survives sabotage, the suite fails review no matter how it looks. Pass four: coverage, investigating any cold branch, which for generated suites usually means a case was implemented against the wrong input." },
+        { "number": 5, "question": "Explain boundary value analysis and how you'd get a model to do it properly.", "answer": "For every rule with a limit, bugs concentrate at the edges, so the cases are both sides of each edge: an 18–65 age rule needs 17, 18, 65, 66 — plus the structural extremes: zero, negative, null, max values. The catch with models is that unprompted they sample a couple of boundaries and move on, so I demand it mechanically: 'produce the boundary table for every numeric, size, and length rule — last invalid, first valid, last valid, first invalid.' The table then maps one-to-one onto NUnit [TestCase] rows — one test body, one row per boundary — so completeness doesn't bloat the suite. And half the value is when the table hits a case the spec doesn't answer: that's a requirements hole found on schedule." },
+        { "number": 6, "question": "What is mutation testing and do you actually use it?", "answer": "It's the practice of deliberately breaking the code to verify tests notice — the only honest measure of whether a suite verifies anything. I use the manual version constantly: after generating a suite, I flip a comparison or delete a validation line, run the tests, and require red; restore and sabotage somewhere else once more. Two minutes, and it exposes the two classic generated-test pathologies — assertion-free tests and tautological expectations — that coverage numbers are structurally blind to. Tooling like Stryker.NET automates it at scale by scoring the kill rate across many mutants; worth adopting once suites matter, but the manual check is free and catches most of it." },
+        { "number": 7, "question": "How much do you trust code coverage as a metric?", "answer": "As a map, fully; as a score, not at all. Coverage tells me which branches no test executes — those are guaranteed gaps, and with generated suites a cold branch often reveals a case implemented against the wrong input. What it cannot see is assertions, so an assertion-free suite posts 95% while catching zero bugs — and generated suites hit exactly that pathology because volume is cheap. So my workflow: coverage locates missing tests, the sabotage check measures whether existing tests mean anything, and coverage never appears as a standalone quality target — teams that target the number get the number, via tests that verify nothing." },
+        { "number": 8, "question": "You're asked to generate tests for a legacy class with no documentation. What do you produce and how do you label it?", "answer": "Characterization tests — and the label matters as much as the tests. With no spec, the only available oracle is current behavior, so the suite pins what the code does today, quirks and all. That's genuinely valuable: it makes refactoring safe by detecting any behavioral change. But it proves stability, not correctness — if there's a lurking bug, the suite now defends it. So I name and document the suite as characterization, ask the model during generation to flag any pinned behavior that looks like a bug rather than intent (that list goes to the product owner), and when a flagged behavior is confirmed wrong, the fix comes with a spec-derived regression test that supersedes the characterization row." },
+        { "number": 9, "question": "How do you keep generated tests from being flaky?", "answer": "Flakiness comes from time, randomness, and async handled lazily, and generated tests inherit whatever the prompt tolerates — so I forbid it in the prompt: injected clock (TimeProvider/IClock) with fixed values, never DateTime.Now in assertions; seeded or injected randomness; async tests as async Task with awaited assertions and Assert.ThrowsAsync — no .Result, no .Wait(), no Thread.Sleep synchronization. When the generated tests can't comply because the code under test has no seams for time or randomness, that's design feedback — the class is untestable — and I fix the seam rather than mock around it. A flaky suite is worse than a missing one: it trains the team to ignore red." },
+        { "number": 10, "question": "What makes AI-generated documentation good instead of mechanical?", "answer": "Intent in the prompt. Code-only docs describe mechanism — 'sets the flag to true' — because that's all the code says. I add intent notes the code can't carry: what the member is for, units, valid ranges, invariants, why odd parameters exist. Then constraints: summaries state purpose not mechanism, params get meaning and units, every exception condition documented, examples for anything non-obvious — and the critical clause, 'document only behavior visible in code or stated in these notes; do not invent defaults, limits, or thread-safety claims.' Verification is fact-checking, not proofreading: every specific claim gets confirmed against code or a run, because hallucinated defaults read exactly like real ones and carry your API's authority." },
+        { "number": 11, "question": "How do you stop documentation going stale?", "answer": "Bind regeneration to the change, not the calendar. Doc drift is the default fate of any docs maintained on a separate cadence — 'update the docs someday' never survives contact with a sprint. So the rule is: the PR that changes a public member regenerates that member's docs in the same diff. The update is then tiny — seconds to review — and the docs never describe a previous version. Same rule powers the pipeline: /// comments feed IntelliSense, DocFX, and package docs from one source, so one regeneration point serves every surface. For endpoint docs, generated descriptions live in the OpenAPI annotations next to the action, same reasoning." },
+        { "number": 12, "question": "A bug was just fixed. What's your artifact protocol?", "answer": "Regression test first, and it must fail before the fix. I generate the test from the bug report — the spec of what should have happened — named after the bug, run it against the unfixed code, and require red: that failure is the only proof the test actually detects the defect. Then the fix lands, the test goes green, and that green now means something. Same PR regenerates the affected member's docs so code, tests, and documentation tell one story. A regression test that never demonstrably failed is unearned green — it might pass for reasons unrelated to the bug — which is the same principle as the sabotage check applied to a single test." },
+        { "number": 13, "question": "Tests from code, or docs from code — which benefits more from including the other artifact?", "answer": "Docs benefit enormously from tests. A well-named, honesty-checked test suite is a machine-verified behavior catalog: exception contracts in the Throws tests, valid ranges in the boundary rows, realistic usage in the arrange blocks. Pasting tests alongside code gives the documentation model spec-grade grounding, so edge behavior gets stated precisely instead of hedged or invented. The reverse helps too but weaker — docs can seed a case list — with the caveat that docs are unverified prose while passing tests are checked, so tests feed docs, not docs feed tests, when both exist. And a documented claim with no corresponding test becomes visible as a gap in one artifact or the other, which is its own review value." },
+        { "number": 14, "question": "Your team's coverage went from 40% to 90% with AI generation, but escaped bugs didn't drop. What happened?", "answer": "The metric moved without the property it proxies — the signature of volume-without-oracle generation. I'd audit a sample: read assertions against specs and run sabotage rounds. Expected findings: implementation-only prompts producing tautological suites that certify existing bugs; assertion-free padding inflating execution counts; legacy characterization read as validation. The fix is process, not effort: mandate a written behavior spec in every generation prompt, require demonstrated red (sabotage) before a suite merges, demote coverage from target to gap-map, and adopt mutation scoring as the real strength metric. Then measure what was supposed to move — escaped bugs — because coverage was never the goal, just the easiest number to inflate." },
+        { "number": 15, "question": "Where do generated tests and docs fit in your definition of done?", "answer": "Same bar as handwritten, with generation-specific checks added. For code to be done: behavior spec exists (it's the oracle and it outlives the sprint); suite generated via the two-turn protocol and reviewed — names against case list, assertions against spec, sabotage demonstrated red; no unexplained cold branches; flakiness constraints (clock, randomness, async) satisfied. For public surface: XML docs regenerated in the same PR, every specific claim fact-checked, examples runnable. What's deliberately absent: a coverage percentage as a gate — I gate on the honesty checks instead. The model does the typing; the definition of done ensures a human still owns every claim the artifacts make." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "Unit test", "definition": "An automated test verifying one unit of behavior in isolation; the primary target of test-generation prompts." },
+        { "term": "NUnit", "definition": "A mainstream .NET test framework: [TestFixture] classes, [Test] methods, [TestCase] parameterized rows, Assert.That assertions." },
+        { "term": "Test fixture", "definition": "The class grouping related tests and shared setup; NUnit's [TestFixture]." },
+        { "term": "Arrange-Act-Assert", "definition": "The canonical test structure — setup, invocation, verification — demanded explicitly in generation prompts." },
+        { "term": "Assertion", "definition": "The verifying line of a test; assertion quality, invisible to coverage, is what separates verification from decoration." },
+        { "term": "Test case", "definition": "One input/expected-outcome pair; listed and human-reviewed as a table before implementation in the two-turn protocol." },
+        { "term": "Parameterized test", "definition": "One test body run over many [TestCase] rows — the natural implementation of a boundary table." },
+        { "term": "Edge case", "definition": "Boundary-of-validity input (empty, null, zero, max, duplicates, unicode) where bugs concentrate; elicited systematically by category." },
+        { "term": "Boundary value analysis", "definition": "Deriving cases from both sides of every limit (17/18, 65/66 for 18–65) plus structural extremes." },
+        { "term": "Test oracle", "definition": "The truth source expectations derive from; spec-derived oracles catch bugs, implementation-derived oracles certify them." },
+        { "term": "Behavior specification", "definition": "Plain-language rules of what code should do — the prompt ingredient that turns generated tests from mirror into judge." },
+        { "term": "Assertion-free test", "definition": "A generated-test pathology: executes code, verifies nothing; inflates coverage; exposed by the sabotage check." },
+        { "term": "Tautological test", "definition": "Expectations restate the implementation, proving code equals itself — bugs included; caused by implementation-only prompting." },
+        { "term": "Characterization test", "definition": "Pins current behavior of legacy code as expected — refactoring protection that must never be mislabeled as correctness proof." },
+        { "term": "Mutation testing", "definition": "Verifying tests by breaking code and demanding red — manually (the sabotage check) or via tools that score mutant kill rates." },
+        { "term": "Code coverage", "definition": "Executed-line/branch percentage; the map of where tests are missing, structurally blind to whether executed tests verify anything." },
+        { "term": "Regression test", "definition": "A test locking in a bug fix; must demonstrably fail on pre-fix code to prove its detection power." },
+        { "term": "XML documentation comments", "definition": "C# /// comments feeding IntelliSense, DocFX, and package docs; generated per-member with purpose-not-mechanism summaries." },
+        { "term": "API documentation", "definition": "Consumer-facing reference for public surface; generated from code plus intent notes, with every specific claim fact-checked." },
+        { "term": "OpenAPI", "definition": "The standard machine-readable HTTP API description; generated endpoint docs belong in its annotations so docs live with code." },
+        { "term": "Doc drift", "definition": "Documentation rotting as code evolves; prevented by regenerating changed members' docs in the same PR." },
+        { "term": "Flaky test", "definition": "A test that passes or fails nondeterministically (time, randomness, async); forbidden via injected clocks, seeds, and awaited assertions." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary & Key Takeaways",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tests and docs are the model-friendliest artifacts in development — structured, grounded, voluminous — and the easiest to generate convincingly wrong.",
+          "The oracle decides everything: supply a behavior spec, or the model derives expectations from the implementation and certifies its bugs.",
+          "Two turns always: case list → human review (which doubles as requirements discovery) → implementation of the approved list.",
+          "Demand boundary tables for every limit and implement them as [TestCase] rows; ask for edge scenarios by category, not by vibe.",
+          "Green is earned, not observed: read assertions against the spec and sabotage the code until the right tests go red.",
+          "Coverage maps missing tests; it cannot score existing ones — an assertion-free suite posts 95% while verifying nothing.",
+          "Docs need intent the code can't carry, a 'do not invent' clause, fact-checking of every specific, and regeneration bound to the changing PR.",
+          "Regression tests must fail before the fix; characterization suites must be labeled for what they are; flakiness constraints go in the prompt."
+        ] },
+        { "type": "paragraph", "text": "You can now direct a model to produce the two artifacts teams chronically lack — and, more importantly, you know exactly how to make their green trustworthy. Next, the course turns to reliability and safety in prompting itself: defending against injection, managing failure modes, and building prompting practices that hold up in production." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Continue with the next tutorial in the path: Reliability, Safety & Best Practices in Prompting — prompt injection and defenses, failure-mode handling, output validation at scale, and the operational discipline that makes prompting production-grade." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: pick one untested method you own and run the full section-12 walkthrough — spec, case list, implementation, sabotage. Count what the workflow catches.",
+          "Practice: take an existing generated (or inherited) test suite and run the 15-minute review — names, assertions, sabotage, coverage. Report to yourself how much of its green was earned.",
+          "Practice: generate XML documentation comments for one public class using the intent-notes template, then fact-check every specific claim it made.",
+          "Practice: on your next bug fix, generate the regression test first and verify it fails before fixing.",
+          "Reading: the NUnit documentation ([TestCase], Assert.That), Coverlet for coverage, and Stryker.NET if you want automated mutation testing."
+        ] },
+        { "type": "note", "style": "info", "text": "Path position: tutorial 5 of 27 · Previous: prompt-engineering-for-coding · Next: prompting-reliability-and-safety" }
+      ]
+    }
+  ]
+}
