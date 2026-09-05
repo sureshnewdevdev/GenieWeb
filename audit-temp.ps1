@@ -1,4 +1,4 @@
-$path = "C:\Genie\GenieWeb\wwwroot\tutorials\ai-security-responsible-usage.json"
+$path = "C:\Genie\GenieWeb\wwwroot\tutorials\building-real-world-ai-dotnet-app.json"
 $raw = Get-Content $path -Raw -Encoding UTF8
 try { $j = $raw | ConvertFrom-Json } catch { "Valid JSON: NO - $($_.Exception.Message)"; exit 1 }
 
@@ -60,12 +60,20 @@ $glossText = (($j.sections | Where-Object key -eq "glossary").items | ForEach-Ob
 $ttText = ($j.tooltips.PSObject.Properties | ForEach-Object { "$($_.Name) $($_.Value)" }) -join " "
 
 $checks = [ordered]@{
-  "1 prompt injection direct  " = "(?i)prompt injection"
-  "2 data privacy             " = "(?i)data minimization"
-  "3 securing API keys        " = "(?i)securing API keys|API keys and endpoints"
-  "4 input/output validation  " = "(?i)output validation"
-  "5 safe prompt design       " = "(?i)safe prompt design"
-  "6 responsible-AI guardrails" = "(?i)responsible.AI"
+  "01 sprint planning/scoping " = "(?i)use-case scoping"
+  "02 system design           " = "(?i)system design"
+  "03 Azure OpenAI integration" = "(?i)Azure OpenAI integration"
+  "04 prompt refinement/optim " = "(?i)prompt refinement"
+  "05 service abstraction     " = "(?i)service abstraction"
+  "06 error handling/logging  " = "(?i)error handling"
+  "07 secure configuration    " = "(?i)secure configuration"
+  "08 UI/UX and input handling" = "(?i)UI/UX"
+  "09 validation/guardrails   " = "(?i)guardrail"
+  "10 e2e testing/quality tune" = "(?i)end-to-end testing"
+  "11 deployment best practice" = "(?i)deployment best practices"
+  "12 AI vs traditional code  " = "(?i)traditional code"
+  "13 enterprise governance   " = "(?i)enterprise governance"
+  "14 reference project ideas " = "(?i)reference project"
 }
 foreach ($k in $checks.Keys) {
   $t = $checks[$k]

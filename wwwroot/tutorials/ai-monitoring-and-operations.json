@@ -1,0 +1,510 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "AI Monitoring and Operations (LLMOps)",
+  "slug": "ai-monitoring-and-operations",
+  "level": "Intermediate",
+  "codeLanguage": "C#",
+  "tutorialNumber": 25,
+  "totalTutorials": 27,
+  "prev": "ai-security-responsible-usage",
+  "next": "ai-evaluation-response-quality",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "AI Monitoring and Operations (LLMOps)"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "Token-usage tracking",
+    "Cost-optimization techniques",
+    "Logging prompts and responses",
+    "Performance monitoring",
+    "Rate limits and throttling",
+    "Operational dashboards"
+  ],
+  "tooltips": {
+    "LLMOps": "The set of operational practices — monitoring, cost management, logging, performance tracking — specific to running large language model applications day to day.",
+    "token-usage tracking": "Recording how many prompt and completion tokens each AI call consumes, the direct basis for cost visibility and optimization.",
+    "cost optimization": "Deliberately reducing AI spend — via model choice, prompt size, caching, or batching — without unacceptably harming quality.",
+    "prompt caching": "Reusing a previously computed result for an identical or near-identical prompt instead of paying for a new model call.",
+    "model tiering": "Routing different requests to different-cost models based on task difficulty, using cheaper models where they suffice.",
+    "token budget": "A planned or enforced limit on how many tokens a feature, user, or time window may consume.",
+    "prompt and response logging": "Capturing prompt and completion content (as distinct from metadata) for debugging or audit, under strict access and retention controls.",
+    "redaction": "Removing or masking sensitive content from logged data before it is stored, to reduce exposure risk.",
+    "p95 latency": "The response time below which 95% of requests complete; a standard way to describe typical worst-case latency, ignoring rare outliers.",
+    "time to first token": "The delay between sending a request and receiving the first piece of a streamed response — the metric users actually perceive as responsiveness.",
+    "rate limit": "A cap on how many requests or tokens a deployment may process in a given time window, enforced by the model provider.",
+    "throttling": "A provider or application actively slowing or rejecting requests once a rate limit is approached or exceeded.",
+    "HTTP 429": "The status code returned when a rate limit has been exceeded, signaling the caller should back off and retry later.",
+    "quota": "The total rate-limit allowance assigned to a deployment or subscription, which can typically be requested to be increased.",
+    "operational dashboard": "A visual, near-real-time summary of a system's key operational metrics used to monitor health and spot problems quickly.",
+    "SLO": "Service Level Objective: a target value for a metric (like p95 latency or error rate) that a team commits to meeting.",
+    "cost per request": "The average or per-transaction spend on model calls, a key unit-economics metric for an AI feature.",
+    "anomaly detection": "Automatically identifying when a metric's behavior deviates unexpectedly from its normal pattern, often triggering an alert."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview: Running an AI System Day to Day",
+      "content": [
+        { "type": "paragraph", "text": "Tutorial 23 established the deployment and monitoring foundation for a GenAI application; tutorial 24 covered securing it. This tutorial goes deeper into the discipline of actually operating one day to day — LLMOps, the operational practices specific to running large language model applications: watching what they cost, keeping that cost under control, deciding what's safe and useful to log, tracking the performance users actually feel, surviving the model provider's rate limits gracefully, and building the dashboards that make all of this visible at a glance." },
+        { "type": "paragraph", "text": "This is where tutorial 23's telemetry becomes an operational practice rather than a one-time setup: token-usage tracking as the foundation for cost visibility; cost-optimization techniques that reduce spend without gutting quality; logging prompts and responses safely, extending tutorial 24's data-privacy rules to the specific question of what's worth capturing and how; performance monitoring focused on what latency actually means for an AI call; rate limits and throttling as an ongoing operational reality, not just a one-time resilience pattern; and operational dashboards that tie all of it into a daily operating picture." },
+        { "type": "note", "style": "info", "text": "If tutorial 23 was 'set up the instruments,' this tutorial is 'read them every day and act on what they say.' The distinction matters: instrumented but unread telemetry provides no operational value at all." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Track token usage per request, feature, and user as the foundation for cost visibility.",
+          "Apply cost-optimization techniques — model tiering, prompt caching, prompt size reduction — without unacceptably harming quality.",
+          "Log prompts and responses safely, balancing debugging value against tutorial 24's data-privacy requirements.",
+          "Monitor performance metrics meaningful for AI calls, including time to first token and p95 latency, not just averages.",
+          "Handle rate limits and throttling as an ongoing operational reality, including HTTP 429 responses and quota management.",
+          "Build operational dashboards that surface token spend, latency, error rate, and quota headroom for daily operations."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorial 23's monitoring and telemetry foundation: Application Insights, custom metrics, distributed tracing.",
+          "Tutorial 24's data-privacy rules, especially the 'never log bodies by default' principle this tutorial refines rather than overturns.",
+          "Tutorial 13's resilience patterns (retry, backoff, circuit breaker), which this tutorial's rate-limiting section extends operationally.",
+          "Basic familiarity with reading a metrics dashboard and interpreting percentile-based latency figures is helpful."
+        ] },
+        { "type": "note", "style": "tip", "text": "This tutorial assumes a system already deployed and monitored per tutorial 23. If that foundation isn't in place yet, build it first — this tutorial deepens an existing practice rather than starting one from zero." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "Key Concepts: Six Daily Operational Questions",
+      "content": [
+        { "type": "paragraph", "text": "LLMOps, as a discipline, answers six recurring operational questions that a deployed AI system raises continuously, not just at launch. Each subtopic in this tutorial is one of these questions, and together they form the daily operating loop of running an AI system responsibly and sustainably." },
+        { "type": "table", "headers": ["Operational question", "Subtopic that answers it"], "rows": [
+          ["How many tokens is this actually using?", "Token-usage tracking"],
+          ["How do we spend less without hurting quality?", "Cost-optimization techniques"],
+          ["What should we capture for debugging, safely?", "Logging prompts and responses"],
+          ["Is it fast enough, and by what measure?", "Performance monitoring"],
+          ["What happens when the provider says slow down?", "Rate limits and throttling"],
+          ["Where does a team look to know the system is healthy?", "Operational dashboards"]
+        ] },
+        { "type": "paragraph", "text": "These questions are interconnected: token-usage tracking feeds cost optimization and dashboards; performance monitoring and rate-limit handling both show up on the same dashboards; and logging decisions balance against the same privacy rules from tutorial 24 throughout. Treat this tutorial as building one coherent operational practice, not six separate checklists." },
+        { "type": "note", "style": "info", "text": "None of these six questions has a one-time answer. Token costs drift as usage patterns change, performance shifts as load grows, and dashboards need maintenance as the system evolves — LLMOps is a continuous practice, exactly like traditional DevOps." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Deep Dive 1: Token-Usage Tracking and Cost-Optimization Techniques",
+      "content": [
+        { "type": "paragraph", "text": "Token-usage tracking is the foundation everything else in this tutorial builds on: recording prompt and completion token counts for every call, tagged by feature, endpoint, and ideally user or tenant, so spend can be broken down meaningfully rather than seen only as one aggregate number. The resulting cost per request, tracked per feature, is the key unit-economics figure that turns raw token counts into a number a team can actually reason about and budget against. Tutorial 13's structured logging already captures this per call; the operational discipline is aggregating it into per-feature and per-user views and watching trends over time, not just logging it and moving on." },
+        { "type": "code", "language": "csharp", "title": "Tagging token usage by feature for breakdown", "code": [
+          "// Extending tutorial 13's telemetry with a feature tag for breakdown by area.",
+          "_telemetryClient.GetMetric(\"AI.TokensUsed\", \"Feature\").TrackValue(",
+          "    completion.Usage.InputTokenCount + completion.Usage.OutputTokenCount,",
+          "    metricNamespace: \"SupportAssistant\");",
+          "",
+          "_logger.LogInformation(",
+          "    \"AI call {Feature} used {PromptTokens}+{CompletionTokens} tokens for user {UserId}\",",
+          "    \"SupportAssistant\", completion.Usage.InputTokenCount,",
+          "    completion.Usage.OutputTokenCount, userId);"
+        ] },
+        { "type": "paragraph", "text": "Cost-optimization techniques act on what token tracking reveals. Model tiering routes easier tasks (classification, simple extraction) to a cheaper, faster model and reserves an expensive flagship model for tasks that genuinely need its capability — a classification task rarely needs the same model as an open-ended reasoning task. Prompt caching reuses a previously computed result for an identical or near-identical prompt rather than paying for a fresh call, valuable for common questions or repeated sub-tasks. Reducing prompt size — trimming unnecessary context, summarizing long conversation history instead of resending it in full, tightening system prompts — directly cuts the input-token side of every call. And a token budget, whether advisory or enforced, gives a feature or team a concrete target to design against rather than an open-ended 'use what you need.'" },
+        { "type": "animation", "title": "Four cost-optimization levers", "intro": "Each lever reduces a different part of the token bill.", "nodes": [
+          { "id": "tier", "label": "Model tiering", "sub": "cheap model for easy tasks" },
+          { "id": "cache", "label": "Prompt caching", "sub": "reuse, don't recompute" },
+          { "id": "trim", "label": "Prompt size reduction", "sub": "less context per call" },
+          { "id": "budget", "label": "Token budget", "sub": "a concrete target" }
+        ], "steps": [
+          { "highlight": ["tier"], "caption": "Model tiering: a classification task routes to a small, cheap model instead of the flagship model reserved for complex reasoning." },
+          { "highlight": ["cache"], "caption": "Prompt caching: a repeated or near-identical question returns a cached result instead of paying for a new completion." },
+          { "highlight": ["trim"], "caption": "Prompt size reduction: summarizing old conversation turns instead of resending them in full cuts input tokens on every subsequent call." },
+          { "highlight": ["budget"], "caption": "A token budget turns 'use what you need' into a concrete number a feature is designed and reviewed against, catching cost creep early." }
+        ] },
+        { "type": "note", "style": "warning", "text": "Every optimization here trades some quality or freshness risk for cost savings — a cheaper model may perform worse on edge cases, a cached response may go stale, aggressive trimming may drop context that mattered. Validate optimizations against tutorial 22's evaluation practice before shipping them, not just against the cost dashboard." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Deep Dive 2: Logging Prompts and Responses Safely",
+      "content": [
+        { "type": "paragraph", "text": "Tutorial 24 established 'never log prompt or response bodies by default.' Prompt and response logging is the operational refinement of that rule: sometimes you genuinely need body content for debugging a specific incident, and the question is how to capture it without recreating the exposure risk the default rule exists to prevent. The answer is layered: keep metadata-only logging as the default for all traffic; provide an explicit, off-by-default debug flag that captures full bodies only when deliberately enabled (for a specific user, a specific time window, or a specific investigation); apply redaction to anything that is captured, stripping or masking obvious PII patterns even in debug captures; and set a short, deliberate retention period for any body-level logs, since the exposure risk compounds the longer sensitive content sits in a log store." },
+        { "type": "code", "language": "csharp", "title": "A scoped, redacted debug-logging flag (illustrative)", "code": [
+          "// Default: metadata only, always on.",
+          "_logger.LogInformation(\"AI call {Feature} finished in {ElapsedMs} ms\", feature, elapsed);",
+          "",
+          "// Debug capture: off by default, enabled deliberately and narrowly (e.g. per",
+          "// investigation, with an expiry), and redacted before it's ever written.",
+          "if (debugLoggingOptions.IsEnabledFor(userId, feature))",
+          "{",
+          "    string redactedPrompt = Redactor.Redact(promptText);",
+          "    string redactedResponse = Redactor.Redact(responseText);",
+          "    _logger.LogDebug(\"DEBUG CAPTURE {Feature} prompt={Prompt} response={Response}\",",
+          "        feature, redactedPrompt, redactedResponse);",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "Access control on any body-level log store should be stricter than for metadata logs — fewer people with access, an audit trail of who viewed what, and ideally the capture disabled again automatically after the investigation window closes rather than left on indefinitely. The operational discipline is treating body-level logging as a deliberate, temporary, access-controlled exception process, not a standing feature anyone can flip on casually." },
+        { "type": "note", "style": "warning", "text": "A debug flag that's easy to enable and forgotten in the 'on' state is functionally the same risk as logging bodies by default. Build in automatic expiry or a recurring review of what debug logging is currently active." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Deep Dive 3: Performance Monitoring",
+      "content": [
+        { "type": "paragraph", "text": "Performance monitoring for an AI call needs metrics beyond a simple average response time, because averages hide exactly the experience most users have. p95 latency — the response time below which 95% of requests complete — is the standard way to describe typical worst-case experience while ignoring rare extreme outliers that would otherwise distort an average. For a streaming response (tutorial 14), time to first token matters more than total completion time for perceived responsiveness: a user sees the first word appear quickly even if the full answer takes several more seconds to finish streaming, and that first-token delay is what actually shapes their sense of whether the system is responsive." },
+        { "type": "animation", "title": "Why p95 and time-to-first-token beat a simple average", "intro": "Two views of the same requests tell very different stories.", "nodes": [
+          { "id": "avg", "label": "Average latency", "sub": "hides the tail" },
+          { "id": "p95", "label": "p95 latency", "sub": "typical worst case" },
+          { "id": "ttft", "label": "Time to first token", "sub": "perceived speed" },
+          { "id": "total", "label": "Total completion time", "sub": "actual full duration" }
+        ], "steps": [
+          { "highlight": ["avg"], "caption": "An average of 800ms can hide that 90% of requests finish in 400ms while 5% take 4 seconds — the average tells a misleadingly smooth story." },
+          { "highlight": ["p95"], "caption": "p95 latency reports that slower tail directly: 'the typical worst-case request takes 4 seconds' is the number that actually matters for user experience commitments." },
+          { "highlight": ["ttft", "total"], "caption": "For a streaming response, time to first token can be under a second even if total completion time is several seconds — the user's perceived experience tracks the first number far more than the second." },
+          { "highlight": ["ttft"], "caption": "Optimizing time to first token (starting generation quickly, minimizing pre-generation work) often improves perceived performance more than optimizing total completion time." }
+        ] },
+        { "type": "paragraph", "text": "Break performance metrics down by the same dimensions as cost — per feature, per model deployment — since a slow RAG retrieval step and a slow model generation step have completely different fixes, and aggregating them into one 'AI call latency' number obscures which one to act on. Set explicit SLOs (service level objectives) for the metrics that matter most — 'p95 time to first token under 2 seconds for the chat assistant' — so performance has a concrete target rather than an implicit 'seems fine' standard." },
+        { "type": "note", "style": "tip", "text": "Instrument time to first token separately from total latency from day one if the feature streams at all. Retrofitting this distinction later, once 'latency' has already meant 'total time' in every dashboard and alert, is more disruptive than building it in from the start." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Deep Dive 4: Rate Limits, Throttling, and Operational Dashboards",
+      "content": [
+        { "type": "paragraph", "text": "Rate limits and throttling are an ongoing operational reality, not a one-time resilience pattern implemented once and forgotten. A model deployment's quota — its allowed requests or tokens per time window — is a hard ceiling; approaching it causes throttling, and exceeding it returns HTTP 429. Tutorial 13 taught the code-level response (exponential backoff with jitter, a hard retry cap); the operational practice is watching quota utilization continuously so a team requests more quota, redistributes load across deployments, or optimizes usage before hitting the ceiling in production, rather than discovering the limit only when 429s start appearing." },
+        { "type": "code", "language": "csharp", "title": "Tracking quota utilization as an operational metric", "code": [
+          "// Beyond retry logic (tutorial 13), track HOW OFTEN throttling occurs --",
+          "// a rising trend is an early warning before it becomes a user-facing incident.",
+          "catch (ClientResultException ex) when (ex.Status == 429)",
+          "{",
+          "    _telemetryClient.GetMetric(\"AI.ThrottledRequests\").TrackValue(1);",
+          "    _logger.LogWarning(\"AI call {Feature} throttled (429); retry {Attempt}\", feature, attempt);",
+          "    // ... existing backoff/retry logic from tutorial 13 ...",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "Operational dashboards tie every prior subtopic into one daily operating picture. A useful dashboard surfaces, at minimum: token spend and trend (per feature, per day); p95 latency and time to first token; error rate and 429/throttling frequency as a leading indicator of quota pressure; and quota headroom — how close current usage sits to the deployment's limit. Alerts on each of these (a cost spike, a latency regression, rising 429 frequency) turn passive dashboards into active operational signals, and anomaly detection can catch deviations from a metric's normal pattern that a fixed threshold might miss." },
+        { "type": "animation", "title": "One dashboard, the whole operational picture", "intro": "Every earlier subtopic in this tutorial becomes one tile on the same dashboard.", "nodes": [
+          { "id": "cost", "label": "Token spend", "sub": "per feature, trend" },
+          { "id": "perf", "label": "p95 / time to first token", "sub": "per feature" },
+          { "id": "quota", "label": "Quota headroom", "sub": "% of limit used" },
+          { "id": "err", "label": "Error / 429 rate", "sub": "leading indicator" }
+        ], "steps": [
+          { "highlight": ["cost"], "caption": "Token spend, broken down by feature, shows where cost-optimization effort (deep-dive 1) would matter most." },
+          { "highlight": ["perf"], "caption": "Performance metrics (deep-dive 3), tracked per feature, show where users are actually experiencing slowness." },
+          { "highlight": ["quota"], "caption": "Quota headroom shows how close the system is to its rate limit before throttling (deep-dive 4) becomes user-visible." },
+          { "highlight": ["err"], "caption": "Error and 429 rates rising together, before users complain, is exactly the early warning a good dashboard is meant to provide." }
+        ] },
+        { "type": "note", "style": "info", "text": "A dashboard nobody looks at regularly provides no operational value regardless of how well it's built. Assign explicit ownership — someone checks it on a schedule, or alerts route to someone who will act on them." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Ecosystem and Tools",
+      "content": [
+        { "type": "table", "headers": ["Tool / practice", "Role in LLMOps"], "rows": [
+          ["Application Insights (tutorial 23)", "Custom metrics, distributed tracing, and the query layer behind cost/performance dashboards"],
+          ["Azure Monitor dashboards and alerts", "Visualizing the operational tiles from deep-dive 4 and triggering notifications"],
+          ["Azure AI Foundry evaluation/monitoring (tutorial 16)", "Platform-level views of model deployment usage and quota"],
+          ["A model catalog with tiered pricing (tutorial 16)", "The basis for model-tiering cost optimization"],
+          ["Caching layers (in-memory, Redis)", "Backing prompt caching for repeated or near-identical requests"],
+          ["Structured logging with a debug-flag mechanism", "The scoped, redacted logging pattern from deep-dive 2"],
+          ["Anomaly detection features (Azure Monitor, Application Insights)", "Catching metric deviations a fixed threshold alert might miss"],
+          ["Quota/capacity management in the Azure portal", "Requesting increased quota and monitoring current allocation"]
+        ] },
+        { "type": "paragraph", "text": "This is largely the same tooling introduced in tutorial 23, used with more depth and a specific operational cadence — checking dashboards, reviewing cost trends, and revisiting rate-limit headroom on a recurring schedule rather than as a one-time setup task." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "Use Cases",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "A support assistant routing simple FAQ-style questions to a cheap model and complex multi-turn troubleshooting to a flagship model, tracked and validated by feature-level token metrics.",
+          "A team enforcing a per-feature token budget during design review, catching a prompt that would have used 3x the intended tokens before it ever shipped.",
+          "An incident investigation where a scoped, time-limited debug-logging flag captures redacted prompt/response bodies for one affected user, then automatically expires.",
+          "A dashboard showing p95 time to first token creeping upward over two weeks, prompting investigation before it becomes a user complaint.",
+          "A team monitoring 429 frequency trending upward days before a growth spike would have caused a hard rate-limit incident, requesting additional quota proactively.",
+          "A monthly cost review comparing token spend per feature against the budget set at design time, feeding back into future feature scoping.",
+          "An anomaly-detection alert firing on an unusual overnight token-spend spike, revealing a runaway retry loop that manual threshold alerts hadn't caught."
+        ] }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples",
+      "content": [
+        { "type": "paragraph", "text": "These examples combine model tiering, quota-aware throttling telemetry, and a dashboard-ready metrics summary into one operational picture." },
+        { "type": "code", "language": "csharp", "title": "Example 1 — Simple model tiering by task complexity", "code": [
+          "public sealed class TieredChatService : IChatService",
+          "{",
+          "    private readonly ChatClient _cheapModel;   // e.g. a smaller, faster deployment",
+          "    private readonly ChatClient _flagshipModel;",
+          "",
+          "    public async Task<string> ClassifyAsync(string text, CancellationToken ct)",
+          "    {",
+          "        // Classification doesn't need the flagship model.",
+          "        var completion = await _cheapModel.CompleteChatAsync(",
+          "            new UserChatMessage($\"Classify this ticket: {text}\"), cancellationToken: ct);",
+          "        return completion.Value.Content[0].Text;",
+          "    }",
+          "",
+          "    public async Task<string> TroubleshootAsync(string conversation, CancellationToken ct)",
+          "    {",
+          "        // Multi-step reasoning over a full conversation warrants the flagship model.",
+          "        var completion = await _flagshipModel.CompleteChatAsync(",
+          "            new UserChatMessage(conversation), cancellationToken: ct);",
+          "        return completion.Value.Content[0].Text;",
+          "    }",
+          "}"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 2 — Time to first token instrumentation for a streaming endpoint", "code": [
+          "var stopwatch = Stopwatch.StartNew();",
+          "bool firstTokenRecorded = false;",
+          "",
+          "await foreach (var update in chat.CompleteChatStreamingAsync(messages, cancellationToken: ct))",
+          "{",
+          "    if (!firstTokenRecorded && update.ContentUpdate.Count > 0)",
+          "    {",
+          "        _telemetryClient.GetMetric(\"AI.TimeToFirstTokenMs\").TrackValue(stopwatch.ElapsedMilliseconds);",
+          "        firstTokenRecorded = true;",
+          "    }",
+          "    // ... stream the fragment to the client (tutorial 14) ...",
+          "}",
+          "",
+          "_telemetryClient.GetMetric(\"AI.TotalCompletionMs\").TrackValue(stopwatch.ElapsedMilliseconds);"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 3 — A summary query feeding an operational dashboard (conceptual)", "code": [
+          "// Conceptual Application Insights query (Kusto/KQL) an operational dashboard",
+          "// tile might run -- illustrating what the tracked telemetry from this tutorial enables.",
+          "// customMetrics",
+          "// | where name in ('AI.TokensUsed', 'AI.TimeToFirstTokenMs', 'AI.ThrottledRequests')",
+          "// | summarize",
+          "//     TotalTokens = sumif(value, name == 'AI.TokensUsed'),",
+          "//     P95Ttft = percentileif(value, 95, name == 'AI.TimeToFirstTokenMs'),",
+          "//     ThrottleCount = countif(name == 'AI.ThrottledRequests')",
+          "//   by bin(timestamp, 1h), tostring(customDimensions.Feature)"
+        ] }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step by Step: Building an LLMOps Dashboard for a Deployed Assistant",
+      "content": [
+        { "type": "paragraph", "text": "This walkthrough builds the full operational picture for the tutorial-23 deployed assistant: token tracking, a cost optimization, safe debug logging, performance metrics, and a dashboard tying it together." },
+        { "type": "list", "style": "numbered", "items": [
+          "Add feature-tagged token-usage telemetry (Example/deep-dive 1) to every AI call path in the deployed assistant, distinguishing at least two features if the app has more than one.",
+          "Identify one genuine cost-optimization opportunity — a task currently using the flagship model that a cheaper model could handle — and implement model tiering (Example 1), validating quality against tutorial 22's golden dataset before and after.",
+          "Add the scoped debug-logging mechanism from deep-dive 2: off by default, enabled per-user/per-window, with redaction applied, and confirm it does not capture anything when disabled.",
+          "Instrument time to first token separately from total completion time for any streaming endpoint (Example 2), and confirm both appear as distinct metrics.",
+          "Add throttling telemetry (deep-dive 4) that records every 429 response, distinct from the retry logic itself, so throttling frequency is visible as a trend.",
+          "Build an operational dashboard with four tiles: token spend by feature, p95 time to first token, error/429 rate, and quota headroom (estimated from request volume against known limits if the exact quota isn't queryable directly).",
+          "Set at least one alert (a token-spend threshold, or a 429-frequency threshold) and confirm it fires correctly with a simulated breach.",
+          "Assign explicit ownership: document who checks this dashboard and how often, and where alerts route.",
+          "Run the dashboard for a defined period (even a few days) and identify one actionable finding — a cost driver, a latency pattern, a quota trend — purely from what the dashboard shows.",
+          "Reflect on the six subtopics as one coherent operational loop: token tracking fed cost optimization, logging supported debugging, performance and rate-limit metrics fed the same dashboard, and the dashboard is what makes the whole loop actionable day to day."
+        ] },
+        { "type": "note", "style": "tip", "text": "Step 9 — finding a real actionable insight — is what proves the dashboard has operational value. A dashboard that's technically correct but never surfaces anything a team acts on is instrumentation theater, not LLMOps." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Cost-optimization techniques trade quality or freshness risk for savings; every optimization should be validated against tutorial 22's evaluation practice, not adopted on cost grounds alone.",
+          "Model tiering requires a reliable way to classify task difficulty in the first place; a poor tiering decision can route a genuinely hard task to a model that underperforms on it.",
+          "Prompt caching is only valid for requests that are truly identical or near-identical in the ways that matter; caching a response for a subtly different question can serve a wrong or stale answer.",
+          "Debug logging, even scoped and redacted, still carries residual risk; redaction patterns can miss unusual PII formats, so scope, access control, and short retention remain essential even with redaction in place.",
+          "p95 latency and time to first token are better than averages but still summary statistics; a dashboard should retain the ability to drill into individual slow requests, not stop at the percentile.",
+          "Quota and rate-limit behavior can change with provider updates; monitoring must be revisited periodically rather than configured once against assumptions that may not hold indefinitely.",
+          "Dashboards and alerts require genuine ownership and response capacity; a well-built dashboard with nobody assigned to act on it provides limited real operational value.",
+          "This tutorial's KQL/query examples are illustrative of intent; exact query syntax and available fields depend on the specific telemetry schema and platform version in use."
+        ] }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Track token usage per feature and, where feasible, per user from day one — retrofitting this breakdown after cost becomes a problem is much harder than building it in from the start.",
+          "Validate every cost optimization against an evaluation suite (tutorial 22) before and after — cost savings that regress quality are a false economy.",
+          "Keep prompt/response body logging off by default, scoped and redacted when enabled, with automatic expiry rather than a standing always-on debug mode.",
+          "Track p95 latency and time to first token separately from averages and from each other, especially for any streaming feature.",
+          "Monitor quota utilization and 429 frequency as leading indicators, requesting more quota or optimizing usage before limits cause user-visible incidents.",
+          "Build dashboards around the questions a team actually needs answered daily — cost, performance, quota headroom — not every metric that's technically available.",
+          "Assign explicit ownership for dashboards and alerts; an unowned alert is functionally the same as no alert.",
+          "Revisit cost, performance, and rate-limit assumptions periodically as usage patterns, models, and provider limits evolve over time."
+        ] },
+        { "type": "table", "headers": ["Common mistake", "Do this instead"], "rows": [
+          ["Tracking only aggregate token spend, not per feature", "Tag telemetry by feature (and user, where appropriate) from the start"],
+          ["Adopting a cost optimization without re-evaluating quality", "Validate against tutorial 22's golden dataset before and after"],
+          ["An always-on or easily-forgotten debug logging flag", "Scoped, redacted, automatically-expiring debug capture only"],
+          ["Reporting only average latency", "Report p95 latency and time to first token separately"],
+          ["Discovering rate limits only when 429s spike in production", "Monitor quota headroom and 429 frequency as leading indicators"],
+          ["A dashboard with no assigned owner", "Explicit ownership and a defined response process for every alert"]
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz: AI Monitoring and Operations (LLMOps)",
+      "items": [
+        { "number": 1, "question": "What does LLMOps refer to?", "options": { "A": "A new model architecture", "B": "The operational practices — monitoring, cost management, logging, performance tracking — specific to running LLM applications day to day", "C": "A programming language for AI", "D": "A type of database index" }, "correctAnswer": "B", "explanation": "LLMOps is the operational discipline of running large language model applications over time: tracking cost, managing logs safely, monitoring performance, handling rate limits, and building dashboards — the practices covered across this tutorial's subtopics." },
+        { "number": 2, "question": "Why should token-usage tracking be broken down by feature rather than kept as one aggregate number?", "options": { "A": "Aggregate numbers are always more accurate", "B": "A per-feature breakdown shows where cost is actually being driven, enabling targeted optimization rather than guesswork", "C": "Breaking it down by feature is required by law", "D": "It has no practical benefit over an aggregate number" }, "correctAnswer": "B", "explanation": "An aggregate token number tells you total spend but not where it's coming from. Tagging usage by feature (and ideally user) lets a team identify specifically which capability is driving cost, enabling targeted optimization instead of guessing." },
+        { "number": 3, "question": "What is model tiering?", "options": { "A": "Sorting models alphabetically", "B": "Routing different requests to different-cost models based on task difficulty, using cheaper models where they suffice", "C": "A billing plan structure unrelated to model choice", "D": "Running the same model on multiple servers" }, "correctAnswer": "B", "explanation": "Model tiering matches task difficulty to model cost: a simple classification task routes to a cheap, fast model, while complex reasoning routes to a more capable (and expensive) model — using expensive capability only where it's actually needed." },
+        { "number": 4, "question": "What risk does prompt caching introduce that must be managed?", "options": { "A": "It always makes responses slower", "B": "A cached response could be served for a subtly different question, or become stale, if caching isn't scoped to truly identical or near-identical requests", "C": "It eliminates the need for any model calls ever", "D": "It has no risks at all" }, "correctAnswer": "B", "explanation": "Prompt caching saves cost by reusing a previous result, but if the caching logic doesn't correctly distinguish truly equivalent requests from subtly different ones, it risks serving a wrong or outdated answer — the caching criteria must be carefully scoped." },
+        { "number": 5, "question": "According to this tutorial, when is it acceptable to log full prompt and response bodies?", "options": { "A": "Always, for every request, by default", "B": "Only through an explicit, off-by-default debug mechanism, scoped narrowly, redacted, and with short retention", "C": "Never, under any circumstances", "D": "Only on weekends" }, "correctAnswer": "B", "explanation": "Body-level logging remains off by default (tutorial 24's rule), but a deliberate, narrowly-scoped, redacted, short-retention debug capture is the acceptable exception for genuine investigation needs — not a standing always-on feature." },
+        { "number": 6, "question": "Why is redaction still necessary even when debug logging is scoped and time-limited?", "options": { "A": "Redaction is not actually necessary if logging is scoped", "B": "Scope and time-limits reduce exposure but don't eliminate risk; redaction removes sensitive content from whatever is captured within that window", "C": "Redaction replaces the need for access control", "D": "Redaction only matters for non-AI applications" }, "correctAnswer": "B", "explanation": "Scoping and expiry limit how much and how long data is exposed, but the captured content itself can still contain PII or sensitive data. Redaction addresses the content of what's captured, which scope and retention limits alone do not." },
+        { "number": 7, "question": "What does p95 latency measure?", "options": { "A": "The fastest 5% of requests", "B": "The response time below which 95% of requests complete, describing typical worst-case experience while ignoring rare extreme outliers", "C": "The average of all request times", "D": "The total number of requests processed" }, "correctAnswer": "B", "explanation": "p95 latency reports a percentile: 95% of requests finish at or below this time. It reveals the tail of slower requests that a simple average would smooth over and hide, giving a more honest picture of typical worst-case user experience." },
+        { "number": 8, "question": "Why does time to first token matter more than total completion time for a streaming response?", "options": { "A": "Total completion time is not measurable for streaming responses", "B": "It's the metric that actually shapes a user's perceived responsiveness, since they see output starting to appear quickly even if full generation takes longer", "C": "Time to first token is always identical to total completion time", "D": "It has no practical significance" }, "correctAnswer": "B", "explanation": "A user watching a streamed answer perceives responsiveness based on how quickly the first token appears, not how long the entire response takes to fully generate — optimizing this specific metric often improves perceived performance more than optimizing total time." },
+        { "number": 9, "question": "What happens when a model deployment's rate limit is exceeded?", "options": { "A": "The deployment is permanently disabled", "B": "The provider throttles requests, typically returning HTTP 429", "C": "Nothing; rate limits are purely advisory", "D": "The request is automatically rerouted to a different provider" }, "correctAnswer": "B", "explanation": "Exceeding a deployment's quota causes throttling, with the provider returning HTTP 429 to signal the caller has hit the limit and should back off — the trigger for the retry/backoff logic covered in tutorial 13." },
+        { "number": 10, "question": "Why should a team monitor 429 frequency as an ongoing metric, not just handle 429s reactively with retry logic?", "options": { "A": "Retry logic alone is sufficient and no monitoring is needed", "B": "Rising 429 frequency is a leading indicator of approaching quota limits, letting a team act (request more quota, optimize usage) before it becomes a user-visible incident", "C": "429 frequency has no relationship to quota", "D": "Monitoring 429s is only useful after an incident has already occurred" }, "correctAnswer": "B", "explanation": "While retry/backoff (tutorial 13) handles individual 429s at the code level, tracking how often they occur over time reveals a trend — rising frequency signals approaching quota pressure that a team can proactively address before it causes a real incident." },
+        { "number": 11, "question": "What is quota headroom?", "options": { "A": "The physical space a data center occupies", "B": "How close current usage sits to a deployment's rate-limit ceiling", "C": "The number of features deployed", "D": "A type of caching strategy" }, "correctAnswer": "B", "explanation": "Quota headroom shows the gap between current usage and the maximum allowed by the deployment's rate limit — a key dashboard tile for anticipating throttling before it happens rather than discovering the limit only when 429s spike." },
+        { "number": 12, "question": "What are the four minimum tiles this tutorial suggests for an LLMOps operational dashboard?", "options": { "A": "User count, page views, click-through rate, and bounce rate", "B": "Token spend by feature, p95/time-to-first-token performance, error/429 rate, and quota headroom", "C": "Server temperature, disk space, network bandwidth, and CPU count", "D": "Number of developers, lines of code, commit frequency, and build time" }, "correctAnswer": "B", "explanation": "These four tiles tie together every subtopic of this tutorial into one operating picture: cost (token spend), performance (latency metrics), reliability (error/429 rate), and capacity (quota headroom) — the recurring questions a team needs answered daily." },
+        { "number": 13, "question": "What is anomaly detection used for in an operational context?", "options": { "A": "Detecting hardware failures only", "B": "Automatically identifying when a metric's behavior deviates unexpectedly from its normal pattern, catching issues a fixed threshold might miss", "C": "Replacing the need for any dashboards", "D": "Only relevant for security, not operations" }, "correctAnswer": "B", "explanation": "Anomaly detection can catch unusual patterns — like an overnight token-spend spike from a runaway retry loop — that a fixed threshold alert might not be tuned to catch, complementing threshold-based alerts rather than replacing them." },
+        { "number": 14, "question": "Why does this tutorial insist that cost-optimization techniques be validated against an evaluation suite?", "options": { "A": "Evaluation is unrelated to cost optimization", "B": "Every optimization trades some quality or freshness risk for savings, and only evaluation reveals whether that trade was acceptable", "C": "Evaluation always shows cost optimizations are safe", "D": "Cost optimizations never affect quality" }, "correctAnswer": "B", "explanation": "Techniques like model tiering, caching, and prompt trimming all risk reducing quality in exchange for lower cost. Running tutorial 22's evaluation practice before and after an optimization is the only way to confirm the trade-off was actually acceptable rather than assumed." },
+        { "number": 15, "question": "Why is a dashboard nobody looks at considered to provide little operational value, according to this tutorial?", "options": { "A": "Dashboards automatically fix problems without human involvement", "B": "Operational value comes from someone acting on what the dashboard shows; an unowned dashboard or unrouted alert has no one positioned to respond", "C": "Dashboards are purely decorative and never provide real value", "D": "This tutorial does not address dashboard ownership" }, "correctAnswer": "B", "explanation": "A technically correct dashboard with no assigned owner or clear alert routing provides no real operational benefit, since nobody is positioned to notice and act on what it shows — explicit ownership and response process are what turn instrumentation into actual operations." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam: Written Questions",
+      "items": [
+        { "number": 1, "question": "Explain token-usage tracking as the foundation for LLMOps, and describe what breakdown dimensions make it operationally useful beyond a single aggregate number.", "modelAnswer": "Token-usage tracking means recording the prompt and completion token counts for every AI call, which is the direct basis for cost (tokens are what's billed) and for several other operational concerns this tutorial covers. A single aggregate 'total tokens used today' number has limited operational value because it doesn't reveal where cost is coming from or whether it's expected. Useful breakdown dimensions include: by feature or endpoint, showing which specific capability drives the most cost, enabling targeted optimization; by user or tenant, useful for detecting a single misbehaving client or for tenant-level cost accounting; over time, showing trend rather than a snapshot, which is what reveals a slow cost creep or a sudden spike; and by model deployment, relevant once multiple deployments (perhaps from model tiering) are in play. Tagging telemetry with these dimensions from the start (building on tutorial 13's structured logging) is what turns token tracking from a number into an actionable operational signal — the foundation the rest of this tutorial's cost-optimization, dashboard, and quota-monitoring practices depend on." },
+        { "number": 2, "question": "Describe three cost-optimization techniques from this tutorial and explain, for each, what quality or risk tradeoff it introduces that must be validated.", "modelAnswer": "Model tiering routes easier tasks to a cheaper model and reserves an expensive model for tasks that need its capability. The tradeoff: a poorly-calibrated tiering decision can route a task that's actually hard enough to need the flagship model to the cheap model instead, degrading quality on exactly the cases where it matters most — validated by running both tiers against tutorial 22's golden dataset and confirming the cheap model's accuracy on its assigned task category meets an acceptable bar. Prompt caching reuses a previous result for an identical or near-identical request instead of paying for a new call. The tradeoff: if the caching criteria aren't scoped tightly enough, a subtly different question could incorrectly receive a cached answer that doesn't actually address it, or a cached answer could go stale if the underlying facts changed — validated by testing the cache-hit logic against genuinely distinct-but-similar inputs and confirming cache entries expire appropriately. Prompt size reduction (trimming context, summarizing history instead of resending it in full) cuts input tokens directly. The tradeoff: removed context might have been relevant to a specific edge-case question, degrading answer quality for cases that needed the trimmed information — validated by comparing evaluation metrics on the full golden dataset before and after the size reduction, watching specifically for regressions concentrated in cases that depended on the removed context." },
+        { "number": 3, "question": "Explain the layered approach to logging prompts and responses safely, and why each layer is necessary rather than redundant.", "modelAnswer": "The layered approach: metadata-only logging as the always-on default (tutorial 24's baseline rule); an explicit, off-by-default debug flag that enables full body capture only when deliberately turned on; redaction applied to whatever is captured even when the flag is on; short, deliberate retention for any body-level logs; and stricter access control on body-level log stores than on metadata logs. Each layer addresses a distinct failure mode the others don't cover, so none is redundant. The default-off flag prevents routine, unnecessary exposure — most debugging never needs bodies, so most traffic should never risk it. Redaction addresses the content of what IS captured during a deliberate debug session — scope and time-limits control when and how much is exposed, but don't remove sensitive content from within that window, which is exactly what redaction does. Short retention limits how long any captured content persists, since exposure risk compounds with how long sensitive data sits in a store regardless of how it got there. And access control ensures that even within the retention window, only the necessary few people can view what was captured. Removing any single layer leaves a specific gap: without the off-by-default flag, all traffic is exposed by default; without redaction, a deliberately-scoped capture still contains raw PII; without short retention, old debug captures accumulate risk indefinitely; without stricter access control, a properly scoped and redacted capture is still visible to more people than necessary." },
+        { "number": 4, "question": "Explain why p95 latency and time to first token are described as necessary complements to, not replacements for, an average latency metric.", "modelAnswer": "An average latency metric is useful for a coarse sense of typical performance and is cheap to compute and reason about, but it has a specific blind spot: it can be dominated by the bulk of fast requests while hiding a meaningful tail of slow ones, since one very slow outlier and many fast requests can average out to a number that looks fine while genuinely misrepresenting a real subset of user experiences. p95 latency directly addresses this blind spot by reporting the threshold below which 95% of requests fall, surfacing that slower tail as its own number rather than letting it get smoothed away — but p95 doesn't tell you WHY it's slow or distinguish streaming delay characteristics. Time to first token addresses a different gap specific to streaming responses: total completion time (whether reported as an average or a percentile) measures how long the full response takes, but users perceive responsiveness based on how quickly the response starts appearing, which can be a very different number. None of the three metrics alone gives a complete picture — average latency for a quick coarse read, p95 for honest worst-case-typical reporting, and time-to-first-token for what streaming users actually perceive — so a mature performance monitoring practice reports all three, using each for the specific question it's suited to answer rather than treating any one as sufficient on its own." },
+        { "number": 5, "question": "Describe the operational practice around rate limits and throttling this tutorial recommends, distinguishing the code-level response from the ongoing monitoring practice.", "modelAnswer": "The code-level response, established in tutorial 13, handles an individual 429 as it happens: exponential backoff with jitter, a bounded retry count, and a circuit breaker for sustained failure — this is reactive, per-request handling that makes an individual rate-limit encounter recoverable rather than a hard failure. The ongoing operational practice this tutorial adds is proactive and trend-based: tracking how often 429s occur over time as a metric distinct from the retry logic itself, and monitoring quota headroom — how close current usage sits to the deployment's actual limit — as a leading indicator. The distinction matters because code-level retry logic can successfully mask rising rate-limit pressure from users (each individual request eventually succeeds after backoff) while the underlying trend of increasing throttling frequency signals that the system is approaching a ceiling that will eventually cause real problems — degraded latency from repeated backoff delays, or a true capacity crisis during a further traffic spike, once headroom runs out entirely. Monitoring this trend lets a team proactively request more quota, redistribute load across multiple deployments, or optimize token usage BEFORE the ceiling causes a user-visible incident, rather than discovering the problem only when retry logic itself starts failing because even the retries are getting throttled." },
+        { "number": 6, "question": "Design the four-tile operational dashboard this tutorial recommends, explaining what specific operational question each tile answers and how the tiles interrelate.", "modelAnswer": "Tile one, token spend by feature (with trend over time), answers 'where is our AI cost coming from and is it growing unexpectedly' — directly informing where cost-optimization effort (deep-dive 1) would have the most impact. Tile two, p95 latency and time to first token (broken down by feature), answers 'is the system fast enough, and specifically fast enough in the way users actually perceive' — informing where performance investigation (deep-dive 3) should focus. Tile three, error rate and 429/throttling frequency, answers 'is the system reliably completing requests, and is it approaching a rate-limit ceiling' — a leading indicator feeding into quota planning (deep-dive 4). Tile four, quota headroom, directly answers 'how much capacity do we have left before we hit our limit,' complementing tile three's frequency trend with an absolute capacity view. The tiles interrelate: a cost spike (tile one) investigated alongside a latency regression (tile two) might reveal a specific feature both getting slower and more expensive, pointing at one root cause (e.g. an unintentionally larger prompt); rising 429 frequency (tile three) alongside shrinking quota headroom (tile four) together tell a team exactly how urgently to act on quota versus how much runway remains. Viewing them together, rather than as four disconnected numbers, is what makes the dashboard diagnostic rather than merely descriptive." },
+        { "number": 7, "question": "A team implements every dashboard and metric from this tutorial but reports no operational improvement six months later. Diagnose likely causes.", "modelAnswer": "The most likely cause, given this tutorial's explicit warning, is a lack of assigned ownership: a technically well-built dashboard that nobody checks on a defined schedule, and alerts that don't route to anyone positioned or empowered to act on them, produces no operational value regardless of how accurate the underlying metrics are — instrumentation without a human (or automated) response loop is inert. A second likely cause is that the metrics were built once and never revisited: usage patterns, models, and provider rate limits all change over time, so thresholds and even the specific metrics tracked can become stale or miscalibrated if nobody periodically reviews whether the dashboard still reflects what matters. A third possibility is that findings from the dashboard were noticed but not acted on due to organizational friction — perhaps the team that sees the cost or performance data isn't the same team empowered to change the prompt, model choice, or architecture that's driving the issue, and no process exists to route findings to the right owner. A fourth possibility is that the dashboard tracks the wrong granularity — perhaps only aggregate numbers were kept despite this tutorial's emphasis on per-feature breakdowns, making the data descriptive but not actionable, since a team can see 'cost is high' without being able to see which specific feature to fix. Diagnosing which of these applies requires checking: is there a named owner, is there a review cadence, does the team that sees alerts have the authority to act on them, and is the data broken down finely enough to point at a specific fix." },
+        { "number": 8, "question": "Explain the relationship between this tutorial's cost-optimization techniques and tutorial 22's evaluation practice, and describe what would go wrong without that connection.", "modelAnswer": "Cost optimization techniques (model tiering, caching, prompt trimming) all reduce spend by changing what the system does — using a different, cheaper model, reusing an old result instead of computing a new one, or giving the model less context to work with. None of these changes are cost-neutral from a quality standpoint; each one is a bet that the change won't meaningfully harm output quality for the cases it's applied to. Tutorial 22's evaluation practice — a golden dataset with defined metrics, run as regression testing on changes — is the mechanism that actually tests this bet rather than assuming it. Without this connection, a team optimizing purely against a cost dashboard has no way to know whether a change that successfully reduced cost also silently reduced quality: a model-tiering decision might route borderline-difficult tasks to the cheap model where they now fail more often, a cache might serve stale or subtly wrong answers, or aggressive prompt trimming might drop context that mattered for a meaningful subset of real questions — and none of this would show up on a cost or latency dashboard, since those dashboards measure operational metrics, not correctness. The team would see a lower bill and assume success, while user-facing quality quietly degraded, discovered only much later (if at all) through user complaints or an unrelated investigation — exactly the failure mode running the golden-dataset evaluation before and after each optimization is meant to prevent." },
+        { "number": 9, "question": "How would you decide whether an observed increase in token spend represents a problem to fix or a legitimate cost of growth?", "modelAnswer": "The key diagnostic is distinguishing a per-request increase from a volume increase, and per-feature breakdown (deep-dive 1) is essential to make this distinction meaningfully rather than guessing from an aggregate number. If the increase is proportional to a genuine increase in request volume — more users, more legitimate usage — with the average tokens per request roughly unchanged, that's very likely a legitimate cost of growth, and the appropriate response is capacity/quota planning (deep-dive 4) rather than treating it as a bug. If instead the average tokens per request has increased while volume is roughly flat, that points to a specific change in behavior worth investigating: a recent prompt change that added unnecessary context, conversation history that's growing unboundedly instead of being summarized, a retry loop causing redundant calls, or a shift in the mix of tasks toward more token-intensive ones. Cross-referencing with recent deployments or configuration changes (tutorial 23's rollout discipline) helps correlate a spike's onset with a specific change. The distinction matters practically because the fixes are entirely different: a legitimate growth-driven increase is addressed by planning more budget and quota, while a per-request regression is addressed by finding and fixing the specific change that caused it — conflating the two leads either to unnecessarily restricting a healthy, growing feature or to accepting an actual bug as 'just growth.'" },
+        { "number": 10, "question": "Explain why this tutorial treats rate-limit monitoring as distinct from (though related to) the resilience patterns taught in tutorial 13, rather than considering tutorial 13's retry logic sufficient on its own.", "modelAnswer": "Tutorial 13's resilience patterns — exponential backoff, retry caps, circuit breakers — operate at the level of a single request's lifecycle: they determine what happens when THIS particular call gets a 429, converting an individual failure into (usually) an eventual success after some delay. This is necessary and correct at that scope, but it is fundamentally reactive and per-request; it has no memory of or visibility into the broader pattern of how often this is happening across the whole system over time. A system with excellent per-request resilience can still be operating dangerously close to its rate-limit ceiling — every individual request eventually succeeds via retry, so no single request fails outright, but the aggregate frequency of throttling is rising toward a point where retries themselves start getting throttled, or where added latency from repeated backoff delays becomes user-visible even though no request technically fails. Monitoring 429 frequency and quota headroom as ongoing metrics operates at a different, complementary scope: it's about the system's overall trajectory relative to its capacity ceiling, which is invisible if you only look at whether any given individual request ultimately succeeded. This is why the tutorial treats them as distinct: resilience patterns answer 'did this specific call eventually work,' while rate-limit monitoring answers 'is our overall usage trending toward a capacity problem that per-request resilience will eventually be unable to fully mask' — and only the second question, tracked continuously, lets a team act before hitting a true ceiling rather than merely surviving each individual brush with the limit." },
+        { "number": 11, "question": "A stakeholder asks why the team needs a 'scoped, redacted, expiring' debug logging mechanism instead of simply logging everything and restricting who has database access. Respond.", "modelAnswer": "Restricting database access is a necessary control but not a sufficient one on its own, and 'log everything, restrict access' underestimates several distinct risks the layered approach specifically addresses. First, access control lists change over time — someone's access is granted for a legitimate reason and not revoked promptly, or access is broader than intended due to role inheritance or administrative convenience — so relying on access control alone as the single safeguard means a single misconfiguration exposes the full, unredacted history of every prompt and response the system has ever processed, rather than exposing only whatever a scoped, time-limited debug session happened to capture. Second, 'restrict access' does nothing about the fact that logs, once written, tend to flow into backups, be replicated for disaster recovery, get exported for analysis, or be retained far longer than anyone intended — data minimization at the point of capture (only logging bodies when explicitly needed, for a limited scope and time) reduces this sprawl risk at the source, rather than trying to control every downstream copy after the fact. Third, redaction addresses a risk access control cannot: even an authorized person viewing a debug log for a legitimate investigation shouldn't need to see a customer's full unredacted PII when investigating an unrelated formatting bug, for instance — redaction implements need-to-know at the content level, which access control alone (a binary can-view/cannot-view permission) does not provide. The layered approach isn't distrust of access control; it's recognizing that access control is one necessary layer among several, not a substitute for minimizing what's captured and for how long in the first place." },
+        { "number": 12, "question": "How would you set meaningful SLOs for an AI feature's performance, and what pitfalls would you avoid in defining them?", "modelAnswer": "I would set SLOs on the specific metrics that reflect actual user experience rather than on whatever happens to be easiest to measure — for a streaming feature, that means an SLO on p95 time to first token (e.g. 'p95 time to first token under 2 seconds') rather than an SLO on average total completion time, since total completion time for a long streamed answer might legitimately take much longer while still feeling responsive if the first token arrives quickly. I would set the SLO on a percentile (p95, not average) to explicitly account for the fact that averages hide the tail of slower requests that matter most for user-perceived reliability. I would break the SLO down per feature rather than setting one system-wide number, since different features (a quick classification lookup versus a complex multi-step research assistant) have legitimately different acceptable latency profiles, and a single blended SLO would be either too lax for the fast feature or unachievable for the genuinely complex one. Pitfalls to avoid: setting an SLO before establishing a baseline of actual current performance (an arbitrary target with no data behind it is unlikely to be well-calibrated); setting an SLO on a metric that doesn't actually correlate with user satisfaction (like total token count, which users don't perceive directly); and setting the SLO once and never revisiting it, since usage patterns, model versions, and infrastructure all change the achievable and appropriate targets over time." },
+        { "number": 13, "question": "Explain how token-usage tracking, cost optimization, performance monitoring, and rate-limit monitoring together inform a single decision: whether to request additional model quota.", "modelAnswer": "Token-usage tracking, broken down over time, reveals the underlying growth trajectory — is usage increasing steadily, and at what rate, which projects forward to when current quota might become insufficient. Cost-optimization review determines whether that growth is already as efficient as reasonably achievable (appropriate model tiering, no obvious caching or prompt-size wins left on the table) or whether optimization could reduce the effective demand on quota without needing more of it — if significant optimization headroom remains unexploited, that's often cheaper and faster than a quota request, and should be pursued first or in parallel. Performance monitoring shows whether current latency is already degraded in a way suggesting the system is straining against capacity, which strengthens the case for urgency if quota pressure is already affecting user experience, versus merely being a future risk. Rate-limit monitoring — specifically 429 frequency and quota headroom — provides the most direct evidence of how close the system actually is to its ceiling right now, translating the token growth trend into a concrete 'we have roughly this much runway left' estimate. Together: rising token usage plus already-optimized usage plus degrading performance plus shrinking quota headroom is a strong, well-evidenced case for a quota increase, made with specific numbers rather than a vague sense that 'things feel slow' — exactly the kind of business case that's much more persuasive and much more likely to be sized correctly than a request made without this operational data behind it." },
+        { "number": 14, "question": "Reflecting on tutorials 23, 24, and 25 together, explain how this tutorial's LLMOps focus differs from and builds on tutorial 23's deployment/monitoring foundation and tutorial 24's security focus.", "modelAnswer": "Tutorial 23 established the foundational operational infrastructure: a deployment architecture, a cloud hosting target, the basic monitoring and telemetry setup (Application Insights, custom metrics for tokens and latency), and a rollout discipline for changes. It answers 'how do we get this system running reliably in production and know its basic health.' Tutorial 24 addressed a specific, critical concern that cuts across the whole system: security and responsible use, focused on prompt injection, data privacy, credential security, and content safety — it answers 'how do we make sure this system isn't exploited or misused.' This tutorial, 25, takes tutorial 23's monitoring foundation and goes deeper into the specific operational discipline of running the system economically and performantly day to day, incorporating tutorial 24's privacy rules into a refined logging practice along the way (the scoped/redacted debug logging in deep-dive 2 directly extends tutorial 24's 'never log bodies by default' rule rather than contradicting it). Where tutorial 23 asked 'is it monitored at all' and tutorial 24 asked 'is it secure,' this tutorial asks 'are we running it well, sustainably, and cost-effectively, and do we have the operational visibility to know when we're not.' The three tutorials are cumulative and non-redundant: each addresses a genuinely distinct operational dimension (basic operability, security, ongoing operational excellence) that a production AI system needs all three of, not any one alone." },
+        { "number": 15, "question": "Design the operational review process a mature team would run monthly, drawing on every subtopic of this tutorial.", "modelAnswer": "Token spend review: examine the per-feature, per-day token trend from the dashboard, comparing actual spend against any token budgets set during design, flagging features that have drifted meaningfully above their budget for investigation. Cost-optimization audit: for any feature with above-budget or rapidly growing spend, evaluate whether model tiering, caching, or prompt-size reduction opportunities exist that haven't yet been implemented, and for any optimization implemented since the last review, confirm its evaluation-suite comparison (tutorial 22) still shows acceptable quality on recent real traffic patterns, not just at the time it was first validated. Logging audit: review what debug-logging flags are currently enabled across the system, confirming none have been left on longer than their intended investigation window, and spot-check that redaction is functioning correctly on a sample of any recent debug captures. Performance review: examine p95 latency and time to first token trends per feature against any SLOs set, investigating any feature trending toward its SLO boundary before it's breached rather than after. Rate-limit and capacity review: examine 429 frequency trends and quota headroom, projecting forward based on the token-usage growth trend to estimate when current quota might become insufficient, and initiating a quota request proactively if that projection falls within a concerning near-term window. Dashboard and alert health check: confirm all dashboard tiles are still populating correctly, alerts are still routing to an actively-monitored destination, and ownership assignments are still current (people change roles). This monthly cadence turns the six subtopics of this tutorial from a one-time setup into the recurring operational discipline the tutorial's overview explicitly calls for." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "LLMOps", "back": "Operational practices for running LLM apps day to day: cost tracking, safe logging, performance monitoring, rate-limit handling, dashboards." },
+        { "number": 2, "front": "Token-usage tracking breakdown", "back": "Tag by feature, user, and model deployment, tracked over time — an aggregate number alone doesn't reveal where cost comes from." },
+        { "number": 3, "front": "Model tiering", "back": "Route easy tasks (classification) to a cheap model, reserve the flagship model for tasks that genuinely need its capability." },
+        { "number": 4, "front": "Prompt caching risk", "back": "Reuse saves cost, but caching criteria must be scoped tightly — a subtly different question served a cached answer, or a stale cached result, are real risks." },
+        { "number": 5, "front": "Cost optimizations need evaluation", "back": "Every cost technique trades quality/freshness risk for savings — validate against tutorial 22's golden dataset before AND after, never on cost alone." },
+        { "number": 6, "front": "Safe debug logging layers", "back": "Off by default → scoped/narrow when enabled → redacted content → short retention → stricter access control. Each layer covers a gap the others don't." },
+        { "number": 7, "front": "p95 latency", "back": "Response time below which 95% of requests complete — reveals the slow tail an average hides. The standard 'typical worst case' metric." },
+        { "number": 8, "front": "Time to first token", "back": "Delay to the FIRST streamed chunk — what users actually perceive as responsiveness, distinct from (often much shorter than) total completion time." },
+        { "number": 9, "front": "HTTP 429 / throttling", "back": "Returned when a rate limit is exceeded. Code-level: retry+backoff (tutorial 13). Operational: track FREQUENCY as a trend, not just handle individually." },
+        { "number": 10, "front": "Quota headroom", "back": "How close current usage sits to the deployment's rate-limit ceiling — a leading indicator to act on before 429s spike in production." },
+        { "number": 11, "front": "4-tile operational dashboard", "back": "Token spend by feature + p95/time-to-first-token + error/429 rate + quota headroom — the daily operating picture tying every subtopic together." },
+        { "number": 12, "front": "Anomaly detection", "back": "Catches metric deviations from normal pattern that a FIXED threshold alert might miss (e.g. an overnight spend spike from a retry loop)." },
+        { "number": 13, "front": "SLO (Service Level Objective)", "back": "A committed target for a metric (e.g. 'p95 time to first token under 2s') — gives performance a concrete goal instead of an implicit 'seems fine.'" },
+        { "number": 14, "front": "Rate-limit monitoring vs retry logic", "back": "Retry logic (tutorial 13) = did THIS request eventually succeed. Rate-limit monitoring = is our OVERALL usage trending toward a capacity ceiling." },
+        { "number": 15, "front": "Dashboard needs an owner", "back": "A dashboard nobody checks or an alert that routes nowhere provides zero operational value, regardless of how accurate the metrics are." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions and Answers",
+      "items": [
+        { "number": 1, "question": "What does LLMOps mean to you, and how does it differ from general DevOps?", "answer": "LLMOps is the set of operational practices specific to running large language model applications continuously — tracking token usage and cost, logging prompts and responses safely given their sensitivity, monitoring performance metrics that matter for AI calls specifically like time to first token, and handling provider rate limits as an ongoing concern. It's not a replacement for general DevOps — deployment, CI/CD, infrastructure monitoring all still apply exactly as they do for any service — it's an extension covering the parts that are genuinely different about running a system whose core dependency is a metered, rate-limited, probabilistic model rather than deterministic code. The biggest conceptual difference from general DevOps is that cost here isn't just infrastructure spend, it's a per-request, usage-driven number that needs its own tracking and optimization discipline, and performance has a perceptual dimension (time to first token) that a typical API's latency metrics don't usually need to distinguish." },
+        { "number": 2, "question": "How would you set up token-usage tracking for a new AI feature from day one?", "answer": "I'd tag every AI call's telemetry with the feature name and, where feasible, a user or tenant identifier, recording prompt and completion token counts separately, extending the structured logging discipline from earlier in the course rather than treating this as a new system. I'd do this from day one rather than retrofitting it later, because once a feature is live and cost becomes a question, having granular historical data to look back at is far more valuable than starting to collect it only after the question comes up. I'd also set a rough token budget during design — even an informal target — so the feature has something concrete to measure actual usage against, catching a prompt that's using far more tokens than intended before it becomes a surprise on a monthly cost review." },
+        { "number": 3, "question": "Walk me through how you'd decide whether to apply model tiering to a feature.", "answer": "I'd look at whether the feature's tasks actually vary meaningfully in difficulty — if every request genuinely needs complex reasoning, tiering doesn't help and adds complexity for no benefit. If tasks do vary — say, some requests are simple classification and others are open-ended troubleshooting — I'd design a reliable way to classify which tier a given request needs, since a poor classification decision is worse than no tiering at all if it routes a genuinely hard task to an underpowered model. Then I'd implement the cheap-model path for the easy tier and run both tiers against a golden dataset (tutorial 22's evaluation practice), specifically checking that the cheap model's accuracy on its assigned task category meets an acceptable bar before shipping it — cost savings that come with a quality regression on real user questions isn't actually a win, it's a hidden cost shifted from the cloud bill to user experience." },
+        { "number": 4, "question": "What's your policy on logging prompt and response content, and how do you balance debugging needs against privacy risk?", "answer": "Metadata-only logging is the default for all traffic — token counts, latency, finish reasons, never the actual prompt or response text. For genuine debugging needs, I'd build an explicit, off-by-default flag that captures full bodies only when deliberately enabled for a specific investigation — a specific user, a specific time window — never a standing always-on capability. Whatever gets captured under that flag goes through redaction first, stripping obvious PII patterns even though it's already scoped and temporary, because scope and time-limits reduce exposure but don't eliminate the risk of what's actually in the captured content. I'd set short retention on any body-level logs and put stricter access controls on that log store than on the metadata logs everyone can see. And critically, I'd build in automatic expiry for the debug flag itself, because a flag that's easy to turn on and easy to forget is functionally no different from logging everything by default." },
+        { "number": 5, "question": "Why do you care about time to first token separately from total latency?", "answer": "Because they measure genuinely different things and users perceive one far more directly than the other. For a streaming response, a user watching the answer type itself out judges responsiveness by how quickly the first word appears, not by how long the complete answer takes to finish generating — a response that starts appearing in half a second but takes six seconds total to fully stream feels much more responsive than a response that takes two seconds before any text appears at all, even though the second one technically 'finishes' faster in one sense. If I only tracked total completion time, I could miss a real time-to-first-token regression entirely, or conversely chase total-time optimizations that don't actually move the needle on perceived speed. I instrument both as distinct metrics from the start for any streaming feature, because retrofitting that distinction after 'latency' has already meant 'total time' throughout every existing dashboard and alert is much more disruptive than building it in correctly the first time." },
+        { "number": 6, "question": "How do you handle rate limits operationally, beyond the retry logic in your code?", "answer": "The retry logic — exponential backoff, a bounded retry count, a circuit breaker for sustained failure — handles an individual request's encounter with a 429 reactively, making that one call eventually succeed or fail gracefully. Operationally, I go further and track how often 429s happen over time as its own metric, separate from the retry logic itself, because a rising frequency trend is a leading indicator that the system is approaching its actual capacity ceiling even while individual requests are all technically still succeeding via retry. I also monitor quota headroom directly — how close current usage sits to the deployment's limit — so I can request more quota, redistribute load, or optimize usage proactively, before the ceiling causes a real incident. The distinction I care about is: retry logic answers 'did this specific request eventually work,' while this ongoing monitoring answers 'is our overall trajectory heading toward a capacity problem that retries alone won't be able to mask forever' — and only the second question, tracked continuously, lets me act ahead of an actual crisis." },
+        { "number": 7, "question": "What would you put on an operational dashboard for a deployed AI feature, and why those specific things?", "answer": "Four tiles, minimum. Token spend by feature with trend over time, because that's where cost visibility comes from and where I'd look first if the bill spikes. p95 latency and time to first token, broken down by feature, because those are the performance numbers that actually reflect what users experience, not an average that hides the slow tail. Error rate and 429/throttling frequency together, because rising throttling is a leading indicator of a capacity problem before it becomes a hard failure. And quota headroom, giving a direct 'how much runway do we have left' view that complements the throttling-frequency trend. I chose these because they answer the recurring operational questions a team actually needs answered — is it costing what we expect, is it fast enough, is it reliable, and are we about to hit a wall — rather than including every metric that's technically available just because it's easy to graph." },
+        { "number": 8, "question": "How would you decide whether a token-spend increase is a problem or expected growth?", "answer": "I'd check whether the increase is proportional to genuine volume growth with per-request token usage roughly stable — if more legitimate users are generating more legitimate requests and each request costs about the same as before, that's healthy growth, and the right response is quota and budget planning, not treating it as a bug. If instead per-request token usage itself has crept up while volume is flat, that points at something specific worth investigating — a prompt change that added unneeded context, unbounded conversation history being resent in full instead of summarized, or a retry loop causing redundant calls. I'd correlate the spike's timing against recent deployments or configuration changes to find the likely cause quickly. The distinction matters because the fixes are completely different — one needs more budget, the other needs a bug fix — and conflating them either wastes money accepting a real regression as 'just growth,' or unnecessarily throttles a healthy feature that's simply succeeding and scaling as intended." },
+        { "number": 9, "question": "A stakeholder wants to skip building a proper debug-logging mechanism and just log everything since 'the database is access-controlled anyway.' How do you respond?", "answer": "I'd point out that access control is necessary but not sufficient on its own, and 'log everything, control access' misses several distinct risks. Access permissions drift over time — someone's access outlives its original purpose, or role-based access ends up broader than intended — so a single access-control gap would expose the entire unredacted history of every prompt and response ever processed, rather than exposing only what a scoped debug window happened to capture. Logs also tend to flow into backups, get replicated, or get exported for analysis in ways that are hard to fully track and control after the fact — minimizing what gets captured at the source is a much more reliable control than trying to lock down every downstream copy. And even an authorized person with a legitimate reason to view a log for one investigation shouldn't need to see a customer's full unredacted PII to debug an unrelated issue — redaction implements a need-to-know principle at the content level that a binary access permission simply doesn't provide. I'd propose the layered approach instead: off-by-default, scoped when needed, redacted, short retention, stricter access control on top — it's not distrust of the access control, it's recognizing it's one layer among several that are each cheap to add and each cover a distinct gap." },
+        { "number": 10, "question": "How do you decide when it's time to request additional model quota versus optimizing existing usage further?", "answer": "I'd look at the whole picture rather than reacting to one signal alone. Token-usage trend tells me the growth trajectory and roughly when current quota might become insufficient if nothing changes. I'd check whether meaningful optimization headroom still exists — is model tiering, caching, or prompt trimming already applied where it makes sense, or is there obvious waste still on the table — because optimizing further is often cheaper and faster than a quota increase and should generally be pursued first if real opportunity remains. Performance monitoring tells me whether the system is already straining, which adds urgency if users are already feeling degraded latency. And rate-limit monitoring — 429 frequency and quota headroom specifically — gives me the most direct, concrete evidence of how much runway is actually left right now. If growth is real, optimization is already reasonably exhausted, and headroom is genuinely shrinking, that combination makes a strong, well-evidenced business case for a quota increase — with specific numbers, not a vague sense that things feel tight." },
+        { "number": 11, "question": "What's the biggest mistake you've seen (or would expect to see) in how teams approach LLMOps dashboards?", "answer": "Building the dashboard and considering the job done, with no assigned ownership or defined response process for what it shows. A technically accurate dashboard that nobody checks on a schedule, or an alert that fires into a channel nobody monitors, provides essentially zero operational value no matter how well-instrumented the underlying metrics are — the dashboard's value comes entirely from someone acting on what it reveals, not from its mere existence. A related mistake is building it once and never revisiting it: usage patterns, models, and even provider rate-limit behavior all change over time, so thresholds and even which metrics matter most can drift out of calibration if nobody periodically reviews whether the dashboard still reflects the team's actual current questions. I'd insist on explicit ownership and a recurring review cadence as part of what 'done' means for any dashboard, not as an optional follow-up." },
+        { "number": 12, "question": "How does this tutorial's cost-optimization work relate to the evaluation practice from earlier in the course?", "answer": "Every cost-optimization technique — model tiering, prompt caching, trimming prompt size — is a bet that reducing cost won't meaningfully hurt output quality, and none of these techniques prove that bet true on their own; they just reduce the number on a cost dashboard. The evaluation practice — a golden dataset with defined metrics, run before and after a change — is what actually tests whether the bet paid off. Without running that evaluation, a team could ship a cost optimization, see the bill go down, and consider it a clean win, while quality quietly regressed for some subset of real questions in a way the cost dashboard would never reveal, since cost and quality are measured by entirely different instruments. I treat 'validate against the evaluation suite' as a required step of any cost optimization, not an optional nice-to-have — a cheaper system that's also meaningfully worse isn't actually a win, it's a cost shifted from the infrastructure bill onto the user experience, just in a form that's much harder to notice." },
+        { "number": 13, "question": "How would you instrument a new streaming feature to make sure you're not missing an important performance signal?", "answer": "I'd instrument time to first token and total completion time as two explicitly separate metrics from the very first version, not bolt on the distinction later — recording the elapsed time at the first content chunk received, separately from the elapsed time when the full stream completes. I'd also track these per feature rather than as one system-wide number, since different features have different acceptable latency profiles and blending them together would hide a specific feature's regression inside an average across everything. And I'd report both as percentiles (p95 at minimum), not just averages, so a slow tail is visible rather than smoothed away. Building this in from day one matters because if 'latency' has already come to mean 'total time' throughout a codebase's existing dashboards, alerts, and team conventions by the time someone wants to add time-to-first-token tracking, that's a much more disruptive retrofit than getting the distinction right from the start." },
+        { "number": 14, "question": "What operational review would you run monthly for a mature, production AI system?", "answer": "I'd walk through this tutorial's subtopics as a checklist. Token spend: review per-feature trends against any budgets set, flag drift. Cost optimization: for anything above budget, check for unexploited tiering/caching/trimming opportunities, and re-confirm any already-implemented optimization's evaluation results still hold against recent real traffic. Logging: audit which debug flags are currently enabled and confirm none have overstayed their intended window, spot-check redaction is working. Performance: review p95 and time-to-first-token trends against SLOs, catching anything trending toward a breach before it actually breaches. Rate limits: review 429 frequency and quota headroom, projecting forward from the usage trend to estimate when current quota becomes insufficient, and initiate a quota request proactively if that's near-term. Dashboard health: confirm every tile is still populating, alerts still route to a monitored destination, and ownership is still current, since people's roles change. Running through all six areas monthly turns what could be a one-time setup into the recurring discipline this tutorial argues LLMOps actually requires." },
+        { "number": 15, "question": "How would you explain to a non-technical stakeholder why 'the AI feature works' isn't the same as 'the AI feature is operationally healthy'?", "answer": "I'd frame it around what 'works' actually covers versus what it misses. 'Works' typically means: a user asks something, gets a reasonable answer, the feature does its job — and that's necessary, but it's a snapshot from one interaction, at one moment, under whatever load existed at that moment. 'Operationally healthy' means the feature keeps working that way reliably as usage grows, at a cost the business can sustain, without leaking sensitive data through logs, fast enough that users don't get frustrated waiting, and without silently hitting the AI provider's rate limits during a busy period. A feature can pass every 'does it work' check in a demo and still be operationally unhealthy in ways that only show up under real, sustained, growing production use — a cost that quietly triples as usage scales, a p95 latency that degrades once real concurrent load appears, or a rate-limit ceiling nobody was watching that suddenly causes visible failures during a traffic spike. The operational practices in this tutorial — tracking cost, monitoring real performance percentiles, watching capacity trends, building dashboards someone actually checks — exist specifically to catch and manage these production-scale realities that a single successful demo interaction simply can't reveal." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "LLMOps", "definition": "The set of operational practices — monitoring, cost management, logging, performance tracking — specific to running large language model applications day to day." },
+        { "term": "Token-usage tracking", "definition": "Recording how many prompt and completion tokens each AI call consumes, the direct basis for cost visibility and optimization." },
+        { "term": "Cost optimization", "definition": "Deliberately reducing AI spend via model choice, prompt size, caching, or batching, without unacceptably harming quality." },
+        { "term": "Prompt caching", "definition": "Reusing a previously computed result for an identical or near-identical prompt instead of paying for a new model call." },
+        { "term": "Model tiering", "definition": "Routing different requests to different-cost models based on task difficulty, using cheaper models where they suffice." },
+        { "term": "Token budget", "definition": "A planned or enforced limit on how many tokens a feature, user, or time window may consume." },
+        { "term": "Prompt and response logging", "definition": "Capturing prompt and completion content, as distinct from metadata, for debugging or audit, under strict access and retention controls." },
+        { "term": "Redaction", "definition": "Removing or masking sensitive content from logged data before it is stored, to reduce exposure risk." },
+        { "term": "p95 latency", "definition": "The response time below which 95% of requests complete; a standard way to describe typical worst-case latency, ignoring rare outliers." },
+        { "term": "Time to first token", "definition": "The delay between sending a request and receiving the first piece of a streamed response — the metric users actually perceive as responsiveness." },
+        { "term": "Rate limit", "definition": "A cap on how many requests or tokens a deployment may process in a given time window, enforced by the model provider." },
+        { "term": "Throttling", "definition": "A provider or application actively slowing or rejecting requests once a rate limit is approached or exceeded." },
+        { "term": "HTTP 429", "definition": "The status code returned when a rate limit has been exceeded, signaling the caller should back off and retry later." },
+        { "term": "Quota", "definition": "The total rate-limit allowance assigned to a deployment or subscription, which can typically be requested to be increased." },
+        { "term": "Operational dashboard", "definition": "A visual, near-real-time summary of a system's key operational metrics used to monitor health and spot problems quickly." },
+        { "term": "SLO", "definition": "Service Level Objective: a target value for a metric, like p95 latency or error rate, that a team commits to meeting." },
+        { "term": "Cost per request", "definition": "The average or per-transaction spend on model calls, a key unit-economics metric for an AI feature." },
+        { "term": "Anomaly detection", "definition": "Automatically identifying when a metric's behavior deviates unexpectedly from its normal pattern, often triggering an alert." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Token-usage tracking, broken down by feature and user, is the foundation cost-optimization, dashboards, and budget planning all build on.",
+          "Cost-optimization techniques — model tiering, prompt caching, prompt size reduction, token budgets — trade quality or freshness risk for savings and must be validated against tutorial 22's evaluation practice, not adopted on cost grounds alone.",
+          "Logging prompts and responses safely means metadata-only by default, with a scoped, redacted, short-retention debug mechanism as the deliberate exception, extending tutorial 24's privacy rules operationally.",
+          "Performance monitoring for AI calls needs p95 latency and time to first token specifically, not just averages, since both reveal what averages hide or miss entirely for streaming responses.",
+          "Rate limits and throttling need ongoing trend monitoring (429 frequency, quota headroom) as a leading indicator, distinct from and complementary to tutorial 13's per-request retry logic.",
+          "Operational dashboards tie every subtopic together into one daily operating picture — but only provide real value when someone owns them and acts on what they show."
+        ] },
+        { "type": "paragraph", "text": "You now have the day-to-day operational discipline that keeps a deployed AI system economical, safe to debug, genuinely fast (not just fast-on-average), and ahead of its own rate limits — the practice that turns tutorial 23's deployed system into one a team can actually run sustainably over time. With cost, logging, performance, and capacity all under active management, the course turns next to the deeper question these dashboards can only partially answer: how do you actually evaluate whether an AI system's responses are good, not just fast and affordable?" }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Next tutorial: AI Evaluation and Response Quality (ai-evaluation-response-quality). Having covered the operational metrics — cost, latency, reliability — that dashboards can measure automatically, the next tutorial goes deeper into evaluating something dashboards can't measure by themselves: whether an AI system's actual responses are good, building further on tutorial 22's evaluation foundation." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: add feature-tagged token telemetry to an existing project and identify one genuine model-tiering opportunity using the resulting breakdown.",
+          "Practice: implement the scoped, redacted debug-logging mechanism and verify it captures nothing when disabled and only redacted content when enabled.",
+          "Practice: instrument time to first token separately from total completion time on a streaming endpoint and compare the two numbers on real traffic.",
+          "Practice: build the four-tile operational dashboard from the walkthrough and identify one real, actionable finding purely from what it shows.",
+          "Read: the official documentation for 'Application Insights custom metrics', 'Azure Monitor alerts and anomaly detection', and any current guidance on Azure OpenAI quota management and rate limits."
+        ] },
+        { "type": "note", "style": "tip", "text": "Keep your dashboard and token-tracking telemetry running. The next tutorial's response-quality evaluation is a different question from cost and performance, but a mature team tracks both side by side — a cheap, fast, wrong answer is not actually a win." }
+      ]
+    }
+  ]
+}
