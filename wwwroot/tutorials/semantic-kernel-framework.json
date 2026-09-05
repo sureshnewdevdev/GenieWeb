@@ -1,0 +1,581 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Semantic Kernel Framework",
+  "slug": "semantic-kernel-framework",
+  "level": "Intermediate",
+  "codeLanguage": "C#",
+  "tutorialNumber": 17,
+  "totalTutorials": 27,
+  "prev": "azure-ai-foundry",
+  "next": "semantic-kernel-advanced",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Semantic Kernel Framework"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "Semantic Kernel architecture",
+    "Prompt engineering with Semantic Kernel",
+    "Plugins and skills",
+    "Memory and embeddings",
+    "Building a Semantic Kernel-based assistant",
+    "Integrating an enterprise API as a skill",
+    "Memory-based context retrieval"
+  ],
+  "tooltips": {
+    "Semantic Kernel": "An open-source .NET (and Python) SDK for orchestrating AI: it connects models, prompts, plugins, and memory into applications with automatic function calling.",
+    "kernel": "The central Semantic Kernel object that holds configured services (models) and plugins and runs prompts and functions through them.",
+    "plugin": "A named group of related functions the kernel can use — the modern term for what earlier Semantic Kernel called a skill.",
+    "skill": "The original Semantic Kernel term for a plugin: a container of functions the AI can call; now generally called a plugin.",
+    "kernel function": "A single callable unit in a plugin — either native C# code or a prompt template — that the kernel can invoke.",
+    "native function": "A kernel function implemented as annotated C# code, letting the model call real application logic like a database query or an API call.",
+    "prompt function": "A kernel function defined by a prompt template rather than code — a reusable, parameterized instruction to the model.",
+    "prompt template": "A parameterized prompt string with placeholders (e.g. {{$input}}) that the kernel fills in before sending it to the model.",
+    "automatic function calling": "A Semantic Kernel setting where the kernel runs the whole function-calling loop for you — the model picks functions, the kernel executes them and feeds results back.",
+    "KernelArguments": "The key/value bag of inputs passed into a kernel function invocation, filling template placeholders and native-function parameters.",
+    "semantic memory": "Semantic Kernel's abstraction for storing and recalling text by meaning using embeddings and a vector store.",
+    "embedding": "A numeric vector capturing the meaning of text so similar texts sit close together — the basis of semantic memory recall.",
+    "memory store": "The backing vector store behind semantic memory (in-memory, Azure AI Search, etc.) that holds embeddings and returns nearest matches.",
+    "memory-based context retrieval": "Recalling relevant remembered text by semantic similarity and injecting it into the prompt — the RAG pattern expressed through Semantic Kernel memory.",
+    "connector": "A Semantic Kernel adapter to a specific model or store provider (Azure OpenAI chat, an embedding model, a vector database).",
+    "planner": "A Semantic Kernel component that asks the model to compose available functions into a multi-step plan toward a goal.",
+    "orchestration": "Coordinating models, prompts, functions, and memory into a working application flow — Semantic Kernel's core purpose.",
+    "dependency injection": "The .NET pattern of supplying a class its dependencies; the kernel and its services register in the DI container like any other service.",
+    "enterprise API": "An internal backend service (inventory, ticketing, HR) that a native function wraps as a skill, so the model can invoke real business operations safely."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview: From Hand-Wiring to Orchestration",
+      "content": [
+        { "type": "paragraph", "text": "In tutorial 12 you wrote the function-calling loop by hand: define tools with JSON schemas, detect tool-call finish reasons, execute functions, append tool messages, and loop until the model produced an answer. In tutorial 15 you wired retrieval into a prompt by hand. That manual work taught you exactly what happens under the hood — and now Semantic Kernel lets you stop writing it. Semantic Kernel is an open-source .NET SDK for orchestrating AI: it connects models, prompts, plugins, and memory into an application, and it runs the function-calling loop for you with automatic function calling." },
+        { "type": "paragraph", "text": "This tutorial covers Semantic Kernel end to end at an intermediate level: its architecture (the kernel, connectors, plugins, and memory); prompt engineering with reusable prompt templates; plugins and skills as containers of callable functions; semantic memory built on embeddings; building a working Semantic Kernel-based assistant; integrating an enterprise API as a skill so the model can reach real systems; and memory-based context retrieval, which is the RAG pattern from tutorial 15 expressed through the framework. Everything sits comfortably on the Azure OpenAI deployments and Azure AI Foundry project from earlier tutorials." },
+        { "type": "note", "style": "info", "text": "Semantic Kernel does not replace what you learned — it embodies it. Every convenience here maps to a mechanism you already built by hand, which is exactly why you will read the framework as shortcuts rather than magic." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Describe the Semantic Kernel architecture: the kernel, connectors, plugins, kernel functions, and memory.",
+          "Do prompt engineering with reusable prompt templates and KernelArguments instead of inline strings.",
+          "Build plugins (skills) containing native functions and prompt functions the kernel can call.",
+          "Use semantic memory and embeddings to store and recall text by meaning.",
+          "Build a Semantic Kernel-based assistant that answers using automatic function calling.",
+          "Integrate an enterprise API as a skill so the model can invoke real backend operations safely.",
+          "Implement memory-based context retrieval — the RAG pattern via Semantic Kernel memory."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorial 12: function calling and tools — the manual loop Semantic Kernel automates.",
+          "Tutorial 11 and 15: embeddings, vectors, and the RAG retrieve-augment-generate pattern.",
+          "Tutorials 13–14: IChatService, dependency injection, and clean layering — Semantic Kernel registers in DI the same way.",
+          "An Azure OpenAI chat deployment and an embedding deployment (text-embedding-3-small), configured via user secrets or a Foundry connection."
+        ] },
+        { "type": "note", "style": "tip", "text": "Add the Microsoft.SemanticKernel NuGet package to a console project to follow along. Keep tutorial 12's order-assistant idea in mind — you will rebuild it here in a fraction of the code." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "Key Concepts: The Kernel and Its Parts",
+      "content": [
+        { "type": "paragraph", "text": "Semantic Kernel's job is orchestration — coordinating models, prompts, functions, and memory into a working flow — and its parts are few. The kernel is the center: a container that holds configured AI services (via connectors) and plugins, and runs prompts and functions through them. A connector adapts the kernel to a provider — an Azure OpenAI chat model, an embedding model, a vector store. A plugin (historically called a skill) is a named group of related kernel functions. A kernel function is one callable unit, either a native function (C# code) or a prompt function (a prompt template). And semantic memory stores and recalls text by meaning using embeddings and a memory store." },
+        { "type": "table", "headers": ["Part", "What it is", "You met it before as"], "rows": [
+          ["Kernel", "The orchestrator holding services and plugins", "Your composition of client + logic"],
+          ["Connector", "Adapter to a model or store provider", "The Azure OpenAI client / search client"],
+          ["Plugin (skill)", "A group of callable functions", "A tool set from tutorial 12"],
+          ["Native function", "A kernel function backed by C# code", "A tool implementation (tutorial 12)"],
+          ["Prompt function", "A kernel function backed by a prompt template", "A hand-built prompt string"],
+          ["Semantic memory", "Store/recall text by meaning via embeddings", "The RAG index (tutorial 15)"]
+        ] },
+        { "type": "paragraph", "text": "The unifying idea is that Semantic Kernel treats prompts and code as the same kind of thing: both are kernel functions the kernel can call, compose, and — with automatic function calling — let the model choose among. That uniformity is what turns the scattered mechanics of earlier tutorials into one coherent programming model. Register the kernel in dependency injection like any other service, and your application orchestrates AI the same disciplined way it does everything else." },
+        { "type": "note", "style": "info", "text": "Terminology note: 'skill' was the original name; 'plugin' is the current term. You will see both in documentation and older code — they mean the same thing: a container of kernel functions." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Deep Dive 1: Architecture and Prompt Engineering",
+      "content": [
+        { "type": "paragraph", "text": "You build a kernel with a builder, adding connectors for the services you need. Once built, the kernel can invoke functions — including prompt functions, which is where prompt engineering with Semantic Kernel lives. Instead of concatenating strings inline, you define a prompt template: a parameterized instruction with placeholders like {{$input}} that the kernel fills from KernelArguments before sending to the model. A prompt template is reusable, testable, and separable from code — the same maturity leap that DTOs brought to web contracts, now for prompts." },
+        { "type": "code", "language": "csharp", "title": "Building a kernel and invoking a prompt function", "code": [
+          "using Microsoft.SemanticKernel;",
+          "",
+          "// Build the kernel with an Azure OpenAI chat connector.",
+          "IKernelBuilder builder = Kernel.CreateBuilder();",
+          "builder.AddAzureOpenAIChatCompletion(",
+          "    deploymentName: \"gpt-4o-mini\",",
+          "    endpoint: endpoint,",
+          "    apiKey: apiKey);          // or use a Foundry connection / Managed Identity",
+          "Kernel kernel = builder.Build();",
+          "",
+          "// A reusable prompt template with a placeholder.",
+          "var summarize = kernel.CreateFunctionFromPrompt(",
+          "    \"Summarize the following text in one sentence:\\n{{$input}}\");",
+          "",
+          "// Invoke it, filling the placeholder from KernelArguments.",
+          "FunctionResult result = await kernel.InvokeAsync(summarize,",
+          "    new KernelArguments { [\"input\"] = longText });",
+          "Console.WriteLine(result);"
+        ] },
+        { "type": "animation", "title": "How the kernel invokes a function", "intro": "One InvokeAsync call, from arguments to model result.", "nodes": [
+          { "id": "app", "label": "App", "sub": "InvokeAsync" },
+          { "id": "args", "label": "KernelArguments", "sub": "fill placeholders" },
+          { "id": "tmpl", "label": "Prompt template", "sub": "rendered prompt" },
+          { "id": "conn", "label": "Connector", "sub": "Azure OpenAI" },
+          { "id": "res", "label": "FunctionResult", "sub": "back to app" }
+        ], "steps": [
+          { "highlight": ["app"], "caption": "The app calls kernel.InvokeAsync with a function and KernelArguments." },
+          { "highlight": ["args", "tmpl"], "caption": "The kernel renders the prompt template, substituting placeholders like {{$input}} from the arguments." },
+          { "highlight": ["conn"], "caption": "The rendered prompt goes through the configured connector to the Azure OpenAI deployment." },
+          { "highlight": ["res"], "caption": "The model's output is wrapped in a FunctionResult and returned — the same shape whether the function was a prompt or native code." }
+        ] },
+        { "type": "paragraph", "text": "Prompt functions can be created inline (as above), loaded from files, or organized into plugins so a set of prompts ships as a unit. The payoff of templating is the same discipline the course has stressed throughout: prompts become named, versioned, reviewable artifacts with explicit inputs, instead of string literals scattered through business logic. And because a prompt function and a native function are both just kernel functions, they compose together seamlessly." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Deep Dive 2: Plugins, Skills, and Automatic Function Calling",
+      "content": [
+        { "type": "paragraph", "text": "A plugin (skill) is how you give the kernel capabilities. A native function is a plain C# method annotated so the kernel — and the model — understand it: [KernelFunction] marks it callable, and [Description] tells the model what it does and what its parameters mean. This is the same information you wrote as a JSON schema by hand in tutorial 12, but now generated automatically from your method signature and attributes. You group related functions into a class and add it to the kernel as a plugin." },
+        { "type": "code", "language": "csharp", "title": "A native-function plugin (the tutorial-12 tool, far less code)", "code": [
+          "using System.ComponentModel;",
+          "using Microsoft.SemanticKernel;",
+          "",
+          "public sealed class OrderPlugin",
+          "{",
+          "    [KernelFunction, Description(\"Gets the status and delivery estimate of a customer order by its order number.\")]",
+          "    public async Task<string> GetOrderStatus(",
+          "        [Description(\"The order number, e.g. ORD-1042\")] string orderNumber)",
+          "    {",
+          "        // Validate, then call the real backend/repository (tutorial 12's discipline).",
+          "        if (!orderNumber.StartsWith(\"ORD-\")) return \"{\\\"error\\\":\\\"invalid order number\\\"}\";",
+          "        OrderStatus? s = await OrderRepository.FindAsync(orderNumber);",
+          "        return s is null ? \"{\\\"error\\\":\\\"not found\\\"}\"",
+          "                         : $\"{{\\\"stage\\\":\\\"{s.Stage}\\\",\\\"eta\\\":\\\"{s.Eta}\\\"}}\";",
+          "    }",
+          "}",
+          "",
+          "// Register the plugin on the kernel.",
+          "kernel.Plugins.AddFromType<OrderPlugin>();"
+        ] },
+        { "type": "paragraph", "text": "With plugins registered, automatic function calling is the headline convenience. Enable it in the execution settings, and the kernel runs the entire function-calling loop you wrote manually in tutorial 12: it advertises the plugin functions to the model, detects when the model wants to call one, executes the native function, feeds the result back, and repeats until the model produces a final answer — all inside one call. The tool-call finish reason, the assistant/tool message bookkeeping, the loop: gone from your code, handled by the framework." },
+        { "type": "animation", "title": "Automatic function calling in Semantic Kernel", "intro": "The loop from tutorial 12, now run by the kernel.", "nodes": [
+          { "id": "ask", "label": "User ask", "sub": "one call" },
+          { "id": "model", "label": "Model", "sub": "picks a function" },
+          { "id": "kernel", "label": "Kernel", "sub": "runs the loop" },
+          { "id": "fn", "label": "Native function", "sub": "your C# code" },
+          { "id": "answer", "label": "Answer", "sub": "grounded reply" }
+        ], "steps": [
+          { "highlight": ["ask"], "caption": "You make one InvokeAsync/GetChatMessageContent call with automatic function calling enabled." },
+          { "highlight": ["model"], "caption": "The kernel advertises the plugin's functions; the model decides GetOrderStatus is needed and requests it with arguments." },
+          { "highlight": ["kernel", "fn"], "caption": "The kernel — not your code — executes the native function, validating and calling the backend, and captures the result." },
+          { "highlight": ["kernel", "model"], "caption": "The kernel feeds the result back to the model automatically and lets it continue, looping if more calls are needed." },
+          { "highlight": ["answer"], "caption": "The model returns a final grounded answer. The entire tutorial-12 loop happened inside the framework." }
+        ] },
+        { "type": "note", "style": "warning", "text": "Automation does not remove responsibility. The safety discipline from tutorial 12 still applies inside each native function: validate arguments, authorize as the user, keep actions idempotent, and return structured errors. The kernel runs the loop; it does not vouch for your functions." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Deep Dive 3: Memory, Embeddings, and Context Retrieval",
+      "content": [
+        { "type": "paragraph", "text": "Semantic memory is Semantic Kernel's abstraction for storing and recalling text by meaning. You add an embedding connector and a memory store (in-memory for demos, or a vector database like Azure AI Search for production), then save pieces of text; the kernel embeds each into a vector and stores it. Later you recall by a query, and the kernel embeds the query, finds the nearest vectors in the memory store, and returns the most semantically relevant saved texts. If this sounds exactly like tutorial 15's retrieval, that is because it is — semantic memory is the RAG retrieval step wrapped in a framework abstraction." },
+        { "type": "code", "language": "csharp", "title": "Saving to and recalling from semantic memory (illustrative)", "code": [
+          "// Configure memory with an embedding connector and a store.",
+          "// (Exact memory API names vary by SK version — see section 13.)",
+          "var memory = new SemanticTextMemory(memoryStore, embeddingGenerator);",
+          "",
+          "// Save facts; each is embedded and stored by meaning.",
+          "await memory.SaveInformationAsync(\"policies\", id: \"refund\",",
+          "    text: \"Refunds are available within 30 days of purchase with a receipt.\");",
+          "await memory.SaveInformationAsync(\"policies\", id: \"shipping\",",
+          "    text: \"Standard shipping takes 3-5 business days.\");",
+          "",
+          "// Recall by meaning — 'get my money back' finds the refund policy.",
+          "await foreach (var hit in memory.SearchAsync(\"policies\",",
+          "        \"how do I get my money back?\", limit: 2, minRelevanceScore: 0.7))",
+          "{",
+          "    Console.WriteLine($\"{hit.Metadata.Id}: {hit.Metadata.Text} ({hit.Relevance:F2})\");",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "Memory-based context retrieval combines the two ideas: recall the relevant remembered text for a question and inject it into the prompt before the model answers. You can do this explicitly — search memory, then pass the results as an argument to a grounded prompt function — or through plugins that make recall a function the model can call. Either way, the retrieve-augment-generate flow of tutorial 15 is preserved; Semantic Kernel just gives it named parts (memory, connectors, prompt functions) and removes the plumbing. For production, back the memory store with Azure AI Search so you get the hybrid search and scale of tutorial 15 beneath the framework abstraction." },
+        { "type": "note", "style": "info", "text": "Semantic memory and a full RAG pipeline are not competitors: memory is a convenient front-end, and Azure AI Search can be the store behind it. Choose the abstraction level you need — memory for simplicity, direct search when you want full control of hybrid queries and ranking." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Deep Dive 4: Building an Assistant & Integrating an Enterprise API as a Skill",
+      "content": [
+        { "type": "paragraph", "text": "Putting the parts together yields a Semantic Kernel-based assistant with strikingly little code. Build a kernel with a chat connector, register your plugins, enable automatic function calling, and invoke with the user's message — the kernel orchestrates prompts, function calls, and (if configured) memory recall to produce the answer. What was a 1,600-line hand-rolled controller in spirit becomes a kernel, a plugin class, and a few lines of setup." },
+        { "type": "code", "language": "csharp", "title": "A minimal assistant with automatic function calling", "code": [
+          "using Microsoft.SemanticKernel;",
+          "using Microsoft.SemanticKernel.Connectors.OpenAI;",
+          "",
+          "IKernelBuilder builder = Kernel.CreateBuilder();",
+          "builder.AddAzureOpenAIChatCompletion(\"gpt-4o-mini\", endpoint, apiKey);",
+          "Kernel kernel = builder.Build();",
+          "kernel.Plugins.AddFromType<OrderPlugin>();          // native functions",
+          "",
+          "// Let the model choose and the kernel run functions automatically.",
+          "var settings = new OpenAIPromptExecutionSettings",
+          "{",
+          "    ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions",
+          "};",
+          "",
+          "FunctionResult answer = await kernel.InvokePromptAsync(",
+          "    \"Where is my order ORD-1042?\",",
+          "    new KernelArguments(settings));",
+          "Console.WriteLine(answer);   // grounded in the order backend, loop handled for you"
+        ] },
+        { "type": "paragraph", "text": "Integrating an enterprise API as a skill is the pattern that makes this valuable in the real world. Wrap a call to an internal service — an inventory API, a ticketing system, an HR service — in a native function inside a plugin, annotate it with a clear description, and register it. Now the model can invoke that enterprise system through the kernel whenever a user's request calls for it, with your code owning authentication, validation, and error handling around the actual HTTP call. The skill is the safe, described boundary between the model's intent and your backend." },
+        { "type": "code", "language": "csharp", "title": "Wrapping an enterprise API as a skill (native function)", "code": [
+          "public sealed class InventoryPlugin",
+          "{",
+          "    private readonly HttpClient _http;   // injected, points at the internal API",
+          "    public InventoryPlugin(HttpClient http) => _http = http;",
+          "",
+          "    [KernelFunction, Description(\"Checks available stock for a product SKU in the warehouse.\")]",
+          "    public async Task<string> CheckStock(",
+          "        [Description(\"The product SKU, e.g. SKU-8842\")] string sku,",
+          "        CancellationToken ct = default)",
+          "    {",
+          "        // Your code owns auth, validation, and error handling around the real call.",
+          "        if (string.IsNullOrWhiteSpace(sku)) return \"{\\\"error\\\":\\\"sku required\\\"}\";",
+          "        using var resp = await _http.GetAsync($\"/inventory/{sku}\", ct);",
+          "        if (!resp.IsSuccessStatusCode) return \"{\\\"error\\\":\\\"inventory service unavailable\\\"}\";",
+          "        return await resp.Content.ReadAsStringAsync(ct);   // compact JSON back to the model",
+          "    }",
+          "}",
+          "",
+          "// Registered like any plugin; created via DI so HttpClient is injected.",
+          "kernel.Plugins.AddFromType<InventoryPlugin>(serviceProvider: kernel.Services);"
+        ] },
+        { "type": "note", "style": "tip", "text": "Because plugins are created through the DI container, a native function can depend on injected services — HttpClient, a repository, IChatService — exactly like any other class. That is how an enterprise skill gets safe, testable access to real systems." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Ecosystem and Tools",
+      "content": [
+        { "type": "table", "headers": ["Piece", "Role"], "rows": [
+          ["Microsoft.SemanticKernel (NuGet)", "The core SDK: kernel, plugins, prompt functions, execution settings"],
+          ["Connectors (Azure OpenAI, OpenAI, etc.)", "Adapters wiring the kernel to chat and embedding models"],
+          ["Memory connectors (Azure AI Search, in-memory, Redis, etc.)", "Backing vector stores for semantic memory"],
+          ["[KernelFunction] / [Description] attributes", "Turn C# methods into model-callable native functions with auto-generated schemas"],
+          ["Prompt templates / prompt functions", "Reusable, parameterized prompts as first-class functions"],
+          ["Planners", "Compose available functions into multi-step plans (covered further in tutorial 18)"],
+          ["Dependency injection integration", "The kernel and plugins register in the .NET DI container like any service"],
+          ["Azure AI Foundry", "Provides the deployments and connections the kernel's connectors target"]
+        ] },
+        { "type": "paragraph", "text": "Semantic Kernel is the orchestration layer that ties this course's building blocks together: it calls the Azure OpenAI deployments from tutorial 10, uses the embeddings of tutorial 11, automates the function calling of tutorial 12, registers in the DI of tutorial 13, and can use Azure AI Search from tutorial 15 as its memory store — all reachable through Foundry from tutorial 16. The advanced planner-and-agent capabilities are the subject of the next tutorial; this one establishes the framework's core so those build cleanly on top." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "Use Cases",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Order/support assistant: rebuild tutorial 12's assistant with an OrderPlugin and automatic function calling, in a fraction of the code and with the loop maintained for you.",
+          "Enterprise system copilot: wrap inventory, ticketing, or HR APIs as skills so one assistant can act across internal systems through described, guarded functions.",
+          "Grounded knowledge bot: use semantic memory (backed by Azure AI Search) for memory-based context retrieval, answering from company documents.",
+          "Reusable prompt library: package prompt functions (summarize, classify, extract) as plugins shared across applications with explicit inputs.",
+          "Mixed prompt-and-code workflows: compose prompt functions and native functions in one flow — e.g. extract fields with a prompt function, then act on them with a native function.",
+          "Multi-capability agent foundation: register several plugins and let automatic function calling coordinate them — the stepping stone to the planners and agents of tutorial 18.",
+          "Model-agnostic apps: swap the connector to change providers without rewriting orchestration logic."
+        ] },
+        { "type": "paragraph", "text": "The common thread is orchestration: whenever an application needs to coordinate a model with real functions, reusable prompts, and remembered knowledge, Semantic Kernel provides the structure so you write intent, not plumbing. The more capabilities an assistant must juggle, the more the framework earns its place." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples",
+      "content": [
+        { "type": "paragraph", "text": "These examples assemble the pieces: a kernel with chat and embedding connectors registered in DI, a plugin, automatic function calling, and memory-based retrieval — the full framework surface for a grounded, tool-using assistant." },
+        { "type": "code", "language": "csharp", "title": "Example 1 — Registering the kernel in dependency injection", "code": [
+          "using Microsoft.SemanticKernel;",
+          "",
+          "// The kernel registers like any service; consumers inject Kernel.",
+          "builder.Services.AddKernel()",
+          "    .AddAzureOpenAIChatCompletion(\"gpt-4o-mini\", endpoint, apiKey)",
+          "    .AddAzureOpenAITextEmbeddingGeneration(\"text-embedding-3-small\", endpoint, apiKey);",
+          "",
+          "// Register plugins so every resolved kernel has them.",
+          "builder.Services.AddSingleton<OrderPlugin>();",
+          "builder.Services.AddSingleton<InventoryPlugin>();"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 2 — A grounded prompt function fed by memory recall", "code": [
+          "// A reusable grounded prompt function: answer only from provided context.",
+          "var answerFromContext = kernel.CreateFunctionFromPrompt(",
+          "    \"\"\"",
+          "    Answer the question using ONLY the context. Cite nothing outside it.",
+          "    If the context lacks the answer, say you don't know.",
+          "",
+          "    Context:",
+          "    {{$context}}",
+          "",
+          "    Question: {{$question}}",
+          "    \"\"\");",
+          "",
+          "// Retrieve context from semantic memory, then invoke the function.",
+          "var recalled = new List<string>();",
+          "await foreach (var hit in memory.SearchAsync(\"policies\", question, limit: 3, minRelevanceScore: 0.7))",
+          "    recalled.Add(hit.Metadata.Text);",
+          "",
+          "FunctionResult grounded = await kernel.InvokeAsync(answerFromContext, new KernelArguments",
+          "{",
+          "    [\"context\"] = string.Join(\"\\n\", recalled),",
+          "    [\"question\"] = question",
+          "});",
+          "Console.WriteLine(grounded);"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 3 — One assistant call combining functions and memory", "code": [
+          "using Microsoft.SemanticKernel.ChatCompletion;",
+          "using Microsoft.SemanticKernel.Connectors.OpenAI;",
+          "",
+          "// Automatic function calling lets the model use OrderPlugin + InventoryPlugin,",
+          "// while a memory-recall step (or a memory plugin) supplies grounding context.",
+          "var chat = kernel.GetRequiredService<IChatCompletionService>();",
+          "var history = new ChatHistory(\"You are an assistant. Use functions for live data; \" +",
+          "                              \"answer policy questions from provided context; never invent details.\");",
+          "history.AddUserMessage(userMessage);",
+          "",
+          "var settings = new OpenAIPromptExecutionSettings",
+          "{",
+          "    ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,",
+          "    Temperature = 0.2",
+          "};",
+          "",
+          "ChatMessageContent reply = await chat.GetChatMessageContentAsync(history, settings, kernel);",
+          "Console.WriteLine(reply.Content);   // functions + memory orchestrated by the kernel"
+        ] }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step by Step: A Semantic Kernel Assistant",
+      "content": [
+        { "type": "paragraph", "text": "This walkthrough rebuilds the order/support assistant on Semantic Kernel, adds an enterprise skill, and grounds policy answers with semantic memory — the whole framework surface in one project." },
+        { "type": "list", "style": "numbered", "items": [
+          "Create a console project and add Microsoft.SemanticKernel plus the Azure OpenAI connector package.",
+          "Build a kernel with an Azure OpenAI chat connector (deployment, endpoint, credential from user secrets or a Foundry connection), and add an embedding connector for memory.",
+          "Write OrderPlugin: a native function GetOrderStatus annotated with [KernelFunction] and [Description], validating input and calling your order repository — the tutorial-12 tool, minus the JSON schema you no longer hand-write.",
+          "Write InventoryPlugin wrapping an internal inventory API in a native function CheckStock, taking HttpClient via DI so your code owns auth and error handling around the real call.",
+          "Register both plugins on the kernel (AddFromType), and enable automatic function calling via ToolCallBehavior.AutoInvokeKernelFunctions in the execution settings.",
+          "Ask 'Where is my order ORD-1042?' and confirm the kernel runs the whole function-calling loop — model picks GetOrderStatus, kernel executes it, model answers — without any loop code from you.",
+          "Set up semantic memory: an embedding connector plus a memory store (in-memory to start), and SaveInformationAsync a few policy statements (refund, shipping, returns).",
+          "Add memory-based context retrieval: for a policy question, SearchAsync the memory, pass the hits as {{$context}} to a grounded prompt function, and confirm the answer is grounded and refuses when the context lacks it.",
+          "Ask a mixed question ('Is SKU-8842 in stock and what's the refund policy?') and watch functions and memory combine in one orchestrated answer.",
+          "Compare with tutorial 12: note how much loop, schema, and message bookkeeping disappeared, and confirm the safety disciplines (validation, structured errors) still live inside your native functions.",
+          "Production step: swap the in-memory store for an Azure AI Search-backed memory store so recall uses real hybrid search at scale, unchanged above the memory abstraction."
+        ] },
+        { "type": "note", "style": "tip", "text": "Log which functions the kernel invoked and with what arguments (Semantic Kernel exposes hooks/filters for this). It is the same visibility you built manually in tutorial 12's trace logging — indispensable for understanding what the model decided." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "SDK evolution caveat: Semantic Kernel has moved quickly and its APIs have changed across versions — memory abstractions especially (ISemanticTextMemory, memory connectors, and newer vector-store abstractions) have been reworked, and execution-settings names (ToolCallBehavior vs newer function-choice settings) differ by version. The examples are correct in shape and intent; verify exact types and members against the installed package.",
+          "Automation hides the loop, not the responsibility: automatic function calling runs the tutorial-12 loop for you, but validation, authorization, idempotency, and structured errors must still live inside every native function. The kernel does not vet your code.",
+          "Automatic function calling costs tokens and rounds like the manual loop: every advertised function's description is prompt tokens, and each round is a model call. Keep plugins few and sharply described, and cap behavior where the SDK allows.",
+          "Semantic memory is convenient but abstracts away control: for demanding retrieval you may want direct Azure AI Search with explicit hybrid queries and ranking (tutorial 15) rather than the memory front-end.",
+          "The framework is orchestration, not intelligence: a poorly described plugin or a vague prompt template fails the same way the hand-rolled versions did. Good descriptions and prompts remain your job.",
+          "Model choice still matters: automatic function calling depends on a model that supports tools well; weaker deployments choose functions unreliably.",
+          "Debugging shifts: because the kernel runs the loop, understanding failures relies on logging/filters to see which functions were chosen and executed — enable that observability early.",
+          "Lock-in consideration: adopting the framework's abstractions is a trade of control for productivity; it is a sound trade for orchestration-heavy apps, but a one-line completion call needs no kernel at all."
+        ] }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Register the kernel and plugins in DI, and inject Kernel where you need it — treat it like any other service, with the service-layer discipline from tutorial 13.",
+          "Write prompt functions as templates with explicit KernelArguments, not inline strings; version and review them like code.",
+          "Give every native function a precise [Description] and describe each parameter — this replaces the hand-written JSON schema and drives the model's choices.",
+          "Keep the tutorial-12 safety discipline inside native functions: validate, authorize as the user, stay idempotent, return structured errors — automation does not absolve you.",
+          "Keep plugins few and orthogonal; overlapping functions confuse selection and cost tokens, exactly as overlapping tools did in tutorial 12.",
+          "Enable function-invocation logging/filters from the start so you can see which functions the kernel chose and executed.",
+          "Back semantic memory with Azure AI Search for production scale and hybrid retrieval; use in-memory only for demos and tests.",
+          "Reach for the framework when orchestration is real (multiple functions, memory, reusable prompts); use a bare completion call for trivial one-shot prompts."
+        ] },
+        { "type": "table", "headers": ["Common mistake", "Do this instead"], "rows": [
+          ["Inline prompt strings scattered in code", "Prompt functions/templates with named KernelArguments"],
+          ["Assuming automatic function calling makes functions safe", "Keep validation/authorization/idempotency inside each native function"],
+          ["Vague [Description] on a native function", "Precise action + parameter descriptions — they drive model selection"],
+          ["Dozens of overlapping plugin functions", "Few, orthogonal, sharply described functions"],
+          ["In-memory store in production", "Azure AI Search-backed memory for scale and hybrid search"],
+          ["No visibility into function calls", "Enable SK logging/filters to trace chosen functions and arguments"]
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz: Semantic Kernel Framework",
+      "items": [
+        { "number": 1, "question": "What is Semantic Kernel?", "options": { "A": "A single large language model", "B": "An open-source .NET SDK for orchestrating AI — connecting models, prompts, plugins, and memory", "C": "A replacement for Azure OpenAI", "D": "A database engine" }, "correctAnswer": "B", "explanation": "Semantic Kernel is an orchestration SDK: it coordinates models (via connectors), prompts (as prompt functions), plugins/skills (callable functions), and semantic memory into applications, and it can run the function-calling loop automatically." },
+        { "number": 2, "question": "What is the kernel in Semantic Kernel?", "options": { "A": "The operating-system kernel", "B": "The central object holding configured services and plugins that runs prompts and functions", "C": "The embedding model", "D": "A prompt template" }, "correctAnswer": "B", "explanation": "The kernel is the orchestrator: it holds AI services (through connectors) and plugins, and invokes kernel functions — prompt or native — through them. You build it with a builder and register it in DI." },
+        { "number": 3, "question": "What is a plugin (skill) in Semantic Kernel?", "options": { "A": "A billing plan", "B": "A named group of related kernel functions the kernel can use", "C": "A new model version", "D": "A logging provider" }, "correctAnswer": "B", "explanation": "A plugin — historically called a skill — is a container of kernel functions (native or prompt). It is the modern equivalent of a tool set from tutorial 12; 'skill' and 'plugin' mean the same thing." },
+        { "number": 4, "question": "What is the difference between a native function and a prompt function?", "options": { "A": "Native functions are faster to type", "B": "A native function is C# code the kernel calls; a prompt function is a prompt template the kernel renders and sends to the model", "C": "They are the same thing", "D": "Prompt functions run on the GPU" }, "correctAnswer": "B", "explanation": "Both are kernel functions. A native function wraps real C# code (e.g. a backend call); a prompt function wraps a parameterized prompt template. The kernel treats them uniformly, so they compose together." },
+        { "number": 5, "question": "How does a native function tell the model what it does?", "options": { "A": "You hand-write a JSON schema every time", "B": "Via [KernelFunction] and [Description] attributes, from which the schema is generated automatically", "C": "The model guesses from the method name only", "D": "Through a configuration file" }, "correctAnswer": "B", "explanation": "[KernelFunction] marks the method callable and [Description] (on the method and its parameters) tells the model what it does — the same information you wrote as a JSON schema by hand in tutorial 12, now generated from your code." },
+        { "number": 6, "question": "What does automatic function calling do?", "options": { "A": "Writes your functions for you", "B": "Runs the entire function-calling loop — advertise, detect, execute, feed back, repeat — inside the framework", "C": "Removes the need for a model", "D": "Encrypts the functions" }, "correctAnswer": "B", "explanation": "With AutoInvokeKernelFunctions enabled, the kernel performs the whole tutorial-12 loop: it advertises plugin functions, detects the model's calls, executes the native functions, feeds results back, and loops until a final answer — all in one call from your code." },
+        { "number": 7, "question": "What is a prompt template?", "options": { "A": "A compiled binary", "B": "A parameterized prompt with placeholders (e.g. {{$input}}) the kernel fills from KernelArguments before sending it to the model", "C": "A vector index", "D": "A DI container" }, "correctAnswer": "B", "explanation": "A prompt template is a reusable, parameterized instruction; the kernel substitutes placeholders from KernelArguments at invocation. It turns prompts into named, versioned artifacts instead of scattered inline strings." },
+        { "number": 8, "question": "What is semantic memory in Semantic Kernel?", "options": { "A": "The model's context window", "B": "An abstraction for storing and recalling text by meaning using embeddings and a memory store", "C": "A cache of HTTP responses", "D": "The chat history only" }, "correctAnswer": "B", "explanation": "Semantic memory embeds saved text into vectors in a memory store and recalls the most semantically similar entries for a query — the same retrieve-by-meaning mechanism as tutorial 15's RAG, wrapped as a framework abstraction." },
+        { "number": 9, "question": "Memory-based context retrieval in Semantic Kernel is essentially…", "options": { "A": "A brand-new technique unrelated to RAG", "B": "The RAG retrieve-augment-generate pattern expressed through memory recall plus a grounded prompt", "C": "Fine-tuning the model", "D": "Increasing the temperature" }, "correctAnswer": "B", "explanation": "You recall relevant text from semantic memory and inject it into the prompt before generation — exactly RAG's retrieve-augment-generate, with the framework providing named parts (memory, connectors, prompt functions) and removing plumbing." },
+        { "number": 10, "question": "When you integrate an enterprise API as a skill, who owns authentication and validation?", "options": { "A": "The model", "B": "The kernel automatically", "C": "Your code, inside the native function wrapping the API call", "D": "Azure OpenAI" }, "correctAnswer": "C", "explanation": "The native function is the boundary: your code authenticates, validates arguments, calls the real API, handles errors, and returns a compact result. The kernel routes the model's intent to the function but does not secure the backend for you." },
+        { "number": 11, "question": "How do you give a native function access to services like HttpClient or a repository?", "options": { "A": "Hardcode them as static fields", "B": "Register plugins through the DI container so their constructors receive injected dependencies", "C": "Pass them in the prompt", "D": "You cannot; native functions are isolated" }, "correctAnswer": "B", "explanation": "Because plugins are created via dependency injection, a native function's containing class can take dependencies (HttpClient, a repository, IChatService) in its constructor like any service — giving enterprise skills safe, testable access to real systems." },
+        { "number": 12, "question": "Does automatic function calling remove the safety disciplines from tutorial 12?", "options": { "A": "Yes — the kernel makes everything safe", "B": "No — validation, authorization, idempotency, and structured errors still belong inside each native function", "C": "Only for read-only functions", "D": "Only if you use memory" }, "correctAnswer": "B", "explanation": "The kernel runs the loop but does not vouch for your functions. Every native function must still validate arguments, authorize as the user, stay idempotent, and return structured errors — automation of the loop is not automation of safety." },
+        { "number": 13, "question": "For production semantic memory at scale, what should back the memory store?", "options": { "A": "The in-memory store, always", "B": "A vector database like Azure AI Search, for hybrid search and scale", "C": "A plain text file", "D": "The model's context window" }, "correctAnswer": "B", "explanation": "In-memory stores are for demos and tests. Backing semantic memory with Azure AI Search gives you the hybrid retrieval and scale of tutorial 15 beneath the framework's memory abstraction, unchanged in the code above it." },
+        { "number": 14, "question": "What is a connector in Semantic Kernel?", "options": { "A": "A network cable", "B": "An adapter wiring the kernel to a specific model or store provider (Azure OpenAI chat, an embedding model, a vector store)", "C": "A prompt template", "D": "A billing tier" }, "correctAnswer": "B", "explanation": "A connector adapts the kernel to a provider — a chat model, an embedding model, or a memory store. Swapping connectors changes providers without rewriting orchestration logic, which is part of the framework's model-agnostic value." },
+        { "number": 15, "question": "Why does automatic function calling still consume tokens and rounds?", "options": { "A": "It doesn't — it is free", "B": "Because it runs the same loop as the manual version: function descriptions are prompt tokens and each round is a model call", "C": "Because memory is always used", "D": "Because it retrains the model" }, "correctAnswer": "B", "explanation": "Automation hides the loop, not its cost. Every advertised function's description adds prompt tokens, and each iteration is a model call, exactly as in tutorial 12 — so keep plugins few and sharply described." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam: Written Questions",
+      "items": [
+        { "number": 1, "question": "Describe the Semantic Kernel architecture, naming its main parts and what each does.", "modelAnswer": "The architecture centers on the kernel, an orchestrator object that holds configured AI services and plugins and invokes functions through them. Connectors adapt the kernel to providers — an Azure OpenAI chat model, an embedding model, a vector store — so the kernel is model-agnostic. Plugins (formerly skills) are named groups of kernel functions. A kernel function is one callable unit and comes in two forms: a native function backed by annotated C# code, and a prompt function backed by a prompt template. Semantic memory stores and recalls text by meaning using an embedding connector and a memory store. KernelArguments carry inputs into invocations. The unifying idea is that prompts and code are both kernel functions the kernel can call and compose, and with automatic function calling the model can choose among them; the kernel registers in dependency injection like any other service, bringing the course's DI discipline to AI orchestration." },
+        { "number": 2, "question": "Explain how prompt engineering works in Semantic Kernel and why prompt templates are an improvement over inline strings.", "modelAnswer": "Prompt engineering in Semantic Kernel happens through prompt functions built on prompt templates: parameterized instruction strings with placeholders like {{$input}} that the kernel fills from KernelArguments before sending to the model. You create a prompt function inline, from a file, or as part of a plugin, and invoke it with explicit arguments. This improves on inline string concatenation the same way DTOs improved web contracts and the service layer improved SDK access: prompts become named, reusable, versioned, reviewable artifacts with declared inputs, rather than string literals buried in business logic. You can test a prompt function in isolation, share it across applications, and change it in one place. And because a prompt function is just a kernel function — the same type as a native function — it composes seamlessly with code, so a workflow can chain a prompt-based extraction step into a native action step within one orchestration." },
+        { "number": 3, "question": "What are plugins and skills, and how does a native function expose itself to the model compared with tutorial 12's approach?", "modelAnswer": "A plugin (the current term; 'skill' is the original) is a named group of related kernel functions — the modern equivalent of a tool set. A native function is a plain C# method marked with [KernelFunction] to make it callable and [Description] (on the method and each parameter) to explain what it does and what the parameters mean. This is exactly the information you wrote as a JSON schema by hand in tutorial 12 — function name, description, parameter descriptions — but Semantic Kernel generates the schema automatically from the method signature and attributes. So instead of maintaining a separate schema string, you annotate the method and the framework advertises it to the model. You group related native (and prompt) functions into a class and register it as a plugin via AddFromType. The model then selects among these functions by their descriptions, just as it selected among tools before — the description quality still drives selection, so it remains a first-class concern." },
+        { "number": 4, "question": "Explain automatic function calling: what it automates, and what it does not.", "modelAnswer": "Automatic function calling (enabled via ToolCallBehavior.AutoInvokeKernelFunctions or the equivalent function-choice setting) automates the entire function-calling loop you wrote manually in tutorial 12. From one call in your code, the kernel advertises the registered plugin functions to the model, detects when the model requests a function, executes the corresponding native function, feeds the result back to the model, and repeats until the model produces a final answer — the tool-call finish-reason handling, the assistant/tool message bookkeeping, and the loop all move from your code into the framework. What it does not automate is responsibility for the functions themselves. Each native function must still validate its arguments, authorize as the requesting user, remain idempotent, and return structured errors — the kernel routes intent to your code but does not vet it. Nor does it remove cost: every advertised function's description is prompt tokens and each round is a model call, exactly as before, so plugin count and description quality still matter." },
+        { "number": 5, "question": "Explain semantic memory and how memory-based context retrieval relates to RAG from tutorial 15.", "modelAnswer": "Semantic memory is Semantic Kernel's abstraction for storing and recalling text by meaning. You configure an embedding connector and a memory store (in-memory for demos, or a vector database like Azure AI Search for production) and save pieces of text; the kernel embeds each into a vector and stores it. Recall takes a query, embeds it with the same model, finds the nearest vectors in the store, and returns the most semantically relevant saved texts. Memory-based context retrieval combines recall with generation: you recall the relevant remembered text for a question and inject it into the prompt — via a grounded prompt function or a memory plugin — before the model answers. This is precisely tutorial 15's RAG retrieve-augment-generate pattern: recall is retrieval, injecting into the prompt is augmentation, the model's answer is generation. Semantic Kernel adds named parts (memory, connectors, prompt functions) and removes plumbing, but the mechanism is identical, which is why backing the memory store with Azure AI Search gives you the same hybrid search and scale beneath the framework abstraction." },
+        { "number": 6, "question": "Walk through building a Semantic Kernel-based assistant and contrast the effort with the hand-rolled version from tutorial 12.", "modelAnswer": "You build a kernel with a chat connector (deployment, endpoint, credential), register your plugins with AddFromType, enable automatic function calling in the execution settings, and invoke with the user's message; the kernel orchestrates function calls and produces the answer. Adding grounding is registering an embedding connector and a memory store, saving knowledge, and either recalling into a grounded prompt function or exposing recall as a plugin. Contrast with tutorial 12: there you hand-wrote each tool's JSON schema, detected the tool-call finish reason, appended the assistant message and one tool message per call id, executed functions, and looped — plus prompt strings inline. Semantic Kernel removes the schema (generated from attributes), the loop (run by automatic function calling), and the message bookkeeping, and turns prompts into reusable functions. The assistant shrinks to a kernel, a plugin class or two, and a few setup lines. What deliberately does not shrink is the safety logic inside native functions — validation, authorization, idempotency, structured errors — because that is correctness the framework cannot supply. The net effect is far less plumbing and the same, or better, discipline where it counts." },
+        { "number": 7, "question": "Describe how to integrate an enterprise API as a skill and why the native function is the right boundary.", "modelAnswer": "You wrap the API call in a native function inside a plugin: a method marked [KernelFunction] with a clear [Description], taking the parameters the operation needs (each described), and containing the code that authenticates to the internal service, validates inputs, makes the HTTP (or client) call, handles errors, and returns a compact result — typically JSON — to the model. The plugin's class receives its dependencies, like a configured HttpClient or a typed client, through dependency injection, so it has safe, testable access to the real system. Register it with AddFromType and the model can invoke the enterprise operation through the kernel whenever a request calls for it. The native function is the right boundary for several reasons: it is the single place your code controls what actually happens, so authentication and least-privilege live there rather than being trusted to the model; it validates model-produced arguments before they reach the backend, treating them as untrusted input; it translates between the model's intent and the API's real contract; and it returns a shaped, safe result rather than leaking raw internals. In short, the skill is the guarded, described seam between the model's language-level intent and your production systems." },
+        { "number": 8, "question": "What are the main limitations and caveats of adopting Semantic Kernel?", "modelAnswer": "First, SDK evolution: Semantic Kernel has changed quickly, especially its memory abstractions and execution-settings names, so exact types and members must be verified against the installed version rather than trusted from any example. Second, automation hides the loop but not the responsibility: automatic function calling runs the loop, yet validation, authorization, idempotency, and structured errors still must live in each native function. Third, cost is unchanged: advertised function descriptions are prompt tokens and each round is a model call, so plugin count and description quality still matter. Fourth, the memory abstraction trades control for convenience; demanding retrieval may warrant direct Azure AI Search with explicit hybrid queries. Fifth, the framework is orchestration, not intelligence — a vague description or poor prompt fails as it always did. Sixth, model choice still matters: automatic function calling needs a model that handles tools well. Seventh, debugging shifts to logging/filters since the kernel runs the loop, so that observability should be enabled early. Finally, it is a control-for-productivity trade: sound for orchestration-heavy apps, unnecessary for a one-line completion. None of these are reasons to avoid it where orchestration is real; they are the conditions for using it well." },
+        { "number": 9, "question": "How does Semantic Kernel integrate with the dependency injection and clean architecture from earlier tutorials?", "modelAnswer": "It fits the same DI and layering model directly. You register the kernel and its connectors with AddKernel().AddAzureOpenAIChatCompletion(...).AddAzureOpenAITextEmbeddingGeneration(...), and register plugin classes as services so every resolved kernel has them; consumers inject Kernel (or a service that wraps it) rather than constructing anything inline — the same composition-root discipline as the singleton AzureOpenAIClient in tutorial 13. Native functions gain dependencies through the container, so an enterprise skill takes an HttpClient or repository by constructor injection like any class, keeping it testable. Architecturally, the kernel and plugins belong at the infrastructure/application edge behind the domain-facing abstraction from tutorial 13: you can keep IChatService (or a similar interface) as the boundary the web layer depends on, implemented now via the kernel instead of raw SDK calls — so, exactly as tutorial 16 noted for Foundry, switching the implementation to Semantic Kernel is a localized change and the controllers, DTOs, streaming, and error handling from tutorial 14 stay untouched. The framework does not bypass clean architecture; it slots into it as another well-behaved service." },
+        { "number": 10, "question": "When should you use Semantic Kernel, and when is it unnecessary overhead?", "modelAnswer": "Use it when orchestration is genuinely the problem: you have multiple functions the model should choose among, reusable prompts worth templating, memory/retrieval to coordinate, or a workflow mixing prompt steps and code steps — in short, when you would otherwise hand-write the function-calling loop, prompt plumbing, and memory glue. There the framework replaces real boilerplate with structure, gives you a model-agnostic connector layer, and scales toward the planners and agents of the next tutorial. It is unnecessary overhead for a single one-shot prompt to a known model — a bare chat completion call (tutorial 11) is simpler and adds no kernel, plugins, or execution settings. The judgment mirrors the Foundry decision from tutorial 16: match the tool to the scope. A useful test is to count the moving parts you are orchestrating — one prompt and no functions leans bare-API; several functions, memory, and reusable prompts lean Semantic Kernel. And because model access should sit behind a service abstraction anyway, you can start bare and adopt the framework when orchestration needs actually appear, changing one implementation rather than the whole app." },
+        { "number": 11, "question": "Explain the claim that Semantic Kernel 'treats prompts and code as the same kind of thing,' and why that matters.", "modelAnswer": "In Semantic Kernel both a prompt (a prompt function built on a template) and a piece of C# code (a native function) are instances of the same abstraction: a kernel function, invoked the same way and returning the same FunctionResult shape. This uniformity matters because it collapses two things that were separate in earlier tutorials — hand-built prompt strings and hand-built tool implementations — into one composable programming model. Practically, you can chain them: a prompt function extracts structured fields from free text, and its output feeds a native function that acts on those fields; or the model, via automatic function calling, chooses among prompt and native functions alike. It also means the same tooling — registration, arguments, logging, DI — applies to prompts and code equally, so prompts inherit software-engineering discipline (naming, versioning, testing, review) rather than living as second-class string literals. The deeper payoff is orchestration: complex behaviors become compositions of small, uniform, individually testable functions, which is precisely the foundation the planners and agents of the next tutorial build on." },
+        { "number": 12, "question": "A team worries Semantic Kernel is 'magic' that will make their AI app hard to understand and debug. How do you address this?", "modelAnswer": "I would show that every convenience maps to a mechanism they can already reason about, and that the debugging story is a matter of enabling the right observability. Nothing in the framework is new behavior: automatic function calling is the tutorial-12 loop, prompt functions are the prompt strings they wrote, semantic memory is tutorial-15 retrieval, connectors are the model/search clients — the framework organizes these, it does not conjure new ones, so understanding rests on fundamentals they have. For debugging, the concern is real but addressable: because the kernel runs the loop, you must add visibility into what it decided, using Semantic Kernel's logging and function-invocation filters to record which functions were chosen, with what arguments, and what they returned — exactly the trace logging they built by hand in tutorial 12, now via hooks. Enable that from day one and the 'magic' becomes an inspectable sequence. I would also keep the framework behind the service-layer abstraction so its footprint is contained and swappable, and keep plugins few and sharply described so behavior is predictable. The honest caveat is SDK churn — verify APIs against the installed version — but that is a versioning discipline, not opacity. Framed this way, Semantic Kernel is less magic than a tidy assembly of parts they already understand." },
+        { "number": 13, "question": "Compare doing RAG with direct Azure AI Search (tutorial 15) versus Semantic Kernel semantic memory. When would you choose each?", "modelAnswer": "They implement the same retrieve-augment-generate pattern at different levels of abstraction. Direct Azure AI Search (tutorial 15) gives full control: you construct hybrid queries, tune the balance of keyword and vector, apply the semantic ranker, set filters for access control, and shape exactly what is retrieved and how it is ranked — at the cost of writing and maintaining that retrieval code. Semantic Kernel semantic memory abstracts this into save/recall operations: simpler to use, uniform with the rest of the framework, and easy to start with an in-memory store, but with less direct control over query construction and ranking. Choose direct search when retrieval quality is demanding or central to the product — complex hybrid queries, fine-grained filtering, precise ranking, large scale — where the control pays for itself and retrieval is where you compete. Choose semantic memory when you want retrieval as one convenient part of a broader orchestration, especially if the app already uses the kernel for functions and prompts and you value uniformity over tuning. Importantly they are not exclusive: you can back Semantic Kernel memory with an Azure AI Search store, getting hybrid search and scale beneath the memory abstraction, and drop to direct search for the queries that need full control. The decision is really how much retrieval control this app needs versus how much it values the framework's simplicity." },
+        { "number": 14, "question": "Describe the observability you would put around a Semantic Kernel assistant and why it parallels earlier tutorials.", "modelAnswer": "I would instrument three layers. Function invocation: use Semantic Kernel's logging and function-invocation filters to record, per request, which kernel functions the model chose, with what arguments, their outcomes (success or structured error), and latency — this is the direct analog of the manual trace logging in tutorial 12, and it is the single most useful window into what the model decided. Model calls: capture token usage per round, finish reasons, and retry/resilience events, the structured logging discipline of tutorial 13, since automatic function calling still costs tokens and rounds and I need to see them. Memory/retrieval: when memory-based context retrieval is used, log the recalled entries and their relevance scores, exactly as tutorial 15 recommended logging retrieved passages, so I can separate a retrieval failure (wrong context recalled) from a generation failure (right context, bad answer). All of it carries a correlation id so one user request's functions, model calls, and recalls line up as one story, and I keep prompt/response bodies out of logs by default as user data. This parallels earlier tutorials because Semantic Kernel did not change what needs observing — functions, tokens, retrieval — only where the loop runs; enabling these hooks restores the visibility the hand-rolled versions gave me for free, which is essential precisely because the framework now runs the loop I used to watch directly." },
+        { "number": 15, "question": "How does this tutorial set up the next one on advanced Semantic Kernel (planners and agents)?", "modelAnswer": "It establishes the core the advanced capabilities compose. Here you learned the kernel, connectors, plugins with native and prompt functions, KernelArguments, semantic memory, and automatic function calling — the vocabulary and mechanics of orchestration. The next tutorial builds on exactly these: a planner asks the model to compose the available kernel functions into a multi-step plan toward a goal, which only makes sense once you have functions to compose and understand how the kernel invokes them; agent patterns extend automatic function calling with autonomy, memory across turns, and coordination, all resting on plugins and memory as introduced here. Because prompts and code are uniform kernel functions, the planner can treat them interchangeably as building blocks — the payoff of this tutorial's central idea. So the progression is deliberate: this tutorial makes the model call your functions and recall your knowledge within a single orchestrated turn; the advanced tutorial lets it plan and act across many turns toward goals. Having built the parts by hand earlier, organized them under Foundry, and now assembled them with Semantic Kernel, you arrive at agents with every underlying mechanism already understood." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Semantic Kernel", "back": "Open-source .NET SDK for orchestrating AI — connects models (connectors), prompts (prompt functions), plugins/skills, and semantic memory, with automatic function calling." },
+        { "number": 2, "front": "Kernel", "back": "The central orchestrator holding configured services and plugins; invokes kernel functions (prompt or native) through them. Built with a builder, registered in DI." },
+        { "number": 3, "front": "Connector", "back": "Adapter wiring the kernel to a provider — Azure OpenAI chat, an embedding model, a vector store. Swap connectors to change providers without rewriting orchestration." },
+        { "number": 4, "front": "Plugin (skill)", "back": "A named group of related kernel functions. 'Skill' = original term, 'plugin' = current; same thing. The tutorial-12 tool set, framework-style." },
+        { "number": 5, "front": "Native vs prompt function", "back": "Native function = annotated C# code the kernel calls. Prompt function = a prompt template the kernel renders and sends. Both are kernel functions and compose." },
+        { "number": 6, "front": "[KernelFunction] + [Description]", "back": "Attributes that make a C# method a model-callable native function with an auto-generated schema — replacing tutorial 12's hand-written JSON schema." },
+        { "number": 7, "front": "Automatic function calling", "back": "ToolCallBehavior.AutoInvokeKernelFunctions — the kernel runs the whole tutorial-12 loop: advertise, detect, execute, feed back, repeat. Still costs tokens/rounds." },
+        { "number": 8, "front": "Prompt template + KernelArguments", "back": "A parameterized prompt ({{$input}}) filled from a key/value KernelArguments bag at invocation. Makes prompts named, reusable, versioned artifacts." },
+        { "number": 9, "front": "Semantic memory", "back": "Store/recall text by meaning via an embedding connector + memory store. Save embeds text; recall returns nearest matches. Tutorial-15 retrieval, abstracted." },
+        { "number": 10, "front": "Memory store", "back": "The vector store behind semantic memory: in-memory for demos, Azure AI Search (or similar) for production scale and hybrid search." },
+        { "number": 11, "front": "Memory-based context retrieval", "back": "Recall relevant remembered text and inject it into the prompt before answering = RAG retrieve-augment-generate via Semantic Kernel memory." },
+        { "number": 12, "front": "Enterprise API as a skill", "back": "Wrap an internal API call in a native function; your code owns auth, validation, errors. The guarded, described seam between model intent and backend." },
+        { "number": 13, "front": "Plugins via DI", "back": "Register plugins through the container so native functions get injected dependencies (HttpClient, repositories) — safe, testable access to real systems." },
+        { "number": 14, "front": "Automation ≠ safety", "back": "The kernel runs the loop but doesn't vet your code. Keep tutorial-12 discipline in every native function: validate, authorize, idempotent, structured errors." },
+        { "number": 15, "front": "When to use SK", "back": "Real orchestration: multiple functions, reusable prompts, memory, mixed prompt+code flows. A one-shot prompt needs a bare completion call, not a kernel." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions and Answers",
+      "items": [
+        { "number": 1, "question": "What problem does Semantic Kernel solve?", "answer": "It solves orchestration — coordinating a model with functions, reusable prompts, and memory into a working application without hand-wiring the plumbing. In earlier work you write the function-calling loop yourself, concatenate prompt strings inline, and glue retrieval into prompts manually. Semantic Kernel provides a kernel that holds your models (via connectors) and plugins, turns prompts into reusable prompt functions, exposes C# methods as native functions the model can call, offers semantic memory for retrieval, and — with automatic function calling — runs the whole tool-calling loop for you. It doesn't add new AI concepts; it organizes the ones you already know into one composable programming model, which is why it scales toward planners and agents." },
+        { "number": 2, "question": "Walk me through the architecture.", "answer": "The kernel is the center — an orchestrator holding configured AI services and plugins that invokes functions through them. Connectors adapt it to providers: an Azure OpenAI chat model, an embedding model, a vector store, so it's model-agnostic. Plugins, historically called skills, are named groups of kernel functions. A kernel function is one callable unit and is either a native function — annotated C# code — or a prompt function — a prompt template. Semantic memory stores and recalls text by meaning using an embedding connector and a memory store. KernelArguments carry inputs in. The elegant part is that prompts and code are the same abstraction — kernel functions — so they compose, and automatic function calling lets the model choose among them. You register the kernel in DI like any service, so it fits the clean architecture from earlier tutorials directly." },
+        { "number": 3, "question": "How does exposing a C# method to the model differ from the manual tool approach?", "answer": "In the manual approach you hand-write a JSON schema — function name, description, parameter descriptions — and keep it in sync with your code. In Semantic Kernel you annotate the method: [KernelFunction] makes it callable and [Description] on the method and each parameter explains it, and the framework generates the schema from the signature and attributes automatically. So the same information the model needs to choose and call the function comes straight from well-described code, with no separate schema to maintain. You group related functions into a class and register it as a plugin. The description quality still drives the model's selection — that concern never goes away — but the mechanical burden of writing and maintaining schemas does." },
+        { "number": 4, "question": "Explain automatic function calling and the trap people fall into with it.", "answer": "Enable AutoInvokeKernelFunctions and, from a single call, the kernel runs the entire loop I'd otherwise hand-write: it advertises the plugin functions, sees when the model wants one, executes the native function, feeds the result back, and repeats until the model gives a final answer. The loop, the finish-reason handling, the assistant/tool message bookkeeping — all gone from my code. The trap is assuming that because the kernel runs the loop, my functions are safe. They're not. Every native function still has to validate its arguments, authorize as the actual user, stay idempotent, and return structured errors — the model can be wrong or manipulated, and the kernel doesn't vet what my function does. Automation of the loop is not automation of safety, and treating it that way is how an assistant ends up cancelling the wrong order. I keep the tutorial-12 disciplines inside every function." },
+        { "number": 5, "question": "How would you integrate an internal enterprise API so the model can use it?", "answer": "As a skill: a native function inside a plugin that wraps the API call. The method gets [KernelFunction] and a precise [Description], takes described parameters, and its body authenticates to the internal service, validates the model-supplied arguments as untrusted input, makes the call, handles errors, and returns a compact JSON result. The plugin's class receives its dependencies — a configured HttpClient or typed client — through dependency injection, so it has safe, testable access and I'm not hardcoding anything. I register it with AddFromType and now the model can invoke that enterprise operation through the kernel whenever a request needs it. The native function is deliberately the boundary: it's the one place my code controls what actually happens, so authentication, least privilege, validation, and result shaping live there rather than being trusted to the model. The skill is the guarded seam between the model's intent and production systems." },
+        { "number": 6, "question": "What's the relationship between semantic memory and RAG?", "answer": "Semantic memory is RAG's retrieval, wrapped as a framework abstraction. I add an embedding connector and a memory store, save text — each piece gets embedded into a vector — and recall by a query, which embeds the query and returns the nearest stored texts by meaning. Memory-based context retrieval then injects those recalled texts into the prompt before the model answers. That's exactly retrieve-augment-generate from the RAG tutorial: recall is retrieval, injection is augmentation, the answer is generation. The difference is packaging — named parts (memory, connectors, prompt functions) and less plumbing. And it's not either/or: for production I back the memory store with Azure AI Search, so I get real hybrid search and scale underneath the convenient memory API. If I need full control over hybrid queries and ranking I'll use Azure AI Search directly; if I want retrieval as one tidy part of a broader orchestration, memory is the simpler front-end." },
+        { "number": 7, "question": "Does adopting Semantic Kernel mean rewriting an app built on raw SDK calls?", "answer": "No, if the app was built with the service-layer discipline. Model access should already sit behind an abstraction like IChatService, with the SDK inside the implementation. Adopting Semantic Kernel changes that implementation — construct and use a kernel instead of raw client calls — while the interface, and therefore the controllers, DTOs, streaming, and error handling above it, stay untouched. It's the same localized-change story as adopting Foundry: a well-placed seam turns a framework migration into a one-file change. The kernel and plugins register in the same DI container, native functions get their dependencies injected like any service, so it fits the existing architecture rather than fighting it. If the app instead scattered raw SDK calls everywhere, the rewrite cost is real — but that's the cost of having skipped the abstraction, not a cost Semantic Kernel imposes." },
+        { "number": 8, "question": "When is Semantic Kernel overkill?", "answer": "For a single one-shot prompt to a known model, it's overkill — a bare chat completion call is simpler and adds no kernel, plugins, or execution settings for zero benefit. The framework earns its place when orchestration is the actual problem: multiple functions the model should choose among, reusable prompts worth templating, memory or retrieval to coordinate, or workflows mixing prompt steps and code steps — basically whenever I'd otherwise hand-write the function-calling loop and prompt glue. It's the same match-the-tool-to-scope judgment as the Foundry decision: count the moving parts. One prompt, no functions leans bare-API; several functions plus memory plus reusable prompts leans Semantic Kernel. And since model access is behind a service abstraction anyway, I can start bare and adopt the framework when orchestration needs genuinely appear, swapping one implementation rather than re-architecting." },
+        { "number": 9, "question": "How do you keep a Semantic Kernel app observable and debuggable?", "answer": "By restoring the visibility the kernel's automation would otherwise hide. I enable Semantic Kernel's logging and function-invocation filters to record, per request, which functions the model chose, with what arguments, their outcomes, and latency — that's the manual trace logging from the function-calling tutorial, now via hooks, and it's the best window into what the model decided. I log token usage, finish reasons, and retry events per model call, the structured-logging discipline from the resilience tutorial, because automatic function calling still costs tokens and rounds. When memory is involved, I log recalled entries and their relevance scores, so I can separate a retrieval failure from a generation failure. Everything carries a correlation id so one request's functions, model calls, and recalls read as one story, and I keep prompt and response bodies out of logs by default as user data. The point is that the kernel runs the loop I used to watch directly, so I have to deliberately re-establish that observability — it's not automatic, and enabling it early is what keeps the framework from feeling like a black box." },
+        { "number": 10, "question": "What's the significance of prompts and code both being 'kernel functions'?", "answer": "It gives you one composable model instead of two separate worlds. A prompt function and a native function are the same abstraction — invoked the same way, returning the same result shape — so you can chain them: a prompt function extracts structured data from free text, then a native function acts on it, all in one orchestrated flow, and automatic function calling lets the model pick among prompt and native functions alike. It also means the same engineering applies to both — DI, arguments, logging, versioning, testing — so prompts stop being second-class string literals and get real software discipline. The deeper significance is that complex behavior becomes a composition of small, uniform, individually testable functions, which is exactly what a planner needs: it can treat any available function, prompt or code, as an interchangeable building block to assemble into a multi-step plan. So this uniformity is the foundation the advanced agent and planner capabilities are built on." },
+        { "number": 11, "question": "How does Semantic Kernel fit with Azure AI Foundry and the rest of the course's stack?", "answer": "It's the orchestration layer that ties the pieces together and sits naturally on Foundry. Its connectors target the Azure OpenAI deployments from the deployment tutorial and can use a Foundry project's managed deployments and connections, so the kernel calls models that Foundry governs. It uses the embeddings from the embeddings tutorial for semantic memory, and can back that memory with the Azure AI Search index from the RAG tutorial. It automates the function calling I built by hand, and it registers in the DI from the enterprise-patterns tutorial. So the layering is: Foundry is the managed platform for models and data; Semantic Kernel is how my code orchestrates them into an application; my service-layer abstraction is the boundary the web app depends on. Nothing conflicts — each layer rests on the one below. And this tutorial deliberately establishes the framework's core so the next one's planners and agents, which are more autonomous ways of composing these same functions, build cleanly on top." },
+        { "number": 12, "question": "A native function in your plugin is being called with malformed arguments by the model. How do you handle it?", "answer": "The same way I'd handle any untrusted input, inside the function — the fact that the arguments came from the model through the kernel doesn't make them trustworthy. The method validates first: check the argument parses, matches expected format and ranges, and refers to something that exists, and if not, return a structured error like a small JSON object the model can read and recover from, not an exception that escapes. Automatic function calling will feed that error back to the model, which can then apologize or ask for clarification, so the conversation stays alive. I also make sure the function is idempotent in case the model retries, authorize as the actual user before doing anything real, and keep the returned result compact. If malformed arguments are frequent, that's usually a signal my [Description] on the parameter is vague — adding a format example ('e.g. ORD-1042') often fixes it, because the description is what the model uses to construct arguments. So: defensive validation and structured errors in the function, plus better descriptions to reduce the problem at the source." },
+        { "number": 13, "question": "Compare Semantic Kernel semantic memory with direct Azure AI Search for retrieval. Which do you pick?", "answer": "Same retrieve-augment-generate pattern, different control levels. Direct Azure AI Search gives me full command of retrieval: explicit hybrid queries, keyword/vector balance, the semantic ranker, access-control filters, precise ranking — at the cost of writing that code. Semantic memory abstracts retrieval into save/recall, which is simpler, uniform with the rest of the kernel, and quick to start with an in-memory store, but with less direct control over query construction and ranking. I pick direct search when retrieval quality is central to the product or demanding — complex filtering, fine ranking, large scale — where control pays off and retrieval is where I compete. I pick semantic memory when I want retrieval as one convenient part of a broader orchestration the kernel is already running, valuing uniformity over tuning. Crucially they're not exclusive: I can back semantic memory with an Azure AI Search store to get hybrid search and scale under the memory API, and drop to direct queries for the cases that need full control. So the real question is how much retrieval control this specific app needs versus how much it benefits from the framework's simplicity." },
+        { "number": 14, "question": "What would you watch out for regarding Semantic Kernel's API stability?", "answer": "It's moved fast and reworked significant areas, so I treat exact APIs as version-specific and verify against the installed package rather than trusting older examples. The memory abstractions in particular have been revised — the older semantic-text-memory interfaces versus newer vector-store abstractions — and execution-settings for function calling have shifted (ToolCallBehavior versus newer function-choice-behavior settings), so code from a blog a year old may not compile. My practical defenses: pin the package version and upgrade deliberately with a changelog review; keep the kernel behind my own service abstraction so churn is contained to one implementation file; write my plugins and prompt functions — which are more stable, being mostly my own code plus attributes — as the bulk of the logic; and lean on the current official samples for the exact wiring. The concepts — kernel, connectors, plugins, functions, memory, automatic function calling — are stable even when the specific types move, so I anchor understanding on those and treat the signatures as details to confirm. It's a versioning discipline, not a reason to avoid the framework." },
+        { "number": 15, "question": "How does this tutorial prepare you for planners and agents?", "answer": "It builds the vocabulary and mechanics that planners and agents compose. Here I learned the kernel, connectors, plugins with native and prompt functions, KernelArguments, semantic memory, and automatic function calling — everything needed to make a model call my functions and recall my knowledge within one orchestrated turn. The advanced tutorial extends exactly these: a planner asks the model to compose the available kernel functions into a multi-step plan toward a goal, which presupposes I have functions to compose and understand how the kernel invokes them; agent patterns add autonomy, cross-turn memory, and coordination on top of plugins and memory as introduced here. Because prompts and code are uniform kernel functions, a planner can treat them interchangeably as building blocks — that's the payoff of this tutorial's central idea. So the arc is deliberate: I built these mechanisms by hand earlier, organized them under Foundry, assembled them with Semantic Kernel now, and next I let the model plan and act across many turns — arriving at agents with every underlying mechanism already understood rather than as magic." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "Semantic Kernel", "definition": "An open-source .NET (and Python) SDK for orchestrating AI: connects models, prompts, plugins, and memory into applications, with automatic function calling." },
+        { "term": "Kernel", "definition": "The central Semantic Kernel object holding configured services (via connectors) and plugins, and invoking kernel functions through them." },
+        { "term": "Connector", "definition": "An adapter wiring the kernel to a specific model or store provider — Azure OpenAI chat, an embedding model, or a vector store." },
+        { "term": "Plugin", "definition": "A named group of related kernel functions the kernel can use; the current term for what was originally called a skill." },
+        { "term": "Skill", "definition": "The original Semantic Kernel term for a plugin — a container of functions the AI can call; now generally called a plugin." },
+        { "term": "Kernel function", "definition": "A single callable unit in a plugin — either native C# code or a prompt template — invoked by the kernel and returning a FunctionResult." },
+        { "term": "Native function", "definition": "A kernel function implemented as annotated C# code ([KernelFunction], [Description]), letting the model call real application logic." },
+        { "term": "Prompt function", "definition": "A kernel function defined by a prompt template rather than code — a reusable, parameterized instruction to the model." },
+        { "term": "Prompt template", "definition": "A parameterized prompt string with placeholders like {{$input}} that the kernel fills from KernelArguments before sending it to the model." },
+        { "term": "KernelArguments", "definition": "The key/value collection of inputs passed into a kernel function invocation, filling template placeholders and native-function parameters." },
+        { "term": "Automatic function calling", "definition": "A setting where the kernel runs the whole function-calling loop: the model picks functions, the kernel executes them and feeds results back until an answer." },
+        { "term": "Semantic memory", "definition": "Semantic Kernel's abstraction for storing and recalling text by meaning using embeddings and a memory store." },
+        { "term": "Embedding", "definition": "A numeric vector capturing the meaning of text so similar texts sit close together — the basis of semantic memory recall." },
+        { "term": "Memory store", "definition": "The backing vector store behind semantic memory (in-memory, Azure AI Search, etc.) that holds embeddings and returns nearest matches." },
+        { "term": "Memory-based context retrieval", "definition": "Recalling relevant remembered text by semantic similarity and injecting it into the prompt — the RAG pattern via Semantic Kernel memory." },
+        { "term": "Planner", "definition": "A Semantic Kernel component that asks the model to compose available functions into a multi-step plan toward a goal (expanded in tutorial 18)." },
+        { "term": "Orchestration", "definition": "Coordinating models, prompts, functions, and memory into a working application flow — the core purpose of Semantic Kernel." },
+        { "term": "Connector (memory)", "definition": "An adapter to an embedding model or vector store that lets semantic memory embed and persist text for later recall." },
+        { "term": "Dependency injection", "definition": "The .NET pattern of supplying a class its dependencies; the kernel and plugins register in the DI container, and native functions receive injected services." },
+        { "term": "Enterprise API", "definition": "An internal backend service (inventory, ticketing, HR) wrapped by a native function as a skill, giving the model safe, guarded access to real business operations." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Semantic Kernel is an open-source .NET SDK for orchestrating AI — a kernel that holds models (via connectors) and plugins and runs prompt and native functions through them, registered in DI like any service.",
+          "Prompt engineering becomes prompt functions built on reusable, parameterized prompt templates filled from KernelArguments — named, versioned, testable artifacts instead of inline strings.",
+          "Plugins (skills) group kernel functions; native functions are annotated C# ([KernelFunction], [Description]) whose schema is generated for you, and automatic function calling runs the entire tutorial-12 loop inside the framework.",
+          "Semantic memory stores and recalls text by meaning via embeddings and a memory store, and memory-based context retrieval is the RAG retrieve-augment-generate pattern expressed through the framework — back it with Azure AI Search for production.",
+          "You build an assistant with a kernel, a plugin or two, and automatic function calling in a fraction of tutorial-12's code, and integrate an enterprise API as a skill where your native function owns auth, validation, and error handling.",
+          "Automation removes the loop and the schema, not the responsibility: keep validation, authorization, idempotency, and structured errors inside every native function, and enable function-call logging for visibility."
+        ] },
+        { "type": "paragraph", "text": "Semantic Kernel is where the course's building blocks become one programming model: it calls your Azure OpenAI deployments, uses your embeddings, automates your function calling, registers in your DI, and can use Azure AI Search as its memory — all reachable through Foundry. The framework does not replace what you learned; it embodies it, turning scattered mechanics into composable functions and orchestrated flows. With prompts and code unified as kernel functions and the model able to choose among them, you have the foundation for autonomy — which is exactly where the next tutorial goes, extending Semantic Kernel with planners and more advanced agent patterns." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Next tutorial: Semantic Kernel Advanced (semantic-kernel-advanced). With the kernel, plugins, prompts, and memory in hand, the advanced tutorial adds the capabilities that turn orchestration into autonomy: planners that ask the model to compose your functions into multi-step plans toward a goal, richer memory patterns, and more sophisticated agent behaviors — all built on the core you established here." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: rebuild tutorial 12's order assistant as an OrderPlugin with automatic function calling, and confirm the loop code you wrote before is entirely gone while the safety checks remain inside the function.",
+          "Practice: write a prompt function with a {{$input}} placeholder, invoke it with KernelArguments, then load a second prompt from a file and compare the two ways of authoring prompts.",
+          "Practice: wrap a small internal or public API as an InventoryPlugin-style skill, injecting HttpClient via DI, and let the model call it through the kernel.",
+          "Practice: set up semantic memory with an in-memory store, save several facts, and implement memory-based context retrieval into a grounded prompt function — then swap the store for Azure AI Search.",
+          "Read: the official documentation for 'Semantic Kernel overview', 'Plugins in Semantic Kernel', 'Function calling with Semantic Kernel', and 'Semantic Kernel memory and embeddings'."
+        ] },
+        { "type": "note", "style": "tip", "text": "Keep your Semantic Kernel assistant. The advanced tutorial's planners compose the very plugins and prompt functions you build here, so a working kernel with a couple of plugins is the perfect starting point for adding autonomy." }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,559 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Semantic Kernel: Agents, Planner and Orchestration",
+  "slug": "semantic-kernel-advanced",
+  "level": "Advanced",
+  "codeLanguage": "C#",
+  "tutorialNumber": 18,
+  "totalTutorials": 27,
+  "prev": "semantic-kernel-framework",
+  "next": "autogen-framework",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Semantic Kernel: Agents, Planner and Orchestration"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "Agent framework concepts in Semantic Kernel",
+    "Planner patterns",
+    "Orchestration patterns",
+    "Building orchestrated multi-step workflows"
+  ],
+  "tooltips": {
+    "agent": "An AI component with a goal, instructions, and access to functions/tools that can reason across multiple turns to accomplish a task, rather than answering once.",
+    "Agent Framework": "Semantic Kernel's set of abstractions (ChatCompletionAgent and related types) for building, running, and coordinating agents.",
+    "ChatCompletionAgent": "A concrete Semantic Kernel agent type backed by a chat model, given instructions and a kernel with plugins, that can converse and call functions across turns.",
+    "agent thread": "The conversation state (message history) an agent maintains across turns of a task, distinct from a single one-shot invocation.",
+    "planner": "A Semantic Kernel component that asks the model to compose available kernel functions into a multi-step plan toward a stated goal.",
+    "plan": "A structured sequence of function calls (steps) a planner produces to achieve a goal, which an executor then carries out.",
+    "function-calling planner": "A planning approach that relies on the model's native function-calling ability to choose and sequence functions, rather than a separate planning prompt.",
+    "sequential orchestration": "An orchestration pattern where agents or steps run one after another, each consuming the previous step's output.",
+    "concurrent orchestration": "An orchestration pattern where multiple agents work on the same input in parallel and results are aggregated.",
+    "group chat orchestration": "An orchestration pattern where multiple agents converse in a shared thread, taking turns, often coordinated by a manager or selection strategy.",
+    "handoff orchestration": "An orchestration pattern where control passes from one agent to another based on the conversation, each agent handling what it specializes in.",
+    "orchestration pattern": "A reusable structure (sequential, concurrent, group chat, handoff) for coordinating multiple agents or steps toward a larger goal.",
+    "multi-step workflow": "A task broken into ordered steps — possibly across different agents or functions — executed and tracked as a whole rather than one call.",
+    "termination strategy": "The rule that decides when a multi-agent conversation or plan should stop — e.g. a goal-met check, a turn limit, or a specific agent's approval.",
+    "selection strategy": "The rule that decides which agent speaks next in a group chat orchestration, based on the conversation so far.",
+    "goal": "The objective given to an agent or planner that its plan or actions are meant to accomplish.",
+    "autonomy": "The degree to which a system decides its own next actions (which function, which agent) rather than following a fixed, code-defined sequence.",
+    "human-in-the-loop": "A checkpoint where a person reviews or approves an agent's proposed action before it executes, used for high-stakes or irreversible steps."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview: From One Orchestrated Turn to Autonomous Workflows",
+      "content": [
+        { "type": "paragraph", "text": "Tutorial 17 gave the kernel one job per call: given a message, use automatic function calling to invoke the right plugin functions and produce an answer, in one orchestrated turn. This tutorial extends that into autonomy across many turns and many participants. An agent is a component with a goal, instructions, and access to functions that can reason across a conversation rather than answer once. A planner asks the model to compose your functions into a multi-step plan before anything runs. And orchestration patterns coordinate multiple agents — sequentially, concurrently, in a group chat, or by handoff — into workflows no single call could express." },
+        { "type": "paragraph", "text": "This is an advanced tutorial: it assumes you are comfortable with the kernel, plugins, native and prompt functions, and automatic function calling from tutorial 17, and it builds four things on top of that foundation — agent framework concepts, planner patterns, orchestration patterns, and how to build an orchestrated multi-step workflow end to end. Every capability here is a natural extension of what you already understand: an agent is a kernel with a persistent goal and thread; a plan is what automatic function calling does, made explicit and inspectable; orchestration is several agents doing what one agent does, coordinated." },
+        { "type": "note", "style": "warning", "text": "More autonomy means more that can go wrong unsupervised. Every pattern in this tutorial pairs with a control — a termination strategy, a turn limit, a human-in-the-loop checkpoint — because an agent or plan that never stops or never gets approval is not a feature, it is an incident waiting to happen." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Explain the agent framework concepts in Semantic Kernel: agents, instructions, threads, and how they extend the kernel and plugins from tutorial 17.",
+          "Describe planner patterns, including function-calling-based planning, and when an explicit plan is preferable to automatic function calling.",
+          "Compare orchestration patterns — sequential, concurrent, group chat, and handoff — and identify which fits a given multi-agent problem.",
+          "Build an orchestrated multi-step workflow in .NET combining agents, a plan, and a termination strategy.",
+          "Apply guardrails — termination strategies, turn limits, and human-in-the-loop checkpoints — to autonomous, multi-turn AI systems."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorial 17 in full: the kernel, connectors, plugins, native and prompt functions, KernelArguments, semantic memory, and automatic function calling.",
+          "Tutorial 12's function-calling loop and its safety disciplines (validation, authorization, idempotency, structured errors) — every agent and plan still needs them.",
+          "Comfort with async/await and C# collections, since orchestration code coordinates multiple in-flight operations.",
+          "An Azure OpenAI chat deployment and the plugins you built in tutorial 17 (an OrderPlugin or similar) are ideal to reuse here."
+        ] },
+        { "type": "note", "style": "tip", "text": "This tutorial is advanced by design: if any part of tutorial 17 feels shaky, revisit it first. Agents and orchestration are built directly on the kernel and plugin mechanics, not a separate system." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "Key Concepts: Agents, Plans, and Orchestration",
+      "content": [
+        { "type": "paragraph", "text": "Three ideas extend tutorial 17's single-turn orchestration into multi-turn autonomy. An agent wraps a kernel with a persistent goal, instructions, and a thread (conversation state), so it can reason across turns rather than answer once — automatic function calling within a longer-lived, purposeful conversation. A planner makes the model's function-composition explicit: instead of letting automatic function calling decide step-by-step inside one call, a planner asks the model to lay out a multi-step plan up front, which your code can inspect, log, or gate before executing. Orchestration coordinates multiple agents (or steps) into a workflow — sequential, concurrent, group chat, or handoff — for problems too broad for one agent to handle alone." },
+        { "type": "table", "headers": ["Concept", "Extends from tutorial 17", "New capability"], "rows": [
+          ["Agent", "Kernel + plugins + automatic function calling", "Persistent goal, instructions, and thread across many turns"],
+          ["Planner", "Automatic function calling's implicit step choice", "An explicit, inspectable multi-step plan before execution"],
+          ["Orchestration pattern", "One kernel handling one request", "Multiple agents/steps coordinated toward a larger goal"],
+          ["Multi-step workflow", "A single InvokeAsync call", "A tracked sequence of steps, possibly across agents, with a stopping rule"]
+        ] },
+        { "type": "paragraph", "text": "None of this removes tutorial 12's or tutorial 17's disciplines — validating arguments, authorizing as the user, idempotent actions, structured errors inside every function. It adds a layer above them: because agents and plans can take many actions with less human oversight per action, this tutorial adds termination strategies, turn limits, and human-in-the-loop checkpoints as the new, necessary controls for that added autonomy." },
+        { "type": "note", "style": "info", "text": "Read this tutorial's four sections as one story: agents are the actors, planners decide their steps, orchestration patterns decide how actors work together, and a workflow is what you get when you put actors, a plan, and a stopping rule together and run it." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Deep Dive 1: Agent Framework Concepts in Semantic Kernel",
+      "content": [
+        { "type": "paragraph", "text": "Semantic Kernel's Agent Framework provides abstractions for building AI components that act across a conversation rather than answer once. A ChatCompletionAgent is the concrete type you will use most: it wraps a kernel (with its plugins) plus instructions — a persistent system-level goal, like 'You are an order-support agent; use the OrderPlugin for facts and never invent order details' — and can be invoked repeatedly against an agent thread, the conversation state that persists across those invocations. Where tutorial 17's kernel answered one message, an agent maintains context and purpose across many." },
+        { "type": "code", "language": "csharp", "title": "Creating and invoking a ChatCompletionAgent (illustrative)", "code": [
+          "using Microsoft.SemanticKernel.Agents;",
+          "",
+          "// The agent wraps a kernel (with plugins already registered) and instructions.",
+          "ChatCompletionAgent agent = new()",
+          "{",
+          "    Name = \"OrderAgent\",",
+          "    Instructions = \"You are an order-support agent. Use OrderPlugin for order facts. \" +",
+          "                   \"Never invent details. Ask for clarification if the order number is missing.\",",
+          "    Kernel = kernel      // already has OrderPlugin registered (tutorial 17)",
+          "};",
+          "",
+          "// A thread holds conversation state across multiple turns.",
+          "AgentThread thread = new ChatHistoryAgentThread();",
+          "",
+          "await foreach (var response in agent.InvokeAsync(\"Where is my order ORD-1042?\", thread))",
+          "{",
+          "    Console.WriteLine(response.Message.Content);",
+          "}",
+          "",
+          "// A later turn reuses the same thread, so context (e.g. the order number) can persist.",
+          "await foreach (var response in agent.InvokeAsync(\"And what carrier is it with?\", thread))",
+          "{",
+          "    Console.WriteLine(response.Message.Content);",
+          "}"
+        ] },
+        { "type": "animation", "title": "An agent across two turns", "intro": "The thread is what makes the second question make sense without repeating context.", "nodes": [
+          { "id": "u1", "label": "Turn 1", "sub": "\"Where is ORD-1042?\"" },
+          { "id": "agent", "label": "Agent", "sub": "instructions + plugins" },
+          { "id": "thread", "label": "Agent thread", "sub": "conversation state" },
+          { "id": "u2", "label": "Turn 2", "sub": "\"What carrier?\"" },
+          { "id": "ans", "label": "Answer", "sub": "uses turn 1's context" }
+        ], "steps": [
+          { "highlight": ["u1", "agent"], "caption": "Turn 1 asks about a specific order; the agent uses its OrderPlugin (automatic function calling) to answer." },
+          { "highlight": ["thread"], "caption": "The exchange — question, function call, result, answer — is recorded in the agent thread." },
+          { "highlight": ["u2", "thread"], "caption": "Turn 2 asks a follow-up with no order number restated; the thread supplies that context to the agent." },
+          { "highlight": ["ans"], "caption": "The agent answers correctly about the carrier for ORD-1042, because the thread carried the reference across turns — exactly what a stateless one-shot call could not do." }
+        ] },
+        { "type": "note", "style": "info", "text": "An agent is not a different AI — it is the same chat model and kernel from tutorial 17, wrapped with persistent instructions and a thread. Understanding it as 'kernel plus memory of purpose across turns' keeps the concept grounded rather than mysterious." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Deep Dive 2: Planner Patterns",
+      "content": [
+        { "type": "paragraph", "text": "Automatic function calling (tutorial 17) already lets the model choose functions step by step, inside one InvokeAsync call — but that choice happens implicitly, one step at a time, with no plan you can inspect before it runs. A planner makes the composition explicit: given a goal and the kernel's available functions, it asks the model to produce a plan — a structured sequence of function calls — that your code can log, review, modify, or gate before any step executes." },
+        { "type": "paragraph", "text": "The dominant planner pattern in modern Semantic Kernel is the function-calling planner: it relies on the same native function-calling capability of the model that powers automatic function calling, but surfaces the result as an inspectable plan rather than letting the kernel silently execute each step as it's decided. Earlier Semantic Kernel versions also had dedicated planner types (e.g. a stepwise or handlebars planner) that generated plans via specialized prompts; the trend has moved toward using the model's native function-calling strength directly, since it is both simpler and more reliable than bespoke planning prompts." },
+        { "type": "code", "language": "csharp", "title": "An explicit plan versus automatic function calling (illustrative)", "code": [
+          "// Automatic function calling (tutorial 17): implicit, step-by-step, inside one call.",
+          "var autoSettings = new OpenAIPromptExecutionSettings",
+          "{",
+          "    ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions",
+          "};",
+          "var direct = await kernel.InvokePromptAsync(",
+          "    \"Check stock for SKU-8842 and, if available, get the price.\",",
+          "    new KernelArguments(autoSettings));",
+          "",
+          "// Planner pattern: ask for the plan FIRST, inspect it, then execute.",
+          "FunctionCallingStepwisePlanner planner = new(new FunctionCallingStepwisePlannerOptions",
+          "{",
+          "    MaxIterations = 5",
+          "});",
+          "FunctionCallingStepwisePlannerResult planResult = await planner.ExecuteAsync(",
+          "    kernel, \"Check stock for SKU-8842 and, if available, get the price.\");",
+          "",
+          "// You can log/inspect planResult's steps and final answer before trusting it.",
+          "Console.WriteLine(planResult.FinalAnswer);"
+        ] },
+        { "type": "paragraph", "text": "Choose a planner over plain automatic function calling when you need the plan itself as a first-class object: to log or audit the intended steps before they run, to insert a human-approval checkpoint between planning and execution, to cap the number of steps explicitly, or to build workflows where the plan spans multiple agents rather than one kernel's functions. For a single-turn task where the model choosing functions on the fly is acceptable, automatic function calling remains simpler and is usually the right default — planners earn their complexity when the plan needs to be inspected or governed, not merely executed." },
+        { "type": "note", "style": "warning", "text": "Planner and execution-settings type names have moved fast across Semantic Kernel versions — verify current names against your installed package (see section 13). The durable idea is stable: separate 'decide the steps' from 'run the steps' when you need to inspect or gate what happens between them." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Deep Dive 3: Orchestration Patterns",
+      "content": [
+        { "type": "paragraph", "text": "A single agent, however capable, is one perspective with one set of instructions. Some problems are better solved by multiple agents, each specialized, coordinated by an orchestration pattern. Semantic Kernel's Agent Framework supports several standard patterns for this coordination, and choosing the right one is a design decision, not a default." },
+        { "type": "animation", "title": "Four orchestration patterns, side by side", "intro": "The same three agents (Researcher, Writer, Reviewer) coordinated four different ways.", "nodes": [
+          { "id": "seq", "label": "Sequential", "sub": "one after another" },
+          { "id": "con", "label": "Concurrent", "sub": "in parallel" },
+          { "id": "grp", "label": "Group chat", "sub": "shared thread, turns" },
+          { "id": "hnd", "label": "Handoff", "sub": "control transfers" }
+        ], "steps": [
+          { "highlight": ["seq"], "caption": "Sequential: Researcher gathers facts, then Writer drafts from them, then Reviewer polishes — each step consumes the previous step's output in a fixed order." },
+          { "highlight": ["con"], "caption": "Concurrent: all three agents work on the same input in parallel (e.g. three independent critiques), and the results are aggregated afterward." },
+          { "highlight": ["grp"], "caption": "Group chat: the three agents share one conversation thread and take turns, guided by a selection strategy that decides who speaks next." },
+          { "highlight": ["hnd"], "caption": "Handoff: control passes explicitly from one agent to another based on the conversation — e.g. a triage agent hands a billing question to a BillingAgent." }
+        ] },
+        { "type": "table", "headers": ["Pattern", "Shape", "Best fit"], "rows": [
+          ["Sequential", "Step 1 → step 2 → step 3, output feeds forward", "A fixed pipeline: research → draft → edit"],
+          ["Concurrent", "Same input to N agents in parallel, then combine", "Independent perspectives: N critiques, then merge"],
+          ["Group chat", "Shared thread, agents take turns", "Collaborative problem-solving needing back-and-forth"],
+          ["Handoff", "Control transfers based on conversation content", "Triage/specialist routing: support bot to billing/technical"]
+        ] },
+        { "type": "code", "language": "csharp", "title": "Sequential orchestration sketch (illustrative)", "code": [
+          "using Microsoft.SemanticKernel.Agents.Orchestration;",
+          "",
+          "// Conceptually: each agent's output becomes the next agent's input.",
+          "var orchestration = new SequentialOrchestration(researcherAgent, writerAgent, reviewerAgent);",
+          "",
+          "OrchestrationResult result = await orchestration.InvokeAsync(",
+          "    \"Produce a short brief on hybrid search in Azure AI Search.\");",
+          "Console.WriteLine(await result.GetValueAsync());"
+        ] },
+        { "type": "paragraph", "text": "Group chat and handoff orchestrations need explicit stopping rules, because multiple agents conversing can otherwise continue indefinitely. A termination strategy decides when the conversation is done — a goal-met check (perhaps another agent judging completion), a maximum turn count, or a specific agent's sign-off — and a selection strategy decides who speaks next in a group chat. Both are configuration you set deliberately, not defaults you can skip; an unbounded multi-agent conversation is a cost and correctness risk, not just an inefficiency." },
+        { "type": "note", "style": "warning", "text": "Every orchestration pattern that lets agents run repeatedly needs a termination strategy and, ideally, a hard turn-count ceiling as a backstop. Treat 'when does this stop' as a required design question, on par with 'what does this do'." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Deep Dive 4: Building an Orchestrated Multi-Step Workflow",
+      "content": [
+        { "type": "paragraph", "text": "Putting agents, a plan (or automatic function calling), an orchestration pattern, and guardrails together yields a multi-step workflow: a task broken into ordered steps, possibly across specialized agents, executed and tracked as a whole with a defined stop condition. The design sequence is consistent regardless of pattern: define the goal, decide whether one agent or several are needed, choose an orchestration pattern if several, decide whether planning should be explicit or left to automatic function calling, and set a termination strategy and turn limit before running anything." },
+        { "type": "code", "language": "csharp", "title": "A group-chat workflow with a termination strategy (illustrative)", "code": [
+          "using Microsoft.SemanticKernel.Agents;",
+          "using Microsoft.SemanticKernel.Agents.Chat;",
+          "",
+          "ChatCompletionAgent researcher = new() { Name = \"Researcher\", Instructions = \"Gather facts only.\", Kernel = kernel };",
+          "ChatCompletionAgent writer     = new() { Name = \"Writer\",     Instructions = \"Draft from the Researcher's facts.\", Kernel = kernel };",
+          "ChatCompletionAgent reviewer   = new() { Name = \"Reviewer\",   Instructions = \"Approve, or request changes with reasons.\", Kernel = kernel };",
+          "",
+          "// A group chat where a termination strategy stops the loop once Reviewer approves,",
+          "// with a hard cap as a backstop against a conversation that never converges.",
+          "AgentGroupChat chat = new(researcher, writer, reviewer)",
+          "{",
+          "    ExecutionSettings = new AgentGroupChatSettings",
+          "    {",
+          "        TerminationStrategy = new ApprovalTerminationStrategy(approverName: \"Reviewer\")",
+          "        {",
+          "            MaximumIterations = 6      // hard backstop even if approval never comes",
+          "        }",
+          "    }",
+          "};",
+          "",
+          "chat.AddChatMessage(new ChatMessageContent(AuthorRole.User,",
+          "    \"Produce a short, accurate brief on hybrid search in Azure AI Search.\"));",
+          "",
+          "await foreach (var message in chat.InvokeAsync())",
+          "{",
+          "    Console.WriteLine($\"{message.AuthorName}: {message.Content}\");",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "For workflows with real-world consequences — anything touching money, irreversible actions, or external communication — insert a human-in-the-loop checkpoint between planning and execution, or before a specific high-stakes step: surface the proposed plan or action to a person and require explicit approval before the workflow proceeds. This is the multi-agent, multi-step generalization of tutorial 12's rule that irreversible tool calls need confirmation — the more autonomous the system, the more deliberately that checkpoint must be designed in, not assumed." },
+        { "type": "note", "style": "tip", "text": "Log every step of a multi-step workflow — which agent or function ran, what it produced, and why the termination strategy did or didn't stop the loop. Debugging a multi-agent workflow without this trace is close to impossible; debugging it with one is a straightforward read of the log." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Ecosystem and Tools",
+      "content": [
+        { "type": "table", "headers": ["Piece", "Role"], "rows": [
+          ["Microsoft.SemanticKernel.Agents (NuGet)", "Agent Framework types: ChatCompletionAgent, AgentThread, and orchestration classes"],
+          ["ChatCompletionAgent", "The standard chat-model-backed agent: instructions + kernel + plugins, invoked across a thread"],
+          ["AgentThread / ChatHistoryAgentThread", "Conversation state an agent carries across invocations"],
+          ["FunctionCallingStepwisePlanner (and successors)", "Planner types that produce an inspectable multi-step plan from available kernel functions"],
+          ["SequentialOrchestration / ConcurrentOrchestration / GroupChatOrchestration / HandoffOrchestration", "Built-in coordination patterns for multiple agents"],
+          ["Termination / selection strategies", "Pluggable rules for when a multi-agent conversation stops and who speaks next"],
+          ["Azure AI Foundry", "Where the underlying model deployments and connections these agents use are managed (tutorial 16)"],
+          ["AutoGen (next tutorial)", "A complementary multi-agent framework with its own orchestration philosophy, contrasted in tutorial 19"]
+        ] },
+        { "type": "paragraph", "text": "Everything here is layered directly on tutorial 17: an agent is a kernel with instructions and a thread; a planner surfaces what automatic function calling already does implicitly; orchestration patterns are ways of running several agents together. The next tutorial, AutoGen, introduces a different (Python-rooted, also usable from .NET) multi-agent framework, letting you compare philosophies once this tutorial's concepts are solid." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "Use Cases",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Multi-turn support agent: a ChatCompletionAgent with an order plugin and a persistent thread handles an entire support conversation, not just one question.",
+          "Content pipeline: sequential orchestration of Researcher, Writer, and Reviewer agents produces a reviewed document from a single topic prompt.",
+          "Parallel review: concurrent orchestration runs several specialist agents (security, performance, style) over the same code change and aggregates their findings.",
+          "Customer triage: handoff orchestration routes a conversation from a general assistant to a BillingAgent or TechnicalAgent based on what the user actually needs.",
+          "Collaborative drafting: group chat orchestration lets a Writer and a Critic iterate on a document in a shared thread until a termination strategy detects approval.",
+          "Governed automation: a planner produces an explicit multi-step plan for a business process, which a human approves before a workflow executes it.",
+          "Complex task decomposition: a goal too broad for one agent (e.g. 'audit this codebase for security issues and propose fixes') is broken into an orchestrated multi-step workflow with specialized agents per step."
+        ] },
+        { "type": "paragraph", "text": "The pattern across these: whenever a task needs multiple turns, multiple perspectives, or multiple specialized skills coordinated toward one goal, agents and orchestration patterns provide the structure — always paired with a termination strategy and, for consequential actions, a human checkpoint." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples",
+      "content": [
+        { "type": "paragraph", "text": "These examples build on tutorial 17's kernel and plugin (OrderPlugin), showing an agent, a planner-produced plan inspected before execution, and a guarded group-chat orchestration." },
+        { "type": "code", "language": "csharp", "title": "Example 1 — A single agent with a thread across turns", "code": [
+          "using Microsoft.SemanticKernel.Agents;",
+          "",
+          "ChatCompletionAgent orderAgent = new()",
+          "{",
+          "    Name = \"OrderAgent\",",
+          "    Instructions = \"Answer order questions using OrderPlugin only. Never invent details.\",",
+          "    Kernel = kernel   // OrderPlugin already registered",
+          "};",
+          "",
+          "AgentThread thread = new ChatHistoryAgentThread();",
+          "await foreach (var r in orderAgent.InvokeAsync(\"Where is ORD-1042?\", thread))",
+          "    Console.WriteLine(r.Message.Content);",
+          "await foreach (var r in orderAgent.InvokeAsync(\"When was it placed?\", thread))",
+          "    Console.WriteLine(r.Message.Content);   // thread supplies the order context"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 2 — Inspecting a plan before trusting it", "code": [
+          "// Ask for a plan, log it, and only then let it run — the governance planners exist for.",
+          "FunctionCallingStepwisePlanner planner = new(new() { MaxIterations = 5 });",
+          "FunctionCallingStepwisePlannerResult planResult =",
+          "    await planner.ExecuteAsync(kernel, \"Cancel order ORD-1042 and notify the customer.\");",
+          "",
+          "// Because this plan includes an irreversible action (cancel), require approval",
+          "// before treating planResult.FinalAnswer as done -- human-in-the-loop checkpoint.",
+          "logger.LogInformation(\"Proposed plan result: {Result}\", planResult.FinalAnswer);",
+          "bool approved = await humanApprovalService.RequestApprovalAsync(planResult.FinalAnswer);",
+          "if (!approved)",
+          "{",
+          "    logger.LogWarning(\"Plan rejected by reviewer; no cancellation executed.\");",
+          "    return;",
+          "}",
+          "// Only on approval would the corresponding action actually be committed.",
+          "logger.LogInformation(\"Plan approved; action already reflected via planner execution.\");"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 3 — Group chat orchestration with a hard turn cap", "code": [
+          "using Microsoft.SemanticKernel.Agents.Chat;",
+          "",
+          "ChatCompletionAgent writer   = new() { Name = \"Writer\",   Instructions = \"Draft the requested text.\", Kernel = kernel };",
+          "ChatCompletionAgent reviewer = new() { Name = \"Reviewer\", Instructions = \"Say APPROVED or request specific changes.\", Kernel = kernel };",
+          "",
+          "AgentGroupChat chat = new(writer, reviewer)",
+          "{",
+          "    ExecutionSettings = new AgentGroupChatSettings",
+          "    {",
+          "        TerminationStrategy = new KeywordTerminationStrategy(\"APPROVED\")",
+          "        {",
+          "            Agents = new[] { reviewer },   // only Reviewer's approval counts",
+          "            MaximumIterations = 6           // backstop if approval never arrives",
+          "        }",
+          "    }",
+          "};",
+          "chat.AddChatMessage(new ChatMessageContent(AuthorRole.User, \"Draft a 3-sentence summary of hybrid search.\"));",
+          "",
+          "await foreach (var msg in chat.InvokeAsync())",
+          "    Console.WriteLine($\"{msg.AuthorName}: {msg.Content}\");"
+        ] }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step by Step: An Orchestrated Review Workflow",
+      "content": [
+        { "type": "paragraph", "text": "This walkthrough builds a small but complete orchestrated workflow — a Writer and Reviewer agent collaborating in a group chat with a termination strategy — then adds a human-approval checkpoint for a higher-stakes variant." },
+        { "type": "list", "style": "numbered", "items": [
+          "In a project with Microsoft.SemanticKernel and Microsoft.SemanticKernel.Agents installed, reuse the kernel and chat connector from tutorial 17.",
+          "Define two ChatCompletionAgents: Writer ('draft the requested text') and Reviewer ('reply APPROVED or list specific requested changes').",
+          "Create an AgentGroupChat with both agents, and configure a termination strategy that ends the chat when Reviewer's message contains APPROVED, restricted to Reviewer's messages only.",
+          "Set MaximumIterations as a hard backstop (e.g. 6) so the chat cannot run away if Reviewer never approves.",
+          "Send an initial user message with a drafting task, invoke the chat, and print each agent's turn — observe Writer draft, Reviewer critique or approve, and Writer revise if needed.",
+          "Confirm the loop actually stops on APPROVED, and separately confirm it also stops at MaximumIterations if you instruct Reviewer never to approve — proving both exit paths work.",
+          "Add a FunctionCallingStepwisePlanner call for a task involving your tutorial-17 OrderPlugin, and log the plan's result before treating it as final.",
+          "Identify one step in your workflow that is irreversible or consequential (e.g. an action that would cancel an order) and add a human-in-the-loop checkpoint: log the proposed action and require an explicit approval flag before it is allowed to execute.",
+          "Add step-by-step logging across the whole workflow — which agent or planner ran, what it produced, why termination did or didn't fire — and use it to narrate a full run.",
+          "Reflect on the design sequence you followed: goal, single agent or several, orchestration pattern, explicit plan or automatic function calling, termination strategy, turn cap, and human checkpoint — the checklist for any future multi-step workflow."
+        ] },
+        { "type": "note", "style": "tip", "text": "Build and test the turn-cap exit path deliberately, not just the happy path. A workflow that only ever stops via the 'success' condition in testing has not proven its safety net actually works." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "API surface caveat: Agent Framework and planner types (ChatCompletionAgent, AgentThread, AgentGroupChat, termination/selection strategies, FunctionCallingStepwisePlanner, orchestration classes) have moved and continue to move quickly across Semantic Kernel versions. Names, namespaces, and construction patterns here are illustrative of shape and intent — verify against the installed package before relying on them.",
+          "More autonomy, more compounding risk: an agent or multi-agent workflow that makes several decisions per run compounds the chance of a wrong step, and errors early in a workflow can propagate through later steps. Guardrails (validation inside functions, termination strategies, turn caps, human checkpoints) are not optional extras here — they are load-bearing.",
+          "Cost and latency scale with participants and turns: each agent turn and each planning step is a model call; group chat and handoff orchestrations especially can consume many calls before termination, so turn caps also function as cost controls.",
+          "Termination is not guaranteed correct by construction: a keyword or goal-met check can be gamed, misfire, or never trigger due to model variability — always pair a semantic termination condition with a hard maximum-iteration backstop.",
+          "Debugging multi-agent systems is harder than single-call systems: with multiple agents and possibly non-deterministic turn order, step-by-step logging is not optional polish — without it, diagnosing why a workflow produced a given result is close to guesswork.",
+          "Planners depend on the same function-calling reliability as automatic function calling: a model that struggles with tool selection produces unreliable plans, regardless of the planner wrapping it.",
+          "Orchestration patterns are structures, not guarantees of quality: choosing 'group chat' does not make agents collaborate well; instructions, roles, and termination design still determine whether the result is actually good.",
+          "This tutorial's safety patterns (human-in-the-loop, termination strategies) are necessary but not sufficient for production autonomy — broader responsible-AI and security review (tutorial 24) still applies to autonomous systems especially."
+        ] }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Default to a single agent with automatic function calling; reach for multiple agents and orchestration only when the problem genuinely needs multiple perspectives or specializations.",
+          "Give every agent narrow, specific instructions and a narrow plugin set — the same orthogonality discipline as tutorial 12's tools, now at the agent level.",
+          "Pair every termination strategy with a hard MaximumIterations backstop; never trust a semantic 'are we done?' check alone.",
+          "Insert a human-in-the-loop checkpoint before any irreversible or high-stakes action a plan or agent proposes — cancellations, payments, external communication.",
+          "Use a planner (not bare automatic function calling) whenever you need to inspect, log, or gate the sequence of steps before it runs.",
+          "Log every agent turn, plan, and termination decision with a correlation id — multi-agent debugging without this trace is impractical.",
+          "Keep tutorial 12's function-level safety (validation, authorization, idempotency, structured errors) inside every function every agent can call — autonomy raises the stakes, it doesn't lower the bar.",
+          "Choose the orchestration pattern by the problem's shape: sequential for pipelines, concurrent for independent perspectives, group chat for collaborative refinement, handoff for specialist routing."
+        ] },
+        { "type": "table", "headers": ["Common mistake", "Do this instead"], "rows": [
+          ["Multi-agent orchestration for a task one agent handles fine", "Default to a single agent; add agents only when the problem needs them"],
+          ["A termination strategy with no turn-count backstop", "Always pair a semantic condition with MaximumIterations"],
+          ["Letting a plan execute an irreversible action automatically", "Human-in-the-loop approval before high-stakes steps run"],
+          ["No logging across agent turns", "Log every turn, plan, and termination decision with a correlation id"],
+          ["Broad, overlapping agent instructions", "Narrow, specific instructions and plugin sets per agent"],
+          ["Assuming a fancy orchestration pattern guarantees quality", "Invest in instructions, roles, and termination design regardless of pattern"]
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz: Semantic Kernel Agents, Planner, and Orchestration",
+      "items": [
+        { "number": 1, "question": "What is an agent in Semantic Kernel's Agent Framework?", "options": { "A": "A faster version of the kernel", "B": "A component with a goal, instructions, and access to functions that can reason across multiple turns via a thread", "C": "A new embedding model", "D": "A configuration file format" }, "correctAnswer": "B", "explanation": "An agent (e.g. ChatCompletionAgent) wraps a kernel with persistent instructions and a conversation thread, so it reasons across many turns toward a goal rather than answering a single message like tutorial 17's one-shot kernel calls." },
+        { "number": 2, "question": "What does an agent thread provide that a plain kernel invocation does not?", "options": { "A": "Faster token generation", "B": "Persistent conversation state across multiple invocations of the agent", "C": "A JSON schema for functions", "D": "Automatic billing alerts" }, "correctAnswer": "B", "explanation": "A thread (e.g. ChatHistoryAgentThread) carries context — prior messages, function results — across separate calls to the agent, so a follow-up question can rely on earlier context without the caller re-stating it." },
+        { "number": 3, "question": "How does a planner differ from plain automatic function calling?", "options": { "A": "Planners don't use the model at all", "B": "A planner produces an explicit, inspectable multi-step plan before execution, rather than deciding steps implicitly inside one call", "C": "Planners are only for embeddings", "D": "There is no meaningful difference" }, "correctAnswer": "B", "explanation": "Automatic function calling picks and runs functions step-by-step inside one InvokeAsync call with nothing to inspect beforehand. A planner surfaces the intended sequence of steps as a result your code can log, review, or gate before anything executes." },
+        { "number": 4, "question": "What is the function-calling planner pattern built on?", "options": { "A": "A separate model trained only for planning", "B": "The same native function-calling capability of the chat model that also powers automatic function calling", "C": "Random selection of available functions", "D": "Manually written plans with no model involvement" }, "correctAnswer": "B", "explanation": "The function-calling planner pattern relies on the model's own tool-calling ability — the same mechanism as automatic function calling — but structures the result as an explicit plan, which has proven simpler and more reliable than older, bespoke planning-prompt approaches." },
+        { "number": 5, "question": "When is a planner preferable to plain automatic function calling?", "options": { "A": "Always — planners are strictly better", "B": "When you need to inspect, log, or gate the sequence of steps before execution", "C": "Only when no functions are registered", "D": "Never — automatic function calling should always be used" }, "correctAnswer": "B", "explanation": "Plain automatic function calling is simpler and fine when the model choosing functions on the fly is acceptable. A planner earns its extra complexity when the plan itself needs governance — auditing, a human-approval checkpoint, or an explicit step cap before anything runs." },
+        { "number": 6, "question": "In sequential orchestration, how do steps relate to each other?", "options": { "A": "They run independently with no relationship", "B": "Each step's output feeds forward as input to the next step, in a fixed order", "C": "They all run at the exact same time", "D": "A random step runs each time" }, "correctAnswer": "B", "explanation": "Sequential orchestration is a pipeline: step 1's output becomes step 2's input, and so on — for example Researcher gathers facts, Writer drafts from them, Reviewer polishes the draft, each stage depending on the last." },
+        { "number": 7, "question": "What characterizes concurrent orchestration?", "options": { "A": "Agents take turns speaking in one shared thread", "B": "Multiple agents work on the same input in parallel, and results are aggregated afterward", "C": "Control passes from one agent to another", "D": "Only one agent is ever used" }, "correctAnswer": "B", "explanation": "Concurrent orchestration runs several agents on the same input simultaneously — for example independent security, performance, and style reviews of the same code — with the individual results combined afterward, unlike sequential's dependent chain." },
+        { "number": 8, "question": "What is group chat orchestration?", "options": { "A": "Sending the same message to many users", "B": "Multiple agents sharing one conversation thread and taking turns, guided by a selection strategy", "C": "A single agent talking to itself", "D": "A billing feature" }, "correctAnswer": "B", "explanation": "In group chat orchestration, agents converse in a shared thread, with a selection strategy deciding who speaks next — suited to collaborative problem-solving that benefits from back-and-forth, like a Writer and Reviewer iterating on a draft." },
+        { "number": 9, "question": "What is handoff orchestration used for?", "options": { "A": "Encrypting messages between agents", "B": "Transferring control from one agent to another based on the conversation, so each agent handles what it specializes in", "C": "Running all agents in parallel", "D": "Terminating a conversation immediately" }, "correctAnswer": "B", "explanation": "Handoff orchestration routes control explicitly — a triage or general agent hands the conversation to a specialist (e.g. a BillingAgent) once it determines that's the right owner, suited to support-style routing scenarios." },
+        { "number": 10, "question": "What does a termination strategy decide?", "options": { "A": "Which model to use", "B": "When a multi-agent conversation or plan execution should stop", "C": "How to format the output", "D": "Which programming language to use" }, "correctAnswer": "B", "explanation": "A termination strategy is the stopping rule for an ongoing agent conversation or plan — a goal-met check (e.g. a keyword like APPROVED), a maximum turn count, or a specific agent's sign-off — preventing an otherwise open-ended interaction from running forever." },
+        { "number": 11, "question": "Why should a termination strategy always be paired with a MaximumIterations backstop?", "options": { "A": "It's required by C# syntax", "B": "A semantic condition (like a keyword or goal-met check) can misfire or never trigger due to model variability, so a hard cap prevents runaway execution", "C": "It makes the code shorter", "D": "It disables logging" }, "correctAnswer": "B", "explanation": "Semantic termination checks depend on model behavior and can fail to fire — a reviewer agent might never say the expected approval keyword. A hard iteration cap guarantees the loop stops regardless, bounding cost and risk even when the intended condition doesn't trigger." },
+        { "number": 12, "question": "What is a selection strategy in group chat orchestration?", "options": { "A": "The rule for choosing a model deployment", "B": "The rule that decides which agent speaks next based on the conversation so far", "C": "A way to select which plugin to load", "D": "A billing configuration" }, "correctAnswer": "B", "explanation": "In a group chat with multiple agents, the selection strategy determines whose turn it is next — round robin, a coordinator's judgment, or another rule — distinct from the termination strategy, which decides when the whole conversation ends." },
+        { "number": 13, "question": "Why does more agent/planner autonomy require more guardrails, not fewer?", "options": { "A": "It doesn't — autonomy makes systems safer automatically", "B": "More autonomous decisions per run compound the chance of a wrong or unsupervised step, especially for irreversible actions", "C": "Guardrails slow down the model", "D": "Autonomy eliminates the need for validation" }, "correctAnswer": "B", "explanation": "Each additional decision an agent or plan makes without a checkpoint is another chance for error, and mistakes early in a multi-step workflow can propagate. This is why termination strategies, turn caps, and human-in-the-loop approval for high-stakes steps become necessary rather than optional as autonomy increases." },
+        { "number": 14, "question": "What is a human-in-the-loop checkpoint for in an orchestrated workflow?", "options": { "A": "A performance optimization", "B": "A point where a person reviews or approves a proposed action before it executes, for high-stakes or irreversible steps", "C": "A way to speed up model responses", "D": "A required step in every single function call" }, "correctAnswer": "B", "explanation": "For consequential actions — cancellations, payments, external communication — a human-in-the-loop checkpoint surfaces the agent's or plan's proposed action for explicit approval before it is committed, generalizing tutorial 12's rule that irreversible tool calls need confirmation." },
+        { "number": 15, "question": "Why is step-by-step logging considered non-optional for multi-agent workflows?", "options": { "A": "It is required by the compiler", "B": "Without a trace of which agent/function ran and why termination did or didn't fire, diagnosing a multi-agent workflow's behavior is close to guesswork", "C": "It reduces token costs", "D": "It replaces the need for a termination strategy" }, "correctAnswer": "B", "explanation": "Multi-agent systems involve several participants and possibly non-deterministic turn order; without logging each step, a produced result or a stuck loop is very hard to explain. Logging turns debugging from guesswork into a straightforward read of what actually happened." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam: Written Questions",
+      "items": [
+        { "number": 1, "question": "Explain the agent framework concepts in Semantic Kernel: what an agent is, what a thread provides, and how both extend the kernel from tutorial 17.", "modelAnswer": "An agent, concretely a ChatCompletionAgent, wraps a kernel (with its registered plugins) plus persistent instructions describing a goal or role — for example 'You are an order-support agent; use OrderPlugin for facts; never invent details.' An agent thread (e.g. ChatHistoryAgentThread) is the conversation state carried across repeated invocations of that agent, holding prior messages and function results. Together they extend tutorial 17's kernel, which handled one message per InvokeAsync call with no memory of prior calls, into something that reasons across many turns toward a stated purpose: the same automatic-function-calling mechanism runs underneath, but now within a longer-lived, purposeful conversation rather than a single exchange. The agent is not a different AI system — it is the kernel and plugins from tutorial 17, given persistent instructions and a place (the thread) to remember context between calls." },
+        { "number": 2, "question": "Describe planner patterns in Semantic Kernel, contrasting them with plain automatic function calling and identifying when each is appropriate.", "modelAnswer": "Automatic function calling (tutorial 17) lets the model choose and invoke functions step by step, implicitly, inside one call — there is no plan object to inspect before execution happens. A planner pattern makes this explicit: given a goal and the kernel's available functions, it asks the model to produce a structured, multi-step plan as a first-class result, which your code can log, review, modify, or gate before any step runs. The dominant modern approach, the function-calling planner, is built on the same native tool-calling ability of the model that powers automatic function calling, rather than a separate bespoke planning prompt (which older Semantic Kernel planner types used and which the field has moved away from for reliability reasons). Plain automatic function calling remains the right default for tasks where the model choosing functions on the fly is acceptable and no inspection is needed. A planner is appropriate when the plan itself needs governance: auditing intended steps, inserting a human-approval checkpoint between planning and execution, capping steps explicitly, or building workflows where planning spans multiple agents rather than one kernel's functions." },
+        { "number": 3, "question": "Compare the four orchestration patterns — sequential, concurrent, group chat, handoff — by shape and best-fit use case.", "modelAnswer": "Sequential orchestration chains steps so each one's output feeds the next in a fixed order — fitting a pipeline like Researcher gathers facts, Writer drafts from them, Reviewer polishes the draft, where each stage genuinely depends on the last. Concurrent orchestration sends the same input to multiple agents in parallel and aggregates their independent results afterward — fitting cases needing several independent perspectives, like security, performance, and style reviews of the same code change, where the agents don't need each other's output. Group chat orchestration has multiple agents share one conversation thread and take turns, coordinated by a selection strategy — fitting collaborative, iterative problems like a Writer and Reviewer refining a document through back-and-forth. Handoff orchestration transfers control from one agent to another based on the conversation's content — fitting triage/specialist routing, like a general support agent handing a billing question to a dedicated BillingAgent. The choice is driven by the problem's actual shape: dependency (sequential), independence (concurrent), iterative collaboration (group chat), or specialization routing (handoff) — picking the wrong pattern forces a problem into an ill-fitting structure." },
+        { "number": 4, "question": "Walk through building an orchestrated multi-step workflow end to end, naming the design decisions in order.", "modelAnswer": "First, define the goal precisely — what the workflow must accomplish. Second, decide whether a single agent suffices or the task genuinely needs multiple specialized agents; default to one agent unless there's a clear reason for more. Third, if multiple agents are needed, choose an orchestration pattern matching the problem's shape (sequential for pipelines, concurrent for independent perspectives, group chat for iterative collaboration, handoff for specialist routing). Fourth, decide whether steps should be planned explicitly (a planner) — needed when the sequence must be inspected or gated before running — or left to automatic function calling within each agent's turn. Fifth, and non-negotiable, set a termination strategy (a semantic goal-met or approval check) paired with a hard MaximumIterations backstop, since a semantic check alone can misfire. Sixth, identify any irreversible or high-stakes step and insert a human-in-the-loop checkpoint requiring explicit approval before it executes. Finally, instrument the whole workflow with step-by-step logging — which agent/function ran, what it produced, why termination did or didn't fire — because without that trace, multi-agent behavior is very hard to diagnose. Building the workflow is then wiring these decisions into agents, an orchestration object, execution settings, and a logging layer, and testing both the intended stop condition and the backstop explicitly." },
+        { "number": 5, "question": "Why must every termination strategy be paired with a hard iteration cap, and what specifically can go wrong without one?", "modelAnswer": "A termination strategy's semantic condition — a keyword like APPROVED, a goal-met judgment by another agent, or similar — depends on model behavior, which is probabilistic and can be wrong, inconsistent, or manipulated. Without a hard backstop, several failure modes become possible: a reviewer agent might never produce the expected approval signal due to phrasing drift, leaving the conversation running indefinitely; two agents might loop in unproductive back-and-forth that never satisfies the goal-met check; or a subtly adversarial or confused input could prevent any agent from ever concluding. Each additional turn is a model call, so an unbounded loop is not just a logic bug but an open-ended cost and, for workflows with side effects, a risk of repeated unintended actions. A MaximumIterations backstop guarantees the workflow halts after a bounded number of turns regardless of whether the semantic condition ever fires, converting an open-ended failure into a bounded, detectable one — the same principle as capping retry attempts in tutorial 13's resilience patterns, applied to multi-agent turns instead of network calls." },
+        { "number": 6, "question": "Explain why increased autonomy in agents and planners demands new guardrails beyond the function-level safety from tutorial 12, and name at least three such guardrails.", "modelAnswer": "Tutorial 12's function-level safety — validating arguments, authorizing as the user, keeping actions idempotent, returning structured errors — protects each individual function call, and it still fully applies inside every function an agent or plan can invoke. What changes with agents and planners is the number and independence of decisions made per run: a multi-turn agent or a multi-step plan can take many actions with comparatively less human oversight per action than a single tool call reviewed once, and an error early in a chain can propagate into and compound with later steps. This is a difference in accumulated risk, not a replacement for function-level safety. The new guardrails address that accumulated risk specifically: a termination strategy with a hard iteration cap bounds how long an autonomous loop can run and how much it can cost or affect; a human-in-the-loop checkpoint inserts explicit approval before irreversible or high-stakes actions a plan or agent proposes, generalizing single-tool confirmation to multi-step workflows; and step-by-step logging with correlation ids makes an otherwise opaque sequence of autonomous decisions auditable and debuggable after the fact. All three exist because autonomy multiplies the number of unsupervised decision points, and each guardrail closes a specific new failure mode that a single well-validated function call didn't have." },
+        { "number": 7, "question": "Contrast a single ChatCompletionAgent handling a task with a group chat orchestration of two agents handling the same task, including what changes and what stays the same.", "modelAnswer": "What stays the same: both rely on the same underlying kernel, plugin functions, and automatic function calling; both need narrow, correct instructions to behave well; and any functions either can call still need tutorial 12's validation, authorization, idempotency, and structured errors. What changes: a single agent produces one line of reasoning toward the goal, using its thread only to remember its own prior turns with the user, with no other AI perspective involved. A group chat orchestration introduces a second agent (say, a Reviewer) sharing a thread with the first (a Writer), so the task passes through two distinct instruction sets and viewpoints, iterating via a selection strategy that decides whose turn is next. This adds real value when a second perspective (critique, verification, a different specialization) improves the outcome enough to justify it, but it also adds cost (more model calls per iteration), complexity (a termination strategy is now mandatory, since two agents conversing has no natural stopping point), and a harder debugging surface (multiple participants instead of one). The decision to use group chat over a single agent should be justified by the task genuinely needing that second perspective, not defaulted to because orchestration is available." },
+        { "number": 8, "question": "A workflow uses a planner to decide whether to cancel a customer's order. Design the safety architecture around this single consequential step.", "modelAnswer": "The plan itself should be treated as a proposal, not an authorization to act. Concretely: the planner (e.g. a function-calling planner) runs with the available functions, including one that would perform the cancellation, and produces its intended result/plan; this is logged in full — the reasoning, the proposed action, and any arguments — before anything with side effects happens. Because cancelling an order is irreversible and financially consequential, a human-in-the-loop checkpoint sits between the plan and execution: the proposed cancellation is surfaced to a person (or a policy-driven approval function, for cases within pre-approved bounds) and requires explicit approval before the actual cancellation function is invoked. The cancellation function itself keeps tutorial 12's discipline regardless: it validates the order exists and is cancellable, authorizes as the actual requesting user (not a privileged path the planner grants itself), remains idempotent so a repeated approval or retry doesn't double-cancel or double-refund, and returns a structured result. A hard cap on planner iterations prevents an unrelated runaway loop from reaching this step unexpectedly. And the whole sequence — plan proposed, approval requested, approval outcome, action executed or not — is logged with a correlation id so the decision trail is fully auditable after the fact, which matters especially for a customer-facing financial action." },
+        { "number": 9, "question": "Explain the difference between a termination strategy and a selection strategy, and why group chat orchestration needs both.", "modelAnswer": "A termination strategy decides when the entire multi-agent conversation should stop — for example, when a Reviewer's message contains an approval keyword, when another agent judges the goal met, or unconditionally at a maximum iteration count. A selection strategy decides who speaks next at each turn within an ongoing conversation — for example, strict round-robin among the agents, or a coordinating rule that picks whichever agent is most relevant to the latest message. They answer different questions — 'are we done?' versus 'whose turn is it?' — and a group chat needs both because without a selection strategy the orchestration has no defined way to sequence multiple agents' turns at all, and without a termination strategy a multi-agent conversation, unlike a single request/response call, has no inherent stopping point and could continue turn after turn indefinitely. Configuring only one leaves a gap: a chat with a selection strategy but no termination strategy could run forever even with well-chosen turns; a chat with termination logic but a poor or absent selection strategy might loop the wrong agent repeatedly, wasting turns before the termination condition is ever reached." },
+        { "number": 10, "question": "Argue for when NOT to use multi-agent orchestration, even though the framework supports it.", "modelAnswer": "Multi-agent orchestration should be reserved for problems that genuinely need multiple perspectives, specializations, or an iterative back-and-forth that a single agent's one line of reasoning cannot provide as well. It should not be used when a single ChatCompletionAgent with automatic function calling and a well-scoped plugin set already solves the task — for example, most single-domain support questions, straightforward data retrieval, or single-step actions. Reasons to avoid it in those cases: cost and latency multiply, since each additional agent turn is another model call, and group chat/handoff patterns especially can consume many calls before terminating; complexity rises, since orchestration requires a termination strategy, often a selection strategy, and more extensive logging to remain debuggable; and orchestration patterns are structures, not guarantees — putting agents in a group chat does not itself produce better output than one well-instructed agent, and a poorly designed multi-agent setup can produce worse results with more overhead than the single-agent baseline. The sound default, mirroring the course's repeated lesson about matching tool to scope (bare API versus Foundry, kernel versus bare completion call), is to start with a single agent and add orchestration only when a specific, articulable need — independent parallel perspectives, genuine specialization routing, or iterative refinement that measurably improves quality — justifies the added cost and complexity." },
+        { "number": 11, "question": "Describe how you would test a multi-step workflow's termination behavior thoroughly, including both intended and backstop exit paths.", "modelAnswer": "Testing needs to cover both ways the workflow can legitimately end. For the intended exit (the semantic termination condition), construct a scenario where the condition is expected to be met naturally — for example, instructing a Reviewer agent normally and confirming the chat ends once it approves — and assert the conversation stopped at that point with the expected final state. For the backstop exit (MaximumIterations), construct a scenario specifically designed to prevent the semantic condition from ever firing — for example, instructing the Reviewer agent to never approve, or to always request unaddressable changes — and confirm the workflow still halts at the configured iteration cap rather than running indefinitely, and that it surfaces a clear 'did not complete/reach approval' outcome rather than silently succeeding. Both tests matter because a workflow that only ever stops via the happy-path condition in testing has not actually proven its safety net works — the backstop path is precisely the one that protects production when the semantic condition misbehaves, so it must be exercised as its own explicit test case, not assumed to work because the code compiles." },
+        { "number": 12, "question": "How does building a Semantic Kernel-based agentic workflow relate architecturally to the clean architecture and service-layer patterns from earlier tutorials?", "modelAnswer": "The relationship is additive, not disruptive. Agents, planners, and orchestration objects are still constructed from a kernel, which is still registered and resolved through dependency injection as in tutorial 13; native functions inside plugins still receive their dependencies (HttpClient, repositories) via the container, so an enterprise-API skill used by an agent is exactly as testable and safe as it was as a plain plugin function. The service-layer boundary from tutorial 13 still makes sense: an application-facing interface can expose 'run this workflow and return the result' without callers needing to know whether the implementation is a single kernel call, an agent, or a multi-agent orchestration — that decision is an implementation detail behind the interface, swappable as the workflow's needs evolve. What's new is internal to that implementation: more state (agent threads), more coordination logic (orchestration, termination/selection strategies), and more decision points needing logging and guardrails. None of this requires abandoning clean architecture's inward-pointing dependencies — the AI framework specifics (Agent Framework types, orchestration classes) still belong at the infrastructure edge, with the domain/application layers depending only on the abstraction that exposes 'run the workflow,' exactly as IChatService abstracted a single model call in earlier tutorials." },
+        { "number": 13, "question": "A stakeholder wants to skip a human-in-the-loop checkpoint for a workflow that processes refunds, arguing the agent's plan is 'almost always correct.' Respond with a reasoned counter-proposal.", "modelAnswer": "The core issue is that 'almost always correct' describes an error rate, not a guarantee, and refunds are financial and often irreversible, so the cost of the rare wrong case can be disproportionate to the convenience saved by skipping review. Rather than a binary all-or-nothing checkpoint, I would propose a graduated design: the agent/planner still gathers context and drafts a proposed refund with amount and justification; for amounts below a defined threshold and meeting policy checks (eligibility, no prior refund on this order, standard reason codes), the action auto-executes with an idempotency key, per-user/day rate limits, and full logging — capturing most of the efficiency gain the stakeholder wants. For amounts above the threshold, or when policy checks fail, or when the plan's confidence/reasoning looks unusual, a human-in-the-loop checkpoint requires explicit approval before execution. This preserves speed for the routine, low-risk majority of cases while keeping a safety net exactly where the 'almost always correct' caveat matters most — the tail of larger or unusual cases where a mistake is expensive. I would also propose reviewing a sample of the auto-executed cases periodically to validate that the threshold and policy checks are actually catching what they should, since the graduated design's safety depends on those checks being well-calibrated, not just present." },
+        { "number": 14, "question": "Explain why the course introduces agents, planners, and orchestration only after Semantic Kernel's core (tutorial 17), rather than starting with them.", "modelAnswer": "Agents, planners, and orchestration are all built directly on tutorial 17's primitives: an agent is a kernel with persistent instructions and a thread; a planner surfaces what automatic function calling already does implicitly as an explicit, inspectable plan; and orchestration patterns are ways of running several agents — each themselves a kernel-based construct — together. None of these concepts make sense, or can be implemented correctly, without first understanding the kernel, connectors, plugins, native and prompt functions, and automatic function calling that tutorial 17 established. Introducing autonomy concepts first would mean either hand-waving over what an agent actually is underneath, or requiring the reader to absorb kernel mechanics and multi-agent coordination simultaneously — compounding two hard topics rather than building one on the other. The sequencing also matches the increasing-autonomy narrative of the course: raw function calling (tutorial 12) taught the loop by hand; Semantic Kernel (tutorial 17) automated that loop within one orchestrated turn; this tutorial extends automation across many turns and many participants; and the next tutorial (AutoGen) contrasts this approach with a different multi-agent framework, which is only a meaningful comparison once the reader deeply understands one approach first." },
+        { "number": 15, "question": "Design a decision framework a team could use to choose among 'single agent,' 'planner,' and one of the four orchestration patterns for a new AI feature.", "modelAnswer": "Start with the simplest option and add complexity only when justified. First question: does the task fit in one agent's single line of reasoning with automatic function calling — most single-domain, single-perspective tasks do — if yes, stop there; a single ChatCompletionAgent with a narrow plugin set and a thread (if multi-turn) is sufficient and cheapest to build, run, and debug. Second question, if the plan itself needs governance (audit before execution, a human-approval gate, or an explicit step cap): introduce a planner rather than plain automatic function calling, keeping it single-agent unless further need is shown. Third question, only if the task genuinely needs more than one agent's perspective or specialization: identify the relationship between the needed contributions. If one step's output must feed the next in a fixed order, use sequential orchestration. If several independent perspectives on the same input should be gathered and combined, use concurrent orchestration. If the agents need genuine back-and-forth to converge on a result, use group chat orchestration, with both a selection strategy and a termination-plus-iteration-cap pair mandatory from the start. If the task is really about routing a conversation to the right specialist based on its content, use handoff orchestration. At every step past 'single agent,' the team should also decide the guardrails up front — termination strategy and cap, human-in-the-loop checkpoints for irreversible actions, and step-by-step logging — as part of choosing the pattern, not as an afterthought once the orchestration is built." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Agent (Semantic Kernel)", "back": "A component with a goal, instructions, and functions that reasons across multiple turns via a thread. Concretely: ChatCompletionAgent — a kernel + persistent instructions + thread." },
+        { "number": 2, "front": "Agent thread", "back": "Conversation state (message history) an agent carries across invocations, so follow-up turns can rely on earlier context without restating it." },
+        { "number": 3, "front": "Planner vs automatic function calling", "back": "Automatic function calling picks functions implicitly, step by step, inside one call. A planner produces an explicit, inspectable multi-step plan BEFORE execution." },
+        { "number": 4, "front": "Function-calling planner", "back": "The dominant modern planner pattern: built on the model's native tool-calling ability (same as automatic function calling), surfaced as an inspectable plan." },
+        { "number": 5, "front": "When to use a planner", "back": "When the plan needs governance: audit/logging before execution, a human-approval checkpoint, an explicit step cap, or multi-agent plan spans." },
+        { "number": 6, "front": "Sequential orchestration", "back": "Step 1 → step 2 → step 3, each output feeding the next. Fits fixed pipelines (Researcher → Writer → Reviewer)." },
+        { "number": 7, "front": "Concurrent orchestration", "back": "Same input to N agents in parallel, results aggregated after. Fits independent perspectives (security + performance + style review)." },
+        { "number": 8, "front": "Group chat orchestration", "back": "Agents share one thread, take turns via a selection strategy. Fits iterative collaboration (Writer + Reviewer refining a draft)." },
+        { "number": 9, "front": "Handoff orchestration", "back": "Control transfers from one agent to another based on the conversation. Fits triage/specialist routing (support → billing agent)." },
+        { "number": 10, "front": "Termination strategy", "back": "The rule deciding when a multi-agent conversation/plan stops (keyword, goal-met check, turn limit). Group chat/handoff need one — no natural stopping point." },
+        { "number": 11, "front": "Selection strategy", "back": "The rule deciding WHO speaks next in a group chat (distinct from termination, which decides WHEN to stop)." },
+        { "number": 12, "front": "Termination + iteration cap", "back": "ALWAYS pair a semantic termination condition with a hard MaximumIterations backstop — semantic checks can misfire or never trigger." },
+        { "number": 13, "front": "Human-in-the-loop checkpoint", "back": "A person approves a proposed action before it executes — required for irreversible/high-stakes steps in agent/planner workflows." },
+        { "number": 14, "front": "Autonomy → more guardrails", "back": "More unsupervised decisions per run = more compounding risk. Function-level safety (tutorial 12) still applies PLUS termination, caps, human checkpoints, logging." },
+        { "number": 15, "front": "Multi-step workflow design order", "back": "Goal → single agent or several? → orchestration pattern (if several) → explicit plan or automatic FC? → termination + cap → human checkpoint for high-stakes steps → logging." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions and Answers",
+      "items": [
+        { "number": 1, "question": "What is an agent in Semantic Kernel, and how does it differ from what you built in the prior tutorial?", "answer": "An agent — concretely a ChatCompletionAgent — wraps a kernel and its plugins with persistent instructions describing a role or goal, and can be invoked repeatedly against a thread that carries conversation state across those calls. The prior tutorial's kernel handled one message per call with automatic function calling deciding steps within that single call, with no memory between separate InvokeAsync calls. An agent is the same underlying mechanism — same kernel, same plugins, same automatic function calling — given a persistent purpose and a place to remember context, so it can hold an entire multi-turn conversation coherently, like a support interaction where a customer's order number mentioned in turn one still applies in turn three." },
+        { "number": 2, "question": "Explain planners and when you'd reach for one instead of just using automatic function calling.", "answer": "Automatic function calling already lets the model choose and run functions, but it does so implicitly, one step at a time, inside a single call — there's nothing to inspect before it happens. A planner asks for the plan explicitly, up front, as a structured object your code can log, review, or gate before any step actually runs. The modern approach, the function-calling planner, relies on the same native tool-calling ability of the model as automatic function calling — it's not a different, more magical capability, just a different packaging that exposes the plan rather than hiding it. I'd reach for a planner specifically when the plan needs governance: I want to log the intended steps for audit, insert a human-approval gate before execution, cap the number of steps explicitly, or the plan spans multiple agents. For a task where the model choosing functions on the fly is fine, plain automatic function calling is simpler and remains my default." },
+        { "number": 3, "question": "Walk me through the four orchestration patterns and how you'd choose among them.", "answer": "Sequential chains agents so each one's output feeds the next — a fixed pipeline, like Researcher gathers facts, Writer drafts, Reviewer polishes. Concurrent runs multiple agents on the same input in parallel and aggregates afterward — good for independent perspectives, like three specialist reviews of the same code change that don't depend on each other. Group chat has agents share a thread and take turns via a selection strategy — suited to iterative, collaborative refinement, like a Writer and Reviewer going back and forth on a draft. Handoff transfers control from one agent to another based on the conversation — suited to triage and specialist routing, like a general assistant handing a billing question to a BillingAgent. I choose by the actual shape of the problem: is there a dependency chain (sequential), true independence (concurrent), a need for back-and-forth (group chat), or a routing decision (handoff)? Picking based on shape, not novelty, is what keeps the orchestration from being over-engineered for the task." },
+        { "number": 4, "question": "Why is a hard iteration cap non-negotiable alongside a termination strategy?", "answer": "Because the termination strategy's semantic condition — a keyword, a goal-met judgment, an approval signal — depends on model behavior, and models are probabilistic: a reviewer agent can fail to phrase the expected approval, two agents can loop without converging, or an edge-case input can prevent any natural stopping point from ever being reached. Without a hard cap, that translates into a conversation or plan execution that could run indefinitely, which is both an open-ended cost problem — every turn is a model call — and, for workflows with side effects, a risk of repeated unintended actions. A MaximumIterations backstop guarantees the workflow halts after a bounded number of turns no matter what, turning an open-ended failure mode into a bounded, detectable one. I treat this exactly like a retry cap in resilience code: the primary condition is the goal, but the hard limit is what actually protects production when the primary condition misbehaves." },
+        { "number": 5, "question": "How do you decide between a single agent and multi-agent orchestration for a new feature?", "answer": "I default to a single agent and only add orchestration when there's a specific, articulable reason it's needed. The test is whether the task genuinely requires multiple distinct perspectives, specializations, or an iterative back-and-forth that one agent's line of reasoning can't provide as well — independent parallel reviews, true specialist routing, or collaborative refinement that measurably improves the result. If a single ChatCompletionAgent with a well-scoped plugin set and automatic function calling already solves it, adding orchestration only adds cost (more model calls per interaction), complexity (mandatory termination and often selection strategies), and a harder debugging surface, without necessarily improving the outcome — orchestration patterns are structures, not guarantees of better results. So the decision isn't 'can we use multiple agents,' it's 'does this specific problem's shape require more than one perspective to solve well,' and I want a concrete answer before reaching for it." },
+        { "number": 6, "question": "A workflow you built can cancel customer orders autonomously. How do you make that safe?", "answer": "I don't let the plan's proposal be the same thing as execution. The agent or planner can gather context and draft the proposed cancellation with its reasoning, and that gets logged in full before anything happens. Because cancelling an order is irreversible and consequential, I insert a human-in-the-loop checkpoint between the plan and the actual cancellation function — a person (or, for low-risk cases within pre-approved bounds, a policy check) has to approve before the function that does the real work runs. That cancellation function itself keeps the same discipline as any tool from the function-calling tutorial: validate the order exists and is cancellable, authorize as the actual user rather than trusting the planner's context, stay idempotent so a retried approval doesn't double-cancel, and return structured results. A hard iteration cap on the planner prevents an unrelated runaway loop from reaching this step unexpectedly. And I log the whole chain — proposal, approval outcome, execution — with a correlation id, because for a customer-facing financial action, being able to reconstruct exactly what happened and why is not optional." },
+        { "number": 7, "question": "What's the difference between a termination strategy and a selection strategy, and why does group chat need both?", "answer": "They answer different questions. A termination strategy decides when the whole conversation should stop — a keyword like APPROVED in a reviewer's message, another agent judging the goal met, or simply a maximum iteration count. A selection strategy decides who talks next at each individual turn — round robin, or a coordinator picking whichever agent is most relevant right now. Group chat orchestration needs both because, unlike a single request-response call, a conversation among multiple agents has no built-in stopping point and no built-in turn order — without a selection strategy there's no defined way to sequence the agents at all, and without a termination strategy the conversation could continue indefinitely even if turns are being chosen sensibly. I've seen the failure mode of configuring one without the other: a good selection strategy with no termination logic just runs forever productively; a termination check with a poor selection strategy might loop the wrong agent repeatedly and waste turns before the stopping condition is ever reached." },
+        { "number": 8, "question": "How does the level of guardrails change as you move from a single tool call to an agent to a multi-agent orchestration?", "answer": "The function-level safety — validate arguments, authorize as the user, keep actions idempotent, structured errors — never goes away; it's the floor at every level, because it protects each individual function regardless of what's calling it. What's added is proportional to how many unsupervised decisions accumulate per run. A single tool call inside one turn has one decision point, reviewable in that turn's context. A multi-turn agent makes a sequence of decisions across a conversation, so I add persistent instructions to keep it on-task and, if actions have consequences, a human-in-the-loop checkpoint before the risky ones. A multi-agent orchestration compounds this further — several agents each making decisions, potentially many turns before completion — so termination strategies with hard iteration caps become mandatory (not just good practice), selection strategy design matters for efficiency, and step-by-step logging becomes essential rather than nice-to-have, because with multiple participants a bad outcome is much harder to diagnose without a full trace. The principle throughout: guardrails scale with the number of unsupervised decision points, not with how impressive the architecture looks." },
+        { "number": 9, "question": "Debugging a group chat orchestration that seems to loop without converging — how do you approach it?", "answer": "First, I check whether it actually looped forever or hit the MaximumIterations backstop — if there's no backstop configured, that's the first fix, immediately, regardless of the underlying cause. Then I look at the step-by-step log: which agent spoke each turn, what they said, and whether the termination condition's expected signal (a keyword, an approval) ever appeared in any message even in a slightly different phrasing than expected — a very common cause is the termination check being too strict (exact keyword match) against a model that phrases approval slightly differently each time. I'd also check the selection strategy: is it actually giving the right agent the turn at the right time, or is a coordinator logic stuck cycling the wrong participant? And I'd look at the agents' instructions for ambiguity or conflicting goals that would prevent natural convergence — e.g., a Reviewer instructed to be maximally thorough may never feel satisfied enough to approve. The fix is usually one of: loosen or fix the termination match, clarify agent instructions toward a clearer stopping signal, or accept that some tasks need a lower iteration cap and a fallback path (like escalating to a human) rather than expecting the agents to always converge on their own." },
+        { "number": 10, "question": "Why does the field seem to be converging on function-calling-based planners over earlier bespoke planning-prompt approaches?", "answer": "Bespoke planning prompts asked the model, via a specially crafted instruction, to output a plan in some custom format, which the framework then had to parse and validate — an extra layer of prompt engineering and parsing brittleness on top of the model's actual capabilities. Modern chat models have gotten reliably good at native function/tool calling specifically, which is a capability providers train and tune directly, unlike a bespoke planning format that's essentially an unofficial convention layered on top. Building planners on that native ability means less custom prompt engineering, less parsing brittleness, and more consistency with how automatic function calling already works for a single-call scenario — the planner is essentially 'the same reliable mechanism, surfaced explicitly' rather than a separate, weaker mechanism. It's a case of building on the model's actual trained strength rather than working around it, which tends to be both simpler to build and more reliable in practice — the general lesson being that betting on a model's native, well-supported capability usually outperforms a custom convention asking it to do something slightly different." },
+        { "number": 11, "question": "How would you architect logging and observability for a production multi-agent workflow?", "answer": "One correlation id per workflow run, threading through every agent turn, function call, and orchestration decision so the whole run reconstructs as one story. Per agent turn: which agent, its input, its output, and whether it triggered any function calls, each logged with that function's name, arguments, and result (structured errors included) — the same discipline as the function-calling tutorial's trace logging, just repeated per agent. Per orchestration step: which selection-strategy decision picked the next speaker and why, if that's inspectable, and every termination-strategy evaluation with its result — did it check for approval, did it match, why did it or didn't it stop. A running iteration counter logged each turn makes it trivial to see how close a run is to its cap. For plans specifically, the full proposed plan gets logged before execution, separate from the execution log, so I can distinguish 'the plan was wrong' from 'the plan was fine but execution failed.' And I keep prompt/response bodies out of default logs as user data, following the same policy as earlier tutorials, capturing them only behind an explicit debug flag when reproducing an issue." },
+        { "number": 12, "question": "A team wants to skip designing a termination strategy, saying 'we'll just let it run and see what happens.' What's your response?", "answer": "I'd point out that 'let it run and see' is itself a termination strategy — it's just an unbounded one, and unbounded is exactly the failure mode termination strategies exist to prevent. Concretely: every additional turn in a multi-agent conversation is a model call, so without a stopping rule the cost is unbounded; if the conversation can trigger any function with side effects, an unbounded loop risks unbounded repeated actions; and 'see what happens' in production usually means a customer or an on-call engineer discovers the runaway behavior, not a developer watching a console. My counter-proposal is minimal, not heavyweight: even a simple MaximumIterations cap with no fancy semantic condition is better than nothing, and takes one line to configure. From there, a semantic condition (an approval keyword, a goal-met check) can be layered on to stop early in the common case, with the cap remaining as the backstop for when it doesn't. I'd frame this as no different from setting a timeout on a network call — nobody would ship a call with no timeout 'to see what happens,' and an open-ended agent loop is the same risk in a different shape." },
+        { "number": 13, "question": "Explain how you'd extend a single-agent order-support assistant into a workflow that also needs a specialist billing agent, using the concepts from this tutorial.", "answer": "I'd start by confirming the need is real — does billing genuinely require different instructions, a different plugin set, or different expertise than the order agent handles well already? Assuming yes, I'd design this as handoff orchestration: the order agent (acting as a general/triage point) keeps its existing instructions and OrderPlugin, and a new BillingAgent gets its own narrow instructions and a BillingPlugin wrapping whatever billing API or logic it needs. The order agent's instructions would include guidance to hand off when the conversation is clearly about billing (refunds, payment methods, invoices) rather than order status/logistics. I'd implement this using handoff orchestration's mechanism for transferring control based on conversation content, keep each agent's plugin set narrow and non-overlapping (avoiding the confusion overlapping tools caused in the function-calling tutorial), and add logging that records every handoff event — which agent, why, at what point in the conversation — since that's exactly the kind of decision a support team will want visibility into. I would not merge both capabilities into one agent with a huge combined instruction set and plugin list; that's the overlapping-instructions anti-pattern and defeats the specialization handoff orchestration is meant to provide." },
+        { "number": 14, "question": "What's your view on using orchestration patterns 'because the framework supports them' versus because the problem needs them?", "answer": "I'm against reaching for orchestration just because it's available — it's the same anti-pattern as premature abstraction in regular software design, applied to AI. Each orchestration pattern adds real cost: more model calls, mandatory termination/selection strategy design, and a genuinely harder debugging surface with multiple participants instead of one. None of that is justified unless the problem's actual shape needs it — real independent perspectives for concurrent, a real dependency chain for sequential, real iterative refinement for group chat, or real specialist routing for handoff. I've found the discipline that works is to build the single-agent version first, see where it actually falls short — maybe one agent's instructions get bloated trying to cover too many specializations, or a task obviously needs independent parallel opinions — and only then introduce the specific orchestration pattern that addresses that concrete gap. This keeps the system as simple as the problem allows, which also keeps it as debuggable and cheap as the problem allows, and avoids the failure mode of an elaborate multi-agent system that performs no better than one well-instructed agent would have." },
+        { "number": 15, "question": "How does this tutorial's material set up the comparison with AutoGen in the next tutorial?", "answer": "This tutorial establishes one coherent philosophy for autonomy and multi-agent coordination — agents as kernel-plus-instructions-plus-thread, planners as explicit inspectable plans built on native function calling, and a fixed set of orchestration patterns (sequential, concurrent, group chat, handoff) each with termination and selection strategies as first-class configuration. Having built that mental model concretely, the next tutorial's introduction of AutoGen — a different, Python-rooted multi-agent framework, also usable from .NET — becomes a meaningful comparison rather than an isolated new topic: the reader can ask how AutoGen represents an agent, how it composes plans or lets agents converse, and how it handles termination, mapping each concept onto what was just learned here rather than starting from zero. It also sets up a broader lesson the course will reinforce: the underlying problems — coordinating models, tools, and memory into autonomous multi-step behavior safely — are framework-agnostic, and different frameworks are different, defensible answers to the same design questions this tutorial raised (how to structure agents, how to plan, how to coordinate multiples, how to bound autonomy), which is a far more transferable takeaway than memorizing one framework's API surface." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "Agent", "definition": "An AI component with a goal, instructions, and function access that reasons across multiple turns via a thread, rather than answering once." },
+        { "term": "Agent Framework", "definition": "Semantic Kernel's abstractions (ChatCompletionAgent and related types) for building, running, and coordinating agents." },
+        { "term": "ChatCompletionAgent", "definition": "A concrete agent type backed by a chat model, given instructions and a kernel with plugins, invoked across a thread over multiple turns." },
+        { "term": "Agent thread", "definition": "The conversation state an agent maintains across turns of a task, distinct from a single one-shot kernel invocation." },
+        { "term": "Planner", "definition": "A component that asks the model to compose available kernel functions into a multi-step plan toward a stated goal, surfaced for inspection." },
+        { "term": "Plan", "definition": "A structured sequence of function-call steps a planner produces to reach a goal, executable and reviewable before or during execution." },
+        { "term": "Function-calling planner", "definition": "A planning approach built on the model's native function-calling ability, producing an explicit plan rather than a bespoke planning-prompt output." },
+        { "term": "Sequential orchestration", "definition": "An orchestration pattern where agents or steps run one after another, each consuming the previous step's output." },
+        { "term": "Concurrent orchestration", "definition": "An orchestration pattern where multiple agents work on the same input in parallel and results are aggregated." },
+        { "term": "Group chat orchestration", "definition": "An orchestration pattern where multiple agents converse in a shared thread, taking turns via a selection strategy." },
+        { "term": "Handoff orchestration", "definition": "An orchestration pattern where control passes from one agent to another based on the conversation, each handling its specialty." },
+        { "term": "Orchestration pattern", "definition": "A reusable structure (sequential, concurrent, group chat, handoff) for coordinating multiple agents or steps toward a goal." },
+        { "term": "Multi-step workflow", "definition": "A task broken into ordered steps, possibly across agents, executed and tracked as a whole with a defined stop condition." },
+        { "term": "Termination strategy", "definition": "The rule deciding when a multi-agent conversation or plan execution should stop — a goal-met check, a turn limit, or an approval signal." },
+        { "term": "Selection strategy", "definition": "The rule deciding which agent speaks next in a group chat orchestration, based on the conversation so far." },
+        { "term": "Goal", "definition": "The objective given to an agent or planner that its plan or actions are meant to accomplish." },
+        { "term": "Autonomy", "definition": "The degree to which a system decides its own next actions rather than following a fixed, code-defined sequence." },
+        { "term": "Human-in-the-loop", "definition": "A checkpoint where a person reviews or approves a proposed action before execution, used for high-stakes or irreversible steps." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "An agent (ChatCompletionAgent) wraps tutorial 17's kernel and plugins with persistent instructions and a thread, extending one-shot automatic function calling into reasoning across many turns.",
+          "A planner makes the model's step composition explicit — a plan you can log, review, or gate — built on the same native function-calling ability as automatic function calling, and used when the sequence needs governance rather than just execution.",
+          "Orchestration patterns coordinate multiple agents: sequential for pipelines, concurrent for independent perspectives, group chat for iterative collaboration (with a selection strategy), and handoff for specialist routing.",
+          "A multi-step workflow combines agents, a plan or automatic function calling, and an orchestration pattern with a mandatory termination strategy and a hard iteration-cap backstop.",
+          "Autonomy compounds risk: tutorial 12's function-level safety (validation, authorization, idempotency, structured errors) still applies inside every function, and higher autonomy adds termination strategies, turn caps, human-in-the-loop checkpoints for consequential steps, and step-by-step logging as necessary new controls.",
+          "Orchestration patterns are structures, not guarantees of quality — good instructions, narrow scoping per agent, and deliberate termination design determine whether a multi-agent system actually outperforms a single well-built agent."
+        ] },
+        { "type": "paragraph", "text": "You now have the vocabulary and mechanics to build systems that reason across turns and coordinate multiple specialized agents toward a goal — agents, planners, orchestration patterns, and the guardrails that keep growing autonomy safe. Every capability here is a direct extension of tutorial 17's kernel and plugins, which is why none of it should feel like a new system so much as the same one, given more room to act. The next tutorial introduces AutoGen, a different multi-agent framework, letting you compare its philosophy against everything just learned here." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Next tutorial: The AutoGen Framework (autogen-framework). Having built agents, planners, and orchestration patterns in Semantic Kernel, the next tutorial introduces AutoGen — a complementary, Python-rooted multi-agent framework also usable from .NET — so you can compare its approach to conversation-driven multi-agent systems against the Agent Framework concepts just covered." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: build the group-chat Writer/Reviewer workflow from the walkthrough, then deliberately break the termination keyword to prove the MaximumIterations backstop actually fires.",
+          "Practice: convert a single-agent tutorial-17 assistant into a ChatCompletionAgent with a thread, and hold a genuine multi-turn conversation that relies on earlier-turn context.",
+          "Practice: use a function-calling planner on a task involving two of your plugin functions, log the plan's result, and add a human-approval gate before treating any consequential step as final.",
+          "Practice: design (on paper first) which orchestration pattern fits a task of your choosing — sequential, concurrent, group chat, or handoff — and justify the choice before implementing it.",
+          "Read: the official documentation for 'Semantic Kernel Agent Framework', 'Semantic Kernel planners', 'Agent orchestration in Semantic Kernel', and the current guidance on function-calling-based planning."
+        ] },
+        { "type": "note", "style": "tip", "text": "Keep your termination-strategy test (both the intended and backstop exit paths) as a template — every future multi-agent workflow you build should pass the same two-sided test before you trust it." }
+      ]
+    }
+  ]
+}
