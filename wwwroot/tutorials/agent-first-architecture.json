@@ -1,0 +1,552 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Designing Agent-First Architectures",
+  "slug": "agent-first-architecture",
+  "level": "Advanced",
+  "codeLanguage": "C#",
+  "tutorialNumber": 20,
+  "totalTutorials": 27,
+  "prev": "autogen-framework",
+  "next": "model-context-protocol-mcp",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Designing Agent-First Architectures"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "Designing agent-first architectures",
+    "Agent communication models",
+    "Governance and safety for agents",
+    "Converting a traditional AI pipeline into an agent-based system"
+  ],
+  "tooltips": {
+    "agent-first architecture": "A system design where agents (goal-driven, tool-using, reasoning components) are the primary unit of functionality, rather than fixed request/response endpoints.",
+    "request/response architecture": "A design where each call follows one fixed code path from input to output — the traditional shape most APIs and AI pipelines use.",
+    "unit of functionality": "The building block an architecture is organized around — an endpoint or service in traditional design, an agent with a goal in agent-first design.",
+    "agent registry": "A directory of the agents available in a system, including what each is responsible for and how to reach it.",
+    "agent communication model": "The pattern by which agents exchange information — direct messaging, a shared message bus, or a blackboard/shared state.",
+    "message bus": "An intermediary that routes messages between agents (or services) without the sender needing to know the receiver directly.",
+    "blackboard pattern": "An agent communication model where agents read and write to shared state that any participant can observe and act on.",
+    "direct messaging": "An agent communication model where one agent sends a message straight to another named agent or service.",
+    "loose coupling": "A design property where components interact through stable contracts (messages, interfaces) without depending on each other's internals.",
+    "governance": "The policies, controls, and oversight mechanisms that constrain what an autonomous system is allowed to do and how it is monitored.",
+    "policy engine": "A component that checks a proposed agent action against defined rules before allowing it to execute.",
+    "sandboxing": "Running an agent's actions in a restricted environment so a mistake or malicious instruction cannot affect systems beyond that boundary.",
+    "audit trail": "A durable, ordered record of agent decisions and actions kept for review, debugging, and compliance.",
+    "kill switch": "A mechanism to immediately halt an agent or agent system's activity, used when behavior is unsafe or out of control.",
+    "capability scoping": "Restricting an agent to the minimum set of tools and permissions it needs, following least privilege at the agent level.",
+    "traditional AI pipeline": "A fixed sequence of steps (e.g. retrieve, prompt, generate) that always runs the same way regardless of the specific input.",
+    "agent-based system": "A system where components decide their own next actions toward a goal, using tools and reasoning, rather than following one fixed sequence.",
+    "migration strategy": "A deliberate, incremental plan for moving a system from one architecture (e.g. a pipeline) to another (e.g. agent-based) without a risky rewrite."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview: Agents as the Unit of Design",
+      "content": [
+        { "type": "paragraph", "text": "Tutorials 17 through 19 built agents inside two frameworks — Semantic Kernel and AutoGen — as a mechanism: a kernel plus instructions and a thread, or a conversable agent exchanging messages. This tutorial steps back from mechanism to architecture. Agent-first architecture asks a different question: if an application's primary unit of functionality is an agent with a goal, rather than a fixed request/response endpoint, how does that reshape how you design the whole system — its structure, how components talk to each other, how you keep it safe, and how you get there from what you already have?" },
+        { "type": "paragraph", "text": "This advanced tutorial covers designing agent-first architectures as a discipline (not a framework feature); agent communication models — how agents actually exchange information at a system level; governance and safety for agents — the organizational and technical controls that make autonomy acceptable in production; and converting a traditional AI pipeline into an agent-based system, a concrete migration you can apply to real code. Every idea here sits above the frameworks from tutorials 17–19 — it applies whether the agents underneath are Semantic Kernel, AutoGen, or something else entirely." },
+        { "type": "note", "style": "warning", "text": "Agent-first is a design choice with real costs (less predictability, more moving parts, more guardrail engineering), not a universal upgrade. Part of this tutorial's job is teaching you when NOT to reach for it." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Explain what agent-first architecture means as a design discipline and contrast it with request/response architecture.",
+          "Describe agent communication models — direct messaging, message bus, blackboard — and choose the right one for a system.",
+          "Design governance and safety controls for agentic systems: policy engines, sandboxing, audit trails, kill switches, and capability scoping.",
+          "Plan and execute converting a traditional AI pipeline into an agent-based system incrementally, without a risky full rewrite.",
+          "Judge when agent-first architecture is the right choice for a system and when a simpler design serves better."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorials 17–19: agents, planners, orchestration patterns (Semantic Kernel) and conversable agents, collaboration patterns, roles (AutoGen) — this tutorial assumes you can build an agent, not just read about one.",
+          "Tutorial 12's function-calling safety discipline and tutorial 13's resilience/observability patterns, which remain the foundation under any architecture.",
+          "General software architecture literacy: services, message queues, and the tradeoffs between coupling and flexibility.",
+          "A traditional AI pipeline of your own (even a simple retrieve-then-prompt RAG flow from tutorial 15) is ideal for the conversion walkthrough."
+        ] },
+        { "type": "note", "style": "tip", "text": "This tutorial is intentionally framework-agnostic in its diagrams and reasoning, with C# examples illustrating the ideas. The architecture lessons apply whether you implement agents in Semantic Kernel, AutoGen, or by hand." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "Key Concepts: From Fixed Paths to Goal-Driven Units",
+      "content": [
+        { "type": "paragraph", "text": "A request/response architecture organizes a system around fixed code paths: a request comes in, a predetermined sequence of steps runs, a response goes out — the same shape every time for a given endpoint. An agent-first architecture organizes a system around agents as the unit of functionality: each agent owns a goal and a set of tools, and decides its own next action rather than following one hardcoded sequence. The shift is from 'what steps always run' to 'what can this component decide to do toward its goal.'" },
+        { "type": "table", "headers": ["Aspect", "Request/response architecture", "Agent-first architecture"], "rows": [
+          ["Unit of functionality", "An endpoint/service with a fixed handler", "An agent with a goal, tools, and its own decision-making"],
+          ["Execution shape", "Same steps every time for a given route", "Steps chosen dynamically based on the situation"],
+          ["Predictability", "High — the code path is the spec", "Lower — behavior emerges from reasoning, needs guardrails"],
+          ["Where to change behavior", "Edit the handler's code", "Edit instructions/tools/goals, or add another agent"],
+          ["Natural fit", "Well-defined, stable operations", "Open-ended, judgment-requiring, multi-step tasks"]
+        ] },
+        { "type": "paragraph", "text": "The other three subtopics follow directly from this shift. If agents are the unit of design, they need a communication model for how they find and talk to each other (agent communication models). Because they decide their own actions, they need governance and safety controls proportional to that autonomy. And because most real systems already have working pipelines, converting a traditional AI pipeline into an agent-based system is a practical migration problem, not a green-field exercise." },
+        { "type": "note", "style": "info", "text": "Nothing here says request/response is obsolete. Most well-defined operations are still better as fixed endpoints; agent-first architecture is for the parts of a system where the steps genuinely cannot be predetermined." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Deep Dive 1: Designing Agent-First Architectures",
+      "content": [
+        { "type": "paragraph", "text": "Designing agent-first means deciding, deliberately, which parts of a system should be agents and which should stay as ordinary services. An agent earns its place when a task's steps genuinely depend on runtime judgment — which tool to use, whether to ask a follow-up question, how to recover from an unexpected result — not when a task is simply 'complex but fully specifiable in advance.' A complex-but-fixed workflow (validate, transform, save, notify) is still better as a pipeline; an open-ended one (diagnose this incident and propose a fix) is a better fit for an agent." },
+        { "type": "animation", "title": "From an endpoint-centric to an agent-centric system diagram", "intro": "The same capabilities, reorganized around a different unit.", "nodes": [
+          { "id": "req", "label": "Request/response", "sub": "endpoints as units" },
+          { "id": "ep1", "label": "Endpoint A", "sub": "fixed handler" },
+          { "id": "ep2", "label": "Endpoint B", "sub": "fixed handler" },
+          { "id": "agn", "label": "Agent-first", "sub": "agents as units" },
+          { "id": "a1", "label": "Agent A", "sub": "goal + tools" },
+          { "id": "a2", "label": "Agent B", "sub": "goal + tools" },
+          { "id": "reg", "label": "Agent registry", "sub": "who does what" }
+        ], "steps": [
+          { "highlight": ["req", "ep1", "ep2"], "caption": "In a request/response system, each capability is an endpoint with a fixed handler — the architecture diagram is a list of routes." },
+          { "highlight": ["agn", "a1", "a2"], "caption": "In an agent-first system, each capability is an agent with a goal and tools — the same capabilities exist, but organized around decision-making units instead of fixed paths." },
+          { "highlight": ["reg"], "caption": "An agent registry replaces the routing table: it records what each agent is responsible for and how to reach it, since agents can be added or specialized without touching a central router." }
+        ] },
+        { "type": "paragraph", "text": "A practical design checklist: identify the goal each agent owns (narrow and specific, as tutorial 18/19 stressed); decide its tool/plugin surface (least privilege — capability scoping, deep-dive 3); decide whether it needs cross-turn memory (a thread) or is stateless per invocation; and decide how it is discovered and invoked by the rest of the system — which is exactly the agent communication model question in deep-dive 2. An agent registry — a directory of available agents, their responsibilities, and how to reach them — plays the role a routing table plays in request/response systems, and becomes essential once a system has more than a couple of agents." },
+        { "type": "note", "style": "warning", "text": "The most common agent-first design mistake is making everything an agent. A service that always does the same three steps in the same order gains nothing from being an agent and loses predictability and testability — keep it a plain service." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Deep Dive 2: Agent Communication Models",
+      "content": [
+        { "type": "paragraph", "text": "Once a system has multiple agents, they need a way to exchange information — a request for help, a result, a status update. Three communication models cover most designs. Direct messaging has one agent call another directly, by name or reference — simple and traceable, but it couples the caller to knowing exactly who to call, which gets brittle as agents are added or replaced. A message bus routes messages between agents without either side knowing the other directly — the sender publishes, interested agents subscribe — trading some directness for loose coupling and easier extension. A blackboard pattern has agents read and write shared state that any participant can observe, useful when many agents contribute partial information toward a shared understanding rather than passing discrete requests." },
+        { "type": "table", "headers": ["Model", "Coupling", "Best fit"], "rows": [
+          ["Direct messaging", "Tight — sender knows the receiver", "Small systems, a known fixed set of agents, simple request/reply"],
+          ["Message bus", "Loose — sender and receiver don't know each other", "Growing systems, agents added/replaced over time, fan-out to multiple subscribers"],
+          ["Blackboard", "Loose via shared state, not direct calls", "Many agents contributing partial findings toward one shared picture (e.g. diagnosis, planning)"]
+        ] },
+        { "type": "code", "language": "csharp", "title": "Direct messaging vs a message bus (illustrative)", "code": [
+          "// Direct messaging: the caller must know exactly which agent to invoke.",
+          "var billingResult = await billingAgent.InvokeAsync(\"Check invoice INV-2031\", thread);",
+          "",
+          "// Message bus: the caller publishes an event; it doesn't know who (if anyone) handles it.",
+          "await messageBus.PublishAsync(new AgentTaskRequested(",
+          "    TaskType: \"CheckInvoice\",",
+          "    Payload: \"INV-2031\"));",
+          "",
+          "// Any agent subscribed to \"CheckInvoice\" tasks picks it up independently —",
+          "// a new specialized agent can start handling this task type with zero changes",
+          "// to the code that published the request.",
+          "messageBus.Subscribe<AgentTaskRequested>(async request =>",
+          "{",
+          "    if (request.TaskType == \"CheckInvoice\")",
+          "        await billingAgent.InvokeAsync($\"Check invoice {request.Payload}\", thread);",
+          "});"
+        ] },
+        { "type": "animation", "title": "Blackboard: agents converging on a shared answer", "intro": "No agent talks to another directly — all contribute to one shared state.", "nodes": [
+          { "id": "bb", "label": "Blackboard", "sub": "shared state" },
+          { "id": "log", "label": "Log-analysis agent", "sub": "writes findings" },
+          { "id": "metric", "label": "Metrics agent", "sub": "writes findings" },
+          { "id": "diag", "label": "Diagnosis agent", "sub": "reads all, concludes" }
+        ], "steps": [
+          { "highlight": ["log", "bb"], "caption": "A log-analysis agent notices an error spike and writes its finding to the shared blackboard." },
+          { "highlight": ["metric", "bb"], "caption": "Independently, a metrics agent notices elevated latency and writes its own finding — neither agent knows the other exists." },
+          { "highlight": ["bb", "diag"], "caption": "A diagnosis agent reads the accumulated blackboard state, combines both findings, and concludes a probable root cause — a conclusion neither contributor could reach alone." }
+        ] },
+        { "type": "note", "style": "info", "text": "These models generalize the group-chat and handoff orchestration patterns from tutorial 18: a GroupChat's shared thread is a form of blackboard; a handoff is direct messaging with a routing decision. Recognizing the underlying communication model helps you choose the right orchestration pattern for a new system, not just the right framework class." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Deep Dive 3: Governance and Safety for Agents",
+      "content": [
+        { "type": "paragraph", "text": "Autonomy at the architecture level demands governance at the architecture level — not per-function safety alone, but system-wide controls that apply regardless of which agent or framework is acting. Five mechanisms form the backbone. Capability scoping restricts each agent to the minimum tools and permissions its goal requires — the agent-level expression of least privilege, extending tutorial 12's per-function scoping to the whole agent. A policy engine checks a proposed action against defined rules (spending limits, allowed operations, required approvals) before it executes, centralizing rules that would otherwise be duplicated across every agent's code." },
+        { "type": "paragraph", "text": "Sandboxing runs an agent's actions in a restricted environment — a scoped execution context, a limited service account, a network-isolated boundary — so a mistake or a successfully manipulated agent cannot reach beyond that boundary. An audit trail durably records every agent decision and action, in order, for review, debugging, and compliance — the system-wide counterpart to tutorial 18/19's step-by-step logging. And a kill switch gives operators a way to immediately halt an agent or the whole agent system's activity when behavior is unsafe or out of control, independent of whatever loop or termination condition the agent's own code relies on." },
+        { "type": "animation", "title": "A governed action, step by step", "intro": "An agent's proposed action passes through governance before it can take effect.", "nodes": [
+          { "id": "agent", "label": "Agent", "sub": "proposes an action" },
+          { "id": "scope", "label": "Capability scope", "sub": "is this tool allowed?" },
+          { "id": "policy", "label": "Policy engine", "sub": "does it satisfy the rules?" },
+          { "id": "sandbox", "label": "Sandbox", "sub": "bounded execution" },
+          { "id": "audit", "label": "Audit trail", "sub": "recorded" }
+        ], "steps": [
+          { "highlight": ["agent"], "caption": "The agent decides it wants to perform an action — say, issue a refund." },
+          { "highlight": ["scope"], "caption": "Capability scoping checks whether this agent is even permitted to use the refund tool at all." },
+          { "highlight": ["policy"], "caption": "The policy engine checks the specific action against rules — is the amount within the agent's authorized limit, does it need human approval." },
+          { "highlight": ["sandbox"], "caption": "If approved, the action executes inside a sandboxed boundary — scoped credentials, no reach beyond what's needed." },
+          { "highlight": ["audit"], "caption": "The full sequence — proposal, checks, outcome — is written to the audit trail, and a kill switch remains available throughout to halt the agent regardless of this pipeline's state." }
+        ] },
+        { "type": "note", "style": "warning", "text": "None of these five mechanisms replace the others. A policy engine without an audit trail is unaccountable; sandboxing without capability scoping still lets an agent misuse whatever tools it has inside the sandbox; a kill switch that nobody tests is not a real control. Governance for agents is a layered system, exactly like tutorial 13's resilience triad was for network calls." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Deep Dive 4: Converting a Traditional AI Pipeline into an Agent-Based System",
+      "content": [
+        { "type": "paragraph", "text": "A traditional AI pipeline runs a fixed sequence — for example, tutorial 15's RAG flow: embed the question, search, build a grounded prompt, generate an answer — the same steps every time. Converting it into an agent-based system does not mean throwing the pipeline away; it means identifying which fixed steps should become a decision an agent makes, and which should stay as tools the agent can call. The pipeline's steps often become exactly the agent's tool set." },
+        { "type": "code", "language": "csharp", "title": "Before: a fixed pipeline (tutorial 15's RAG flow)", "code": [
+          "// Every question follows the identical sequence, regardless of what it actually needs.",
+          "async Task<string> AnswerAsync(string question, CancellationToken ct)",
+          "{",
+          "    var passages = await RetrieveAsync(question, k: 5, ct);         // always retrieves",
+          "    var prompt = BuildGroundedPrompt(question, passages);          // always the same prompt shape",
+          "    return await GenerateAsync(prompt, ct);                        // always one generation call",
+          "}"
+        ] },
+        { "type": "code", "language": "csharp", "title": "After: the same steps become tools an agent chooses among", "code": [
+          "public sealed class KnowledgePlugin",
+          "{",
+          "    [KernelFunction, Description(\"Searches the knowledge base for passages relevant to a question.\")]",
+          "    public Task<string> SearchKnowledgeBase(string question) => RetrieveAsJsonAsync(question);",
+          "",
+          "    [KernelFunction, Description(\"Looks up a specific order's live status. Use for order questions, not general knowledge.\")]",
+          "    public Task<string> GetOrderStatus(string orderNumber) => OrderRepository.FindJsonAsync(orderNumber);",
+          "",
+          "    [KernelFunction, Description(\"Asks a clarifying question when the user's request is ambiguous.\")]",
+          "    public string AskClarification(string question) => question;   // surfaced back to the user",
+          "}",
+          "",
+          "// The agent now DECIDES whether to search knowledge, check an order, ask a",
+          "// clarifying question, or some combination -- instead of always doing all three.",
+          "ChatCompletionAgent supportAgent = new()",
+          "{",
+          "    Instructions = \"Help the user. Use SearchKnowledgeBase for policy/how-to questions, \" +",
+          "                   \"GetOrderStatus for a specific order, and AskClarification if the request is unclear.\",",
+          "    Kernel = kernelWithKnowledgePlugin",
+          "};"
+        ] },
+        { "type": "animation", "title": "The migration in three moves", "intro": "Turning a fixed sequence into agent-chosen tool calls, one step at a time.", "nodes": [
+          { "id": "fixed", "label": "Fixed pipeline", "sub": "retrieve→prompt→generate" },
+          { "id": "wrap", "label": "Wrap steps as tools", "sub": "each step becomes a function" },
+          { "id": "agent", "label": "Introduce an agent", "sub": "instructions + tool set" },
+          { "id": "govern", "label": "Add governance", "sub": "scope, policy, audit" }
+        ], "steps": [
+          { "highlight": ["fixed"], "caption": "Start from the working pipeline — it already does something valuable; the goal is added flexibility, not a rewrite from scratch." },
+          { "highlight": ["wrap"], "caption": "Wrap each pipeline step as a described function (retrieval, order lookup, anything else useful) — the same code, now callable independently." },
+          { "highlight": ["agent"], "caption": "Introduce an agent whose instructions describe the goal and whose tool set is exactly those wrapped functions — it now decides which to use per request instead of always running all of them." },
+          { "highlight": ["govern"], "caption": "Add capability scoping, a policy check for any consequential tool, and audit logging — the governance layer this new flexibility requires that the old fixed pipeline didn't." }
+        ] },
+        { "type": "paragraph", "text": "Do this incrementally and keep the old pipeline available as a fallback during rollout: run both in parallel behind a feature flag, compare outcomes, and only fully cut over once the agent version's behavior is trusted on real traffic. This is a migration strategy, not a one-shot rewrite, and it mirrors tutorial 18's testing advice — test the intended path (agent picks the right tool) and the edge cases (ambiguous input, tool failure) before trusting the migration in production." },
+        { "type": "note", "style": "tip", "text": "Not every step needs to become agent-chosen. It's common and often correct to keep the first step or two (e.g., basic input validation) as fixed code and only make the genuinely judgment-requiring middle of the pipeline agentic." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Ecosystem and Tools",
+      "content": [
+        { "type": "table", "headers": ["Concept / tool", "Role in agent-first architecture"], "rows": [
+          ["Agent registry", "A directory of agents, their responsibilities, and how to reach them — the agent-first analog of a routing table"],
+          ["Message bus (e.g. Azure Service Bus, a pub/sub layer)", "Infrastructure for loosely-coupled agent communication"],
+          ["Blackboard/shared state store", "A database, cache, or shared document that multiple agents read/write for collaborative reasoning"],
+          ["Policy engine", "A rules component (custom or a policy framework) gating agent actions before execution"],
+          ["Sandboxed execution environment", "Restricted compute/identity/network boundary an agent's actions run within"],
+          ["Structured/audit logging (tutorial 13)", "The foundation the audit trail is built on, extended to cover agent decisions system-wide"],
+          ["Semantic Kernel / AutoGen (tutorials 17–19)", "The frameworks that implement individual agents; this tutorial's ideas apply above and around them"],
+          ["Feature flags", "A rollout mechanism for running old pipeline and new agent-based system in parallel during migration"]
+        ] },
+        { "type": "paragraph", "text": "Agent-first architecture is a design layer above any specific framework — the registry, communication model, and governance controls here would look similar whether the agents underneath are built in Semantic Kernel, AutoGen, or hand-rolled. That is deliberate: architecture decisions should outlive framework choices." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "Use Cases",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Incident response: log-analysis, metrics, and diagnosis agents collaborate via a blackboard to converge on a probable root cause faster than a fixed runbook.",
+          "Customer support platform: a triage agent uses direct messaging or a message bus to route conversations to specialist agents (billing, technical, account) as needs are discovered.",
+          "Enterprise workflow automation: a traditional multi-step approval pipeline is converted into an agent that decides which checks are relevant per request, cutting unnecessary steps for simple cases while keeping the full sequence for complex ones.",
+          "Regulated financial operations: heavy governance (policy engine, sandboxing, audit trail, kill switch) wraps a lending or transaction-review agent so autonomy doesn't outrun compliance requirements.",
+          "Research/analysis assistants: multiple specialist agents (data-gathering, synthesis, critique) communicate via a message bus, each addable independently as new specialties are needed.",
+          "Legacy RAG modernization: an organization's existing fixed retrieve-then-answer pipeline is incrementally converted into an agent that can also check live systems, ask clarifying questions, or escalate — without discarding the working retrieval code."
+        ] },
+        { "type": "paragraph", "text": "The common thread: agent-first architecture pays off when a system's tasks are open-ended and judgment-dependent, involve multiple specialized capabilities that need to combine flexibly, or must evolve incrementally from something that already works." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples",
+      "content": [
+        { "type": "paragraph", "text": "These examples show an agent registry, a policy-engine gate around an agent action, and an audit-trail wrapper — the architecture-level scaffolding this tutorial's concepts need in code." },
+        { "type": "code", "language": "csharp", "title": "Example 1 — A minimal agent registry", "code": [
+          "public sealed record AgentDescriptor(string Name, string Responsibility, Func<string, Task<string>> Invoke);",
+          "",
+          "public sealed class AgentRegistry",
+          "{",
+          "    private readonly Dictionary<string, AgentDescriptor> _agents = new();",
+          "",
+          "    public void Register(AgentDescriptor descriptor) => _agents[descriptor.Name] = descriptor;",
+          "",
+          "    public AgentDescriptor? FindFor(string taskDescription) =>",
+          "        _agents.Values.FirstOrDefault(a => TaskMatchesResponsibility(taskDescription, a.Responsibility));",
+          "",
+          "    // A real system might use embeddings/semantic match here instead of simple heuristics.",
+          "    private bool TaskMatchesResponsibility(string task, string responsibility) =>",
+          "        task.Contains(responsibility, StringComparison.OrdinalIgnoreCase);",
+          "}"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 2 — A policy engine gating a consequential agent action", "code": [
+          "public interface IPolicyEngine",
+          "{",
+          "    PolicyResult Evaluate(AgentAction action);",
+          "}",
+          "",
+          "public sealed record AgentAction(string AgentName, string Operation, decimal? Amount, string UserId);",
+          "public sealed record PolicyResult(bool Allowed, bool RequiresHumanApproval, string? Reason);",
+          "",
+          "public sealed class RefundPolicyEngine : IPolicyEngine",
+          "{",
+          "    public PolicyResult Evaluate(AgentAction action)",
+          "    {",
+          "        if (action.Operation != \"refund\") return new(true, false, null);",
+          "        if (action.Amount is > 500m) return new(true, true, \"Refunds over $500 require approval\");",
+          "        return new(true, false, null);",
+          "    }",
+          "}",
+          "",
+          "// The agent's action goes through the policy engine before executing.",
+          "var decision = policyEngine.Evaluate(new AgentAction(\"BillingAgent\", \"refund\", 620m, userId));",
+          "if (decision.RequiresHumanApproval)",
+          "    await humanApproval.RequestAsync(decision.Reason!, action);",
+          "else",
+          "    await ExecuteRefundAsync(action);"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 3 — An audit-trail wrapper around any agent action", "code": [
+          "async Task<string> InvokeWithAuditAsync(",
+          "    string agentName, string operation, Func<Task<string>> action, ILogger logger, string correlationId)",
+          "{",
+          "    logger.LogInformation(\"AUDIT {CorrelationId} {Agent} PROPOSED {Operation}\",",
+          "        correlationId, agentName, operation);",
+          "    try",
+          "    {",
+          "        string result = await action();",
+          "        logger.LogInformation(\"AUDIT {CorrelationId} {Agent} SUCCEEDED {Operation}: {Result}\",",
+          "            correlationId, agentName, operation, result);",
+          "        return result;",
+          "    }",
+          "    catch (Exception ex)",
+          "    {",
+          "        logger.LogError(ex, \"AUDIT {CorrelationId} {Agent} FAILED {Operation}\",",
+          "            correlationId, agentName, operation);",
+          "        throw;",
+          "    }",
+          "}"
+        ] }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step by Step: Converting a RAG Pipeline into a Governed Agent",
+      "content": [
+        { "type": "paragraph", "text": "This walkthrough converts tutorial 15's fixed RAG pipeline into a small agent-first system with a registry, a communication model, and governance, following the migration sequence from deep-dive 4." },
+        { "type": "list", "style": "numbered", "items": [
+          "Start from a working retrieve-then-answer pipeline (tutorial 15) and identify its steps: retrieval, prompt construction, generation.",
+          "Wrap retrieval as a described native function (SearchKnowledgeBase) and identify at least one more capability worth adding that the old pipeline never had (e.g. GetOrderStatus) — this is the moment the system gains flexibility.",
+          "Create a ChatCompletionAgent (or AutoGen equivalent) whose instructions state the goal and name when to use each tool, replacing the old fixed sequence.",
+          "Register the agent in a simple AgentRegistry (Example 1) alongside a placeholder second agent (even a stub), and route an incoming request through the registry instead of calling the agent directly — this is your agent communication model in miniature.",
+          "Identify one action in the system that is consequential (e.g. anything with a dollar amount or irreversible effect) and add a policy-engine check (Example 2) in front of it.",
+          "Wrap every agent action with the audit-trail logger (Example 3), and confirm you can reconstruct a full decision trail from logs after a test run.",
+          "Add capability scoping explicitly: document, in code or configuration, exactly which tools each agent may use, and verify the agent cannot invoke a tool it wasn't given.",
+          "Add a kill switch: a simple flag or endpoint that, when set, causes the agent invocation path to short-circuit and refuse to act — test that it actually stops a mid-flight scenario.",
+          "Run the old pipeline and the new agent-based system side by side (behind a flag) on the same test questions, and compare: does the agent's flexibility change answers for the better, and does governance catch the scenarios it should?",
+          "Reflect on the checklist from deep-dive 1: was this task genuinely a good fit for agent-first, or did the conversion add complexity without proportional benefit? Both conclusions are valid outcomes of this exercise."
+        ] },
+        { "type": "note", "style": "tip", "text": "Do steps 5–8 (governance) before declaring the migration done, not after. Governance retrofitted onto an already-live agent system is far riskier than governance designed in from the first agent action." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Agent-first is not a universal upgrade: it trades predictability and testability for flexibility, and many systems (well-defined, stable operations) are better off staying request/response.",
+          "Communication model choice has real operational cost: a message bus and blackboard pattern both add infrastructure (a broker, a shared store) and new failure modes (message loss, stale shared state) that direct messaging doesn't have.",
+          "Governance mechanisms (policy engine, sandboxing, audit trail, kill switch) are necessary but not sufficient — each must actually be tested and maintained, or it provides false confidence rather than real safety.",
+          "A policy engine only enforces the rules it has been given; it cannot catch a genuinely novel harmful action nobody anticipated writing a rule for.",
+          "Sandboxing bounds damage but doesn't guarantee correctness — a sandboxed agent can still produce a wrong answer or waste resources within its boundary.",
+          "Converting a pipeline to an agent is not free: it typically increases latency (more decision rounds), cost (more model calls), and debugging surface, so it should be justified by a genuine need for flexibility, not novelty.",
+          "This tutorial's patterns (registry, policy engine, audit wrapper) are illustrative scaffolding, not a specific product or library — real systems often adopt an existing message-bus or policy-engine product rather than hand-rolling one, and exact class/library choices are outside this course's scope.",
+          "Migrating incrementally (deep-dive 4) reduces risk but extends timelines; running old and new systems in parallel has its own maintenance cost during the transition."
+        ] }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Make agents the exception, not the default: apply agent-first only to genuinely open-ended, judgment-requiring parts of a system, and keep the rest as ordinary, predictable services.",
+          "Choose the communication model by actual coupling needs: direct messaging for small, stable agent sets; a message bus as the system grows or agents are added/replaced; a blackboard when multiple agents contribute partial findings toward one shared conclusion.",
+          "Design governance in from the first agent action, not after an incident — capability scoping, a policy engine, sandboxing, an audit trail, and a tested kill switch are a package, not a checklist to satisfy individually.",
+          "When converting a pipeline, wrap existing steps as tools first and preserve their tested behavior; introduce the agent as a thin decision layer on top rather than rewriting the underlying logic.",
+          "Run old and new systems in parallel during migration and compare real outcomes before fully cutting over.",
+          "Keep an explicit agent registry once a system has more than a couple of agents — implicit knowledge of 'which agent handles what' does not scale.",
+          "Test governance controls directly and regularly (does the kill switch actually stop it, does the policy engine actually block the disallowed action) rather than assuming they work because the code compiles.",
+          "Revisit the agent-first decision periodically: a task that was genuinely open-ended six months ago may have stabilized into a predictable pattern worth converting back to a fixed pipeline."
+        ] },
+        { "type": "table", "headers": ["Common mistake", "Do this instead"], "rows": [
+          ["Making every component an agent 'for consistency'", "Reserve agents for genuinely judgment-requiring, open-ended tasks"],
+          ["Direct messaging hardcoded everywhere as the system grows", "Move to a message bus once agents are added/replaced regularly"],
+          ["Adding governance only after an incident", "Design capability scoping, policy checks, and audit logging in from the start"],
+          ["Rewriting a working pipeline from scratch to 'make it agentic'", "Wrap existing steps as tools; add the agent as a thin decision layer"],
+          ["Assuming a kill switch works because it exists", "Test it directly, on a schedule, as part of operational readiness"],
+          ["Cutting over to the agent system on day one", "Run old and new in parallel, compare outcomes, then cut over"]
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz: Designing Agent-First Architectures",
+      "items": [
+        { "number": 1, "question": "What is the central shift in agent-first architecture compared to request/response architecture?", "options": { "A": "Using a faster database", "B": "The unit of functionality becomes an agent with a goal that decides its own actions, instead of a fixed handler that always runs the same steps", "C": "Replacing REST with GraphQL", "D": "Removing the need for any code at all" }, "correctAnswer": "B", "explanation": "Request/response organizes around fixed code paths per endpoint; agent-first organizes around agents that own a goal and tools and decide their own next action, trading predictability for flexibility on tasks that genuinely need runtime judgment." },
+        { "number": 2, "question": "When does a task NOT justify becoming an agent, according to this tutorial?", "options": { "A": "When it's complex but fully specifiable in advance as a fixed sequence", "B": "When it requires runtime judgment about which tool to use", "C": "When it's completely open-ended", "D": "Only image-generation tasks disqualify agents" }, "correctAnswer": "A", "explanation": "A complex-but-fixed workflow (validate, transform, save, notify) is still better as an ordinary pipeline. Agents earn their place when steps genuinely cannot be predetermined, not merely when a task involves many steps." },
+        { "number": 3, "question": "What role does an agent registry play in an agent-first system?", "options": { "A": "It stores embeddings", "B": "It is a directory of available agents, their responsibilities, and how to reach them — the analog of a routing table", "C": "It replaces the need for a chat model", "D": "It only matters for billing" }, "correctAnswer": "B", "explanation": "As request/response systems use a routing table to map paths to handlers, agent-first systems use a registry to map responsibilities to agents, becoming essential once a system has more than a couple of agents." },
+        { "number": 4, "question": "What characterizes direct messaging as an agent communication model?", "options": { "A": "Agents write to shared state with no direct calls", "B": "One agent calls another directly, by name or reference, coupling the caller to knowing the receiver", "C": "Messages are broadcast to every agent in the system automatically", "D": "It requires a message broker" }, "correctAnswer": "B", "explanation": "Direct messaging is simple and traceable but ties the caller to knowing exactly which agent to invoke, which becomes brittle as agents are added or replaced — the tightest-coupled of the three communication models." },
+        { "number": 5, "question": "What is the key benefit of a message bus over direct messaging?", "options": { "A": "It's always faster", "B": "It loosely couples sender and receiver — the sender doesn't need to know who (if anyone) handles the message", "C": "It eliminates the need for agents entirely", "D": "It guarantees zero message loss" }, "correctAnswer": "B", "explanation": "With a message bus, a sender publishes without knowing the receiver, and new agents can subscribe to handle a task type without any change to the publishing code — trading some directness for loose coupling and easier extension." },
+        { "number": 6, "question": "In the blackboard pattern, how do agents interact?", "options": { "A": "They call each other's methods directly", "B": "They read and write to shared state that any participant can observe, without necessarily knowing about each other", "C": "They communicate only through email", "D": "They never interact; each works in isolation" }, "correctAnswer": "B", "explanation": "In a blackboard pattern, agents contribute partial findings to shared state that others can read — for example a log-analysis agent and a metrics agent each writing independent findings that a diagnosis agent later combines, none of them calling each other directly." },
+        { "number": 7, "question": "What is capability scoping?", "options": { "A": "Increasing an agent's context window", "B": "Restricting an agent to the minimum set of tools and permissions its goal requires — least privilege at the agent level", "C": "Measuring an agent's response latency", "D": "A billing tier for agents" }, "correctAnswer": "B", "explanation": "Capability scoping extends tutorial 12's per-function least-privilege principle to the whole agent: each agent gets only the tools and permissions its specific goal needs, limiting the damage a compromised or mistaken agent can do." },
+        { "number": 8, "question": "What does a policy engine do in an agentic system's governance layer?", "options": { "A": "It generates the agent's responses", "B": "It checks a proposed agent action against defined rules (limits, allowed operations, required approvals) before it executes", "C": "It replaces the need for capability scoping", "D": "It stores embeddings for retrieval" }, "correctAnswer": "B", "explanation": "A policy engine centralizes rules — like spending limits or required human approval above a threshold — and evaluates proposed actions against them before execution, rather than duplicating such rules inside every agent's own code." },
+        { "number": 9, "question": "What is the purpose of sandboxing an agent's actions?", "options": { "A": "To make the agent respond faster", "B": "To run the agent's actions in a restricted environment so a mistake or manipulated agent cannot affect systems beyond that boundary", "C": "To hide the agent's actions from audit logs", "D": "To increase the agent's available tools" }, "correctAnswer": "B", "explanation": "Sandboxing bounds the blast radius: scoped execution context, limited service accounts, or network isolation ensure that even if an agent misbehaves, the damage is contained within the sandbox rather than reaching the wider system." },
+        { "number": 10, "question": "What must an audit trail provide for an agentic system?", "options": { "A": "A way to speed up model responses", "B": "A durable, ordered record of every agent decision and action for review, debugging, and compliance", "C": "A cache of embeddings", "D": "A billing dashboard only" }, "correctAnswer": "B", "explanation": "The audit trail is the system-wide counterpart to the step-by-step logging built for individual agent frameworks — a durable record of what was proposed, checked, and done, essential for reconstructing what happened after the fact." },
+        { "number": 11, "question": "Why is a kill switch necessary even when termination strategies and policy checks exist?", "options": { "A": "It isn't necessary if those other controls exist", "B": "It provides an independent way to halt an agent or system immediately, regardless of whether the agent's own loop or termination logic is working correctly", "C": "It replaces the need for an audit trail", "D": "It only matters during development, never production" }, "correctAnswer": "B", "explanation": "A kill switch is an operator-controlled, out-of-band halt mechanism — independent of whatever termination condition or policy logic the agent's own code relies on — so operators retain control even if those in-process mechanisms fail or are bypassed." },
+        { "number": 12, "question": "When converting a traditional AI pipeline into an agent-based system, what typically happens to the pipeline's original steps?", "options": { "A": "They are deleted entirely and rewritten from scratch", "B": "They often become the tools an agent can choose among, rather than always running in the same fixed sequence", "C": "They are left completely unchanged and unused", "D": "They are converted into a single monolithic function" }, "correctAnswer": "B", "explanation": "The migration wraps existing pipeline steps (like retrieval) as described functions/tools, then introduces an agent whose instructions and tool set let it decide which steps to use per request — preserving the tested logic while adding flexibility." },
+        { "number": 13, "question": "What is a recommended practice for rolling out a pipeline-to-agent conversion safely?", "options": { "A": "Cut over to the agent system immediately for all traffic", "B": "Run the old pipeline and new agent-based system in parallel behind a feature flag and compare outcomes before fully cutting over", "C": "Skip testing since agents are self-correcting", "D": "Remove the old pipeline's code before testing the new agent" }, "correctAnswer": "B", "explanation": "Running both systems in parallel on real or representative traffic lets a team compare whether the agent's added flexibility genuinely improves outcomes and whether governance catches the scenarios it should, before committing to a full cutover." },
+        { "number": 14, "question": "Which governance mechanisms, together, form the recommended safety layer for agentic systems in this tutorial?", "options": { "A": "Only a kill switch", "B": "Capability scoping, a policy engine, sandboxing, an audit trail, and a kill switch, used together", "C": "Just increasing the model's context window", "D": "Only code comments explaining intended behavior" }, "correctAnswer": "B", "explanation": "The tutorial presents these five as a layered system, not independent alternatives — a policy engine without an audit trail is unaccountable, sandboxing without capability scoping still allows misuse of granted tools, and each mechanism covers a gap the others leave open." },
+        { "number": 15, "question": "Why does the tutorial warn against making every component in a system an agent?", "options": { "A": "Agents are more expensive to license", "B": "A component that always performs the same fixed steps gains nothing from being an agent and loses predictability and testability", "C": "Only one agent is allowed per system", "D": "Agents cannot call functions" }, "correctAnswer": "B", "explanation": "The most common agent-first design mistake identified is over-application: services with genuinely fixed, predictable behavior should stay plain services, since making them agents adds decision-making overhead and reduces predictability without any corresponding benefit." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam: Written Questions",
+      "items": [
+        { "number": 1, "question": "Define agent-first architecture and explain precisely how it differs from request/response architecture as a design discipline, not just a technical mechanism.", "modelAnswer": "Agent-first architecture organizes a system around agents — components that own a goal, a set of tools, and the ability to decide their own next action — as the primary unit of functionality. Request/response architecture organizes a system around endpoints or services with fixed handlers that execute the same predetermined sequence of steps for a given route every time. The difference is a design discipline, not merely which framework or language feature is used: it is a decision about where judgment lives in the system. In request/response, all judgment about what steps to take is made once, at development time, and baked into the code path; the running system has no discretion. In agent-first, judgment about what steps to take for a specific situation is deferred to runtime, exercised by the agent based on its instructions, available tools, and the specifics of the request. This has cascading consequences: agent-first systems are less predictable but more flexible, need governance proportional to that flexibility, and are organized (registries, communication models) differently than a routing table would organize a request/response system." },
+        { "number": 2, "question": "Provide a decision framework for choosing between direct messaging, a message bus, and a blackboard pattern for a new multi-agent system, with justification for each branch.", "modelAnswer": "First, determine how many agents exist and how stable that set is. If the system has a small, known, largely fixed set of agents where a caller naturally knows which specific agent to invoke for a given need, direct messaging is appropriate: it is the simplest model, fully traceable, and the coupling cost is low because the set of receivers rarely changes. If the system is expected to grow — new agents added over time, existing ones replaced or specialized — a message bus is the better choice: publishers do not need to know which agent (if any) will handle a given task type, so adding a new specialized agent to handle a task type requires no changes to existing publishing code, trading some directness for that extensibility. If the task involves multiple agents each contributing partial, independent findings that must be combined into one shared conclusion — such as several diagnostic agents each surfacing different symptoms that together indicate a root cause — a blackboard pattern fits best, since it lets agents that don't know about each other still converge on a shared understanding through shared state, which neither direct messaging nor a bus naturally supports as well. The decision is driven by coupling tolerance, agent-set stability, and whether communication is fundamentally request/reply or fundamentally collaborative-and-cumulative." },
+        { "number": 3, "question": "Explain each of the five governance mechanisms for agentic systems — capability scoping, policy engine, sandboxing, audit trail, kill switch — and describe a specific gap that would remain if any one were missing.", "modelAnswer": "Capability scoping restricts an agent to the minimum tools and permissions its goal requires; without it, an agent with a broad, unscoped toolset could misuse capabilities entirely unrelated to its actual purpose if manipulated or mistaken. A policy engine checks a proposed action against defined rules (limits, required approvals) before execution; without it, such rules would need to be duplicated inside every agent's own code, inconsistently enforced and hard to update centrally. Sandboxing runs an agent's actions in a restricted environment; without it, even a properly-scoped agent's mistake could reach systems or data beyond what was intended, since scoping alone doesn't guarantee execution-time isolation. An audit trail durably records every decision and action; without it, a governance failure or a disputed action becomes undebuggable and unaccountable after the fact, even if the other four controls functioned correctly at the time. A kill switch provides an independent way to halt activity immediately; without it, operators have no recourse if an agent's own termination logic fails, is bypassed, or the situation calls for an immediate stop faster than any in-process condition would trigger. Each mechanism closes a distinct failure mode the others do not — they are complementary layers, not redundant alternatives, mirroring the resilience triad from earlier tutorials but for autonomous decision-making rather than network calls." },
+        { "number": 4, "question": "Walk through converting a fixed retrieve-then-generate RAG pipeline into an agent-based system, explaining what changes and what is deliberately preserved.", "modelAnswer": "What is preserved: the retrieval logic itself (embedding a question, searching an index) and the generation call — this is tested, working code that should not be rewritten from scratch. What changes: the retrieval step is wrapped as a described, callable function (a native function/tool with a name and description, e.g. SearchKnowledgeBase) rather than being hardcoded as step one of an unconditional sequence; additional capabilities that the old fixed pipeline never had — such as looking up a live order status or asking a clarifying question — are added as further tools, since this is exactly the point at which the system gains new flexibility; and a new decision layer, an agent with instructions describing its goal and when to use each tool, is introduced in place of the old fixed sequence, so a request now results in the agent choosing which tool(s) to invoke rather than the pipeline always running retrieval, prompt-building, and generation identically for every question. Governance — capability scoping, a policy check on any consequential action, and audit logging — is added at this point too, since it did not need to exist for the old deterministic pipeline but is now required by the new decision-making flexibility. The old pipeline can run in parallel behind a feature flag during rollout so outcomes can be compared before full cutover." },
+        { "number": 5, "question": "Argue for or against: 'Once you have working agent frameworks like Semantic Kernel and AutoGen, agent-first architecture is just a matter of using them more.' Defend your position using this tutorial's content.", "modelAnswer": "Against, as stated. Semantic Kernel and AutoGen (tutorials 17-19) provide the mechanism for building an individual agent — a kernel with instructions and a thread, or a conversable agent exchanging messages — but agent-first architecture is a system-level design discipline concerning which parts of a system should be agents at all, how those agents find and communicate with each other across the whole system (direct messaging, a message bus, a blackboard), and what governance surrounds their collective autonomy (capability scoping, a policy engine, sandboxing, an audit trail, a kill switch). None of these architectural concerns are automatically solved by using an agent framework more; a system built entirely of Semantic Kernel or AutoGen agents with no registry, no deliberate communication model, and no governance layer would be just as poorly architected as one built with none — arguably more dangerous, since it would have more autonomous decision points with no corresponding oversight. The frameworks answer 'how do I build one capable agent'; agent-first architecture answers 'which parts of my system should be agents, how do they fit together, and how do I keep the whole thing safe' — a strictly higher-level and framework-agnostic set of questions that using the frameworks 'more' does not by itself address." },
+        { "number": 6, "question": "A team has converted a customer-support pipeline into an agent system and reports it 'works great in testing.' What agent-first architecture questions would you ask before considering it production-ready?", "modelAnswer": "First, on design fit: was this task genuinely open-ended enough to justify an agent, or could most of it have stayed a fixed pipeline with the agent reserved for a narrower judgment-requiring subset? Second, on communication: as this system grows to include more specialist agents, what communication model is in place — direct messaging that will need revisiting, or a bus/blackboard already accommodating growth? Is there an agent registry, or is 'which agent handles what' only known implicitly by the team? Third, and most critically, on governance: what tools is each agent scoped to, and has that scope been verified rather than assumed? Is there a policy engine gating any consequential action (refunds, account changes), and has it been tested against both allowed and disallowed cases? Is every agent action written to an audit trail sufficient to reconstruct a disputed interaction after the fact? Is there a kill switch, and has it actually been exercised — not just implemented — to confirm it stops in-flight activity? Fourth, on testing thoroughness: did testing include adversarial or edge-case inputs (ambiguous requests, tool failures, attempts to manipulate the agent into disallowed actions), not just the happy path that 'works great' likely describes? 'Works great in testing' typically means the happy path succeeds; production-readiness for an agentic system specifically requires demonstrating that the governance layer catches the cases testing on the happy path would never surface." },
+        { "number": 7, "question": "Explain why the tutorial insists governance should be 'designed in from the first agent action' rather than added after an incident, using specific reasoning about how agentic systems fail.", "modelAnswer": "Agentic systems fail differently from fixed pipelines: because an agent decides its own actions at runtime, failures are not confined to a small set of pre-identified code paths a team can review exhaustively in advance — they can be triggered by novel input combinations, model variability, or (in adversarial contexts) deliberate manipulation, any of which produces an action nobody explicitly coded for. If governance is added only after an incident, the system has already operated with no bound on what an agent could do for some period, meaning any incident during that window had no capability scoping to limit its reach, no policy engine to catch an out-of-bounds action before it executed, no sandboxing to contain the damage, potentially no audit trail to even reconstruct what happened, and no kill switch to have stopped it faster than manual intervention. Retrofitting governance afterward also tends to be harder and riskier than designing it in from the start: it requires understanding all the ways the already-deployed agent could act (which the incident itself proved was incompletely understood) and modifying a live system under pressure, rather than defining bounded capabilities and checks before the agent's first action ever executes. Designing governance in from the start converts these open-ended risks into bounded, observable, and haltable ones from day one, rather than discovering the bound was needed only after it was crossed." },
+        { "number": 8, "question": "Compare the blackboard communication pattern described in this tutorial with the group chat orchestration pattern from Semantic Kernel (tutorial 18), and explain what the comparison reveals about architecture versus framework mechanics.", "modelAnswer": "Structurally they are close relatives: in group chat orchestration, multiple agents share one conversation thread, each contributing messages that become visible to the others, coordinated by a manager handling speaker selection and termination — functionally, the shared thread acts as shared state that participants read from and write to, which is the defining property of a blackboard. The difference is framing and generality: 'group chat orchestration' is a specific Semantic Kernel implementation with its own manager class, selection strategy, and termination strategy types, whereas 'blackboard pattern' is the general architectural concept — shared state multiple independent participants read and write to converge on a combined understanding — that group chat happens to implement using a conversation thread as the shared medium. The same blackboard concept could be implemented without any conversation abstraction at all: a shared document, a database table, or a cache that multiple agents (built in any framework, or not using an agent framework at all) read and write. This comparison reveals the deeper point of the tutorial: architectural patterns like communication models are more fundamental and framework-agnostic than any specific framework's classes; recognizing that a framework feature is an implementation of a general architectural pattern lets a developer reason about the tradeoffs (coupling, scalability, failure modes) using architecture principles rather than only the framework's documentation, and lets them recognize the same pattern if they later switch frameworks or build a custom implementation." },
+        { "number": 9, "question": "Design the governance architecture for an agent that can approve or deny small business loan applications, addressing all five mechanisms from this tutorial and justifying the specific configuration for this high-stakes domain.", "modelAnswer": "Capability scoping: the loan agent's toolset is limited strictly to read-only data-gathering functions (credit check retrieval, financial document parsing, business registry lookup) plus a single 'recommend decision' function that produces a proposal — critically, it has no direct 'approve loan' or 'disburse funds' tool, so the agent can never itself execute the consequential action. Policy engine: every proposed recommendation is evaluated against explicit, auditable rules — loan amount thresholds, required minimum credit scores, industry restrictions, regulatory eligibility criteria — with any recommendation outside pre-approved parameters automatically routed to mandatory human review rather than auto-approved, regardless of how confident the agent's reasoning appears. Sandboxing: the agent's execution runs under a service identity scoped only to the specific data sources it needs, with no network or credential access to the actual disbursement systems, so even a compromised or manipulated agent process cannot reach money-moving systems directly. Audit trail: every data point retrieved, every intermediate reasoning step surfaced, the final recommendation, the policy evaluation result, and the human reviewer's decision (if triggered) are all durably logged with a correlation id — essential for regulatory compliance and for investigating any disputed or discriminatory-seeming outcome after the fact. Kill switch: a human-operated control that immediately halts the agent's ability to process new applications, independent of the agent's own logic, for use if a systemic bias or error is suspected. This configuration reflects that lending decisions are both consequential and regulated: the design goes further than the tutorial's general pattern by removing the ability to directly execute the highest-stakes action at all, making human approval structurally mandatory rather than merely policy-gated for genuinely high-risk cases." },
+        { "number": 10, "question": "A pipeline-to-agent conversion shows the agent-based version has higher latency and cost than the original pipeline, with only modest quality improvement on most requests. How should this evidence shape the team's decision?", "modelAnswer": "This is exactly the evidence the tutorial's parallel-rollout practice exists to surface, and it should be taken seriously rather than dismissed in favor of the newer architecture's appeal. Higher latency and cost are expected and inherent costs of agent-first design — an agent takes decision rounds and model calls a fixed pipeline does not — so the real question is whether the added flexibility's benefit, in practice and on real traffic, justifies that cost for this specific task. 'Only modest quality improvement on most requests' suggests the original hypothesis — that this task needed runtime judgment badly enough to justify an agent — may have been wrong, or only true for a minority of requests. The team's options, following the tutorial's guidance, include: keeping the fixed pipeline for the bulk of straightforward requests and routing only the identifiably ambiguous or judgment-requiring subset to the agent (a hybrid, rather than all-or-nothing, migration); reconsidering whether the agent's tool set and instructions are well-designed, since a poorly-scoped agent can underperform its potential; or concluding that this particular task was, in fact, better suited to request/response architecture after all, and reverting or keeping the pipeline as the primary path. The tutorial explicitly frames 'this task didn't need to be agent-first' as a valid, non-failure outcome of running the evaluation — evidence of modest benefit for real cost is precisely the signal that should trigger this reconsideration rather than proceeding to full cutover on architectural enthusiasm alone." },
+        { "number": 11, "question": "Explain the relationship between capability scoping at the agent level and the function-level safety discipline (validation, authorization, idempotency, structured errors) established in tutorial 12.", "modelAnswer": "They operate at different layers of the same defense-in-depth principle and are both necessary, neither sufficient alone. Function-level safety from tutorial 12 governs what happens inside a single function once it is called: it validates the arguments it receives, authorizes the specific operation against the real requesting user, ensures repeated calls are safe, and fails with structured errors rather than exceptions — this protects correctness and safety for any given function regardless of what calls it. Capability scoping governs a level above that: which functions an agent is even allowed to attempt to call in the first place, based on that agent's specific goal and role. An agent with narrow capability scoping but functions lacking tutorial 12's internal safety could still misuse the few tools it has access to (e.g., an under-validated CheckStock function returning or accepting malformed data); conversely, an agent with excellent function-level safety on every function in the system but no capability scoping could reach and misuse functions entirely unrelated to its purpose, simply because nothing stopped it from being given access to them. Proper agent-first governance requires both: capability scoping decides the boundary of what an agent may even attempt, and function-level safety ensures that everything within that boundary behaves correctly and safely when actually invoked." },
+        { "number": 12, "question": "How does the choice of agent communication model interact with the governance mechanisms from deep-dive 3? Give a concrete example of a communication-model choice that would make governance harder or easier.", "modelAnswer": "The communication model determines how visible and interceptable agent actions are, which directly affects how practically a policy engine, audit trail, or kill switch can be applied system-wide. Direct messaging makes governance comparatively straightforward to apply at a single choke point: since a caller invokes a specific agent through a known code path, a policy check or audit-log wrapper can be placed at that call site with confidence it will see every relevant action. A message bus makes this harder to guarantee centrally unless the governance checks are built into the bus's dispatch pipeline itself rather than into each individual caller, since new subscribers can appear over time and a governance check added only at one publisher's call site would miss actions triggered by messages that arrive from elsewhere; the fix is to enforce policy and audit logging as bus middleware that every message passes through, not as caller-side code. A blackboard pattern is the hardest to govern centrally in this sense, because agents write to shared state somewhat independently and there may be no single call site at all to intercept — governance for a blackboard system typically needs to be built into the shared-state layer itself (e.g., every write to the blackboard passes through a governed write function) rather than relying on catching individual agent-to-agent calls, since those calls may not exist as such. The concrete lesson: choosing a message bus or blackboard model for extensibility reasons should come with an explicit plan for where governance checks live in that topology, or the extensibility gained can silently create governance gaps." },
+        { "number": 13, "question": "Why does this tutorial describe agent-first architecture as sitting 'above' Semantic Kernel and AutoGen rather than being a feature of either framework?", "modelAnswer": "Because the concepts covered — deciding which parts of a system should be agents, choosing a communication model for how agents find and talk to each other, and designing governance controls around collective agent autonomy — are architectural decisions about the whole system's structure, and they remain the same regardless of which specific framework implements any individual agent. An agent registry, a message-bus-based communication model, a policy engine, sandboxing, an audit trail, and a kill switch would all look substantially similar whether the agents underneath were built with Semantic Kernel's ChatCompletionAgent and orchestration classes, AutoGen's conversable agents and GroupChat, a different framework, or hand-rolled code — none of these frameworks provide an opinion on, for example, whether a given business capability should be an agent at all, or how to gate a consequential action with organization-specific policy rules. This is precisely why the tutorial's diagrams and reasoning are framework-agnostic even while its code examples happen to use Semantic Kernel-flavored syntax: the architectural lessons are meant to transfer to whatever agent-building mechanism a team uses, now or in the future, which is a direct continuation of the broader course lesson (established across tutorials 12, 17, and 19) that the underlying design problems in agentic AI are stable even as specific framework APIs evolve." },
+        { "number": 14, "question": "Describe how you would test an agentic system's governance layer specifically, as distinct from testing the agent's task-completion behavior.", "modelAnswer": "Task-completion testing asks 'does the agent accomplish the goal correctly for a range of inputs,' which is the tutorial 18/19-style testing already covered (happy path, ambiguous input, termination behavior). Governance testing asks a different question: 'do the safety controls actually constrain the agent when they should,' and needs its own deliberate test scenarios rather than being inferred from task-completion tests passing. Concretely: for capability scoping, attempt (in a test harness) to have the agent invoke a tool it was not granted, or instruct it (via a crafted or adversarial prompt) to try to use one, and confirm the attempt is blocked rather than silently succeeding. For the policy engine, construct test cases that should trigger every distinct rule branch — an action within limits, one just over a threshold requiring approval, one that should be denied outright — and confirm each produces the expected policy result, not just the common case. For sandboxing, verify the execution boundary directly (e.g., that the sandboxed identity genuinely lacks access to systems outside its intended scope) rather than assuming the configuration is correct. For the audit trail, run a test scenario and confirm the resulting log entries are actually sufficient to reconstruct what happened, including for failure cases. For the kill switch, actually trigger it during a simulated in-flight agent action and confirm the action halts, rather than only confirming the switch exists in code. This is fundamentally adversarial and boundary-focused testing, distinct from and complementary to functional testing of whether the agent completes tasks well." },
+        { "number": 15, "question": "Reflecting on this tutorial together with tutorials 17-19, explain what 'architecture' contributes that 'framework knowledge' alone does not, using agent-first architecture as the example.", "modelAnswer": "Framework knowledge (Semantic Kernel's kernel/plugins/agents, AutoGen's conversable agents/GroupChat) answers 'how do I correctly build and configure an individual agent or a specific multi-agent conversation using this particular library's API.' It is necessary but answers a narrower question than the ones this tutorial raises: whether a given piece of functionality should be an agent at all versus a plain service; how agents across an entire system — potentially built with different tools, added at different times, by different teams — should discover and communicate with each other; and what organization-wide controls (capability scoping, policy, sandboxing, audit, kill switch) must exist so that the sum of many individually-correct agents doesn't add up to an ungoverned, unpredictable whole. A developer with deep framework knowledge but no architectural perspective could build a technically correct individual agent that is nonetheless the wrong choice for its task (over-applying agent-first to a job better served by a fixed pipeline), poorly integrated into the rest of the system (ad hoc direct-messaging coupling that doesn't survive growth), and inadequately governed (safety bolted on only after an incident). Architecture is the discipline of making these system-level, framework-independent decisions well, and it is what lets the specific framework choice remain a swappable implementation detail — which is precisely why this tutorial's lessons, unlike a framework's API reference, are expected to remain valid even as Semantic Kernel, AutoGen, or whatever comes after them continue to evolve." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Agent-first architecture", "back": "System design where agents (goal + tools + own decision-making) are the primary unit of functionality, replacing fixed request/response handlers for open-ended, judgment-requiring tasks." },
+        { "number": 2, "front": "Request/response vs agent-first", "back": "Request/response: same fixed steps every time per endpoint. Agent-first: steps chosen dynamically per situation by an agent pursuing a goal." },
+        { "number": 3, "front": "When NOT to use an agent", "back": "When a task is complex but fully specifiable in advance as a fixed sequence — it gains nothing from being an agent and loses predictability/testability." },
+        { "number": 4, "front": "Agent registry", "back": "A directory of available agents, their responsibilities, and how to reach them — the agent-first analog of a routing table. Essential past 2-3 agents." },
+        { "number": 5, "front": "Direct messaging", "back": "One agent calls another by name/reference directly. Simple, traceable; tightly couples caller to knowing the receiver — brittle as agents are added/replaced." },
+        { "number": 6, "front": "Message bus", "back": "Routes messages between agents without either knowing the other — publish/subscribe. Loose coupling; new agents can handle a task type with zero publisher changes." },
+        { "number": 7, "front": "Blackboard pattern", "back": "Agents read/write shared state any participant can observe. Fits many agents contributing partial findings toward one shared conclusion (e.g. diagnosis)." },
+        { "number": 8, "front": "Capability scoping", "back": "Restrict each agent to the minimum tools/permissions its goal needs — least privilege at the AGENT level (extends tutorial 12's per-function scoping)." },
+        { "number": 9, "front": "Policy engine", "back": "Checks a proposed agent action against defined rules (limits, required approvals) BEFORE it executes — centralizes rules instead of duplicating per-agent." },
+        { "number": 10, "front": "Sandboxing", "back": "Runs agent actions in a restricted environment (scoped identity, network isolation) so a mistake/manipulated agent can't reach beyond that boundary." },
+        { "number": 11, "front": "Audit trail", "back": "Durable, ordered record of every agent decision and action — system-wide counterpart to per-framework step logging. Essential for review/compliance." },
+        { "number": 12, "front": "Kill switch", "back": "Operator-controlled, INDEPENDENT halt mechanism — works even if the agent's own termination logic fails or is bypassed. Must be tested, not just implemented." },
+        { "number": 13, "front": "5 governance mechanisms = layered system", "back": "Capability scoping + policy engine + sandboxing + audit trail + kill switch. Each closes a gap the others don't — none replaces the others." },
+        { "number": 14, "front": "Pipeline → agent conversion", "back": "Wrap existing pipeline steps as described tools; introduce an agent that CHOOSES among them via instructions, instead of always running all steps. Preserve tested logic." },
+        { "number": 15, "front": "Safe migration rollout", "back": "Run old pipeline + new agent system in parallel behind a feature flag; compare real outcomes; add governance BEFORE declaring done; cut over only once trusted." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions and Answers",
+      "items": [
+        { "number": 1, "question": "How would you explain agent-first architecture to someone who only knows request/response API design?", "answer": "In request/response, the unit of design is an endpoint with a fixed handler — for a given route, the same steps run every time, and all the judgment about what those steps are was made once, at development time. Agent-first flips that: the unit of design is an agent that owns a goal and a set of tools and decides its own next action at runtime, based on the specific situation. It's not a technology swap, it's a shift in where decision-making happens — baked into code ahead of time versus exercised dynamically. That flexibility is valuable for genuinely open-ended, judgment-requiring tasks, but it comes at a real cost in predictability and testability, so I'd never recommend converting a whole API surface to agents — only the parts where the steps truly can't be predetermined." },
+        { "number": 2, "question": "How do you decide which parts of a system should be agents and which should stay as plain services?", "answer": "I look at whether the steps for a given task can be fully specified in advance regardless of the input, or whether they genuinely depend on runtime judgment. A workflow like validate-transform-save-notify is complex but fixed — the same steps in the same order every time — so it stays a plain service; making it an agent adds decision overhead with zero benefit since there's no decision to make. A task like 'diagnose this incident and propose a fix' can't be reduced to one fixed sequence — the right next step depends entirely on what's found along the way — so that's a good agent candidate. The test I apply: if I can write the pseudocode as an unconditional sequence of steps, it's a service; if the pseudocode would need to be 'figure out what to do next based on what just happened,' that's an agent." },
+        { "number": 3, "question": "Walk me through the tradeoffs between the three agent communication models.", "answer": "Direct messaging is simplest and most traceable — one agent calls another it knows about — but it hardcodes the caller to knowing exactly who handles what, which gets brittle as a system grows or agents get replaced. A message bus decouples that: the sender publishes without knowing who, if anyone, will handle it, so I can add a new specialized agent to handle a task type without touching any existing calling code — better for systems where the agent roster changes over time, at the cost of needing broker infrastructure and dealing with things like message loss. A blackboard pattern is for when multiple agents each contribute partial, independent findings that need to combine into one picture — like several diagnostic agents each noticing a different symptom — where no single agent could reach the conclusion alone and there isn't really a natural 'caller' and 'callee' at all. I pick based on how stable the agent set is and whether the interaction is fundamentally request/reply or fundamentally collaborative-and-cumulative." },
+        { "number": 4, "question": "What governance would you put around an agent that can take real actions, like processing refunds?", "answer": "Five layers together. Capability scoping so the refund agent has only the tools its job needs — read customer/order data and propose a refund — nothing broader. A policy engine that checks every proposed refund against rules before it executes: amount thresholds, eligibility, whether it needs human sign-off — refunds over a limit route to a human, full stop, regardless of how confident the agent seems. Sandboxing so the agent's execution identity can't reach anything beyond what refund processing actually requires. An audit trail logging every proposal, policy check result, and outcome with a correlation id, so any disputed refund can be fully reconstructed later. And a kill switch a human can hit immediately if something looks wrong, independent of whatever internal logic the agent or its termination conditions rely on. None of these substitute for the others — I've seen teams implement just a policy engine and think they're covered, but without an audit trail you can't prove what happened, and without a kill switch you can't stop it fast if the policy engine itself has a gap." },
+        { "number": 5, "question": "A team wants to convert their working RAG pipeline into an agent. How would you approach that migration?", "answer": "I wouldn't rewrite the pipeline — I'd wrap it. The existing retrieval and generation logic is tested and working, so step one is turning retrieval into a described, callable function rather than hardcoded step one of an unconditional sequence. Step two is identifying what new capability actually motivates this — usually something the fixed pipeline couldn't do, like checking a live system or asking a clarifying question — and adding that as another tool, since that's where the real value of the migration comes from. Step three is introducing an agent whose instructions state the goal and when to use each tool, replacing the old fixed sequence with a decision. Only then, step four, do I add governance — capability scoping, a policy check on anything consequential, audit logging — since the old deterministic pipeline didn't need it but this new decision-making flexibility does. And I'd run the old and new systems side by side behind a flag on real traffic before fully cutting over, because 'the agent adds flexibility' is a hypothesis that needs checking against real outcomes, not an assumption." },
+        { "number": 6, "question": "What's the biggest architectural mistake you see teams make when adopting agent-first design?", "answer": "Making everything an agent. There's a pull toward agentifying a whole system once agents are available and impressive, but a component that always does the same three steps in the same order gains nothing from being an agent — it just adds decision-making overhead, more model calls, and less predictability for zero corresponding benefit, since there was never a decision to make in the first place. I treat agent-ness as something that has to be earned by genuine runtime judgment requirements, not something to apply by default because the tooling exists. The healthiest agent-first systems I've seen are mostly ordinary, boring, predictable services, with agents reserved specifically for the handful of genuinely open-ended parts — that's a feature of good design, not a sign of under-adoption." },
+        { "number": 7, "question": "How does capability scoping at the agent level relate to the function-level safety you'd build for any tool-calling system?", "answer": "They're different layers of the same defense-in-depth idea, and you need both. Function-level safety — validating arguments, authorizing as the real user, keeping things idempotent, returning structured errors — governs what happens correctly inside a function once it's called, regardless of what's calling it. Capability scoping governs a level above that: which functions a given agent is even allowed to attempt to call, based on its specific role. An agent with tight scoping but sloppy function-level safety can still misuse the few tools it does have; an agent with excellent function-level safety everywhere but no scoping can reach and misuse functions that have nothing to do with its actual job, just because nobody restricted its toolset. I think of scoping as deciding the fence, and function-level safety as making sure everything inside the fence behaves correctly — you need the fence and the correct behavior, not one or the other." },
+        { "number": 8, "question": "Why do you insist on testing a kill switch directly rather than trusting that it works because it's implemented?", "answer": "Because 'exists in code' and 'actually stops the thing' are different claims, and the gap between them is exactly where a kill switch would fail you at the worst possible moment. I've seen implementations that set a flag some code path checks — but if that check only happens at the start of a loop iteration and an iteration is mid-flight doing something slow, the flag doesn't actually halt anything until the current iteration finishes on its own, which defeats the entire purpose of an emergency stop. The only way to know it works is to trigger it during a simulated in-flight action and confirm the action actually halts, not just confirm the flag gets set. This is the same discipline as testing a circuit breaker's backstop or a resilience policy's timeout — a safety mechanism you haven't exercised is a hypothesis, not a guarantee, and for something billed as an emergency control, I want it tested on a schedule as part of operational readiness, not assumed correct because it compiled." },
+        { "number": 9, "question": "How would you decide whether a message bus or a blackboard pattern makes more sense for a growing multi-agent system?", "answer": "I'd look at the shape of the interaction, not just the growth. A message bus fits when interactions are fundamentally task requests — 'someone needs this specific thing done' — and I want to decouple who asks from who does it, so new specialist agents can pick up task types without touching existing callers. A blackboard fits when the interaction isn't really request/reply at all — it's several agents independently noticing different partial things and needing a shared place to accumulate that so a conclusion can emerge that no single agent could reach alone, like several diagnostic signals combining into one root-cause hypothesis. If I'm mostly routing discrete requests to whichever specialist should handle them, that's a bus. If I'm accumulating partial evidence toward one shared understanding, that's a blackboard. They can also coexist — a bus for routing initial requests to the right specialist, and a blackboard within a diagnostic sub-system where multiple specialists converge on one finding." },
+        { "number": 10, "question": "What would make you recommend AGAINST agent-first architecture for a system a team is proposing to build agentically?", "answer": "A few signals. If I can write out the intended behavior as a fixed sequence of steps that doesn't meaningfully change based on input — even if it's a long sequence — that's a sign the task doesn't need an agent's runtime decision-making at all, just a well-structured pipeline. If the team's real motivation is 'agents are the modern approach' rather than a specific judgment-requiring gap in the current design, that's a red flag for adopting complexity without justified benefit. If the domain is high-stakes and heavily regulated in a way that demands full predictability and traceability of every possible code path — some compliance contexts genuinely need that — the reduced predictability of agent-first can be a poor fit regardless of flexibility gains. And if the team doesn't have a credible plan for the governance side — capability scoping, policy checks, audit, a kill switch — I'd push back on shipping the autonomy before the safety net exists, even if the underlying task genuinely would benefit from an agent eventually." },
+        { "number": 11, "question": "Explain how an agent registry changes as a system scales from two or three agents to a few dozen.", "answer": "At two or three agents, you can often get away without a formal registry — a developer just knows 'billing questions go to the billing agent' and hardcodes that. Once you're at a few dozen, that implicit knowledge doesn't scale: new team members don't know the mapping, agents get duplicated or their responsibilities overlap because nobody has a single source of truth, and adding a new agent means hunting through code to make sure you're not conflicting with an existing one. A formal registry — even a simple dictionary of name, responsibility, and how to invoke it — becomes essential at that point, serving the same role a routing table serves once an API has dozens of endpoints instead of three. At real scale, I'd also expect the registry to support more than exact-match lookup — some kind of semantic matching so a task description can be routed to the right agent by resemblance to its stated responsibility, not just a literal keyword match, though I'd start simple and only add that complexity once literal matching genuinely breaks down." },
+        { "number": 12, "question": "How do you evaluate whether a completed pipeline-to-agent migration was actually worth it?", "answer": "I look at the same things I'd have planned to measure before starting, comparing old and new run in parallel: does the agent version produce meaningfully better outcomes on the requests where flexibility should matter — not just parity on the easy cases, but genuine improvement on the ones the fixed pipeline used to handle poorly? What's the cost delta in latency and model calls, and is that acceptable given the improvement? Did governance actually catch anything in practice, or did the system never exercise the policy engine or capability boundaries in ways that justified building them — which might mean they were prudent insurance, not wasted effort, but is still worth knowing? If quality improvement is modest and cost is meaningfully higher, that's a legitimate signal the task didn't need to be agent-first after all, and reverting or narrowing the agent's scope to only the genuinely ambiguous subset of requests is a perfectly good outcome — not a failure of the exercise, but exactly the kind of evidence-based conclusion the migration process is designed to surface." },
+        { "number": 13, "question": "What's the relationship between the blackboard pattern here and group chat orchestration from Semantic Kernel?", "answer": "They're the same underlying idea at different levels of abstraction. Group chat orchestration's shared conversation thread functions as a blackboard — multiple agents read and write to it, and each can see what the others have contributed, converging toward a result through that shared visibility rather than direct agent-to-agent calls. The difference is that 'blackboard pattern' is the general architectural concept, while group chat orchestration is one specific framework's implementation of it using a conversation abstraction. Recognizing that connection is useful because it means I can reason about a group chat's behavior — its coupling properties, its scalability characteristics, where race conditions or stale-state issues might arise — using general blackboard-pattern thinking, and I'm not limited to only the mental model a specific framework's documentation gives me. It also means if I ever need a blackboard-style system without a conversational framing at all — say, several independent services writing findings to a shared table — I can build that directly without needing an agent-conversation framework to get the same coordination benefit." },
+        { "number": 14, "question": "How would you architecturally prevent an agent from being manipulated into taking an action it shouldn't via a crafted user input?", "answer": "I don't rely on the agent's own judgment as the only defense, because that's exactly what a crafted input is trying to subvert. The real defense is architectural: capability scoping means even a successfully manipulated agent can only attempt actions from its genuinely narrow toolset — it literally cannot request something it was never given access to, no matter what it's convinced to try. The policy engine is the second layer: it evaluates the actual proposed action against hard rules regardless of the agent's stated reasoning or confidence, so a manipulated agent proposing an out-of-policy action still gets blocked or routed to human approval at that checkpoint, which doesn't care why the agent thinks it's a good idea. Sandboxing is the third layer: even if scoping and policy both had a gap, the execution boundary limits what the action can actually reach. And the audit trail ensures that if a manipulation attempt does get partway through, there's a full record to investigate afterward. The principle is that no single layer, including 'trust the agent's judgment,' is the defense — manipulation resistance comes from the action having to pass through independent, code-level checkpoints that don't care about the agent's internal reasoning at all." },
+        { "number": 15, "question": "Looking back across tutorials 17 through 20, what's the overall lesson about the relationship between frameworks and architecture in agentic AI?", "answer": "Frameworks give you the mechanism for building a correct individual agent — Semantic Kernel's kernel-and-plugin model, AutoGen's conversable-agent-and-conversation model — and that mechanism matters and takes real skill to use well. But architecture is a layer above that: it's the set of decisions about whether something should be an agent at all, how agents across a whole system find and talk to each other, and what governance has to exist given the autonomy you're introducing — and none of that is answered by knowing a framework's API well. A team can build technically excellent individual agents with either framework and still end up with a poorly architected system if it over-applies agents to tasks that didn't need them, couples agents together in ways that don't survive growth, or bolts on safety only after something goes wrong. The overall lesson is that framework fluency and architectural judgment are separate skills that both matter, and the architectural judgment is the one that transfers regardless of which framework — or whatever comes after these two — a team ends up using, which is exactly why this tutorial deliberately kept its reasoning framework-agnostic even while illustrating it with familiar code." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "Agent-first architecture", "definition": "A system design where agents (goal-driven, tool-using, reasoning components) are the primary unit of functionality, rather than fixed request/response endpoints." },
+        { "term": "Request/response architecture", "definition": "A design where each call follows one fixed code path from input to output — the traditional shape most APIs and AI pipelines use." },
+        { "term": "Unit of functionality", "definition": "The building block an architecture is organized around — an endpoint or service in traditional design, an agent with a goal in agent-first design." },
+        { "term": "Agent registry", "definition": "A directory of the agents available in a system, including what each is responsible for and how to reach it." },
+        { "term": "Agent communication model", "definition": "The pattern by which agents exchange information — direct messaging, a shared message bus, or a blackboard/shared state." },
+        { "term": "Message bus", "definition": "An intermediary that routes messages between agents (or services) without the sender needing to know the receiver directly." },
+        { "term": "Blackboard pattern", "definition": "An agent communication model where agents read and write to shared state that any participant can observe and act on." },
+        { "term": "Direct messaging", "definition": "An agent communication model where one agent sends a message straight to another named agent or service." },
+        { "term": "Loose coupling", "definition": "A design property where components interact through stable contracts (messages, interfaces) without depending on each other's internals." },
+        { "term": "Governance", "definition": "The policies, controls, and oversight mechanisms that constrain what an autonomous system is allowed to do and how it is monitored." },
+        { "term": "Policy engine", "definition": "A component that checks a proposed agent action against defined rules before allowing it to execute." },
+        { "term": "Sandboxing", "definition": "Running an agent's actions in a restricted environment so a mistake or malicious instruction cannot affect systems beyond that boundary." },
+        { "term": "Audit trail", "definition": "A durable, ordered record of agent decisions and actions kept for review, debugging, and compliance." },
+        { "term": "Kill switch", "definition": "A mechanism to immediately halt an agent or agent system's activity, used when behavior is unsafe or out of control." },
+        { "term": "Capability scoping", "definition": "Restricting an agent to the minimum set of tools and permissions it needs, following least privilege at the agent level." },
+        { "term": "Traditional AI pipeline", "definition": "A fixed sequence of steps (e.g. retrieve, prompt, generate) that always runs the same way regardless of the specific input." },
+        { "term": "Agent-based system", "definition": "A system where components decide their own next actions toward a goal, using tools and reasoning, rather than following one fixed sequence." },
+        { "term": "Migration strategy", "definition": "A deliberate, incremental plan for moving a system from one architecture (e.g. a pipeline) to another (e.g. agent-based) without a risky rewrite." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Agent-first architecture makes agents — goal-owning, tool-using, decision-making components — the primary unit of functionality, replacing fixed request/response handlers for genuinely open-ended, judgment-requiring tasks only.",
+          "Agent communication models — direct messaging, a message bus, and the blackboard pattern — trade coupling for flexibility differently, and the right choice depends on how stable the agent set is and whether interaction is request/reply or collaborative-and-cumulative.",
+          "Governance for agentic systems layers five mechanisms — capability scoping, a policy engine, sandboxing, an audit trail, and a kill switch — each closing a gap the others leave open, designed in from the first agent action rather than retrofitted after an incident.",
+          "Converting a traditional AI pipeline into an agent-based system means wrapping existing steps as tools and introducing an agent to choose among them, not rewriting working logic from scratch — rolled out in parallel with the old system before full cutover.",
+          "None of this is a universal upgrade: the tutorial's repeated caution is to apply agent-first only where fixed sequences genuinely cannot capture the needed behavior, and to treat 'this task didn't need to be agentic' as a valid conclusion.",
+          "These architectural lessons sit above and outlive any specific framework (Semantic Kernel, AutoGen, or otherwise) — they are the transferable judgment that framework fluency alone does not provide."
+        ] },
+        { "type": "paragraph", "text": "You now have the architectural vocabulary to decide not just how to build an agent, but whether and where agents belong in a system at all, how they should find and talk to each other as a system grows, and what governance autonomy demands before it reaches production. This is the layer above tutorials 17–19's frameworks — durable across whatever specific tools you use to implement it. With architecture and safety established, the course now turns to a concrete standard for one piece of this puzzle: how agents and tools describe themselves to each other in an interoperable way, which is exactly what the Model Context Protocol addresses next." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Next tutorial: Model Context Protocol (MCP) (model-context-protocol-mcp). Agent-first architecture raised the question of how agents and tools connect across a system; MCP is an open standard that addresses one important piece of that — packaging tools and context sources into reusable, interoperable servers that any compliant AI application can discover and use, rather than each application defining its own bespoke tool integrations." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: take one existing service in a project you control and explicitly decide, using deep-dive 1's checklist, whether it is a good agent-first candidate — write down the reasoning either way.",
+          "Practice: build the AgentRegistry and RefundPolicyEngine sketches from the code examples, then write a test that deliberately tries to invoke an out-of-scope tool and confirms it's blocked.",
+          "Practice: implement and then directly test a kill switch against a simulated in-flight agent loop, confirming it actually halts mid-execution rather than only at a natural boundary.",
+          "Practice: complete the RAG-to-agent conversion walkthrough end to end, including running both versions in parallel on the same test set and recording the latency/cost/quality comparison.",
+          "Read: general software architecture material on the blackboard pattern and publish/subscribe messaging, plus any current guidance on responsible AI governance frameworks, since this tutorial's five governance mechanisms map onto established patterns from those fields."
+        ] },
+        { "type": "note", "style": "tip", "text": "Keep the governance scaffolding (registry, policy engine, audit wrapper) from this tutorial's walkthrough — MCP servers in the next tutorial still need capability scoping and policy checks around whatever tools they expose, so this code is not a one-off exercise." }
+      ]
+    }
+  ]
+}

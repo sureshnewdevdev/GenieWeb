@@ -1,0 +1,508 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Deploying GenAI Applications",
+  "slug": "deploying-genai-applications",
+  "level": "Intermediate to Advanced",
+  "codeLanguage": "C#",
+  "tutorialNumber": 23,
+  "totalTutorials": 27,
+  "prev": "multi-agent-systems",
+  "next": "ai-security-responsible-usage",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Deploying GenAI Applications"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "Deployment architecture for GenAI apps",
+    "Cloud deployment",
+    "Monitoring and observability",
+    "Enabling logging and telemetry",
+    "Rollout and configuration concerns"
+  ],
+  "tooltips": {
+    "deployment architecture": "The arrangement of an application's components — web tier, model access, data stores, background workers — across environments and infrastructure.",
+    "container": "A packaged, portable unit bundling an application with its dependencies so it runs consistently across environments.",
+    "Azure Container Apps": "A managed Azure service for running containerized applications with built-in scaling, without managing the underlying servers.",
+    "Azure App Service": "A managed Azure platform for hosting web applications and APIs, handling scaling, patching, and infrastructure operationally.",
+    "environment": "A distinct deployment target (development, staging, production) with its own configuration, data, and often its own model deployment.",
+    "blue-green deployment": "A rollout strategy running two identical environments (blue and pending green) and switching traffic to the new one only after it's verified healthy.",
+    "canary release": "A rollout strategy routing a small percentage of traffic to a new version before gradually increasing it, limiting the blast radius of a bad release.",
+    "rollback": "Reverting a deployment to a previous known-good version when a new release is found to be broken or unsafe.",
+    "observability": "The ability to understand a running system's internal state from its external outputs — logs, metrics, and traces.",
+    "telemetry": "Data automatically collected from a running application — requests, latency, errors, token usage — and sent to a monitoring system.",
+    "Application Insights": "Azure's application performance monitoring service, collecting telemetry, traces, and metrics for .NET and other applications.",
+    "distributed tracing": "Tracking a single request's path across multiple services or calls (including AI calls) as one connected trace for debugging.",
+    "dashboard": "A visual summary of metrics and telemetry (latency, error rate, token spend) used to monitor a system's health at a glance.",
+    "alert": "An automated notification triggered when a monitored metric crosses a defined threshold, prompting investigation or action.",
+    "configuration drift": "The gradual divergence of an environment's actual configuration from its intended, documented, or version-controlled state.",
+    "feature flag": "A runtime toggle that enables or disables a feature (or a new deployment) without requiring a new code deployment.",
+    "secrets management": "Storing and accessing credentials (API keys, connection strings) securely rather than embedding them in code or config files.",
+    "infrastructure as code": "Defining and provisioning infrastructure (resources, configuration) through versioned code rather than manual portal steps."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview: From a Working System to a Running Service",
+      "content": [
+        { "type": "paragraph", "text": "Every tutorial to this point has built something that works — an agent, a RAG pipeline, a multi-agent system with governance and evaluation. Working is necessary but not sufficient: a GenAI application also has to be deployed, monitored, and operated as a real service that real users depend on, that changes safely over time, and that someone can debug at 2 a.m. when something goes wrong. This tutorial covers that operational layer: deployment architecture for GenAI apps, cloud deployment options, monitoring and observability, enabling logging and telemetry specifically for AI calls, and the rollout and configuration concerns that separate a demo from production." },
+        { "type": "paragraph", "text": "Much of this is standard .NET operations — deployment, monitoring, configuration are not new problems GenAI invented. What's new is what to monitor and configure specifically for AI: token usage and cost, model deployment health, retrieval quality, and the rollout risk of changing a prompt or swapping a model version, none of which a traditional web app's operations playbook covers by default. This tutorial extends the operational practices you already know with the AI-specific additions that make the difference." },
+        { "type": "note", "style": "info", "text": "If you did tutorial 13's resilience and structured logging work, you already have half of this tutorial's foundation. This tutorial extends that foundation to full production deployment, monitoring, and rollout." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Design deployment architecture for a GenAI app spanning web tier, model access, and background/agent work.",
+          "Choose an appropriate cloud deployment target for a .NET GenAI application and understand its operational tradeoffs.",
+          "Establish monitoring and observability covering both ordinary application health and AI-specific signals.",
+          "Enable logging and telemetry for AI calls specifically — tokens, latency, finish reasons, retrieval quality — building on tutorial 13.",
+          "Apply rollout and configuration practices (canary releases, feature flags, secrets management) suited to changes that affect model behavior."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorial 13: structured logging, resilience, and dependency injection for AI services — this tutorial's monitoring section extends that foundation.",
+          "Tutorial 14: the ASP.NET Core web layer an AI feature typically deploys as part of.",
+          "Basic familiarity with cloud deployment concepts (containers, managed platforms) and CI/CD pipelines is helpful but not required.",
+          "Tutorial 22's evaluation/golden-dataset practice, referenced here for validating a rollout's safety."
+        ] },
+        { "type": "note", "style": "tip", "text": "This tutorial is intentionally about operations, not new AI mechanics — if a concept here feels like general software deployment practice, that's correct; the emphasis is on the parts specific to AI workloads." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "Key Concepts: Operating an AI Application Like Any Production Service",
+      "content": [
+        { "type": "paragraph", "text": "A GenAI application in production has all the operational needs of any web service — deployment architecture, a hosting environment, monitoring, logging, and a safe way to roll out changes — plus AI-specific additions layered on top of each. The five subtopics of this tutorial map directly onto standard operational concerns, each with what changes when AI is involved." },
+        { "type": "table", "headers": ["Standard operational concern", "AI-specific addition"], "rows": [
+          ["Deployment architecture", "Where model access, agent/background work, and MCP servers (tutorial 21) fit relative to the web tier"],
+          ["Cloud deployment target", "Model deployment/quota lives in the same or a connected cloud boundary as the app"],
+          ["Monitoring and observability", "Token usage, cost, model latency, and retrieval/groundedness quality alongside CPU/memory/request metrics"],
+          ["Logging and telemetry", "AI-specific fields (tokens, finish reason, retrieved passages) in every trace, never logging prompt/response bodies by default"],
+          ["Rollout and configuration", "A prompt or model-version change is a behavior change needing the same caution as a code deployment, validated against tutorial 22's golden dataset"]
+        ] },
+        { "type": "paragraph", "text": "None of this replaces ordinary .NET deployment practice — it extends it. A GenAI app still needs a deployment architecture, a cloud target, dashboards, logs, and a rollout strategy exactly as any production service does; this tutorial's job is showing what to add so those practices actually cover the AI-specific ways this kind of application can fail or regress." },
+        { "type": "note", "style": "info", "text": "A useful test throughout: for anything you'd monitor, log, or roll out carefully in an ordinary web app, ask 'does this app also have an AI-specific version of that concern?' Usually yes — and that's exactly what this tutorial adds." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Deep Dive 1: Deployment Architecture for GenAI Apps",
+      "content": [
+        { "type": "paragraph", "text": "A typical GenAI application's deployment architecture has several distinct pieces beyond a plain web app: the web tier (tutorial 14's ASP.NET Core app serving REST endpoints and streaming responses), model access (an Azure OpenAI or Azure AI Foundry connection, ideally via Managed Identity, tutorial 13/16), background/agent work (tutorial 22's long-running or multi-agent workflows, which may need their own hosting separate from the request-serving web tier), and any MCP servers (tutorial 21) the app depends on, which are themselves independently deployed services with their own lifecycle." },
+        { "type": "animation", "title": "The pieces of a GenAI deployment architecture", "intro": "More moving parts than a typical web app, each with its own deployment lifecycle.", "nodes": [
+          { "id": "web", "label": "Web tier", "sub": "ASP.NET Core" },
+          { "id": "model", "label": "Model access", "sub": "Azure OpenAI/Foundry" },
+          { "id": "bg", "label": "Background/agent work", "sub": "long-running workflows" },
+          { "id": "mcp", "label": "MCP servers", "sub": "independent services" },
+          { "id": "data", "label": "Data stores", "sub": "search index, DB" }
+        ], "steps": [
+          { "highlight": ["web"], "caption": "The web tier serves user-facing requests — synchronous, streaming, or accepting long-running jobs (tutorial 14)." },
+          { "highlight": ["web", "model"], "caption": "It reaches model access through a governed connection, ideally Managed Identity rather than a stored key." },
+          { "highlight": ["bg"], "caption": "Background/agent work (multi-step workflows, tutorial 22) often deploys separately from the web tier, since its scaling and lifecycle needs differ from request handling." },
+          { "highlight": ["mcp"], "caption": "MCP servers the app depends on (tutorial 21) are independently deployed and versioned — the deployment architecture must account for their availability too." },
+          { "highlight": ["data"], "caption": "Data stores (a search index for RAG, a database) round out the architecture, each with its own deployment and scaling story." }
+        ] },
+        { "type": "paragraph", "text": "The key architectural decision is what deploys together versus separately. A simple app might deploy web tier and lightweight background work as one unit. A more complex system separates them: the web tier scales for request volume, background/agent workers scale for job volume, and each MCP server scales independently based on its own consumers — mirroring tutorial 22's lesson that scaling one component doesn't automatically help another. Documenting this architecture (even a simple diagram) is worth doing before choosing a cloud deployment target, since the target needs to accommodate every piece, not just the web tier." },
+        { "type": "note", "style": "warning", "text": "A common early mistake is deploying long-running agent workflows inside the same process that serves web requests. If a multi-agent job runs for minutes, it can starve the request-handling threads of the same process — deploy background/agent work separately once it's more than trivially short." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Deep Dive 2: Cloud Deployment",
+      "content": [
+        { "type": "paragraph", "text": "For a .NET GenAI application, two common Azure targets cover most cases. Azure App Service hosts the web tier directly — .NET-native, straightforward deployment from CI/CD, built-in scaling and slots for rollout (deep-dive 5) — a strong default for a web app with no unusual infrastructure needs. Azure Container Apps runs containerized applications with built-in scaling (including scale-to-zero) and is well suited when the app is packaged as a container, needs to run background/agent workloads alongside the web tier, or needs more control over the runtime environment than App Service's model provides." },
+        { "type": "table", "headers": ["Target", "Fits when", "Consideration"], "rows": [
+          ["Azure App Service", "A straightforward .NET web app/API, no container requirement", "Simplest CI/CD path for .NET; deployment slots support safe rollout"],
+          ["Azure Container Apps", "Containerized app, background workers, more runtime control needed", "Handles scale-to-zero and background container workloads well"],
+          ["Both", "Any GenAI app", "Model access via Managed Identity works the same way regardless of host"]
+        ] },
+        { "type": "paragraph", "text": "Whichever target is chosen, the app connects to model access (Azure OpenAI or a Foundry project) the same way regardless of host — via Managed Identity where possible, following tutorial 13's secrets discipline, so the hosting choice doesn't change how credentials are managed. Environment separation matters here too: development, staging, and production should be distinct environments, ideally with their own model deployments or at least clearly separated quota, so a staging load test or a broken prompt in staging cannot exhaust production's token budget or leak staging data into a production index." },
+        { "type": "note", "style": "tip", "text": "Whatever target you choose, provision it with infrastructure as code (e.g. Bicep or Terraform) rather than manual portal clicks. GenAI deployment architectures have enough moving parts (web tier, background workers, MCP servers, data stores) that manual provisioning quickly drifts out of sync with what's actually documented." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Deep Dive 3: Monitoring, Observability, Logging, and Telemetry",
+      "content": [
+        { "type": "paragraph", "text": "Observability is the ability to understand a running system's internal state from its outputs — logs, metrics, and traces — and enabling logging and telemetry is how you produce those outputs in the first place. For a GenAI app, this means everything a normal .NET app needs (request rates, error rates, CPU/memory, response times) plus AI-specific telemetry: token usage per request (the direct driver of cost), model call latency separate from total request latency, finish reasons (catching truncated or filtered responses), and for RAG systems, retrieval quality signals like which passages were retrieved and their relevance scores." },
+        { "type": "code", "language": "csharp", "title": "Extending tutorial 13's structured logging with telemetry for dashboards", "code": [
+          "// Building on tutorial 13's structured logging: the same fields also feed",
+          "// Application Insights custom metrics for dashboards and alerts.",
+          "using var activity = _activitySource.StartActivity(\"AI.ChatCompletion\");",
+          "activity?.SetTag(\"ai.deployment\", deploymentName);",
+          "",
+          "var watch = Stopwatch.StartNew();",
+          "ChatCompletion completion = await chat.CompleteChatAsync(messages, options, ct);",
+          "watch.Stop();",
+          "",
+          "_telemetryClient.GetMetric(\"AI.TokensUsed\").TrackValue(",
+          "    completion.Usage.InputTokenCount + completion.Usage.OutputTokenCount);",
+          "_telemetryClient.GetMetric(\"AI.LatencyMs\").TrackValue(watch.ElapsedMilliseconds);",
+          "",
+          "_logger.LogInformation(",
+          "    \"AI call {Operation} finished in {ElapsedMs} ms using {TotalTokens} tokens, finish {FinishReason}\",",
+          "    \"ChatCompletion\", watch.ElapsedMilliseconds,",
+          "    completion.Usage.InputTokenCount + completion.Usage.OutputTokenCount, completion.FinishReason);"
+        ] },
+        { "type": "animation", "title": "From a single AI call to a dashboard alert", "intro": "The telemetry pipeline from one request to an operator's attention.", "nodes": [
+          { "id": "call", "label": "AI call", "sub": "one request" },
+          { "id": "trace", "label": "Distributed trace", "sub": "spans the request" },
+          { "id": "collect", "label": "Application Insights", "sub": "collects telemetry" },
+          { "id": "dash", "label": "Dashboard", "sub": "aggregated view" },
+          { "id": "alert", "label": "Alert", "sub": "threshold crossed" }
+        ], "steps": [
+          { "highlight": ["call"], "caption": "One AI call emits structured log fields and custom metrics: tokens, latency, finish reason." },
+          { "highlight": ["trace"], "caption": "Distributed tracing ties this call to the broader request it's part of — a chat message, a document-processing job — as one connected trace." },
+          { "highlight": ["collect"], "caption": "Application Insights collects this telemetry across every request, aggregating it over time." },
+          { "highlight": ["dash"], "caption": "A dashboard surfaces the aggregated view: token spend per day, p95 latency, error rate — the health-at-a-glance view of the system." },
+          { "highlight": ["alert"], "caption": "An alert fires automatically when a metric crosses a defined threshold — a token-spend spike, a latency regression — prompting investigation before users complain." }
+        ] },
+        { "type": "note", "style": "warning", "text": "Never log full prompt or response bodies by default — they are user data, exactly as tutorial 13 established. Telemetry should capture metadata (counts, latencies, finish reasons, retrieval scores) that supports dashboards and alerts without becoming an unaudited copy of sensitive content." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Deep Dive 4: Rollout and Configuration Concerns",
+      "content": [
+        { "type": "paragraph", "text": "A GenAI application has more kinds of 'changes' than ordinary code deployments: a code change, a prompt or instruction change, a model version upgrade, and a configuration change (temperature, max tokens, which tools are enabled) can each independently alter behavior — and only the first is caught by traditional code review and unit tests. Rollout practices need to account for all four. Canary release routes a small percentage of traffic to a new version (code or prompt) first, catching regressions before they reach everyone. Blue-green deployment keeps two full environments and switches traffic only once the new one is verified — well suited when a full behavioral comparison before cutover matters more than gradual exposure." },
+        { "type": "code", "language": "csharp", "title": "A feature flag gating a prompt/model change (illustrative)", "code": [
+          "// A feature flag lets a prompt or model change roll out without a new deployment,",
+          "// and lets it be instantly reverted if evaluation (tutorial 22) flags a regression.",
+          "bool useNewPrompt = await featureFlags.IsEnabledAsync(\"NewGroundingPrompt\", userId);",
+          "",
+          "string systemPrompt = useNewPrompt",
+          "    ? PromptLibrary.GroundingPromptV2",
+          "    : PromptLibrary.GroundingPromptV1;",
+          "",
+          "var messages = new ChatMessage[]",
+          "{",
+          "    new SystemChatMessage(systemPrompt),",
+          "    new UserChatMessage(userQuestion)",
+          "};"
+        ] },
+        { "type": "paragraph", "text": "Before widening a canary or flipping a feature flag, run the change against tutorial 22's golden dataset and compare evaluation metrics between old and new — a prompt change that looks fine on a handful of manual tries can still regress accuracy on cases the golden dataset covers but a developer didn't happen to try. If regression appears, a rollback should be as fast as flipping the feature flag or reverting the canary weight, not a full redeploy. Configuration itself needs its own discipline: secrets management (Managed Identity, Key Vault, never in source, per tutorial 13) prevents credential leaks, and guarding against configuration drift — an environment's actual settings silently diverging from what's documented — is what infrastructure as code (deep-dive 2) is for." },
+        { "type": "note", "style": "tip", "text": "Treat a prompt or model-version change with the same rollout caution as a code change, not less. It is easy to think of a prompt edit as 'just text' and skip the canary/evaluation step that a code change would automatically get from CI — that's exactly the gap that causes silent production regressions." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Ecosystem and Tools",
+      "content": [
+        { "type": "table", "headers": ["Tool / service", "Role in deploying a GenAI app"], "rows": [
+          ["Azure App Service", "Managed hosting for the web tier, with deployment slots for staged rollout"],
+          ["Azure Container Apps", "Managed container hosting for the web tier and/or background agent workloads"],
+          ["Azure OpenAI / Azure AI Foundry", "Model access, reached via Managed Identity regardless of hosting target"],
+          ["Application Insights", "Collects logs, metrics, and distributed traces; the backbone of observability"],
+          ["Azure Monitor / dashboards / alerts", "Aggregates telemetry into dashboards and triggers alerts on thresholds"],
+          ["Azure Key Vault", "Secrets management for any credential that can't be eliminated via Managed Identity"],
+          ["Feature flag service (e.g. Azure App Configuration)", "Runtime toggles for canary rollout of prompts, models, or features without redeploying"],
+          ["Bicep / Terraform (infrastructure as code)", "Versioned, repeatable provisioning of the deployment architecture's pieces"],
+          ["CI/CD pipeline (GitHub Actions, Azure DevOps)", "Automates build, test (including golden-dataset evaluation), and deployment"]
+        ] },
+        { "type": "paragraph", "text": "This is standard .NET cloud operations tooling. The GenAI-specific value-add is what you point it at: custom metrics for tokens and cost, evaluation as a pipeline gate, and feature flags scoped to prompt/model changes as much as to code features." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "Use Cases",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "A RAG-based support assistant deployed to Azure App Service, with Application Insights dashboards tracking token spend and retrieval relevance alongside ordinary request metrics.",
+          "A multi-agent document-processing system (tutorial 22) deployed to Azure Container Apps, with the web tier and background workers scaled independently.",
+          "A canary rollout of a new grounding prompt: 5% of traffic for a day, evaluated against the golden dataset, widened only after metrics hold steady.",
+          "An incident where token spend spikes unexpectedly: an alert fires, the on-call engineer checks the dashboard, traces the spike to a specific endpoint via distributed tracing, and finds a recent prompt change resent too much conversation history.",
+          "A staging environment with its own Azure OpenAI deployment and quota, so a load test never risks exhausting production's token budget.",
+          "A feature flag instantly reverting a newly-deployed model version after evaluation detects a groundedness regression, without waiting for a new deployment.",
+          "Infrastructure as code defining the whole deployment architecture (web tier, background workers, Key Vault, Application Insights) so a new environment can be stood up identically to production."
+        ] }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples",
+      "content": [
+        { "type": "paragraph", "text": "These examples show custom telemetry for AI-specific dashboards, a health check covering model connectivity, and a rollout guard tied to evaluation results." },
+        { "type": "code", "language": "csharp", "title": "Example 1 — Registering Application Insights with custom AI metrics", "code": [
+          "// Program.cs",
+          "builder.Services.AddApplicationInsightsTelemetry();",
+          "builder.Services.AddSingleton<TelemetryClient>();",
+          "",
+          "// A small wrapper service records AI-specific metrics on every call,",
+          "// reusing the resilient ChatService from tutorial 13.",
+          "builder.Services.AddSingleton<IChatService>(sp =>",
+          "    new TelemetryEnrichedChatService(",
+          "        inner: sp.GetRequiredService<ChatService>(),",
+          "        telemetry: sp.GetRequiredService<TelemetryClient>()));"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 2 — A health check covering model connectivity", "code": [
+          "// A cheap real call proves the deployment is reachable and authorized --",
+          "// closing the gap ValidateOnStart (tutorial 13) leaves for connectivity issues.",
+          "builder.Services.AddHealthChecks()",
+          "    .AddCheck<AzureOpenAIHealthCheck>(\"azure-openai\", tags: new[] { \"ready\" });",
+          "",
+          "public sealed class AzureOpenAIHealthCheck : IHealthCheck",
+          "{",
+          "    private readonly ChatClient _chat;",
+          "    public AzureOpenAIHealthCheck(ChatClient chat) => _chat = chat;",
+          "",
+          "    public async Task<HealthCheckResult> CheckHealthAsync(",
+          "        HealthCheckContext context, CancellationToken ct = default)",
+          "    {",
+          "        try",
+          "        {",
+          "            await _chat.CompleteChatAsync(",
+          "                new UserChatMessage(\"ping\"),",
+          "                new ChatCompletionOptions { MaxOutputTokenCount = 5 }, ct);",
+          "            return HealthCheckResult.Healthy();",
+          "        }",
+          "        catch (Exception ex)",
+          "        {",
+          "            return HealthCheckResult.Unhealthy(\"Model deployment unreachable\", ex);",
+          "        }",
+          "    }",
+          "}"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 3 — Gating a rollout on evaluation results", "code": [
+          "// A CI/CD pipeline step (conceptual): widen the canary only if evaluation passes.",
+          "EvaluationReport report = await EvaluateAsync(goldenDataset, candidateService: newVersion);",
+          "",
+          "if (report.Accuracy < baselineAccuracy - 0.02)   // more than a 2-point regression",
+          "{",
+          "    logger.LogWarning(\"Evaluation regression detected: {Accuracy} vs baseline {Baseline}\",",
+          "        report.Accuracy, baselineAccuracy);",
+          "    await featureFlags.SetAsync(\"NewGroundingPrompt\", enabled: false);   // auto-rollback",
+          "    throw new InvalidOperationException(\"Rollout blocked: evaluation regression.\");",
+          "}",
+          "",
+          "await canaryController.WidenAsync(\"NewGroundingPrompt\", toPercent: 25);"
+        ] }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step by Step: Deploying and Monitoring a GenAI Web App",
+      "content": [
+        { "type": "paragraph", "text": "This walkthrough deploys the tutorial-14 streaming assistant to Azure, wires up monitoring, and performs a governed rollout of a prompt change." },
+        { "type": "list", "style": "numbered", "items": [
+          "Sketch the deployment architecture: web tier (the ASP.NET Core app), model access (Azure OpenAI via Managed Identity), and any background work — decide what deploys together and what deploys separately.",
+          "Provision the target with infrastructure as code: an Azure App Service (or Container Apps) instance, an Application Insights resource, and a Key Vault, all defined in Bicep or Terraform rather than manual steps.",
+          "Deploy the app via CI/CD, confirming Managed Identity grants it access to the Azure OpenAI deployment with no key in configuration.",
+          "Add the health check from Example 2 and confirm the platform's readiness probe reflects actual model connectivity, not just process liveness.",
+          "Add the telemetry wrapper from Example 1, recording tokens and latency as custom metrics alongside tutorial 13's structured logs.",
+          "Build a dashboard in Application Insights showing request rate, error rate, p95 latency, and daily token spend; set an alert on a token-spend threshold.",
+          "Prepare a prompt change (e.g. a revised grounding instruction) behind a feature flag, and run it against tutorial 22's golden dataset before enabling it for any real traffic.",
+          "Enable the flag for a small percentage of traffic (a canary), monitor the dashboard and evaluation metrics for a defined period, and only then widen it — following Example 3's gating logic.",
+          "Simulate a regression: deliberately degrade the new prompt, confirm the evaluation gate catches it, and confirm the feature flag rollback actually reverts behavior for all traffic within seconds.",
+          "Document the whole architecture, environments, and rollout process — the artifact a new team member or an on-call engineer would need to operate this system without you."
+        ] },
+        { "type": "note", "style": "tip", "text": "Step 9 — testing the rollback path deliberately — is the most skipped step and the most important one. A rollback mechanism nobody has triggered outside a real incident is a hypothesis, not a safety net." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "This tutorial's guidance is Azure-centric and .NET-centric by design (matching the course); other clouds and stacks have direct equivalents (containers, APM services, secret stores) but different specific names and setup steps.",
+          "Custom telemetry and health-check code shown are illustrative; exact Application Insights/telemetry SDK APIs evolve, and production code should be verified against current package documentation.",
+          "Canary releases and feature flags add operational complexity (traffic splitting, flag management) that a very low-traffic or internal-only app may not need — match rollout rigor to actual risk and blast radius.",
+          "Evaluation-gated rollout (Example 3) assumes a maintained, representative golden dataset (tutorial 22); a stale or narrow dataset gives false confidence that a regression was caught when it wasn't.",
+          "Health checks that make a real model call (Example 2) consume tokens and count against rate limits on every check — tune check frequency accordingly rather than checking on every request.",
+          "Separating web tier and background/agent work into different deployment units adds coordination overhead (versioning, communication) that a very simple app may not need yet.",
+          "Monitoring dashboards and alerts require someone to actually watch and respond to them; tooling alone does not provide operational readiness without a team practice around it.",
+          "Cost monitoring via token telemetry approximates spend; always reconcile against the cloud provider's actual billed usage, since telemetry counts and billing can diverge in edge cases."
+        ] }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Document the deployment architecture explicitly — what deploys together, what deploys separately, and why — before choosing a cloud target.",
+          "Deploy long-running background/agent work separately from the request-serving web tier once it's more than trivially short.",
+          "Provision infrastructure as code, not manual portal steps, to prevent configuration drift across environments.",
+          "Monitor AI-specific signals (tokens, model latency, finish reasons, retrieval quality) alongside ordinary application metrics, not as an afterthought.",
+          "Never log prompt or response bodies by default; capture metadata for dashboards and alerts instead.",
+          "Treat prompt, instruction, and model-version changes with the same rollout caution as code changes — canary or feature-flag them, and gate on evaluation results.",
+          "Keep secrets in Managed Identity or Key Vault, never in source or plain configuration, across every environment.",
+          "Test the rollback path deliberately, before an incident forces you to discover whether it actually works."
+        ] },
+        { "type": "table", "headers": ["Common mistake", "Do this instead"], "rows": [
+          ["Running long agent jobs inside the web-request process", "Deploy background/agent work as a separate unit once it's non-trivial"],
+          ["Manual portal provisioning", "Infrastructure as code (Bicep/Terraform) for repeatable, drift-free environments"],
+          ["Monitoring only CPU/memory/request metrics", "Add token usage, model latency, finish reasons, and retrieval quality"],
+          ["Shipping a prompt change straight to 100% of traffic", "Canary or feature-flag it, gated on golden-dataset evaluation"],
+          ["Assuming a rollback mechanism works because it's coded", "Test it deliberately before relying on it during a real incident"],
+          ["One shared environment for dev, staging, and production", "Separate environments with separate quota/model deployments"]
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz: Deploying GenAI Applications",
+      "items": [
+        { "number": 1, "question": "What does deployment architecture for a GenAI app typically include beyond a plain web app?", "options": { "A": "Nothing different — it's identical to any web app", "B": "Model access, background/agent work, MCP servers, and data stores, each with their own deployment lifecycle", "C": "Only a database", "D": "A single monolithic process with no other components" }, "correctAnswer": "B", "explanation": "A GenAI app's architecture includes the web tier plus model access (via Managed Identity), background/agent workflows that may need separate hosting, MCP servers as independently deployed services, and data stores like a search index — more pieces than a plain CRUD web app." },
+        { "number": 2, "question": "Why should long-running agent workflows typically deploy separately from the request-serving web tier?", "options": { "A": "It's required by Azure billing rules", "B": "A minutes-long job running inside the same process can starve request-handling threads", "C": "Background work cannot use the same model deployment", "D": "There is no reason; they should always share a process" }, "correctAnswer": "B", "explanation": "If a multi-agent job runs for minutes inside the same process serving web requests, it competes for the same resources and can degrade responsiveness for other users — separating background/agent work avoids this once jobs are more than trivially short." },
+        { "number": 3, "question": "What is a key advantage of Azure Container Apps over Azure App Service for a GenAI application?", "options": { "A": "It's the only option that supports .NET", "B": "It handles containerized workloads and background container jobs alongside the web tier, with scale-to-zero support", "C": "It removes the need for Managed Identity", "D": "It's always cheaper regardless of workload" }, "correctAnswer": "B", "explanation": "Azure Container Apps is well suited when the app is packaged as a container, needs to run background/agent workloads alongside the web tier, or needs scale-to-zero — App Service remains a strong default for a straightforward .NET web app with no such needs." },
+        { "number": 4, "question": "Why should development, staging, and production have separate model deployments or clearly separated quota?", "options": { "A": "It's a billing requirement", "B": "So a staging load test or broken prompt cannot exhaust production's token budget or leak data across environments", "C": "Azure OpenAI requires separate deployments per environment by default", "D": "It has no real benefit" }, "correctAnswer": "B", "explanation": "Without separation, testing or a bug in a non-production environment can consume the shared token quota production needs, or risk cross-environment data leakage — environment isolation for GenAI apps extends to quota and model deployments, not just application configuration." },
+        { "number": 5, "question": "What AI-specific telemetry should be monitored beyond standard application metrics like CPU and request rate?", "options": { "A": "Nothing extra is needed", "B": "Token usage, model call latency, finish reasons, and retrieval quality signals for RAG systems", "C": "Only the number of deployed models", "D": "Just the total number of users" }, "correctAnswer": "B", "explanation": "Token usage drives cost directly, model latency reveals AI-specific slowness separate from overall request time, finish reasons catch truncated/filtered responses, and retrieval quality (for RAG) reveals whether the right context was found — none of which standard web app metrics capture." },
+        { "number": 6, "question": "What is distributed tracing used for in a GenAI application?", "options": { "A": "Compressing log files", "B": "Tracking a single request's path across multiple services or calls, including AI calls, as one connected trace", "C": "Encrypting telemetry data", "D": "Replacing the need for structured logging" }, "correctAnswer": "B", "explanation": "Distributed tracing ties together the multiple steps a single logical request may involve — a web request, an AI call, a tool invocation — into one connected trace, making it possible to see the whole path a request took rather than disconnected log lines." },
+        { "number": 7, "question": "What should NEVER be logged by default in a GenAI application's telemetry?", "options": { "A": "Token counts", "B": "Full prompt or response bodies", "C": "Latency measurements", "D": "Finish reasons" }, "correctAnswer": "B", "explanation": "Prompt and response bodies are user data; logging them by default turns telemetry into an unaudited copy of potentially sensitive content. Metadata (counts, latencies, finish reasons, scores) supports dashboards and alerts without this risk." },
+        { "number": 8, "question": "Why does a prompt or instruction change need the same rollout caution as a code change?", "options": { "A": "It doesn't — prompt changes are always low-risk", "B": "A prompt change can alter model behavior significantly, but unlike code changes, it isn't automatically caught by traditional unit tests or code review", "C": "Prompt changes require a full server restart", "D": "Prompts cannot be changed without redeploying the entire application" }, "correctAnswer": "B", "explanation": "A code change goes through code review, unit tests, and CI; a prompt or instruction change can alter behavior just as significantly but often skips that scrutiny because it 'looks like just text' — which is exactly why it needs canary/feature-flag rollout and evaluation gating." },
+        { "number": 9, "question": "What is a canary release?", "options": { "A": "Deploying to production with no testing", "B": "Routing a small percentage of traffic to a new version first, gradually increasing it if healthy", "C": "A type of database migration", "D": "A method for compressing telemetry data" }, "correctAnswer": "B", "explanation": "A canary release limits the blast radius of a bad release by exposing only a small fraction of traffic to the new version initially, widening exposure only after confirming the new version is healthy — reducing the impact if something is wrong." },
+        { "number": 10, "question": "What should gate the decision to widen a canary rollout of a new prompt, beyond just 'it seems to work'?", "options": { "A": "A coin flip", "B": "Evaluation results against a golden dataset (tutorial 22), compared to a baseline", "C": "The number of lines of code changed", "D": "Whether the developer personally likes the new prompt" }, "correctAnswer": "B", "explanation": "A prompt change that looks fine on a handful of manual tries can still regress accuracy on cases a golden dataset covers but a developer didn't happen to try — comparing evaluation metrics between old and new versions before widening exposure catches this systematically." },
+        { "number": 11, "question": "What is the purpose of a feature flag in the context of a GenAI rollout?", "options": { "A": "To permanently disable a feature", "B": "A runtime toggle that enables or disables a change (like a new prompt or model) without requiring a new deployment, allowing fast rollback", "C": "To encrypt configuration values", "D": "To replace the need for infrastructure as code" }, "correctAnswer": "B", "explanation": "A feature flag lets a prompt or model change roll out gradually and be instantly reverted (by flipping the flag) if evaluation flags a regression, without waiting for a new code deployment — much faster than a full redeploy-based rollback." },
+        { "number": 12, "question": "What is configuration drift, and what practice guards against it?", "options": { "A": "A type of network latency; guarded against by caching", "B": "An environment's actual configuration silently diverging from its documented/intended state; guarded against by infrastructure as code", "C": "A model's accuracy declining over time; guarded against by retraining", "D": "A billing anomaly; guarded against by cost alerts" }, "correctAnswer": "B", "explanation": "Manual portal changes accumulate over time until an environment no longer matches what's documented or version-controlled. Infrastructure as code (Bicep, Terraform) defines the environment in versioned files, so provisioning is repeatable and drift becomes visible as a diff rather than silent divergence." },
+        { "number": 13, "question": "Why is it important to test a rollback mechanism deliberately, before an actual incident?", "options": { "A": "It isn't important — rollback code is always correct if it compiles", "B": "A rollback mechanism nobody has triggered outside a real incident is an untested hypothesis, not a proven safety net", "C": "Testing rollback voids the deployment warranty", "D": "Rollback mechanisms only work during business hours" }, "correctAnswer": "B", "explanation": "The same discipline as testing a kill switch (tutorial 20) applies to rollback: code that exists but has never been exercised may not actually work as expected when needed, so deliberately triggering a rollback in a controlled test is the only way to know it functions before a real incident depends on it." },
+        { "number": 14, "question": "Why should a health check for an AI application ideally include a real (cheap) call to the model deployment, not just process liveness?", "options": { "A": "It has no benefit and wastes tokens", "B": "It catches connectivity or authorization issues (e.g. an expired credential) that a simple 'is the process running' check would miss", "C": "It replaces the need for any other monitoring", "D": "It automatically fixes model deployment issues" }, "correctAnswer": "B", "explanation": "A process can be running and technically 'alive' while its connection to the model deployment is broken (wrong endpoint, revoked Managed Identity permission, deployment deleted) — a real, minimal model call in the health check surfaces this class of failure that liveness alone would miss." },
+        { "number": 15, "question": "What is the relationship between secrets management and Managed Identity in a deployed GenAI application?", "options": { "A": "They are unrelated concepts", "B": "Managed Identity eliminates the need to store a credential at all for supported services; secrets management (e.g. Key Vault) handles any credential that can't be eliminated this way", "C": "Secrets management replaces the need for Managed Identity entirely", "D": "Both are only relevant during local development" }, "correctAnswer": "B", "explanation": "Managed Identity is the strongest posture — no stored secret exists for services that support it (like Azure OpenAI). Secrets management (Key Vault) is the fallback for credentials that genuinely can't be eliminated this way, continuing tutorial 13's hierarchy of Managed Identity first, Key Vault second." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam: Written Questions",
+      "items": [
+        { "number": 1, "question": "Describe the deployment architecture for a typical GenAI application, naming its distinct pieces and explaining what determines whether they deploy together or separately.", "modelAnswer": "A typical GenAI application's deployment architecture includes: the web tier (an ASP.NET Core app serving REST endpoints, potentially streaming responses); model access (a connection to Azure OpenAI or an Azure AI Foundry project, ideally via Managed Identity); background/agent work (long-running or multi-agent workflows from tutorial 22 that may not fit a request/response lifecycle); any MCP servers the application depends on, which are independently deployed and versioned services; and data stores such as a search index for RAG or a relational database. What determines whether pieces deploy together or separately is primarily their scaling and lifecycle characteristics: the web tier scales with request volume and needs low-latency responsiveness, so a long-running background job sharing its process risks starving request-handling threads — once background/agent work is more than trivially short, it should deploy as its own unit, scaling independently based on job volume rather than request volume. MCP servers, being external dependencies with their own consumers, are deployed and versioned independently by design. A simple app might reasonably combine web tier and lightweight background work; a complex system separates every piece that has genuinely different scaling needs." },
+        { "number": 2, "question": "Compare Azure App Service and Azure Container Apps as deployment targets for a .NET GenAI application, and give a decision rule for choosing between them.", "modelAnswer": "Azure App Service is a managed platform purpose-built for .NET web applications: straightforward CI/CD deployment, built-in scaling, and deployment slots that support safe rollout patterns like blue-green deployment, with minimal operational overhead for a standard web app or API. Azure Container Apps runs containerized applications with built-in scaling including scale-to-zero, and is better suited when the application is packaged as a container, needs to run background or agent workloads alongside (or instead of) a web tier, or needs more control over the runtime environment than App Service's model provides. Both connect to model access the same way — via Managed Identity — so the hosting choice doesn't affect credential management. The decision rule: if the app is a straightforward .NET web app/API with no container requirement and no need to co-locate background container workloads, App Service is the simpler default; if the app is containerized, needs to run agent/background work as part of the same deployment unit, or needs scale-to-zero economics, Container Apps fits better. Neither choice is universally correct — it follows from the deployment architecture decisions made in deep-dive 1." },
+        { "number": 3, "question": "Explain what monitoring and observability must cover for a GenAI application beyond standard web application metrics, and why each AI-specific addition matters.", "modelAnswer": "Beyond standard metrics (request rate, error rate, CPU, memory, response time), a GenAI application must monitor: token usage per request, because tokens are the direct driver of AI cost and a spike often signals a bug (like resending too much conversation history) before it signals a billing surprise; model call latency measured separately from total request latency, because a slow response could be network, application code, or the model call itself, and only separating them tells you where to look; finish reasons, because a 'length' finish reveals truncation from an undersized max-tokens setting and a content-filter finish reveals blocked content, both of which look identical to a user as 'the answer seems short or wrong' without this signal; and for RAG systems, retrieval quality signals like which passages were retrieved and their relevance scores, because a wrong or ungrounded answer is often a retrieval failure, not a generation failure, and only retrieval-level telemetry can distinguish the two. Observability is the ability to understand internal state from these outputs; without the AI-specific additions, an operator can see that the system is technically 'up' while missing the AI-specific ways it can be quietly wrong or expensive." },
+        { "number": 4, "question": "Describe how to enable logging and telemetry for AI calls specifically, extending tutorial 13's structured logging, and explain what must never be included.", "modelAnswer": "Building on tutorial 13's structured logging (message templates with named properties, not interpolated strings), enabling telemetry for AI calls means capturing, per call: the operation name, elapsed time, prompt and completion token counts, the finish reason, the deployment name, and a correlation id — the same fields tutorial 13 established, now also emitted as custom metrics (via something like Application Insights' TelemetryClient) so they aggregate into dashboards rather than living only as individual log lines. Distributed tracing ties this AI call into the broader request or workflow it's part of, so a single trace shows the web request, the AI call, and any tool invocations as one connected story. What must never be included, under any circumstances by default: the full prompt text or the full response text, since both are user data that would turn telemetry into an unaudited copy of potentially sensitive content; if debugging genuinely requires seeing bodies, that should be an explicit, off-by-default debug flag with redaction, not standard telemetry. The principle is identical to tutorial 13's: metadata about the call is safe and valuable telemetry; the content of the call is not." },
+        { "number": 5, "question": "Explain rollout and configuration concerns specific to GenAI applications, covering canary releases, feature flags, and evaluation gating together as one coherent practice.", "modelAnswer": "A GenAI application has more kinds of behavior-changing 'releases' than ordinary software: a code change, a prompt/instruction change, a model version upgrade, and a configuration change (temperature, max tokens, enabled tools) can each independently alter behavior, and only the code change is caught by conventional code review and unit tests. The coherent practice: put a candidate change (a new prompt, a new model version) behind a feature flag so it can be toggled without a new deployment; before exposing it to any real traffic, run it against tutorial 22's golden dataset and compare its evaluation metrics (accuracy, groundedness, whatever fits the system) to the current baseline; if the comparison shows an acceptable result, enable the flag for a small percentage of traffic as a canary release, continuing to monitor both the operational dashboard (deep-dive 3's telemetry) and evaluation metrics on live traffic; only widen the canary's percentage gradually once both remain healthy; and if a regression appears at any point, flip the feature flag off — an instant rollback that reverts behavior for all traffic without waiting for a new deployment. This treats a prompt change with exactly the rollout rigor a code change would get from CI/CD, closing the gap where prompt changes are informally treated as lower-risk than they actually are." },
+        { "number": 6, "question": "A team ships a prompt change directly to 100% of production traffic because 'it's just a text change, not code.' Explain what specifically can go wrong, and design the process that should have been followed instead.", "modelAnswer": "What can go wrong: a prompt change can alter model behavior as significantly as a code change — a slightly different grounding instruction can change how often the model cites sources, how it handles ambiguous questions, or how strictly it refuses out-of-scope requests — but because it's text rather than compiled code, it typically skips code review scrutiny, automated unit tests, and any deployment gate a code change would trigger in CI/CD. If the new prompt subtly regresses behavior on a class of questions the team didn't happen to manually try (a golden dataset would have caught this; ad hoc testing did not), every user hits the regression simultaneously with no canary buffer and no fast rollback path beyond a manual code revert and redeploy. The process that should have been followed: put the new prompt behind a feature flag; run it against the golden dataset and compare metrics to the current baseline before any real traffic sees it; if metrics hold, enable the flag for a small canary percentage; monitor both operational telemetry and evaluation metrics on live traffic for a defined period; widen gradually; and keep the flag ready to flip off instantly if any of these steps reveal a problem. The core lesson: 'not code' does not mean 'not a behavior change,' and behavior changes need a rollout process regardless of what form the change takes." },
+        { "number": 7, "question": "Design a health check strategy for a GenAI application that goes beyond simple process liveness, and explain the tradeoff involved.", "modelAnswer": "A liveness check (is the process running and responding to HTTP) catches process crashes but misses an important failure class: the process can be alive while its connection to the model deployment is broken — an expired or revoked Managed Identity permission, a deleted deployment, a wrong endpoint after a configuration change. A readiness check that makes a real, minimal call to the model deployment (a tiny prompt with a very small max-tokens value) catches this class of failure, surfacing it to the orchestration platform (which can then avoid routing traffic to an instance that can't actually serve AI requests) and to on-call monitoring. The tradeoff: every health check invocation consumes tokens and counts against the deployment's rate limit, so checking on every single incoming request, or too frequently, adds real cost and could itself contribute to rate-limit pressure. The resolution is to run this deeper check at a modest, fixed interval (e.g. every 30-60 seconds) independent of request volume, rather than per-request, accepting a small window of potential undetected failure in exchange for bounded, predictable token cost — the same kind of cost-versus-thoroughness tradeoff made throughout this course whenever a safety mechanism has a per-check cost." },
+        { "number": 8, "question": "Explain why token usage telemetry and cloud provider billing might diverge, and what practice reconciles this.", "modelAnswer": "Application-level token telemetry counts tokens as the SDK reports them for each completed call the application's own code observes — but billing may diverge from this for several reasons: a request that fails partway through generation may still have consumed and been billed for tokens the application's telemetry never recorded if the failure happened before the SDK returned usage data; retried requests (tutorial 13's resilience patterns) may each independently consume billable tokens even though only the final successful attempt's usage is what application-level telemetry naturally emphasizes; and billing granularity, rounding, or pricing tier details can introduce small discrepancies unrelated to the raw token count. The reconciling practice is to treat application telemetry as an approximation useful for real-time dashboards, trend detection, and alerting (which need to be fast and don't require perfect precision), while periodically reconciling against the cloud provider's actual billed usage reports (which are authoritative but typically arrive with more latency, e.g. daily or monthly) to catch and understand any systematic divergence — never treating the application's own token counters as the final word on actual spend." },
+        { "number": 9, "question": "How does infrastructure as code address configuration drift, and what would concretely go wrong for a GenAI deployment architecture without it?", "modelAnswer": "Infrastructure as code (e.g. Bicep or Terraform) defines the entire deployment architecture — the web tier's hosting resource, the Application Insights instance, the Key Vault, network settings, and their configuration — as versioned files that are applied to provision or update the actual environment. This addresses configuration drift because the versioned definition is the single source of truth: any discrepancy between what's deployed and what's defined shows up as a diff when the infrastructure-as-code tool is next applied, rather than accumulating silently. Without it, for a GenAI deployment architecture specifically with its many pieces (web tier, background workers, MCP servers, data stores, Key Vault, Application Insights), manual portal changes accumulate over time: someone manually adjusts a scaling setting during an incident and forgets to document it; a Key Vault access policy gets added ad hoc and is never recorded; a new environment is stood up by copying settings from memory rather than from a definitive source, introducing subtle differences from production. Eventually, no one can confidently answer 'what does production actually look like right now,' incidents become harder to diagnose because the running configuration doesn't match what documentation or tribal knowledge describes, and standing up a new environment (disaster recovery, a new region) becomes error-prone guesswork rather than a repeatable, verified process." },
+        { "number": 10, "question": "A team's dashboard shows a sudden spike in daily token spend. Walk through the investigation using the monitoring and telemetry concepts from this tutorial.", "modelAnswer": "First, the alert (deep-dive 3) that should exist on a token-spend threshold would have already flagged this rather than requiring someone to notice it on a dashboard by chance. Investigation starts by narrowing scope: using distributed tracing and the token-usage telemetry broken down by operation/endpoint, identify which specific feature or endpoint's token consumption increased, rather than treating the spike as one undifferentiated number. Once narrowed, check whether it's a volume increase (more requests, each using a normal number of tokens — possibly a legitimate traffic increase, not a bug) or a per-request increase (each request now using more tokens than before, which is the concerning case). If per-request, check recent deployments and configuration changes around the time the spike began — a common cause is a prompt or code change that started resending more conversation history than intended, or a max-tokens setting change, or a system prompt that grew significantly. Cross-reference with finish-reason telemetry: if 'length' finishes increased alongside the token spike, generation lengths grew, pointing at prompt or parameter changes rather than pure volume. If a specific recent change correlates with the spike's onset, the rollout practice from deep-dive 4 (feature flags) should allow reverting that specific change quickly while the root cause is confirmed, rather than waiting for a full investigation to complete before mitigating the cost impact." },
+        { "number": 11, "question": "Explain the relationship between this tutorial's rollout practices and tutorial 22's evaluation/golden-dataset work — why can't rollout safety be achieved with monitoring alone?", "modelAnswer": "Monitoring (deep-dive 3) observes what's happening to real production traffic after a change has already been exposed to it — it's reactive by nature, telling you a regression occurred, often after users have already experienced it. Evaluation against a golden dataset (tutorial 22) is proactive: it tests a candidate change against a known, representative set of cases before any real user is exposed to it, catching regressions that would otherwise only surface once live traffic encountered the specific input pattern that broke. Rollout safety needs both because they cover different gaps: evaluation catches issues on the specific cases in the golden dataset before rollout, but a golden dataset, however good, cannot represent every possible real-world input a live audience will send, so monitoring after a canary release is exposed to a fraction of real traffic is what catches issues evaluation's necessarily finite dataset missed. Relying only on evaluation risks a real-world edge case slipping through to full production; relying only on monitoring means every regression is discovered by real users experiencing it first, with the full blast radius of whatever percentage of traffic is exposed at the time. The combination — evaluate before exposure, canary a small percentage, monitor that canary closely, widen gradually — uses each technique for what it's actually good at." },
+        { "number": 12, "question": "Design the full deployment and rollout process for changing an agent's system prompt in a multi-agent document-processing system (tutorial 22), integrating every subtopic of this tutorial.", "modelAnswer": "Deployment architecture: confirm which deployment unit the affected agent runs in (likely the background/agent worker unit, separate from the web tier per deep-dive 1) so the change's scope of impact is understood. Configuration: implement the new prompt behind a feature flag (deep-dive 4), stored via the app's configuration system, not hardcoded, so it can be toggled without redeploying the worker unit. Pre-rollout validation: run the new prompt against tutorial 22's golden dataset of documents with known-correct extraction/classification results, comparing accuracy, and require it to meet or exceed the current baseline within an acceptable tolerance before proceeding. Canary: enable the flag for a small percentage of incoming documents (or a specific low-stakes document category first), monitoring both the workflow's own state-transition/audit logging (tutorial 22) and the operational telemetry from this tutorial — token usage, latency, finish reasons — for that canary slice specifically. Cloud/monitoring: ensure the background worker deployment target (Container Apps, likely, given background workload needs) has dashboards and alerts covering this agent's specific metrics, not just aggregate system-wide numbers, so a canary-specific regression is visible. Widen and finalize: after a defined observation period with healthy metrics on both evaluation and live telemetry, widen the flag to 100% of documents; keep the flag mechanism available for at least one further cycle in case a rare edge case surfaces after full rollout, with rollback being an instant flag flip rather than a redeploy. This single scenario touches every one of the tutorial's five subtopics as one coherent operational sequence rather than five separate concerns." },
+        { "number": 13, "question": "Why does the tutorial argue that separating environments (dev/staging/production) matters more, not less, for GenAI applications compared to traditional web apps?", "modelAnswer": "In a traditional web app, environment separation primarily protects against things like a staging bug corrupting production data or a load test degrading production performance if environments were accidentally shared — real risks, but generally bounded and reversible (data can be restored from backup, performance recovers once the load test stops). For a GenAI application, environment separation additionally protects a resource that is directly metered and rate-limited: model deployment quota. If staging and production share a model deployment, a staging load test, a runaway agent loop during testing (tutorial 20's concern about unbounded autonomy), or simply heavy manual testing during a demo can consume enough of the shared tokens-per-minute quota to cause real production requests to be rate-limited or degraded — a direct, immediate user-facing production incident caused entirely by non-production activity, which is a more severe and more likely failure mode than most traditional shared-environment risks. Additionally, a broken prompt or a testing agent in a non-production environment interacting with a shared RAG index could pollute production's retrieval results with test data. This is why the tutorial specifically calls out separate model deployments or clearly separated quota, not just separate application configuration, as part of proper environment isolation for GenAI apps — the blast radius of insufficient separation is both faster to trigger and more directly costly than in most traditional web application scenarios." },
+        { "number": 14, "question": "A stakeholder asks why deploying a GenAI application requires 'so much more monitoring setup' than a typical CRUD web application. Give a substantive answer.", "modelAnswer": "A CRUD web application's behavior is deterministic and code-defined: given the same input and the same code, it produces the same output every time, so traditional metrics (is it up, how fast, how many errors) largely capture whether it's working correctly, and a code review plus unit tests provide strong confidence before deployment. A GenAI application's core behavior comes from a probabilistic model whose output can vary, whose quality depends on retrieved context (for RAG) or tool-calling decisions (for agents) that aren't fully deterministic, and whose cost scales with usage in a way that a CRUD app's cost typically doesn't (tokens, not just compute cycles, drive spend). This means 'is it up and fast' is necessary but insufficient — the application can be perfectly 'healthy' by traditional metrics while quietly producing wrong, ungrounded, or expensively verbose answers, none of which traditional monitoring would flag. The additional monitoring (tokens, finish reasons, retrieval quality) and the additional rollout rigor (evaluation gating, canary for prompt changes) exist specifically to close this gap — they're not extra bureaucracy, they're the direct consequence of the system's behavior being probabilistic and content-dependent rather than purely deterministic and code-dependent, which is exactly the property that makes it a GenAI application in the first place." },
+        { "number": 15, "question": "Reflecting on tutorials 12 through 23, explain how this tutorial's deployment and operations focus completes the arc from 'a working AI feature' to 'a production AI system,' and what remains for the final tutorials to address.", "modelAnswer": "Tutorials 12 through 22 built increasingly sophisticated AI capability: function calling, enterprise integration patterns, web delivery, RAG, a managed platform (Foundry), orchestration frameworks, agent-first architecture, MCP for shareable tools, and finally complete multi-agent systems with their own evaluation practice. All of that work answers 'does the system do the right thing when it runs' — correctness and capability. This tutorial addresses a different, necessary dimension: 'does the system keep running correctly, safely, and affordably once it's live, handling real traffic, changing over time, and eventually failing in some way someone has to notice and fix' — deployment architecture, cloud hosting, monitoring, telemetry, and governed rollout. Without this tutorial's concerns, even the most capable multi-agent system from tutorial 22 is not actually a production system; it's a demonstrated capability with no plan for how it stays healthy, observable, and safely changeable in the real world. What remains for the final tutorials, given this arc, is squarely security and responsible use (the next tutorial) — since a deployed, monitored, well-architected system that is nonetheless insecure or used irresponsibly is not actually safe to operate regardless of how well-deployed it is — followed by the course's remaining tutorials on evaluation depth and other closing topics. This tutorial is the bridge from 'capability' to 'operable system'; the next is the bridge from 'operable' to 'safe to operate.'" }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "GenAI deployment architecture", "back": "Web tier + model access (Managed Identity) + background/agent work + MCP servers + data stores — more pieces than a plain web app, each with its own lifecycle." },
+        { "number": 2, "front": "Background work: separate deployment", "back": "Long-running agent jobs sharing the web-request process can starve request-handling threads. Deploy separately once non-trivially short." },
+        { "number": 3, "front": "Azure App Service vs Container Apps", "back": "App Service: simplest for a straightforward .NET web app, deployment slots for rollout. Container Apps: containerized apps, background workloads, scale-to-zero." },
+        { "number": 4, "front": "Environment separation for GenAI", "back": "Dev/staging/prod need separate model deployments/quota too — not just app config — so testing can't exhaust production's token budget." },
+        { "number": 5, "front": "AI-specific telemetry", "back": "Beyond CPU/requests: token usage, model call latency, finish reasons, retrieval quality (RAG) — none of which standard web metrics capture." },
+        { "number": 6, "front": "Distributed tracing", "back": "Tracks one logical request's full path (web call + AI call + tool calls) as one connected trace, across services/calls." },
+        { "number": 7, "front": "Never log by default", "back": "Full prompt/response bodies — they're user data. Log metadata (tokens, latency, finish reason) instead, same rule as tutorial 13." },
+        { "number": 8, "front": "Prompt change = behavior change", "back": "A prompt/instruction/model-version change alters behavior like code but skips code review/unit tests — needs the SAME rollout caution." },
+        { "number": 9, "front": "Canary release", "back": "Route a small % of traffic to a new version first, widen gradually if healthy — limits blast radius of a bad release." },
+        { "number": 10, "front": "Evaluation-gated rollout", "back": "Before widening a canary, run the change against tutorial 22's golden dataset and compare metrics to baseline — catches regressions manual testing misses." },
+        { "number": 11, "front": "Feature flag rollback", "back": "Instant revert by flipping a flag — no redeploy needed. Must be tested deliberately (like a kill switch) before relying on it in an incident." },
+        { "number": 12, "front": "Configuration drift", "back": "Environment's actual config silently diverges from documented/intended state. Guarded against by infrastructure as code (Bicep/Terraform)." },
+        { "number": 13, "front": "Health check with a real model call", "back": "Catches connectivity/auth issues (expired credential, deleted deployment) that simple process-liveness checks miss. Run at a fixed interval, not per-request, to bound token cost." },
+        { "number": 14, "front": "Token telemetry vs billing", "back": "App-level token counts approximate spend; reconcile periodically against the cloud provider's actual billed usage — they can diverge." },
+        { "number": 15, "front": "Secrets management + Managed Identity", "back": "Managed Identity eliminates the credential entirely where supported; Key Vault handles whatever can't be eliminated. Never in source/plain config." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions and Answers",
+      "items": [
+        { "number": 1, "question": "Walk me through the deployment architecture you'd design for a GenAI application.", "answer": "I'd start by identifying the distinct pieces: the web tier serving requests, model access to Azure OpenAI or a Foundry project via Managed Identity, any background or agent work that runs longer than a request/response cycle, MCP servers the app depends on for shared tools, and data stores like a search index for RAG. The key decision is what deploys together versus separately, driven by scaling and lifecycle differences — the web tier scales with request volume and needs low latency, so I keep long-running background or agent jobs out of that process entirely once they're more than trivially short, deploying them as their own unit that scales with job volume instead. MCP servers are independently deployed by design since they may serve other consumers too. I'd document this architecture — even a simple diagram — before picking a cloud target, since the target has to accommodate every piece, not just the web tier." },
+        { "number": 2, "question": "How would you choose between Azure App Service and Azure Container Apps for a .NET GenAI app?", "answer": "App Service is my default for a straightforward .NET web app or API with no container requirement — it's the simplest CI/CD path, has built-in scaling, and deployment slots give me an easy blue-green rollout mechanism. I'd reach for Container Apps instead when the app is already containerized, when I need to run background or agent workloads alongside the web tier as part of the same deployment story, or when I want scale-to-zero economics for something with bursty or intermittent traffic. Either way, model access works identically — Managed Identity to Azure OpenAI or Foundry — so the hosting choice doesn't change how I handle credentials. The decision really flows from the deployment architecture I've already sketched out, not from a general preference for one platform." },
+        { "number": 3, "question": "What would you monitor for a GenAI application that you wouldn't monitor for a typical CRUD API?", "answer": "Everything I'd monitor for a CRUD API still applies — request rate, error rate, latency, CPU and memory — but I'd add token usage per request, since tokens are the direct driver of cost and a spike often means something's wrong before it means the bill is high. I'd separate model call latency from total request latency, so I can tell whether slowness is the model, the network, or my own code. I'd track finish reasons, because a 'length' finish tells me generations are getting truncated and a content-filter finish tells me something's being blocked — both invisible in a standard error-rate metric. And for anything RAG-based, I'd monitor retrieval quality — which passages came back and their relevance scores — because a bad answer is very often a retrieval problem wearing a generation costume, and only retrieval-level telemetry lets me tell the difference." },
+        { "number": 4, "question": "How do you decide what's safe to log for an AI application, versus what's off-limits?", "answer": "The rule I follow is metadata yes, content no, by default. Token counts, latencies, finish reasons, deployment names, correlation ids — all safe, all valuable for dashboards and debugging, and none of it is user data. Full prompt text and full response text are off-limits by default because they're user-generated content that could contain anything — personal information, business-sensitive details — and logging them turns my telemetry pipeline into an unaudited copy of that content with whatever access controls and retention my logging system happens to have, which is usually not designed for sensitive data. If I genuinely need to see bodies to debug something, that's an explicit, off-by-default debug flag with redaction and short retention, not something that's ever on by default in production." },
+        { "number": 5, "question": "Why do you treat a prompt change with the same rollout caution as a code change?", "answer": "Because a prompt change can alter behavior just as much as a code change can — a different grounding instruction can change how the model handles ambiguous questions, how strictly it cites sources, or how it responds to edge cases — but it's text, not compiled code, so it tends to skip the scrutiny a code change automatically gets from code review and CI unit tests. That gap is exactly where regressions sneak into production. My practice: put the new prompt behind a feature flag, run it against a golden dataset and compare metrics to the current baseline before any real traffic sees it, then canary it to a small percentage, watch both operational telemetry and evaluation metrics, and widen gradually. If something regresses, I flip the flag off — instant rollback, no redeploy. I'd apply that exact process to a prompt change even though it feels like 'just text,' because the behavioral risk is real regardless of what form the change takes." },
+        { "number": 6, "question": "What's your test for whether a rollback mechanism actually works?", "answer": "Whether I've actually triggered it, deliberately, outside of a real incident. Code that exists to do a rollback — flip a feature flag, revert a canary weight — is a hypothesis until someone has exercised it and confirmed the system's behavior actually reverts as expected within an acceptable time. I've seen teams assume a flag-based rollback works because the flag-checking code is straightforward, only to discover during a real incident that some cached value or some component didn't re-check the flag promptly, delaying the actual reversion. Same principle as testing a kill switch for an autonomous agent — a safety mechanism nobody has fired is not a proven safety net, so I build a deliberate test of the rollback path into the rollout process itself, before I ever rely on it under pressure." },
+        { "number": 7, "question": "Why does environment separation matter more for a GenAI app than a typical web app, in your experience?", "answer": "Because a shared environment risks a metered, rate-limited resource that traditional web apps don't have in the same way: model deployment quota. If staging and production share a model deployment, a staging load test or even heavy manual testing can consume enough of the shared tokens-per-minute quota to degrade or rate-limit real production requests — a direct production incident caused by non-production activity, and one that can happen fast since quota limits are usually tight. There's also a data-leakage risk specific to RAG systems: test data indexed in a shared search index during staging testing could surface in production answers. So beyond the usual reasons to separate environments, I specifically make sure dev, staging, and production have separate model deployments or clearly partitioned quota — not just separate connection strings pointing at the same underlying deployment." },
+        { "number": 8, "question": "How would you design a health check for a GenAI service, and what would you watch out for?", "answer": "I'd go beyond simple process liveness and include a readiness check that makes a real, minimal call to the model deployment — a tiny prompt with a very small max-tokens value — because a process can be alive and still have a broken connection to the model: an expired Managed Identity permission, a deleted deployment, a misconfigured endpoint after a config change. That failure mode is invisible to liveness alone but very visible to users. What I'd watch out for is cost: if that check runs on every incoming request, it's burning tokens and adding to rate-limit pressure for no good reason. I'd run it on a fixed interval instead — every 30 to 60 seconds, say — independent of request volume, accepting a small detection-latency tradeoff in exchange for bounded, predictable cost." },
+        { "number": 9, "question": "A dashboard shows daily token spend spiking. How do you investigate?", "answer": "First I'd check whether an alert should have already caught this — if there's no alert on token spend, that's the first gap to fix. Then I narrow scope using telemetry broken down by operation or endpoint, rather than staring at one aggregate number, to find which specific feature's consumption increased. I'd distinguish volume increase (more requests, normal tokens each — possibly legitimate growth) from per-request increase (each request now costs more — the concerning case). For a per-request spike, I'd check recent deployments or config changes around when it started; a very common cause is a change that started resending more conversation history than intended, or a system prompt that grew, or a max-tokens setting change. Cross-referencing with finish-reason telemetry helps too — more 'length' finishes alongside the spike points at longer generations specifically. Once I've correlated it to a specific recent change, I'd use the feature-flag rollback to mitigate immediately while confirming root cause, rather than waiting on a full investigation before acting." },
+        { "number": 10, "question": "How do evaluation-gated rollout and production monitoring complement each other, rather than one making the other unnecessary?", "answer": "Evaluation is proactive — it tests a candidate change against a known, curated set of cases before any real user sees it, so it catches regressions on whatever the golden dataset represents. Monitoring is reactive — it watches what actually happens once real, unpredictable production traffic hits the change. Neither alone is sufficient: a golden dataset, however good, can't represent every input real users will ever send, so some regressions only surface in production; and relying only on monitoring means every regression is discovered by a real user experiencing it first, at whatever blast radius the traffic exposure was at the time. Combining them — evaluate before exposure, canary a small slice, monitor that slice closely, widen gradually — uses each for what it's actually good at: evaluation catches the known-case regressions cheaply and early, monitoring catches the unknown-case regressions with limited blast radius before full exposure." },
+        { "number": 11, "question": "What's your policy on infrastructure as code for a GenAI deployment, and why does it matter more given how many pieces are involved?", "answer": "I provision everything — web tier hosting, background worker hosting, Application Insights, Key Vault, networking — through Bicep or Terraform, never through manual portal clicks, and I treat that as non-negotiable specifically because GenAI deployment architectures have more moving pieces than a typical web app. With that many components, manual provisioning drifts fast: someone tweaks a scaling setting during an incident and doesn't document it, an access policy gets added ad hoc, a new environment gets built from memory instead of from a definitive source. Infrastructure as code makes the versioned definition the single source of truth, so any drift shows up as a diff the next time it's applied instead of accumulating silently, and standing up a new environment — for disaster recovery or a new region — becomes a repeatable, verified process instead of error-prone guesswork." },
+        { "number": 12, "question": "Why is 'the process is up and fast' not sufficient monitoring for a GenAI application?", "answer": "Because a GenAI app's core behavior comes from a probabilistic model and, often, retrieval or tool-calling steps that aren't fully deterministic — it can be perfectly healthy by every traditional metric while quietly producing wrong, ungrounded, or unnecessarily expensive answers, none of which uptime, latency, or error-rate metrics would ever flag. A CRUD app given the same input produces the same output, so traditional health metrics correlate well with 'is it working correctly.' A GenAI app can be 'up' and still be broken in ways only AI-specific telemetry — finish reasons, retrieval quality, token usage patterns — would reveal. That gap is exactly why the additional monitoring in this tutorial isn't extra bureaucracy; it's the direct consequence of the system's core behavior being probabilistic and content-dependent rather than purely deterministic." },
+        { "number": 13, "question": "How would you decide the rollout rigor (canary, feature flags, evaluation gating) appropriate for a given GenAI feature?", "answer": "I'd match the rigor to actual risk and blast radius rather than applying maximum process to everything. A low-traffic internal tool with an easy manual fallback might reasonably ship a prompt tweak with a quick evaluation check and a fast rollback plan, without a formal canary infrastructure. A customer-facing, high-traffic, or consequential system (anything touching money, health, or public reputation) gets the full treatment: feature-flagged, evaluated against a golden dataset before any exposure, canaried gradually, monitored closely, with a tested rollback ready. The mistake I try to avoid in both directions is either over-engineering rollout process for a low-stakes internal tool, or under-engineering it for something with real consequences just because 'it's just a prompt change' — the risk should drive the rigor, not the superficial form of the change." },
+        { "number": 14, "question": "What's the relationship between token telemetry your application collects and what actually shows up on the cloud bill?", "answer": "They're related but not identical, and I don't treat my own telemetry as the final word on spend. My application's telemetry counts tokens as the SDK reports them for calls my code observes completing — but a request that fails partway through generation might still be billed for tokens my telemetry never captured if the failure happened before usage data came back, and retried requests can each consume billable tokens even though my dashboards might emphasize the final successful attempt. So I use my own telemetry for what it's good at — fast, real-time dashboards, trend detection, alerting — and I periodically reconcile against the cloud provider's actual billed usage reports, which are authoritative but arrive with more latency, to catch and understand any systematic divergence rather than assuming my counters and the invoice will always match exactly." },
+        { "number": 15, "question": "How does this tutorial's content fit into the overall arc from earlier AI-capability tutorials to production readiness?", "answer": "The earlier tutorials — function calling, RAG, agent frameworks, multi-agent systems — all answer 'does this system do the right thing when it runs,' building increasingly sophisticated capability. This tutorial answers a different question that only matters once that capability is real and live: does the system keep running correctly, safely, and affordably as real traffic hits it, as it changes over time, and as things inevitably go wrong in ways someone has to notice and fix. A brilliantly capable multi-agent system with no deployment architecture, no monitoring, and no safe rollout process isn't a production system — it's a demonstrated capability with no operational plan. This tutorial is the bridge from 'it works' to 'it's operable,' and I'd expect whatever comes next in a course like this to build on that by addressing security and responsible use, because an operable system that's insecure or misused isn't actually safe to run regardless of how well it's deployed and monitored." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "Deployment architecture", "definition": "The arrangement of an application's components — web tier, model access, data stores, background workers — across environments and infrastructure." },
+        { "term": "Container", "definition": "A packaged, portable unit bundling an application with its dependencies so it runs consistently across environments." },
+        { "term": "Azure Container Apps", "definition": "A managed Azure service for running containerized applications with built-in scaling, without managing the underlying servers." },
+        { "term": "Azure App Service", "definition": "A managed Azure platform for hosting web applications and APIs, handling scaling, patching, and infrastructure operationally." },
+        { "term": "Environment", "definition": "A distinct deployment target (development, staging, production) with its own configuration, data, and often its own model deployment." },
+        { "term": "Blue-green deployment", "definition": "A rollout strategy running two identical environments and switching traffic to the new one only after it's verified healthy." },
+        { "term": "Canary release", "definition": "A rollout strategy routing a small percentage of traffic to a new version before gradually increasing it, limiting the blast radius of a bad release." },
+        { "term": "Rollback", "definition": "Reverting a deployment to a previous known-good version when a new release is found to be broken or unsafe." },
+        { "term": "Observability", "definition": "The ability to understand a running system's internal state from its external outputs — logs, metrics, and traces." },
+        { "term": "Telemetry", "definition": "Data automatically collected from a running application — requests, latency, errors, token usage — and sent to a monitoring system." },
+        { "term": "Application Insights", "definition": "Azure's application performance monitoring service, collecting telemetry, traces, and metrics for .NET and other applications." },
+        { "term": "Distributed tracing", "definition": "Tracking a single request's path across multiple services or calls, including AI calls, as one connected trace for debugging." },
+        { "term": "Dashboard", "definition": "A visual summary of metrics and telemetry used to monitor a system's health at a glance." },
+        { "term": "Alert", "definition": "An automated notification triggered when a monitored metric crosses a defined threshold, prompting investigation or action." },
+        { "term": "Configuration drift", "definition": "The gradual divergence of an environment's actual configuration from its intended, documented, or version-controlled state." },
+        { "term": "Feature flag", "definition": "A runtime toggle that enables or disables a feature (or a new deployment) without requiring a new code deployment." },
+        { "term": "Secrets management", "definition": "Storing and accessing credentials securely rather than embedding them in code or config files." },
+        { "term": "Infrastructure as code", "definition": "Defining and provisioning infrastructure through versioned code rather than manual portal steps." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Deployment architecture for a GenAI app includes the web tier, model access, background/agent work, MCP servers, and data stores — deployed together or separately based on differing scaling and lifecycle needs.",
+          "Cloud deployment options like Azure App Service and Azure Container Apps both reach model access the same way (Managed Identity); the choice follows from the architecture, not the reverse.",
+          "Monitoring and observability, plus enabling logging and telemetry, must cover AI-specific signals — tokens, model latency, finish reasons, retrieval quality — alongside standard application metrics, without ever logging prompt/response bodies by default.",
+          "Rollout and configuration concerns treat prompt, instruction, and model-version changes with the same rollout caution as code — canary releases and feature flags gated on evaluation results (tutorial 22), with a deliberately tested rollback path.",
+          "Environment separation, infrastructure as code, and secrets management (Managed Identity, Key Vault) round out the operational discipline a GenAI app needs to run safely over time.",
+          "None of this is new mechanism: it's standard .NET deployment and operations practice extended with the specific additions AI workloads require."
+        ] },
+        { "type": "paragraph", "text": "You now have the operational layer that turns a capable AI system into a production one: an architecture that accommodates AI's extra moving parts, a cloud deployment suited to it, monitoring that watches what's specifically worth watching in an AI system, and a rollout discipline that treats behavior changes — prompts and models, not just code — with real rigor. With the system deployed, monitored, and safely changeable, the course turns next to a concern that applies regardless of how well any of this is done: security and responsible use, because an operable system that isn't secure or responsibly used isn't actually safe to run." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Next tutorial: AI Security and Responsible Usage (ai-security-responsible-usage). With deployment, monitoring, and rollout established, the next tutorial addresses the security threats specific to AI applications (like prompt injection, hinted at in earlier tutorials) and the responsible-AI practices that must accompany a system now capable of running in production at scale." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: sketch the deployment architecture for a system you've built in this course, identifying which pieces would deploy together versus separately and why.",
+          "Practice: add the health check and telemetry examples from this tutorial to an existing project, and confirm a dashboard reflects token usage and latency accurately.",
+          "Practice: implement a feature flag around a prompt change, run it against a golden dataset, and practice the full canary-then-widen-then-rollback cycle deliberately.",
+          "Practice: write an infrastructure-as-code definition (Bicep or Terraform) for a simple GenAI deployment architecture, even if you don't apply it to a real subscription.",
+          "Read: the official documentation for 'Azure App Service', 'Azure Container Apps', 'Application Insights for .NET', and any current guidance on deployment slots and canary releases in Azure."
+        ] },
+        { "type": "note", "style": "tip", "text": "Keep your dashboard and evaluation harness from this tutorial and tutorial 22 running. The next tutorial's security concerns are best understood against a system you can actually observe misbehaving, not just read about." }
+      ]
+    }
+  ]
+}

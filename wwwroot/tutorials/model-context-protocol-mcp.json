@@ -1,0 +1,526 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Model Context Protocol (MCP) Servers",
+  "slug": "model-context-protocol-mcp",
+  "level": "Advanced",
+  "codeLanguage": "C#",
+  "tutorialNumber": 21,
+  "totalTutorials": 27,
+  "prev": "agent-first-architecture",
+  "next": "multi-agent-systems",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Model Context Protocol (MCP) Servers"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "Introduction to the Model Context Protocol",
+    "MCP architecture",
+    "Building an MCP server",
+    "Integrating MCP with agents",
+    "Connecting an agent to enterprise data via MCP"
+  ],
+  "tooltips": {
+    "Model Context Protocol": "MCP: an open standard defining how AI applications discover and call tools and context sources exposed by independent servers, over a common protocol.",
+    "MCP server": "A process that exposes tools, resources, and/or prompts over the Model Context Protocol for any compliant client to discover and use.",
+    "MCP client": "The component inside an AI application (often embedded in the model-calling layer) that connects to MCP servers, lists their capabilities, and invokes them.",
+    "MCP host": "The application that embeds an MCP client and orchestrates the overall AI experience — for example a chat app or an agent framework.",
+    "tool (MCP)": "An MCP capability the client can invoke with arguments to perform an action or computation, analogous to a function-calling tool.",
+    "resource (MCP)": "An MCP capability exposing readable data (a file, a record, a query result) that a client can fetch as context without invoking an action.",
+    "prompt (MCP)": "A reusable, parameterized prompt template an MCP server exposes so multiple clients can share the same well-crafted instruction.",
+    "transport": "The underlying communication channel MCP messages travel over, such as standard input/output for local processes or HTTP for remote servers.",
+    "JSON-RPC": "A lightweight remote-procedure-call protocol using JSON messages; MCP defines its message exchange on top of JSON-RPC.",
+    "capability discovery": "The process by which an MCP client asks a server what tools, resources, and prompts it exposes, before deciding what to use.",
+    "server manifest": "The declared list of tools, resources, and prompts an MCP server advertises, together with their names, descriptions, and schemas.",
+    "interoperability": "The property that independently built clients and servers can work together correctly because they share a common protocol.",
+    "enterprise data source": "An internal system of record — a database, CRM, ticketing system, document store — that an organization wants an AI agent to query safely.",
+    "MCP tool call": "A JSON-RPC request from an MCP client asking a server to execute a named tool with given arguments, mirroring ordinary function calling.",
+    "least privilege": "Scoping an MCP server's exposed tools and its own backend credentials to the minimum access the intended use case requires.",
+    "server-side authorization": "Enforcing who may access what inside the MCP server itself, rather than trusting the calling agent or model to self-restrict.",
+    "reusable tool server": "An MCP server built once and consumed by many different AI applications, avoiding duplicated bespoke tool integrations per app.",
+    "protocol version negotiation": "The handshake step where an MCP client and server agree on a compatible protocol version before exchanging capabilities."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview: One Standard for Tools Across Every AI App",
+      "content": [
+        { "type": "paragraph", "text": "Every framework in this course so far — raw function calling (tutorial 12), Semantic Kernel plugins (tutorial 17), AutoGen's function map (tutorial 19) — solves tool integration the same way but with its own bespoke registration mechanics. If your organization builds five AI applications, each one re-implements its own connection to the same internal order system, the same ticketing API, the same document store. The Model Context Protocol, MCP, exists to fix exactly this duplication: it is an open standard for how AI applications discover and call tools and context sources exposed by independent servers, so a tool built once — an MCP server — can be used by any compliant AI application, regardless of which framework or vendor built it." },
+        { "type": "paragraph", "text": "This advanced tutorial covers MCP end to end: an introduction to what problem it solves and why it matters; its architecture — hosts, clients, servers, and the tools/resources/prompts it exposes; building an MCP server in .NET; integrating MCP with the agents you built in tutorials 17–19; and connecting an agent to enterprise data via MCP, the concrete payoff this whole standard exists for. Everything here builds directly on tutorial 12's function-calling mechanics and tutorial 20's agent-first governance — MCP does not replace either, it standardizes how tools are packaged and shared." },
+        { "type": "note", "style": "info", "text": "Think of MCP the way you'd think of REST or ODBC: not a new capability, but a shared contract that lets independently built pieces interoperate instead of each reinventing the connection." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Explain what the Model Context Protocol is and the interoperability problem it solves across AI applications.",
+          "Describe MCP architecture: hosts, clients, servers, transports, and the tool/resource/prompt capability model.",
+          "Build a minimal MCP server in .NET exposing a tool with capability discovery.",
+          "Integrate an MCP server with an agent (Semantic Kernel or AutoGen) so the model can call MCP tools like any other function.",
+          "Connect an agent to an enterprise data source via MCP, applying least privilege and server-side authorization."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorial 12's function-calling mechanics: describing a function, the model requesting it, code executing and returning a result.",
+          "Tutorial 17 (Semantic Kernel plugins) or tutorial 19 (AutoGen function maps) — at least one agent framework you can integrate MCP into.",
+          "Tutorial 20's governance concepts: capability scoping, policy engines, and least privilege, which apply directly to MCP servers.",
+          "Basic familiarity with JSON-RPC or any RPC-style protocol is helpful but not required — this tutorial explains what's needed."
+        ] },
+        { "type": "note", "style": "tip", "text": "If you only remember one thing from tutorial 12 for this lesson, remember the shape: name, description, parameters, execute, return a result. MCP wraps that exact shape in a protocol so it can cross process and vendor boundaries." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "Key Concepts: A Contract Instead of a Convention",
+      "content": [
+        { "type": "paragraph", "text": "Every framework you've used defines tools its own way: Semantic Kernel with [KernelFunction] attributes, AutoGen with a function map, raw function calling with hand-written JSON schemas. These are conventions, each internal to one library. MCP is a contract: any MCP server, regardless of what language or framework built it, exposes its tools in the same protocol shape, and any MCP client, regardless of what framework it's embedded in, can discover and call them the same way. The payoff is interoperability — a tool built once is usable everywhere, not re-wired per framework." },
+        { "type": "table", "headers": ["Concept", "Role", "Familiar from"], "rows": [
+          ["MCP host", "The AI application orchestrating the overall experience", "Your chat app / agent framework"],
+          ["MCP client", "Embedded component that connects to servers and invokes their capabilities", "Similar role to a Semantic Kernel plugin loader, but protocol-based"],
+          ["MCP server", "A standalone process exposing tools/resources/prompts", "Like a tutorial-12 tool set, but externalized and reusable"],
+          ["Tool (MCP)", "An invocable action with arguments and a result", "A [KernelFunction] or function-map entry, protocol-standardized"],
+          ["Resource (MCP)", "Readable context data, not an action", "A RAG passage or reference document, exposed uniformly"],
+          ["Prompt (MCP)", "A shared, reusable prompt template", "A Semantic Kernel prompt function, made shareable across apps"]
+        ] },
+        { "type": "paragraph", "text": "The remaining sections build this up concretely: MCP architecture explains how host, client, and server relate and communicate; building an MCP server shows the shape of a real one in .NET; integrating MCP with agents connects it back to the frameworks from tutorials 17–19; and connecting an agent to enterprise data via MCP is the concrete business case — the reason organizations build MCP servers at all." },
+        { "type": "note", "style": "info", "text": "MCP does not change what a tool call fundamentally is — describe it, the model requests it, code executes it, a result comes back. It changes where that description and execution can live: in a separate, independently deployable, reusable server." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Deep Dive 1: Introduction to the Model Context Protocol",
+      "content": [
+        { "type": "paragraph", "text": "MCP addresses a specific pain point that emerges once an organization builds more than one AI application: N applications each needing to talk to M internal systems traditionally means N×M bespoke integrations — every chatbot re-implementing its own order-lookup tool, every internal assistant re-implementing its own ticketing integration. MCP turns this into N+M: each system is wrapped once as an MCP server, and each application only needs one MCP client capable of speaking the protocol to reach any of them." },
+        { "type": "animation", "title": "N×M integrations versus N+M with MCP", "intro": "The same three apps and three systems, wired two different ways.", "nodes": [
+          { "id": "a1", "label": "App A", "sub": "chatbot" },
+          { "id": "a2", "label": "App B", "sub": "internal tool" },
+          { "id": "a3", "label": "App C", "sub": "support agent" },
+          { "id": "s1", "label": "Orders system", "sub": "one MCP server" },
+          { "id": "s2", "label": "Ticketing system", "sub": "one MCP server" },
+          { "id": "s3", "label": "Document store", "sub": "one MCP server" }
+        ], "steps": [
+          { "highlight": ["a1", "s1"], "caption": "Without MCP, App A hand-builds its own connection to the orders system — one bespoke integration." },
+          { "highlight": ["a2", "s1", "s2"], "caption": "App B needs orders and ticketing, so it builds two more bespoke integrations — none reusable by App A." },
+          { "highlight": ["a1", "a2", "a3", "s1", "s2", "s3"], "caption": "Without a shared protocol, three apps needing three systems means up to nine separate integrations — duplicated effort, duplicated bugs, duplicated security review." },
+          { "highlight": ["s1", "s2", "s3"], "caption": "With MCP, each system is wrapped once as an MCP server — three servers total, each independently built, deployed, and secured." },
+          { "highlight": ["a1", "a2", "a3"], "caption": "Every app gets one MCP client and can reach any of the three servers through the same protocol — three apps, three servers, one shared contract instead of nine bespoke wires." }
+        ] },
+        { "type": "paragraph", "text": "MCP is an open standard, not tied to one vendor or one AI framework — a server built for one AI application can, in principle, be used by an application built with a different framework or even a different vendor's model, as long as both speak the protocol. This is the same interoperability value proposition as REST for web APIs or ODBC for databases: a shared contract that lets independently built pieces interoperate without prior coordination between their authors." },
+        { "type": "note", "style": "warning", "text": "MCP standardizes the plumbing, not the safety. A server exposed over MCP still needs every governance control from tutorial 20 — capability scoping, authorization, audit logging — because the protocol makes a tool reachable, not automatically safe to reach." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Deep Dive 2: MCP Architecture",
+      "content": [
+        { "type": "paragraph", "text": "Three roles make up an MCP system. The MCP host is the AI application itself — a chat app, an agent framework, an IDE assistant — that orchestrates the overall experience and decides when to reach for external tools. The MCP client is a component the host embeds that handles the protocol mechanics: connecting to a server, performing capability discovery (asking 'what do you offer?'), and issuing calls. The MCP server is the standalone process that actually implements tools, resources, and prompts, running independently of any particular host — often as a separate process on the same machine, or a remote service." },
+        { "type": "paragraph", "text": "Communication happens over a transport — commonly standard input/output for a local server process the host launches, or HTTP-based transports for a remote server — carrying messages formatted as JSON-RPC, a lightweight standard for structuring remote procedure calls as JSON. Before any real work happens, the client and server perform protocol version negotiation (agreeing on a compatible protocol version) and then capability discovery, where the client asks the server for its manifest: the list of tools, resources, and prompts it exposes, each with a name, description, and schema — exactly the same information tutorial 12 hand-wrote and tutorial 17 generated from attributes, now declared once by the server itself." },
+        { "type": "animation", "title": "An MCP tool call end to end", "intro": "From host to server and back, through the client and the wire.", "nodes": [
+          { "id": "host", "label": "MCP host", "sub": "the AI app" },
+          { "id": "client", "label": "MCP client", "sub": "embedded in host" },
+          { "id": "transport", "label": "Transport", "sub": "stdio / HTTP" },
+          { "id": "server", "label": "MCP server", "sub": "implements tools" },
+          { "id": "result", "label": "Result", "sub": "returns to host" }
+        ], "steps": [
+          { "highlight": ["host", "client"], "caption": "The host decides (via the model's function-calling decision) that it needs a tool the MCP client knows about, from earlier capability discovery." },
+          { "highlight": ["client", "transport"], "caption": "The client sends a JSON-RPC tool-call request over the transport — standard input/output for a local process, or HTTP for a remote server." },
+          { "highlight": ["transport", "server"], "caption": "The server receives the request, executes the actual tool logic (a database query, an API call), applying its own server-side authorization." },
+          { "highlight": ["server", "result"], "caption": "The server returns a JSON-RPC result over the same transport, and the client hands it back to the host — which feeds it to the model exactly like any other tool result." }
+        ] },
+        { "type": "table", "headers": ["MCP capability type", "What it represents", "Function-calling analog"], "rows": [
+          ["Tool", "An invocable action with parameters and a result", "A function the model requests and code executes"],
+          ["Resource", "Readable data fetched as context, not executed as an action", "A retrieved document/passage in RAG"],
+          ["Prompt", "A reusable, parameterized prompt template", "A Semantic Kernel prompt function, shared across apps"]
+        ] },
+        { "type": "note", "style": "tip", "text": "Not every MCP capability is a tool. If your server just needs to expose readable reference data (a policy document, a schema), a resource is the more accurate fit than forcing it into a tool that 'returns' the data — resources are cacheable and browsable by clients in a way pure tools aren't." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Deep Dive 3: Building an MCP Server",
+      "content": [
+        { "type": "paragraph", "text": "Building an MCP server in .NET follows the same shape as any tool you've defined so far — name, description, parameters, implementation — wrapped in the protocol's server scaffolding. An SDK handles the JSON-RPC and transport plumbing; your job is declaring the server's capabilities and implementing them, with the same tutorial-12 discipline (validate arguments, authorize, keep idempotent, return structured errors) inside every tool." },
+        { "type": "code", "language": "csharp", "title": "A minimal MCP server exposing one tool (illustrative)", "code": [
+          "using ModelContextProtocol.Server;   // illustrative namespace -- verify against the current SDK",
+          "",
+          "var builder = Host.CreateApplicationBuilder(args);",
+          "builder.Services",
+          "    .AddMcpServer()",
+          "    .WithStdioServerTransport()          // local process, communicates over stdio",
+          "    .WithToolsFromAssembly();             // discovers [McpServerTool]-attributed methods",
+          "",
+          "var app = builder.Build();",
+          "await app.RunAsync();",
+          "",
+          "// The tool itself: same shape as a tutorial-17 native function, now MCP-attributed.",
+          "public static class OrderTools",
+          "{",
+          "    [McpServerTool, Description(\"Gets the status and delivery estimate of an order by its order number.\")]",
+          "    public static async Task<string> GetOrderStatus(",
+          "        [Description(\"The order number, e.g. ORD-1042\")] string orderNumber)",
+          "    {",
+          "        if (!orderNumber.StartsWith(\"ORD-\"))",
+          "            return \"{\\\"error\\\":\\\"invalid order number format\\\"}\";",
+          "",
+          "        var status = await OrderRepository.FindAsync(orderNumber);",
+          "        return status is null",
+          "            ? \"{\\\"error\\\":\\\"order not found\\\"}\"",
+          "            : $\"{{\\\"stage\\\":\\\"{status.Stage}\\\",\\\"eta\\\":\\\"{status.Eta}\\\"}}\";",
+          "    }",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "Notice how little of this is new: the tool implementation is identical in spirit to tutorial 17's OrderPlugin — validate, look up, return compact structured JSON or a structured error. What's new is the hosting shell around it: AddMcpServer registers the protocol machinery, a transport (stdio here, HTTP for a remote server) defines how clients reach it, and WithToolsFromAssembly performs the capability discovery a client will later query, generating the server manifest from your [McpServerTool]-attributed methods and their [Description] attributes automatically." },
+        { "type": "note", "style": "warning", "text": "SDK type and attribute names here (AddMcpServer, McpServerTool, WithStdioServerTransport) are illustrative — the Model Context Protocol .NET SDK's exact surface is actively evolving; verify current names against the installed package (see section 13) before relying on them." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Deep Dive 4: Integrating MCP with Agents and Connecting to Enterprise Data",
+      "content": [
+        { "type": "paragraph", "text": "Integrating MCP with agents means an agent framework's MCP client discovers a server's tools and presents them to the model exactly like any native plugin function — the model doesn't know or care whether a tool call resolves to a local [KernelFunction] or a remote MCP server; from its perspective, both are just named functions with descriptions and parameters. In Semantic Kernel, an MCP client's discovered tools can be added to a kernel's plugin collection alongside native functions; in AutoGen, they can populate a function map the same way a hand-written delegate would." },
+        { "type": "code", "language": "csharp", "title": "Adding MCP-discovered tools into a Semantic Kernel plugin collection (illustrative)", "code": [
+          "using ModelContextProtocol.Client;",
+          "",
+          "// Connect to an MCP server (here, a local process) and discover its tools.",
+          "await using McpClient mcpClient = await McpClient.ConnectAsync(",
+          "    new StdioClientTransport(command: \"dotnet\", args: [\"run\", \"--project\", \"OrderMcpServer\"]));",
+          "",
+          "IList<McpClientTool> discoveredTools = await mcpClient.ListToolsAsync();",
+          "",
+          "// The kernel treats MCP-discovered tools the same as native [KernelFunction]s --",
+          "// the model sees one uniform set of callable functions regardless of origin.",
+          "kernel.Plugins.AddFromFunctions(\"OrderMcpTools\", discoveredTools.Select(t => t.AsKernelFunction()));",
+          "",
+          "var agent = new ChatCompletionAgent",
+          "{",
+          "    Instructions = \"Use the available tools to answer order questions.\",",
+          "    Kernel = kernel   // now includes both native plugins and MCP-discovered tools",
+          "};"
+        ] },
+        { "type": "animation", "title": "One agent, tools from two origins", "intro": "The model can't tell — and shouldn't need to — where a tool actually lives.", "nodes": [
+          { "id": "agent", "label": "Agent", "sub": "sees one tool list" },
+          { "id": "native", "label": "Native plugin", "sub": "in-process function" },
+          { "id": "mcpclient", "label": "MCP client", "sub": "discovered tools" },
+          { "id": "mcpserver", "label": "MCP server", "sub": "enterprise data" }
+        ], "steps": [
+          { "highlight": ["agent", "native"], "caption": "Some tools are ordinary in-process functions — fast, simple, no protocol overhead." },
+          { "highlight": ["agent", "mcpclient"], "caption": "Others are discovered via an MCP client from a separate server and merged into the same tool collection." },
+          { "highlight": ["mcpclient", "mcpserver"], "caption": "When the model requests one of the MCP-sourced tools, the call actually routes out to the MCP server — potentially reaching real enterprise data — while the agent's code looks identical either way." }
+        ] },
+        { "type": "paragraph", "text": "This is exactly how connecting an agent to enterprise data via MCP works in practice: rather than writing a bespoke native function that directly queries a CRM, ticketing system, or internal database from inside the agent process (as tutorial 12 and tutorial 17 did for a mock order repository), an organization builds one MCP server that wraps that enterprise data source, with its own server-side authorization, connection credentials, and rate limiting entirely separate from any particular agent. Any agent — built with Semantic Kernel, AutoGen, or another framework — connects to that same server and inherits its governed access, instead of every agent team re-implementing and re-securing its own direct connection to the enterprise system." },
+        { "type": "note", "style": "warning", "text": "The enterprise data server, not the calling agent, is where least privilege and server-side authorization must be enforced. A malicious or confused agent should be constrained by what the server allows it to do, never by trusting the agent to behave — exactly tutorial 20's capability scoping, applied at the MCP server boundary." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Ecosystem and Tools",
+      "content": [
+        { "type": "table", "headers": ["Piece", "Role"], "rows": [
+          ["Model Context Protocol (open standard)", "The specification defining hosts, clients, servers, transports, and the tool/resource/prompt model"],
+          ["MCP .NET SDK", "Libraries for building MCP servers and clients in C#, including attribute-based tool/resource declaration"],
+          ["JSON-RPC", "The message format MCP is built on for requests, responses, and notifications"],
+          ["stdio / HTTP transports", "The two common ways an MCP client reaches a server — local process pipes or a network connection"],
+          ["Semantic Kernel / AutoGen (tutorials 17, 19)", "Agent frameworks that can consume MCP-discovered tools alongside native ones"],
+          ["Enterprise data sources", "Databases, CRMs, ticketing systems, document stores wrapped as MCP servers for governed agent access"],
+          ["Azure AI Foundry (tutorial 16)", "Where MCP server connections can be managed alongside model deployments in a governed project"]
+        ] },
+        { "type": "paragraph", "text": "MCP sits at the same architectural layer as tutorial 20's agent-first patterns: it is one concrete, standardized way to implement 'a reusable tool server' that many agents can discover and use, addressing the agent communication and governance concerns from that tutorial specifically for tools and enterprise data access." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "Use Cases",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Shared enterprise data access: one MCP server wraps an order management system; every internal AI application (support bot, sales assistant, ops dashboard) connects to the same governed server instead of re-integrating.",
+          "Cross-framework tool sharing: a tool built as an MCP server can be consumed by a Semantic Kernel-based app and an AutoGen-based app without maintaining two separate implementations.",
+          "Vendor-neutral tool ecosystems: an organization publishes internal MCP servers that any team's AI project can adopt, regardless of which agent framework that team chooses.",
+          "IDE and developer tool integration: MCP servers exposing code search, documentation lookup, or build tooling let AI coding assistants reach project-specific context uniformly.",
+          "Third-party data and service integration: external providers expose their APIs as MCP servers so any compliant AI application can integrate without a bespoke SDK per provider.",
+          "Governed data access layers: a data platform team builds one MCP server with strict server-side authorization and audit logging in front of sensitive enterprise data, and every downstream agent inherits that governance automatically."
+        ] },
+        { "type": "paragraph", "text": "The throughline is reuse across boundaries — framework boundaries, team boundaries, and vendor boundaries — which is precisely the interoperability problem MCP exists to solve." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples",
+      "content": [
+        { "type": "paragraph", "text": "These examples show a slightly fuller MCP server with a resource alongside a tool, and the client-side discovery-plus-invocation pattern." },
+        { "type": "code", "language": "csharp", "title": "Example 1 — A server exposing both a tool and a resource", "code": [
+          "public static class SupportTools",
+          "{",
+          "    [McpServerTool, Description(\"Creates a support ticket from a summary and priority.\")]",
+          "    public static async Task<string> CreateTicket(",
+          "        [Description(\"A short summary of the issue\")] string summary,",
+          "        [Description(\"low, normal, or high\")] string priority)",
+          "    {",
+          "        if (priority is not (\"low\" or \"normal\" or \"high\"))",
+          "            return \"{\\\"error\\\":\\\"invalid priority\\\"}\";",
+          "        var ticket = await TicketRepository.CreateAsync(summary, priority);",
+          "        return $\"{{\\\"ticketId\\\":\\\"{ticket.Id}\\\"}}\";",
+          "    }",
+          "",
+          "    [McpServerResource, Description(\"The current support escalation policy document.\")]",
+          "    public static Task<string> EscalationPolicy() => PolicyStore.ReadAsync(\"escalation-policy\");",
+          "}"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 2 — Client-side discovery and a direct tool call", "code": [
+          "await using McpClient client = await McpClient.ConnectAsync(",
+          "    new StdioClientTransport(command: \"dotnet\", args: [\"run\", \"--project\", \"SupportMcpServer\"]));",
+          "",
+          "// Capability discovery: ask the server what it offers before using anything.",
+          "IList<McpClientTool> tools = await client.ListToolsAsync();",
+          "logger.LogInformation(\"Discovered {Count} tools: {Names}\",",
+          "    tools.Count, string.Join(\", \", tools.Select(t => t.Name)));",
+          "",
+          "// A direct call, outside any agent, showing the raw request/response shape.",
+          "McpToolResult result = await client.CallToolAsync(",
+          "    \"CreateTicket\",",
+          "    new Dictionary<string, object?> { [\"summary\"] = \"Login page 500 error\", [\"priority\"] = \"high\" });",
+          "Console.WriteLine(result.Content);"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 3 — Server-side authorization inside an MCP tool", "code": [
+          "[McpServerTool, Description(\"Gets a customer's account balance.\")]",
+          "public static async Task<string> GetAccountBalance(",
+          "    [Description(\"The account id\")] string accountId,",
+          "    McpServerRequestContext context)   // illustrative: how server-side identity might be surfaced",
+          "{",
+          "    // Server-side authorization: never trust the caller to have already checked this.",
+          "    string callerIdentity = context.RequestingIdentity;",
+          "    if (!await AuthorizationService.CanAccessAccountAsync(callerIdentity, accountId))",
+          "        return \"{\\\"error\\\":\\\"not authorized for this account\\\"}\";",
+          "",
+          "    decimal balance = await AccountRepository.GetBalanceAsync(accountId);",
+          "    return $\"{{\\\"accountId\\\":\\\"{accountId}\\\",\\\"balance\\\":{balance}}}\";",
+          "}"
+        ] }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step by Step: An MCP Server for Enterprise Order Data, Consumed by an Agent",
+      "content": [
+        { "type": "paragraph", "text": "This walkthrough builds a small MCP server wrapping a mock enterprise order system, then connects a Semantic Kernel agent to it — demonstrating the full introduction-through-enterprise-data arc of this tutorial." },
+        { "type": "list", "style": "numbered", "items": [
+          "Create a new console project for the MCP server and add the MCP .NET SDK package; scaffold it with AddMcpServer and a stdio transport, following Example/deep-dive 3's shape.",
+          "Implement GetOrderStatus as an [McpServerTool]-attributed method wrapping your mock OrderRepository, with the same validation and structured-error discipline as tutorial 12.",
+          "Run the server standalone and, using a minimal test client (Example 2's pattern), call ListToolsAsync to confirm capability discovery returns the tool with its name, description, and parameter schema.",
+          "Add server-side authorization: require a caller identity and check it against which orders that identity may view, refusing (with a structured error) rather than trusting the caller.",
+          "Create a separate console project for the agent, referencing tutorial 17's Semantic Kernel setup, and connect an McpClient to the order server process.",
+          "Merge the MCP-discovered tools into the kernel's plugin collection alongside (or instead of) any native plugins, and create a ChatCompletionAgent with instructions to use them for order questions.",
+          "Ask the agent 'Where is my order ORD-1042?' and confirm the request actually crosses the process boundary to the MCP server and back — verify with logging on both sides.",
+          "Test the authorization boundary: have the agent attempt (via a crafted question) to access an order it should not be authorized for, and confirm the server refuses rather than the agent voluntarily declining.",
+          "Add a second, independent client — a plain console app with no agent framework at all — and confirm it can also discover and call the same MCP server's tools, demonstrating the interoperability MCP exists to provide.",
+          "Reflect on what changed versus tutorial 17's OrderPlugin: the tool logic is nearly identical, but it now lives in its own process, is reachable by any compliant client, and enforces its own authorization independent of whichever agent is calling it."
+        ] },
+        { "type": "note", "style": "tip", "text": "Step 9 is the point of the whole exercise. If only one client can ever reach your 'MCP' server, something in the setup has quietly coupled it back to being a bespoke integration — the interoperability has to actually be demonstrated, not assumed." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "SDK and ecosystem caveat: MCP is a young, fast-evolving standard; the .NET SDK's exact types (AddMcpServer, McpServerTool, McpClient, transport classes) are illustrative here and will continue to change — verify against current documentation and the installed package before relying on any signature in this tutorial.",
+          "Protocol overhead is real: an MCP tool call crosses a process (and possibly network) boundary with JSON-RPC serialization, which is slower than an in-process native function call — reserve MCP for tools that genuinely benefit from being externalized and shared, not every function in a system.",
+          "MCP standardizes discovery and invocation, not safety: every governance concern from tutorial 20 (capability scoping, policy engines, sandboxing, audit trails, kill switches) still applies and must be implemented inside the server; the protocol does not provide these for you.",
+          "Trust boundaries require explicit design: an MCP server must perform its own server-side authorization and never assume a connecting client has already validated the caller, since any compliant client can, in principle, connect.",
+          "Transport choice has operational implications: a local stdio server is simple but tied to a single machine/process lifecycle; a remote HTTP server needs its own deployment, scaling, and network security considerations.",
+          "Interoperability depends on both sides actually complying with the standard correctly; a server or client with subtle protocol deviations can fail in ways that are harder to diagnose than a bug in code you fully control.",
+          "Not every tool needs to become an MCP server: a tool used by exactly one application, with no plan to share it, gains protocol overhead and operational complexity without the interoperability benefit that justifies MCP.",
+          "The tool/resource/prompt taxonomy requires judgment: forcing something that's really a resource (static readable data) into a tool shape, or vice versa, works but forfeits some of the protocol's intended benefits (caching, browsability)."
+        ] }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Build an MCP server when a tool or data source will genuinely be reused across multiple applications or teams; keep single-app tools as native functions to avoid needless protocol overhead.",
+          "Apply tutorial 12's function-level safety and tutorial 20's capability scoping inside every MCP tool exactly as you would for a native function — the protocol boundary is not a safety boundary by itself.",
+          "Enforce server-side authorization inside the MCP server itself; never trust a connecting client or calling agent to have already checked permissions.",
+          "Choose the right capability type deliberately: tools for actions, resources for readable reference data, prompts for shared reusable instructions — don't force everything into 'tool' shape.",
+          "Keep tool descriptions precise, exactly as in tutorial 12/17/19 — capability discovery surfaces these descriptions to models across every consuming application, so quality here has wide leverage.",
+          "Log and audit MCP server activity independently of any calling agent's own logging, since a server may be called by multiple different agents/applications you don't fully control.",
+          "Version your server's protocol support and capability manifest deliberately, since multiple independently-updated clients may depend on it simultaneously.",
+          "Treat an MCP server wrapping enterprise data with the same governance rigor as any production data-access layer — it is one, regardless of the AI framing."
+        ] },
+        { "type": "table", "headers": ["Common mistake", "Do this instead"], "rows": [
+          ["Wrapping every internal function as an MCP server 'for consistency'", "Reserve MCP servers for tools genuinely shared across apps/teams"],
+          ["Trusting the calling agent to have already authorized the request", "Enforce server-side authorization inside the MCP server itself"],
+          ["Forcing readable reference data into a tool", "Expose it as an MCP resource instead, enabling caching/browsability"],
+          ["Vague tool descriptions on a shared server", "Precise descriptions — many different apps' models rely on them"],
+          ["No independent logging on the server", "Audit server activity separately from any single calling agent's logs"],
+          ["Assuming protocol compliance without testing with a second client", "Verify interoperability with at least one independently-built client"]
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz: Model Context Protocol (MCP) Servers",
+      "items": [
+        { "number": 1, "question": "What problem does the Model Context Protocol primarily solve?", "options": { "A": "It makes models generate text faster", "B": "It standardizes how AI applications discover and call tools/context sources, avoiding duplicated bespoke integrations per app", "C": "It replaces the need for embeddings", "D": "It is a new way to train models" }, "correctAnswer": "B", "explanation": "MCP addresses the N×M integration problem: without it, every AI application re-implements its own connection to every internal system it needs. MCP turns this into N+M by letting each system be wrapped once as a server any compliant client can use." },
+        { "number": 2, "question": "What is an MCP host?", "options": { "A": "A physical server rack", "B": "The AI application itself, which embeds an MCP client and orchestrates the overall experience", "C": "The database an MCP server connects to", "D": "A billing account" }, "correctAnswer": "B", "explanation": "The host is the application-level component — a chat app, an agent framework, an IDE assistant — that decides when to reach for tools and embeds an MCP client to do so; it is distinct from the client (protocol mechanics) and the server (capability implementation)." },
+        { "number": 3, "question": "What does an MCP client do?", "options": { "A": "It implements the actual business logic of tools", "B": "It connects to servers, performs capability discovery, and issues calls on behalf of the host", "C": "It stores enterprise data directly", "D": "It trains the underlying model" }, "correctAnswer": "B", "explanation": "The client handles protocol mechanics: connecting to a server, discovering what it offers via capability discovery, and sending tool/resource/prompt requests — the actual implementation of those capabilities lives in the server, not the client." },
+        { "number": 4, "question": "What protocol format does MCP build its messages on?", "options": { "A": "SOAP", "B": "JSON-RPC", "C": "GraphQL", "D": "Raw binary sockets only" }, "correctAnswer": "B", "explanation": "MCP defines its message exchange on top of JSON-RPC, a lightweight standard for structuring remote procedure calls as JSON, carried over a transport such as standard input/output or HTTP." },
+        { "number": 5, "question": "What is capability discovery in MCP?", "options": { "A": "Training a new model capability", "B": "The process by which a client asks a server what tools, resources, and prompts it exposes before using anything", "C": "A billing feature", "D": "Automatically fixing bugs in a server" }, "correctAnswer": "B", "explanation": "Before invoking anything, the client queries the server's manifest — its declared tools, resources, and prompts with names, descriptions, and schemas — exactly the information a model needs to decide what to call, now declared once by the server itself." },
+        { "number": 6, "question": "How does an MCP 'tool' compare to a function-calling tool from tutorial 12?", "options": { "A": "They are unrelated concepts", "B": "An MCP tool is the same kind of invocable action with parameters and a result, standardized to cross process/vendor boundaries", "C": "MCP tools cannot take parameters", "D": "MCP tools only work with embeddings" }, "correctAnswer": "B", "explanation": "An MCP tool is functionally the same as any function-calling tool — name, description, parameters, execution, result — the protocol just standardizes how that shape is declared and invoked so it can work across independently built clients and servers." },
+        { "number": 7, "question": "What distinguishes an MCP resource from an MCP tool?", "options": { "A": "Resources cannot be used by AI applications", "B": "A resource exposes readable context data without performing an action, while a tool is invoked to perform an action or computation", "C": "There is no difference", "D": "Resources are always faster than tools" }, "correctAnswer": "B", "explanation": "A resource is for fetching readable reference data (like a RAG passage or policy document) as context, while a tool is for invoking an action with arguments. Forcing readable data into a tool shape works but forfeits resource-specific benefits like caching and browsability." },
+        { "number": 8, "question": "What are the two common transports mentioned for MCP communication?", "options": { "A": "Email and SMS", "B": "Standard input/output (for local processes) and HTTP-based transports (for remote servers)", "C": "Bluetooth and NFC", "D": "FTP and Telnet" }, "correctAnswer": "B", "explanation": "A locally launched server process commonly communicates over stdio, while a remote server uses an HTTP-based transport — the choice affects deployment and operational considerations like scaling and network security." },
+        { "number": 9, "question": "When integrating MCP with an agent framework like Semantic Kernel, how does the model perceive an MCP-discovered tool versus a native plugin function?", "options": { "A": "The model refuses to use MCP tools", "B": "The model sees both as the same kind of named, described, callable function — it doesn't know or need to know where a tool actually lives", "C": "MCP tools require a completely different model", "D": "Native functions always take priority automatically" }, "correctAnswer": "B", "explanation": "Once MCP-discovered tools are merged into a kernel's plugin collection (or an equivalent structure in another framework), the model sees one uniform set of callable functions with names and descriptions — whether a call resolves to in-process code or a remote MCP server is invisible to the model." },
+        { "number": 10, "question": "Why is server-side authorization essential when connecting an agent to enterprise data via MCP?", "options": { "A": "It isn't essential if the agent framework already validates requests", "B": "The MCP server, not the calling agent, must enforce who may access what, since any compliant client can in principle connect", "C": "Authorization is handled automatically by JSON-RPC", "D": "Only client-side checks are needed" }, "correctAnswer": "B", "explanation": "A malicious or confused agent should be constrained by what the server allows, never by trusting the agent to behave — this is tutorial 20's capability-scoping principle applied at the MCP server boundary, since the server cannot assume every future caller has already checked permissions." },
+        { "number": 11, "question": "What is the main value of wrapping an enterprise data source as one MCP server versus giving each AI application its own direct connection?", "options": { "A": "It makes the data source run faster", "B": "Every application inherits the same governed access, credentials, and authorization instead of each team re-implementing and re-securing its own connection", "C": "It eliminates the need for any authentication", "D": "It removes the need for a database entirely" }, "correctAnswer": "B", "explanation": "One MCP server centralizes connection credentials, rate limiting, and server-side authorization for an enterprise data source; every consuming agent, regardless of framework, connects to that same governed server rather than duplicating and re-securing the integration independently." },
+        { "number": 12, "question": "Does MCP replace the safety disciplines from tutorial 20 (capability scoping, policy engines, audit trails)?", "options": { "A": "Yes, MCP handles all safety automatically", "B": "No — MCP standardizes discovery and invocation of tools, but every governance concern still must be implemented inside the server", "C": "Only capability scoping is still needed", "D": "MCP makes governance unnecessary for enterprise data" }, "correctAnswer": "B", "explanation": "MCP is a protocol for how tools are found and called, not a safety mechanism. Capability scoping, policy engines, sandboxing, audit trails, and kill switches from tutorial 20 all still apply and must be built into the server; the protocol makes a tool reachable, not automatically safe." },
+        { "number": 13, "question": "When is building a dedicated MCP server NOT the right choice, according to this tutorial?", "options": { "A": "Never — every tool should be an MCP server", "B": "When a tool is used by exactly one application with no plan to share it, since the protocol overhead isn't justified without an interoperability benefit", "C": "Only tools involving databases should ever be MCP servers", "D": "When the tool has more than one parameter" }, "correctAnswer": "B", "explanation": "MCP's value comes from reuse across applications, teams, or vendors. A single-app tool gains protocol overhead (serialization, process/network boundary) without the corresponding interoperability payoff, so a native function remains the better choice in that case." },
+        { "number": 14, "question": "What does it mean that MCP is an 'open standard'?", "options": { "A": "It is free but only usable by one company", "B": "It is not tied to one vendor or framework, so independently built clients and servers can interoperate as long as both comply with the protocol", "C": "It only works with open-source models", "D": "It requires no implementation at all" }, "correctAnswer": "B", "explanation": "Being an open standard means a server built for one AI application can, in principle, be used by an application built with a different framework or vendor's model, as long as both speak the protocol — the same interoperability value proposition as REST or ODBC." },
+        { "number": 15, "question": "How would you verify that an MCP server is genuinely interoperable rather than accidentally coupled to one specific client?", "options": { "A": "Check that it compiles without errors", "B": "Connect a second, independently-built client and confirm it can also discover and call the server's capabilities successfully", "C": "Only test it with the original agent framework it was built alongside", "D": "Interoperability cannot be tested" }, "correctAnswer": "B", "explanation": "If only one client can ever reach a server, something has quietly coupled it back into a bespoke integration despite using MCP's shape. Demonstrating that an independent client can also discover and call it is the concrete proof that the interoperability MCP promises is actually present." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam: Written Questions",
+      "items": [
+        { "number": 1, "question": "Explain the interoperability problem the Model Context Protocol solves, using the N×M versus N+M framing.", "modelAnswer": "Without a shared protocol, every AI application that needs to reach every internal system requires its own bespoke integration: if an organization has N applications and M systems those applications collectively need, the naive result is up to N×M separate integrations, since each application-system pairing is wired independently, duplicating effort, bugs, and security review. MCP changes this by introducing a standard contract: each system is wrapped once as an MCP server exposing its capabilities in the protocol's standard shape, and each application only needs one MCP client capable of speaking that protocol to reach any compliant server. This reduces the integration count to roughly N+M — N clients (one per application) plus M servers (one per system) — because the protocol, not bespoke code, is what lets any client reach any server. The savings compound as N and M grow: a new application added to the ecosystem can immediately reach every existing MCP server without new integration work, and a new system wrapped as a server is immediately usable by every existing application." },
+        { "number": 2, "question": "Describe MCP's architecture: the three roles (host, client, server) and how a tool call flows through them.", "modelAnswer": "The MCP host is the AI application itself — a chat app, agent framework, or IDE assistant — responsible for the overall user experience and for deciding, typically via a model's function-calling decision, when an external tool is needed. The MCP client is a component embedded in the host that handles protocol mechanics: connecting to one or more servers, performing capability discovery to learn what each exposes, and sending requests. The MCP server is a standalone process implementing the actual tools, resources, and prompts, running independently of any specific host, reachable over a transport such as standard input/output for a local process or HTTP for a remote one. A tool call flows: the host decides a tool is needed; the client, already aware of the tool from earlier capability discovery, sends a JSON-RPC tool-call request over the transport; the server receives it, executes the real logic (applying its own server-side authorization), and returns a JSON-RPC result over the same transport; the client hands that result back to the host, which feeds it to the model exactly as it would any other tool result. The host and model never need to know whether the server is local or remote, or what language implemented it." },
+        { "number": 3, "question": "Walk through building a minimal MCP server in .NET, explaining what's genuinely new compared to a tutorial-17 Semantic Kernel plugin and what stays the same.", "modelAnswer": "What stays the same: the tool implementation itself is nearly identical in spirit to a tutorial-17 native function — a method with a description attribute, parameters with their own descriptions, and a body that validates input, performs the real work (a repository lookup, an API call), and returns a compact result or a structured error, following the exact tutorial-12 safety discipline. What's new is the hosting shell: the server process registers MCP server services (conceptually AddMcpServer), configures a transport (stdio for a locally-launched process, HTTP for a remote deployment), and performs capability registration (conceptually WithToolsFromAssembly) that scans for attributed tool methods and builds the manifest a client's capability discovery will later query — generating that manifest automatically from the method signatures and description attributes, the same generation tutorial 17's [KernelFunction] performed, but now exposed over the protocol rather than kept internal to one process's kernel. In short: the tool logic barely changes; what's added is the protocol-facing scaffolding that makes that logic externally reachable and discoverable by any compliant client, not just the process it was written inside." },
+        { "number": 4, "question": "Explain how MCP integrates with an agent framework like Semantic Kernel, and why the model's perspective on a tool's origin doesn't change.", "modelAnswer": "An MCP client embedded in the agent's process connects to one or more MCP servers and performs capability discovery, retrieving a list of the tools (and resources/prompts) each server exposes, each with the same name/description/parameter-schema shape a native function would have. Those discovered tools are then merged into the kernel's plugin collection — conceptually alongside, or in place of, native [KernelFunction] plugins — so that from the kernel and the model's perspective there is one uniform set of callable functions. When the model, via automatic function calling, requests one of these tools, the underlying call is routed by the framework: for a native function, execution happens in-process; for an MCP-discovered tool, the client sends the request out over the transport to the actual MCP server, which executes the real logic and returns a result that flows back the same way. The model's perspective doesn't change because the protocol was specifically designed to make tool origin invisible at that layer — the model reasons only about names, descriptions, and parameters, never about whether a function lives in the same process or across a network boundary, which is exactly what allows agents to incorporate externally-built, reusable tools without any special-casing in the reasoning layer." },
+        { "number": 5, "question": "Describe the concrete architecture for connecting an agent to an enterprise data source via MCP, including where governance responsibilities live.", "modelAnswer": "Rather than each agent (or each team's agent implementation) writing its own native function that directly queries the enterprise system — with its own copy of connection credentials, its own ad hoc authorization checks, and its own rate limiting — the organization builds one MCP server that wraps that data source. This server owns the actual connection to the enterprise system, its credentials, and critically, its own server-side authorization: it must independently verify what any given caller is permitted to access, since it cannot assume a connecting client or the agent behind it has already checked this, exactly following tutorial 20's principle that governance belongs at the boundary the untrusted party cannot bypass, not at the discretion of the untrusted party itself. Any agent — regardless of framework, team, or even organization if the server is intentionally exposed more broadly — connects to this single server via an MCP client, discovers its tools, and inherits its governed access without needing its own copy of the credentials or authorization logic. The result is centralized governance (one place to audit, update authorization rules, or revoke access) with decentralized consumption (many independently-built agents using the same governed gateway), which is precisely the architectural payoff that justifies the protocol overhead of externalizing the tool into its own server in the first place." },
+        { "number": 6, "question": "Argue for or against: 'Since MCP standardizes tool discovery and invocation, it removes the need for the function-level safety discipline from tutorial 12.' Defend your position.", "modelAnswer": "Against. MCP standardizes how a client discovers and invokes a tool — the protocol shape of the request and response, the transport, the capability manifest — but it says nothing about what happens inside the tool's implementation once invoked, which is exactly where tutorial 12's safety discipline lives: validating arguments (which, in an MCP context, are still model-generated and therefore untrusted input, now arriving over a protocol boundary rather than an in-process call, if anything demanding more scrutiny not less), authorizing the specific operation against the real caller, ensuring idempotency, and returning structured errors rather than letting exceptions escape. If anything, MCP servers often have a stronger obligation here, since a server may be called by many different, independently-built clients and agents the server's author does not fully control — meaning the server cannot rely on any assumption about how carefully a particular calling agent validated its own request before sending it. The protocol handles 'how does a request reach the tool and how does a result come back'; it does not and cannot handle 'is this specific request, from this specific caller, actually something that should be allowed to happen' — that remains entirely the implementer's responsibility, arguably amplified rather than removed by MCP's multi-consumer reach." },
+        { "number": 7, "question": "A team wants to convert every native function in their agent's plugin into a separate MCP server 'for consistency and future-proofing.' Evaluate this plan.", "modelAnswer": "This overextends MCP's value proposition and should be pushed back on. MCP's benefit — interoperability across applications, teams, or vendors — only materializes when a tool is genuinely reused beyond the single agent that currently calls it; a tool used by exactly one application gains protocol overhead (JSON-RPC serialization, a process or network boundary, transport configuration, separate deployment and versioning) without any corresponding interoperability payoff, since there is no second consumer to share it with. 'Future-proofing' is a weak justification on its own: the migration path from a native function to an MCP server, when a genuine reuse need eventually appears, is not especially costly (the tool's core logic transfers almost unchanged, as shown in this tutorial), so preemptively incurring the overhead for tools that may never need to be shared trades a real, ongoing cost (latency, operational complexity, more processes to deploy and monitor) for a speculative future benefit. The better guidance from this tutorial is selective adoption: identify specifically which tools or data sources are, or clearly will be, needed by multiple applications or teams, and build those as MCP servers; leave single-consumer tools as native functions, and convert them later, deliberately, if and when a real second consumer materializes." },
+        { "number": 8, "question": "Explain the distinction between MCP tools, resources, and prompts, and give a scenario where using the wrong one would be a design mistake.", "modelAnswer": "A tool is an invocable action with parameters that performs work and returns a result — creating a ticket, checking a live status, running a computation. A resource is readable context data exposed for fetching, not execution — a policy document, a reference dataset, a schema — analogous to a retrieved passage in a RAG system. A prompt is a reusable, parameterized prompt template a server exposes so multiple clients can share the same well-crafted instruction rather than each reimplementing their own version of it. A design mistake scenario: exposing a static escalation-policy document as a 'tool' that takes no meaningful parameters and simply returns the document's text on every call. This works functionally — a client can still invoke it and get the text — but it forfeits the benefits a resource would have provided: resources are intended to be cacheable and browsable in a way that signals to clients 'this is stable reference data, not an action with side effects,' letting clients and hosts reason about and potentially cache it differently than they would a genuine action. Modeling it correctly as a resource communicates its actual nature (readable, idempotent, non-action) to every consuming client through the protocol's own semantics, rather than requiring each client to infer that from a tool's description text." },
+        { "number": 9, "question": "How would you test that an MCP server you built is genuinely interoperable, and why is this test necessary even after the server 'works' with your primary agent?", "modelAnswer": "The test is to connect a second, independently-built client to the server — ideally one built with different code entirely from whatever agent framework or test harness was used during initial development — and confirm it can perform capability discovery and successfully invoke the server's tools/resources without any special accommodation. This is necessary because 'works with my primary agent' only proves the server functions correctly for the one specific calling pattern that agent happens to use; it does not prove the server is actually compliant with the protocol in the general sense MCP is meant to guarantee. It's entirely possible to build something that superficially uses MCP's types and attributes but has accidentally baked in an assumption specific to how the original client calls it — an implicit ordering dependency, an assumption about argument formatting the original client happens to satisfy by coincidence, or a manifest that's technically served but not quite standard enough for a strict independent client to parse correctly. Only demonstrating success with a genuinely independent second client validates the actual claim MCP is meant to deliver: that any compliant client, not just the one you happened to develop against, can use the server. Skipping this test risks discovering the coupling only when a second, real consuming team tries to adopt the server later and it doesn't quite work — a far more expensive time to find out." },
+        { "number": 10, "question": "Compare the operational tradeoffs of a stdio-based local MCP server versus an HTTP-based remote MCP server.", "modelAnswer": "A stdio-based local server is launched as a child process by the host/client, communicating over standard input and output pipes. This is simple to set up (no network configuration, no separate deployment pipeline), has minimal latency since there's no network hop, and its lifecycle is naturally tied to the host process — but this is also its limitation: it's tied to a single machine and a single host process's lifetime, cannot be shared across multiple simultaneously-running host applications on different machines, and scaling it means running multiple independent copies rather than one shared service. An HTTP-based remote server runs as its own independently deployed and scaled service, reachable over a network by many different hosts and clients simultaneously — genuinely realizing the 'build once, use by many applications' interoperability MCP is meant to provide at organizational scale, and it can be scaled, monitored, and secured using standard web-service practices (load balancing, network policies, standard authentication). The tradeoffs are added network latency per call, the need for its own deployment and operational lifecycle independent of any single host, and more surface area for network-level security considerations (TLS, network isolation, DDoS exposure) that a local stdio process never has to worry about. The choice follows directly from how broadly the tool needs to be shared: single-machine, tightly-coupled scenarios favor stdio; genuinely multi-application, multi-team, or multi-organization sharing favors an HTTP-based remote deployment." },
+        { "number": 11, "question": "Explain why server-side authorization is described as non-negotiable for an MCP server, using a concrete failure scenario if it were omitted.", "modelAnswer": "An MCP server, once built, may be called by multiple different clients and agents that its author does not fully control or even know about in advance — that's the entire point of the interoperability MCP provides. If the server omits its own authorization checks and instead assumes that any connecting client has already verified the caller is permitted to perform the requested action, it is trusting parties outside its own boundary to enforce a security property it alone is actually positioned to guarantee. Concrete failure: an enterprise account-balance MCP server that skips server-side authorization, assuming 'the calling agent already checked the user is allowed to see this account.' A new agent, built later by a different team, connects to the same server (exactly the reuse MCP encourages) but has a bug, or was deliberately built without that check, or is manipulated via a crafted user input into requesting a balance for an account the actual end user shouldn't see. Because the server performed no independent check, the request succeeds and sensitive financial data leaks to an unauthorized party — a failure that originated entirely in a different team's agent code, but that the data-owning server was the only party actually positioned to have prevented. This is why authorization must live at the server: it is the one component present in every possible call path, regardless of which client or agent initiated the request." },
+        { "number": 12, "question": "How does MCP relate to the agent-first architecture concepts from tutorial 20 — specifically agent communication models and governance?", "modelAnswer": "MCP is a concrete, standardized implementation of ideas tutorial 20 introduced abstractly. On communication: tutorial 20 discussed agent communication models (direct messaging, message bus, blackboard) primarily in terms of how agents talk to each other; MCP addresses a closely related but distinct question — how an agent (or any AI application) talks to a tool or data source — and does so via a request/response style protocol most similar in spirit to direct messaging, but standardized so the 'destination' can be any compliant server rather than a specific known agent. On governance: tutorial 20 established capability scoping, a policy engine, sandboxing, an audit trail, and a kill switch as the necessary safety layer around agent autonomy; every one of these still applies fully to an MCP server, which is simply a specific, protocol-standardized place where those controls must be implemented — capability scoping determines which tools a server exposes and to whom, a policy engine or its equivalent logic gates consequential MCP tool calls, sandboxing bounds what the server process itself can reach, an audit trail records MCP tool invocations, and a kill switch can disable a server's ability to execute actions. MCP doesn't introduce new governance concepts; it gives tutorial 20's abstract governance requirements a concrete, reusable boundary — the server process itself — where they must be enforced." },
+        { "number": 13, "question": "A junior developer says 'MCP means the AI model can now access my database directly.' Correct this misunderstanding.", "modelAnswer": "This conflates the model with the system that actually executes tool calls, and skips over where the real database access happens. The model never touches a database, an API, or any other system directly, with or without MCP — it only ever produces a request to call a named tool with certain arguments, exactly as in ordinary function calling from tutorial 12. What MCP changes is where the code that actually executes that tool call lives and how it's discovered: instead of that code being an in-process native function the agent's own process implements, it's implemented inside a separate MCP server process, which is the component that holds the actual database connection, credentials, and query logic, and which performs its own server-side authorization before touching the database at all. So the corrected picture: the model requests a named tool; the agent's MCP client sends that request to the MCP server; the server — not the model, not the agent, and not any AI component at all — executes the actual database query using its own controlled credentials and its own authorization checks; the server returns a result, which flows back to the model as context for its next response. MCP standardizes and externalizes where that tool logic runs; it does not grant the model any new kind of direct access to anything." },
+        { "number": 14, "question": "Design a decision checklist a team could use to decide whether a given tool or data source should be built as a native function or as an MCP server.", "modelAnswer": "First: will this tool or data source be used by more than one application, team, or agent framework, now or in a clearly foreseeable near-term? If no, a native function is simpler and sufficient; build an MCP server only when a genuine second consumer exists or is concretely planned, not speculatively. Second: does the underlying capability represent a genuine, reusable business asset — an enterprise data source, a shared internal service — as opposed to something narrowly specific to one application's internal logic? Business-asset-shaped capabilities are better MCP-server candidates; purely internal application logic usually isn't. Third: is centralized governance (one place to enforce authorization, audit, and policy for this capability across all its consumers) valuable here, particularly for sensitive or consequential operations? If so, that centralization is a strong argument for a server even with only one current consumer, since it's establishing the governed boundary before a second consumer arrives. Fourth: can the team tolerate the added latency and operational overhead (a separate process/deployment, transport configuration, independent monitoring) this specific tool would introduce, given its performance and reliability requirements? Fifth: is there an existing MCP server elsewhere in the organization that already covers this capability, meaning the right move is integration rather than building anew? A 'yes' pattern across reuse, business-asset nature, and governance value points toward an MCP server; a 'no' pattern, especially combined with tight latency requirements, points toward keeping it a native function." },
+        { "number": 15, "question": "Reflecting on tutorials 12, 17, 19, 20, and this tutorial, explain what MCP contributes to the progression of ideas across the course, and what remains unchanged beneath it.", "modelAnswer": "What remains unchanged is the fundamental shape established in tutorial 12: a tool is a described, named, parameterized capability the model can request, code executes it, and a result feeds back — every subsequent tutorial (Semantic Kernel's attribute-driven plugins in 17, AutoGen's function map in 19, and MCP here) is a different way of packaging and reaching that same fundamental shape, not a replacement for it. Each layer added something new: tutorial 17 automated the function-calling loop and generated schemas from code; tutorial 19 offered a conversation-centric alternative packaging; tutorial 20 stepped back to ask architectural questions about which components should be agents, how they communicate, and what governance autonomy requires system-wide; and this tutorial answers one specific piece of tutorial 20's communication and reuse questions concretely — MCP is what 'a reusable tool server accessible via a standard communication model' looks like in practice, solving the specific problem of framework- and vendor-boundary interoperability that none of tutorials 12, 17, or 19 addressed, since each of those defined tools in ways specific to their own framework. The contribution of MCP to the course's progression, then, is extending the reach of tool-calling from 'within one agent, one framework, one process' to 'across any compliant application, framework, or organization,' while every safety and design principle learned along the way — validate arguments, authorize the real caller, scope capabilities narrowly, choose communication models deliberately, govern autonomy proportionally — continues to apply exactly as before, just now enforced at a server boundary reachable by more than one consumer." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Model Context Protocol (MCP)", "back": "Open standard for how AI apps discover and call tools/context sources exposed by independent servers — turns N×M bespoke integrations into N+M." },
+        { "number": 2, "front": "MCP host", "back": "The AI application itself (chat app, agent framework, IDE assistant) that orchestrates the experience and embeds an MCP client." },
+        { "number": 3, "front": "MCP client", "back": "Embedded component handling protocol mechanics: connects to servers, performs capability discovery, issues calls on the host's behalf." },
+        { "number": 4, "front": "MCP server", "back": "Standalone process implementing tools/resources/prompts, independent of any host, reachable via a transport (stdio/HTTP)." },
+        { "number": 5, "front": "Tool vs Resource vs Prompt", "back": "Tool = invocable action + result. Resource = readable context data, no action. Prompt = shared reusable prompt template." },
+        { "number": 6, "front": "JSON-RPC", "back": "The lightweight RPC-over-JSON format MCP messages are built on, carried over a transport (stdio or HTTP)." },
+        { "number": 7, "front": "Capability discovery", "back": "Client asks server 'what do you offer?' before use — retrieves the server manifest (tools/resources/prompts, names, descriptions, schemas)." },
+        { "number": 8, "front": "N×M vs N+M", "back": "Without MCP: N apps × M systems = up to N×M bespoke integrations. With MCP: N clients + M servers, each system wrapped once, reused by all." },
+        { "number": 9, "front": "MCP tool = tutorial-12 tool", "back": "Same shape (name, description, parameters, execute, result), same safety discipline (validate, authorize, idempotent, structured errors) — now protocol-standardized." },
+        { "number": 10, "front": "Model's view of MCP tools", "back": "Identical to native functions — the model sees names/descriptions/params only; doesn't know or care if execution is in-process or a remote MCP server." },
+        { "number": 11, "front": "MCP ≠ safety", "back": "MCP standardizes discovery/invocation, NOT safety. Tutorial 20's governance (scoping, policy, sandboxing, audit, kill switch) must be built INSIDE the server." },
+        { "number": 12, "front": "Server-side authorization (MCP)", "back": "The server, never the calling agent, must enforce who may access what — any compliant client can connect, so the server can't trust the caller already checked." },
+        { "number": 13, "front": "Enterprise data via MCP", "back": "One MCP server wraps the data source (owns credentials + authorization); every agent (any framework) inherits governed access instead of re-integrating." },
+        { "number": 14, "front": "When to build an MCP server", "back": "When a tool/data source is genuinely reused across apps/teams/vendors. Single-app tools: stay native — protocol overhead without interoperability payoff." },
+        { "number": 15, "front": "Testing real interoperability", "back": "Connect a SECOND independently-built client and confirm it can discover + call the server. 'Works with my one agent' doesn't prove protocol compliance." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions and Answers",
+      "items": [
+        { "number": 1, "question": "What is the Model Context Protocol and why does it matter?", "answer": "MCP is an open standard for how AI applications discover and call tools and context sources exposed by independent servers. It matters because of what happens without it: every AI application an organization builds ends up re-implementing its own bespoke connection to every internal system it needs — if you have several applications and several systems, that's potentially every application-system pair wired independently, duplicating integration work, bugs, and security review. MCP turns that into 'wrap each system once as a server, give each application one client that speaks the protocol' — a new application can immediately reach every existing server, and a new system wrapped as a server is immediately usable by every existing application. It's the same interoperability idea as REST for web APIs: a shared contract that lets independently built pieces work together without prior coordination between their authors." },
+        { "number": 2, "question": "Walk me through the three roles in MCP's architecture.", "answer": "Host, client, server. The host is the AI application itself — a chat app, an agent framework, whatever orchestrates the overall experience and decides, usually via the model's own function-calling decision, that a tool is needed. The client is embedded in the host and handles the protocol mechanics: connecting to a server, doing capability discovery to find out what it offers, and sending the actual JSON-RPC requests. The server is a separate, independent process that actually implements the tools, resources, or prompts — it doesn't know or care which host is calling it, as long as the caller speaks the protocol correctly. A call flows: host decides it needs a tool, client sends the request over a transport like stdio or HTTP, server executes the real logic with its own authorization, and the result flows back the same path to the model." },
+        { "number": 3, "question": "How is an MCP tool different from a function-calling tool you'd build with raw function calling or Semantic Kernel?", "answer": "Functionally, it's not different at all — it's still name, description, parameters, execution, and a returned result, and it needs exactly the same safety discipline inside it: validate arguments, authorize the real caller, stay idempotent, return structured errors. What's different is packaging and reach. A raw function-calling tool or a Semantic Kernel [KernelFunction] lives inside one process and is only reachable by whatever code is in that process. An MCP tool is declared inside a standalone server process using the protocol's standard shape, so any compliant client — built with any framework, by any team — can discover and call it. So the mental model I use: MCP doesn't change what a tool call is, it changes where the tool's implementation can live and who can reach it." },
+        { "number": 4, "question": "How would you integrate an MCP server's tools into an existing Semantic Kernel agent?", "answer": "You connect an MCP client to the server, call something like ListToolsAsync to perform capability discovery and get back the server's declared tools with their names, descriptions, and parameter schemas, then merge those into the kernel's plugin collection alongside any native [KernelFunction] plugins the agent already has. From that point, the kernel and the model see one uniform set of callable functions — the model doesn't know or need to know that some of them resolve to in-process code and others route out to a separate MCP server process. When the model requests one of the MCP-sourced tools via automatic function calling, the framework's integration handles routing that call through the MCP client to the actual server and bringing the result back, exactly like any other tool invocation from the model's perspective." },
+        { "number": 5, "question": "Why is server-side authorization non-negotiable for an MCP server, more so than for a typical single-app native function?", "answer": "Because an MCP server, by design, may be called by multiple different clients and agents its author doesn't fully control or even know about — that reach is the entire point of building it as an MCP server instead of a native function. If the server assumes 'whoever's calling me already checked the user is authorized,' it's trusting parties outside its own boundary to enforce a security property only the server itself is actually positioned to guarantee for every possible caller. Concretely: if an account-balance MCP server skips its own authorization and a different team's agent, built later, has a bug or gets manipulated into requesting a balance the actual user shouldn't see, the server has no defense — the leak happened through a component the data-owning server should have gated itself. Authorization has to live at the one point present in every call path, which is the server, not any particular caller." },
+        { "number": 6, "question": "When would you tell a team NOT to build something as an MCP server?", "answer": "When there's no genuine second consumer — a tool used by exactly one application with no concrete plan to share it gains real costs from being an MCP server (JSON-RPC serialization, a process or network boundary, its own deployment and versioning lifecycle) without the interoperability benefit that justifies those costs, since there's nothing to share it with yet. I'd also push back on 'future-proofing' as the sole justification — converting a well-designed native function into an MCP server later, when a real second consumer actually appears, isn't especially expensive, since the core tool logic transfers almost unchanged; paying the overhead speculatively for tools that may never need to be shared is usually the wrong tradeoff. My rule of thumb: build the MCP server when you can name the second consumer, or when centralized governance over a sensitive capability is valuable even with one current consumer — not merely because MCP is available." },
+        { "number": 7, "question": "What's your test for whether an MCP server you built is actually interoperable, versus just superficially using MCP's types?", "answer": "Connect a second, genuinely independent client to it — ideally built with different code than whatever you used during development — and confirm it can do capability discovery and successfully invoke the server's tools with no special accommodation. 'It works with my primary agent' only proves the server handles the one calling pattern that agent happens to use; it's entirely possible to have baked in an implicit assumption — argument formatting the original client happens to satisfy by coincidence, an ordering dependency, a manifest detail a lenient client tolerates but a strict one wouldn't — that only surfaces when someone else's client tries to use it. I'd rather find that gap during my own testing than have a different team discover it when they try to adopt my server months later." },
+        { "number": 8, "question": "Explain the difference between an MCP tool and an MCP resource, and describe a mistake you'd flag if you saw the wrong one used.", "answer": "A tool is for actions — it takes parameters and does something, like creating a ticket or checking a live status. A resource is for readable context data with no action involved — a policy document, reference data — analogous to a retrieved passage in RAG. I'd flag exposing something like a static escalation-policy document as a 'tool' that just returns the same text every time with no meaningful parameters. It technically works, but it misses what modeling it as a resource would communicate through the protocol itself: that it's stable, readable, non-action data that a client could reasonably cache or browse differently than it would treat an action with side effects. Using the right capability type isn't just semantics — it's giving every consuming client accurate information about how to treat what they're getting." },
+        { "number": 9, "question": "How does MCP relate to the agent-first architecture and governance concepts from earlier in an agentic AI course?", "answer": "MCP is a concrete answer to questions that architecture discussion raises abstractly. On communication between an agent and a tool or data source, MCP provides a standardized, request/response style protocol — similar in spirit to direct messaging, but generalized so the destination can be any compliant server rather than one specific known one. On governance, every control that discussion establishes — capability scoping, a policy engine, sandboxing, an audit trail, a kill switch — still fully applies to an MCP server; MCP doesn't add new governance ideas, it gives those abstract requirements one specific, protocol-standardized boundary — the server process — where they have to actually be implemented. I think of MCP as one concrete building block for the broader architectural pattern of 'a reusable tool server accessible via a standard communication model, wrapped in appropriate governance,' not a separate topic from that architecture discussion." },
+        { "number": 10, "question": "A stakeholder says 'now that we have MCP, the model can access our database directly.' How do you correct this?", "answer": "I'd clarify that the model never touches a database directly, with or without MCP — it only ever produces a request to call a named tool with arguments, same as ordinary function calling. What MCP changes is where the code executing that tool call lives: instead of being an in-process function the agent's own code implements, it's implemented in a separate MCP server process that holds the actual database connection, credentials, and query logic, and which does its own authorization checks before touching the database at all. So the real flow is: model requests a tool, the agent's MCP client sends that request to the server, the server — not the model, not the agent — runs the actual query with its own controlled access, and the result comes back as context. MCP standardizes and externalizes where the tool logic runs; it doesn't grant the model any new kind of direct system access." },
+        { "number": 11, "question": "What operational tradeoffs would you weigh when choosing a stdio-based versus HTTP-based MCP server transport?", "answer": "Stdio is simple — the host just launches the server as a child process and talks over its input/output pipes, no network setup, minimal latency, and the server's lifecycle is naturally tied to the host. But it's tied to one machine and one host process; it can't be shared by multiple applications running elsewhere, and 'scaling' it just means running more independent copies. HTTP-based transport lets the server run as its own independently deployed, network-reachable service that many different hosts and applications can hit simultaneously — which is what actually realizes MCP's 'build once, use everywhere' value at organizational scale — at the cost of network latency per call, its own deployment and monitoring lifecycle, and needing real network-security considerations like TLS and access control that a local stdio process never has to think about. I'd choose based on how broadly the tool genuinely needs to be shared: single-machine or single-team tooling can stay stdio; anything meant to serve multiple applications or teams organization-wide needs the HTTP path." },
+        { "number": 12, "question": "How would you decide whether a specific capability should become a native function or an MCP server?", "answer": "A short checklist. Is there a real second consumer, now or clearly planned — not just a hypothetical future one? Does this represent a genuine shared business asset (an enterprise data source, a service other teams would want) rather than logic specific to one app? Would centralizing authorization and auditing for this capability, in one governed place, be valuable given its sensitivity — sometimes worth doing even with a single current consumer, to establish the boundary before a second one arrives. Can this specific tool tolerate the added latency and operational overhead of a separate process or service? And does an MCP server for this already exist elsewhere in the org, meaning the right move is adopting it rather than building anew? If reuse, shared-asset nature, and governance value line up, I lean MCP server; if it's narrowly internal logic with tight latency needs and no foreseeable second consumer, I keep it a native function and revisit later if that changes." },
+        { "number": 13, "question": "What would concern you about a team's plan to expose sensitive enterprise data through an MCP server?", "answer": "Mainly whether authorization is actually enforced inside the server itself, independent of whoever calls it. I'd want to see that the server checks the real caller's permissions for the specific data being requested on every call, not just once at a connection level, and that it doesn't assume any connecting client has already done that check — because once it's an MCP server, it may eventually be called by agents the team didn't build and can't fully audit. I'd also want an independent audit trail on the server itself, since relying on whatever logging the calling agent happens to do would leave gaps for any other consumer. And I'd want to see this tested specifically — not just 'the happy path returns the right data,' but a deliberate attempt to request data a given caller shouldn't have access to, confirming it's actually refused. Sensitive enterprise data behind MCP needs the server treated with the same rigor as any production data-access layer, because that's exactly what it is, regardless of the AI framing around it." },
+        { "number": 14, "question": "Why do you think MCP was introduced at this specific point in an agentic AI curriculum, after frameworks and after architecture?", "answer": "Because it needs both as prerequisites to make sense. Without having built tool-calling by hand and inside frameworks first, MCP's tool/resource/prompt model would seem like an arbitrary new thing to memorize rather than a recognizable standardization of a shape you already deeply understand — the value of 'oh, it's the same tool shape, just externalized' only lands if you've felt the pain of building that shape yourself a few different ways already. And without the architecture discussion about agent communication models and governance first, MCP would look like just another framework feature rather than what it actually is: one concrete, standardized implementation of 'a reusable tool server reachable via a standard communication model,' addressing a specific interoperability gap that discussion raises but doesn't solve on its own. Introducing MCP after both means a learner can immediately place it correctly — not as a competing framework, but as infrastructure sitting alongside and reachable from any of the frameworks already learned, solving a problem those frameworks individually can't solve because each defines tools in its own internal way." },
+        { "number": 15, "question": "Summarize, in your own words, what MCP fundamentally changes and what it fundamentally doesn't.", "answer": "It doesn't change what a tool call is — describe a capability, the model requests it, code executes it, a result comes back — and it doesn't change any of the safety discipline that execution needs: validating arguments, authorizing the real caller, idempotency, structured errors, and every governance control around agent autonomy. What it changes is reach and reusability: it gives that same familiar tool shape a standard, protocol-level packaging so a capability built once, in its own independent server, can be discovered and called by any compliant client — regardless of what framework or vendor built that client — instead of being locked inside whichever single process or framework originally implemented it. I'd summarize it as: MCP is the interoperability layer for tool-calling, not a new kind of tool-calling itself." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "Model Context Protocol", "definition": "MCP: an open standard defining how AI applications discover and call tools and context sources exposed by independent servers, over a common protocol." },
+        { "term": "MCP server", "definition": "A process that exposes tools, resources, and/or prompts over the Model Context Protocol for any compliant client to discover and use." },
+        { "term": "MCP client", "definition": "The component inside an AI application that connects to MCP servers, lists their capabilities, and invokes them on the host's behalf." },
+        { "term": "MCP host", "definition": "The application that embeds an MCP client and orchestrates the overall AI experience — for example a chat app or an agent framework." },
+        { "term": "Tool (MCP)", "definition": "An MCP capability the client can invoke with arguments to perform an action or computation, analogous to a function-calling tool." },
+        { "term": "Resource (MCP)", "definition": "An MCP capability exposing readable data that a client can fetch as context without invoking an action." },
+        { "term": "Prompt (MCP)", "definition": "A reusable, parameterized prompt template an MCP server exposes so multiple clients can share the same well-crafted instruction." },
+        { "term": "Transport", "definition": "The underlying communication channel MCP messages travel over, such as standard input/output for local processes or HTTP for remote servers." },
+        { "term": "JSON-RPC", "definition": "A lightweight remote-procedure-call protocol using JSON messages; MCP defines its message exchange on top of JSON-RPC." },
+        { "term": "Capability discovery", "definition": "The process by which an MCP client asks a server what tools, resources, and prompts it exposes, before deciding what to use." },
+        { "term": "Server manifest", "definition": "The declared list of tools, resources, and prompts an MCP server advertises, together with their names, descriptions, and schemas." },
+        { "term": "Interoperability", "definition": "The property that independently built clients and servers can work together correctly because they share a common protocol." },
+        { "term": "Enterprise data source", "definition": "An internal system of record that an organization wants an AI agent to query safely, often wrapped as an MCP server." },
+        { "term": "MCP tool call", "definition": "A JSON-RPC request from an MCP client asking a server to execute a named tool with given arguments, mirroring ordinary function calling." },
+        { "term": "Least privilege", "definition": "Scoping an MCP server's exposed tools and its own backend credentials to the minimum access the intended use case requires." },
+        { "term": "Server-side authorization", "definition": "Enforcing who may access what inside the MCP server itself, rather than trusting the calling agent or model to self-restrict." },
+        { "term": "Reusable tool server", "definition": "An MCP server built once and consumed by many different AI applications, avoiding duplicated bespoke tool integrations per app." },
+        { "term": "Protocol version negotiation", "definition": "The handshake step where an MCP client and server agree on a compatible protocol version before exchanging capabilities." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "The Model Context Protocol standardizes how AI applications discover and call tools/context sources, turning N×M bespoke integrations into N+M by letting each system be wrapped once as a server any compliant client can use.",
+          "MCP architecture has three roles — host (the AI application), client (protocol mechanics, capability discovery), and server (implements tools/resources/prompts) — communicating via JSON-RPC over a transport like stdio or HTTP.",
+          "Building an MCP server in .NET follows tutorial 12's exact tool shape (name, description, parameters, validated implementation) wrapped in protocol-facing scaffolding for discovery and invocation.",
+          "Integrating MCP with agents merges discovered tools into a framework's existing plugin/function collection, so the model sees one uniform tool set regardless of whether execution is in-process or on a remote server.",
+          "Connecting an agent to enterprise data via MCP centralizes credentials, authorization, and audit in one governed server that many agents inherit access from, instead of each team re-implementing and re-securing its own direct connection.",
+          "MCP standardizes discovery and invocation only — every governance control from agent-first architecture (capability scoping, policy engines, sandboxing, audit trails, kill switches) still must be implemented inside the server itself."
+        ] },
+        { "type": "paragraph", "text": "MCP extends the tool-calling shape you've built since tutorial 12 across a boundary none of the frameworks alone could cross: any compliant application, any framework, any team. The safety principles don't change — validate, authorize, scope narrowly, govern proportionally — only where they're enforced does: at a server boundary reachable by more than one consumer. With individual agents, architecture, and now standardized, shareable tools in place, the course's final agent-focused tutorial turns to what happens when several agents — potentially built by different teams using different frameworks, all speaking MCP where they need shared tools — must work together as one coordinated multi-agent system." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Next tutorial: Multi-Agent Systems (multi-agent-systems). Having covered individual agents (tutorials 17–19), architecture and governance (tutorial 20), and now a standard for sharing tools across agents and applications (this tutorial), the next tutorial brings these together into complete multi-agent systems — synthesizing orchestration patterns, communication models, and MCP-based tool sharing into cohesive, production-oriented designs." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: build the order-status MCP server from the walkthrough, then connect two independent clients to it — a Semantic Kernel agent and a plain console test client — confirming both can discover and call it.",
+          "Practice: add a deliberate authorization gap to a test MCP server (skip the server-side check) and demonstrate the failure scenario from exam question 11, then fix it and confirm the fix holds.",
+          "Practice: model one tool and one piece of static reference data on the same server, exposing the first as an MCP tool and the second as an MCP resource, and articulate why each fits its type.",
+          "Practice: apply the decision checklist from exam question 14 to three real or hypothetical capabilities in a project you know, and write down which should be native functions versus MCP servers.",
+          "Read: the official Model Context Protocol specification, the MCP .NET SDK documentation, and any current guidance on securing MCP servers in production."
+        ] },
+        { "type": "note", "style": "tip", "text": "Keep your MCP server and its second-client test running. The multi-agent systems tutorial assumes agents can share governed tools across framework boundaries, and this is your concrete proof that they can." }
+      ]
+    }
+  ]
+}
