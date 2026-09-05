@@ -1,0 +1,323 @@
+@model GenieWeb.Models.TutorialDocument
+@using GenieWeb.Models
+@{
+    var prevExists = (bool)(ViewData["PrevExists"] ?? false);
+    var nextExists = (bool)(ViewData["NextExists"] ?? false);
+}
+
+@functions {
+    private static string NoteCss(string? style) => style switch
+    {
+        "tip" => "alert-success",
+        "warning" => "alert-warning",
+        _ => "alert-info"
+    };
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        @for (var i = 0; i < Model.Breadcrumbs.Count; i++)
+        {
+            if (i == Model.Breadcrumbs.Count - 1)
+            {
+                <li class="breadcrumb-item active" aria-current="page">@Model.Breadcrumbs[i]</li>
+            }
+            else if (Model.Breadcrumbs[i] == Model.Category)
+            {
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Tutorials")">@Model.Breadcrumbs[i]</a></li>
+            }
+            else if (Model.Breadcrumbs[i] == "Home")
+            {
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+            }
+            else
+            {
+                <li class="breadcrumb-item">@Model.Breadcrumbs[i]</li>
+            }
+        }
+    </ol>
+</nav>
+
+<div class="mb-4">
+    <span class="badge bg-dark">Tutorial @Model.TutorialNumber of @Model.TotalTutorials</span>
+    <span class="badge bg-secondary">@Model.Level</span>
+    <span class="badge bg-primary">@Model.CodeLanguage</span>
+    <span class="badge bg-light text-dark border">@Model.CourseName</span>
+</div>
+
+@{
+    void RenderBlocks(List<TutorialContentBlock>? blocks)
+    {
+        if (blocks == null) { return; }
+        foreach (var b in blocks)
+        {
+            switch (b.Type)
+            {
+                case "paragraph":
+                    <p>@b.Text</p>
+                    break;
+
+                case "list":
+                    if (b.Style == "numbered")
+                    {
+                        <ol>
+                            @foreach (var it in b.Items ?? new List<string>()) { <li class="mb-1">@it</li> }
+                        </ol>
+                    }
+                    else
+                    {
+                        <ul>
+                            @foreach (var it in b.Items ?? new List<string>()) { <li class="mb-1">@it</li> }
+                        </ul>
+                    }
+                    break;
+
+                case "code":
+                    <div class="card mb-3">
+                        @if (!string.IsNullOrEmpty(b.Title))
+                        {
+                            <div class="card-header py-2 small fw-semibold">@b.Title</div>
+                        }
+                        <pre class="mb-0 p-3 bg-dark text-light rounded-bottom" style="overflow-x:auto;"><code>@string.Join("\n", b.Code ?? new List<string>())</code></pre>
+                    </div>
+                    break;
+
+                case "table":
+                    <div class="table-responsive mb-3">
+                        <table class="table table-bordered table-striped align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    @foreach (var h in b.Headers ?? new List<string>()) { <th>@h</th> }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var row in b.Rows ?? new List<List<string>>())
+                                {
+                                    <tr>
+                                        @foreach (var cell in row) { <td>@cell</td> }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    break;
+
+                case "note":
+                    <div class="alert @NoteCss(b.Style)">@b.Text</div>
+                    break;
+            }
+        }
+    }
+
+    void RenderQuiz(TutorialSection s)
+    {
+        <p class="text-muted">Pick an answer for each question, then press <em>Check answer</em>.</p>
+        foreach (var q in s.Items ?? new List<TutorialItem>())
+        {
+            <div class="card mb-3 quiz-item" data-correct="@q.CorrectAnswer">
+                <div class="card-body">
+                    <p class="fw-semibold mb-2">@q.Number. @q.Question</p>
+                    @foreach (var opt in q.Options ?? new Dictionary<string, string>())
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="quiz-@q.Number" id="quiz-@q.Number-@opt.Key" value="@opt.Key" />
+                            <label class="form-check-label" for="quiz-@q.Number-@opt.Key"><strong>@opt.Key.</strong> @opt.Value</label>
+                        </div>
+                    }
+                    <button type="button" class="btn btn-sm btn-primary mt-3 quiz-check">Check answer</button>
+                    <div class="quiz-feedback mt-3 d-none">
+                        <div class="alert alert-success py-2 correct-msg d-none">✅ Correct!</div>
+                        <div class="alert alert-danger py-2 wrong-msg d-none">❌ Not quite — the correct answer is <strong class="correct-letter"></strong>.</div>
+                        <div class="alert alert-secondary py-2 mb-0">@q.Explanation</div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    void RenderExam(TutorialSection s)
+    {
+        <p class="text-muted">Try answering each question yourself before expanding the model answer.</p>
+        foreach (var q in s.Items ?? new List<TutorialItem>())
+        {
+            <details class="mb-2 border rounded">
+                <summary class="p-3 fw-semibold" style="cursor:pointer;">@q.Number. @q.Question</summary>
+                <div class="p-3 bg-light border-top">@q.ModelAnswer</div>
+            </details>
+        }
+    }
+
+    void RenderFlashcards(TutorialSection s)
+    {
+        <p class="text-muted">Click a card to reveal the back.</p>
+        <div class="row">
+            @foreach (var c in s.Items ?? new List<TutorialItem>())
+            {
+                <div class="col-md-6 col-lg-4 mb-3 d-flex">
+                    <details class="border rounded w-100 shadow-sm">
+                        <summary class="p-3 fw-semibold text-primary" style="cursor:pointer;">@c.Front</summary>
+                        <div class="p-3 bg-light border-top">@c.Back</div>
+                    </details>
+                </div>
+            }
+        </div>
+    }
+
+    void RenderInterview(TutorialSection s)
+    {
+        foreach (var q in s.Items ?? new List<TutorialItem>())
+        {
+            <details class="mb-2 border rounded">
+                <summary class="p-3 fw-semibold" style="cursor:pointer;">@q.Number. @q.Question</summary>
+                <div class="p-3 bg-light border-top">@q.Answer</div>
+            </details>
+        }
+    }
+
+    void RenderGlossary(TutorialSection s)
+    {
+        <dl class="row">
+            @foreach (var g in s.Items ?? new List<TutorialItem>())
+            {
+                <dt class="col-sm-3">@g.Term</dt>
+                <dd class="col-sm-9">@g.Definition</dd>
+            }
+        </dl>
+    }
+}
+
+@{
+    var assessmentKeys = new[] { "quiz", "exam", "flashcards", "interview-qa", "glossary" };
+    var bodySections = Model.Sections.Where(s => !assessmentKeys.Contains(s.Key)).ToList();
+    var quizSec = Model.Sections.FirstOrDefault(s => s.Key == "quiz");
+    var examSec = Model.Sections.FirstOrDefault(s => s.Key == "exam");
+    var fcSec = Model.Sections.FirstOrDefault(s => s.Key == "flashcards");
+    var intSec = Model.Sections.FirstOrDefault(s => s.Key == "interview-qa");
+    var glSec = Model.Sections.FirstOrDefault(s => s.Key == "glossary");
+}
+
+<ul class="nav nav-tabs mb-4 sticky-top bg-white" id="tutorialTabs" role="tablist" style="top: 60px; z-index: 100;">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active fw-semibold" id="tab-tutorial-btn" data-bs-toggle="tab" data-bs-target="#tab-tutorial" type="button" role="tab">📖 Tutorial</button>
+    </li>
+    @if (quizSec != null)
+    {
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold" id="tab-quiz-btn" data-bs-toggle="tab" data-bs-target="#tab-quiz" type="button" role="tab">📝 MCQ Quiz <span class="badge bg-primary">@(quizSec.Items?.Count ?? 0)</span></button>
+        </li>
+    }
+    @if (examSec != null)
+    {
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold" id="tab-exam-btn" data-bs-toggle="tab" data-bs-target="#tab-exam" type="button" role="tab">🎓 Exam <span class="badge bg-primary">@(examSec.Items?.Count ?? 0)</span></button>
+        </li>
+    }
+    @if (fcSec != null)
+    {
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold" id="tab-flashcards-btn" data-bs-toggle="tab" data-bs-target="#tab-flashcards" type="button" role="tab">🃏 Flashcards <span class="badge bg-primary">@(fcSec.Items?.Count ?? 0)</span></button>
+        </li>
+    }
+    @if (intSec != null)
+    {
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold" id="tab-interview-btn" data-bs-toggle="tab" data-bs-target="#tab-interview" type="button" role="tab">💼 Interview Q&amp;A <span class="badge bg-primary">@(intSec.Items?.Count ?? 0)</span></button>
+        </li>
+    }
+    @if (glSec != null)
+    {
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold" id="tab-glossary-btn" data-bs-toggle="tab" data-bs-target="#tab-glossary" type="button" role="tab">📚 Glossary <span class="badge bg-primary">@(glSec.Items?.Count ?? 0)</span></button>
+        </li>
+    }
+</ul>
+
+<div class="tab-content" id="tutorialTabContent">
+    <div class="tab-pane fade show active" id="tab-tutorial" role="tabpanel">
+        @foreach (var sec in bodySections)
+        {
+            <section id="@sec.Key" class="mb-5">
+                <h2 class="h4 border-bottom pb-2">@sec.Number. @sec.Title</h2>
+                @{ RenderBlocks(sec.Content); }
+            </section>
+        }
+    </div>
+
+    @if (quizSec != null)
+    {
+        <div class="tab-pane fade" id="tab-quiz" role="tabpanel">
+            <h2 class="h4 border-bottom pb-2">@quizSec.Title</h2>
+            @{ RenderQuiz(quizSec); }
+        </div>
+    }
+    @if (examSec != null)
+    {
+        <div class="tab-pane fade" id="tab-exam" role="tabpanel">
+            <h2 class="h4 border-bottom pb-2">@examSec.Title</h2>
+            @{ RenderExam(examSec); }
+        </div>
+    }
+    @if (fcSec != null)
+    {
+        <div class="tab-pane fade" id="tab-flashcards" role="tabpanel">
+            <h2 class="h4 border-bottom pb-2">@fcSec.Title</h2>
+            @{ RenderFlashcards(fcSec); }
+        </div>
+    }
+    @if (intSec != null)
+    {
+        <div class="tab-pane fade" id="tab-interview" role="tabpanel">
+            <h2 class="h4 border-bottom pb-2">@intSec.Title</h2>
+            @{ RenderInterview(intSec); }
+        </div>
+    }
+    @if (glSec != null)
+    {
+        <div class="tab-pane fade" id="tab-glossary" role="tabpanel">
+            <h2 class="h4 border-bottom pb-2">@glSec.Title</h2>
+            @{ RenderGlossary(glSec); }
+        </div>
+    }
+</div>
+
+<div class="d-flex justify-content-between align-items-center border-top pt-3 mb-4">
+    @if (prevExists)
+    {
+        <a class="btn btn-outline-primary" href="@Url.Action("Detail", "Tutorials", new { slug = Model.Prev })">&larr; Previous</a>
+    }
+    else
+    {
+        <span></span>
+    }
+
+    <a class="btn btn-outline-secondary" href="@Url.Action("Index", "Tutorials")">Course contents</a>
+
+    @if (nextExists)
+    {
+        <a class="btn btn-primary" href="@Url.Action("Detail", "Tutorials", new { slug = Model.Next })">Next &rarr;</a>
+    }
+    else if (Model.Next != null)
+    {
+        <button class="btn btn-outline-secondary" disabled title="Not published yet">Next &rarr;</button>
+    }
+    else
+    {
+        <span></span>
+    }
+</div>
+
+<script>
+    document.querySelectorAll('.quiz-check').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var card = this.closest('.quiz-item');
+            var selected = card.querySelector('input[type=radio]:checked');
+            if (!selected) { return; }
+            var correct = card.dataset.correct;
+            var isRight = selected.value === correct;
+            card.querySelector('.quiz-feedback').classList.remove('d-none');
+            card.querySelector('.correct-msg').classList.toggle('d-none', !isRight);
+            card.querySelector('.wrong-msg').classList.toggle('d-none', isRight);
+            card.querySelector('.correct-letter').textContent = correct;
+        });
+    });
+</script>

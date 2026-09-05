@@ -1,0 +1,477 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Introduction to Generative AI",
+  "slug": "introduction-to-generative-ai",
+  "level": "Beginner",
+  "codeLanguage": "C#",
+  "tutorialNumber": 1,
+  "totalTutorials": 27,
+  "prev": null,
+  "next": "prompt-engineering-foundations",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Introduction to Generative AI"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "What Generative AI is and what it produces",
+    "How AI, machine learning, and generative AI differ",
+    "How large language models (LLMs) work at a high level",
+    "Tokens and tokenization",
+    "Embeddings: what they are and why they matter",
+    "The Microsoft AI ecosystem: Microsoft 365 Copilot, GitHub Copilot, Azure OpenAI",
+    "Typical developer use cases for GenAI"
+  ],
+  "tooltips": {
+    "generative AI": "A branch of AI that creates new content — text, code, images, audio — instead of only classifying or predicting from existing data.",
+    "artificial intelligence": "The broad field of building software that performs tasks normally requiring human intelligence.",
+    "machine learning": "A subset of AI where systems learn patterns from data instead of being explicitly programmed with rules.",
+    "deep learning": "Machine learning using multi-layered neural networks; the technique behind modern generative AI.",
+    "large language model": "A neural network trained on massive amounts of text that generates language by predicting the next token.",
+    "token": "A small chunk of text (a word, part of a word, or punctuation) that is the basic unit an LLM reads, writes, and bills by.",
+    "tokenization": "The process of splitting text into tokens before a model processes it.",
+    "context window": "The maximum number of tokens (input plus output) a model can handle in a single request.",
+    "embedding": "A list of numbers (a vector) that represents the meaning of text, so similar meanings end up numerically close together.",
+    "vector": "An ordered array of numbers; embeddings are vectors, often with hundreds or thousands of dimensions.",
+    "cosine similarity": "A score between -1 and 1 measuring how close two vectors point in the same direction; used to compare embeddings.",
+    "semantic search": "Search that matches by meaning (using embeddings) rather than by exact keywords.",
+    "prompt": "The text you send to a model — instructions, questions, and context — that shapes what it generates.",
+    "temperature": "A setting that controls randomness in generation: low values give focused, repeatable output; high values give more creative variety.",
+    "hallucination": "When a model confidently produces output that is plausible-sounding but factually wrong or invented.",
+    "inference": "Running a trained model to get output for your input, as opposed to training the model.",
+    "GitHub Copilot": "An AI pair programmer that suggests code and answers questions inside your editor, such as Visual Studio or VS Code.",
+    "Azure OpenAI": "An Azure service that hosts OpenAI models with enterprise security, private networking, and Azure billing/compliance.",
+    "Microsoft 365 Copilot": "An AI assistant built into Word, Excel, Outlook, Teams and other Microsoft 365 apps for end users.",
+    "transformer": "The neural network architecture behind modern LLMs; its attention mechanism lets the model weigh which words matter to each other.",
+    "human-in-the-loop": "A use case pattern where a person reviews AI output before it acts — the safest shape for a first generative AI feature."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview",
+      "content": [
+        { "type": "paragraph", "text": "Generative AI has changed what software can do: applications can now draft documents, explain code, answer questions in natural language, and generate working C# from a plain-English description. For .NET developers this is not a research curiosity — it is a set of services and SDKs you can call from ordinary C# code, the same way you call a database or a REST API." },
+        { "type": "paragraph", "text": "This tutorial is the first step in the GenAI-Powered .NET learning path. It builds the mental model everything else depends on: what generative AI actually is, how it relates to AI and machine learning, how large language models (LLMs) produce text, what tokens and embeddings are, and where Microsoft's AI products — Microsoft 365 Copilot, GitHub Copilot, and Azure OpenAI — fit into a developer's world." },
+        { "type": "paragraph", "text": "No AI or math background is assumed. If you can write basic C#, you can follow everything here. By the end you will be able to explain how an LLM turns your prompt into a response, estimate what a request will cost in tokens, and name the right Microsoft tool for a given job." },
+        { "type": "note", "style": "info", "text": "This is tutorial 1 of 27. The next tutorial, Foundations of Prompt Engineering for Developers, builds directly on the concepts introduced here." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "paragraph", "text": "After completing this tutorial, you will be able to:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Define generative AI and list the kinds of content it can produce.",
+          "Explain how artificial intelligence, machine learning, deep learning, and generative AI relate to each other.",
+          "Describe, at a high level, how a large language model generates text through next-token prediction.",
+          "Explain what tokens are, why models are limited and billed by tokens, and roughly estimate token counts.",
+          "Describe what embeddings are and why they power semantic search and retrieval.",
+          "Distinguish the roles of Microsoft 365 Copilot, GitHub Copilot, and Azure OpenAI, and identify which one a .NET developer builds with.",
+          "List common developer use cases for generative AI and pick a sensible first use case for a .NET application."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "paragraph", "text": "This is a beginner tutorial. You need working knowledge of C# (classes, methods, async/await at a reading level) and a .NET development environment — Visual Studio, VS Code with the C# extension, or the .NET SDK and any editor." },
+        { "type": "list", "style": "bullet", "items": [
+          "C# fundamentals: variables, methods, classes, and running a console application.",
+          ".NET 8 SDK (or later) installed if you want to try the code samples.",
+          "No machine learning, statistics, or Python background is required.",
+          "An Azure subscription is NOT required for this tutorial; it becomes useful from the Azure OpenAI tutorials onward."
+        ] },
+        { "type": "note", "style": "tip", "text": "You can read this tutorial end-to-end without running anything. The code samples exist to make the concepts concrete, not to set up infrastructure." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "What Generative AI Is and What It Produces",
+      "content": [
+        { "type": "paragraph", "text": "Generative AI is a branch of artificial intelligence that creates new content rather than only analyzing existing content. A traditional (discriminative) model answers questions like 'is this email spam?' or 'what is this house worth?' — it assigns labels or numbers to input. A generative model instead produces something that did not exist before: a paragraph, a C# method, an image, a summary, a translation." },
+        { "type": "paragraph", "text": "The models behind this are often called foundation models: very large neural networks trained on broad data that can be applied to many tasks without task-specific retraining. Large language models (LLMs) are foundation models specialized in text — and because source code is text, they handle code remarkably well." },
+        { "type": "table", "headers": ["Content type", "Example output", "Example developer scenario"], "rows": [
+          ["Text", "A product description, an email draft, a summary", "Summarize a support ticket thread in an ASP.NET admin dashboard"],
+          ["Code", "A C# method, a unit test, a SQL query", "Generate an EF Core LINQ query from a plain-English request"],
+          ["Structured data", "JSON matching a schema you define", "Extract invoice fields from free-form text into a C# record"],
+          ["Images", "Illustrations, product mock-ups", "Generate placeholder art for a prototype"],
+          ["Audio", "Speech from text, transcriptions from speech", "Read notifications aloud; transcribe meeting recordings"],
+          ["Conversation", "Multi-turn chat grounded in your data", "A help chatbot inside your web application"]
+        ] },
+        { "type": "paragraph", "text": "Two properties distinguish generative AI from the software you usually write. First, it is probabilistic: the same input can produce different output on different runs. Second, it is instructable with natural language: behavior is shaped by the prompt you send, not only by code you compile. Both properties have deep consequences for how you design, test, and ship AI features — themes that run through this entire course." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "AI vs. Machine Learning vs. Generative AI",
+      "content": [
+        { "type": "paragraph", "text": "The terms AI, machine learning, and generative AI are often used interchangeably in marketing, but they are nested concepts — each one is a subset of the one before it. Keeping the hierarchy straight makes every later topic easier." },
+        { "type": "table", "headers": ["Layer", "What it means", "Example"], "rows": [
+          ["Artificial intelligence (AI)", "The broad field: software performing tasks that normally need human intelligence", "A chess engine, a route planner, a rules-based fraud filter"],
+          ["Machine learning (ML)", "A subset of AI: systems that learn patterns from data instead of following hand-written rules", "A model trained on past sales that predicts next month's demand"],
+          ["Deep learning (DL)", "A subset of ML using multi-layer neural networks", "An image classifier that recognizes products in photos"],
+          ["Generative AI (GenAI)", "A subset of deep learning: models that generate new content", "An LLM that writes a C# unit test from a description"]
+        ] },
+        { "type": "paragraph", "text": "Classic ML is mostly discriminative: given input, predict a label (spam / not spam) or a value (price). You typically train such models yourself on your own data. Generative AI flips the workflow: the model is already trained by a provider at enormous cost, and you consume it as a service — your engineering effort goes into prompts, data grounding, and integration rather than training. That is why this course spends far more time on calling and steering models from C# than on training them." },
+        { "type": "note", "style": "info", "text": "Rule of thumb: if the output is a label or a number, think classic ML. If the output is new content — sentences, code, images — think generative AI." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "How Large Language Models Work (High Level)",
+      "content": [
+        { "type": "paragraph", "text": "A large language model is a neural network — almost always based on the transformer architecture — trained on a huge corpus of text and code. During training, the model repeatedly plays one game: given a sequence of tokens, predict the next token. Over billions of examples it internalizes grammar, facts, reasoning patterns, and coding conventions, purely as statistical structure in its parameters." },
+        { "type": "paragraph", "text": "When you send a prompt, the model runs inference: it converts your text to tokens, computes which token is most likely to come next, appends it, and repeats — one token at a time — until it emits a stop signal or hits a length limit. Everything an LLM does, from answering questions to writing C#, emerges from this next-token loop. The transformer's attention mechanism is what makes the predictions good: it lets every token 'look at' the other tokens that matter, so the model can connect a variable's use on line 40 with its declaration on line 2." },
+        { "type": "list", "style": "bullet", "items": [
+          "Training happens once, at massive scale, at the provider. You never see it.",
+          "Inference is what you pay for per request — it is the API call your C# code makes.",
+          "The context window caps how many tokens (your input plus the model's output) fit in one request.",
+          "Temperature and similar settings control how random the next-token choice is: low = focused and repeatable, high = varied and creative.",
+          "The model has a knowledge cutoff: it knows nothing after its training data ends, and nothing about your private data — unless you supply that data in the prompt."
+        ] },
+        { "type": "paragraph", "text": "Two practical consequences follow. First, output is not deterministic by default — asking twice may yield two different (both plausible) answers, which changes how you test AI features. Second, the model does not 'look things up'; it generates likely text. When likely text is not true text, you get a hallucination. Later tutorials cover the standard defenses: grounding the model in your data (RAG) and evaluating output quality." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Tokens and Tokenization",
+      "content": [
+        { "type": "paragraph", "text": "Models do not read characters or whole words — they read tokens. Tokenization splits text into pieces from a fixed vocabulary: common words like 'the' are a single token, while rarer words split into subword chunks ('tokenization' might become 'token' + 'ization'). Code, spaces, and punctuation all consume tokens too." },
+        { "type": "paragraph", "text": "Tokens matter to you as a developer for three concrete reasons. Pricing: API usage is billed per token, input and output counted separately. Limits: the context window is a token budget — a model with a 128k-token window cannot accept your 200k-token document in one call. Behavior: when a response stops mid-sentence, you usually hit the output token limit, not a bug in your code." },
+        { "type": "list", "style": "bullet", "items": [
+          "Rule of thumb for English: 1 token is roughly 4 characters, so 100 tokens is about 75 words.",
+          "A rough estimate is fine for budgeting; exact counts come from a tokenizer library or the usage numbers the API returns with every response.",
+          "Different model families use different tokenizers, so counts vary slightly between models.",
+          "Non-English text and unusual identifiers often use more tokens per word than plain English."
+        ] },
+        { "type": "code", "language": "csharp", "title": "Quick-and-dirty token estimate for budgeting", "code": [
+          "// Rough heuristic: ~4 characters per token for English text.",
+          "// Use the API's returned usage figures for exact billing numbers.",
+          "static int EstimateTokens(string text) =>",
+          "    (int)Math.Ceiling(text.Length / 4.0);",
+          "",
+          "string prompt = \"Explain dependency injection in ASP.NET Core in one paragraph.\";",
+          "Console.WriteLine($\"~{EstimateTokens(prompt)} tokens\"); // ~16 tokens"
+        ] },
+        { "type": "note", "style": "warning", "text": "Every message you send — including system instructions and conversation history you replay each turn — counts against the token budget and the bill. Chat history grows every turn; unmanaged, it quietly gets expensive." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Embeddings: What They Are and Why They Matter",
+      "content": [
+        { "type": "paragraph", "text": "An embedding is a numeric representation of meaning: an embedding model turns a piece of text into a vector — an array of floating-point numbers, often 1,536 or 3,072 dimensions. The defining property is that texts with similar meaning produce vectors that are close together, even when they share no words. 'How do I reset my password?' and 'I forgot my login credentials' land near each other in vector space." },
+        { "type": "paragraph", "text": "Closeness is measured mathematically, most commonly with cosine similarity — a score near 1 means very similar meaning, near 0 means unrelated. That single trick unlocks a family of features: semantic search (find documents by meaning, not keywords), recommendations (find items similar to this one), clustering and de-duplication, and — most importantly for this course — retrieval-augmented generation (RAG), where you find the most relevant chunks of your own data and hand them to an LLM as context so it answers from facts instead of guessing." },
+        { "type": "code", "language": "csharp", "title": "Comparing two embedding vectors with cosine similarity", "code": [
+          "// An embedding model (e.g. an Azure OpenAI embeddings deployment)",
+          "// returns a float[] for each input text. Comparing two vectors:",
+          "static double CosineSimilarity(float[] a, float[] b)",
+          "{",
+          "    double dot = 0, magA = 0, magB = 0;",
+          "    for (int i = 0; i < a.Length; i++)",
+          "    {",
+          "        dot  += a[i] * b[i];",
+          "        magA += a[i] * a[i];",
+          "        magB += b[i] * b[i];",
+          "    }",
+          "    return dot / (Math.Sqrt(magA) * Math.Sqrt(magB));",
+          "}",
+          "// ~0.9 for near-identical meaning, ~0.0 for unrelated text."
+        ] },
+        { "type": "note", "style": "info", "text": "Remember the division of labor: LLMs generate text; embedding models locate meaning. Real applications almost always combine both — embeddings find the right information, the LLM writes the answer. Tutorial 15 (RAG with Azure AI Search) builds exactly this." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "The Microsoft AI Ecosystem",
+      "content": [
+        { "type": "paragraph", "text": "Microsoft ships generative AI at three distinct altitudes, and knowing which is which prevents endless confusion, because all three carry the word 'Copilot' or sit near it in the news." },
+        { "type": "table", "headers": ["Product", "Who it serves", "What it does", "How a .NET developer meets it"], "rows": [
+          ["Microsoft 365 Copilot", "End users in an organization", "AI assistance inside Word, Excel, Outlook, Teams, PowerPoint — drafting, summarizing, analyzing", "As a user of Office apps; optionally by building plugins/extensions for it"],
+          ["GitHub Copilot", "Developers", "AI pair programmer in Visual Studio / VS Code: code completions, chat, explaining and refactoring code", "Daily coding aid while writing C#; covered in tutorials 8–9"],
+          ["Azure OpenAI", "Application builders", "Hosts OpenAI models (GPT family, embeddings, image models) as an Azure service with enterprise security, private networking, and regional deployments", "The service your C# applications call via SDK/REST to add AI features; covered from tutorial 10 onward"]
+        ] },
+        { "type": "paragraph", "text": "The distinction that matters most for this course: Microsoft 365 Copilot and GitHub Copilot are finished products you use, while Azure OpenAI is a building block you program against. When your ASP.NET application needs to summarize a document or answer a customer question, your code calls Azure OpenAI (directly or through frameworks like Semantic Kernel, introduced later in this course). Azure OpenAI also brings the enterprise properties applications need: your prompts and data are not used to train the underlying models, access is controlled with Azure identity and networking, and usage is billed and monitored through your Azure subscription." },
+        { "type": "note", "style": "tip", "text": "Quick mental filing: 365 Copilot = AI in Office for users. GitHub Copilot = AI in your editor for you. Azure OpenAI = AI in your architecture for your applications." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "Typical Developer Use Cases for GenAI",
+      "content": [
+        { "type": "paragraph", "text": "Generative AI shows up in a .NET developer's life in two ways: as a productivity tool while you build software, and as a capability inside the software you build. Both matter, and this course covers both." },
+        { "type": "list", "style": "bullet", "items": [
+          "Code generation and completion — turning intent into C# scaffolding, LINQ queries, regex, or SQL.",
+          "Code explanation and review — understanding unfamiliar or legacy code, spotting bugs and smells.",
+          "Test generation — drafting xUnit/NUnit tests and edge cases for existing methods.",
+          "Documentation — generating XML doc comments, README drafts, and release notes from code and commits.",
+          "Summarization — condensing tickets, logs, meeting notes, or long documents inside your applications.",
+          "Conversational interfaces — chatbots and assistants that answer from your product's data.",
+          "Data extraction and transformation — pulling structured JSON out of free-form text like emails or invoices.",
+          "Translation and rewriting — localizing content or adjusting tone for different audiences."
+        ] },
+        { "type": "paragraph", "text": "When choosing a first AI feature for a real application, favor use cases where output is reviewed by a human or is easy to validate (summaries, drafts, extraction with schema validation) over use cases where wrong output acts unsupervised. A summarizer whose output a support agent reads is a far safer first project than an agent that closes tickets automatically. The reliability tutorials later in the course explain how to graduate from the first kind to the second." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples in C#",
+      "content": [
+        { "type": "paragraph", "text": "This first example shows the shape of a chat call to an Azure OpenAI deployment from C#. Treat it as illustrative: it reflects the Azure.AI.OpenAI SDK's general design, but package versions evolve — see section 13 and tutorial 11, which walks through this end to end against a real resource." },
+        { "type": "code", "language": "csharp", "title": "Minimal chat completion call (illustrative — see section 13)", "code": [
+          "// NuGet: Azure.AI.OpenAI",
+          "using Azure;",
+          "using Azure.AI.OpenAI;",
+          "using OpenAI.Chat;",
+          "",
+          "var client = new AzureOpenAIClient(",
+          "    new Uri(\"https://<your-resource>.openai.azure.com/\"),",
+          "    new AzureKeyCredential(\"<your-key>\")); // use Entra ID in real apps",
+          "",
+          "ChatClient chat = client.GetChatClient(\"<your-model-deployment-name>\");",
+          "",
+          "ChatCompletion completion = await chat.CompleteChatAsync(",
+          "    new SystemChatMessage(\"You are a concise assistant for C# developers.\"),",
+          "    new UserChatMessage(\"In one sentence, what is a token in an LLM?\"));",
+          "",
+          "Console.WriteLine(completion.Content[0].Text);"
+        ] },
+        { "type": "paragraph", "text": "Notice the three moving parts you will meet in every AI call: a client bound to your service endpoint and credentials, a deployment name identifying which model to use, and a list of messages — a system message setting behavior plus a user message carrying the request. The response also carries usage metadata (exact input and output token counts), which is how you monitor cost." },
+        { "type": "code", "language": "csharp", "title": "Reading token usage from a response (illustrative)", "code": [
+          "// Every response reports exactly what the request consumed:",
+          "Console.WriteLine($\"Input tokens:  {completion.Usage.InputTokenCount}\");",
+          "Console.WriteLine($\"Output tokens: {completion.Usage.OutputTokenCount}\");",
+          "// Log these in production — token usage is your cost meter."
+        ] },
+        { "type": "paragraph", "text": "The EstimateTokens helper from section 7 and the CosineSimilarity method from section 8 complete this tutorial's code set: one estimates the budget before a call, one compares the embedding vectors that later tutorials will retrieve from an embeddings deployment." }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step-by-Step: From Zero to Your First AI Call",
+      "content": [
+        { "type": "paragraph", "text": "Here is the end-to-end path from nothing to a working AI feature in a .NET application. This tutorial explains the map; tutorials 10–11 execute it in detail." },
+        { "type": "list", "style": "numbered", "items": [
+          "Get access: create an Azure OpenAI resource in your Azure subscription and note its endpoint URL and key (or, better, plan to use Microsoft Entra ID authentication).",
+          "Deploy a model: in the Azure portal or Azure AI Foundry, create a deployment of a chat model — the deployment name you choose is what your code references.",
+          "Create the project: `dotnet new console` (or start from your existing ASP.NET solution) and add the Azure.AI.OpenAI NuGet package.",
+          "Protect secrets: store the endpoint and key with `dotnet user-secrets` or environment variables — never hard-code credentials or commit them to source control.",
+          "Write the call: build the client, pick the deployment, send a system message and a user message, and print the response — as in section 11.",
+          "Inspect the result: read the reply and the token usage on the response; change the user message and observe how output (and cost) changes.",
+          "Iterate: adjust the system message and settings like temperature, and watch how the model's behavior shifts — this experimentation is the seed of prompt engineering, the subject of the next tutorial."
+        ] },
+        { "type": "note", "style": "tip", "text": "Steps 1–2 are one-time Azure setup; steps 3–7 are an ordinary edit-run-observe loop, no different in spirit from any other API integration you have done." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations, Risks, and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Hallucination: models generate likely text, not verified facts. They can state falsehoods fluently and confidently, invent APIs, or cite sources that do not exist. Never ship unreviewed model output where correctness matters.",
+          "Non-determinism: the same prompt can return different responses across runs. Design features and tests around this (the evaluation tutorial covers how).",
+          "Knowledge cutoff: a model knows nothing after its training data ends and nothing about your private systems unless you provide that context in the request.",
+          "Token limits and cost: every request spends a token budget; long histories and big documents can hit context-window limits or produce surprising bills.",
+          "Latency: generation takes noticeably longer than a typical database or cache call; plan for streaming and async patterns in user-facing features.",
+          "Data handling: with Azure OpenAI your prompts are not used to train the foundation models, but you must still follow your organization's rules for what data may be sent to any external service.",
+          "Rapid change: models, SDKs, and pricing evolve quickly; verify specifics against current official documentation when you build."
+        ] },
+        { "type": "note", "style": "warning", "text": "API-accuracy disclosure: the C# samples in sections 7 and 8 are exact, standard C#. The Azure OpenAI calls in sections 11 and 12 are illustrative — they reflect the Azure.AI.OpenAI SDK's design, but exact class and method signatures vary between package versions, so confirm against the current SDK documentation before compiling. Tutorial 11 develops a verified, working version of this code." }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices and Common Mistakes",
+      "content": [
+        { "type": "paragraph", "text": "Practices worth adopting from day one:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Start with a use case where a human reviews the output — summaries, drafts, suggestions — before attempting autonomous behavior.",
+          "Log token usage from every response so cost is visible from the first prototype onward.",
+          "Keep secrets out of code: user-secrets locally, managed identity and Key Vault in Azure.",
+          "Treat prompts as real engineering artifacts — version them, review them, test them.",
+          "Ground the model in your own data (via retrieval) whenever answers must be factual and current.",
+          "Learn the vocabulary of this tutorial well — tokens, context window, embeddings — because every later topic assumes it."
+        ] },
+        { "type": "paragraph", "text": "Mistakes beginners make most often:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Treating model output as deterministic and asserting exact strings in tests.",
+          "Assuming the model knows current events or your internal data without being given it.",
+          "Confusing the three Copilot-era products — building against the wrong one wastes weeks (your applications call Azure OpenAI, not Microsoft 365 Copilot).",
+          "Ignoring token growth in chat history until the context window overflows or the bill arrives.",
+          "Sending sensitive data in prompts without checking organizational and regulatory constraints.",
+          "Skipping the fundamentals and jumping straight to agents — the advanced topics in this course all stand on today's concepts."
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz",
+      "items": [
+        { "number": 1, "question": "What primarily distinguishes generative AI from traditional (discriminative) machine learning?", "options": { "A": "It runs only in the cloud", "B": "It creates new content rather than only classifying or predicting from input", "C": "It requires no training data at all", "D": "It is always more accurate" }, "correctAnswer": "B", "explanation": "Discriminative models map input to labels or numbers (spam/not spam, a price). Generative models produce new artifacts — text, code, images — that did not exist before. Deployment location and accuracy are not the distinction, and generative models are trained on enormous datasets." },
+        { "number": 2, "question": "Which ordering correctly nests the fields from broadest to most specific?", "options": { "A": "Machine learning > AI > generative AI > deep learning", "B": "AI > machine learning > deep learning > generative AI", "C": "Generative AI > deep learning > machine learning > AI", "D": "Deep learning > AI > machine learning > generative AI" }, "correctAnswer": "B", "explanation": "Artificial intelligence is the umbrella field; machine learning is the subset that learns from data; deep learning is ML with multi-layer neural networks; generative AI is deep learning specialized in producing new content." },
+        { "number": 3, "question": "At its core, how does a large language model generate a response?", "options": { "A": "It searches the internet for matching answers", "B": "It retrieves the closest stored answer from a database", "C": "It repeatedly predicts the next most likely token until it decides to stop", "D": "It executes your prompt as code" }, "correctAnswer": "C", "explanation": "An LLM generates one token at a time, each chosen based on the tokens so far, in a loop. It has no live internet access or answer database — all behavior emerges from learned next-token prediction." },
+        { "number": 4, "question": "What is a token in the context of LLMs?", "options": { "A": "A security credential for the API", "B": "A small chunk of text — a word, subword, or punctuation — that the model reads and writes", "C": "One complete sentence", "D": "A single character" }, "correctAnswer": "B", "explanation": "Tokenization splits text into vocabulary pieces: common words are often one token, rarer words split into subwords. (API keys are also casually called tokens, but that is a different concept entirely.)" },
+        { "number": 5, "question": "Using the standard rule of thumb for English text, about how many tokens is a 300-word document?", "options": { "A": "About 100", "B": "About 200", "C": "About 400", "D": "About 3,000" }, "correctAnswer": "C", "explanation": "The heuristic is 100 tokens per ~75 English words (about 4 characters per token), so 300 words is roughly 400 tokens. Exact numbers come from a tokenizer or the API's usage report." },
+        { "number": 6, "question": "What does a model's context window limit?", "options": { "A": "The number of users who can call the model at once", "B": "How many requests you may send per minute", "C": "The total tokens (input plus generated output) a single request can involve", "D": "The number of languages the model supports" }, "correctAnswer": "C", "explanation": "The context window is a per-request token budget shared by everything you send (system message, history, documents) and everything the model produces. Concurrency and rate limits are separate service-level quotas." },
+        { "number": 7, "question": "What is an embedding?", "options": { "A": "A compressed ZIP of a document", "B": "A numeric vector that represents the meaning of a piece of text", "C": "An encrypted copy of the prompt", "D": "A cached model response" }, "correctAnswer": "B", "explanation": "An embedding model maps text to a high-dimensional vector such that semantically similar texts get nearby vectors — the foundation of semantic search, recommendations, and RAG." },
+        { "number": 8, "question": "Which measure is most commonly used to compare two embedding vectors?", "options": { "A": "Cosine similarity", "B": "String edit distance", "C": "File size difference", "D": "Alphabetical ordering" }, "correctAnswer": "A", "explanation": "Cosine similarity measures the angle between vectors: near 1 means very similar meaning, near 0 unrelated. Edit distance compares raw strings, which is exactly what embeddings let you move beyond." },
+        { "number": 9, "question": "Why do the sentences 'How do I reset my password?' and 'I forgot my login credentials' end up with similar embeddings despite sharing almost no words?", "options": { "A": "Both are short", "B": "Embedding models capture meaning, not surface keywords", "C": "The API caches similar questions", "D": "They happen to have the same token count" }, "correctAnswer": "B", "explanation": "Embeddings place texts by semantic content, so paraphrases land close together in vector space. This is what makes semantic search find relevant results that keyword search misses." },
+        { "number": 10, "question": "Which Microsoft offering does your C# application code call to add generative AI features to an ASP.NET web app?", "options": { "A": "Microsoft 365 Copilot", "B": "GitHub Copilot", "C": "Azure OpenAI", "D": "Windows Copilot" }, "correctAnswer": "C", "explanation": "Azure OpenAI is the programmable service — your application calls it via SDK or REST. Microsoft 365 Copilot assists end users inside Office apps, and GitHub Copilot assists you inside your editor; neither is the API your app integrates for its own features." },
+        { "number": 11, "question": "GitHub Copilot is best described as:", "options": { "A": "A hosted API for building chatbots", "B": "An AI pair programmer that suggests and explains code inside your editor", "C": "An AI assistant inside Word and Excel", "D": "A model training platform" }, "correctAnswer": "B", "explanation": "GitHub Copilot lives in Visual Studio / VS Code, offering completions, chat, refactoring help, and explanations while you code. Option C describes Microsoft 365 Copilot; hosted APIs for your apps are Azure OpenAI's role." },
+        { "number": 12, "question": "What is an AI hallucination?", "options": { "A": "A crash caused by malformed prompts", "B": "The model refusing to answer", "C": "Confident, fluent output that is factually wrong or invented", "D": "A slow response caused by a long queue" }, "correctAnswer": "C", "explanation": "Because LLMs generate statistically likely text rather than verified facts, they can fabricate details, sources, and even APIs while sounding certain. This is why human review and grounding in real data matter." },
+        { "number": 13, "question": "What does a high temperature setting do to model output?", "options": { "A": "Makes responses faster", "B": "Makes token choice more random, producing more varied and creative output", "C": "Increases the context window", "D": "Reduces the cost per token" }, "correctAnswer": "B", "explanation": "Temperature scales the randomness of next-token selection. Low values give focused, repeatable output (good for extraction); higher values give diversity (useful for brainstorming). It has no effect on speed, limits, or price." },
+        { "number": 14, "question": "Which of these is the SAFEST first generative-AI feature for a production .NET application?", "options": { "A": "An agent that automatically closes customer tickets", "B": "A draft-summary generator whose output a support agent reviews", "C": "An unattended system that emails customers directly", "D": "An automatic production database migrator" }, "correctAnswer": "B", "explanation": "Start where a human reviews output before it acts on the world. Drafts and summaries fail safely; autonomous actions amplify any hallucination or error. Graduating to autonomy comes after you can measure quality." },
+        { "number": 15, "question": "Why does your application need to send its own data (e.g., your product docs) to the model to get accurate answers about it?", "options": { "A": "The model's training data has a cutoff and never included your private data", "B": "It makes responses cheaper", "C": "Azure requires it for billing", "D": "It increases the context window" }, "correctAnswer": "A", "explanation": "Models know only their training data, which ends at a cutoff date and excludes your internal systems. Supplying relevant context in the request — done systematically, this is retrieval-augmented generation — is how the model answers from your facts." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam Questions",
+      "items": [
+        { "number": 1, "question": "Define generative AI and contrast it with discriminative machine learning. Give two examples of generative output relevant to a .NET developer.", "modelAnswer": "Generative AI is a branch of deep learning whose models produce new content — text, code, images, audio — rather than mapping input to a label or number. Discriminative models answer 'which category?' or 'what value?' (spam detection, price prediction); generative models answer 'create this' (draft an email, write a method). Developer-relevant examples: generating a C# unit test for an existing class, and producing a JSON summary of a support ticket thread for display in an admin dashboard." },
+        { "number": 2, "question": "Explain the relationship between AI, machine learning, deep learning, and generative AI, with one example at each layer.", "modelAnswer": "They nest: AI is the broad field of machines doing tasks needing human-like intelligence (a rules-based fraud filter). Machine learning is the AI subset that learns patterns from data rather than hand-coded rules (a demand-forecasting model). Deep learning is ML built on multi-layer neural networks (an image classifier). Generative AI is deep learning specialized in producing new content (an LLM writing C# from a description). Each layer is a subset of the previous one." },
+        { "number": 3, "question": "Describe, at a high level, how an LLM turns a prompt into a response. Include the terms token, next-token prediction, and inference.", "modelAnswer": "The prompt is first tokenized into tokens the model's vocabulary knows. At inference time the model computes a probability distribution over possible next tokens given everything so far, selects one (influenced by settings like temperature), appends it, and repeats the loop token by token until a stop condition. The full response is the accumulated sequence of generated tokens converted back to text. All apparent capabilities — answering, coding, summarizing — emerge from this learned next-token prediction." },
+        { "number": 4, "question": "What is the transformer architecture's attention mechanism, and why does it matter for working with code?", "modelAnswer": "Attention lets every token weigh its relationship to other tokens in the context, so the model can connect distant but related pieces of text instead of only neighboring words. For code this is essential: a variable used on line 40 must be linked to its declaration on line 2, a method call to its signature elsewhere. Attention is what lets the model maintain that long-range coherence when reading and generating programs." },
+        { "number": 5, "question": "Explain what tokens are and give three concrete reasons a .NET developer must care about them.", "modelAnswer": "Tokens are the subword text chunks a model actually reads and writes; tokenization maps text onto a fixed vocabulary where common words are single tokens and rare words split into pieces. Developers care because: (1) billing is per token, input and output, so tokens are the cost meter; (2) the context window is a token budget — oversized inputs must be chunked or summarized; (3) behavior debugging — a response cut off mid-sentence usually means the output token limit was reached, not a code bug. (A fourth: replayed chat history consumes tokens every turn.)" },
+        { "number": 6, "question": "A colleague plans to send a 500-page manual (~150,000 words) to a model with a 128k-token context window in one request. Evaluate the plan.", "modelAnswer": "It will fail: at roughly 4 characters (≈¾ word) per token, 150,000 English words is on the order of 200,000 tokens, exceeding the 128k window before reserving any room for output tokens. The document must be split — chunked and summarized hierarchically, or better, indexed with embeddings so only the most relevant chunks are retrieved and sent per question (the RAG pattern). This also costs far less per query than shipping the whole manual every time." },
+        { "number": 7, "question": "What is an embedding, how is one produced, and what property makes embeddings useful?", "modelAnswer": "An embedding is a high-dimensional numeric vector (commonly 1,536+ floats) representing a piece of text. It is produced by sending the text to an embedding model, which outputs the vector. The useful property is semantic locality: texts with similar meaning produce nearby vectors even with zero word overlap, so meaning can be compared mathematically — typically with cosine similarity — enabling semantic search, clustering, recommendations, and retrieval for RAG." },
+        { "number": 8, "question": "Explain cosine similarity's role when working with embeddings, and interpret scores near 1, near 0.", "modelAnswer": "Cosine similarity measures the angle between two vectors, yielding a score from -1 to 1 that serves as the standard 'how similar in meaning' metric for embeddings. Near 1 means the texts are semantically very close (paraphrases, same topic); near 0 means unrelated content. In a semantic search feature you embed the query, compute cosine similarity against stored document vectors, and return the highest-scoring documents." },
+        { "number": 9, "question": "Compare Microsoft 365 Copilot, GitHub Copilot, and Azure OpenAI: audience, purpose, and how a .NET developer interacts with each.", "modelAnswer": "Microsoft 365 Copilot serves end users, embedding AI assistance in Word, Excel, Outlook, and Teams; a developer meets it as an Office user or by building extensions for it. GitHub Copilot serves developers as an AI pair programmer inside Visual Studio / VS Code — completions, chat, explanation — improving how you write code. Azure OpenAI serves application builders: it hosts OpenAI models as a programmable Azure service that your C# applications call via SDK/REST to add AI features. In short: a product for users, a tool for developers, and a platform for applications." },
+        { "number": 10, "question": "Why would an enterprise choose Azure OpenAI to power its .NET applications? Name at least four platform properties.", "modelAnswer": "(1) Data handling: prompts and completions are not used to train the underlying foundation models. (2) Identity and access: integration with Microsoft Entra ID instead of shared API keys. (3) Network security: private endpoints keep traffic off the public internet. (4) Compliance and residency: regional deployments and Azure's certification portfolio. (5) Operations: unified Azure billing, quotas, monitoring, and support alongside the rest of the application's infrastructure. These let AI features meet the same enterprise bar as the application hosting them." },
+        { "number": 11, "question": "List four developer use cases for generative AI and state, for each, why generative AI fits better than conventional code.", "modelAnswer": "Summarization of tickets/logs — conventional code cannot compress arbitrary natural language meaningfully. Data extraction from free-form text to JSON — regex breaks on human variability; an LLM handles paraphrase and mess. Test generation — enumerating edge cases from intent requires understanding the method's purpose, not just its syntax. Conversational help over product docs — mapping arbitrary user questions to relevant answers requires semantic understanding. In each, the input is unstructured language, which is precisely where deterministic parsing fails and LLMs excel." },
+        { "number": 12, "question": "Explain non-determinism in LLM output: where it comes from and two engineering consequences.", "modelAnswer": "Generation samples from a probability distribution over next tokens; settings like temperature control how sharply it favors the most likely token, so the same prompt can legitimately yield different responses across runs. Consequences: (1) testing must change — assert properties of output (valid JSON, contains required fields, passes an evaluator) rather than exact strings; (2) user experience and downstream code must tolerate variation — parse defensively, validate schemas, and consider low temperature for tasks needing consistency." },
+        { "number": 13, "question": "What is a hallucination, why is it inherent to how LLMs work, and what are two beginner-level mitigations?", "modelAnswer": "A hallucination is fluent, confident output that is factually wrong — invented facts, citations, or APIs. It is inherent because the model generates statistically plausible text; plausibility and truth usually coincide but are not the same thing, and the model has no built-in fact checker. Mitigations: keep a human reviewing output where correctness matters, and ground the model by supplying authoritative context in the prompt (systematically: retrieval-augmented generation), so it answers from provided facts rather than parametric memory." },
+        { "number": 14, "question": "Outline the steps to make a first Azure OpenAI call from a C# console application, including how secrets should be handled.", "modelAnswer": "Create an Azure OpenAI resource and note the endpoint; deploy a chat model, choosing a deployment name. Create a console project and add the Azure.AI.OpenAI NuGet package. Store the endpoint and key via dotnet user-secrets or environment variables — never in source; prefer Entra ID auth and Key Vault in real deployments. In code: construct the client with endpoint and credential, get a chat client for the deployment name, send a system message plus a user message, print the response text, and read the usage property for exact input/output token counts." },
+        { "number": 15, "question": "Your team wants its first AI feature in an existing ASP.NET application. Propose one, justify it with selection criteria from this tutorial, and note one metric to log from day one.", "modelAnswer": "Proposal: AI-drafted reply suggestions on support tickets, shown to the agent who edits and approves before sending. Justification: the input is unstructured language (LLM strength), output is human-reviewed so hallucinations fail safely, it fits the existing workflow without autonomous action, and quality is easy to assess from agent edit rates. Metric: log input/output token usage per request (the response reports both) to track cost per ticket from the first prototype — plus, over time, how often agents accept drafts unmodified as a quality signal." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Generative AI", "back": "AI that creates new content (text, code, images, audio) rather than only classifying or predicting from existing data." },
+        { "number": 2, "front": "AI → ML → DL → GenAI", "back": "Nested subsets: AI is the broad field; ML learns from data; deep learning uses multi-layer neural networks; generative AI is DL that produces new content." },
+        { "number": 3, "front": "Large language model (LLM)", "back": "A transformer-based neural network trained on massive text corpora that generates language via next-token prediction." },
+        { "number": 4, "front": "Next-token prediction", "back": "The core loop of an LLM: predict the most likely next token given the sequence so far, append it, repeat until a stop condition." },
+        { "number": 5, "front": "Token", "back": "The unit of LLM text: a word, subword, or punctuation chunk. ~4 English characters ≈ 1 token; models are limited and billed by tokens." },
+        { "number": 6, "front": "Tokenization", "back": "Splitting text into vocabulary tokens before the model processes it; common words = 1 token, rare words split into subwords." },
+        { "number": 7, "front": "Context window", "back": "The per-request token budget shared by all input (system message, history, documents) and generated output." },
+        { "number": 8, "front": "Temperature", "back": "Randomness control for token selection: low = focused/repeatable (extraction), high = varied/creative (brainstorming)." },
+        { "number": 9, "front": "Embedding", "back": "A numeric vector representing text meaning; similar meanings yield nearby vectors, enabling semantic comparison by math." },
+        { "number": 10, "front": "Cosine similarity", "back": "The standard measure of embedding closeness (angle between vectors): ~1 = same meaning, ~0 = unrelated." },
+        { "number": 11, "front": "Semantic search", "back": "Search by meaning using embeddings — finds 'I forgot my login' for 'password reset' despite zero shared keywords." },
+        { "number": 12, "front": "Hallucination", "back": "Confident, fluent, but false model output. Inherent to likelihood-based generation; mitigated by human review and grounding in real data." },
+        { "number": 13, "front": "Microsoft 365 Copilot vs GitHub Copilot vs Azure OpenAI", "back": "365 Copilot: AI in Office for end users. GitHub Copilot: AI pair programmer in your editor. Azure OpenAI: the service your applications call." },
+        { "number": 14, "front": "Azure OpenAI (enterprise properties)", "back": "Hosts OpenAI models with Entra ID auth, private networking, regional/compliance options, Azure billing; prompts are not used to train foundation models." },
+        { "number": 15, "front": "Inference vs training", "back": "Training builds the model (done by the provider, once, at huge scale); inference is running it per request — the API call your C# code makes and pays for." },
+        { "number": 16, "front": "Safe first AI use case", "back": "One where a human reviews the output before it acts — drafts, summaries, suggestions — so wrong output fails safely while you learn to measure quality." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions & Answers",
+      "items": [
+        { "number": 1, "question": "In your own words, what is generative AI?", "answer": "It's the branch of AI where models produce new content — text, code, images — instead of just classifying input. Under the hood these are large deep-learning models trained by providers on massive datasets; as developers we consume them as services and shape their behavior with prompts. The practical shift is that unstructured language becomes something applications can read and write reliably enough to build features on." },
+        { "number": 2, "question": "How would you explain the difference between machine learning and generative AI to a stakeholder?", "answer": "Classic machine learning answers narrow questions from data: is this fraud, what will sales be. You usually train those models on your own data. Generative AI produces open-ended content — a summary, an email, working code — and comes pre-trained; we integrate and steer it rather than train it. Practically: ML gives you predictions to act on, GenAI gives you drafts and answers your users can read." },
+        { "number": 3, "question": "How does a large language model actually generate its answer?", "answer": "It generates one token at a time. The prompt is tokenized, the model predicts a probability distribution for the next token, one is selected — with randomness controlled by temperature — appended, and the process repeats until a stop token or length limit. There's no database lookup or live search involved; everything comes from patterns learned during training plus whatever context you put in the request. That's also why it can be wrong fluently: it produces likely text, not verified facts." },
+        { "number": 4, "question": "What are tokens, and why do they matter to you as an engineer?", "answer": "Tokens are the chunks — words or subwords — that models read and write; roughly four English characters each. They matter in three places: cost, since billing is per input and output token; capacity, since the context window caps tokens per request, forcing chunking strategies for large documents; and debugging, since truncated responses usually mean a token limit was hit. In chat features, replayed history also grows token spend every turn, so it needs managing." },
+        { "number": 5, "question": "What is a context window, and how has it influenced a design you'd propose?", "answer": "It's the per-request token budget covering everything sent plus everything generated. It means you can't just throw a whole knowledge base at the model — you design around it: chunk documents, summarize long chat histories, and use retrieval so only the most relevant content per question is included. Even with large windows, sending less, more relevant context is cheaper and usually yields better answers." },
+        { "number": 6, "question": "What are embeddings and where would you use them in a .NET application?", "answer": "An embedding is a vector of floats that captures a text's meaning, with the property that similar meanings produce nearby vectors — compared using cosine similarity. I'd use them for semantic search over product docs or tickets, deduplication and clustering, and most importantly as the retrieval half of RAG: embed the user's question, find the closest document chunks, and pass those to the LLM so it answers from our actual data." },
+        { "number": 7, "question": "A search feature needs to find 'password reset' articles when users type 'I forgot my login.' Keyword search fails. What do you propose?", "answer": "Semantic search with embeddings. Embed each article (or chunk) once and store the vectors; at query time embed the user's phrase and rank articles by cosine similarity. Paraphrases land close together in vector space, so 'forgot my login' matches 'reset your password' with no shared keywords. In the Azure ecosystem this is typically built with an embeddings deployment plus a vector-capable index such as Azure AI Search." },
+        { "number": 8, "question": "What's the difference between GitHub Copilot and Azure OpenAI? When does each apply?", "answer": "GitHub Copilot is a finished product for developers — an AI pair programmer in the editor that speeds up my coding but ships nothing to my users. Azure OpenAI is the platform my application code calls to put AI features in front of users — summaries, chat, extraction — with enterprise controls like Entra ID, private networking, and Azure billing. Copilot improves how I build; Azure OpenAI is what I build with." },
+        { "number": 9, "question": "Where does Microsoft 365 Copilot fit relative to what application developers build?", "answer": "Microsoft 365 Copilot is an end-user product embedded in Word, Excel, Outlook, and Teams — employees use it to draft and summarize within Office. It isn't the API your application calls; that's Azure OpenAI's role. The developer connection is extensibility: you can build plugins or connectors that surface your systems inside 365 Copilot, which is a different kind of project than adding AI features to your own app." },
+        { "number": 10, "question": "What is hallucination and how do you design around it?", "answer": "It's when the model produces confident but false content — invented facts, citations, even nonexistent APIs — which is inherent to generating 'likely' text. I design around it in layers: choose features where humans review output first; ground responses in retrieved company data rather than the model's memory; validate structured output against schemas; and keep hard guarantees in ordinary code — the model drafts, deterministic systems enforce." },
+        { "number": 11, "question": "Why can the same prompt give different answers twice, and how does that change testing?", "answer": "Because generation samples from a probability distribution — temperature and related settings control how much variety that sampling allows. So exact-string assertions are the wrong tool. Instead I test properties: the output parses as valid JSON, contains required fields, passes business-rule checks, or scores well on an evaluation set. For consistency-critical paths I also lower temperature, while accepting that behavior is statistical, more like testing a service than a pure function." },
+        { "number": 12, "question": "What is temperature and when would you set it low versus high?", "answer": "It scales randomness in next-token selection. Low temperature makes output focused and repeatable — right for extraction, classification-style prompts, and anything parsed by code. Higher temperature increases variety — useful for brainstorming names or generating alternative phrasings. My default for application features is low, raising it only when diversity is the point." },
+        { "number": 13, "question": "Why choose Azure OpenAI over calling a model provider's public API directly for an enterprise app?", "answer": "Governance and fit with the existing estate. Azure OpenAI runs the models inside Azure's boundary: Entra ID replaces shared keys, private endpoints keep traffic off the public internet, regional deployments address residency, and prompts aren't used to train the foundation models. Operationally it rides the same subscription as the rest of our infrastructure — billing, quotas, monitoring, support. For a company already on Azure, it's the difference between an external dependency and a first-class platform service." },
+        { "number": 14, "question": "What's the difference between training and inference, and which one do application developers deal with?", "answer": "Training is building the model — the provider runs it once at enormous scale, adjusting billions of parameters over massive datasets. Inference is using the trained model: every API call my code makes is inference, billed per token. Application developers live almost entirely on the inference side; our leverage comes from prompts, supplied context, and integration design, not from changing model weights." },
+        { "number": 15, "question": "If your team adopted generative AI tomorrow, what first project would you pick and why?", "answer": "Something with unstructured-language input and human-reviewed output — say, AI-drafted responses or summaries in our existing support workflow. It exercises the full integration stack (Azure OpenAI, prompts, token/cost logging) while wrong output just costs an agent an edit rather than harming a customer. It also generates measurable signals — acceptance rate, edit distance, cost per ticket — which builds the evaluation muscle needed before attempting anything autonomous." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "Artificial intelligence (AI)", "definition": "The broad field of building software that performs tasks normally requiring human intelligence, from rule-based systems to modern neural networks." },
+        { "term": "Machine learning (ML)", "definition": "A subset of AI in which systems learn patterns from data rather than following explicitly programmed rules." },
+        { "term": "Deep learning", "definition": "Machine learning based on neural networks with many layers; the technique underlying modern generative models." },
+        { "term": "Generative AI", "definition": "A subset of deep learning whose models create new content — text, code, images, audio — rather than only classifying or predicting." },
+        { "term": "Large language model (LLM)", "definition": "A transformer-based neural network trained on massive text corpora that generates language one token at a time via next-token prediction." },
+        { "term": "Transformer", "definition": "The neural network architecture behind modern LLMs, whose attention mechanism lets tokens weigh their relationships to all other tokens in context." },
+        { "term": "Foundation model", "definition": "A very large model trained on broad data that serves many downstream tasks without task-specific retraining." },
+        { "term": "Token", "definition": "The unit of text an LLM reads and writes — a word, subword, or punctuation chunk; roughly 4 English characters. Models are limited and billed by tokens." },
+        { "term": "Tokenization", "definition": "The process of splitting text into vocabulary tokens before model processing; common words map to single tokens, rare words to multiple subwords." },
+        { "term": "Context window", "definition": "The maximum number of tokens — all input plus generated output — that one model request can involve." },
+        { "term": "Temperature", "definition": "A generation setting controlling randomness of token selection: low values give focused, repeatable output; high values give creative variety." },
+        { "term": "Inference", "definition": "Running a trained model to produce output for a given input — the per-request, per-token-billed operation application code performs." },
+        { "term": "Training", "definition": "The process of building a model by adjusting its parameters over large datasets; done by the model provider, not by application developers." },
+        { "term": "Knowledge cutoff", "definition": "The date at which a model's training data ends; the model knows nothing after it, and nothing about private data, unless supplied in the request." },
+        { "term": "Embedding", "definition": "A high-dimensional numeric vector representing the meaning of text, such that semantically similar texts yield nearby vectors." },
+        { "term": "Vector", "definition": "An ordered array of numbers; embeddings are vectors, typically with hundreds or thousands of dimensions." },
+        { "term": "Cosine similarity", "definition": "A measure of the angle between two vectors used to score embedding similarity: near 1 means closely related meaning, near 0 unrelated." },
+        { "term": "Semantic search", "definition": "Search that ranks results by meaning using embedding similarity instead of keyword overlap." },
+        { "term": "Retrieval-augmented generation (RAG)", "definition": "A pattern that retrieves relevant data (usually via embeddings) and includes it in the prompt so the model answers from supplied facts." },
+        { "term": "Hallucination", "definition": "Fluent, confident model output that is factually incorrect or invented — an inherent risk of likelihood-based generation." },
+        { "term": "Prompt", "definition": "The text sent to a model — instructions, question, and context — that shapes its generated response." },
+        { "term": "Microsoft 365 Copilot", "definition": "Microsoft's AI assistant for end users inside Word, Excel, Outlook, PowerPoint, and Teams." },
+        { "term": "GitHub Copilot", "definition": "An AI pair programmer integrated into editors like Visual Studio and VS Code, providing code completions, chat, and explanations." },
+        { "term": "Azure OpenAI", "definition": "An Azure service hosting OpenAI models with enterprise identity, networking, compliance, and billing; the service .NET applications call for AI features." },
+        { "term": "Model deployment", "definition": "A named instance of a model created in Azure OpenAI; application code targets the deployment name when making calls." },
+        { "term": "Human-in-the-loop", "definition": "A use case design in which a person reviews model output before it takes effect — the recommended pattern for a team's first generative AI features, such as drafts and summaries." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary & Key Takeaways",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Generative AI creates new content — text, code, images, structured data — and is consumed by developers as a service, not trained in-house.",
+          "The fields nest: AI ⊃ machine learning ⊃ deep learning ⊃ generative AI. Labels and numbers = classic ML; new content = GenAI.",
+          "LLMs work by tokenizing input and repeatedly predicting the next token; capability and failure modes (non-determinism, hallucination, knowledge cutoff) all follow from this.",
+          "Tokens are the currency of LLMs: they bound each request (context window) and drive cost (~4 English characters ≈ 1 token).",
+          "Embeddings turn meaning into vectors compared by cosine similarity — the engine behind semantic search and, later, RAG.",
+          "In the Microsoft ecosystem: Microsoft 365 Copilot assists end users in Office, GitHub Copilot assists you in the editor, and Azure OpenAI is the platform your C# applications call.",
+          "Start with human-reviewed use cases (summaries, drafts, extraction), log token usage from day one, and keep secrets out of code."
+        ] },
+        { "type": "paragraph", "text": "You now hold the complete conceptual toolkit this course builds on: what generative models are, how they process text, what they cost, how meaning becomes searchable, and which Microsoft services turn all of it into shippable .NET features. Everything from prompt engineering to multi-agent systems is an elaboration of the ideas on this page." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Continue with the next tutorial in the path: Foundations of Prompt Engineering for Developers. You now know that a model's behavior is shaped by the text you send it — the next tutorial teaches you to shape that text deliberately: roles, instructions, context, and the patterns that turn an unpredictable model into a dependable component." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: explain tokens, embeddings, and the three Microsoft AI products aloud in your own words — teaching it back is the fastest check of understanding.",
+          "Practice: take a paragraph of text and estimate its token count with the ~4-characters rule, then compare against any online tokenizer.",
+          "Practice: sketch (on paper) where an AI summarization feature would sit in an application you already maintain — which data goes into the prompt, who reviews the output.",
+          "Reading: Microsoft Learn's introductory modules on generative AI and the Azure OpenAI documentation's 'What is Azure OpenAI?' overview.",
+          "Reading: the GitHub Copilot documentation for editor setup, previewing tutorials 8–9."
+        ] },
+        { "type": "note", "style": "info", "text": "Path position: tutorial 1 of 27 · Previous: none · Next: prompt-engineering-foundations" }
+      ]
+    }
+  ]
+}

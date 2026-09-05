@@ -1,0 +1,511 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Foundations of Prompt Engineering for Developers",
+  "slug": "prompt-engineering-foundations",
+  "level": "Beginner to Intermediate",
+  "codeLanguage": "C#",
+  "tutorialNumber": 2,
+  "totalTutorials": 27,
+  "prev": "introduction-to-generative-ai",
+  "next": "developer-prompting-patterns",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Foundations of Prompt Engineering for Developers"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "What a prompt is and why prompts matter for output quality",
+    "Prompt engineering vs traditional programming",
+    "Deterministic code vs probabilistic models",
+    "Anatomy of an effective prompt: instruction, context, input data, output constraints",
+    "Vague vs precise prompts (developer examples)",
+    "Prompt iteration and refinement techniques",
+    "Tokens, tokenization, and context windows",
+    "Zero-shot, few-shot, and multi-shot prompting",
+    "Instruction vs role-based prompts",
+    "Reusable prompt templates",
+    "Avoiding hallucinations and validating output"
+  ],
+  "tooltips": {
+    "prompt": "The full text sent to a model — instructions, context, input data, and constraints — that steers what it generates.",
+    "prompt engineering": "The practice of designing, testing, and refining prompts so a model produces reliable, useful output.",
+    "deterministic": "Producing the same output for the same input every time — the behavior of ordinary code.",
+    "probabilistic": "Producing output by sampling from a probability distribution, so the same input can yield different results.",
+    "instruction": "The part of a prompt that tells the model what to do — the verb of the request.",
+    "context": "Background information in a prompt that grounds the model: domain facts, documents, or situation details.",
+    "input data": "The specific content the model should operate on, such as the text to summarize or the code to review.",
+    "output constraints": "Rules in a prompt about the response's format, length, tone, or allowed values.",
+    "zero-shot prompting": "Asking a model to do a task with instructions only — no worked examples included in the prompt.",
+    "few-shot prompting": "Including a small number of input→output examples in the prompt so the model imitates the demonstrated pattern.",
+    "multi-shot prompting": "Few-shot prompting with many examples — more pattern evidence at the cost of more tokens.",
+    "role-based prompt": "A prompt that assigns the model a persona (e.g. 'You are a senior C# reviewer') to shape tone and expertise.",
+    "system message": "The message that sets the model's standing behavior and rules for a conversation; users don't see it.",
+    "prompt template": "A reusable prompt with placeholders that code fills in at runtime, keeping wording consistent and versionable.",
+    "prompt iteration": "The loop of running a prompt, inspecting output, and refining wording, examples, or constraints until quality holds.",
+    "vague prompt": "A prompt that leaves audience, format, or scope unstated, forcing the model to guess — differently each run.",
+    "precise prompt": "A prompt that explicitly resolves the decisions the model would otherwise guess, collapsing variance toward the intended output.",
+    "token": "A small chunk of text (word, subword, or punctuation) — the unit models read, write, and bill by; ~4 English characters.",
+    "tokenization": "Splitting text into tokens before the model processes it.",
+    "context window": "The per-request token budget covering everything sent plus everything generated.",
+    "hallucination": "Confident, fluent model output that is factually wrong or invented.",
+    "output validation": "Checking model output in code — parsing, schema checks, business rules — before the application trusts it.",
+    "grounding": "Supplying authoritative facts in the prompt so the model answers from provided data instead of guessing."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview",
+      "content": [
+        { "type": "paragraph", "text": "In the previous tutorial you learned that a large language model's behavior is shaped by the text you send it. This tutorial turns that observation into a craft. Prompt engineering is the discipline of writing, structuring, and refining that text so the model produces output your application can rely on — and for developers it is as fundamental as knowing SQL is for working with databases." },
+        { "type": "paragraph", "text": "The stakes are practical: the difference between a vague prompt and a precise one is routinely the difference between unusable output and production-quality output, from the exact same model at the exact same cost. Because .NET applications consume models through prompts embedded in code, prompt quality is code quality." },
+        { "type": "paragraph", "text": "You will learn the anatomy of an effective prompt (instruction, context, input data, output constraints), how prompting differs from traditional programming, the core prompting styles (zero-shot, few-shot, multi-shot, role-based), how to iterate on prompts systematically, how to package prompts as reusable C# templates, and how to defend against hallucinations by validating output." },
+        { "type": "note", "style": "info", "text": "This is tutorial 2 of 27. It builds on Introduction to Generative AI (tokens, context windows, hallucination) and leads into Prompting Patterns Used by Developers." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "paragraph", "text": "After completing this tutorial, you will be able to:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Define what a prompt is and explain why prompt wording directly determines output quality.",
+          "Contrast prompt engineering with traditional programming, and deterministic code with probabilistic models.",
+          "Break a prompt into its four working parts: instruction, context, input data, and output constraints.",
+          "Transform vague prompts into precise ones using concrete developer examples.",
+          "Apply a systematic iteration loop to refine prompts until output is dependable.",
+          "Budget prompts with tokens and context windows in mind.",
+          "Choose appropriately between zero-shot, few-shot, and multi-shot prompting, and between instruction-style and role-based prompts.",
+          "Package prompts as reusable, versionable templates in C# code.",
+          "Reduce hallucinations through prompt design and validate model output before your application trusts it."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorial 1 (Introduction to Generative AI) — especially tokens, context windows, temperature, and hallucination.",
+          "Working C# knowledge: string interpolation, classes, and basic collections.",
+          "No Azure subscription needed — prompts here can be tried in any chat interface; the C# samples show how they live in application code."
+        ] },
+        { "type": "note", "style": "tip", "text": "The fastest way to internalize this material is to test each example prompt in a chat model as you read, and watch how each refinement changes the output." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "What a Prompt Is and Why It Matters",
+      "content": [
+        { "type": "paragraph", "text": "A prompt is everything you send to the model for a request: the instructions, any background context, the data to operate on, and the rules for the response. In a chat API this spans the system message (standing behavior) and user messages (the current request). The model does not see your intentions, your codebase, or your requirements document — it sees only the prompt's tokens, and it generates the continuation those tokens make most likely." },
+        { "type": "paragraph", "text": "That last sentence explains why prompts matter so much. Generation is conditioned entirely on the prompt: every word you include (or omit) shifts the probability distribution the model samples from. A prompt that says 'summarize this' leaves the model guessing about length, audience, and format, so it guesses — differently each time. A prompt that specifies 'summarize this support ticket in exactly 3 bullet points for a support manager, naming the customer issue, what was tried, and the current status' collapses those guesses into your requirements." },
+        { "type": "paragraph", "text": "For developers there is a second reason prompts matter: prompts are executed by your application, unattended, at scale. A slightly ambiguous prompt that a human would clarify in conversation instead produces thousands of slightly wrong responses in production. Treating prompt text with the same care as code — reviewed, versioned, tested — is the core mindset of this tutorial." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Prompt Engineering vs. Traditional Programming",
+      "content": [
+        { "type": "paragraph", "text": "Traditional programming and prompt engineering are both ways of instructing a machine, but they differ in the machine's contract with you. Code executes deterministically: the same input produces the same output, every time, and deviations are bugs. A language model is probabilistic: it samples from a distribution of likely continuations, so the same prompt can produce different (all 'valid') outputs across runs, and even the best prompt shifts probabilities rather than guaranteeing results." },
+        { "type": "table", "headers": ["Aspect", "Traditional code", "Prompting a model"], "rows": [
+          ["Language", "Formal syntax (C#), compiler-enforced", "Natural language, no compiler — ambiguity silently accepted"],
+          ["Behavior", "Deterministic: same input → same output", "Probabilistic: same prompt → varying outputs"],
+          ["Failure mode", "Exceptions, wrong values — usually loud", "Plausible-but-wrong text — usually quiet"],
+          ["Correctness", "Provable against a spec; unit-testable exactly", "Statistical: measured over many runs, not proven"],
+          ["Change process", "Edit code, compile, tests pass or fail", "Edit wording, re-run, judge outputs against criteria"],
+          ["Precision lever", "Types, contracts, assertions", "Instructions, examples, constraints, grounding context"]
+        ] },
+        { "type": "paragraph", "text": "The consequence for engineers: you do not stop being rigorous when you write prompts — you relocate the rigor. Instead of types and assertions inside the computation, you put precision into the prompt (explicit instructions, examples, output constraints) and verification after the computation (parsing and validating what came back, covered in section 13). Deterministic code wraps the probabilistic model on both sides." },
+        { "type": "note", "style": "info", "text": "Rule of thumb: use ordinary code for anything code can do — arithmetic, exact lookups, hard business rules. Use the model for what code cannot do — understanding and producing natural language. Never delegate a guarantee to a probability." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Anatomy of an Effective Prompt — and Vague vs. Precise",
+      "content": [
+        { "type": "paragraph", "text": "Effective prompts are built from four working parts. You will not always need all four, but when output disappoints, the fix is almost always adding or sharpening one of them." },
+        { "type": "table", "headers": ["Component", "What it does", "Example fragment"], "rows": [
+          ["Instruction", "Says what to do — the verb of the request", "Summarize the ticket below for a support manager."],
+          ["Context", "Grounds the model: domain facts, audience, situation", "Our product is a REST API for invoicing; 'sandbox' means the test environment."],
+          ["Input data", "The content to operate on, clearly delimited", "Ticket text between triple quotes: \"\"\"...\"\"\""],
+          ["Output constraints", "Format, length, tone, allowed values for the response", "Respond as JSON: { \"summary\": string, \"severity\": \"low\"|\"medium\"|\"high\" }. No other text."]
+        ] },
+        { "type": "paragraph", "text": "The gap between vague and precise prompts is easiest to feel through developer examples. Each row below is the same task, asked lazily and asked well:" },
+        { "type": "table", "headers": ["Vague prompt", "Precise prompt", "What the precision buys"], "rows": [
+          ["Write a C# method to check email.", "Write a C# method 'bool IsValidEmail(string input)' using MailAddress parsing, no regex; return false for null/whitespace; include XML doc comments.", "Correct signature, chosen technique, edge cases handled, documented"],
+          ["Explain this code.", "Explain this LINQ query line by line to a junior developer who knows loops but not LINQ; end with one performance caveat.", "Right depth, right audience, actionable ending"],
+          ["Summarize these logs.", "From the log lines below, list each distinct error, its count, and first timestamp, as a markdown table sorted by count descending.", "Structured, complete, deterministic ordering"],
+          ["Fix this bug.", "The method below throws NullReferenceException when 'order.Customer' is null. Propose the minimal fix preserving current behavior for non-null customers, and explain the change in two sentences.", "Scoped change, preserved behavior, reviewable rationale"]
+        ] },
+        { "type": "paragraph", "text": "Notice what precision consists of: nailing down the things the model would otherwise guess — audience, format, technique, scope, edge cases. A useful drafting habit is to ask yourself: 'if I gave this request to a contractor who takes everything literally and asks no questions, what would they need to know?' Write that." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Prompt Iteration, Tokens, and Context Windows",
+      "content": [
+        { "type": "paragraph", "text": "First drafts of prompts are rarely right, and that is expected — prompt engineering is an iterative loop, not a single act of writing. The professional version of the loop looks like this:" },
+        { "type": "list", "style": "numbered", "items": [
+          "Define success first: write down what a good output looks like (format, content, tone) before writing the prompt — otherwise you cannot judge results.",
+          "Draft the prompt with the four-part anatomy: instruction, context, input data, output constraints.",
+          "Run it several times, not once — variation between runs is data about where the prompt is ambiguous.",
+          "Diagnose failures specifically: wrong format → tighten output constraints or add an example; wrong content → add context or sharpen the instruction; invented facts → add grounding data and an 'if unsure, say so' rule.",
+          "Change one thing at a time so you know which edit caused which improvement, exactly like debugging.",
+          "Keep a small set of test inputs (easy, hard, edge-case) and re-run all of them after each change — this is regression testing for prompts.",
+          "Stop when outputs are consistently acceptable across your test inputs, and save the prompt with a version note."
+        ] },
+        { "type": "paragraph", "text": "Iteration happens inside a hard budget: the context window. Recall from tutorial 1 that everything — system message, instructions, examples, input data, and the generated response — shares one token limit, and every token is billed. Precision usually pays for itself (a tighter prompt often produces shorter, better output), but examples are the expensive ingredient: each few-shot example you add costs its full token length on every single request. When a prompt must process large inputs, budget explicitly: reserve tokens for the response, and trim or chunk input data rather than letting it crowd out your instructions." },
+        { "type": "note", "style": "warning", "text": "A subtle failure: when input data exceeds the context window, the start or end of your prompt may be truncated — and if your instructions were there, the model never saw them. Always check input length in code before sending (a rough ~4-characters-per-token estimate suffices for guarding)." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Prompting Styles: Zero-Shot, Few-Shot, Multi-Shot, and Roles",
+      "content": [
+        { "type": "paragraph", "text": "Prompting styles differ along two independent axes: how many worked examples you include, and whether you assign the model a persona." },
+        { "type": "table", "headers": ["Style", "What it is", "When to use it"], "rows": [
+          ["Zero-shot", "Instructions only, no examples: 'Classify this ticket as billing, technical, or account.'", "Simple, well-known tasks; cheapest in tokens; try it first"],
+          ["Few-shot", "2–5 input→output examples before the real input", "The model must imitate a specific format, style, or subtle classification boundary"],
+          ["Multi-shot", "Many examples (typically 5+)", "Hard patterns with tricky edge cases — pay the token cost only when few-shot underperforms"],
+          ["Instruction-style", "Direct commands with no persona", "Most application tasks; pairs with any shot count"],
+          ["Role-based", "Assign a persona: 'You are a senior C# code reviewer focused on async correctness.'", "Shaping tone, depth, and domain focus — usually set in the system message"]
+        ] },
+        { "type": "paragraph", "text": "Few-shot prompting deserves emphasis because it is the single most reliable format-control technique. Models are exceptional pattern-continuers: showing two examples of 'ticket text → one-line JSON verdict' teaches the output shape more effectively than a paragraph describing it. The examples must be consistent with each other and with your constraints — the model will faithfully imitate any inconsistency, including your mistakes." },
+        { "type": "paragraph", "text": "Role-based prompting complements rather than replaces instructions. 'You are an expert' does not add knowledge, but it usefully biases register and focus: a 'patient teacher for beginners' explains, a 'terse senior reviewer' critiques. In applications, the role belongs in the system message where it governs the whole conversation, while per-request instructions travel in user messages. Combine them: role for standing behavior, instruction anatomy for each task." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Where Prompts Live in the .NET Ecosystem",
+      "content": [
+        { "type": "paragraph", "text": "In a .NET application, prompts are not chat messages you type — they are artifacts your code assembles and sends. Knowing where each piece lives keeps designs clean:" },
+        { "type": "list", "style": "bullet", "items": [
+          "System message — standing role, rules, and output policy for the whole conversation; set once by your code (e.g. as the first message in an Azure OpenAI chat request).",
+          "User message(s) — the per-request instruction, context, and input data your application constructs, often from a template plus runtime values.",
+          "Prompt templates — string or file resources with placeholders, kept alongside code, code-reviewed and versioned like any other source artifact.",
+          "Azure AI Foundry playground — the interactive environment for iterating on a prompt against real models before committing it to code.",
+          "Semantic Kernel — a .NET framework (covered in tutorials 17–18) with first-class prompt template support, including template files with variables and functions."
+        ] },
+        { "type": "paragraph", "text": "A practical workflow follows from this: iterate in the playground with your test inputs until the prompt is stable, then transfer the final wording into a template in your repository, wire it to real data in C#, and keep the test inputs for regression checks. The playground is the prototyping surface; the repository is the source of truth." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "Reusable Prompt Templates in Applications",
+      "content": [
+        { "type": "paragraph", "text": "Application prompts repeat: your app summarizes thousands of tickets with the same prompt and different data. That makes templates — fixed wording plus placeholders — the natural unit of prompt reuse, and it brings prompt work fully into software engineering discipline:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Consistency: every request uses identical, tested wording; quality does not drift between call sites.",
+          "Versioning: templates live in source control; a prompt change is a reviewable diff, and output regressions are traceable to it.",
+          "Separation of concerns: prompt wording changes without touching request-handling code, and vice versa.",
+          "Safe data insertion: a single place to delimit and sanitize runtime data before it enters the prompt.",
+          "Testability: each template pairs with saved test inputs and expected-output criteria, enabling regression checks.",
+          "Localization and variants: the same task can carry audience-specific templates (e.g. terse for the API, verbose for the help page)."
+        ] },
+        { "type": "paragraph", "text": "Typical template-worthy use cases in .NET applications: summarizing entities (tickets, orders, reviews) for dashboards; extracting structured JSON from free-form text; drafting notification or reply text for human review; explaining domain data to end users; and classifying inbound content. Section 11 turns one of these into working C#." },
+        { "type": "note", "style": "tip", "text": "Delimit runtime data clearly inside templates — triple quotes, XML-style tags, or fenced blocks — so instructions and data cannot blur together. This also mitigates the risk of instructions hidden in user-supplied data being followed as if they were yours (prompt injection, treated fully in tutorial 6)." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples in C#",
+      "content": [
+        { "type": "paragraph", "text": "A minimal but production-shaped prompt template: fixed wording, placeholders, delimited data, explicit output constraints." },
+        { "type": "code", "language": "csharp", "title": "A reusable prompt template with delimited input data", "code": [
+          "public static class TicketPrompts",
+          "{",
+          "    public const string SystemMessage =",
+          "        \"You are an assistant that summarizes support tickets for support managers. \" +",
+          "        \"Be factual; use only information from the ticket. If information is missing, write 'unknown'.\";",
+          "",
+          "    // Version note: v3 — added severity constraint and 'no other text' rule (2026-09).",
+          "    public static string BuildSummaryPrompt(string ticketText) => $\"\"\"",
+          "        Summarize the support ticket below.",
+          "",
+          "        Respond with JSON only, exactly this shape, and no other text:",
+          "        {{ \"summary\": \"<max 40 words>\", \"severity\": \"low\" | \"medium\" | \"high\" }}",
+          "",
+          "        Ticket:",
+          "        \\\"\\\"\\\"",
+          "        {ticketText}",
+          "        \\\"\\\"\\\"",
+          "        \"\"\";",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "Few-shot prompting maps naturally onto chat messages: examples become alternating user/assistant message pairs before the real input, teaching the pattern in the model's native format." },
+        { "type": "code", "language": "csharp", "title": "Few-shot examples as chat messages (illustrative — see section 13)", "code": [
+          "// Teaching a strict one-line classification format by example:",
+          "List<ChatMessage> messages =",
+          "[",
+          "    new SystemChatMessage(TicketPrompts.SystemMessage),",
+          "    // --- few-shot examples ---",
+          "    new UserChatMessage(\"Classify: 'I was charged twice for my subscription.'\"),",
+          "    new AssistantChatMessage(\"{\\\"category\\\":\\\"billing\\\"}\"),",
+          "    new UserChatMessage(\"Classify: 'The export endpoint returns HTTP 500.'\"),",
+          "    new AssistantChatMessage(\"{\\\"category\\\":\\\"technical\\\"}\"),",
+          "    // --- the real request ---",
+          "    new UserChatMessage($\"Classify: '{ticketText}'\")",
+          "];"
+        ] },
+        { "type": "paragraph", "text": "Finally, never trust structured output blindly — parse and validate it in ordinary deterministic code, and treat failure as a first-class outcome:" },
+        { "type": "code", "language": "csharp", "title": "Validating model output before the application uses it", "code": [
+          "public sealed record TicketSummary(string Summary, string Severity);",
+          "",
+          "private static readonly string[] AllowedSeverities = [\"low\", \"medium\", \"high\"];",
+          "",
+          "public static bool TryParseSummary(string modelOutput, out TicketSummary? result)",
+          "{",
+          "    result = null;",
+          "    try",
+          "    {",
+          "        var parsed = System.Text.Json.JsonSerializer.Deserialize<TicketSummary>(",
+          "            modelOutput,",
+          "            new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });",
+          "",
+          "        if (parsed is null ||",
+          "            string.IsNullOrWhiteSpace(parsed.Summary) ||",
+          "            !AllowedSeverities.Contains(parsed.Severity))",
+          "        {",
+          "            return false; // caller decides: retry, fall back, or queue for a human",
+          "        }",
+          "",
+          "        result = parsed;",
+          "        return true;",
+          "    }",
+          "    catch (System.Text.Json.JsonException)",
+          "    {",
+          "        return false;",
+          "    }",
+          "}"
+        ] }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step-by-Step: Refining a Prompt from Vague to Reliable",
+      "content": [
+        { "type": "paragraph", "text": "This walkthrough applies the iteration loop to one realistic task: turning free-form support tickets into structured data for a dashboard. Follow it in any chat model." },
+        { "type": "list", "style": "numbered", "items": [
+          "Define success: output must be JSON with 'summary' (≤40 words) and 'severity' (low/medium/high), correct on easy tickets and honest ('unknown') on incomplete ones.",
+          "Draft 0 — vague on purpose: 'Summarize this ticket.' Run it on a test ticket. Typical result: a friendly paragraph, no JSON, invented severity. Every failure is a missing anatomy part.",
+          "Add output constraints: specify the exact JSON shape and add 'no other text'. Re-run: format improves but severity judgments drift between runs — the boundary is ambiguous.",
+          "Add context: define the boundaries — 'high = outage or data loss; medium = feature broken with workaround; low = question or cosmetic'. Re-run: severity stabilizes.",
+          "Add a few-shot example of a tricky case (an angry-but-low-severity ticket) to pin the boundary the definition alone did not fix.",
+          "Add an honesty rule: 'If the ticket lacks the information, use \"unknown\" — do not guess.' Test with a one-line ticket; confirm it says unknown instead of hallucinating.",
+          "Regression-check: run all saved test tickets (easy, hard, edge) several times each; confirm outputs stay within your success criteria.",
+          "Ship it: move the final wording into a C# template (as in section 11), wire the validator around the call, and record a version note for the next engineer."
+        ] },
+        { "type": "note", "style": "tip", "text": "Total changes made: four — constraints, context, one example, one honesty rule. Effective iteration is a small number of deliberate, diagnosed edits, not twenty rounds of rewording at random." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations, Hallucinations, and Output Validation",
+      "content": [
+        { "type": "paragraph", "text": "Prompt engineering improves probabilities; it never creates guarantees. The residual risks — and the standing defenses every application should layer — are:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Hallucination is reduced, not eliminated, by good prompts. Prompt-level defenses: ground the model with authoritative context ('use only the information provided'), permit uncertainty ('say unknown if not stated'), and constrain output to values you can check. Retrieval-based grounding is covered in tutorial 15.",
+          "Validation belongs in code, not in hope: parse structured output, check schemas and allowed values (as in section 11), verify claims that can be verified (IDs exist, numbers add up), and route failures to retry or human review. The model drafts; deterministic code decides.",
+          "Prompts are model-sensitive: wording tuned on one model may behave differently on another or after a model upgrade — re-run your test inputs when the model changes.",
+          "Instructions compete with data: very long inputs can dilute or truncate instructions (see section 7); guard input sizes in code.",
+          "Examples teach everything, including errors: an inconsistent few-shot example silently degrades output; review examples as carefully as instructions.",
+          "Natural language remains ambiguous: two readers — and two model runs — can parse the same sentence differently; precision plus validation, never precision alone."
+        ] },
+        { "type": "note", "style": "warning", "text": "API-accuracy disclosure: the prompt template and validation examples in section 11 are exact, standard C# (raw string literals require C# 11+). The chat-message list follows the Azure.AI.OpenAI / OpenAI .NET SDK message-type design (SystemChatMessage, UserChatMessage, AssistantChatMessage), but exact type names and construction vary by package version — verify against the current SDK documentation; tutorial 11 develops verified end-to-end code." }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices and Common Mistakes",
+      "content": [
+        { "type": "paragraph", "text": "Practices that separate reliable prompts from lucky ones:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Write the success criteria before the prompt; you cannot iterate toward an undefined target.",
+          "Use the four-part anatomy as a drafting checklist: instruction, context, input data, output constraints.",
+          "Prefer showing to telling: one consistent example beats a paragraph of format description.",
+          "Delimit runtime data (triple quotes, tags) so data can never read as instructions.",
+          "Keep prompts in versioned templates with a small regression set of test inputs.",
+          "Run prompts multiple times while iterating — single runs hide variance.",
+          "Validate every output in code; design the failure path (retry, fallback, human) before shipping."
+        ] },
+        { "type": "paragraph", "text": "Mistakes that account for most bad output:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Vague requests that outsource decisions to the model — then blaming the model for deciding.",
+          "Stuffing the entire task into one paragraph with no structure, so instructions, data, and constraints blur.",
+          "Adding more and more words instead of diagnosing which anatomy part is missing.",
+          "Changing five things per iteration, learning nothing from the result.",
+          "Few-shot examples that contradict the stated constraints (the model follows the examples).",
+          "Treating a response that parsed once as a format guarantee — variance will eventually break it.",
+          "Leaving prompts inline in application code, unversioned and untested, where no one reviews them."
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz",
+      "items": [
+        { "number": 1, "question": "In the context of LLM applications, what is a prompt?", "options": { "A": "The model's configuration file", "B": "Everything sent to the model for a request: instructions, context, input data, and constraints", "C": "Only the first sentence of a user's question", "D": "The API key used to authenticate" }, "correctAnswer": "B", "explanation": "The prompt is the complete text the model conditions on — across system and user messages. The model sees nothing else: not your intent, not your codebase, only the prompt's tokens." },
+        { "number": 2, "question": "Why does prompt wording have such a large effect on output quality?", "options": { "A": "The model penalizes short prompts", "B": "Generation is conditioned on the prompt — every included or omitted detail shifts which continuations are likely", "C": "Longer prompts are always better", "D": "The API routes better-written prompts to better servers" }, "correctAnswer": "B", "explanation": "The model samples continuations made likely by the prompt's tokens. Unspecified decisions (audience, format, scope) get guessed — differently per run. Precision replaces guessing with your requirements. Length itself is not the lever." },
+        { "number": 3, "question": "What is the fundamental behavioral difference between traditional code and a language model?", "options": { "A": "Code is deterministic (same input → same output); a model is probabilistic (same prompt can yield different outputs)", "B": "Code runs locally; models cannot run locally", "C": "Models are always slower", "D": "Code cannot process text" }, "correctAnswer": "A", "explanation": "Deviating output is a bug in code but expected behavior in a sampling-based model. This is why prompt work pairs precision going in with validation coming out, rather than expecting exact repeatability." },
+        { "number": 4, "question": "Which of these is NOT one of the four components of effective prompt anatomy?", "options": { "A": "Instruction", "B": "Context", "C": "Model weights", "D": "Output constraints" }, "correctAnswer": "C", "explanation": "The anatomy is instruction, context, input data, and output constraints — all things you control in the prompt text. Model weights are fixed by the provider; you steer them, you don't edit them." },
+        { "number": 5, "question": "The prompt 'Write a C# method to check email' keeps producing regex-based methods with the wrong signature. What is the best fix?", "options": { "A": "Repeat the prompt until the output is right", "B": "Raise the temperature", "C": "Specify the requirements: exact signature, technique to use, edge-case behavior, documentation", "D": "Switch to a different programming language" }, "correctAnswer": "C", "explanation": "Every unstated decision (signature, technique, null handling) is a guess the model will make for you. Stating them — 'bool IsValidEmail(string input), use MailAddress, no regex, false for null/whitespace' — removes the guesses. Re-rolling or adding randomness just varies the guesses." },
+        { "number": 6, "question": "During prompt iteration, why should you run the same prompt several times rather than once?", "options": { "A": "To warm up the model", "B": "Because variation between runs reveals where the prompt is ambiguous", "C": "Because the first response is always discarded by the API", "D": "To earn volume discounts" }, "correctAnswer": "B", "explanation": "A probabilistic model answers ambiguity with variance. If format or judgments differ across runs, some decision is underspecified — that variance tells you exactly what to pin down next." },
+        { "number": 7, "question": "Why is 'change one thing at a time' good practice when refining a prompt?", "options": { "A": "The API rejects large edits", "B": "It keeps the prompt short", "C": "So you can attribute each improvement or regression to a specific edit, like debugging", "D": "Models remember previous prompt versions" }, "correctAnswer": "C", "explanation": "Iteration is an experiment loop. Changing five things at once and seeing improvement teaches you nothing about which change mattered — the same reason you don't fix five suspects in one debugging step." },
+        { "number": 8, "question": "Your prompt template plus a large document exceeds the model's context window. What is a likely silent failure?", "options": { "A": "The API automatically summarizes the document", "B": "Part of the prompt — possibly your instructions — is truncated and never seen by the model", "C": "The model switches to a larger variant", "D": "The response is returned in multiple parts" }, "correctAnswer": "B", "explanation": "The context window is a hard token budget for input plus output. Overflow means something gets cut or the call errors; if instructions are what got cut, output degrades mysteriously. Guard input length in code (~4 characters per token estimate)." },
+        { "number": 9, "question": "What is the main cost consideration of few-shot prompting in production?", "options": { "A": "Examples must be re-approved monthly", "B": "Every example's tokens are paid on every single request", "C": "Few-shot requires a fine-tuned model", "D": "Examples expire after 24 hours" }, "correctAnswer": "B", "explanation": "Examples travel in the prompt, so their full token length recurs per call. That is why the ladder is: try zero-shot first, add few examples if needed, and go multi-shot only when the quality gain justifies the recurring token cost." },
+        { "number": 10, "question": "What is zero-shot prompting?", "options": { "A": "Sending an empty prompt", "B": "Asking the model to perform a task with instructions only, no worked examples", "C": "Setting temperature to zero", "D": "A prompt with no output constraints" }, "correctAnswer": "B", "explanation": "'Shots' are worked examples in the prompt. Zero-shot relies on instructions alone — cheapest and often sufficient for well-known tasks. It is unrelated to temperature or constraint use." },
+        { "number": 11, "question": "When is few-shot prompting most clearly worth its cost over zero-shot?", "options": { "A": "When the model must imitate a specific output format or a subtle classification boundary", "B": "When you want faster responses", "C": "When the input data is very short", "D": "Always — more examples are always better" }, "correctAnswer": "A", "explanation": "Models are strong pattern-continuers: consistent examples teach shape and boundary judgments better than descriptions. But examples cost tokens per request and can teach errors, so 'always more' is wrong — escalate only when zero-shot underperforms." },
+        { "number": 12, "question": "What does a role-based prompt like 'You are a senior C# code reviewer' actually do?", "options": { "A": "Unlocks knowledge the model otherwise lacks", "B": "Biases tone, depth, and focus toward the persona's register", "C": "Guarantees factually correct reviews", "D": "Reduces the per-token price" }, "correctAnswer": "B", "explanation": "A role adds no new knowledge and no correctness guarantee — it shifts style and emphasis usefully. In applications it belongs in the system message as standing behavior, combined with per-request instruction anatomy." },
+        { "number": 13, "question": "Which is a key engineering benefit of reusable prompt templates?", "options": { "A": "Templates make output deterministic", "B": "Prompt changes become reviewable, versioned diffs with traceable effects on output quality", "C": "Templates remove the need for output validation", "D": "Templates reduce model latency" }, "correctAnswer": "B", "explanation": "Templates bring prompts into normal software discipline: source control, code review, regression test inputs, and one safe place to delimit runtime data. They do not change the model's probabilistic nature — validation is still required." },
+        { "number": 14, "question": "Which prompt addition most directly reduces hallucinated answers on incomplete inputs?", "options": { "A": "'Answer as fast as possible'", "B": "'Be creative'", "C": "'Use only the information provided; if it is not stated, respond \"unknown\"'", "D": "'Write at least 200 words'" }, "correctAnswer": "C", "explanation": "Grounding ('only the information provided') plus permitted uncertainty ('say unknown') removes the pressure to fill gaps with plausible inventions. Length and creativity instructions push the opposite direction." },
+        { "number": 15, "question": "Your app receives JSON from the model. What should happen before the application acts on it?", "options": { "A": "Nothing — JSON output means the response is correct", "B": "Deterministic code parses it, validates schema and allowed values, and routes failures to retry or human review", "C": "The JSON is logged and trusted", "D": "The model is asked 'are you sure?'" }, "correctAnswer": "B", "explanation": "Parsing once successfully is not a guarantee — variance eventually produces malformed or out-of-range output. Validation in code (as in section 11) is the deterministic wrapper that makes a probabilistic component safe to build on." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam Questions",
+      "items": [
+        { "number": 1, "question": "Define 'prompt' precisely, including where it lives in a chat-based API, and explain the mechanism by which prompt wording determines output quality.", "modelAnswer": "A prompt is the complete text the model conditions on for a request: instructions, context, input data, and output constraints, spread across the system message (standing behavior) and user messages (the current task). The model generates by sampling continuations made likely by the prompt's tokens — it sees nothing but the prompt. Therefore every specified detail shifts probability toward desired outputs, and every unspecified decision (audience, format, scope, edge cases) is delegated to the model to guess, with different guesses across runs. Prompt quality is thus the primary lever on output quality at fixed model and cost." },
+        { "number": 2, "question": "Contrast prompt engineering with traditional programming across at least four dimensions, and state where engineering rigor relocates when working with prompts.", "modelAnswer": "Language: formal, compiler-checked syntax vs natural language whose ambiguity is silently accepted. Behavior: deterministic execution vs probabilistic sampling — variance is a bug in code but expected from a model. Failure mode: loud exceptions vs quiet plausible-but-wrong text. Correctness: provable/unit-testable exactly vs statistical, measured over many runs. Change process: compile-and-test vs run-and-judge against criteria. Rigor relocates to the two ends: precision going in (explicit instructions, examples, constraints, grounding) and verification coming out (parsing, schema and business-rule validation in deterministic code)." },
+        { "number": 3, "question": "Explain 'deterministic code vs probabilistic models' and derive two concrete engineering consequences for building AI features.", "modelAnswer": "Deterministic code maps the same input to the same output every time; a model samples from a probability distribution, so identical prompts can yield different valid outputs. Consequence one: testing changes — exact-string assertions are wrong; test properties (parses as JSON, values in allowed sets, passes evaluators) over multiple runs, and lower temperature where consistency matters. Consequence two: architecture changes — guarantees stay in code (validation, business rules, exact computation), while the model handles language understanding and generation; the deterministic layer wraps the probabilistic one on both sides." },
+        { "number": 4, "question": "Name and define the four components of effective prompt anatomy, and write a short example prompt for a developer task that labels each component.", "modelAnswer": "Instruction — what to do: 'Review the C# method below for async/await mistakes.' Context — grounding facts and audience: 'It runs in an ASP.NET Core request path; the team is junior, explain briefly.' Input data — the delimited content to operate on: 'Method between triple quotes: \"\"\"...\"\"\"'. Output constraints — response rules: 'List at most 3 issues as bullets: issue, why it matters, one-line fix. If none, reply exactly: No issues found.' Together: instruction says the verb, context prevents wrong assumptions, delimitation separates data from directives, and constraints make output predictable and parseable." },
+        { "number": 5, "question": "Take the vague prompt 'Summarize these logs' and rewrite it as a precise prompt. Then identify which guesses your rewrite eliminated.", "modelAnswer": "Rewrite: 'From the log lines below (between triple quotes), list each distinct error message, its occurrence count, and the timestamp of its first occurrence. Output a markdown table with columns Error | Count | First seen, sorted by Count descending. Ignore INFO and DEBUG lines. If no errors are present, reply exactly: No errors found.' Eliminated guesses: what to extract (distinct errors, not a narrative), what to ignore (non-error levels), output structure (table, columns), ordering (count descending), and the empty-input behavior (exact fallback string) — each previously a decision the model would have made differently per run." },
+        { "number": 6, "question": "Describe a disciplined prompt iteration workflow (at least five steps) and explain why running a prompt multiple times per iteration matters.", "modelAnswer": "(1) Define success criteria first — target format, content, tone. (2) Draft using the four-part anatomy. (3) Run several times on saved test inputs (easy, hard, edge). (4) Diagnose failures to a component: format issues → constraints/examples; content issues → context/instruction; inventions → grounding + honesty rule. (5) Change one thing, re-run everything, compare. (6) Stop at consistent acceptability; version the result with a note. Multiple runs matter because a probabilistic model expresses ambiguity as variance — a single run can pass by luck; cross-run variation pinpoints exactly which decision is still underspecified." },
+        { "number": 7, "question": "Explain how tokens, tokenization, and the context window constrain prompt design, including one silent failure mode and its code-level guard.", "modelAnswer": "Text is tokenized into subword tokens (~4 English characters each); the context window is a hard per-request budget shared by system message, instructions, examples, input data, and the generated response, and every token is billed. Design consequences: few-shot examples cost their full length on every call; large inputs must be trimmed, chunked, or retrieved selectively; and room must be reserved for output. Silent failure: overflow can truncate parts of the prompt — if instructions are cut, the model never sees them and output degrades mysteriously. Guard: estimate tokens in code before sending (length/4 heuristic) and reject or chunk oversized inputs." },
+        { "number": 8, "question": "Compare zero-shot, few-shot, and multi-shot prompting: define each, give selection criteria, and state the escalation order with its rationale.", "modelAnswer": "Zero-shot: instructions only — cheapest, often sufficient for well-known tasks. Few-shot: 2–5 consistent input→output examples — the strongest tool for teaching a specific format, style, or subtle classification boundary, at a recurring token cost per request. Multi-shot: many examples for genuinely hard patterns with edge cases — highest cost. Escalate zero → few → multi, adding examples only when the previous level demonstrably underperforms on your test inputs, because examples are paid on every call and each added example is another chance to teach an inconsistency." },
+        { "number": 9, "question": "Distinguish instruction-style from role-based prompting: what a role actually changes, what it cannot do, and where each belongs in a chat-based application.", "modelAnswer": "Instruction-style prompting issues direct task commands; role-based prompting assigns a persona ('You are a senior C# reviewer focused on async correctness'). A role biases tone, depth, and domain focus — useful for register and emphasis — but adds no knowledge and no correctness guarantee. They complement each other: in applications, the role and standing rules belong in the system message where they govern the whole conversation; each task's instruction, context, data, and constraints travel in user messages. Combining a well-chosen role with full instruction anatomy outperforms either alone." },
+        { "number": 10, "question": "Argue the case for reusable prompt templates in a production .NET application, covering at least four engineering benefits and one implementation precaution.", "modelAnswer": "Benefits: (1) consistency — all call sites use identical tested wording, so quality doesn't drift; (2) versioning — prompts live in source control, changes are reviewable diffs, regressions are traceable; (3) testability — each template pairs with saved test inputs for regression checks after any prompt or model change; (4) separation of concerns — wording evolves without touching request code; (5) one safe place to delimit and sanitize runtime data. Precaution: always insert user data inside clear delimiters (triple quotes/tags) so data cannot be read as instructions — both for clarity and to blunt prompt-injection attempts." },
+        { "number": 11, "question": "Why do hallucinations persist even under good prompts, and which three prompt-level defenses most reduce them?", "modelAnswer": "Generation optimizes plausibility, not truth: the model produces likely text, and when the prompt leaves gaps or demands unavailable facts, plausible invention is often the most likely continuation — no prompt changes that architecture. Defenses: (1) grounding — supply the authoritative facts and instruct 'use only the information provided'; (2) permitted uncertainty — 'if not stated, answer unknown', removing pressure to fill gaps; (3) checkable constraints — force output into values and structures code can verify, converting quiet fabrication into detectable validation failure. Residual risk is then handled by output validation and human review paths." },
+        { "number": 12, "question": "Design the output-validation layer for a feature where the model returns JSON {summary, severity}. What is checked, and what happens on failure?", "modelAnswer": "Checks, in deterministic code: (1) parse — response deserializes as JSON at all (reject prose wrappers); (2) schema — required fields present with correct types; (3) allowed values — severity ∈ {low, medium, high}; (4) business sanity — summary non-empty, within length limit, and if severity claims 'high', optionally cross-check against signals in the source. On failure: log the raw output for prompt diagnostics, retry once (optionally with a corrective instruction), then fall back — queue for human review or use a safe default — and emit a metric so validation-failure rates are visible. The application acts only on validated objects, never on raw model text." },
+        { "number": 13, "question": "Few-shot examples 'teach everything, including errors.' Explain this failure mode with an example and the practice that prevents it.", "modelAnswer": "The model imitates demonstrated patterns more strongly than described rules. If your constraints say 'JSON only' but one example's answer includes a trailing explanation sentence, the model learns that trailing sentences are acceptable and reproduces them — an inconsistency you taught it. Similarly, an example with inconsistent casing or a mislabeled classification silently biases all future outputs. Prevention: review examples with the same rigor as instructions; check each example strictly satisfies every stated constraint; keep examples minimal and mutually consistent; and re-run the regression set whenever an example changes." },
+        { "number": 14, "question": "Propose how a team should manage prompts as engineering artifacts across their lifecycle (authoring, review, testing, change management, model upgrades).", "modelAnswer": "Authoring: draft in a playground against saved test inputs; finalize into a template file/class with placeholders and delimiters. Review: prompts enter the repo via pull request, reviewed like code — including few-shot examples. Testing: each template keeps a small regression set (easy/hard/edge inputs) with acceptance criteria; runs are repeated to account for variance. Change management: version notes on each template; output regressions bisect to prompt diffs. Model upgrades: re-run all regression sets on the new model before switching, since prompts are model-sensitive; treat a model change like a dependency upgrade with its own test pass." },
+        { "number": 15, "question": "Scenario: extract {vendor, date, total} JSON from OCR'd invoice text in an ASP.NET service. Design the complete prompting approach using this tutorial's concepts.", "modelAnswer": "System message: role ('precise data-extraction assistant'), grounding rule ('use only the invoice text'), honesty rule ('null for missing fields — never guess'). Template (versioned in the repo): instruction (extract the three fields), context (dates ISO-8601, total is the final payable amount including tax), delimited input data (OCR text in triple quotes), output constraints (exact JSON shape, no other text). Few-shot: two consistent examples, including one with a missing field → null, to pin both format and honesty. Budget: cap input tokens in code; chunk long invoices. Validation: TryParse-style deserialization, date parses, total is a non-negative decimal; failures → one retry, then human-review queue with the raw output logged. Iterate on a saved set of real invoices (clean, messy, incomplete) until stable across runs; record the version note." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Prompt", "back": "Everything sent to the model for a request — instructions, context, input data, constraints — across system and user messages. The model conditions on nothing else." },
+        { "number": 2, "front": "Prompt engineering", "back": "Designing, testing, and refining prompt text so a probabilistic model produces reliable output; rigor lives in precision going in and validation coming out." },
+        { "number": 3, "front": "Deterministic vs probabilistic", "back": "Code: same input → same output; deviation is a bug. Model: samples from a distribution; same prompt → varying outputs is expected behavior." },
+        { "number": 4, "front": "Prompt anatomy (4 parts)", "back": "Instruction (what to do), Context (grounding facts/audience), Input data (delimited content to operate on), Output constraints (format, length, allowed values)." },
+        { "number": 5, "front": "Vague → precise prompt", "back": "Precision = stating what the model would otherwise guess: audience, format, technique, scope, edge cases. 'Contractor who takes everything literally' test." },
+        { "number": 6, "front": "Prompt iteration loop", "back": "Define success → draft with anatomy → run multiple times → diagnose failures to a component → change ONE thing → regression-check saved inputs → version the result." },
+        { "number": 7, "front": "Why run a prompt multiple times?", "back": "Variance between runs is data: it reveals exactly which decision the prompt leaves ambiguous. A single run can pass by luck." },
+        { "number": 8, "front": "Token / context window (prompt view)", "back": "All prompt parts + response share one token budget, billed per token. Few-shot examples recur in cost on every call; overflow can silently truncate instructions." },
+        { "number": 9, "front": "Zero-shot prompting", "back": "Instructions only, no examples. Cheapest; try it first for well-known tasks." },
+        { "number": 10, "front": "Few-shot prompting", "back": "2–5 consistent input→output examples before the real input. The strongest format/boundary teaching tool; costs tokens every request; teaches your mistakes too." },
+        { "number": 11, "front": "Multi-shot prompting", "back": "Many examples (5+) for hard patterns with edge cases. Escalate to it only when few-shot measurably underperforms — highest recurring cost." },
+        { "number": 12, "front": "Role-based prompt", "back": "Assigns a persona to bias tone, depth, and focus. Adds no knowledge, guarantees nothing. Lives in the system message; combine with per-task instruction anatomy." },
+        { "number": 13, "front": "System vs user message", "back": "System: standing role and rules for the whole conversation. User: the per-request instruction, context, and data your code assembles (often from a template)." },
+        { "number": 14, "front": "Prompt template", "back": "Fixed wording + placeholders, versioned in source control: consistency across call sites, reviewable diffs, regression testability, one safe place to delimit data." },
+        { "number": 15, "front": "Anti-hallucination prompt rules", "back": "Ground: 'use only the information provided.' Permit uncertainty: 'say unknown if not stated.' Constrain output to checkable values. Validation catches the rest." },
+        { "number": 16, "front": "Output validation", "back": "Deterministic code parses, schema-checks, and range-checks model output; failures route to retry/fallback/human. The app acts on validated objects, never raw text." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions & Answers",
+      "items": [
+        { "number": 1, "question": "What is prompt engineering, and why does a development team need it?", "answer": "It's the discipline of designing and refining the text we send to language models so their output is reliable enough to build on. Teams need it because in applications, prompts run unattended at scale — an ambiguity a human would clarify in conversation becomes thousands of inconsistent responses in production. Since output is conditioned entirely on the prompt, prompt quality is the cheapest, highest-leverage quality control we have: better wording improves results at the same model and same cost." },
+        { "number": 2, "question": "How is writing a prompt different from writing code?", "answer": "Code is a formal language executed deterministically — same input, same output, and the compiler rejects ambiguity. A prompt is natural language steering a probabilistic model: ambiguity is silently accepted and answered with variance, and failures are quiet plausible-but-wrong text rather than loud exceptions. So the rigor moves: into the prompt as explicit instructions, examples, and constraints, and after the call as validation in ordinary code. I treat the model as an untrusted-but-useful component wrapped by deterministic engineering." },
+        { "number": 3, "question": "Walk me through the anatomy of a good prompt.", "answer": "Four parts. Instruction: what to do, stated as a clear verb-first command. Context: the background the model can't know — domain terms, audience, situation. Input data: the content to operate on, clearly delimited with quotes or tags so it can't blur into the instructions. Output constraints: exact format, length, tone, and allowed values, ideally something code can validate. When output disappoints, I diagnose which of the four is missing or weak rather than rewording at random — format problems point at constraints, wrong content points at context or instruction." },
+        { "number": 4, "question": "Give an example of turning a vague prompt into a precise one.", "answer": "Vague: 'Explain this code.' Precise: 'Explain this LINQ query line by line to a junior developer who knows loops but not LINQ; end with one performance caveat.' The rewrite fixes the audience, the depth, the structure, and the ending — four decisions the model would otherwise guess differently on every run. My drafting test is: if I handed this to a contractor who takes everything literally and asks no questions, would they produce what I want?" },
+        { "number": 5, "question": "How do you iterate on a prompt that isn't working?", "answer": "First I make sure success is defined — format, content, tone criteria — because otherwise 'better' is vibes. Then I run the current prompt several times on saved test inputs; the variance pattern tells me what's ambiguous. I diagnose failures to an anatomy component: format drift means tighter constraints or an example; wrong content means missing context; inventions mean grounding plus an 'unknown is acceptable' rule. I change one thing per iteration, re-run the whole test set, and stop when outputs are consistently acceptable — then version the prompt with a note." },
+        { "number": 6, "question": "How do tokens and context windows influence how you write prompts?", "answer": "They're the budget everything shares — instructions, examples, input data, and the response, billed per token. Practical effects: few-shot examples recur in cost on every request, so I add them only when they earn it; large documents get chunked or retrieved selectively instead of pasted whole; and I guard input sizes in code because overflow can silently truncate the prompt — possibly the instructions themselves, which produces mysterious quality drops. A rough four-characters-per-token estimate is enough for the guard." },
+        { "number": 7, "question": "When would you use few-shot prompting over zero-shot?", "answer": "When the model must imitate something specific: an exact output format, a house style, or a subtle classification boundary that instructions alone can't pin down. Models are excellent pattern-continuers, so two consistent examples often beat a paragraph of description. But examples cost their token length on every call and the model imitates everything in them, including mistakes — so my ladder is zero-shot first, few-shot when measurably needed, multi-shot only for genuinely hard boundaries." },
+        { "number": 8, "question": "Do role-based prompts like 'You are an expert' actually work?", "answer": "They work for what they actually do: bias tone, depth, and focus. 'You are a senior reviewer focused on async correctness' gets terser, more targeted output than no role. What they don't do is add knowledge or guarantee correctness — 'expert' doesn't make the model right. In applications I put the role in the system message as standing behavior and still supply full instruction anatomy per request; the role complements precision, it never substitutes for it." },
+        { "number": 9, "question": "How would you manage prompts in a real codebase?", "answer": "As versioned artifacts, not inline strings. Each prompt is a template — fixed wording plus placeholders with clear delimiters around runtime data — living in source control and changed via pull request like code. Each template keeps a small regression set of test inputs with acceptance criteria, re-run after any prompt edit and after any model upgrade, since prompts are model-sensitive. This gives consistency across call sites, reviewable diffs when quality shifts, and one place to enforce safe data insertion." },
+        { "number": 10, "question": "What causes hallucinations, and what do you do about them at the prompt level?", "answer": "The model generates plausible text, and when the prompt demands facts it doesn't have, plausible invention is often the likeliest continuation — it's a property of the architecture, not a bug to patch. Prompt-level defenses: ground it ('use only the information provided' plus the actual data), permit uncertainty ('answer unknown if not stated' — removing the pressure to fill gaps), and constrain output to checkable values so fabrication becomes a detectable validation failure instead of a quiet lie. Then code-level validation and human-review paths catch the residual." },
+        { "number": 11, "question": "The model returned valid JSON in all your tests. Do you still need validation in production?", "answer": "Absolutely. Passing tests means the probability of good output is high, not that it's one. Variance will eventually produce prose around the JSON, a missing field, or an out-of-range value — at production volume, 'eventually' is 'daily'. So the call site always parses defensively, checks schema and allowed values, and has a designed failure path: retry once, then fall back or queue for a human, with the raw output logged for prompt diagnostics. The application acts on validated objects, never on raw model text." },
+        { "number": 12, "question": "How do you test something that gives different answers each run?", "answer": "I test properties, not strings. For structured output: it parses, required fields exist, values are in allowed sets, business rules hold. For prose: criteria-based checks — length bounds, required elements present, optionally an evaluator pass. I run each test input multiple times and track the pass rate rather than expecting 100% identical output, and I pin down consistency where it matters with tighter constraints and lower temperature. It's closer to testing an external service with an SLA than testing a pure function." },
+        { "number": 13, "question": "What's your take on prompt length — are longer prompts better?", "answer": "Length is a side effect, not a goal. The goal is resolving the decisions the model would otherwise guess — which usually makes prompts somewhat longer, but every sentence should be doing work: an instruction, a needed fact, a constraint, or an example. Padding actively hurts: it spends tokens, dilutes the instructions, and can push important content toward truncation on large inputs. I'd rather have six precise lines than three vague ones or thirty rambling ones." },
+        { "number": 14, "question": "Your prompt worked well, then output quality dropped after a model upgrade. What happened and what's the process fix?", "answer": "Prompts are model-sensitive: wording, examples, and even formatting tuned against one model's behavior can land differently on another — the prompt didn't change, the interpreter did. The process fix is treating model changes like dependency upgrades: every prompt template keeps a regression set of test inputs, and switching models requires re-running all sets and comparing against acceptance criteria before rollout, with the old model as rollback. This is also why prompts belong in version control — you can correlate quality shifts with exactly what changed." },
+        { "number": 15, "question": "A junior developer asks how to get better results from the model. What are your top three rules?", "answer": "One: stop making the model guess — state the audience, format, scope, and edge-case behavior explicitly; if output is wrong, find which of instruction, context, data, or constraints is missing rather than rewording randomly. Two: show, don't just tell — one consistent example of the exact output you want teaches format better than any description, just keep examples flawless because the model imitates mistakes too. Three: never trust, always verify — run it several times to see the variance, and put a validator after every call so the app acts on checked data. And iterate deliberately: one change at a time against saved test inputs." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "Prompt", "definition": "The complete text sent to a model for a request — instructions, context, input data, and constraints — across system and user messages; the sole input generation is conditioned on." },
+        { "term": "Prompt engineering", "definition": "The discipline of designing, testing, and refining prompts so a probabilistic model produces reliable, application-grade output." },
+        { "term": "Deterministic code", "definition": "Ordinary program logic that maps the same input to the same output every time; deviations are bugs." },
+        { "term": "Probabilistic model", "definition": "A system that generates output by sampling from a probability distribution, so identical inputs can produce different results across runs." },
+        { "term": "Instruction (prompt component)", "definition": "The part of a prompt stating what the model should do — the explicit, verb-first command." },
+        { "term": "Context (prompt component)", "definition": "Background the model cannot know: domain facts, terminology, audience, and situation that ground the response." },
+        { "term": "Input data (prompt component)", "definition": "The specific content the model operates on — text to summarize, code to review — clearly delimited from the instructions." },
+        { "term": "Output constraints (prompt component)", "definition": "Explicit rules for the response: format, structure, length, tone, and allowed values, ideally checkable by code." },
+        { "term": "Vague prompt", "definition": "A prompt that leaves audience, format, scope, or edge-case decisions unstated, delegating them to the model's per-run guesses." },
+        { "term": "Precise prompt", "definition": "A prompt that resolves the decisions the model would otherwise guess, collapsing output variance toward the intended result." },
+        { "term": "Prompt iteration", "definition": "The refinement loop: define success, run multiple times, diagnose failures to an anatomy component, change one thing, regression-check, version the result." },
+        { "term": "Regression set (for prompts)", "definition": "Saved test inputs (easy, hard, edge-case) with acceptance criteria, re-run after every prompt edit or model change." },
+        { "term": "Token", "definition": "The subword unit models read, write, and bill by — roughly 4 English characters." },
+        { "term": "Tokenization", "definition": "Splitting text into tokens from the model's vocabulary before processing." },
+        { "term": "Context window", "definition": "The hard per-request token budget shared by all prompt parts and the generated response; overflow truncates or errors." },
+        { "term": "Zero-shot prompting", "definition": "Prompting with instructions only — no worked examples; the cheapest style and the right first attempt for well-known tasks." },
+        { "term": "Few-shot prompting", "definition": "Including 2–5 consistent input→output examples so the model imitates the demonstrated format or boundary; costs tokens on every request." },
+        { "term": "Multi-shot prompting", "definition": "Few-shot with many examples for hard patterns; used only when smaller example counts measurably underperform." },
+        { "term": "Instruction-style prompt", "definition": "A prompt built from direct commands without a persona; the default for application tasks." },
+        { "term": "Role-based prompt", "definition": "A prompt assigning the model a persona to bias tone, depth, and focus; adds no knowledge and no correctness guarantee." },
+        { "term": "System message", "definition": "The conversation-level message carrying standing role and rules; in applications, set by code, not visible to end users." },
+        { "term": "Prompt template", "definition": "Fixed prompt wording with placeholders for runtime data, stored and versioned in source control for consistency, review, and testing." },
+        { "term": "Hallucination", "definition": "Fluent, confident output that is factually wrong or invented — plausibility without truth." },
+        { "term": "Grounding", "definition": "Supplying authoritative facts in the prompt and restricting the model to them ('use only the information provided')." },
+        { "term": "Output validation", "definition": "Deterministic post-processing — parse, schema, allowed values, business rules — that gates model output before the application acts on it." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary & Key Takeaways",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "A prompt is everything the model conditions on; every unstated decision becomes a per-run guess, which is why wording directly controls quality.",
+          "Prompting differs from programming in kind: natural language steering a probabilistic system. Rigor relocates to precision going in and validation coming out.",
+          "Draft with the four-part anatomy — instruction, context, input data, output constraints — and diagnose bad output by asking which part is missing.",
+          "Precision means resolving guesses: audience, format, technique, scope, edge cases. Write for a literal-minded contractor who asks no questions.",
+          "Iterate deliberately: define success first, run multiple times, change one thing, keep a regression set, version the result.",
+          "Tokens are the budget: examples recur in cost every call, and overflow can silently truncate your instructions — guard sizes in code.",
+          "Escalate zero-shot → few-shot → multi-shot only as needed; use roles for tone and focus in the system message, never as a substitute for precision.",
+          "Package prompts as versioned templates with delimited data slots; validate every output in deterministic code with a designed failure path."
+        ] },
+        { "type": "paragraph", "text": "You now have the foundation of the prompting craft: a vocabulary for what prompts are made of, a method for improving them, and the engineering habits that make them safe to ship. The next tutorial builds on this base with the specific prompting patterns developers reach for daily." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Continue with the next tutorial in the path: Prompting Patterns Used by Developers — a catalog of reusable patterns (persona, output-format, recipe, refinement chains and more) that build directly on today's anatomy and iteration method." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: take three vague prompts you'd naturally type ('fix this', 'explain this', 'summarize this') and rewrite each with all four anatomy parts; compare outputs before and after.",
+          "Practice: run section 12's refinement walkthrough yourself in any chat model, keeping notes on which single change fixed which failure.",
+          "Practice: build the TicketPrompts template and TryParseSummary validator from section 11 in a console app, and feed the validator deliberately broken output.",
+          "Reading: Microsoft Learn's prompt engineering modules and the Azure OpenAI documentation's prompt engineering techniques guide.",
+          "Looking ahead: note which of your rewritten prompts feel like repeatable recipes — the next tutorial names and systematizes them."
+        ] },
+        { "type": "note", "style": "info", "text": "Path position: tutorial 2 of 27 · Previous: introduction-to-generative-ai · Next: developer-prompting-patterns" }
+      ]
+    }
+  ]
+}

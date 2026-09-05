@@ -36,6 +36,16 @@ Standard ASP.NET Core MVC (`Program.cs` is the composition root: EF Core/MySQL v
 
 **Static/reference assets**: `wwwroot/` (bootstrap via libman, jquery), `SupportFiles/` and `HTMLFiles/` contain standalone HTML reference material (not served through MVC routing directly in most cases — check before assuming a controller serves them), `HelperFiles/Prompts/` contains the GenAI prompt text files used to generate MCQ content offline.
 
+## Tutorial generation ("newvision" system)
+
+`AI dotnet/` holds 27 numbered prompt files (`00-INDEX.txt` explains the set) for generating a "GenAI-Powered .NET" course. Each prompt instructs Claude to follow `newvision-tutorial-builder.md` (repo root) — the master spec defining the output JSON schema: exactly 21 canonical sections, ≥15 each of quiz/exam/flashcards/interview items, ≥15 glossary terms and tooltips, and a mechanical Step-5 self-audit (parse the JSON, count items, verify canonical key order and prev/next chain, print the audit table).
+
+Workflow rules:
+- Run prompts **one at a time, in order** (01 → 27); the user reviews each result before the next run.
+- Output goes to `wwwroot/tutorials/<slug>.json`. Completed so far: 01 `introduction-to-generative-ai`.
+- Tutorial content must be vendor-neutral: never mention Genie/GenieWeb/ItTechGenie or any company/client/training-provider name inside generated JSON (Microsoft/Azure/GitHub product names the topic is about are fine).
+- `TutorialsController` (attribute-routed: `/Tutorials` index, `/Tutorials/{slug}` detail) renders these JSONs via `ITutorialService`/`TutorialService` (reads `wwwroot/tutorials` fresh per request, no cache) and `Models/TutorialModels.cs`. `Views/Tutorials/Detail.cshtml` renders all 21 sections including interactive quiz (inline JS) and `<details>`-based exam/flashcards/interview accordions. Nav menu key: `ActiveMenu = "GenAIDotNet"` ("GenAI .NET" item in both navbars in `_Layout.cshtml`).
+
 ## Notes
 
 - `appsettings.json` currently contains live DB credentials, SMTP credentials, and the JWT signing key committed in plaintext, and `Program.cs` sends a live test email on every startup — be aware of this when editing config, don't assume these are placeholders.
