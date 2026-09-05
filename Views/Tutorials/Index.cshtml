@@ -1,36 +1,375 @@
 @model IReadOnlyList<GenieWeb.Models.TutorialDocument>
 @{
     var total = Model.FirstOrDefault()?.TotalTutorials ?? 27;
+
+    static string LevelColor(string level) => level switch
+    {
+        var l when l.Contains("Advanced") => "#e6294b",
+        var l when l.Contains("Intermediate") => "#d98a1f",
+        var l when l.Contains("Beginner") => "#1fa971",
+        _ => "#6c757d"
+    };
 }
 
-<p class="lead">
-    A @total-part learning path on building GenAI-powered applications with C# and .NET —
-    from prompt engineering fundamentals through Azure OpenAI, RAG, Semantic Kernel, and
-    multi-agent systems, to a real-world capstone project.
-</p>
+<div class="tut-idx" id="tutIdx">
+    <canvas class="tut-idx-sparkle-canvas" id="tutIdxSparkleCanvas" aria-hidden="true"></canvas>
 
-@if (Model.Count == 0)
-{
-    <div class="alert alert-info">No tutorials have been published yet — check back soon.</div>
-}
-else
-{
-    <div class="list-group shadow-sm">
-        @foreach (var t in Model)
-        {
-            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-               href="@Url.Action("Detail", "Tutorials", new { slug = t.Slug })">
-                <span>
-                    <span class="badge bg-dark me-2">@t.TutorialNumber</span>
-                    @t.Title
-                </span>
-                <span class="badge bg-secondary">@t.Level</span>
-            </a>
-        }
+    <div class="tut-idx-hero">
+        <span class="tut-idx-eyebrow"><i class="fa-solid fa-robot me-1"></i>GenAI-Powered .NET</span>
+        <h1 class="tut-idx-title" data-text="Application Development">Application Development</h1>
+        <p class="lead tut-idx-lead">
+            A @total-part learning path on building GenAI-powered applications with C# and .NET —
+            from prompt engineering fundamentals through Azure OpenAI, RAG, Semantic Kernel, and
+            multi-agent systems, to a real-world capstone project.
+        </p>
     </div>
 
-    @if (Model.Count < total)
+    @if (Model.Count == 0)
     {
-        <p class="text-muted mt-3">@Model.Count of @total tutorials published so far — the rest are on the way.</p>
+        <div class="alert alert-info">No tutorials have been published yet — check back soon.</div>
     }
-}
+    else
+    {
+        <div class="tut-idx-grid">
+            @foreach (var t in Model)
+            {
+                <a class="tut-idx-card" href="@Url.Action("Detail", "Tutorials", new { slug = t.Slug })">
+                    <span class="tut-idx-card-glow"></span>
+                    <span class="tut-idx-card-top">
+                        <span class="tut-idx-num">@t.TutorialNumber</span>
+                        <span class="tut-idx-level" style="--level-color:@LevelColor(t.Level)">@t.Level</span>
+                    </span>
+                    <span class="tut-idx-card-title">@t.Title</span>
+                    <span class="tut-idx-card-cta">
+                        Start tutorial <i class="fa-solid fa-arrow-right-long"></i>
+                    </span>
+                </a>
+            }
+        </div>
+
+        @if (Model.Count < total)
+        {
+            <p class="text-muted mt-3">@Model.Count of @total tutorials published so far — the rest are on the way.</p>
+        }
+    }
+</div>
+
+<style>
+    .tut-idx {
+        position: relative;
+        isolation: isolate;
+        padding-bottom: 1rem;
+    }
+
+    .tut-idx-sparkle-canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* Hero */
+    .tut-idx-hero {
+        position: relative;
+        z-index: 1;
+        padding: 2.25rem 0 1.5rem;
+        text-align: center;
+    }
+
+    .tut-idx-eyebrow {
+        display: inline-block;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #fff;
+        background: linear-gradient(135deg, #6b46c1, #b100a4);
+        padding: 0.35rem 0.9rem;
+        border-radius: 999px;
+        margin-bottom: 0.85rem;
+        box-shadow: 0 6px 18px rgba(107, 70, 193, 0.35);
+    }
+
+    .tut-idx-title {
+        font-size: clamp(2rem, 4.5vw, 3.1rem);
+        font-weight: 800;
+        margin: 0 auto 0.75rem;
+        background: linear-gradient(90deg, #6b46c1, #b100a4, #e6294b, #d98a1f, #6b46c1);
+        background-size: 300% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        animation: tutIdxGradientShift 6s ease-in-out infinite;
+    }
+
+    @@keyframes tutIdxGradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .tut-idx-lead {
+        max-width: 760px;
+        margin: 0 auto;
+        color: #495057;
+    }
+
+    /* Grid of topic cards */
+    .tut-idx-grid {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.1rem;
+    }
+
+    .tut-idx-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        padding: 1.15rem 1.25rem 1.3rem;
+        border-radius: 14px;
+        background: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        text-decoration: none;
+        color: inherit;
+        overflow: hidden;
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .tut-idx-card-glow {
+        position: absolute;
+        inset: -40%;
+        background: radial-gradient(circle at 50% 0%, rgba(107, 70, 193, 0.18), transparent 65%);
+        opacity: 0;
+        transition: opacity 0.35s ease;
+        pointer-events: none;
+    }
+
+    .tut-idx-card:hover,
+    .tut-idx-card:focus-visible {
+        transform: translateY(-5px) scale(1.015);
+        border-color: rgba(107, 70, 193, 0.45);
+        box-shadow: 0 14px 30px rgba(107, 70, 193, 0.22);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .tut-idx-card:hover .tut-idx-card-glow {
+        opacity: 1;
+    }
+
+    .tut-idx-card-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .tut-idx-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #fff;
+        background: linear-gradient(135deg, #343a40, #495057);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .tut-idx-card:hover .tut-idx-num {
+        transform: scale(1.12);
+        box-shadow: 0 0 0 4px rgba(107, 70, 193, 0.18);
+    }
+
+    .tut-idx-level {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--level-color);
+        border: 1px solid var(--level-color);
+        border-radius: 999px;
+        padding: 0.15rem 0.6rem;
+        white-space: nowrap;
+    }
+
+    .tut-idx-card-title {
+        position: relative;
+        display: inline-block;
+        font-size: 1.08rem;
+        font-weight: 600;
+        line-height: 1.35;
+        color: #212529;
+        transition: color 0.25s ease;
+    }
+
+    .tut-idx-card-title::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -3px;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #6b46c1, #b100a4);
+        transition: width 0.3s ease;
+    }
+
+    .tut-idx-card:hover .tut-idx-card-title {
+        color: #6b46c1;
+    }
+
+    .tut-idx-card:hover .tut-idx-card-title::after {
+        width: 100%;
+    }
+
+    .tut-idx-card-cta {
+        margin-top: auto;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #6b46c1;
+        opacity: 0;
+        transform: translateX(-6px);
+        transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .tut-idx-card-cta i {
+        margin-left: 0.3rem;
+        transition: transform 0.25s ease;
+    }
+
+    .tut-idx-card:hover .tut-idx-card-cta {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .tut-idx-card:hover .tut-idx-card-cta i {
+        transform: translateX(4px);
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .tut-idx-title {
+            animation: none;
+            background-position: 0% 50%;
+        }
+
+        .tut-idx-card,
+        .tut-idx-num,
+        .tut-idx-card-title,
+        .tut-idx-card-title::after,
+        .tut-idx-card-cta,
+        .tut-idx-card-cta i {
+            transition: none !important;
+        }
+
+        .tut-idx-card:hover {
+            transform: none;
+        }
+    }
+</style>
+
+<script>
+    (function () {
+        var wrap = document.getElementById('tutIdx');
+        var canvas = document.getElementById('tutIdxSparkleCanvas');
+        if (!wrap || !canvas) return;
+
+        var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduceMotion) return;
+
+        var ctx = canvas.getContext('2d');
+        var particles = [];
+        var lastSpawn = 0;
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        function resize() {
+            var rect = wrap.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        var colors = ['#b100a4', '#6b46c1', '#e6294b', '#d98a1f', '#1fa971'];
+
+        function spawn(x, y) {
+            for (var i = 0; i < 2; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 1.4,
+                    vy: (Math.random() - 0.5) * 1.4 - 0.3,
+                    size: Math.random() * 2.5 + 1.5,
+                    life: 0,
+                    maxLife: 40 + Math.random() * 20,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    spin: Math.random() * Math.PI
+                });
+            }
+        }
+
+        function onMove(e) {
+            var now = performance.now();
+            if (now - lastSpawn < 24) return;
+            lastSpawn = now;
+            var rect = wrap.getBoundingClientRect();
+            spawn(e.clientX - rect.left, e.clientY - rect.top);
+        }
+
+        wrap.addEventListener('mousemove', onMove);
+
+        function drawStar(p, alpha) {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.spin);
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = p.color;
+            var s = p.size;
+            ctx.beginPath();
+            for (var i = 0; i < 4; i++) {
+                ctx.rotate(Math.PI / 2);
+                ctx.moveTo(0, 0);
+                ctx.lineTo(s, s * 0.28);
+                ctx.lineTo(s * 2.4, 0);
+                ctx.lineTo(s, -s * 0.28);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function tick() {
+            var rect = wrap.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
+
+            for (var i = particles.length - 1; i >= 0; i--) {
+                var p = particles[i];
+                p.life++;
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.01;
+
+                var t = p.life / p.maxLife;
+                if (t >= 1) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+                var alpha = t < 0.15 ? t / 0.15 : 1 - (t - 0.15) / 0.85;
+                drawStar(p, Math.max(alpha, 0));
+            }
+
+            requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+    })();
+</script>
