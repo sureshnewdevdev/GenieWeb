@@ -1,4 +1,4 @@
-$path = "C:\Genie\GenieWeb\wwwroot\tutorials\calling-azure-openai-from-csharp.json"
+$path = "C:\Genie\GenieWeb\wwwroot\tutorials\enterprise-ai-integration-patterns.json"
 $raw = Get-Content $path -Raw -Encoding UTF8
 try { $j = $raw | ConvertFrom-Json } catch { "Valid JSON: NO - $($_.Exception.Message)"; exit 1 }
 
@@ -60,13 +60,12 @@ $glossText = (($j.sections | Where-Object key -eq "glossary").items | ForEach-Ob
 $ttText = ($j.tooltips.PSObject.Properties | ForEach-Object { "$($_.Name) $($_.Value)" }) -join " "
 
 $checks = [ordered]@{
-  "1 chat completion API " = "chat completion"
-  "2 embeddings API      " = "embedding"
-  "3 temperature         " = "(?i)temperature"
-  "4 max tokens          " = "(?i)max tokens"
-  "5 errors and retries  " = "(?i)backoff"
-  "6 console app build   " = "(?i)console app"
-  "7 config and API keys " = "(?i)API key"
+  "1 dependency injection     " = "(?i)dependency injection"
+  "2 structured logging       " = "(?i)structured logging"
+  "3 API keys and secrets     " = "(?i)Key Vault"
+  "4 service-layer abstraction" = "(?i)service layer"
+  "5 secure configuration     " = "(?i)options pattern"
+  "6 resilience retry/timeout " = "(?i)circuit breaker"
 }
 foreach ($k in $checks.Keys) {
   $t = $checks[$k]

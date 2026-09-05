@@ -1,0 +1,580 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Enterprise-Ready AI Integration Patterns",
+  "slug": "enterprise-ai-integration-patterns",
+  "level": "Intermediate",
+  "codeLanguage": "C#",
+  "tutorialNumber": 13,
+  "totalTutorials": 27,
+  "prev": "function-calling-and-tools",
+  "next": "ai-in-aspnet-web-apps",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Enterprise-Ready AI Integration Patterns"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "Dependency injection for AI services",
+    "Structured logging",
+    "Securing API keys and secrets",
+    "Introducing a service-layer abstraction",
+    "Secure configuration management",
+    "Resilience: retries and timeouts"
+  ],
+  "tooltips": {
+    "dependency injection": "A pattern where a container constructs objects and supplies their dependencies (via constructors), instead of classes creating what they need themselves.",
+    "service lifetime": "How long the DI container keeps an instance: singleton (one for the app), scoped (one per request), or transient (new every resolve).",
+    "singleton": "A single shared instance for the application's lifetime — the correct lifetime for the thread-safe Azure OpenAI client.",
+    "service layer": "An application-owned interface (e.g. IChatService) whose methods speak your domain, hiding the AI SDK's types behind one swappable boundary.",
+    "options pattern": "Binding a configuration section to a typed class and injecting it via IOptions<T>, with validation at startup instead of failures at first use.",
+    "structured logging": "Logging events as message templates with named properties ({OrderNumber}) so log systems can filter and aggregate on fields, not parse strings.",
+    "correlation id": "An identifier stamped on every log entry of one logical operation so a single user request can be traced across services and AI calls.",
+    "ILogger": "The .NET logging abstraction (ILogger<T>) injected into services; providers route its structured events to console, files, or telemetry systems.",
+    "configuration provider": "One source of configuration values (JSON file, environment variables, user secrets, Key Vault); the host layers providers so later ones override earlier ones.",
+    "user secrets": "The .NET development-time secret store (dotnet user-secrets), living in the user profile so secrets never enter the repository.",
+    "Key Vault": "Azure's managed secret store: access-controlled, audited, and rotatable — the production home for any API key you cannot eliminate.",
+    "Managed Identity": "An Azure-issued identity for your app; with a role assignment it authenticates to Azure OpenAI or Key Vault with no stored secret at all.",
+    "secret rotation": "Replacing credentials on a schedule (or after exposure) so a leaked key has a short useful life; automated when secrets live in Key Vault.",
+    "timeout": "The maximum time your code waits for a call before cancelling it — turning an indefinite hang into a fast, handleable failure.",
+    "exponential backoff": "Retry delays that double after each failed attempt (1s, 2s, 4s), plus jitter, giving an overloaded service room to recover.",
+    "circuit breaker": "A resilience pattern that stops calling a repeatedly failing service for a cooldown period, failing fast instead of piling on.",
+    "transient fault": "A temporary failure (HTTP 429, brief 5xx) likely to succeed on retry — the only kind of error a retry policy should touch.",
+    "Polly": "The standard .NET resilience library: retry, timeout, and circuit breaker policies composed into pipelines, integrated with HttpClientFactory and DI.",
+    "mock": "A test double standing in for a real dependency; a service-layer interface lets tests mock the AI service and run without network calls or cost."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview: From Working Demo to Production Citizen",
+      "content": [
+        { "type": "paragraph", "text": "Tutorials 11 and 12 left you with something valuable and fragile: a console app that calls Azure OpenAI, uses tools, and handles a 429 — with the client built by hand, the configuration read inline, errors logged with Console.WriteLine, and everything welded together in Program.cs. That shape is perfect for learning and unacceptable for a team codebase. An AI call is just another remote dependency, and enterprises already know how to integrate remote dependencies well." },
+        { "type": "paragraph", "text": "This tutorial applies that knowledge to AI: a service layer that hides the SDK behind an interface your domain understands; dependency injection to construct and share the client correctly; the options pattern and layered configuration providers for secure configuration management; Key Vault and Managed Identity for securing API keys and secrets; structured logging so every AI call is traceable and measurable; and resilience — timeouts, retries with exponential backoff, and the circuit breaker — so a slow or rate-limited AI service degrades your app gracefully instead of hanging it." },
+        { "type": "note", "style": "info", "text": "Nothing in this tutorial is AI-exotic. That is the point: the fastest route to production-ready AI is treating the model as a remote service and applying the .NET patterns your team already trusts." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Design a service-layer abstraction (IChatService) that isolates AI SDK types behind domain-shaped methods and makes them mockable in tests.",
+          "Register AI services with dependency injection using correct service lifetimes — a singleton client — and constructor injection throughout.",
+          "Bind AI settings with the options pattern, layer configuration providers correctly, and validate configuration at startup.",
+          "Secure API keys with user secrets in development and Key Vault plus Managed Identity in production, with secret rotation in mind.",
+          "Emit structured logging for every AI call — correlation ids, latency, token usage — without leaking prompts or secrets into logs.",
+          "Add resilience with timeouts, retries with exponential backoff for transient faults, and a circuit breaker for sustained failure."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorials 11–12: calling chat completions from C#, the orchestration loop for tools, and basic retry-on-429 handling.",
+          "Working familiarity with ASP.NET Core or the .NET Generic Host: Program.cs, builder.Services, appsettings.json.",
+          "C# interfaces and constructor injection as language features (this tutorial supplies the architectural discipline around them).",
+          "Your Azure OpenAI endpoint and deployment from earlier tutorials, with credentials currently in user secrets or environment variables."
+        ] },
+        { "type": "note", "style": "tip", "text": "The step-by-step section refactors tutorial 12's order assistant. Having that code open in a second window makes the before/after contrast vivid." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "Key Concepts: The Six Disciplines",
+      "content": [
+        { "type": "paragraph", "text": "Each subtopic of this tutorial answers one production question. Who constructs the AI client, and how many exist? — dependency injection with a singleton lifetime. What does the rest of the codebase call? — a service layer interface, not the SDK. Where do settings live? — layered configuration providers bound through the options pattern. Where does the API key live? — ideally nowhere (Managed Identity); otherwise Key Vault with secret rotation. What happened at runtime? — structured logging with correlation ids. What when the service is slow or failing? — timeouts, retries, and a circuit breaker." },
+        { "type": "table", "headers": ["Discipline", "Failure it prevents"], "rows": [
+          ["Service layer abstraction", "SDK types leaking through the codebase; untestable AI features; a rewrite when the SDK or provider changes"],
+          ["Dependency injection", "Clients constructed per request; socket exhaustion; hidden dependencies impossible to replace in tests"],
+          ["Options pattern + config layering", "Settings scattered as magic strings; a missing key discovered by the first user instead of at startup"],
+          ["Key Vault / Managed Identity", "Credentials in the repository; a leaked key with unlimited lifetime; no audit of who read what"],
+          ["Structured logging", "Un-debuggable incidents; no cost visibility; grep-only logs that cannot answer 'which requests were slow?'"],
+          ["Resilience (timeout/retry/breaker)", "One hung AI call pinning a thread; retry storms against a rate-limited deployment; cascading failure"]
+        ] },
+        { "type": "paragraph", "text": "The six reinforce each other: DI is what lets the resilience policy wrap the service layer; the options pattern is what lets Key Vault swap in for user secrets without code changes; structured logging is what proves the retries and the circuit breaker are doing their jobs. You will build them as one coherent composition in the step-by-step section." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Deep Dive 1: The Service-Layer Abstraction",
+      "content": [
+        { "type": "paragraph", "text": "The first refactoring is architectural: no controller, page, or domain class should ever see a ChatClient, a ChatMessage, or a BinaryData of tool arguments. Instead the application defines a service layer — an interface owned by your code, speaking your domain: Task<OrderAnswer> AskAboutOrderAsync(string question, CancellationToken ct). One implementation class translates between that domain language and the SDK: building messages, running the orchestration loop from tutorial 12, and mapping results back to plain domain types." },
+        { "type": "paragraph", "text": "The payoffs compound. Testability: consumers depend on the interface, so unit tests substitute a mock and run instantly, offline, at zero token cost — without it, every test of an AI feature is a slow, flaky, billable network call. Swappability: when the SDK's types shift between versions (they have), or a second model provider appears, or tutorial 17 replaces the hand-rolled loop with Semantic Kernel, the change is confined to one class. Reviewability: prompt text, tool definitions, and parameters live in one place a reviewer can audit, not scattered across features. Policy: temperature, max tokens, and the system message become decisions the service makes consistently, not copy-pasted defaults." },
+        { "type": "animation", "title": "One request through the layered design", "intro": "The layers each own one concern; the SDK appears in exactly one of them.", "nodes": [
+          { "id": "ui", "label": "Controller / UI", "sub": "domain call" },
+          { "id": "iface", "label": "IChatService", "sub": "the abstraction" },
+          { "id": "impl", "label": "ChatService", "sub": "SDK + prompts" },
+          { "id": "client", "label": "AzureOpenAIClient", "sub": "singleton" },
+          { "id": "aoai", "label": "Azure OpenAI", "sub": "deployment" }
+        ], "steps": [
+          { "highlight": ["ui"], "caption": "A controller calls AskAboutOrderAsync(question) — domain types in, domain types out. It cannot tell an AI model is involved." },
+          { "highlight": ["iface"], "caption": "The call goes through the interface. In tests, a mock implements this same interface and the real stack below never runs." },
+          { "highlight": ["impl"], "caption": "ChatService builds the system message, runs the tool loop, applies temperature and token policy — every SDK detail lives here and only here." },
+          { "highlight": ["client"], "caption": "The shared singleton client, injected by the container, carries the request out — one instance, pooled connections, for the whole app." },
+          { "highlight": ["impl", "ui"], "caption": "The reply is mapped back to a plain OrderAnswer record and flows up. Swapping the SDK, the provider, or the framework touches one class." }
+        ] },
+        { "type": "note", "style": "tip", "text": "Design the interface around what callers need ('answer an order question'), not around the SDK ('send messages'). If the interface has parameters named temperature or messages, the abstraction is leaking." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Deep Dive 2: Dependency Injection for AI Services",
+      "content": [
+        { "type": "paragraph", "text": "Dependency injection inverts construction: classes declare what they need in their constructors, and the container builds the object graph at startup. For AI services the pattern resolves three practical questions. Construction: the AzureOpenAIClient needs an endpoint and a credential — that wiring happens once, in the composition root, not wherever someone needs a completion. Sharing: the client is thread-safe and manages HTTP connections, so its service lifetime must be singleton; per-request construction wastes sockets and handshakes and can exhaust the connection pool under load. Substitution: because consumers receive IChatService through their constructors, tests and future implementations slot in without touching consumers." },
+        { "type": "code", "language": "csharp", "title": "Composition root: registering the AI stack", "code": [
+          "// Program.cs — the only place that knows how the AI stack is assembled.",
+          "var builder = Host.CreateApplicationBuilder(args);",
+          "",
+          "// 1. Options: bind and validate the AzureOpenAI section (deep-dive 3).",
+          "builder.Services.AddOptions<AzureOpenAIOptions>()",
+          "    .Bind(builder.Configuration.GetSection(AzureOpenAIOptions.SectionName))",
+          "    .ValidateDataAnnotations()",
+          "    .ValidateOnStart();   // fail at startup, not at first user request",
+          "",
+          "// 2. The SDK client: one singleton for the whole application.",
+          "builder.Services.AddSingleton(sp =>",
+          "{",
+          "    var opts = sp.GetRequiredService<IOptions<AzureOpenAIOptions>>().Value;",
+          "    return new AzureOpenAIClient(new Uri(opts.Endpoint),",
+          "        new AzureKeyCredential(opts.ApiKey));   // or DefaultAzureCredential — see deep-dive 3",
+          "});",
+          "",
+          "// 3. The service layer: consumers depend on the interface only.",
+          "builder.Services.AddSingleton<IChatService, ChatService>();",
+          "",
+          "var app = builder.Build();"
+        ] },
+        { "type": "paragraph", "text": "Lifetime reasoning for the rest of the stack: the service-layer class is stateless (all per-call state lives in locals), so it can be a singleton too; anything holding per-request state — a conversation history builder, say — belongs scoped in a web app. The rule that catches most mistakes: a singleton may not depend on a scoped service. Keep the AI stack stateless-singleton and inject per-call context (user id, cancellation token) as method parameters instead." },
+        { "type": "note", "style": "warning", "text": "Never construct AzureOpenAIClient inside a request path or a loop. If you see 'new AzureOpenAIClient' outside the composition root, that is the code review finding." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Deep Dive 3: Secure Configuration and Secrets",
+      "content": [
+        { "type": "paragraph", "text": "Secure configuration management has two halves: how settings reach the app, and where secrets live. The first half is the host's configuration provider chain: appsettings.json (safe defaults — endpoint, deployment name, temperature), appsettings.{Environment}.json, user secrets in development, environment variables, and finally a Key Vault provider in production. Later providers override earlier ones, so the same key — AzureOpenAI:ApiKey — can come from user secrets on a laptop and from Key Vault in production with zero code differences. The options pattern then binds the merged result to a typed, validated class, so a missing endpoint stops the app at startup with a clear message instead of surfacing as a 401 at 2 a.m." },
+        { "type": "animation", "title": "Where AzureOpenAI:ApiKey comes from", "intro": "One key, five possible sources, resolved in order at startup.", "nodes": [
+          { "id": "json", "label": "appsettings.json", "sub": "no secrets here" },
+          { "id": "usec", "label": "User secrets", "sub": "dev laptop" },
+          { "id": "env", "label": "Environment vars", "sub": "CI / containers" },
+          { "id": "kv", "label": "Key Vault", "sub": "production" },
+          { "id": "opts", "label": "IOptions<T>", "sub": "typed + validated" }
+        ], "steps": [
+          { "highlight": ["json"], "caption": "appsettings.json carries non-secret defaults: endpoint, deployment name, temperature. The ApiKey line does not exist here — ever." },
+          { "highlight": ["usec"], "caption": "On a developer machine, user secrets supplies the key from the user profile — outside the repository, immune to accidental commits." },
+          { "highlight": ["env"], "caption": "In CI and containers, an environment variable injected by the pipeline overrides anything before it." },
+          { "highlight": ["kv"], "caption": "In production the Key Vault provider loads secrets over a Managed Identity connection — access-controlled, audited, and rotatable." },
+          { "highlight": ["opts"], "caption": "The merged configuration binds to AzureOpenAIOptions, data annotations validate it, and ValidateOnStart fails fast if anything is missing. Consumers see one clean typed object." }
+        ] },
+        { "type": "paragraph", "text": "The second half is minimizing what counts as a secret at all. The strongest move is Managed Identity: the app authenticates to Azure OpenAI (and to Key Vault itself) as an Azure identity via DefaultAzureCredential, a role assignment grants access, and no API key exists anywhere in the system. Where a key is unavoidable — third-party services, local tooling — Key Vault gives it an access policy, an audit log, and automated secret rotation, so exposure has a short shelf life. The hierarchy to remember: no secret beats a vaulted secret beats an environment secret beats anything in a file — and a secret in source control is an incident, not a configuration choice." },
+        { "type": "note", "style": "warning", "text": "Rotation is only painless if nothing caches the key forever. Read secrets through the configuration/options system (which can reload), not into a static field at startup." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Deep Dive 4: Resilience and Structured Logging",
+      "content": [
+        { "type": "paragraph", "text": "AI calls are the slowest, most rate-limited remote calls most apps make, which makes two runtime disciplines mandatory. Resilience first. A timeout converts a hung call into a prompt, handleable failure — without one, a stalled request pins a thread and a user for minutes; generation is slow, so budget generously (say 30–60 seconds) but finitely, and flow a CancellationToken through every async signature so cancellation actually reaches the SDK. Retries handle transient faults — 429 and 5xx — with exponential backoff and jitter, capped at a few attempts, exactly as built in tutorial 11. The circuit breaker completes the set: when failures are sustained rather than momentary, it opens after a threshold and fails fast for a cooldown, sparing the struggling deployment a retry storm and sparing your users the full timeout wait; after the cooldown it lets a trial request probe recovery." },
+        { "type": "animation", "title": "The resilience pipeline around one AI call", "intro": "Timeout, retry, and circuit breaker compose into one pipeline — each handles a different failure shape.", "nodes": [
+          { "id": "svc", "label": "ChatService", "sub": "makes the call" },
+          { "id": "brk", "label": "Circuit breaker", "sub": "open = fail fast" },
+          { "id": "rty", "label": "Retry + backoff", "sub": "transient faults" },
+          { "id": "tmo", "label": "Timeout", "sub": "bounded wait" },
+          { "id": "aoai", "label": "Azure OpenAI", "sub": "deployment" }
+        ], "steps": [
+          { "highlight": ["svc", "brk"], "caption": "The call enters the pipeline. The breaker is closed (healthy), so it passes through while the breaker counts outcomes." },
+          { "highlight": ["rty", "tmo", "aoai"], "caption": "The attempt runs under a timeout. A 429 comes back — a transient fault — so the retry layer waits with exponential backoff and tries again." },
+          { "highlight": ["tmo", "aoai"], "caption": "The retry succeeds within its timeout. Total latency: one backoff pause. The user never saw an error." },
+          { "highlight": ["brk"], "caption": "Later, the deployment degrades: attempt after attempt times out. The breaker's failure threshold trips and the circuit opens." },
+          { "highlight": ["svc", "brk"], "caption": "While open, calls fail immediately with a clear exception — no thread pinned for 60 seconds, no retry storm. The app shows its fallback ('assistant temporarily unavailable')." },
+          { "highlight": ["brk", "aoai"], "caption": "After the cooldown, one probe request goes through. Success closes the circuit and normal traffic resumes; failure keeps it open another interval." }
+        ] },
+        { "type": "paragraph", "text": "Structured logging is how you see any of this working. The principle: log message templates with named properties — logger.LogInformation(\"AI call {Operation} finished in {ElapsedMs} ms using {TotalTokens} tokens\", ...) — never interpolated strings. The logging system stores Operation, ElapsedMs, and TotalTokens as fields, so questions like 'p95 latency of order questions this week' or 'token spend by feature' become queries, not archaeology. Stamp every entry with a correlation id (ASP.NET Core's request id, or an Activity/trace id) so one user request's completion calls, tool executions, retries, and breaker events line up as one story. And log about prompts — lengths, token counts, deployment, finish reason — not the prompt text itself, which is user data; if you must capture bodies for debugging, gate it behind a flag and redact." },
+        { "type": "note", "style": "tip", "text": "Log every retry attempt and every breaker state change at Warning level. When cost or latency regresses, the first question is 'did retries spike?' — your logs should answer it in one query." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Ecosystem and Tools",
+      "content": [
+        { "type": "table", "headers": ["Tool / package", "Role in the enterprise AI stack"], "rows": [
+          ["Microsoft.Extensions.DependencyInjection", "The container: service registration, lifetimes, constructor injection — built into ASP.NET Core and the Generic Host"],
+          ["Microsoft.Extensions.Options (+ DataAnnotations)", "The options pattern: typed binding, validation, ValidateOnStart"],
+          ["Microsoft.Extensions.Logging / ILogger<T>", "Structured logging abstraction; providers route events to console, files, or telemetry backends"],
+          ["Azure.Extensions.AspNetCore.Configuration.Secrets", "The Key Vault configuration provider — vault secrets appear as ordinary configuration keys"],
+          ["Azure.Identity (DefaultAzureCredential)", "Managed Identity locally-and-in-cloud credential chain for keyless auth to Azure OpenAI and Key Vault"],
+          ["Polly (and Microsoft.Extensions.Resilience)", "Retry, timeout, and circuit breaker policies composed into pipelines instead of hand-rolled loops"],
+          ["OpenTelemetry / Application Insights", "Where structured logs and correlation ids pay off: tracing, dashboards, alerts (deepened in tutorial 25)"],
+          ["Moq / NSubstitute", "Mocking libraries that implement IChatService in tests — possible only because the service layer exists"]
+        ] },
+        { "type": "paragraph", "text": "Everything in this table is standard .NET infrastructure — none of it was invented for AI. Polly deserves a special note: this course taught the retry loop by hand so you understand it, but production code should generally express timeout, retry, and circuit breaker as a composed Polly pipeline registered in DI, giving you tested policies, jitter strategies, and telemetry hooks for free." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "Use Cases",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Team onboarding: a new developer adds an AI feature by injecting IChatService — without reading SDK docs, holding a key, or knowing which deployment is live.",
+          "Provider migration: switching a workload to a different model deployment (or a second provider for comparison) by changing one implementation class and zero consumers.",
+          "Cost governance: structured logs of token usage per operation feed a dashboard that catches a prompt change doubling spend — the day it ships, not on the invoice.",
+          "Incident response: a correlation id from one user complaint pulls up the exact request's retries, breaker state, latency, and finish reason across services.",
+          "Security review: the audit is short because the answer is boring — no key in code, user secrets in dev, Key Vault plus Managed Identity in production, rotation automated.",
+          "Load spikes: a marketing campaign triples traffic; backoff absorbs the 429s, the breaker sheds load when a deployment saturates, and the app degrades to a friendly fallback instead of a hung UI.",
+          "Test suites: hundreds of unit tests run against a mock of the service layer in seconds — zero tokens billed, zero network flakiness in CI."
+        ] }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples",
+      "content": [
+        { "type": "paragraph", "text": "These examples form one coherent stack: an options class, a service-layer interface with its SDK-facing implementation, and the logging plus resilience wrapper. Deep-dive 2 already showed the Program.cs registration that wires them together." },
+        { "type": "code", "language": "csharp", "title": "Example 1 — Options class: typed, validated configuration", "code": [
+          "using System.ComponentModel.DataAnnotations;",
+          "",
+          "public sealed class AzureOpenAIOptions",
+          "{",
+          "    public const string SectionName = \"AzureOpenAI\";",
+          "",
+          "    [Required, Url]",
+          "    public string Endpoint { get; set; } = string.Empty;",
+          "",
+          "    [Required]",
+          "    public string ChatDeployment { get; set; } = string.Empty;",
+          "",
+          "    // Empty when using Managed Identity — see the factory in Program.cs.",
+          "    public string ApiKey { get; set; } = string.Empty;",
+          "",
+          "    [Range(0.0, 2.0)]",
+          "    public float Temperature { get; set; } = 0.2f;",
+          "",
+          "    [Range(1, 4000)]",
+          "    public int MaxOutputTokens { get; set; } = 400;",
+          "",
+          "    [Range(1, 10)]",
+          "    public int MaxRetryAttempts { get; set; } = 4;",
+          "",
+          "    [Range(1, 300)]",
+          "    public int TimeoutSeconds { get; set; } = 45;",
+          "}"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 2 — The service layer: domain-shaped interface, SDK-shaped implementation", "code": [
+          "// The abstraction consumers depend on: no SDK types anywhere in sight.",
+          "public interface IChatService",
+          "{",
+          "    Task<OrderAnswer> AskAboutOrderAsync(string question, CancellationToken ct = default);",
+          "}",
+          "",
+          "public sealed record OrderAnswer(string Text, bool Truncated);",
+          "",
+          "// The one class allowed to know the SDK exists.",
+          "public sealed class ChatService : IChatService",
+          "{",
+          "    private readonly ChatClient _chat;",
+          "    private readonly AzureOpenAIOptions _options;",
+          "    private readonly ILogger<ChatService> _logger;",
+          "",
+          "    public ChatService(AzureOpenAIClient client,",
+          "                       IOptions<AzureOpenAIOptions> options,",
+          "                       ILogger<ChatService> logger)",
+          "    {",
+          "        _options = options.Value;",
+          "        _chat = client.GetChatClient(_options.ChatDeployment);",
+          "        _logger = logger;",
+          "    }",
+          "",
+          "    public async Task<OrderAnswer> AskAboutOrderAsync(string question, CancellationToken ct = default)",
+          "    {",
+          "        var messages = new ChatMessage[]",
+          "        {",
+          "            new SystemChatMessage(\"You are an order-support assistant. \" +",
+          "                                  \"Use tools for order data; never invent details.\"),",
+          "            new UserChatMessage(question)",
+          "        };",
+          "        var chatOptions = new ChatCompletionOptions",
+          "        {",
+          "            Temperature = _options.Temperature,",
+          "            MaxOutputTokenCount = _options.MaxOutputTokens",
+          "        };",
+          "",
+          "        ChatCompletion completion =",
+          "            await CompleteResilientlyAsync(messages, chatOptions, ct);   // Example 3",
+          "",
+          "        return new OrderAnswer(",
+          "            Text: completion.Content[0].Text,",
+          "            Truncated: completion.FinishReason == ChatFinishReason.Length);",
+          "    }",
+          "}"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 3 — Resilience + structured logging around the SDK call", "code": [
+          "private async Task<ChatCompletion> CompleteResilientlyAsync(",
+          "    ChatMessage[] messages, ChatCompletionOptions chatOptions, CancellationToken ct)",
+          "{",
+          "    var jitter = Random.Shared;",
+          "    for (int attempt = 1; ; attempt++)",
+          "    {",
+          "        // Timeout: this attempt gets a bounded window, linked to the caller's token.",
+          "        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);",
+          "        timeoutCts.CancelAfter(TimeSpan.FromSeconds(_options.TimeoutSeconds));",
+          "",
+          "        var watch = System.Diagnostics.Stopwatch.StartNew();",
+          "        try",
+          "        {",
+          "            ChatCompletion completion = await _chat.CompleteChatAsync(",
+          "                messages, chatOptions, timeoutCts.Token);",
+          "",
+          "            // Structured logging: named properties, queryable fields — no prompt text.",
+          "            _logger.LogInformation(",
+          "                \"AI call {Operation} ok in {ElapsedMs} ms: {PromptTokens}+{CompletionTokens} tokens, finish {FinishReason}, attempt {Attempt}\",",
+          "                nameof(AskAboutOrderAsync), watch.ElapsedMilliseconds,",
+          "                completion.Usage.InputTokenCount, completion.Usage.OutputTokenCount,",
+          "                completion.FinishReason, attempt);",
+          "            return completion;",
+          "        }",
+          "        catch (ClientResultException ex)",
+          "            when ((ex.Status == 429 || ex.Status >= 500) && attempt < _options.MaxRetryAttempts)",
+          "        {",
+          "            // Transient fault: exponential backoff with jitter, and a Warning you can query.",
+          "            int delayMs = (int)(Math.Pow(2, attempt - 1) * 1000) + jitter.Next(0, 250);",
+          "            _logger.LogWarning(",
+          "                \"AI call {Operation} transient {Status} on attempt {Attempt}; retrying in {DelayMs} ms\",",
+          "                nameof(AskAboutOrderAsync), ex.Status, attempt, delayMs);",
+          "            await Task.Delay(delayMs, ct);",
+          "        }",
+          "        catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested && !ct.IsCancellationRequested)",
+          "        {",
+          "            _logger.LogWarning(\"AI call {Operation} timed out after {TimeoutSeconds} s on attempt {Attempt}\",",
+          "                nameof(AskAboutOrderAsync), _options.TimeoutSeconds, attempt);",
+          "            if (attempt >= _options.MaxRetryAttempts) throw;",
+          "        }",
+          "    }",
+          "}"
+        ] },
+        { "type": "note", "style": "info", "text": "In production, prefer expressing this method as a Polly resilience pipeline (timeout + retry + circuit breaker) registered in DI — same behavior, tested implementation, breaker included. The hand-rolled version is shown so every moving part is visible." }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step by Step: Refactoring the Order Assistant to Enterprise Shape",
+      "content": [
+        { "type": "paragraph", "text": "This walkthrough takes tutorial 12's single-file order assistant and rebuilds it with every discipline from this tutorial. The observable behavior does not change — that is the point of a refactoring — but every seam a production team needs appears." },
+        { "type": "list", "style": "numbered", "items": [
+          "Create the skeleton: 'dotnet new console -n OrderAssistant', then add Microsoft.Extensions.Hosting, Azure.AI.OpenAI, and Azure.Identity. The Generic Host brings configuration, DI, and logging in one builder.",
+          "Add AzureOpenAIOptions (Example 1). Put Endpoint, ChatDeployment, Temperature, and MaxOutputTokens in appsettings.json under an 'AzureOpenAI' section — and confirm the section contains no ApiKey line.",
+          "Move the key: 'dotnet user-secrets init', then 'dotnet user-secrets set AzureOpenAI:ApiKey <your-key>'. Delete any environment-variable reading code left from tutorial 11.",
+          "Register the stack in Program.cs exactly as in deep-dive 2: AddOptions with ValidateDataAnnotations and ValidateOnStart, the singleton AzureOpenAIClient factory, and AddSingleton<IChatService, ChatService>.",
+          "Create the service layer (Example 2): IChatService plus OrderAnswer in their own files; move the system message, the tool definitions, and the orchestration loop from Program.cs into ChatService. Program.cs shrinks to host setup plus a read-ask-print loop that only sees IChatService.",
+          "Wrap the SDK call with Example 3's resilience and logging: timeout from options, exponential backoff on 429/5xx, structured Warning per retry, structured Information per success with token counts.",
+          "Run 'dotnet run' and ask about ORD-1042. Confirm the answer still works — and that the console now shows a structured log line with latency, token counts, and finish reason.",
+          "Prove fail-fast: temporarily rename Endpoint in appsettings.json and run again. The host must refuse to start with a validation error naming the missing field — that is ValidateOnStart earning its keep.",
+          "Prove testability: add an xUnit test project referencing the app, write a FakeChatService implementing IChatService that returns a canned OrderAnswer, and unit-test the console loop's truncation warning logic with zero network calls.",
+          "Sketch production: add the Key Vault configuration provider behind an if (builder.Environment.IsProduction()) guard, using DefaultAzureCredential — the options class and every consumer stay untouched, which is the layering payoff.",
+          "Commit, then diff against tutorial 12's version: same feature, but now the SDK lives in one file, the key lives in no file, and every AI call leaves a queryable trace."
+        ] },
+        { "type": "note", "style": "tip", "text": "Keep this refactored project — tutorial 14 lifts it into an ASP.NET Core web app, where scoped lifetimes, per-request cancellation, and the middleware pipeline make these seams pay off again." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "SDK naming caveat: examples target Azure.AI.OpenAI 2.x (AzureOpenAIClient, ChatClient, CompleteChatAsync with a CancellationToken, ChatCompletion.Usage.InputTokenCount/OutputTokenCount, ClientResultException.Status). Names shift between versions — if a member does not compile, check the package's current samples; the pattern stands even where a property name moved.",
+          "The hand-rolled resilience in Example 3 omits a real circuit breaker; breakers need shared state across calls and are genuinely easier to get right with Polly than by hand. Treat Example 3 as pedagogy, Polly as production.",
+          "Timeouts cancel your wait, not the server's work — a cancelled generation may still bill tokens for what was produced before cancellation reached it.",
+          "Retries interact with cost and idempotency: a retried completion is a second billable call, and a retried tool-using conversation may re-execute tools — another reason tool implementations must be idempotent (tutorial 12).",
+          "ValidateOnStart catches missing configuration, not wrong configuration — a valid-looking endpoint for the wrong resource still fails at first call. A startup health probe that makes one cheap real call closes that gap.",
+          "Key Vault adds a startup dependency and latency, and cached secrets mean rotation is not instantaneous — understand your provider's reload behavior before rotating under load.",
+          "Structured logging of token counts is not a billing system; reconcile against the portal's usage data. And logging prompt bodies, even truncated, can put user data in logs — default to metadata only.",
+          "DI lifetimes shown here assume the stateless-singleton service design from deep-dive 2; if you add per-conversation state to ChatService, its lifetime (and thread safety) must be redesigned, not just re-registered."
+        ] }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "One interface, one implementation file, zero SDK types outside it — enforce with code review and, at scale, an architecture test that fails on forbidden references.",
+          "Register the AI client once as a singleton in the composition root; inject everything, construct nothing inline.",
+          "Bind all AI settings through the options pattern with DataAnnotations and ValidateOnStart; treat a magic string deployment name in code as a bug.",
+          "Follow the secrets hierarchy: Managed Identity if possible, Key Vault if not, user secrets in development — and never a secret in appsettings.json or source.",
+          "Flow CancellationToken through every async AI signature, and give every call a finite timeout.",
+          "Retry only transient faults, with exponential backoff, jitter, and a bounded attempt count; add a circuit breaker (via Polly) for sustained failure.",
+          "Log structured events for every call — operation, latency, token counts, finish reason, attempt — with a correlation id, and never log prompt text or keys.",
+          "Unit-test consumers against a mock of the service layer; keep one small integration test that exercises the real deployment nightly, not per-commit."
+        ] },
+        { "type": "table", "headers": ["Common mistake", "Do this instead"], "rows": [
+          ["new AzureOpenAIClient(...) inside a request handler", "Resolve the singleton from DI; construction belongs to the composition root"],
+          ["IChatService exposing messages, temperature, or SDK types", "Domain-shaped methods; policy decided inside the service, not by callers"],
+          ["ApiKey sitting in appsettings.json 'temporarily'", "User secrets today, Key Vault or Managed Identity in production — no exceptions"],
+          ["logger.LogInformation($\"call took {ms} ms\")", "Message templates with named properties — interpolation destroys queryability"],
+          ["Infinite patience: no timeout on AI calls", "Bounded timeout linked to the caller's CancellationToken; fail fast, tell the user"],
+          ["Testing AI features only against the live service", "Mock the interface for unit tests; reserve live calls for a thin integration suite"]
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz: Enterprise AI Integration Patterns",
+      "items": [
+        { "number": 1, "question": "What is the correct DI service lifetime for AzureOpenAIClient, and why?", "options": { "A": "Transient, so each request gets a fresh connection", "B": "Scoped, to match the web request lifecycle", "C": "Singleton, because it is thread-safe and manages pooled HTTP connections", "D": "It should not be in the container at all" }, "correctAnswer": "C", "explanation": "The client is designed to be created once and shared: it is thread-safe and reuses connections. Per-request construction wastes handshakes and can exhaust sockets under load — the classic HttpClient mistake repeated with an AI SDK." },
+        { "number": 2, "question": "What is the primary purpose of a service-layer abstraction like IChatService?", "options": { "A": "To make AI calls run faster", "B": "To isolate SDK types behind a domain-shaped interface that consumers depend on", "C": "To encrypt prompts before sending them", "D": "To avoid needing dependency injection" }, "correctAnswer": "B", "explanation": "The interface is the seam: consumers speak domain language, one implementation speaks SDK, and tests substitute a mock. SDK upgrades, provider swaps, and framework migrations (like moving to Semantic Kernel) then touch a single class." },
+        { "number": 3, "question": "Which benefit does the service layer provide for testing specifically?", "options": { "A": "Tests can mock IChatService and run offline with zero token cost", "B": "Tests automatically get a free Azure OpenAI quota", "C": "The interface makes integration tests unnecessary", "D": "It lets tests share one live conversation" }, "correctAnswer": "A", "explanation": "Because consumers depend on the interface, a test double slots in without network access. Without the seam, every test of an AI feature is a slow, flaky, billable live call. A thin integration suite still exercises the real service — separately." },
+        { "number": 4, "question": "In the options pattern, what does ValidateOnStart change?", "options": { "A": "It reloads configuration when files change", "B": "Invalid or missing settings fail at application startup instead of at first use", "C": "It encrypts the bound options class", "D": "It merges appsettings.json with user secrets" }, "correctAnswer": "B", "explanation": "Binding alone defers errors until something reads the options — often the first user request. ValidateOnStart runs the validations (e.g. DataAnnotations) during startup, so a missing endpoint stops deployment with a clear message." },
+        { "number": 5, "question": "Configuration providers are layered: appsettings.json, then user secrets (dev), then environment variables, then Key Vault. Which value wins for a key present in several?", "options": { "A": "The first provider registered", "B": "appsettings.json always wins", "C": "The last provider registered — later sources override earlier ones", "D": "The host throws on duplicates" }, "correctAnswer": "C", "explanation": "Later providers override earlier ones by design. That is what lets the same key come from user secrets on a laptop and Key Vault in production with no code changes — the environments differ only in which provider supplies the final value." },
+        { "number": 6, "question": "Where should the Azure OpenAI API key NEVER appear?", "options": { "A": "The user secrets store", "B": "A Key Vault secret", "C": "appsettings.json committed to source control", "D": "A CI pipeline's secret variable" }, "correctAnswer": "C", "explanation": "Anything committed to the repository is exposed to everyone with repo access, forever (history included). User secrets, Key Vault, and pipeline secrets all live outside source control — a key in a committed file is an incident, not a configuration choice." },
+        { "number": 7, "question": "What advantage does Managed Identity have over storing the key in Key Vault?", "options": { "A": "It bypasses the deployment's rate limits", "B": "No secret exists at all — Azure issues and rotates the identity's credentials automatically", "C": "It makes completions cheaper per token", "D": "It removes the need for role assignments" }, "correctAnswer": "B", "explanation": "Key Vault protects a secret that still exists and must be fetched and rotated. Managed Identity eliminates the secret: the app authenticates as an Azure identity via DefaultAzureCredential, with access granted by a role assignment — nothing to leak." },
+        { "number": 8, "question": "Why is secret rotation important even for keys stored securely?", "options": { "A": "Rotated keys get higher quotas", "B": "It limits the useful lifetime of any leaked or exposed credential", "C": "Azure requires rotation before every deployment", "D": "It resets the model's context window" }, "correctAnswer": "B", "explanation": "Storage can be perfect and exposure still happen — a screenshot, a log line, a compromised laptop. Rotation on a schedule means a leaked key stops working soon regardless of whether the leak was ever noticed. Vault-managed secrets make it automatable." },
+        { "number": 9, "question": "What distinguishes structured logging from string-interpolated logging?", "options": { "A": "Structured logging is faster to write to disk", "B": "Message templates with named properties are stored as queryable fields, not flat text", "C": "Structured logging cannot leak secrets", "D": "Interpolated logs cannot include variables" }, "correctAnswer": "B", "explanation": "LogInformation(\"{Operation} took {ElapsedMs} ms\", op, ms) stores Operation and ElapsedMs as fields a log system can filter and aggregate. An interpolated string bakes the values into text, and 'p95 latency by operation' becomes regex archaeology." },
+        { "number": 10, "question": "Which of these belongs in the structured log of an AI call?", "options": { "A": "The full prompt text for every request", "B": "The API key, for correlation", "C": "Latency, token counts, finish reason, attempt number, and a correlation id", "D": "The complete JSON response body" }, "correctAnswer": "C", "explanation": "Metadata makes calls traceable and measurable without putting user data or credentials in logs. Prompt and response bodies are user content — captured, if ever, behind an explicit debug flag with redaction. Keys never appear in logs under any flag." },
+        { "number": 11, "question": "What does a correlation id enable?", "options": { "A": "Authentication of log entries", "B": "Tracing every log event of one logical request across services and AI calls", "C": "Compression of duplicate log lines", "D": "Automatic retry of failed requests" }, "correctAnswer": "B", "explanation": "Stamping the same id (request id, trace id) on every entry for one operation turns scattered lines — completion call, tool execution, retry, breaker event — into one queryable story when a user reports 'it was slow at 3pm'." },
+        { "number": 12, "question": "What failure mode does a timeout on AI calls prevent?", "options": { "A": "The model generating incorrect answers", "B": "A hung call pinning a thread and a user indefinitely", "C": "HTTP 429 responses from the service", "D": "Configuration values going stale" }, "correctAnswer": "B", "explanation": "Generation is slow and occasionally stalls; without a bound, a stuck call holds resources and the user waits forever. A finite timeout (generous but real, linked via CancellationToken) converts the hang into a fast, handleable failure." },
+        { "number": 13, "question": "When should a retry policy NOT retry?", "options": { "A": "HTTP 429 rate limit responses", "B": "Transient 5xx service errors", "C": "Permanent errors like 401 (bad credential) or 404 (wrong deployment name)", "D": "Timeouts on the first attempt" }, "correctAnswer": "C", "explanation": "Retries exist for transient faults — failures likely to pass on their own. A 401 or 404 fails identically every time; retrying adds latency and load while hiding a configuration bug that should fail loudly." },
+        { "number": 14, "question": "What does an OPEN circuit breaker do?", "options": { "A": "Sends requests through a backup deployment automatically", "B": "Fails calls immediately for a cooldown period instead of attempting them", "C": "Doubles the timeout for each request", "D": "Queues requests until the service recovers" }, "correctAnswer": "B", "explanation": "After a failure threshold trips, the breaker fails fast: no thread waits out a doomed timeout, and the struggling service is spared a retry storm. After the cooldown, a probe request tests recovery — success closes the circuit again." },
+        { "number": 15, "question": "Why is Polly recommended over the hand-rolled resilience loop for production?", "options": { "A": "Polly makes the AI model more accurate", "B": "Hand-rolled loops are not allowed in ASP.NET Core", "C": "Polly provides tested, composable timeout/retry/circuit-breaker pipelines with jitter and telemetry built in", "D": "Polly removes the need for structured logging" }, "correctAnswer": "C", "explanation": "The concepts are identical — that is why this course hand-rolls them once — but breakers especially need shared state and careful edge handling that a mature library gets right. Polly pipelines register in DI and compose the three policies declaratively." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam: Written Questions",
+      "items": [
+        { "number": 1, "question": "Explain what a service-layer abstraction for AI looks like and give four distinct benefits it provides.", "modelAnswer": "It is an application-owned interface with domain-shaped methods — Task<OrderAnswer> AskAboutOrderAsync(string question, CancellationToken ct) — implemented by exactly one class that touches the SDK: builds messages, applies temperature and token policy, runs the tool loop, maps results to plain domain records. Benefits: (1) testability — consumers mock the interface, so unit tests run offline, instantly, unbilled; (2) swappability — SDK version changes, provider swaps, or a Semantic Kernel rewrite are confined to one class; (3) reviewability and policy — prompts, tool definitions, and parameters live in one auditable place instead of being scattered; (4) simplicity for consumers — controllers and pages handle domain types and never learn the SDK, which lowers onboarding cost and prevents parameter drift across features." },
+        { "number": 2, "question": "Walk through the DI registrations for an AI stack in Program.cs and justify each lifetime choice.", "modelAnswer": "Three registrations. First, AddOptions<AzureOpenAIOptions>().Bind(config.GetSection(...)).ValidateDataAnnotations().ValidateOnStart() — options are effectively singleton snapshots of validated configuration. Second, AddSingleton<AzureOpenAIClient> via a factory that reads the options and picks the credential (key or DefaultAzureCredential): singleton because the client is thread-safe and pools connections; per-request construction risks socket exhaustion. Third, AddSingleton<IChatService, ChatService>: the service is stateless — all per-call state is local — so a shared instance is safe and cheap. Per-request context (user, cancellation) flows as method parameters, not injected state. Anything genuinely per-request (a conversation history accumulator in a web app) would be scoped instead, and must then never be injected into a singleton." },
+        { "number": 3, "question": "Describe the options pattern end to end for AI settings and explain what each piece contributes to 'secure configuration management'.", "modelAnswer": "A typed class (AzureOpenAIOptions) declares every setting — endpoint, deployment, temperature, token cap, retry and timeout budgets — with DataAnnotations ([Required], [Url], [Range]). It binds to a named configuration section assembled by the provider chain, and ValidateOnStart runs the annotations during startup. Contributions: typing eliminates magic strings and typo'd keys scattered through code; central declaration makes review possible ('what can even be configured?'); validation converts a missing or malformed value into a startup failure naming the field, instead of a 401 or NullReferenceException mid-request; and binding decouples the class from any particular source, which is what lets user secrets, environment variables, and Key Vault supply the same keys per environment without code differences." },
+        { "number": 4, "question": "Lay out the configuration provider chain from development to production for AzureOpenAI:ApiKey and state the rule that makes it work.", "modelAnswer": "appsettings.json holds non-secret defaults and deliberately no ApiKey entry. In development, the user secrets provider supplies AzureOpenAI:ApiKey from the developer's profile — outside the repo. In CI, the pipeline injects it as an environment variable, which the environment-variables provider maps onto the same key. In production, the Key Vault configuration provider (authenticated via Managed Identity) loads a secret whose name maps to the key. The rule: providers are evaluated in registration order and later providers override earlier ones — so each environment's natural source silently wins without a single line of environment-conditional code around the consumer, which only ever sees IOptions<AzureOpenAIOptions>." },
+        { "number": 5, "question": "Compare the three secret postures — user secrets, Key Vault, Managed Identity — and rank them for production use with reasons.", "modelAnswer": "User secrets is a development convenience: per-user storage outside the project folder, protecting against accidental commits, but unencrypted-at-heart, per-machine, and unmanaged — never a production mechanism. Key Vault is production-grade secret storage: access policies, audit logs, and rotation support; the secret still exists and must be fetched, cached sensibly, and rotated. Managed Identity is the strongest posture because it changes the question: the app authenticates as an Azure identity through DefaultAzureCredential with a role assignment on the resource, so no API key exists — nothing to store, leak, log accidentally, or rotate manually. Production ranking: Managed Identity first wherever the target supports Azure AD auth (Azure OpenAI does); Key Vault for secrets that must exist (third-party keys); user secrets strictly for laptops." },
+        { "number": 6, "question": "Why is 'no secret in source control, ever' treated as absolute, including in history?", "modelAnswer": "A repository multiplies exposure: every clone, fork, mirror, and CI cache carries the secret; access control is team-wide and often broader; and git history preserves the value even after the line is deleted, so 'we removed it in the next commit' does not unexpose it. Scanning tools (attackers run them too) find committed keys in public and leaked private repos within minutes. Once committed, the key must be treated as compromised: regenerate it, rotate anything derived, and audit usage. The disciplines in this tutorial exist to make the safe path the easy path — user secrets and Key Vault mean there is never a reason for the key to be in a tracked file even for ten minutes." },
+        { "number": 7, "question": "Design the structured logging for a single AI call: the event(s), the named properties, the levels, and two things that must never be logged.", "modelAnswer": "One Information event on success with properties: Operation (method name), ElapsedMs, PromptTokens, CompletionTokens, FinishReason, Attempt, Deployment, and the ambient CorrelationId/TraceId. One Warning per retry with Status, Attempt, and DelayMs; one Warning per timeout with TimeoutSeconds and Attempt; one Error on final failure with the exception (message and status, not payloads). Breaker state changes log at Warning. All as message templates with named properties — never interpolated strings — so latency percentiles, token spend by operation, and retry-rate spikes are single queries. Never logged: the API key or any credential (under any flag), and prompt/response bodies by default — they are user data; if a debug flag captures them, they are redacted and the flag is off in production." },
+        { "number": 8, "question": "Explain what each element of the resilience triad — timeout, retry, circuit breaker — protects against, and why one of them alone is insufficient.", "modelAnswer": "Timeout bounds a single attempt: it converts a hung or glacial call into a fast failure, freeing threads and users; without it, retries and breakers never even get to act because the first call never returns. Retry with exponential backoff and jitter absorbs transient faults — a 429 or momentary 5xx becomes a short pause instead of a user-visible error; without it, every blip surfaces. The circuit breaker handles sustained failure: after a threshold it fails fast for a cooldown, sparing the degraded service a retry storm and sparing users full timeout waits, then probes recovery; without it, a real outage turns your retry policy into an amplifier. Each covers a failure shape the others do not — slow, brief, and sustained — so production pipelines compose all three, in breaker→retry→timeout order around the call." },
+        { "number": 9, "question": "Why must CancellationToken flow through every async signature in the AI stack, and what happens when it does not?", "modelAnswer": "Cancellation is cooperative: a token only stops work if every layer passes it down to the operation that actually waits — here, the SDK call. The service method takes ct, links it with the per-attempt timeout via CreateLinkedTokenSource, and hands the linked token to CompleteChatAsync. In a web app, the request-aborted token flows in, so a user closing the tab cancels the model call instead of paying for a reply nobody will read. When the chain is broken — a signature without a token, a call site passing default — timeouts stop working (CancelAfter fires but nothing observes it), abandoned requests keep consuming quota, threads wait out the full generation, and graceful shutdown hangs on in-flight calls. One missing parameter quietly disables the entire resilience design above it." },
+        { "number": 10, "question": "A retried AI call is not free. Enumerate the costs and interactions a retry policy must respect in an AI context.", "modelAnswer": "Financial: each attempt is a billable completion; tokens consumed by a failed-late attempt (e.g. timeout after partial generation) may still be charged. Quota: attempts count against tokens-per-minute, so aggressive retries against a 429 deepen the very rate limiting they respond to — hence backoff, jitter, and a low cap. Latency: worst case is attempts × (timeout + delay); budgets must fit the user experience. Idempotency: a retried tool-using conversation can re-trigger tool executions, so action tools must be idempotent (tutorial 12's discipline). Correctness: at temperature above zero a retry may produce a different answer — fine for one user reply, problematic mid-multi-step-pipeline. The policy therefore retries only transient statuses, bounds attempts, logs every attempt, and leaves permanent errors to fail immediately." },
+        { "number": 11, "question": "Describe how you would unit-test a feature that uses IChatService, and separately how you would integration-test ChatService itself.", "modelAnswer": "Unit tests: substitute the interface — a hand-written fake or a mocking library returning canned OrderAnswer values, including edge shapes (Truncated = true, error outcomes). Assert the consumer's behavior: does the UI warn on truncation, does the controller map errors to the right status code. These run offline, in milliseconds, at zero cost, in every CI run. Integration tests for ChatService: a thin suite against a real (cheap) deployment — one happy-path call asserting a non-empty answer and sane token counts, one configuration-failure case, run nightly or pre-release rather than per-commit to contain cost and flakiness. Resilience logic tests sit between: fake the SDK boundary to throw 429s and timeouts, and assert backoff timing, attempt caps, and the structured Warning events — no network needed." },
+        { "number": 12, "question": "Your team inherits an app where every controller constructs its own client and reads configuration statically. Prioritize the refactoring steps and justify the order.", "modelAnswer": "1) Introduce the options class with validation and move all settings behind it — lowest risk, immediately kills scattered magic strings, and every later step depends on it. 2) Register a singleton client in DI and delete inline constructions — fixes the resource bug (socket churn) before behavior changes. 3) Extract the service layer: define the interface from current call sites' needs, move SDK code into one implementation, point controllers at the interface — the biggest diff, done as pure refactoring with behavior frozen. 4) Add structured logging inside the service — now that calls flow through one place, one change instruments everything. 5) Add resilience (Polly pipeline) around the same choke point. 6) Move secrets: user secrets locally, Key Vault + Managed Identity in production. The order front-loads safety and creates the single seam (step 3) that makes steps 4–6 one-file changes; doing secrets or resilience first would mean doing them once per controller." },
+        { "number": 13, "question": "What is the difference between what ValidateOnStart guarantees and what a startup health check guarantees for AI configuration?", "modelAnswer": "ValidateOnStart guarantees the configuration is present and well-formed: required fields exist, the endpoint parses as a URL, ranges hold. It runs no I/O — a syntactically perfect endpoint pointing at the wrong resource, a rotated-away key, or a deleted deployment all pass. A startup (or readiness) health check closes that gap with one cheap real call — a minimal completion or a metadata request — proving the endpoint resolves, the credential authenticates, and the deployment exists. Together they split failure classes usefully: config-shape errors fail deployment instantly with a field name; connectivity/authorization errors fail readiness with a service-level message. Relying on either alone leaves the other class to be discovered by the first user request." },
+        { "number": 14, "question": "How do structured logs turn into cost governance for AI features? Give the mechanism and two concrete queries.", "modelAnswer": "Mechanism: every completion logs PromptTokens and CompletionTokens as named properties alongside Operation and CorrelationId; the log pipeline ships events to a queryable store (Application Insights, or any structured sink). Token counts times published pricing approximate spend per event, aggregable by any property — and because the properties are fields, no parsing is involved. Query one: sum of tokens by Operation by day — catches the prompt change that doubled a feature's spend the day it shipped, visible as a step change on one series. Query two: p95 ElapsedMs and retry-Warning rate by Operation — distinguishes 'model got slower' from 'we started rate-limiting ourselves', which have different fixes (capacity vs backoff tuning). Reconcile monthly against the portal's billed usage, since logs approximate but the invoice decides." },
+        { "number": 15, "question": "Argue for or against: 'These patterns are overkill for a small internal AI tool.' Take a position and defend it.", "modelAnswer": "Mostly against, with one concession. The patterns' cost is front-loaded and small — an options class, three DI registrations, one interface, a logging template — an hour of work copied from a reference project. Their absence compounds: the 'small tool' that works gets adopted, then someone pastes the key from its repo, then nobody can explain a bill, then a rate-limit spike hangs a meeting demo. Secrets discipline and the singleton client are non-negotiable at any size (a leak or socket exhaustion does not care that the tool is small); the service layer costs one file and buys testability the first time anyone touches the prompt; structured logging is the difference between answering 'what happened?' and re-running it and hoping. The concession: a full Polly pipeline and Key Vault provider can wait for production stakes — hand-rolled retry and user secrets are honest interim states, provided they are labeled interim and the seams (options, interface, DI) that make upgrading them one-file changes exist from day one." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Service-layer abstraction (IChatService)", "back": "Domain-shaped interface hiding all SDK types in one implementation class. Buys testability (mock it), swappability (SDK/provider changes touch one file), and centralized prompt/parameter policy." },
+        { "number": 2, "front": "Lifetime for AzureOpenAIClient", "back": "Singleton — thread-safe, pools connections. Constructed once in the composition root via a DI factory; 'new AzureOpenAIClient' in a request path is a bug." },
+        { "number": 3, "front": "Dependency injection payoff for AI code", "back": "Construction centralized, client shared correctly, and consumers depend on interfaces — so tests and future implementations substitute cleanly." },
+        { "number": 4, "front": "Options pattern", "back": "Typed class + Bind(section) + ValidateDataAnnotations + ValidateOnStart. Missing/malformed AI settings fail at startup with a field name, not at first request." },
+        { "number": 5, "front": "Configuration provider layering", "back": "appsettings.json → user secrets (dev) → environment variables → Key Vault (prod). Later providers override earlier — same keys, different source per environment, zero code changes." },
+        { "number": 6, "front": "Secrets hierarchy", "back": "Best: Managed Identity (no secret exists). Then: Key Vault (audited, rotatable). Dev: user secrets. Never: source control or committed appsettings.json — history remembers." },
+        { "number": 7, "front": "Managed Identity + DefaultAzureCredential", "back": "App authenticates as an Azure identity with a role assignment on the resource. One-line credential swap; nothing to store, leak, or rotate." },
+        { "number": 8, "front": "Secret rotation", "back": "Scheduled credential replacement so leaks have a short shelf life. Automate via Key Vault; read secrets through reloadable configuration, never cache in a static." },
+        { "number": 9, "front": "Structured logging", "back": "Message templates with named properties ({ElapsedMs}, {TotalTokens}) stored as queryable fields. Interpolated strings destroy queryability — that is the whole difference." },
+        { "number": 10, "front": "What to log per AI call", "back": "Operation, latency, prompt/completion token counts, finish reason, attempt, deployment, correlation id. Never: keys (ever) or prompt bodies (user data — debug flag + redaction only)." },
+        { "number": 11, "front": "Correlation id", "back": "One id stamped on every log event of a logical request — completion, tool runs, retries, breaker events become one traceable story across services." },
+        { "number": 12, "front": "Timeout (AI calls)", "back": "Bounded wait per attempt — generous (30–60s) but finite, implemented via linked CancellationTokenSource. Converts hangs into fast failures; useless if the token chain breaks." },
+        { "number": 13, "front": "Retry policy scope", "back": "Only transient faults: 429 + 5xx (+ timeouts). Exponential backoff, jitter, 3–5 attempt cap. Never retry 400/401/404 — they fail identically every time." },
+        { "number": 14, "front": "Circuit breaker", "back": "Trips open after sustained failures: fails fast during cooldown (no retry storm, no timeout waits), then probes recovery. Needs shared state — use Polly, don't hand-roll." },
+        { "number": 15, "front": "Testing strategy with a service layer", "back": "Unit tests mock IChatService (offline, free, fast). Resilience tests fake the SDK boundary. One thin nightly integration suite hits the real deployment." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions and Answers",
+      "items": [
+        { "number": 1, "question": "How would you structure Azure OpenAI access in an enterprise .NET codebase?", "answer": "One seam, everything flows through it. A service-layer interface with domain-shaped methods — AskAboutOrderAsync, SummarizeTicketAsync — and a single implementation that owns the SDK: message building, tool loop, temperature and token policy. The AzureOpenAIClient registers as a DI singleton built in the composition root from validated options; consumers inject the interface and never see SDK types. Configuration binds through the options pattern from layered providers, secrets follow the Managed-Identity-first hierarchy, and the implementation wraps every call in resilience plus structured logging. The result: tests mock the interface, SDK upgrades touch one file, and every AI call is traced and measured." },
+        { "number": 2, "question": "Why is client lifetime such a big deal with AI SDKs?", "answer": "Same reason as HttpClient, amplified. The client is thread-safe and manages pooled connections; constructing it per request churns sockets and TLS handshakes and under load exhausts the pool — failures that look like mysterious timeouts and only appear in production traffic. AI calls make it worse because they are long-lived, so leaked or churned connections linger. The fix is boring: singleton registration in DI, factory reads options and picks the credential, and code review treats inline construction as a defect. It is a one-line rule that prevents a class of 3 a.m. incidents." },
+        { "number": 3, "question": "Walk me through how a request's API key is found in each environment without code changes.", "answer": "The code only ever reads IOptions<AzureOpenAIOptions>; the provider chain does the environment-specific work. appsettings.json carries non-secret defaults and no key. On a dev laptop, the user secrets provider supplies AzureOpenAI:ApiKey from the profile. In CI, the pipeline injects an environment variable that maps to the same key and overrides. In production, the Key Vault provider — authenticated by Managed Identity — loads the secret into the same configuration key. Later providers override earlier ones, so each environment's source wins naturally. And the best production variant sidesteps the question: DefaultAzureCredential straight to Azure OpenAI, no key anywhere in the chain." },
+        { "number": 4, "question": "What does 'structured' buy you in structured logging, concretely?", "answer": "Fields instead of prose. LogInformation with a message template — {Operation}, {ElapsedMs}, {PromptTokens}, {CompletionTokens}, {FinishReason} — stores each property as a queryable field in the sink. Concretely: p95 latency per operation is a one-line query; token spend by feature per day is an aggregation, which is your cost dashboard; a retry-rate spike after a deploy is an alert condition. With interpolated strings the same questions are regex over text — slow, brittle, and usually just not asked. For AI specifically, token counts as fields are the difference between managing spend and discovering it on the invoice." },
+        { "number": 5, "question": "How do you keep secrets out of a repo across a whole team, not just your own machine?", "answer": "Make the safe path the default path. The repo ships with appsettings.json containing no secret keys and a README line saying 'dotnet user-secrets set AzureOpenAI:ApiKey ...' — thirty seconds of setup, nothing to remember afterwards. CI uses pipeline secrets; production uses Key Vault or, better, Managed Identity so the secret class disappears. Then enforcement: a pre-commit/CI secret scanner failing the build on key-shaped strings, and the team agreement that a committed key is an incident — regenerate immediately, because history keeps it forever. The pattern works because no workflow ever requires the key to sit in a tracked file, even briefly." },
+        { "number": 6, "question": "Design the resilience wrapper for AI calls and explain the ordering of policies.", "answer": "Outermost, the circuit breaker: it sees every outcome and, when failures are sustained, fails fast for a cooldown so we neither storm the service nor make users wait out doomed timeouts. Inside it, retry with exponential backoff and jitter, capped at 3–5 attempts, matching only transient statuses — 429, 5xx, timeouts. Innermost, a per-attempt timeout via a linked CancellationTokenSource so each attempt has its own bounded window (a timeout wrapping all retries would let attempt one eat the whole budget). In .NET I express this as a Polly pipeline registered in DI rather than hand-rolling — the breaker especially, since it needs correct shared state. Every retry and state change logs at Warning with structured properties, because a resilience layer you cannot observe is a rumor." },
+        { "number": 7, "question": "A user closes the browser mid-generation. What should happen in a well-built stack, and what makes it happen?", "answer": "The request-aborted CancellationToken fires, flows through the controller into IChatService, gets linked with the per-attempt timeout token, and reaches CompleteChatAsync — which abandons the wait. The thread frees, the retry loop observes the caller's token (not just the timeout's) and does not retry a cancelled request, and the structured log records a cancellation rather than an error. What makes it happen is discipline, not framework magic: every async signature in the chain takes a CancellationToken and passes it down. One method that swallows the token — takes it but passes default — silently converts user-abandonment into paid, pointless generation and threads that wait out the full response." },
+        { "number": 8, "question": "How do you test code that depends on an AI service without burning tokens or building flaky suites?", "answer": "Three tiers against the service-layer seam. Unit tests mock IChatService with canned domain results — including truncated and error shapes — and assert consumer behavior; they run offline in milliseconds and cover the bulk of logic. Resilience tests fake the SDK boundary underneath ChatService, scripting 429s, 500s, and delays, and assert backoff schedules, attempt caps, cancellation behavior, and the Warning events — still no network. A thin integration tier makes real calls against a cheap deployment — one happy path, one auth-failure probe — nightly rather than per-commit, with assertions loose enough to survive model nondeterminism (non-empty answer, plausible token counts). The seam is what makes the tiers possible; without the interface, everything is tier three and the suite is slow, flaky, and billed." },
+        { "number": 9, "question": "What belongs in appsettings.json for an AI app, and what is banned from it?", "answer": "Belongs: everything non-secret that operators legitimately tune — endpoint URL, deployment names, temperature, max output tokens, retry attempts, timeout seconds — organized under a section the options class binds. This file is the readable contract of what is configurable. Banned: the API key, connection strings with passwords, any credential — not 'discouraged', banned, because the file is committed and git history is permanent. The tell-tale smell is a placeholder like 'ApiKey': '' inviting someone to fill it in locally; even that invites the accident. The key's homes are user secrets, pipeline secrets, Key Vault — or nonexistence via Managed Identity, which is the only place a secret is truly safe." },
+        { "number": 10, "question": "Your AI feature's latency doubled last week. Walk me through the investigation your logging should enable.", "answer": "Query one: p95 ElapsedMs by day for the operation — confirms when the doubling started, correlating with deploys. Query two: retry Warning rate over the same window — if retries spiked, this is rate limiting (check 429 statuses; fix is quota, backoff tuning, or prompt-size reduction), not model slowness. Query three: PromptTokens by day — a prompt or history-window change that ballooned input explains slower generation and points at a specific commit. Query four: FinishReason distribution — a shift toward Length means someone raised output caps and generations are simply longer. Query five: breaker state-change events — sustained degradation upstream. Each is a single structured query because latency, tokens, attempts, and reasons are fields with a correlation id; the same investigation over interpolated text logs is an afternoon of grep and guessing." },
+        { "number": 11, "question": "When would you NOT put something behind the AI service layer?", "answer": "The seam is for consumers of AI, not for everything that touches it. Offline tooling — prompt experiment scripts, evaluation harnesses — can use the SDK directly; forcing the domain interface on them obscures the parameters those tools exist to vary. Cross-cutting infrastructure (the Polly pipeline, telemetry enrichment) belongs inside or around the implementation, not on the interface. And resist premature generalization of the interface itself: a speculative universal SendMessagesAsync(messages, options) that mirrors the SDK is the abstraction leaking — worse than no seam, because it has the cost of indirection with none of the decoupling. Add methods when a real consumer needs a real domain capability, one at a time." },
+        { "number": 12, "question": "How does Managed Identity actually work for an app calling Azure OpenAI, end to end?", "answer": "The hosting platform assigns the app an identity in the directory — system-assigned (born and dying with the resource) or user-assigned (shared, reusable). An operator grants that identity a role on the Azure OpenAI resource — 'Cognitive Services OpenAI User' for calling deployments. In code, DefaultAzureCredential replaces AzureKeyCredential; at runtime it walks its chain (environment, workload identity, managed identity endpoint, developer tooling locally) and obtains tokens from the platform's identity endpoint — short-lived, automatically refreshed, never touching your configuration. Locally the same chain falls through to your CLI or IDE login, so developers run keyless too. The security win: no long-lived secret exists; access is a role assignment you audit and revoke centrally, and token theft has a lifetime measured in minutes." },
+        { "number": 13, "question": "What is your policy on logging prompts and completions, and why is it stricter than for ordinary request logging?", "answer": "Default: metadata only — lengths, token counts, deployment, finish reason, latency — never bodies. Prompts aggregate whatever users typed plus whatever context the app injected — personal data, order details, internal documents — so logged bodies quietly become an unaudited copy of sensitive data in a system with different (usually weaker) access controls and retention than the source systems. Stricter than ordinary HTTP logging because prompt text is unstructured and unpredictable — you cannot enumerate its fields to redact them the way you redact a known 'password' field. When debugging genuinely needs bodies: an explicit flag, off in production, sampled, redacted where patterns allow, short retention, and access-controlled sink. And the flag's existence is documented so a compliance review finds it before an auditor does." },
+        { "number": 14, "question": "Sell me the refactoring: the AI demo works, the sprint is full, why spend days on 'patterns'?", "answer": "It is hours, not days — and the alternative is paying interest forever. Concretely: options class plus validation, one interface extraction, three DI registrations, a logging template, a Polly pipeline — each a mechanical change, and I would sequence them so the app never breaks (config first, then client lifetime, then the seam, then instrumentation on the seam). What the hours buy: the next AI feature is an afternoon because it injects a tested interface; tests stop costing tokens and stop flaking in CI; the first production incident is a query instead of a mystery; the security review is one meeting because secrets have one story; and the Semantic Kernel migration in the roadmap becomes a one-file change instead of a rewrite. The demo proved the model works. The patterns are what make the team able to keep shipping on top of it — that is not polish, that is the velocity budget for every sprint after this one." },
+        { "number": 15, "question": "Which of these patterns change when you move from a console app to ASP.NET Core, and how?", "answer": "The composition stays identical — same options, same singleton client, same interface — which is exactly why building it in a console app first was safe. What changes: lifetimes gain a scoped tier, so anything per-request (conversation state, a user context) registers scoped and must not be injected into singletons — the container will flag it, but the design should prevent it. Cancellation gets real: HttpContext.RequestAborted flows into every service call, making user-abandonment cancellation automatic if the token chain is intact. Correlation upgrades from a generated GUID to the framework's TraceIdentifier / distributed trace id, linking AI calls into end-to-end traces. Configuration gains per-environment files and (in production) the Key Vault provider wired in Program.cs. And resilience policy meets concurrency: many simultaneous requests share the client and quota, so backoff jitter and the breaker move from nice-to-have to load-bearing. Tutorial 14 walks exactly this move." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "Dependency injection", "definition": "Pattern where a container constructs objects and supplies dependencies through constructors; in .NET, built into the Generic Host and ASP.NET Core." },
+        { "term": "Composition root", "definition": "The one place (Program.cs) where the object graph is assembled — options bound, client factories defined, services registered. SDK construction lives here only." },
+        { "term": "Service lifetime", "definition": "Container-managed instance duration: singleton (application), scoped (request), transient (per resolve). AI clients and stateless services: singleton." },
+        { "term": "Singleton", "definition": "One shared instance for the app's lifetime. Correct for AzureOpenAIClient (thread-safe, pooled connections) and stateless service-layer classes." },
+        { "term": "Service layer", "definition": "Application-owned abstraction (IChatService) with domain-shaped methods; the single boundary behind which all AI SDK types and prompt policy live." },
+        { "term": "Options pattern", "definition": "Typed configuration: a class bound to a config section, validated with DataAnnotations, injected as IOptions<T>, failing at startup via ValidateOnStart." },
+        { "term": "Configuration provider", "definition": "One source in the host's layered config chain (JSON files, user secrets, environment variables, Key Vault); later providers override earlier ones." },
+        { "term": "User secrets", "definition": "Per-developer secret store (dotnet user-secrets) in the user profile — development-time keys outside the repository. Not a production mechanism." },
+        { "term": "Azure Key Vault", "definition": "Managed secret store with access policies, audit logging, and rotation; surfaces secrets as configuration keys via its provider package." },
+        { "term": "Managed Identity", "definition": "Azure-issued application identity enabling keyless authentication (DefaultAzureCredential + role assignment) to Azure OpenAI and Key Vault." },
+        { "term": "Secret rotation", "definition": "Scheduled replacement of credentials so exposure has bounded lifetime; automated through Key Vault, dependent on configuration that can reload." },
+        { "term": "Structured logging", "definition": "Logging via message templates with named properties stored as queryable fields — enabling latency percentiles, token-spend dashboards, and alerting." },
+        { "term": "Correlation id", "definition": "Identifier (request id, trace id) stamped on all log events of one logical operation, linking AI calls, retries, and tool runs into one story." },
+        { "term": "ILogger<T>", "definition": ".NET's logging abstraction, injected per class; providers route its structured events to console, files, Application Insights, or OpenTelemetry." },
+        { "term": "Timeout", "definition": "Bounded wait per call attempt, implemented with a linked CancellationTokenSource; converts hangs into fast failures. Requires an unbroken token chain." },
+        { "term": "Retry with exponential backoff", "definition": "Re-attempting transient faults (429/5xx/timeouts) with doubling, jittered delays and a 3–5 attempt cap. Permanent errors are never retried." },
+        { "term": "Circuit breaker", "definition": "Policy that opens after sustained failures, failing fast through a cooldown, then probing recovery — preventing retry storms and timeout pile-ups." },
+        { "term": "Transient fault", "definition": "Temporary failure (429, brief 5xx, timeout) likely to succeed on retry — the only error class a retry policy should match." },
+        { "term": "Polly", "definition": "The standard .NET resilience library: timeout, retry, and circuit breaker composed as pipelines, registered in DI; production-grade replacement for hand-rolled loops." },
+        { "term": "Mock", "definition": "Test double implementing a dependency's interface; with a service layer, lets AI-consuming code be tested offline, deterministically, at zero token cost." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Treat the model as a remote dependency and every standard .NET discipline applies: the fastest route to production-ready AI is patterns your team already trusts.",
+          "A service layer (IChatService) hides all SDK types behind domain-shaped methods — one file to change for SDK upgrades, one interface to mock for free, fast, offline tests.",
+          "Dependency injection assembles the stack in the composition root: validated options, a singleton AzureOpenAIClient, and stateless singleton services with per-call context as parameters.",
+          "Secure configuration layers providers (appsettings → user secrets → environment variables → Key Vault) under the options pattern with ValidateOnStart; secrets follow the hierarchy Managed Identity > Key Vault > user secrets > never source control.",
+          "Structured logging with named properties and a correlation id turns every AI call into queryable fields — latency, token spend, retries, finish reasons — which is observability and cost governance in one habit.",
+          "Resilience composes three policies for three failure shapes: timeouts for hangs, backoff retries for transient faults, a circuit breaker for sustained outage — expressed in production as a Polly pipeline, with an unbroken CancellationToken chain making all of it real."
+        ] },
+        { "type": "paragraph", "text": "The order assistant does exactly what it did yesterday — but today the SDK lives in one file, the key lives in no file, a missing setting stops startup with a field name, a hung call fails in forty-five seconds instead of never, and every request leaves a trace you can query. None of it required anything AI-specific; all of it is what makes the AI parts safe to build on. That foundation is precisely what the next tutorial assumes as it moves the assistant into a real ASP.NET Core web application." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Next tutorial: AI in ASP.NET Core Web Apps (ai-in-aspnet-web-apps). The enterprise-shaped stack you built slots straight into a web application — and gains new dimensions there: scoped lifetimes and per-user context, request cancellation wired to real browsers, streaming responses to the UI, and the middleware pipeline as a home for cross-cutting AI concerns." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: replace Example 3's hand-rolled loop with a Polly resilience pipeline (timeout + retry + circuit breaker) registered in DI, and verify the structured log events still tell the story.",
+          "Practice: break your configuration on purpose five ways (missing endpoint, malformed URL, out-of-range temperature, absent key, wrong deployment name) and confirm which are caught at startup versus first call — then add the startup health probe that closes the gap.",
+          "Practice: write the FakeChatService test from step 9 of the walkthrough, then add a second fake that always returns Truncated = true and assert your UI's warning path.",
+          "Practice: switch the client factory to DefaultAzureCredential and run keyless locally via your development tool sign-in — then delete the ApiKey from user secrets entirely.",
+          "Read: the official documentation for 'Options pattern in ASP.NET Core', 'Safe storage of app secrets in development', 'Azure Key Vault configuration provider', 'Logging in .NET', and the Polly project's resilience strategy docs."
+        ] },
+        { "type": "note", "style": "tip", "text": "Diff your refactored project against tutorial 12's version and keep both. The before/after pair is the most persuasive artifact you can show a team debating whether these patterns are worth the hours." }
+      ]
+    }
+  ]
+}
