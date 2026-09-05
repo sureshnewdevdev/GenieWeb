@@ -82,6 +82,12 @@ Content blocks (use any mix):
   (code is an ARRAY OF LINES, not one string)
 - `{ "type": "table", "headers": ["..."], "rows": [["..."]] }`
 - `{ "type": "note", "style": "info" | "tip" | "warning", "text": "..." }`
+- `{ "type": "animation", "title": "...", "intro": "one-line setup", "nodes": [ { "id": "a", "label": "Prompt", "sub": "short subtitle" } ], "steps": [ { "highlight": ["a"], "caption": "what is happening in this step" } ] }`
+  — a step-based animated diagram the site renderer plays: `nodes` are the boxes
+  of a left-to-right pipeline (3–6 nodes, short labels), `steps` highlight one or
+  more node ids in sequence with a caption per step (3–7 steps). Use it to make a
+  process or flow visible: how data moves, how a loop iterates, how parts interact.
+  Every `highlight` id MUST exist in `nodes`.
 
 Assessment sections use `items` instead of `content`:
 
@@ -96,6 +102,11 @@ Assessment sections use `items` instead of `content`:
 - Sections: exactly 21, canonical keys, canonical order.
 - Quiz: >= 15 items. Exam: >= 15. Flashcards: >= 15. Interview Q&A: >= 15.
 - Glossary: >= 15 terms. Tooltips: >= 15 entries.
+- Animations: >= 2 "animation" content blocks across the body sections, placed
+  at the most concept-heavy points (deep dives, step-by-step).
+- Tooltip keys must appear VERBATIM (case-insensitive) somewhere in the body
+  sections' text — the site renderer turns each first occurrence into a hover
+  tooltip showing the definition, so a term that never appears is never seen.
 - Every subtopic from INPUTS must appear (a) in the body sections, (b) as at
   least one glossary term, (c) as at least one tooltip, and (d) in at least one
   quiz/exam/flashcard/interview item.

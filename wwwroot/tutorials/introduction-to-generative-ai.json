@@ -129,6 +129,20 @@
       "content": [
         { "type": "paragraph", "text": "A large language model is a neural network — almost always based on the transformer architecture — trained on a huge corpus of text and code. During training, the model repeatedly plays one game: given a sequence of tokens, predict the next token. Over billions of examples it internalizes grammar, facts, reasoning patterns, and coding conventions, purely as statistical structure in its parameters." },
         { "type": "paragraph", "text": "When you send a prompt, the model runs inference: it converts your text to tokens, computes which token is most likely to come next, appends it, and repeats — one token at a time — until it emits a stop signal or hits a length limit. Everything an LLM does, from answering questions to writing C#, emerges from this next-token loop. The transformer's attention mechanism is what makes the predictions good: it lets every token 'look at' the other tokens that matter, so the model can connect a variable's use on line 40 with its declaration on line 2." },
+        { "type": "animation", "title": "How an LLM turns your prompt into a response", "intro": "Press Play — or use Next — to watch one request flow through the model.", "nodes": [
+          { "id": "prompt", "label": "Prompt", "sub": "your text" },
+          { "id": "tokens", "label": "Tokenizer", "sub": "text → tokens" },
+          { "id": "model", "label": "Model", "sub": "transformer" },
+          { "id": "next", "label": "Next token", "sub": "one at a time" },
+          { "id": "resp", "label": "Response", "sub": "tokens → text" }
+        ], "steps": [
+          { "highlight": ["prompt"], "caption": "Your prompt arrives — instructions, context, and data as plain text." },
+          { "highlight": ["tokens"], "caption": "The tokenizer splits the text into tokens the model's vocabulary knows." },
+          { "highlight": ["model"], "caption": "The transformer weighs every token against the others (attention) and computes probabilities for what should come next." },
+          { "highlight": ["next"], "caption": "One likely next token is selected — the temperature setting controls how random this choice is." },
+          { "highlight": ["model", "next"], "caption": "The new token is appended and the loop repeats: predict, pick, append — one token at a time." },
+          { "highlight": ["resp"], "caption": "At a stop condition, the accumulated tokens are converted back to text — your response." }
+        ] },
         { "type": "list", "style": "bullet", "items": [
           "Training happens once, at massive scale, at the provider. You never see it.",
           "Inference is what you pay for per request — it is the API call your C# code makes.",
@@ -171,6 +185,19 @@
       "content": [
         { "type": "paragraph", "text": "An embedding is a numeric representation of meaning: an embedding model turns a piece of text into a vector — an array of floating-point numbers, often 1,536 or 3,072 dimensions. The defining property is that texts with similar meaning produce vectors that are close together, even when they share no words. 'How do I reset my password?' and 'I forgot my login credentials' land near each other in vector space." },
         { "type": "paragraph", "text": "Closeness is measured mathematically, most commonly with cosine similarity — a score near 1 means very similar meaning, near 0 means unrelated. That single trick unlocks a family of features: semantic search (find documents by meaning, not keywords), recommendations (find items similar to this one), clustering and de-duplication, and — most importantly for this course — retrieval-augmented generation (RAG), where you find the most relevant chunks of your own data and hand them to an LLM as context so it answers from facts instead of guessing." },
+        { "type": "animation", "title": "How embeddings power semantic search", "intro": "Watch a question find the right document by meaning — with zero shared keywords.", "nodes": [
+          { "id": "q", "label": "User question", "sub": "'forgot my login'" },
+          { "id": "emb", "label": "Embedding model", "sub": "text → vector" },
+          { "id": "vec", "label": "Vector", "sub": "[0.12, -0.87, …]" },
+          { "id": "cmp", "label": "Cosine compare", "sub": "vs stored vectors" },
+          { "id": "hit", "label": "Best match", "sub": "'Reset your password'" }
+        ], "steps": [
+          { "highlight": ["q"], "caption": "The user types a question in their own words: 'I forgot my login'." },
+          { "highlight": ["emb"], "caption": "The embedding model converts the question into a vector that captures its meaning." },
+          { "highlight": ["vec"], "caption": "The result is a list of numbers — nearby vectors mean similar meaning." },
+          { "highlight": ["cmp"], "caption": "Cosine similarity compares the question's vector against every stored document vector." },
+          { "highlight": ["hit"], "caption": "The 'Reset your password' article scores highest — found by meaning, though it shares no keywords with the question." }
+        ] },
         { "type": "code", "language": "csharp", "title": "Comparing two embedding vectors with cosine similarity", "code": [
           "// An embedding model (e.g. an Azure OpenAI embeddings deployment)",
           "// returns a float[] for each input text. Comparing two vectors:",

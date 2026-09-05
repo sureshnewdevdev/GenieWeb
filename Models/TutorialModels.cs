@@ -35,15 +35,31 @@ namespace GenieWeb.Models
 
     public class TutorialContentBlock
     {
-        public string Type { get; set; } = string.Empty; // paragraph | list | code | table | note
+        public string Type { get; set; } = string.Empty; // paragraph | list | code | table | note | animation
         public string? Text { get; set; }
         public string? Style { get; set; }                // list: bullet/numbered; note: info/tip/warning
         public List<string>? Items { get; set; }          // list items
         public string? Language { get; set; }             // code
-        public string? Title { get; set; }                // code
+        public string? Title { get; set; }                // code / animation
         public List<string>? Code { get; set; }           // code, as array of lines
         public List<string>? Headers { get; set; }        // table
         public List<List<string>>? Rows { get; set; }     // table
+        public string? Intro { get; set; }                // animation
+        public List<TutorialAnimNode>? Nodes { get; set; }// animation
+        public List<TutorialAnimStep>? Steps { get; set; }// animation
+    }
+
+    public class TutorialAnimNode
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Label { get; set; } = string.Empty;
+        public string? Sub { get; set; }
+    }
+
+    public class TutorialAnimStep
+    {
+        public List<string> Highlight { get; set; } = new();
+        public string Caption { get; set; } = string.Empty;
     }
 
     // One shape for all assessment item kinds; unused properties stay null.

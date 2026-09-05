@@ -134,6 +134,20 @@
           ["Input data", "The content to operate on, clearly delimited", "Ticket text between triple quotes: \"\"\"...\"\"\""],
           ["Output constraints", "Format, length, tone, allowed values for the response", "Respond as JSON: { \"summary\": string, \"severity\": \"low\"|\"medium\"|\"high\" }. No other text."]
         ] },
+        { "type": "animation", "title": "Assembling an effective prompt", "intro": "Watch the four anatomy parts combine into one reliable request.", "nodes": [
+          { "id": "inst", "label": "Instruction", "sub": "what to do" },
+          { "id": "ctx", "label": "Context", "sub": "grounding facts" },
+          { "id": "data", "label": "Input data", "sub": "delimited content" },
+          { "id": "cons", "label": "Constraints", "sub": "output rules" },
+          { "id": "model", "label": "Model", "sub": "reliable output" }
+        ], "steps": [
+          { "highlight": ["inst"], "caption": "Start with the instruction — a clear, verb-first command: 'Summarize the support ticket below.'" },
+          { "highlight": ["ctx"], "caption": "Add context the model cannot know: domain terms, the audience, what 'severity' means here." },
+          { "highlight": ["data"], "caption": "Insert the input data between clear delimiters (triple quotes) so it can never blur into the instructions." },
+          { "highlight": ["cons"], "caption": "Finish with output constraints: exact JSON shape, length limit, allowed values, 'no other text'." },
+          { "highlight": ["inst", "ctx", "data", "cons"], "caption": "All four parts travel together as one prompt — every part removes guesses the model would otherwise make." },
+          { "highlight": ["model"], "caption": "The model now produces focused, checkable output — precision in, reliability out." }
+        ] },
         { "type": "paragraph", "text": "The gap between vague and precise prompts is easiest to feel through developer examples. Each row below is the same task, asked lazily and asked well:" },
         { "type": "table", "headers": ["Vague prompt", "Precise prompt", "What the precision buys"], "rows": [
           ["Write a C# method to check email.", "Write a C# method 'bool IsValidEmail(string input)' using MailAddress parsing, no regex; return false for null/whitespace; include XML doc comments.", "Correct signature, chosen technique, edge cases handled, documented"],
@@ -158,6 +172,20 @@
           "Change one thing at a time so you know which edit caused which improvement, exactly like debugging.",
           "Keep a small set of test inputs (easy, hard, edge-case) and re-run all of them after each change — this is regression testing for prompts.",
           "Stop when outputs are consistently acceptable across your test inputs, and save the prompt with a version note."
+        ] },
+        { "type": "animation", "title": "The prompt iteration loop", "intro": "Refining a prompt is a debugging loop — watch one full cycle.", "nodes": [
+          { "id": "def", "label": "Define success", "sub": "criteria first" },
+          { "id": "draft", "label": "Draft", "sub": "4-part anatomy" },
+          { "id": "run", "label": "Run ×N", "sub": "test inputs" },
+          { "id": "diag", "label": "Diagnose", "sub": "which part failed?" },
+          { "id": "fix", "label": "Change ONE thing", "sub": "then re-run" }
+        ], "steps": [
+          { "highlight": ["def"], "caption": "Write down what a good output looks like before touching the prompt — format, content, tone." },
+          { "highlight": ["draft"], "caption": "Draft the prompt using the anatomy: instruction, context, input data, output constraints." },
+          { "highlight": ["run"], "caption": "Run it several times on saved test inputs — variation between runs reveals what is still ambiguous." },
+          { "highlight": ["diag"], "caption": "Map each failure to a component: format drift → constraints; wrong content → context; inventions → grounding." },
+          { "highlight": ["fix"], "caption": "Change exactly one thing so you know what caused the improvement — just like debugging." },
+          { "highlight": ["run", "diag", "fix"], "caption": "Loop: run, diagnose, adjust… until outputs stay acceptable across all test inputs. Then version the prompt." }
         ] },
         { "type": "paragraph", "text": "Iteration happens inside a hard budget: the context window. Recall from tutorial 1 that everything — system message, instructions, examples, input data, and the generated response — shares one token limit, and every token is billed. Precision usually pays for itself (a tighter prompt often produces shorter, better output), but examples are the expensive ingredient: each few-shot example you add costs its full token length on every single request. When a prompt must process large inputs, budget explicitly: reserve tokens for the response, and trim or chunk input data rather than letting it crowd out your instructions." },
         { "type": "note", "style": "warning", "text": "A subtle failure: when input data exceeds the context window, the start or end of your prompt may be truncated — and if your instructions were there, the model never saw them. Always check input length in code before sending (a rough ~4-characters-per-token estimate suffices for guarding)." }
