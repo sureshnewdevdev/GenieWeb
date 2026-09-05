@@ -1,0 +1,515 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Prompting Patterns Used by Developers",
+  "slug": "developer-prompting-patterns",
+  "level": "Intermediate",
+  "codeLanguage": "C#",
+  "tutorialNumber": 3,
+  "totalTutorials": 27,
+  "prev": "prompt-engineering-foundations",
+  "next": "prompt-engineering-for-coding",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Prompting Patterns Used by Developers"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "The Ask -> Review -> Improve pattern",
+    "The Explain -> Generate -> Refine pattern",
+    "Step-by-step (chain-of-thought) prompting",
+    "Breaking complex requirements into prompt sequences",
+    "Prompting for debugging and error analysis"
+  ],
+  "tooltips": {
+    "prompting pattern": "A reusable, named recipe for interacting with a model — a proven sequence of prompts and checks that reliably gets good results for a class of tasks.",
+    "Ask → Review → Improve": "The core loop: request output, critically review it against your requirements, then ask for targeted improvements instead of accepting the first draft.",
+    "Explain → Generate → Refine": "First have the model explain the problem or existing code, verify its understanding, then let it generate, then refine — alignment before production.",
+    "chain-of-thought": "Prompting the model to reason step by step before giving its final answer, which improves results on multi-step logic problems.",
+    "prompt sequence": "A chain of small, focused prompts where each verified output feeds the next — instead of one giant prompt that tries to do everything.",
+    "decomposition": "Breaking a complex requirement into smaller, independently promptable and verifiable pieces.",
+    "error analysis": "Using the model to interpret an error: you supply the message, stack trace, code, and context; it proposes likely causes to investigate.",
+    "multi-turn conversation": "A chat where each request includes the previous messages, letting the model build on earlier answers.",
+    "conversation history": "The prior messages replayed with each chat request — the model is stateless, so history is its only memory, and it costs tokens.",
+    "system message": "The message that sets the model's standing role and rules for a whole conversation.",
+    "acceptance criteria": "The concrete conditions an output must satisfy before you accept it — defined before prompting, checked during review.",
+    "self-review": "Asking the model to critique its own output against stated criteria before you do the final human check.",
+    "stack trace": "The call-path listing where an exception occurred — one of the highest-value inputs to include when prompting about an error.",
+    "minimal reproduction": "The smallest code sample that still shows the problem; trimming noise makes model debugging dramatically more accurate.",
+    "root cause": "The underlying reason a bug happens, as opposed to its visible symptom; the goal of error analysis.",
+    "token": "The unit of text models read, write, and bill by — roughly 4 English characters.",
+    "context window": "The per-request token budget shared by all input (including replayed history) and generated output.",
+    "hallucination": "Confident, fluent model output that is wrong or invented — including plausible-but-wrong root causes for bugs.",
+    "prompt template": "Fixed prompt wording with placeholders, versioned in source control for consistency and reuse.",
+    "grounding": "Supplying authoritative facts (code, logs, docs) in the prompt so the model works from your data instead of guessing.",
+    "few-shot prompting": "Including worked input→output examples in the prompt so the model imitates the demonstrated pattern."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview",
+      "content": [
+        { "type": "paragraph", "text": "The previous tutorial gave you the anatomy of a single good prompt. Real development work, though, is rarely one prompt — it is a conversation with structure. Experienced developers do not improvise that structure each time; they reach for a small set of named, repeatable recipes. This tutorial catalogs those recipes: the prompting patterns that turn a capable model into a dependable working partner." },
+        { "type": "paragraph", "text": "You will learn five patterns that cover most day-to-day development interaction: Ask → Review → Improve (the fundamental quality loop), Explain → Generate → Refine (alignment before production), step-by-step chain-of-thought prompting (for problems that need reasoning), prompt sequences (decomposing big requirements into verifiable stages), and the debugging pattern (structured error analysis). Each pattern comes with the why, the mechanics, C# examples, and the failure modes to watch for." },
+        { "type": "paragraph", "text": "A prompting pattern is to prompts what a design pattern is to classes: not a rigid rule, but a proven shape you adapt. Once these five are in your muscle memory, you will notice that most 'the model gave me garbage' complaints trace back to skipping a pattern step — usually the review." },
+        { "type": "note", "style": "info", "text": "This is tutorial 3 of 27. It assumes the prompt anatomy and iteration loop from Foundations of Prompt Engineering, and it feeds directly into the next tutorial, Prompt Engineering for Coding Tasks." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "paragraph", "text": "After completing this tutorial, you will be able to:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Explain what a prompting pattern is and why patterns beat improvised prompting.",
+          "Run the Ask → Review → Improve loop with explicit acceptance criteria and targeted improvement requests.",
+          "Apply Explain → Generate → Refine to align the model's understanding before it produces code.",
+          "Use step-by-step chain-of-thought prompting for problems that require multi-step reasoning, and know its costs.",
+          "Break a complex requirement into a prompt sequence whose stages are individually verifiable.",
+          "Prompt effectively for debugging and error analysis: what to include, what to withhold, and how to verify proposed causes.",
+          "Implement multi-turn pattern conversations in C# with proper conversation history management.",
+          "Choose the right pattern (or combination) for a given development task."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorial 2 (Foundations of Prompt Engineering) — prompt anatomy, iteration, zero/few-shot styles, output validation.",
+          "Tutorial 1 concepts: tokens, context window, hallucination, system vs user messages.",
+          "Comfortable intermediate C#: async/await, collections, exceptions, and reading stack traces.",
+          "Any chat model to practice with; the C# samples show how patterns become application code."
+        ] },
+        { "type": "note", "style": "tip", "text": "Patterns are habits, not knowledge. As you read, replay your last week of AI interactions and ask which pattern you were (or should have been) using." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "What Prompting Patterns Are and Why They Work",
+      "content": [
+        { "type": "paragraph", "text": "A prompting pattern is a reusable interaction recipe: a named sequence of prompts, checks, and follow-ups that reliably produces good results for a class of tasks. Patterns exist because single-shot prompting has a ceiling — even a perfectly written prompt gets a probabilistic first draft, and first drafts are where quality problems live. Patterns wrap the model's raw generation in structure: verification points, alignment steps, and decomposition." },
+        { "type": "paragraph", "text": "Patterns work for three reasons. First, they impose checkpoints: every pattern has at least one moment where a human (or validating code) judges output against acceptance criteria before it moves forward. Second, they manage context deliberately: each step's prompt carries exactly the information that step needs — verified output from earlier steps, not raw hope. Third, they match the model's strengths: models are excellent at focused transformations and explanations, and weaker at giant, under-specified, do-everything requests." },
+        { "type": "table", "headers": ["Pattern", "One-line purpose", "Reach for it when"], "rows": [
+          ["Ask → Review → Improve", "Never ship the first draft — review, then request targeted fixes", "Every non-trivial generation task; it is the default loop"],
+          ["Explain → Generate → Refine", "Verify the model's understanding before it produces anything", "Working with existing code, or requirements that could be misread"],
+          ["Chain-of-thought", "Make the model reason step by step before answering", "Logic, edge-case analysis, tricky calculations, 'why' questions"],
+          ["Prompt sequence", "Decompose one big requirement into verifiable stages", "Features too large or too risky for a single prompt"],
+          ["Debugging pattern", "Structured error analysis from evidence you provide", "Exceptions, wrong output, performance mysteries"]
+        ] },
+        { "type": "paragraph", "text": "The patterns compose. A prompt sequence's individual stages each run Ask → Review → Improve; a debugging session often opens with Explain (have the model restate the failing behavior) and uses chain-of-thought for the causal reasoning. They also combine freely with the styles from the previous tutorial — few-shot prompting can teach a stage's output format, and grounding supplies its facts. Treat the five as a toolkit, not as five separate ceremonies." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "The Ask → Review → Improve Pattern",
+      "content": [
+        { "type": "paragraph", "text": "Ask → Review → Improve is the fundamental quality loop, and the discipline is almost entirely in the second and third steps. Ask: request the output with full prompt anatomy — instruction, context, input data, output constraints — and, crucially, know your acceptance criteria before you ask. Review: read the output critically against those criteria; for code that means correctness, edge cases, naming, error handling, and fit with your codebase — not 'does it look plausible'. Improve: instead of re-rolling the whole request, name the specific deficiencies and ask for targeted fixes." },
+        { "type": "animation", "title": "The Ask → Review → Improve loop", "intro": "Watch how output only leaves the loop after it passes review.", "nodes": [
+          { "id": "ask", "label": "Ask", "sub": "full anatomy" },
+          { "id": "draft", "label": "Draft output", "sub": "probabilistic" },
+          { "id": "review", "label": "Review", "sub": "vs criteria" },
+          { "id": "improve", "label": "Improve", "sub": "targeted fixes" },
+          { "id": "accept", "label": "Accept", "sub": "criteria met" }
+        ], "steps": [
+          { "highlight": ["ask"], "caption": "Ask with the full prompt anatomy — and with acceptance criteria already written down." },
+          { "highlight": ["draft"], "caption": "The model returns a first draft. Drafts are probabilistic — treat every one as unreviewed work." },
+          { "highlight": ["review"], "caption": "Review the draft against your criteria: correctness, edge cases, error handling, style, fit." },
+          { "highlight": ["improve"], "caption": "Found problems? Name them specifically: 'Handle the empty-list case; use decimal, not double; add cancellation support.'" },
+          { "highlight": ["draft", "review", "improve"], "caption": "Loop: each improvement request produces a new draft that goes back through review." },
+          { "highlight": ["accept"], "caption": "Only output that passes review leaves the loop. The first draft almost never does — that is expected, not failure." }
+        ] },
+        { "type": "paragraph", "text": "Two refinements make the loop sharper. First, targeted improvement requests beat regeneration: 'add null handling for the customer parameter and make the method async' converges in one turn, while 'try again' just re-rolls the dice. Second, use model self-review as a pre-filter: 'Review the code you just wrote against these criteria: … List any violations before I do.' The model catches many of its own mechanical misses — but self-review supplements your review, it never replaces it, because the model grades its own work with the same blind spots that produced it." },
+        { "type": "note", "style": "warning", "text": "The most common failure of this pattern is silently skipping Review under time pressure. Plausible-looking code that was never reviewed is exactly how subtle model mistakes reach production." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "The Explain → Generate → Refine Pattern",
+      "content": [
+        { "type": "paragraph", "text": "Explain → Generate → Refine tackles a different risk: the model producing confident output from a wrong understanding. Before asking for any production output, you first ask the model to explain — restate the requirement in its own words, or walk through what the existing code actually does. You verify that explanation. Only then does it generate, and afterwards you refine as usual." },
+        { "type": "paragraph", "text": "The Explain step is cheap insurance. If the model misreads your requirement ('rolling 30-day window' understood as 'calendar month'), you catch it in a two-sentence explanation instead of in 80 lines of confidently wrong code. And when modifying existing code, Explain doubles as grounding: a model that has just correctly traced your method's behavior is dramatically less likely to break it while changing it. The pattern shines for legacy code changes, ambiguous tickets, and any task where the cost of misunderstanding is high." },
+        { "type": "list", "style": "bullet", "items": [
+          "Explain: 'Before writing anything, explain in your own words what this method does and what I am asking you to change.'",
+          "Verify: read the explanation; correct any drift — 'point 2 is wrong: the discount applies before tax, not after.'",
+          "Generate: 'Correct. Now make the change, preserving current behavior for all other paths.'",
+          "Refine: run the Ask → Review → Improve loop on what came back."
+        ] },
+        { "type": "note", "style": "tip", "text": "A useful litmus test: if you cannot judge whether the model's explanation is right, you are not ready to review its code either — read the source first. The pattern protects you only as far as your own verification reaches." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Step-by-Step (Chain-of-Thought) Prompting",
+      "content": [
+        { "type": "paragraph", "text": "Chain-of-thought prompting asks the model to reason step by step before committing to an answer: 'Think through this step by step, then give your conclusion.' Because generation is sequential, the intermediate reasoning tokens become context that conditions the final answer — the model effectively shows its work and then answers from that work, which measurably improves results on multi-step logic: boundary conditions, date arithmetic, concurrency interleavings, 'what does this query return when the join is empty'." },
+        { "type": "animation", "title": "Chain-of-thought: reasoning before answering", "intro": "Compare the direct path with the step-by-step path.", "nodes": [
+          { "id": "task", "label": "Hard question", "sub": "multi-step logic" },
+          { "id": "cot", "label": "'Step by step'", "sub": "instruction" },
+          { "id": "steps", "label": "Reasoning steps", "sub": "written out" },
+          { "id": "check", "label": "You inspect", "sub": "each step" },
+          { "id": "ans", "label": "Final answer", "sub": "built on steps" }
+        ], "steps": [
+          { "highlight": ["task"], "caption": "A question with several dependent steps — exactly where a direct answer is most likely to be confidently wrong." },
+          { "highlight": ["cot"], "caption": "You add the chain-of-thought instruction: 'Reason through this step by step before answering.'" },
+          { "highlight": ["steps"], "caption": "The model writes out intermediate steps — each generated token becomes context for the next." },
+          { "highlight": ["check"], "caption": "Bonus: the visible steps are inspectable. A wrong step tells you exactly where the reasoning derailed." },
+          { "highlight": ["ans"], "caption": "The final answer is conditioned on the worked reasoning — measurably more reliable on logic-heavy tasks." }
+        ] },
+        { "type": "paragraph", "text": "Use chain-of-thought deliberately, not universally. It costs tokens and latency (all that reasoning is billed output), and for simple lookups or formatting tasks it adds nothing. It earns its cost on reasoning-heavy questions — and it pairs beautifully with debugging (section 10) and with review steps ('walk through this code path step by step for the case where the list is empty'). Two caveats: the written reasoning is itself model output, so a step can be wrong while sounding rigorous — inspect it; and some newer models perform internal reasoning on their own, making explicit step-by-step instructions less necessary — test with your model rather than assuming." },
+        { "type": "note", "style": "info", "text": "Variant worth knowing: ask for the steps and the answer in separate labeled parts ('Reasoning:' then 'Answer:') so your application can parse just the answer while keeping the reasoning for logs and review." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Breaking Complex Requirements into Prompt Sequences",
+      "content": [
+        { "type": "paragraph", "text": "Some tasks are simply too big for one prompt: 'build the invoicing module' stuffed into a single request produces a sprawling, unreviewable draft with hallucinated pieces. The prompt sequence pattern applies standard engineering decomposition to prompting: split the requirement into stages, prompt each stage separately, verify each output, and feed verified outputs forward as context for the next stage." },
+        { "type": "animation", "title": "A prompt sequence in action", "intro": "One big requirement becomes four small, verifiable prompts.", "nodes": [
+          { "id": "req", "label": "Requirement", "sub": "'build feature X'" },
+          { "id": "split", "label": "Decompose", "sub": "into stages" },
+          { "id": "p1", "label": "Design prompt", "sub": "verify ✓" },
+          { "id": "p2", "label": "Code prompt", "sub": "verify ✓" },
+          { "id": "p3", "label": "Tests prompt", "sub": "verify ✓" }
+        ], "steps": [
+          { "highlight": ["req"], "caption": "The raw requirement is too large and too ambiguous for one reliable prompt." },
+          { "highlight": ["split"], "caption": "You decompose it: interface design → implementation → tests → docs. Each stage has its own acceptance criteria." },
+          { "highlight": ["p1"], "caption": "Stage 1: propose the interface and data shapes. You review and correct it — cheap to fix at this altitude." },
+          { "highlight": ["p2"], "caption": "Stage 2: implement against the approved interface. The verified design travels in this prompt as context." },
+          { "highlight": ["p3"], "caption": "Stage 3: generate tests against the approved interface and implementation — each stage builds only on verified output." },
+          { "highlight": ["split", "p1", "p2", "p3"], "caption": "Errors are caught at stage boundaries instead of compounding silently inside one giant draft." }
+        ] },
+        { "type": "paragraph", "text": "Decomposition brings three concrete wins. Reviewability: a 30-line interface proposal is checkable in a minute; a 400-line module dump is not. Error containment: a mistake caught at the design stage costs one correction, not a cascade. Context control: each prompt carries only what its stage needs, staying well inside the context window even for large features. The standard stage sequence for a feature — design → implementation → tests → documentation — mirrors how you would review a colleague's work, which is not a coincidence." },
+        { "type": "paragraph", "text": "Manage the sequence's context deliberately: pass forward the verified artifacts (the approved interface, the corrected code), not the full transcript of every turn. Summarize decisions between stages when the conversation history grows. In application code, each stage is often a separate API call with a purpose-built prompt template rather than one long chat — you control exactly what context each stage sees." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Where Patterns Live in the .NET Ecosystem",
+      "content": [
+        { "type": "paragraph", "text": "These patterns are tool-agnostic — the same shapes work in a chat window, in GitHub Copilot, and in your application code — but each surface has its own mechanics:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Interactive chat (Azure AI Foundry playground, any chat UI): patterns are conversational turns; you are the review step. Ideal for practicing the loop before encoding it.",
+          "GitHub Copilot Chat in Visual Studio / VS Code: patterns map to threaded conversations with your code in context — Explain → Generate → Refine is Copilot's natural gait for modifying existing files (tutorials 8–9 go deep).",
+          "Application code via Azure OpenAI: patterns become orchestrated API calls — a multi-turn conversation is a list of messages your C# code builds, and each pattern step is a message (or a separate call) with conversation history you explicitly manage.",
+          "Semantic Kernel (tutorials 17–18): patterns formalized — prompt templates per stage, function chaining for sequences, and planners that decompose goals automatically.",
+          "Prompt templates in your repository: each pattern step that your application runs unattended (a review prompt, a debugging prompt) should be a versioned prompt template with its own test inputs."
+        ] },
+        { "type": "paragraph", "text": "One mechanical point matters everywhere: models are stateless. A 'conversation' exists only because every request replays the conversation history. That is why patterns that span turns (all five here) are also token-budget decisions — history you replay is context you pay for, so the pattern step that summarizes or trims history is part of the engineering, not an optimization afterthought. Standing rules belong in the system message, where they survive every turn without being repeated." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "The Debugging Pattern: Prompting for Error Analysis",
+      "content": [
+        { "type": "paragraph", "text": "Debugging is the pattern developers reach for most often under pressure, and the one where prompt quality changes outcomes most dramatically. The model cannot attach a debugger — it reasons only from the evidence you provide. Structured error analysis means assembling that evidence deliberately:" },
+        { "type": "list", "style": "bullet", "items": [
+          "The exact error message and the full stack trace — verbatim, not paraphrased.",
+          "The relevant code — ideally a minimal reproduction rather than the whole file; trimming noise focuses the analysis and fits the context window.",
+          "Expected vs actual behavior, stated precisely: 'expected 3 rows, got 0' beats 'it doesn't work'.",
+          "Environment facts that matter: framework version, database, concurrency, recent changes.",
+          "What you already tried and what it ruled out — this prunes the model's search space."
+        ] },
+        { "type": "paragraph", "text": "Then ask for ranked hypotheses, not a single verdict: 'List the most likely root causes in order of probability, and for each, tell me what evidence would confirm or rule it out.' This framing does two things: it makes the model reason comparatively (chain-of-thought fits naturally here), and it hands you a verification plan instead of a leap of faith. You then check the top hypothesis in the debugger — the model proposes, your tools confirm." },
+        { "type": "paragraph", "text": "Beyond exceptions, the same shape works for wrong-output bugs ('here is the input, the output, and the transformation code — walk through step by step where the value diverges'), performance mysteries (provide the profile numbers), and flaky tests (provide the failure frequency and both passing and failing logs). In every variant, the quality of the analysis tracks the quality of the evidence — garbage in, confident garbage out." },
+        { "type": "note", "style": "warning", "text": "The debugging pattern's specific hazard: the model states a plausible root cause with total confidence, you 'fix' it, and the bug remains — a hallucination that cost you an hour. Never apply a proposed fix without first confirming the diagnosis with the evidence test the model itself suggested." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples in C#",
+      "content": [
+        { "type": "paragraph", "text": "Patterns in application code are conversations your program conducts. This example runs Ask → Review → Improve as a multi-turn conversation, using model self-review as the middle step (illustrative SDK usage — see section 13):" },
+        { "type": "code", "language": "csharp", "title": "Ask → self-Review → Improve as a multi-turn conversation", "code": [
+          "// The conversation history IS the state — the model itself is stateless.",
+          "List<ChatMessage> history =",
+          "[",
+          "    new SystemChatMessage(",
+          "        \"You are a careful C# engineer. Follow the acceptance criteria exactly.\"),",
+          "",
+          "    // --- ASK ---",
+          "    new UserChatMessage(",
+          "        \"\"\"",
+          "        Write a C# extension method 'Chunk<T>' that splits an IEnumerable<T>",
+          "        into lists of a given size.",
+          "        Acceptance criteria: lazy evaluation; last chunk may be short;",
+          "        throw ArgumentOutOfRangeException for size < 1; include XML docs.",
+          "        \"\"\")",
+          "];",
+          "",
+          "ChatCompletion draft = await chat.CompleteChatAsync(history);",
+          "history.Add(new AssistantChatMessage(draft.Content[0].Text));",
+          "",
+          "// --- REVIEW (model self-review first, human review still follows) ---",
+          "history.Add(new UserChatMessage(",
+          "    \"Review your code against each acceptance criterion. \" +",
+          "    \"List any violations or edge cases you missed. Do not rewrite yet.\"));",
+          "ChatCompletion review = await chat.CompleteChatAsync(history);",
+          "history.Add(new AssistantChatMessage(review.Content[0].Text));",
+          "",
+          "// --- IMPROVE (targeted, based on the review) ---",
+          "history.Add(new UserChatMessage(",
+          "    \"Fix every issue you listed. Output only the corrected code.\"));",
+          "ChatCompletion final = await chat.CompleteChatAsync(history);",
+          "",
+          "Console.WriteLine(final.Content[0].Text); // now goes to HUMAN review + tests"
+        ] },
+        { "type": "paragraph", "text": "The debugging pattern makes an excellent prompt template — the structure is fixed, only the evidence changes:" },
+        { "type": "code", "language": "csharp", "title": "A reusable debugging prompt template", "code": [
+          "public static class DebugPrompts",
+          "{",
+          "    // v2: added 'already tried' and ranked-hypotheses framing (2026-09).",
+          "    public static string BuildErrorAnalysisPrompt(",
+          "        string errorMessage, string stackTrace, string minimalRepro,",
+          "        string expectedVsActual, string alreadyTried) => $\"\"\"",
+          "        Analyze this .NET error.",
+          "",
+          "        Error message:",
+          "        {errorMessage}",
+          "",
+          "        Stack trace:",
+          "        {stackTrace}",
+          "",
+          "        Minimal reproduction:",
+          "        ```csharp",
+          "        {minimalRepro}",
+          "        ```",
+          "",
+          "        Expected vs actual: {expectedVsActual}",
+          "        Already tried (ruled out): {alreadyTried}",
+          "",
+          "        Reason step by step, then list the most likely root causes",
+          "        ranked by probability. For each: what evidence would confirm",
+          "        or rule it out. Do not propose fixes yet.",
+          "        \"\"\";",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "Note the last line: separating diagnosis from fixing is deliberate. You confirm the root cause first (the pattern's review step), then request the fix in a follow-up turn — carrying the confirmed diagnosis forward as verified context, exactly like a prompt sequence stage." }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step-by-Step: A Full Debugging Session with the Patterns",
+      "content": [
+        { "type": "paragraph", "text": "This walkthrough combines four of the five patterns on a realistic bug: an ASP.NET endpoint intermittently returns stale data after an update. Follow the same shape on your next real bug." },
+        { "type": "list", "style": "numbered", "items": [
+          "Gather evidence first (debugging pattern): the exact symptom ('GET returns the old value for up to 30 seconds after PUT succeeds'), the controller and repository code trimmed to a minimal reproduction, the cache configuration, and what you ruled out (database write confirmed immediate).",
+          "Open with Explain: paste the minimal reproduction and ask the model to explain what the code does — no diagnosis yet. Verify its reading matches reality; correct any drift.",
+          "Ask for ranked hypotheses with chain-of-thought: 'Reason step by step, then rank likely root causes; for each, what evidence confirms or rules it out.' Suppose it ranks: (1) cache not invalidated on update, (2) distributed cache replication lag, (3) response caching middleware.",
+          "Verify before fixing: check hypothesis 1 in the code — the update path indeed never evicts the cache key. The model proposed; your inspection confirmed. (If inspection had disproved it, you would feed that fact back and re-rank — improving the analysis, not guessing.)",
+          "Request the fix against the confirmed diagnosis only: 'Root cause confirmed: missing cache eviction on update. Propose the minimal fix; preserve existing behavior for reads.'",
+          "Review the fix (Ask → Review → Improve): check it against criteria — evicts the right key, no race between eviction and write, no behavior change elsewhere. Ask for targeted improvements if needed.",
+          "Close the loop with a sequence stage: 'Write a test that fails under the old code and passes with the fix' — regression protection generated while the context is still verified and warm."
+        ] },
+        { "type": "note", "style": "tip", "text": "Count the checkpoints: explanation verified, diagnosis confirmed, fix reviewed, test added. Four human verifications in one session — that density of checking is what separates pattern-driven work from pasting an error into chat and applying whatever comes back." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Patterns raise reliability; they do not create guarantees. Every pattern's checkpoint assumes a competent reviewer — the loop is only as strong as your review.",
+          "Chain-of-thought reasoning is itself generated text: a step can be wrong while sounding rigorous, and visible reasoning is not always the model's actual computation. Inspect steps; never treat shown reasoning as proof.",
+          "Multi-turn patterns pay a token tax: replayed conversation history grows every turn and is billed every turn. Summarize or trim between stages; in application code, prefer purpose-built calls per stage over one ever-growing chat.",
+          "Error analysis can hallucinate root causes with high confidence — always run the confirming evidence check before applying a fix.",
+          "Long conversations drift: earlier constraints fade from the model's effective attention. Re-state critical constraints in later turns, or restart with a summary when a session grows long.",
+          "Model behavior varies: newer models with built-in reasoning may need less explicit chain-of-thought; re-test your patterns when the model changes, exactly as you re-test prompts."
+        ] },
+        { "type": "note", "style": "warning", "text": "API-accuracy disclosure: the prompt-template code in section 11 is exact, standard C# (raw string literals need C# 11+). The multi-turn chat example follows the Azure.AI.OpenAI / OpenAI .NET SDK design (ChatMessage list, SystemChatMessage/UserChatMessage/AssistantChatMessage, CompleteChatAsync), but exact type names and signatures vary by package version — verify against current SDK documentation. Tutorial 11 builds verified end-to-end code." }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices and Common Mistakes",
+      "content": [
+        { "type": "paragraph", "text": "Practices that make the patterns stick:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Write acceptance criteria before the first Ask — review needs a yardstick.",
+          "Make improvement requests targeted and specific; 'try again' is a wasted turn.",
+          "Use model self-review as a pre-filter, never as the final review.",
+          "Verify the Explain step before allowing generation — it is the cheapest checkpoint you will ever get.",
+          "Reserve chain-of-thought for reasoning-heavy tasks; ask for labeled 'Reasoning:' and 'Answer:' parts when code must parse the result.",
+          "Decompose anything you could not review in one sitting; verify at every stage boundary and pass forward only verified artifacts.",
+          "In debugging, provide verbatim errors, a minimal reproduction, and what you ruled out; demand ranked hypotheses with confirming evidence."
+        ] },
+        { "type": "paragraph", "text": "Mistakes that undo the patterns:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Skipping Review under deadline pressure — the pattern's entire value lives there.",
+          "Regenerating instead of improving: five re-rolls teach the model nothing; one targeted fix converges.",
+          "Letting the model generate against an unverified understanding of your requirement or code.",
+          "Using chain-of-thought everywhere and paying its token cost on trivial tasks.",
+          "One giant prompt for a feature, then trying to review a 400-line dump in one pass.",
+          "Paraphrasing error messages or pasting whole files instead of a minimal reproduction.",
+          "Applying a proposed fix without confirming the diagnosis — the classic hallucinated-root-cause trap.",
+          "Letting conversation history balloon until early constraints silently fall out of effective context."
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz",
+      "items": [
+        { "number": 1, "question": "What is a prompting pattern?", "options": { "A": "A regex for validating prompts", "B": "A reusable interaction recipe — a proven sequence of prompts and checks for a class of tasks", "C": "A model configuration preset", "D": "A prompt written in a template language" }, "correctAnswer": "B", "explanation": "Patterns are to prompting what design patterns are to OO code: named, repeatable shapes (Ask → Review → Improve, prompt sequences, …) that wrap probabilistic generation in structure — checkpoints, alignment, and decomposition." },
+        { "number": 2, "question": "In Ask → Review → Improve, what makes the Review step effective?", "options": { "A": "Reading the output to see if it looks plausible", "B": "Judging the output against acceptance criteria defined before asking", "C": "Running the prompt twice and comparing", "D": "Checking only that the code compiles" }, "correctAnswer": "B", "explanation": "Review needs a yardstick that exists before the output does. 'Looks plausible' is exactly the trap — model output is optimized to look plausible. Criteria written at Ask time (edge cases, error handling, constraints) make review a check, not an impression." },
+        { "number": 3, "question": "The first draft has two problems: no null check and a wrong return type. What is the best Improve step?", "options": { "A": "'Try again'", "B": "'Make it better'", "C": "Regenerate with a higher temperature", "D": "'Add a null check for the customer parameter and change the return type to decimal'" }, "correctAnswer": "D", "explanation": "Targeted improvement requests converge in one turn because the model knows exactly what to change. Re-rolling ('try again') just samples another draft with the same blind spots — and higher temperature makes output more random, not more correct." },
+        { "number": 4, "question": "What is the role of model self-review in the quality loop?", "options": { "A": "It replaces human review", "B": "It is a pre-filter that catches mechanical misses before your final human review", "C": "It guarantees the code meets the criteria", "D": "It reduces token usage" }, "correctAnswer": "B", "explanation": "Asking the model to critique its own output against the criteria catches many surface violations cheaply. But it shares the blind spots that produced the draft, so it supplements — never replaces — the human check. It also costs tokens rather than saving them." },
+        { "number": 5, "question": "What does the Explain step in Explain → Generate → Refine protect against?", "options": { "A": "High token bills", "B": "Slow responses", "C": "The model generating confident output from a wrong understanding", "D": "Compiler errors" }, "correctAnswer": "C", "explanation": "A misread requirement caught in a two-sentence explanation costs one correction; the same misread discovered inside 80 lines of generated code costs far more. Verifying the model's understanding first is the cheapest checkpoint in any pattern." },
+        { "number": 6, "question": "When is Explain → Generate → Refine MOST valuable?", "options": { "A": "Generating a throwaway one-liner", "B": "Modifying existing/legacy code or implementing an ambiguous requirement", "C": "Formatting JSON", "D": "Asking for a definition" }, "correctAnswer": "B", "explanation": "The pattern earns its extra turn when the cost of misunderstanding is high: legacy code the model might break, or tickets that can be read two ways. A model that just correctly traced your code is far less likely to break it while changing it." },
+        { "number": 7, "question": "Why does chain-of-thought prompting improve answers on multi-step problems?", "options": { "A": "It makes the model use a larger neural network", "B": "The written reasoning steps become context that conditions the final answer", "C": "It disables temperature", "D": "It queries the model multiple times in parallel" }, "correctAnswer": "B", "explanation": "Generation is sequential: each reasoning token the model writes becomes input for what follows, so the final answer is built on the worked steps instead of leaping straight to a conclusion. Same model, same settings — better-conditioned answer." },
+        { "number": 8, "question": "What is the main cost of chain-of-thought prompting?", "options": { "A": "It requires a fine-tuned model", "B": "More output tokens and latency — the reasoning is billed generation", "C": "It disables few-shot prompting", "D": "It only works in English" }, "correctAnswer": "B", "explanation": "All those reasoning steps are generated output you pay for and wait for. That is why chain-of-thought is a deliberate choice for reasoning-heavy tasks, not a default garnish on every prompt." },
+        { "number": 9, "question": "A visible chain-of-thought step looks rigorous. What must you still remember?", "options": { "A": "The reasoning is itself generated text and can be wrong while sounding rigorous", "B": "Visible reasoning is mathematically verified", "C": "The model cannot show wrong steps", "D": "Reasoning steps are free of token charges" }, "correctAnswer": "A", "explanation": "Shown reasoning is model output like any other — inspectable (a real advantage) but not proof. A confident wrong step tells you where the analysis derailed, which is useful precisely because you are expected to check it." },
+        { "number": 10, "question": "What is the core mechanic of a prompt sequence?", "options": { "A": "Sending the same prompt to several models", "B": "Splitting a requirement into stages, verifying each output, and feeding verified outputs forward as context", "C": "Increasing the context window", "D": "Running prompts in parallel threads" }, "correctAnswer": "B", "explanation": "Decomposition plus stage-boundary verification: design → code → tests → docs, where each stage builds only on approved artifacts. Errors get caught at boundaries instead of compounding inside one giant draft." },
+        { "number": 11, "question": "Which is a direct benefit of decomposing a big feature into a prompt sequence?", "options": { "A": "The model becomes deterministic", "B": "A 30-line stage output is reviewable; errors are contained at stage boundaries; each prompt stays inside the context window", "C": "No review is needed at the end", "D": "Tokens become free between stages" }, "correctAnswer": "B", "explanation": "Reviewability, error containment, and context control are the three wins. Nothing about decomposition removes the need for review — it makes review feasible." },
+        { "number": 12, "question": "Which evidence set makes a debugging prompt most effective?", "options": { "A": "'My app crashes, please fix it' plus the whole repository", "B": "A paraphrase of the error from memory", "C": "Verbatim error + stack trace, a minimal reproduction, expected vs actual, environment facts, and what you already ruled out", "D": "Only the line where the exception was thrown" }, "correctAnswer": "C", "explanation": "The model reasons only from supplied evidence. Verbatim errors and a minimal reproduction maximize signal per token; expected-vs-actual and ruled-out attempts prune the hypothesis space. Whole-repo dumps bury the signal; paraphrases corrupt it." },
+        { "number": 13, "question": "Why ask for ranked root-cause hypotheses with confirming evidence instead of a single diagnosis?", "options": { "A": "It is cheaper in tokens", "B": "It forces comparative reasoning and hands you a verification plan instead of a leap of faith", "C": "Models cannot output single answers", "D": "It avoids the context window limit" }, "correctAnswer": "B", "explanation": "Ranked hypotheses with 'what would confirm or rule this out' turn the model's output into a checkable plan. You verify the top hypothesis with real tools before fixing — the antidote to confidently hallucinated root causes." },
+        { "number": 14, "question": "Why does a multi-turn pattern conversation cost more per turn as it grows?", "options": { "A": "The API charges a premium for long sessions", "B": "The model is stateless, so every request replays the whole conversation history — which is billed as input tokens each time", "C": "Later turns use a bigger model", "D": "It does not; history is free" }, "correctAnswer": "B", "explanation": "A 'conversation' is an illusion your code maintains by resending prior messages. History grows every turn and is re-billed every turn — which is why summarizing or trimming between pattern stages is part of the engineering." },
+        { "number": 15, "question": "You need a small, well-understood utility method. Which pattern application is proportionate?", "options": { "A": "A five-stage prompt sequence with documents per stage", "B": "Chain-of-thought with fifty reasoning steps", "C": "A quick Ask → Review → Improve loop against short acceptance criteria", "D": "No review — small code cannot be wrong" }, "correctAnswer": "C", "explanation": "Patterns scale to the task. A utility method needs the default quality loop and nothing more; full decomposition is for work too big to review at once. But 'too small to review' is never true — small model code still ships subtle bugs." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam Questions",
+      "items": [
+        { "number": 1, "question": "Define 'prompting pattern' and give three reasons patterns outperform improvised prompting.", "modelAnswer": "A prompting pattern is a reusable interaction recipe: a named sequence of prompts, checks, and follow-ups that reliably produces good results for a class of tasks. Patterns outperform improvisation because (1) they impose checkpoints — every pattern has a moment where output is judged against acceptance criteria before moving forward; (2) they manage context deliberately — each step carries exactly the information it needs, including verified outputs of earlier steps; (3) they fit the model's strengths — focused transformations and explanations rather than giant under-specified requests. They also compose: sequence stages each run the quality loop; debugging opens with Explain." },
+        { "number": 2, "question": "Walk through Ask → Review → Improve for generating a C# method, detailing what each step requires to be effective.", "modelAnswer": "Ask: full prompt anatomy — instruction, context, input data, output constraints — plus acceptance criteria written down first (signature, edge cases, error handling, docs). Review: judge the draft against those criteria specifically: correctness on edge cases, argument validation, naming, async correctness, fit with the codebase — never 'looks plausible'. Improve: name the deficiencies and request targeted fixes ('handle empty input; use decimal; add cancellation'), which converges in a turn, unlike regeneration. Optionally insert model self-review between draft and human review as a pre-filter. Output leaves the loop only when review passes." },
+        { "number": 3, "question": "Explain why 'try again' is an ineffective Improve step and what to do instead.", "modelAnswer": "'Try again' re-samples the distribution that produced the flawed draft: the model gets no information about what was wrong, so the next draft carries the same blind spots plus new randomness. Effective improvement transfers your review findings into the conversation: enumerate the specific violations ('no null check on customer; return type should be decimal; missing XML docs') and ask for exactly those fixes. Each named issue constrains the regeneration, typically converging in one turn — and it builds a conversation record of the criteria that later turns keep respecting." },
+        { "number": 4, "question": "Describe Explain → Generate → Refine and argue where its extra turn pays for itself most.", "modelAnswer": "The pattern inserts an alignment step before production: the model first explains — restates the requirement or traces what existing code does — you verify and correct that explanation, then it generates, then you refine via the quality loop. The extra turn pays off where misunderstanding is expensive: modifying legacy code (a model that just correctly traced the method is much less likely to break it), ambiguous tickets (a wrong reading caught in two sentences instead of 80 lines), and high-stakes logic (billing, security). Its limit: the pattern protects only as far as your ability to verify the explanation — if you cannot judge it, read the source first." },
+        { "number": 5, "question": "Explain the mechanism by which chain-of-thought prompting improves multi-step answers, and give its two main caveats.", "modelAnswer": "Generation is sequential: every token the model emits becomes context for subsequent tokens. When prompted to reason step by step, the model writes intermediate steps that then condition the final answer — it answers from its worked reasoning rather than leaping to a conclusion, measurably improving logic-heavy results (boundaries, date math, concurrency traces). Caveats: (1) cost — reasoning is billed output and adds latency, so reserve it for tasks that need it; (2) the shown reasoning is itself generated text — a step can be wrong while sounding rigorous, and it may not reflect the model's true internal computation, so inspect steps rather than treating them as proof." },
+        { "number": 6, "question": "Design a prompt sequence for 'add CSV export to the orders page', specifying stages, what each prompt contains, and what is verified at each boundary.", "modelAnswer": "Stage 1 — design: prompt with the requirement, existing OrdersController surface, and constraints; output an interface proposal (endpoint signature, streaming approach, column spec). Verify: fits routing conventions, streams rather than buffers, columns match the ticket. Stage 2 — implementation: prompt carries the approved design plus relevant existing code; output the exporter and endpoint. Verify: compiles, handles empty results and large sets, culture-safe formatting, no blocking IO. Stage 3 — tests: prompt carries approved interface and implementation; output unit/integration tests including edge cases. Verify: tests fail meaningfully when the exporter is broken. Stage 4 — docs/changelog from the verified artifacts. Each stage passes forward only approved outputs, never raw drafts." },
+        { "number": 7, "question": "List the evidence a high-quality debugging prompt should contain, and explain what each element contributes.", "modelAnswer": "(1) Verbatim error message and full stack trace — exact tokens carry signal a paraphrase destroys; the trace localizes the failure path. (2) Minimal reproduction — maximizes signal per token, fits the context window, and removes red herrings. (3) Expected vs actual behavior, precisely — defines the delta to explain. (4) Environment facts — framework version, database, concurrency, recent changes — that select between otherwise-equal hypotheses. (5) What was already tried and ruled out — prunes the hypothesis space and prevents the model re-proposing dead ends. The analysis quality tracks the evidence quality: the model reasons only from what you provide." },
+        { "number": 8, "question": "Why should diagnosis and fixing be separated into different turns in the debugging pattern?", "modelAnswer": "Separating them inserts the pattern's critical checkpoint: the ranked root-cause hypotheses arrive with confirming/ruling-out evidence, and you verify the top hypothesis with real tools (debugger, logs) before any code changes. If diagnosis and fix arrive together, the plausible-sounding fix anchors you and gets applied unverified — the classic path to 'fixed' bugs that persist because the diagnosis was hallucinated. Separation also improves the fix itself: the confirmed diagnosis travels forward as verified context, so the fix prompt is grounded in established fact rather than conjecture, exactly like a prompt sequence stage." },
+        { "number": 9, "question": "Explain why models being stateless matters for multi-turn patterns, and derive two engineering consequences.", "modelAnswer": "A model retains nothing between requests; the 'conversation' exists only because your code (or the chat UI) replays prior messages with every call. Consequence one — cost and limits: history grows every turn and is re-billed as input tokens every turn, and can eventually crowd the context window, so pattern engineering includes summarizing or trimming between stages and passing forward verified artifacts rather than full transcripts. Consequence two — reliability: constraints stated early can fall out of effective attention in long sessions, so critical rules must be re-stated in later turns or moved to the system message, and long sessions are better restarted from a written summary." },
+        { "number": 10, "question": "Compare when you would choose Ask → Review → Improve alone versus a full prompt sequence, with examples.", "modelAnswer": "The quality loop alone fits tasks you can review in one sitting: a utility method, a single query, a config change — one Ask with criteria, one or two Improve turns. A prompt sequence fits work whose single-prompt output would be unreviewable or high-risk: a feature spanning design decisions, multiple files, and tests. The decision test is reviewability: if you could not competently review the whole output at once, decompose until each stage's output is reviewable. Example: 'write IsValidIban' → quality loop; 'add IBAN payment support to checkout' → sequence (design → validation code → integration → tests), each stage running the loop internally." },
+        { "number": 11, "question": "How does chain-of-thought integrate with the debugging pattern? Illustrate with a concrete prompt fragment.", "modelAnswer": "Ranked root-cause analysis is comparative multi-step reasoning — exactly chain-of-thought territory. Instructing 'reason step by step, then rank likely root causes with confirming evidence' makes the model trace the failure path explicitly (request → cache read → stale value) before committing to causes, and the visible trace lets you spot where its model of the system diverges from reality. Fragment: 'Walk through the request flow step by step for a GET immediately after a PUT. At each step, state what value each component holds. Then rank the most likely root causes of the staleness, and for each, name the evidence that would confirm or rule it out. Do not propose fixes yet.'" },
+        { "number": 12, "question": "Describe the failure mode 'hallucinated root cause' and the pattern discipline that defuses it.", "modelAnswer": "The model, asked to explain a bug, produces a fluent, specific, confident diagnosis that happens to be wrong — e.g., blaming cache replication lag when the code simply never evicts the key. Developers under pressure apply the suggested fix, the bug persists, and an hour is lost — worse, the codebase now contains a change justified by a fiction. The discipline: demand ranked hypotheses each paired with confirming/ruling-out evidence; verify the top hypothesis with the debugger, logs, or a targeted experiment before requesting any fix; and feed disconfirming results back ('hypothesis 1 ruled out — eviction is present and firing') to re-rank rather than guessing." },
+        { "number": 13, "question": "How should conversation history be managed across a long pattern-driven session? Give at least three techniques.", "modelAnswer": "(1) Pass forward artifacts, not transcripts: between sequence stages, include the approved interface or corrected code, not every intermediate draft and review. (2) Summarize checkpoints: replace old turns with a compact summary of decisions and constraints ('agreed: decimal money, UTC dates, no breaking changes to IOrderService'). (3) Re-state critical constraints in later turns or promote them to the system message so they cannot drift out of effective attention. (4) Restart deliberately: when a session grows unwieldy, open a fresh conversation seeded with the summary — cheaper and more reliable than dragging a bloated history. (5) In application code, use purpose-built calls per stage instead of one growing chat." },
+        { "number": 14, "question": "Your team pastes errors into chat ad hoc with mixed results. Propose how to institutionalize the debugging pattern.", "modelAnswer": "Create a versioned debugging prompt template (as in section 11) with slots for verbatim error, stack trace, minimal reproduction, expected vs actual, environment, and ruled-out attempts — and the fixed framing 'reason step by step; ranked hypotheses with confirming evidence; no fixes yet'. Document the two-phase rule: no fix is applied until the diagnosis is confirmed by the suggested evidence check. Add a short guide with two worked examples (a good session and a garbage-in session). Track outcomes informally (diagnosis confirmed on first hypothesis? time to fix) to show the pattern earns its overhead, and fold lessons back into the template as version notes." },
+        { "number": 15, "question": "Scenario: a junior developer must add a non-trivial feature to unfamiliar legacy code using AI assistance. Prescribe a complete pattern-based workflow.", "modelAnswer": "Start with Explain: paste the relevant legacy sections and require an explanation of behavior and dependencies; verify it against the source before proceeding — correcting the model's reading teaches the developer the code too. Decompose into a sequence: (1) design the change against the verified understanding, review; (2) implement per approved design, with the design and relevant code as context; (3) generate tests including regression cases for touched behavior; (4) update docs. Run Ask → Review → Improve inside every stage with written acceptance criteria; use chain-of-thought for any tricky logic ('walk through the flow for a cancelled order step by step'). If bugs surface, apply the debugging pattern with a minimal reproduction and confirmed-diagnosis-before-fix. Manage history by passing forward only approved artifacts; re-state the 'no breaking changes' constraint each stage." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Prompting pattern", "back": "A reusable interaction recipe: a named sequence of prompts, checks, and follow-ups that reliably gets good results for a class of tasks. Patterns compose." },
+        { "number": 2, "front": "Ask → Review → Improve", "back": "The default quality loop: ask with criteria defined first, review the draft against them, request targeted fixes. Output leaves only after passing review." },
+        { "number": 3, "front": "Why targeted Improve beats 'try again'", "back": "Named deficiencies constrain the regeneration and converge in a turn; re-rolling samples the same blind spots with fresh randomness." },
+        { "number": 4, "front": "Model self-review", "back": "'Critique your output against these criteria before I do.' A useful pre-filter for mechanical misses — never a replacement for human review." },
+        { "number": 5, "front": "Explain → Generate → Refine", "back": "Alignment before production: model explains the requirement/code, you verify the explanation, then it generates, then you refine. Cheapest checkpoint available." },
+        { "number": 6, "front": "When Explain-first pays most", "back": "Legacy-code changes and ambiguous requirements — a wrong reading caught in 2 sentences instead of 80 lines of confident code." },
+        { "number": 7, "front": "Chain-of-thought prompting", "back": "'Reason step by step, then answer.' Written steps become context conditioning the final answer — better results on multi-step logic." },
+        { "number": 8, "front": "Chain-of-thought costs & caveats", "back": "Reasoning is billed output + latency; steps can be wrong while sounding rigorous; some newer models reason internally — test, don't assume." },
+        { "number": 9, "front": "Prompt sequence", "back": "Decompose a big requirement into stages (design → code → tests → docs); verify each stage; feed only verified artifacts forward." },
+        { "number": 10, "front": "Three wins of decomposition", "back": "Reviewability (small outputs), error containment (caught at boundaries), context control (each prompt carries only what its stage needs)." },
+        { "number": 11, "front": "Debugging pattern evidence set", "back": "Verbatim error + stack trace, minimal reproduction, expected vs actual, environment facts, and what you already ruled out." },
+        { "number": 12, "front": "Ranked hypotheses framing", "back": "'Rank likely root causes; for each, what evidence confirms or rules it out. No fixes yet.' Yields a verification plan, not a leap of faith." },
+        { "number": 13, "front": "Minimal reproduction", "back": "The smallest code that still shows the bug — maximizes signal per token, fits the context window, removes red herrings." },
+        { "number": 14, "front": "Hallucinated root cause trap", "back": "Confident, specific, wrong diagnosis → unverified 'fix' → bug persists. Defense: confirm the diagnosis with real tools before requesting any fix." },
+        { "number": 15, "front": "Statelessness & conversation history", "back": "Models retain nothing; every request replays history — re-billed each turn. Summarize between stages; pass artifacts, not transcripts." },
+        { "number": 16, "front": "Choosing a pattern", "back": "Reviewable in one sitting → quality loop. Existing/ambiguous code → Explain first. Logic-heavy → chain-of-thought. Too big to review → sequence. Broken → debugging pattern." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions & Answers",
+      "items": [
+        { "number": 1, "question": "What prompting patterns do you actually use day to day, and why patterns at all?", "answer": "My default is Ask → Review → Improve — criteria first, critical review of the draft, targeted fixes rather than re-rolls. For existing or ambiguous code I add an Explain step first so the model proves its understanding before generating. Logic-heavy questions get chain-of-thought; anything too big to review in one pass gets decomposed into a prompt sequence; and bugs get a structured debugging prompt. Patterns matter because they build verification into the interaction — the model's first draft is probabilistic, and patterns are how you stop first drafts from reaching production." },
+        { "number": 2, "question": "How do you review AI-generated code differently from human code?", "answer": "Same criteria, different priors. Model code fails in characteristic ways: plausible-looking APIs that don't exist, missing edge cases the prompt didn't spell out, subtly wrong domain logic stated with total confidence, and inconsistency with codebase conventions. So I review against acceptance criteria I wrote before asking, I specifically probe edge cases and error paths, and I never let 'it reads cleanly' stand in for 'it is correct'. I also use model self-review as a pre-filter — it catches its own mechanical misses — but the final judgment is mine, backed by tests." },
+        { "number": 3, "question": "Explain the Explain → Generate → Refine pattern and when you reach for it.", "answer": "Before letting the model produce anything, I have it explain — restate the ticket in its own words or trace what the existing code does — and I verify that explanation. Then it generates, then normal refinement. I reach for it whenever misunderstanding is expensive: legacy modifications, ambiguous requirements, anything touching billing or security. The economics are compelling: a wrong reading costs two sentences to catch at the Explain stage versus a rewrite plus review time if it surfaces inside generated code. And with legacy code, a model that just traced the method correctly is far less likely to break it." },
+        { "number": 4, "question": "What is chain-of-thought prompting, mechanically — why does it work?", "answer": "You instruct the model to reason step by step before answering. It works because generation is autoregressive: every reasoning token the model writes becomes part of the context conditioning subsequent tokens, so the final answer is computed on top of the worked steps instead of pattern-matching straight to a conclusion. Practically it lifts accuracy on multi-step logic — boundary analysis, date arithmetic, tracing concurrent flows. I use it deliberately: it costs output tokens and latency, the visible steps still need inspection because they're generated text too, and newer models with built-in reasoning may need less explicit prompting — I test per model." },
+        { "number": 5, "question": "How do you handle a requirement too large for one prompt?", "answer": "I decompose it into a prompt sequence with verification at every boundary — typically design → implementation → tests → docs. Stage one produces an interface proposal I can review in a minute; once approved, it travels as context into the implementation prompt; the verified implementation feeds the test prompt. Three wins: each output is small enough to actually review, an error caught at the design stage costs one correction instead of cascading, and each prompt carries only what its stage needs so I stay comfortably inside the context window. Each stage internally runs the normal quality loop." },
+        { "number": 6, "question": "Walk me through how you'd use an AI assistant on a production bug.", "answer": "Evidence first: verbatim error and stack trace, a minimal reproduction rather than whole files, precise expected-vs-actual, environment facts, and what I've already ruled out. Then I ask for ranked root-cause hypotheses with, for each, the evidence that would confirm or rule it out — explicitly no fixes yet. I verify the top hypothesis with the debugger or logs. Only after confirmation do I request a fix, scoped to the confirmed cause, and I review it like any generated code — then have it write a regression test while the context is warm. The one rule I never break: no fix applied on an unconfirmed diagnosis." },
+        { "number": 7, "question": "The model gave you a confident root cause and it was wrong. What happened and what's your protocol?", "answer": "That's a hallucinated diagnosis — the model optimizes for plausible explanation, and a specific, fluent, wrong root cause is well within its failure modes, especially with thin evidence. My protocol prevents damage: because I require ranked hypotheses with confirming evidence, the wrong hypothesis fails its own verification check in the debugger before any code changes. I then feed the disconfirming fact back — 'eviction is present and firing, rule that out' — and let it re-rank with better information. The waste is minutes of checking, not an hour of fixing the wrong thing." },
+        { "number": 8, "question": "How do you keep long AI-assisted sessions from degrading?", "answer": "Three habits. I pass forward artifacts, not transcripts — between stages the prompt carries the approved interface or corrected code, not every draft and critique. I summarize decisions periodically and re-state critical constraints, because early rules drift out of effective attention as history grows — or I promote them to the system message. And I restart deliberately: when a session gets long, a fresh conversation seeded with a written summary beats dragging a bloated history that's re-billed on every turn. Statelessness means history is both my only memory and a growing cost — I manage it like any resource." },
+        { "number": 9, "question": "'Try again' versus a targeted improvement request — does it really matter?", "answer": "Enormously. 'Try again' re-samples the same distribution that produced the flawed draft — the model learns nothing about what was wrong, so you're paying tokens for dice rolls. A targeted request — 'add null handling for customer, make it async, return decimal' — injects your review findings into the context, constrains the next generation to exactly those fixes, and usually converges in one turn. It also accumulates: stated criteria stay in history and later turns keep respecting them. The review step only pays off if its findings make it back into the conversation." },
+        { "number": 10, "question": "When would you NOT use chain-of-thought?", "answer": "Simple retrieval, formatting, and well-trodden generation — 'convert this JSON to a C# record', 'what does this attribute do' — where reasoning adds tokens and latency but no accuracy. Also in tight application loops where output must be terse and parseable; if I need some reasoning there, I ask for labeled 'Reasoning:' and 'Answer:' sections so code parses the answer while logs keep the reasoning. And with models that do internal reasoning natively, explicit step-by-step instructions can be redundant — I benchmark on my actual tasks instead of assuming." },
+        { "number": 11, "question": "How do these patterns show up when you're building AI features in C#, not just chatting?", "answer": "Patterns become orchestration code. A multi-turn pattern is a List<ChatMessage> my service builds — Ask, append the draft, append a self-review request, append the improvement request — with the conversation history explicitly managed. Sequence stages are often separate API calls with purpose-built, versioned prompt templates rather than one growing chat, so each stage sees exactly the context I choose. Review steps that run unattended become validating code — schema checks, allowed values — and anything that fails routes to retry or a human. The pattern's checkpoints don't disappear in automation; they turn into validators." },
+        { "number": 12, "question": "What's your minimal evidence bar before prompting about an error?", "answer": "Verbatim error message and full stack trace, a minimal reproduction, and a precise expected-vs-actual. If I can't produce a minimal reproduction yet, that's usually a sign I don't understand the failure well enough for the model to help — trimming the repro is itself diagnostic. I add environment facts when they plausibly matter and always list what I've ruled out so the model doesn't re-propose dead ends. Paraphrasing the error from memory or dumping whole files are the two habits I coach people out of first — one corrupts the signal, the other buries it." },
+        { "number": 13, "question": "How do you decide between the quality loop alone and full decomposition?", "answer": "Reviewability is the test: can I competently review the whole output in one sitting? A utility method, a single query — quality loop alone. A feature with design decisions, multiple files, and tests — decompose until each stage's output passes the one-sitting test. Risk shifts the threshold: for billing or security code I decompose earlier because I want a design-level checkpoint before any implementation exists. It mirrors code review norms — nobody reviews a 2,000-line PR well, and the same limit applies to reviewing model output." },
+        { "number": 14, "question": "Do these patterns still matter as models get better?", "answer": "The parameters shift; the structure stays. Better models need fewer Improve iterations, less explicit chain-of-thought, and handle bigger stages — I recalibrate those dials with every model upgrade, using the same regression inputs I keep for prompts. What doesn't change: output remains probabilistic, so review checkpoints stay; models still can't attach a debugger, so evidence-based error analysis stays; and human reviewability still caps how much output one prompt should produce, so decomposition stays. Patterns encode where verification belongs, and verification doesn't go out of style." },
+        { "number": 15, "question": "A teammate says patterns are ceremony that slows them down. Your response?", "answer": "I'd ask where their last three AI-assisted defects came from — in my experience they trace to a skipped checkpoint, usually review. The patterns aren't fixed ceremony; they scale: a small task is one Ask with criteria and one review pass — thirty seconds of structure. The expensive ceremony is the alternative: an hour lost to a hallucinated root cause because the diagnosis was never confirmed, or a subtle bug shipped because a plausible draft went unreviewed. I'd also point out they already accept this logic elsewhere — nobody calls code review or CI 'ceremony that slows them down' — patterns are the same discipline applied to a new, confidently fallible collaborator." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "Prompting pattern", "definition": "A reusable, named interaction recipe — prompts, checks, and follow-ups — that reliably produces good results for a class of development tasks." },
+        { "term": "Ask → Review → Improve", "definition": "The fundamental quality loop: request with predefined acceptance criteria, review the draft against them, request targeted fixes; accept only what passes review." },
+        { "term": "Explain → Generate → Refine", "definition": "An alignment-first pattern: the model explains the requirement or existing code, you verify the explanation, then generation and refinement proceed on verified understanding." },
+        { "term": "Chain-of-thought prompting", "definition": "Instructing the model to reason step by step before answering; the written steps condition the final answer, improving multi-step logic results." },
+        { "term": "Step-by-step prompting", "definition": "Synonym for chain-of-thought prompting: eliciting explicit intermediate reasoning ahead of the conclusion." },
+        { "term": "Prompt sequence", "definition": "A chain of focused prompts implementing one requirement in stages, with verification at each boundary and verified outputs fed forward as context." },
+        { "term": "Decomposition", "definition": "Splitting a complex requirement into smaller, independently promptable and reviewable pieces — the engineering move behind prompt sequences." },
+        { "term": "Stage boundary", "definition": "The checkpoint between prompt-sequence stages where output is verified before becoming the next stage's context." },
+        { "term": "Error analysis", "definition": "The debugging pattern: supplying structured evidence (error, trace, repro, environment) and requesting ranked root-cause hypotheses with confirming evidence." },
+        { "term": "Stack trace", "definition": "The call-path record of where an exception occurred; provided verbatim, one of the highest-signal inputs in a debugging prompt." },
+        { "term": "Minimal reproduction", "definition": "The smallest code sample that still exhibits the problem; it maximizes signal per token and removes red herrings from analysis." },
+        { "term": "Root cause", "definition": "The underlying reason a defect occurs, as distinct from its visible symptom; confirmed by evidence before any fix is applied." },
+        { "term": "Ranked hypotheses", "definition": "The debugging output format: likely causes ordered by probability, each with the evidence that would confirm or rule it out." },
+        { "term": "Self-review", "definition": "Asking the model to critique its own output against stated criteria — a pre-filter for mechanical misses, never the final review." },
+        { "term": "Acceptance criteria", "definition": "Concrete, pre-written conditions an output must satisfy; the yardstick that turns review from impression into check." },
+        { "term": "Multi-turn conversation", "definition": "An interaction spanning several requests where each includes prior messages, allowing patterns to build on earlier verified turns." },
+        { "term": "Conversation history", "definition": "The replayed prior messages that constitute the model's memory; grows each turn, is re-billed each turn, and requires deliberate management." },
+        { "term": "Statelessness", "definition": "The property that a model retains nothing between requests — conversations exist only through replayed history." },
+        { "term": "Targeted improvement request", "definition": "An Improve step naming specific deficiencies to fix, which converges quickly — unlike regeneration, which re-samples blindly." },
+        { "term": "Hallucinated root cause", "definition": "A confident, specific, but wrong diagnosis produced during error analysis; defused by confirming diagnoses before applying fixes." },
+        { "term": "Grounding", "definition": "Supplying authoritative material (code, logs, verified prior outputs) in the prompt so the model works from facts rather than inventing them." },
+        { "term": "Prompt template", "definition": "Versioned, fixed prompt wording with slots for runtime data — the form pattern steps take when applications run them unattended." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary & Key Takeaways",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "A prompting pattern is a reusable interaction recipe; patterns beat improvisation because they build in checkpoints, deliberate context management, and task shapes that fit the model.",
+          "Ask → Review → Improve is the default loop: criteria before asking, critical review of every draft, targeted fixes instead of re-rolls. Skipping review is the number-one failure.",
+          "Explain → Generate → Refine buys the cheapest checkpoint available: verify the model's understanding in two sentences before it writes eighty lines.",
+          "Chain-of-thought makes the model reason step by step — the written steps condition the answer. Use it for logic-heavy work, inspect the steps, and budget its token cost.",
+          "Prompt sequences decompose big requirements into verifiable stages: reviewable outputs, contained errors, controlled context. Pass forward artifacts, not transcripts.",
+          "The debugging pattern is evidence engineering: verbatim errors, minimal reproduction, expected-vs-actual, ruled-out attempts — then ranked hypotheses, confirmed before any fix.",
+          "Models are stateless: conversation history is your only memory and a recurring cost — summarize, trim, and re-state critical constraints.",
+          "The patterns compose; scale the ceremony to the task, but never scale it to zero — review is the part that is never optional."
+        ] },
+        { "type": "paragraph", "text": "You now have the interaction toolkit that experienced developers bring to every model session. The next tutorial applies these patterns to the specific craft of generating code: idiomatic C#, tests, refactoring, and the coding-task prompt shapes that get production-quality results." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Continue with the next tutorial in the path: Prompt Engineering for Coding Tasks — where these patterns meet concrete code generation: scaffolding, refactoring, translating between idioms, and getting C# that fits your codebase rather than a tutorial's." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: take your next real task and run the full Ask → Review → Improve loop with written acceptance criteria — count how many criteria the first draft actually missed.",
+          "Practice: pick a legacy method you know well, run the Explain step, and grade the model's explanation — then try the same on a method you don't know, and notice the difference in your ability to verify.",
+          "Practice: on your next bug, use the debugging template from section 11 verbatim — including 'no fixes yet' — and verify the top hypothesis before requesting the fix.",
+          "Practice: replay section 12's session shape on a bug from your own backlog, counting your verification checkpoints.",
+          "Reading: Microsoft Learn's prompt engineering guidance on chain-of-thought and conversation design in the Azure OpenAI documentation."
+        ] },
+        { "type": "note", "style": "info", "text": "Path position: tutorial 3 of 27 · Previous: prompt-engineering-foundations · Next: prompt-engineering-for-coding" }
+      ]
+    }
+  ]
+}

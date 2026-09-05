@@ -1,0 +1,512 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Prompt Engineering for Coding Tasks",
+  "slug": "prompt-engineering-for-coding",
+  "level": "Intermediate",
+  "codeLanguage": "C#",
+  "tutorialNumber": 4,
+  "totalTutorials": 27,
+  "prev": "developer-prompting-patterns",
+  "next": "prompting-for-testing-and-docs",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Prompt Engineering for Coding Tasks"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "Prompts for code scaffolding",
+    "Refactoring existing code with prompts",
+    "Explaining legacy code",
+    "Writing clean, optimized logic",
+    "Prompting for algorithms and logic building",
+    "Prompting for data-structure explanations",
+    "Enforcing coding standards through prompts"
+  ],
+  "tooltips": {
+    "scaffolding": "Generating the structural skeleton of code — classes, interfaces, method stubs, wiring — that you then flesh out and adapt.",
+    "refactoring": "Restructuring existing code to improve its design without changing its observable behavior.",
+    "behavior-preserving": "A change that keeps all observable outputs and side effects identical — the non-negotiable contract of refactoring.",
+    "legacy code": "Existing code, often old and under-documented, that must be understood and changed carefully because things depend on it.",
+    "code smell": "A surface symptom of a deeper design problem — long methods, duplicated logic, feature envy — that suggests a refactoring.",
+    "characterization test": "A test written to pin down what existing code actually does today, so a refactoring can prove it changed nothing.",
+    "clean code": "Code optimized for human readers: clear names, small functions, minimal nesting, obvious intent.",
+    "time complexity": "How an algorithm's running time grows with input size — O(1), O(n), O(n log n) — the language of performance trade-offs.",
+    "algorithm": "A precise, step-by-step procedure for solving a computational problem.",
+    "edge case": "An input at the boundary of what the code must handle — empty, null, maximum, duplicate — where bugs concentrate.",
+    "data structure": "A way of organizing data (list, dictionary, set, queue, tree) with characteristic costs for lookup, insert, and iteration.",
+    "coding standards": "A team's agreed rules for naming, layout, idioms, and patterns that keep a codebase consistent.",
+    "style guide": "The written form of coding standards — the document (or config) that defines how code should look and be structured.",
+    "static analyzer": "A tool that checks code against rules at build time (e.g. Roslyn analyzers) — the deterministic enforcement layer prompts cannot replace.",
+    "idiomatic": "Written the way experienced practitioners of the language write it — using its natural constructs rather than translations from another language.",
+    "standards profile": "A reusable prompt fragment encoding your team's conventions, included in every code-generation request (often via the system message).",
+    "hallucinated API": "A method, class, or package the model invents because it looks plausible — it compiles in the model's imagination only.",
+    "grounding": "Supplying real code — interfaces, related classes, examples — in the prompt so generation fits your codebase instead of a generic tutorial.",
+    "few-shot prompting": "Showing worked examples in the prompt (e.g. one of your existing classes) so the model imitates their style and structure.",
+    "regression test": "A test that guards previously working behavior, proving a change did not break what already worked.",
+    "prompt template": "Fixed, versioned prompt wording with slots for runtime data — how repeated coding prompts become team assets.",
+    "context window": "The per-request token budget shared by everything you paste and everything the model generates."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview",
+      "content": [
+        { "type": "paragraph", "text": "Code is where prompt engineering pays its clearest dividends — and exposes its sharpest failure modes. A well-built coding prompt produces code that compiles, fits your codebase, and respects your standards; a lazy one produces tutorial-grade snippets with invented APIs and generic naming that costs more to adapt than writing from scratch would have." },
+        { "type": "paragraph", "text": "This tutorial is the craft manual for that difference. It covers the seven coding tasks developers prompt for most: scaffolding new code, refactoring existing code, explaining legacy code, writing clean and optimized logic, building algorithms, understanding data structures, and enforcing coding standards. For each, you get the prompt shape that works, the context it needs, and the verification it demands." },
+        { "type": "paragraph", "text": "The through-line is one idea: the model has never seen your codebase. Every quality gap between 'generic code' and 'your code' is context you failed to supply — conventions, signatures, examples, constraints. Coding prompts are context engineering." },
+        { "type": "note", "style": "info", "text": "This is tutorial 4 of 27. It applies the patterns from tutorial 3 (Ask → Review → Improve, Explain-first, sequences) to concrete code work, and leads into Prompting for Testing & Documentation." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "paragraph", "text": "After completing this tutorial, you will be able to:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Write scaffolding prompts that produce code fitting your codebase — correct signatures, conventions, and dependencies.",
+          "Drive behavior-preserving refactorings with prompts, backed by tests that prove nothing changed.",
+          "Get layered, trustworthy explanations of legacy code before touching it.",
+          "Prompt for clean, optimized logic with specific criteria instead of vague adjectives.",
+          "Build algorithms collaboratively: approach first, implementation second, edge cases always.",
+          "Use the model as a data-structure advisor that reasons about trade-offs for your actual use case.",
+          "Encode team coding standards into a reusable standards profile, and know where analyzers must take over.",
+          "Recognize coding-specific failure modes: hallucinated APIs, outdated idioms, and unverified optimization claims."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorial 3 (Prompting Patterns) — especially Ask → Review → Improve and Explain → Generate → Refine, which this tutorial applies constantly.",
+          "Solid intermediate C#: interfaces, generics, LINQ, async/await, and familiarity with reading others' code.",
+          "Helpful but optional: a codebase of your own to practice against — the techniques land hardest on real code."
+        ] },
+        { "type": "note", "style": "tip", "text": "Every prompt shape in this tutorial works in a chat window, in GitHub Copilot Chat, and as an API prompt template. Practice interactively first; encode as templates what you find yourself repeating." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "What Makes Coding Prompts Different",
+      "content": [
+        { "type": "paragraph", "text": "Coding prompts inherit the standard anatomy — instruction, context, input data, output constraints — but the weights shift hard toward context and constraints. Prose tolerates approximation; code does not. A summary that is 90% right is useful; code that is 90% right does not compile, or worse, compiles and is wrong. So coding prompts must close every degree of freedom that matters: language version, framework, signatures, error handling, naming, and the surrounding code the result must mesh with." },
+        { "type": "paragraph", "text": "The most valuable single technique is grounding with your own code. Pasting the interface to implement, the class the new code will call, or one existing class that exemplifies your house style converts the request from 'write generic C#' to 'extend this specific codebase'. An example class is few-shot prompting in its most natural coding form — the model imitates its structure, naming, and idioms with remarkable fidelity." },
+        { "type": "table", "headers": ["Degree of freedom", "If unstated, the model guesses…", "Close it with"], "rows": [
+          ["Language/framework version", "Any era — possibly obsolete idioms", "'.NET 8, C# 12, nullable enabled'"],
+          ["Signatures & types", "Plausible but mismatched shapes", "Paste the exact interface / method signature"],
+          ["Error handling", "Silent catches or none at all", "'Throw ArgumentException for …; never swallow exceptions'"],
+          ["House style", "Tutorial style: var everywhere, generic names", "One exemplar class + a standards profile"],
+          ["Dependencies", "Invented or trendy packages", "'Use only System.* and our existing IClock abstraction'"],
+          ["Scope", "Extra features you didn't ask for", "'Only this method; do not modify callers'"]
+        ] },
+        { "type": "paragraph", "text": "Verification also changes character with code: you have a compiler, analyzers, and tests — deterministic judges the model's output must face. The workflow that works everywhere in this tutorial is: prompt with rich context, review against acceptance criteria, then let the toolchain confirm. Generated code that hasn't compiled and passed tests is a draft, not a deliverable." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Prompts for Code Scaffolding",
+      "content": [
+        { "type": "paragraph", "text": "Scaffolding — generating the skeleton of a service, controller, entity set, or test fixture — is where models save the most keystrokes, because structure is exactly what they imitate best. The quality lever is what you pack into the prompt before asking. A scaffolding prompt has four context layers: the requirement (what to build), the contracts (interfaces and types it must fit), the exemplar (one existing class showing house style), and the constraints (framework version, DI registration style, error policy)." },
+        { "type": "animation", "title": "Anatomy of a scaffolding prompt", "intro": "Watch the four context layers combine into codebase-ready output.", "nodes": [
+          { "id": "req", "label": "Requirement", "sub": "what to build" },
+          { "id": "contracts", "label": "Contracts", "sub": "interfaces, types" },
+          { "id": "exemplar", "label": "Exemplar class", "sub": "house style" },
+          { "id": "cons", "label": "Constraints", "sub": "versions, rules" },
+          { "id": "out", "label": "Skeleton", "sub": "fits your repo" }
+        ], "steps": [
+          { "highlight": ["req"], "caption": "State the requirement: 'Scaffold an OrderArchiveService that moves closed orders to cold storage on a schedule.'" },
+          { "highlight": ["contracts"], "caption": "Paste the contracts it must fit: IOrderRepository, IColdStorageClient, the Order entity. Real signatures kill invented ones." },
+          { "highlight": ["exemplar"], "caption": "Paste one existing service as the exemplar — the model imitates its naming, DI pattern, logging, and layout." },
+          { "highlight": ["cons"], "caption": "Add constraints: .NET 8, constructor injection, CancellationToken on public methods, no new NuGet packages." },
+          { "highlight": ["out"], "caption": "The skeleton comes back in your style, against your types — review it, then let the compiler and tests judge." }
+        ] },
+        { "type": "paragraph", "text": "Scope the ask deliberately: skeleton first, logic second. 'Generate the class with method stubs, XML docs, and TODO comments; do not implement the logic yet' produces a reviewable frame you approve before any behavior exists — a two-stage prompt sequence in miniature. Then fill methods one at a time with focused prompts, each carrying the approved skeleton as context." },
+        { "type": "note", "style": "tip", "text": "For repeated scaffolds (a new endpoint, a new entity + repository + tests), turn the prompt into a template with slots for the entity name and contracts. Consistent scaffolding prompts are how teams keep generated code from drifting stylistically." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Refactoring and Explaining Legacy Code",
+      "content": [
+        { "type": "paragraph", "text": "Refactoring with a model starts from one iron rule: the change must be behavior-preserving, and the model must be told so explicitly — 'refactor for readability; observable behavior, public signatures, and side effects must remain identical'. Without that constraint, models happily 'improve' behavior while restructuring, fixing what they perceive as bugs and thereby creating real ones. With legacy code, safety comes from the Explain → Generate → Refine pattern plus tests: first have the model explain what the code does, verify that explanation against the source, write (or generate) characterization tests that pin current behavior, and only then refactor." },
+        { "type": "list", "style": "bullet", "items": [
+          "Name the target smell: 'extract the duplicated validation into one method' beats 'clean this up' — naming the code smell focuses the transformation.",
+          "Small steps over big bangs: one refactoring per prompt (extract method, replace conditional with polymorphism), each verified, exactly like manual refactoring discipline.",
+          "Paste the dependencies: the types the code touches, or the model will guess at members that don't exist.",
+          "Demand a diff-sized answer: 'output only the changed method' keeps review tractable and prevents drive-by rewrites of untouched code.",
+          "Run the tests after every step — each green regression test, not the model's confidence, is what proves behavior held."
+        ] },
+        { "type": "paragraph", "text": "For explaining legacy code, ask in layers rather than all at once: first a two-paragraph overview (purpose, inputs/outputs, side effects), then a walkthrough of the specific path you care about, then targeted questions — 'what happens when this dictionary is empty?', 'which callers observe this static field?'. Layered explanation matches how you'd onboard a human, and each layer is verifiable before you rely on the next. Ask explicitly for risks: 'list anything fragile, surprising, or order-dependent in this code' surfaces the landmines refactoring might trip." },
+        { "type": "note", "style": "warning", "text": "The model explains code by reading it, same as you — it has no runtime knowledge. Claims about behavior that depends on data, configuration, or concurrent timing are educated guesses and must be verified by running the code." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Clean Logic, Optimization, and Algorithm Building",
+      "content": [
+        { "type": "paragraph", "text": "'Make it clean' and 'optimize this' are the two laziest coding prompts, and both get lazy results. Clean code is specific or it is nothing: name the criteria — guard clauses over nested ifs, methods under 20 lines, intention-revealing names, no boolean parameters. Optimization is measured or it is folklore: ask for the time complexity of current and proposed versions, the specific bottleneck addressed, and a statement of what got worse (allocation? readability?) — and treat every performance claim as unverified until a benchmark says otherwise." },
+        { "type": "paragraph", "text": "Algorithm building is where chain-of-thought prompting and the design-first habit pay off most. Don't ask for code; ask for an approach: restate the problem with concrete input/output examples (including edge cases — empty input, duplicates, boundaries), request candidate approaches with their time complexity trade-offs, choose one, and only then request the implementation against your chosen approach. The examples double as test cases for the result." },
+        { "type": "animation", "title": "Building an algorithm with the model", "intro": "Design first, implement second — watch the approach get approved before code exists.", "nodes": [
+          { "id": "prob", "label": "Problem + examples", "sub": "incl. edge cases" },
+          { "id": "appr", "label": "Approaches", "sub": "with complexity" },
+          { "id": "pick", "label": "You choose", "sub": "trade-off call" },
+          { "id": "impl", "label": "Implement", "sub": "chosen approach" },
+          { "id": "test", "label": "Test", "sub": "examples → tests" }
+        ], "steps": [
+          { "highlight": ["prob"], "caption": "State the problem with concrete input→output examples: normal case, empty input, duplicates, boundary values." },
+          { "highlight": ["appr"], "caption": "Ask for 2–3 candidate approaches with time complexity and trade-offs — 'reason step by step' fits naturally here." },
+          { "highlight": ["pick"], "caption": "You make the trade-off call: O(n log n) sort-based simplicity versus O(n) dictionary-based speed. The model advises; you decide." },
+          { "highlight": ["impl"], "caption": "Request the implementation of the chosen approach only — the approved design travels as context." },
+          { "highlight": ["test"], "caption": "Your original examples become the test cases. If an edge case fails, that's a targeted Improve turn, not a rewrite." }
+        ] },
+        { "type": "paragraph", "text": "This sequence protects you from the classic failure: a fluent implementation of the wrong approach. It also produces reviewable artifacts at every stage — a stated approach is checkable by reading; a 60-line method's correctness is not." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Data-Structure Guidance and Enforcing Coding Standards",
+      "content": [
+        { "type": "paragraph", "text": "As a data structure advisor, the model shines when you supply the workload, not just the question. 'Dictionary or List?' gets a textbook answer; 'I have 50k items, lookups by ID thousands of times per request, inserts rare, iteration order irrelevant — which collection and why?' gets engineering. Ask for the costs that matter — lookup, insert, memory, ordering guarantees — expressed as time complexity for your operations, and for the break-even point where the answer would flip. For learning, ask for the structure explained through your domain's objects rather than abstract Ts; concrete beats generic for retention." },
+        { "type": "paragraph", "text": "Enforcing coding standards through prompts works at three levels. Level one: a standards profile — a compact, reusable prompt fragment encoding your conventions (naming, nullability, async suffixes, error policy, forbidden patterns) — included in every generation request, ideally via the system message so it survives the whole session. Level two: an exemplar class, because demonstrated style beats described style. Level three: a standards-review prompt — 'review this code against the profile; list violations with line references' — which turns the model into a first-pass reviewer of its own or humans' code." },
+        { "type": "table", "headers": ["Enforcement layer", "Mechanism", "Guarantee level"], "rows": [
+          ["Standards profile in prompts", "Model generates compliant code from the start", "Probabilistic — raises the hit rate substantially"],
+          ["Exemplar class (few-shot)", "Model imitates demonstrated conventions", "Probabilistic — strongest style lever"],
+          ["Model as standards reviewer", "Violations listed before human review", "Probabilistic — good recall, imperfect"],
+          [".editorconfig + Roslyn analyzers + CI", "Build breaks on violations", "Deterministic — the actual enforcement"]
+        ] },
+        { "type": "paragraph", "text": "The table's last row is the honest one: prompts raise compliance; only the toolchain enforces it. Encode your standards in a style guide and analyzers, and let the standards profile exist to minimize the friction between what the model generates and what the build accepts. When the analyzer and the profile disagree, fix the profile — drift between them wastes an Improve turn on every generation." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Where Coding Prompts Run in the .NET Ecosystem",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "GitHub Copilot completions: implicit prompts — your open files and comments are the context; you steer by writing intent comments and keeping exemplar code visible (tutorials 8–9 go deep).",
+          "Copilot Chat in Visual Studio / VS Code: explicit coding prompts with workspace context — the natural home for refactor/explain/review conversations about code you have open.",
+          "Chat models via Azure AI Foundry playground: best for algorithm design sessions and prompt-shape experimentation before encoding anything.",
+          "Azure OpenAI from application code: coding prompts as versioned prompt templates — scaffolding generators, standards reviewers, migration assistants — with output validated before use (tutorial 11 onward).",
+          "The deterministic backstop: .editorconfig, every static analyzer you run (Roslyn analyzers, StyleCop), and CI builds — the enforcement layer that judges all generated code, regardless of which surface produced it."
+        ] },
+        { "type": "paragraph", "text": "One budget note that bites in practice: pasting code costs tokens, and whole-file pastes of large classes can crowd the context window until your instructions lose force. Paste the relevant members, not the file; link the rest by describing it ('the class also implements IDisposable; disposal is not relevant here'). Precision of context beats volume of context." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "The Coding-Task Catalog: Which Prompt Shape for Which Job",
+      "content": [
+        { "type": "table", "headers": ["Task", "Prompt shape", "Non-negotiable ingredient"], "rows": [
+          ["New service/endpoint scaffold", "Requirement + contracts + exemplar + constraints; skeleton first", "The exemplar class"],
+          ["Refactor a smelly method", "Name the smell; demand behavior-preserving; one step per prompt", "Tests green before and after"],
+          ["Understand inherited module", "Layered explanation: overview → path walkthrough → targeted questions → risks", "Verifying each layer against source"],
+          ["Tighten messy logic", "Specific clean-code criteria, not adjectives", "The criteria list"],
+          ["Design an algorithm", "Examples incl. edge cases → approaches with complexity → choose → implement", "Approach approved before code"],
+          ["Pick a collection type", "Workload description → costs per operation → break-even analysis", "The workload numbers"],
+          ["Keep generated code on-standard", "Standards profile in system message + exemplar + review prompt", "Analyzers as the real gate"],
+          ["Translate code between idioms", "Source + target framework/version + 'idiomatic, not literal'", "Explicit target version"]
+        ] },
+        { "type": "paragraph", "text": "Two composite use cases deserve mention. Code review assistance: paste the diff and the standards profile, ask for issues ranked by severity with line references — a strong pre-filter before human review, never a replacement. And migration work (say, .NET Framework to .NET 8): sequence it — inventory of incompatibilities first, then file-by-file migration prompts each grounded in the target idiom, with the compiler arbitrating every step." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples in C#",
+      "content": [
+        { "type": "paragraph", "text": "A standards profile as a reusable constant — included in every coding prompt your team or tooling sends:" },
+        { "type": "code", "language": "csharp", "title": "A team standards profile for code generation", "code": [
+          "public static class CodingPrompts",
+          "{",
+          "    // v4: added async suffix + ConfigureAwait rule (2026-09).",
+          "    public const string StandardsProfile = \"\"\"",
+          "        Coding standards (apply to ALL generated code):",
+          "        - .NET 8, C# 12, nullable reference types enabled.",
+          "        - Async methods end in 'Async' and accept a CancellationToken.",
+          "        - Guard clauses over nested ifs; max 2 levels of nesting.",
+          "        - Constructor injection only; no service locator, no statics for state.",
+          "        - Throw ArgumentException/ArgumentNullException for bad inputs;",
+          "          never catch-and-ignore.",
+          "        - Names: intention-revealing; no abbreviations; bools ask questions.",
+          "        - Use only existing project dependencies; propose no new packages.",
+          "        \"\"\";",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "A scaffolding prompt template that packs the four context layers, with the profile riding along:" },
+        { "type": "code", "language": "csharp", "title": "Scaffolding prompt template (skeleton-first)", "code": [
+          "public static string BuildScaffoldPrompt(",
+          "    string requirement, string contracts, string exemplarClass) => $\"\"\"",
+          "    {CodingPrompts.StandardsProfile}",
+          "",
+          "    Task: scaffold the following. Generate the class skeleton ONLY:",
+          "    method stubs with XML docs and TODO comments — no logic yet.",
+          "",
+          "    Requirement:",
+          "    {requirement}",
+          "",
+          "    It must implement/consume these contracts exactly as declared:",
+          "    ```csharp",
+          "    {contracts}",
+          "    ```",
+          "",
+          "    Match the style of this existing class from our codebase:",
+          "    ```csharp",
+          "    {exemplarClass}",
+          "    ```",
+          "    \"\"\";"
+        ] },
+        { "type": "paragraph", "text": "And a refactoring prompt that encodes the iron rule and keeps the answer diff-sized:" },
+        { "type": "code", "language": "csharp", "title": "Behavior-preserving refactor prompt", "code": [
+          "public static string BuildRefactorPrompt(",
+          "    string method, string smell, string dependencies) => $\"\"\"",
+          "    {CodingPrompts.StandardsProfile}",
+          "",
+          "    Refactor the method below. Target exactly one issue: {smell}.",
+          "",
+          "    HARD CONSTRAINTS:",
+          "    - Behavior-preserving: observable behavior, public signature,",
+          "      exceptions, and side effects must remain identical.",
+          "    - Output ONLY the changed method (plus any new private helpers).",
+          "    - Do not 'fix' anything else you notice; list observations separately.",
+          "",
+          "    Types this method depends on (do not invent members):",
+          "    ```csharp",
+          "    {dependencies}",
+          "    ```",
+          "",
+          "    Method:",
+          "    ```csharp",
+          "    {method}",
+          "    ```",
+          "    \"\"\";"
+        ] },
+        { "type": "note", "style": "info", "text": "These are plain C# string templates (raw string literals, C# 11+) — no SDK types involved, so nothing here is version-sensitive. How to send them to a model is tutorial 11's job." }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step-by-Step: Scaffolding a Service Into a Real Codebase",
+      "content": [
+        { "type": "paragraph", "text": "This walkthrough scaffolds a `ProductImportService` into an existing ASP.NET application using the full technique stack. Replay it on your own codebase with your own feature." },
+        { "type": "list", "style": "numbered", "items": [
+          "Gather the context pack: the requirement (import products from uploaded CSV, validate, upsert), the contracts (IProductRepository, IFileParser, the Product entity — copied verbatim), one exemplar service (your cleanest existing service class), and the standards profile.",
+          "Request the skeleton only, using the scaffolding template: class, constructor with injected dependencies, method stubs with XML docs and TODOs. No logic.",
+          "Review the skeleton against the codebase: right namespace, DI-friendly constructor, CancellationTokens present, naming matches the exemplar. Fix by targeted Improve turns ('rename ImportData to ImportAsync; add IProgress<int> parameter').",
+          "Approve the skeleton — it is now verified context. Every following prompt pastes it back in.",
+          "Fill one method per prompt: 'Implement ValidateRowAsync per the TODO. Rules: SKU required and unique per file; price non-negative decimal. Return a RowValidationResult; do not throw for data errors.' Review each against its criteria.",
+          "Compile and run analyzers after each fill — invented members and style drift surface immediately, while the faulty prompt is still the last one you sent.",
+          "Generate tests for the completed service (next tutorial's craft, but the shape is: paste the finished class + the validation rules, ask for xUnit tests covering the rules and edge cases — empty file, duplicate SKU, malformed price).",
+          "Final human review of the assembled whole: seams between generated pieces are where inconsistencies hide — naming drift between methods, duplicated guard logic, missed cancellation propagation."
+        ] },
+        { "type": "note", "style": "tip", "text": "Notice the rhythm: every prompt is small, every output is reviewed, and the toolchain votes after every step. The model typed most of the code; you made every decision that mattered." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Hallucinated APIs are the signature coding failure: plausible methods, overloads, or NuGet packages that don't exist. The compiler catches the loud ones; the quiet ones (wrong overload semantics, deprecated-but-compiling calls) need review and docs. A hallucinated API in a suggestion is a prompt-context smell: you probably didn't paste the real types.",
+          "Training-data lag means idioms can be stale: pre-nullable patterns, old JSON libraries, obsolete hosting models. Pin versions in every prompt ('.NET 8, C# 12') and treat 'modern' as a claim to verify.",
+          "Optimization claims are unverified until benchmarked: models assert performance improvements fluently; BenchmarkDotNet, not fluency, is the judge.",
+          "Behavior preservation is claimed, not guaranteed: only tests prove a refactoring changed nothing — especially around exception types, culture-sensitive formatting, and ordering.",
+          "Explanations of code are static analysis by reading: anything dependent on runtime data, configuration, or timing is a guess to be confirmed by execution.",
+          "Standards profiles raise compliance probabilistically; analyzers and CI remain the only enforcement. Keep profile and analyzers in sync or pay an Improve turn per generation.",
+          "Large pastes dilute instructions: context is a budget (see section 9) — paste relevant members, not whole files."
+        ] },
+        { "type": "note", "style": "warning", "text": "API-accuracy disclosure: all code in this tutorial is plain, standard C# (raw string literals require C# 11+) with no external SDK calls, so nothing here is package-version-sensitive. Where prompts mention project types (IProductRepository, IClock), they are illustrative stand-ins for your own codebase's contracts." }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices and Common Mistakes",
+      "content": [
+        { "type": "paragraph", "text": "Practices that produce codebase-ready output:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Ground every coding prompt in real code: contracts verbatim, one exemplar class, pinned versions.",
+          "Skeleton first, logic second; one method per fill prompt; the approved skeleton travels as context.",
+          "State 'behavior-preserving' explicitly for every refactor, and have tests green before and after.",
+          "Explain before touching legacy code, in layers, verifying each layer; ask for risks explicitly.",
+          "Replace adjectives with criteria: clean means your named rules; fast means measured complexity plus a benchmark.",
+          "Design algorithms before implementing them; your examples become the tests.",
+          "Maintain one versioned standards profile, mirror it in analyzers, and let CI be the enforcement."
+        ] },
+        { "type": "paragraph", "text": "Mistakes that produce adaptation debt:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Prompting without context and then hand-porting the generic result into your codebase — slower than typing it yourself.",
+          "Accepting refactors that 'also fixed' something — that fix is an unreviewed behavior change.",
+          "Trusting an explanation of legacy code you didn't spot-check, then editing based on it.",
+          "'Optimize this' with no profile data — you'll get confident micro-optimizations of the wrong thing.",
+          "Asking for the algorithm implementation before agreeing on the approach.",
+          "Whole-file pastes that bury your instructions under 400 lines of context.",
+          "Treating the standards profile as enforcement and skipping the analyzers.",
+          "Letting generated code merge without the same review bar as human code — the bar is the point."
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz",
+      "items": [
+        { "number": 1, "question": "What single technique most improves scaffolding output quality?", "options": { "A": "Raising the temperature", "B": "Grounding the prompt with real code: contracts, an exemplar class, and pinned versions", "C": "Asking for the whole feature in one prompt", "D": "Using shorter prompts" }, "correctAnswer": "B", "explanation": "The model has never seen your codebase; every gap between generic and codebase-ready output is missing context. Real signatures prevent invented ones, and an exemplar class transmits house style better than any description." },
+        { "number": 2, "question": "Why is 'skeleton first, logic second' a good scaffolding strategy?", "options": { "A": "Skeletons use fewer tokens", "B": "The model cannot generate logic", "C": "You approve a reviewable frame before any behavior exists — a mini prompt sequence with a cheap checkpoint", "D": "Compilers require it" }, "correctAnswer": "C", "explanation": "A skeleton with stubs and TODOs is checkable in a minute — names, signatures, DI, structure. Approving it before logic exists means every later fill prompt builds on verified context, and structural mistakes cost one correction instead of a rewrite." },
+        { "number": 3, "question": "What is the iron rule of prompting for refactoring?", "options": { "A": "Always refactor the whole class at once", "B": "State explicitly that the change must be behavior-preserving — identical observable behavior, signatures, and side effects", "C": "Let the model fix bugs it notices along the way", "D": "Never provide the dependencies" }, "correctAnswer": "B", "explanation": "Unconstrained, models 'improve' behavior while restructuring — perceived bugs get silently fixed, which is an unreviewed behavior change. The constraint must be explicit, and tests before/after are what prove it held." },
+        { "number": 4, "question": "Before refactoring legacy code with a model, what should happen first?", "options": { "A": "Delete the old tests", "B": "Ask for the biggest possible rewrite", "C": "Have the model explain the code, verify the explanation, and pin current behavior with characterization tests", "D": "Increase the context window" }, "correctAnswer": "C", "explanation": "Explain → verify → characterization tests → then refactor. A model that just traced the code correctly is less likely to break it, and the tests convert 'behavior-preserving' from a claim into a checkable fact." },
+        { "number": 5, "question": "Why paste the real dependency types into a refactoring prompt?", "options": { "A": "It makes the response longer", "B": "Without them the model guesses at members — producing hallucinated API calls that don't exist", "C": "The API requires it", "D": "It lowers the temperature automatically" }, "correctAnswer": "B", "explanation": "Models complete patterns; absent real signatures, they invent plausible members. Pasting the actual types verbatim is the grounding that keeps generated calls compilable — a hallucinated member in output usually means missing context in input." },
+        { "number": 6, "question": "What is wrong with the prompt 'optimize this method'?", "options": { "A": "Nothing — it is concise", "B": "Optimization prompts are not supported by models", "C": "It invites unmeasured micro-optimization; better: supply profile data, ask for complexity of current vs proposed, and benchmark the claim", "D": "It should say 'please optimize'" }, "correctAnswer": "C", "explanation": "Models assert performance gains fluently whether or not they're real. Engineering optimization names the bottleneck, compares time complexity, states what got worse, and lets BenchmarkDotNet judge — fluency is not a profiler." },
+        { "number": 7, "question": "What is the recommended sequence for building an algorithm with a model?", "options": { "A": "Implementation first, then explanation", "B": "Problem + examples (incl. edge cases) → candidate approaches with complexity → you choose → implement → test with the examples", "C": "Generate five implementations and pick the longest", "D": "Ask for the fastest possible code immediately" }, "correctAnswer": "B", "explanation": "Design before code: the approach is reviewable by reading; a 60-line method's correctness is not. Your input/output examples do double duty as the test cases, and the classic failure — a fluent implementation of the wrong approach — never gets a chance." },
+        { "number": 8, "question": "Which data-structure question gets an engineering-grade answer?", "options": { "A": "'Dictionary or List?'", "B": "'What is the best data structure?'", "C": "'Explain all collections'", "D": "'50k items, thousands of ID lookups per request, rare inserts, order irrelevant — which collection, why, and where does the answer flip?'" }, "correctAnswer": "D", "explanation": "Supplying the workload turns a textbook answer into analysis: costs per operation as time complexity, applied to your access pattern, with the break-even point. The model advises on trade-offs only when it knows the trade." },
+        { "number": 9, "question": "A Dictionary<TKey,TValue> lookup by key is typically which time complexity?", "options": { "A": "O(1)", "B": "O(n)", "C": "O(n log n)", "D": "O(n²)" }, "correctAnswer": "A", "explanation": "Hash-based lookup is amortized constant time — which is exactly why the 'thousands of lookups by ID' workload favors Dictionary over List's O(n) scans. Knowing these costs is what makes data-structure prompts reviewable." },
+        { "number": 10, "question": "What is a standards profile?", "options": { "A": "A compiler flag", "B": "A reusable prompt fragment encoding team conventions, included with every generation request (often via the system message)", "C": "A NuGet package of coding rules", "D": "An .editorconfig replacement" }, "correctAnswer": "B", "explanation": "It's the promptable form of your style guide: naming, nullability, async rules, error policy, forbidden patterns. It raises generation compliance substantially — while .editorconfig and analyzers remain the deterministic enforcement." },
+        { "number": 11, "question": "Which layer actually ENFORCES coding standards on generated code?", "options": { "A": "The standards profile in the prompt", "B": "The exemplar class", "C": "Analyzers, .editorconfig, and CI — the build that breaks on violations", "D": "The model's self-review" }, "correctAnswer": "C", "explanation": "Everything prompt-side is probabilistic — it raises the hit rate, sometimes dramatically, but only the toolchain guarantees. The profile exists to minimize friction with the build, not to replace it." },
+        { "number": 12, "question": "Why does an exemplar class beat a written style description?", "options": { "A": "It uses fewer tokens", "B": "Models imitate demonstrated patterns more faithfully than described rules — it is few-shot prompting in natural coding form", "C": "Written descriptions are forbidden", "D": "Exemplars disable hallucination" }, "correctAnswer": "B", "explanation": "Showing beats telling: one real class transmits naming, layout, DI style, and idioms at full fidelity. Combine both — profile for explicit rules, exemplar for everything a description would miss." },
+        { "number": 13, "question": "The model's legacy-code explanation says 'this cache is refreshed every 5 minutes'. What should you assume?", "options": { "A": "It read the configuration at runtime", "B": "The claim is static reading of code — anything depending on runtime data, config, or timing is a guess to verify by execution", "C": "Explanations are always exact", "D": "The model tested it" }, "correctAnswer": "B", "explanation": "The model explains by reading source, like you would — it has no runtime access. The '5 minutes' may be a default the config overrides. Layered explanation plus spot-verification against the running system is the discipline." },
+        { "number": 14, "question": "What does 'output only the changed method' accomplish in a refactor prompt?", "options": { "A": "Saves output tokens only", "B": "Keeps review diff-sized and prevents drive-by rewrites of untouched code", "C": "Makes the code compile", "D": "Disables the standards profile" }, "correctAnswer": "B", "explanation": "Scoping the answer scopes the change: you review a focused diff, and code you didn't ask about can't be silently 'improved'. It pairs with 'do not fix anything else you notice; list observations separately'." },
+        { "number": 15, "question": "Generated code compiled on the first try. What is its correct status?", "options": { "A": "Ready to merge — the compiler approved it", "B": "Ready for production if it looks clean", "C": "A draft that passed one deterministic check — review, tests, and analyzers still apply at the same bar as human code", "D": "Automatically behavior-preserving" }, "correctAnswer": "C", "explanation": "Compilation eliminates one failure class (loud hallucinated APIs) and says nothing about logic, edge cases, or subtle misuse. The bar for merging generated code is the same review-plus-tests bar as for human code — that bar is the point." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam Questions",
+      "items": [
+        { "number": 1, "question": "Explain why coding prompts weight context and constraints more heavily than prose prompts, and enumerate the degrees of freedom a good coding prompt closes.", "modelAnswer": "Prose tolerates approximation; code does not — 90%-right code fails to compile or compiles and misbehaves. So coding prompts must close every consequential degree of freedom: language/framework version (else stale idioms), exact signatures and types (else plausible-but-wrong shapes), error-handling policy (else silent catches), house style (else tutorial-grade naming — closed via exemplar + standards profile), permitted dependencies (else invented or trendy packages), and scope (else drive-by changes). The second difference is verification: code faces deterministic judges — compiler, analyzers, tests — so the workflow is rich context in, review against criteria, toolchain confirms." },
+        { "number": 2, "question": "Design a complete scaffolding prompt for a new service in an existing codebase: name the four context layers, what each contributes, and the two-stage delivery strategy.", "modelAnswer": "Layers: (1) Requirement — what to build and its responsibilities; (2) Contracts — the interfaces and entities it must implement/consume, pasted verbatim so signatures cannot be invented; (3) Exemplar — one existing class from the codebase, transmitting naming, DI pattern, logging, and layout by imitation (few-shot in coding form); (4) Constraints — pinned versions, injection style, cancellation policy, no-new-packages rule, ideally via a standards profile. Delivery: stage one requests the skeleton only (stubs, XML docs, TODOs) which is reviewed and approved as verified context; stage two fills one method per prompt against that approved frame, with compiler and analyzers run after each fill." },
+        { "number": 3, "question": "State the refactoring iron rule and describe the full safety harness for refactoring legacy code with a model.", "modelAnswer": "Iron rule: the change must be behavior-preserving — observable behavior, public signatures, exception contracts, and side effects identical — and this must be stated explicitly in the prompt, because unconstrained models 'improve' behavior while restructuring. Harness: (1) Explain first — the model walks through what the code does; you verify against source; (2) characterization tests pin current actual behavior, including its oddities; (3) refactor in small named steps — one smell per prompt ('extract duplicated validation'), dependencies pasted, output scoped to the changed method; (4) tests run after every step — green-before/green-after is the proof; (5) any 'also fixed' improvements are rejected or split into explicit, separately reviewed changes." },
+        { "number": 4, "question": "Describe the layered technique for explaining legacy code and justify each layer.", "modelAnswer": "Layer 1 — overview: purpose, inputs/outputs, side effects in two paragraphs; verifiable quickly, catches wholesale misreading before details build on it. Layer 2 — path walkthrough: the specific execution path you care about, traced step by step; matches how you'd onboard a human and concentrates attention where change will happen. Layer 3 — targeted questions: 'what if this dictionary is empty?', 'who observes this static field?' — probes the exact risks of your intended change. Layer 4 — explicit risk inventory: 'list anything fragile, surprising, or order-dependent'. Each layer is verified before relying on the next, and all claims about runtime-dependent behavior (config, data, timing) are marked for confirmation by execution, since the model reads code statically." },
+        { "number": 5, "question": "Rewrite the lazy prompts 'make it clean' and 'optimize this' into engineering-grade prompts, and explain what each addition buys.", "modelAnswer": "Clean: 'Refactor for readability with these criteria: guard clauses instead of nested ifs (max 2 levels); methods under 20 lines; intention-revealing names; no boolean parameters; keep behavior identical; output only the changed method.' Named criteria make review a checklist and prevent taste-based churn. Optimize: 'This method shows as the top allocation source in our profile [data attached]. Propose an optimization: state current and proposed time complexity, the specific bottleneck addressed, and what gets worse (allocations, readability). Behavior must be identical; I will benchmark with BenchmarkDotNet before accepting.' Profile data aims the work; complexity framing forces analysis over folklore; the benchmark clause pre-commits to measurement as the judge." },
+        { "number": 6, "question": "Walk through the design-first algorithm workflow on a concrete example (e.g., 'find all duplicate SKUs in a product feed'), naming what each stage produces and verifies.", "modelAnswer": "Stage 1 — problem + examples: inputs/outputs including edge cases (empty feed, all unique, all duplicates, case-differing SKUs); this fixes the spec and doubles as the test set. Stage 2 — approaches: sort-then-scan O(n log n) low-allocation vs HashSet single-pass O(n) with O(n) memory vs GroupBy LINQ clarity; each with complexity and trade-offs — reviewable by reading. Stage 3 — you choose (say HashSet single-pass; memory is fine, feed is 100k rows) — the human owns the trade-off. Stage 4 — implementation of the chosen approach only, approved design as context. Stage 5 — the stage-1 examples become xUnit cases; failures drive targeted Improve turns. The workflow prevents the classic failure: a fluent implementation of the wrong approach." },
+        { "number": 7, "question": "How do you prompt for data-structure guidance that is decision-ready rather than textbook? Include the elements the prompt must supply.", "modelAnswer": "Supply the workload: item count and growth, operation mix with frequencies (lookups by what key, inserts, removals, iteration), ordering and uniqueness requirements, memory sensitivity, and concurrency. Ask for: recommended structure with per-operation time complexity for your operations specifically; the runner-up and the break-even point where the recommendation flips; and any .NET-specific behavior that matters (Dictionary ordering non-guarantees, List growth reallocation, struct vs class element costs). For learning contexts, additionally ask for the explanation in terms of your domain objects rather than abstract examples — concrete mapping aids retention and reveals mismatches early." },
+        { "number": 8, "question": "Describe the three prompt-side levels of standards enforcement and argue why the toolchain must remain the final layer.", "modelAnswer": "Level 1 — standards profile: compact promptable rules (naming, nullability, async suffix + CancellationToken, error policy, forbidden patterns) in every request, ideally the system message. Level 2 — exemplar class: demonstrated style, which models imitate more faithfully than descriptions. Level 3 — standards-review prompt: 'list violations of the profile with line references' as a pre-filter before human review. All three are probabilistic — they raise compliance rates but guarantee nothing, because generation samples a distribution. Only .editorconfig, Roslyn analyzers, and CI breaking the build enforce deterministically. The profile's real job is minimizing friction between generation and the gate; when profile and analyzers disagree, fix the profile — drift costs an Improve turn per generation." },
+        { "number": 9, "question": "Explain the hallucinated API failure mode: why it happens, which variants are dangerous, and the layered defense.", "modelAnswer": "Models complete patterns learned across millions of codebases; when your prompt lacks the real types, the statistically plausible member gets invented — Repository.FindByIdOrDefault() that never existed. Loud variants fail compilation and cost minutes. Dangerous variants compile: a real method with different semantics than the model assumed, deprecated-but-working calls, or a wrong overload whose behavior differs subtly (culture-sensitive parsing, timezone handling). Defense layers: grounding — paste actual contracts so invention is unnecessary (a hallucinated member in output signals missing context in input); compilation and analyzers — the deterministic first gate; review with docs for semantic claims on unfamiliar APIs; and tests that exercise the actual behavior, not just the signature." },
+        { "number": 10, "question": "Why does training-data lag matter for C# code generation, and what prompt hygiene mitigates it?", "modelAnswer": "Models learn from historical code, so their default idioms can trail the platform: pre-nullable null handling, Newtonsoft where System.Text.Json is standard, old hosting/startup patterns, missing modern syntax. The output compiles and works, so nothing loud flags it — it just accretes yesterday's style into today's codebase. Hygiene: pin versions in every prompt ('.NET 8, C# 12, nullable enabled'); include modern exemplar code so imitation pulls forward; encode current idioms in the standards profile ('System.Text.Json only; file-scoped namespaces'); treat 'modern'/'best practice' claims as verifiable assertions; and let analyzers with current rulesets catch what slips through." },
+        { "number": 11, "question": "Compare context volume vs context precision when pasting code into prompts, and give practical rules for the trade-off.", "modelAnswer": "More context is not better context: whole-file pastes spend the context window on irrelevant members, dilute the instructions' effective weight, and can push critical constraints out of attention. Precision rules: paste the members the task touches, verbatim; summarize the rest in one line ('class also implements IDisposable; not relevant here'); paste contracts fully but exemplars partially (one representative method plus the class shell often suffices); keep instructions and constraints adjacent to the end of the prompt where they're near the generation; and when a task genuinely needs lots of code, decompose the task instead of inflating the paste — sequence stages each with their own focused context." },
+        { "number": 12, "question": "Design a model-assisted code-review workflow for AI-generated and human PRs alike: prompt shape, placement in the pipeline, and limits.", "modelAnswer": "Prompt shape: paste the diff (not whole files), the standards profile, and relevant contracts; ask for issues ranked by severity with line references, each with a one-line rationale and a suggested fix; require a 'no issues found in categories X/Y' statement so silence is explicit. Placement: pre-human pass — run before review, letting humans start from the model's findings and spend attention on design and domain logic the model can't judge. Limits: probabilistic recall (absence of findings proves nothing), no runtime knowledge (perf and concurrency claims are hypotheses), and anchoring risk (reviewers may under-look where the model said 'clean') — mitigated by treating the model pass as a checklist supplement, never a gate, and keeping the human bar unchanged." },
+        { "number": 13, "question": "Explain how the section-12 walkthrough applies the tutorial-3 patterns: identify each pattern instance in the scaffolding workflow.", "modelAnswer": "Prompt sequence: the feature is decomposed into skeleton → per-method fills → tests → final review, each stage verified before feeding the next. Ask → Review → Improve: every stage internally — skeleton reviewed against codebase conventions with targeted fixes ('rename ImportData to ImportAsync'), each method fill reviewed against its stated rules. Explain-adjacent grounding: the context pack (contracts verbatim, exemplar class) plays the alignment role — generation proceeds from verified artifacts rather than model guesses. Chain-of-thought would appear inside any tricky fill (validation ordering logic). The toolchain acts as the deterministic reviewer after every step, and 'seam review' at the end is the whole-artifact acceptance check the sequence pattern requires." },
+        { "number": 14, "question": "Your team adopts AI coding assistance and quality drops: generic naming, stale idioms, occasional invented APIs. Diagnose and prescribe.", "modelAnswer": "Diagnosis: context-free prompting — developers are asking for code without grounding (no contracts, no exemplars, no pinned versions), so the model returns tutorial-grade output that gets hand-adapted or merged as-is; invented APIs confirm missing type context; stale idioms confirm missing version pins. Prescription: (1) create the versioned standards profile and require it in generation prompts; (2) establish the context-pack habit — contracts verbatim + one exemplar + versions — via a shared prompt template; (3) skeleton-first for anything non-trivial; (4) sync analyzers/.editorconfig with the profile so the build enforces what prompts request; (5) unchanged review bar for generated code, with a short team guide of the good/bad prompt examples; (6) revisit after a sprint measuring analyzer violations per PR and review findings — the metrics show whether the context discipline stuck." },
+        { "number": 15, "question": "Scenario: migrate a utility library from .NET Framework 4.8 to .NET 8 using model assistance. Prescribe the full workflow with pattern and prompt choices.", "modelAnswer": "Stage 0 — inventory: paste the csproj and representative files; ask for a categorized incompatibility inventory (APIs removed, behavior changes, packages to replace) with severity — chain-of-thought fits; verify highlights against the official migration docs since model knowledge may lag. Stage 1 — plan: order files by dependency and risk; define per-category target idioms ('System.Text.Json replaces Newtonsoft; file-scoped namespaces; nullable enabled') into a migration standards profile. Stage 2 — per-file migration prompts: source file + profile + 'idiomatic .NET 8, not literal translation; behavior-preserving; flag any semantic-change risk explicitly'; compiler after every file. Stage 3 — behavior verification: run the existing test suite; where coverage is thin, generate characterization tests on the .NET Framework side first, then require green on .NET 8. Stage 4 — final pass: analyzer sweep with current rulesets and a model review of the whole diff for stale idioms that slipped through. Human review bar unchanged throughout; every 'behavior identical' claim is proven by tests, not asserted." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Coding prompts vs prose prompts", "back": "Code tolerates no approximation — close every degree of freedom: versions, signatures, error policy, style, dependencies, scope. Then let compiler + tests judge." },
+        { "number": 2, "front": "Context pack (scaffolding)", "back": "Requirement + contracts verbatim + one exemplar class + constraints/standards profile. The model has never seen your codebase — this is how it learns it." },
+        { "number": 3, "front": "Skeleton-first strategy", "back": "Stage 1: stubs + XML docs + TODOs only — review and approve. Stage 2: fill one method per prompt against the approved skeleton. Structural mistakes cost one correction." },
+        { "number": 4, "front": "Exemplar class", "back": "One real class pasted as a style model — few-shot prompting in coding form. Demonstrated style beats described style for naming, DI, layout, idioms." },
+        { "number": 5, "front": "Refactoring iron rule", "back": "Say it explicitly: behavior-preserving — identical observable behavior, signatures, exceptions, side effects. Tests green before and after are the proof." },
+        { "number": 6, "front": "Legacy-code safety harness", "back": "Explain (verify it) → characterization tests → small named refactor steps → tests after each. Reject any 'also fixed' improvements." },
+        { "number": 7, "front": "Layered legacy explanation", "back": "Overview → specific path walkthrough → targeted questions → explicit risk list. Verify each layer; runtime-dependent claims need execution to confirm." },
+        { "number": 8, "front": "'Make it clean' fixed", "back": "Name criteria: guard clauses, ≤2 nesting levels, <20-line methods, intention-revealing names, no bool params. Clean is a checklist, not an adjective." },
+        { "number": 9, "front": "'Optimize this' fixed", "back": "Supply profile data; ask for current vs proposed time complexity, the bottleneck addressed, what got worse. BenchmarkDotNet judges — not fluency." },
+        { "number": 10, "front": "Algorithm workflow", "back": "Problem + examples (incl. edge cases) → approaches with complexity → YOU choose → implement chosen approach → examples become tests." },
+        { "number": 11, "front": "Data-structure prompt", "back": "Supply the workload: counts, operation mix, ordering/uniqueness, memory, concurrency. Ask for per-operation costs and the break-even where the answer flips." },
+        { "number": 12, "front": "Standards profile", "back": "Versioned promptable rules (naming, nullability, async, errors, forbidden patterns) sent with every generation — usually in the system message." },
+        { "number": 13, "front": "Standards enforcement truth", "back": "Profile, exemplar, and model review are probabilistic. Only .editorconfig + analyzers + CI enforce. Keep profile and analyzers in sync." },
+        { "number": 14, "front": "Hallucinated API", "back": "Invented member/package from pattern completion. Loud ones fail compile; quiet ones compile with wrong semantics. Usually signals missing type context in the prompt." },
+        { "number": 15, "front": "Training-data lag", "back": "Default idioms may be stale (pre-nullable, old JSON libs). Pin versions in prompts, use modern exemplars, verify 'best practice' claims." },
+        { "number": 16, "front": "Status of compiling generated code", "back": "A draft that passed one deterministic check. Review, tests, analyzers still apply — at the same bar as human code." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions & Answers",
+      "items": [
+        { "number": 1, "question": "How do you get AI-generated code that fits your codebase instead of looking like a tutorial?", "answer": "Context, deliberately packed. I paste the actual contracts — interfaces, entities — verbatim so signatures can't be invented; I include one exemplar class from our codebase, because the model imitates demonstrated style with high fidelity; and I pin the environment: .NET 8, C# 12, nullable enabled, our DI and error-handling rules via a standards profile. The mental model is that the model has never seen our code — every gap between generic output and codebase-ready output is context I failed to supply. With that pack, output usually needs an Improve turn or two, not a hand-port." },
+        { "number": 2, "question": "Describe your workflow for scaffolding a new service with AI assistance.", "answer": "Two stages. First, skeleton only: requirement, contracts, exemplar, constraints — 'generate the class with stubs, XML docs, and TODOs; no logic'. That frame is reviewable in a minute: names, signatures, DI, cancellation. I fix it with targeted requests and approve it. Second, I fill one method per prompt, each carrying the approved skeleton plus that method's specific rules, compiling and running analyzers after each fill so problems surface while the faulty prompt is still the last one sent. It's the prompt-sequence pattern applied to code: small outputs, verified boundaries, and the toolchain voting continuously." },
+        { "number": 3, "question": "What's your rule set for AI-assisted refactoring?", "answer": "One iron rule and three disciplines. The rule: behavior-preserving, stated explicitly in the prompt — identical observable behavior, signatures, exceptions, side effects — because unconstrained models 'helpfully' fix perceived bugs mid-refactor, which is an unreviewed behavior change. Disciplines: tests green before and after (characterization tests first if coverage is thin); one named smell per prompt — 'extract the duplicated validation' — with dependencies pasted so members aren't invented; and diff-sized output — 'only the changed method; list other observations separately, don't fix them'. The model restructures; the tests prove nothing else moved." },
+        { "number": 4, "question": "You inherit an undocumented module. How does AI help you understand it safely?", "answer": "Layered explanation with verification at each layer. First an overview — purpose, inputs/outputs, side effects — which I check against the source before going deeper; wholesale misreadings die here cheaply. Then a walkthrough of the specific path I intend to change, then targeted questions about my change's risks — 'what happens when this collection is empty', 'who else reads this field'. Finally an explicit risk inventory: anything fragile, surprising, or order-dependent. One caveat I hold firmly: the model reads statically. Any claim depending on runtime data, configuration, or timing — cache durations, actual call frequencies — is a hypothesis until I've confirmed it against the running system." },
+        { "number": 5, "question": "How do you prompt for performance work?", "answer": "With measurements on both ends. Going in, I supply profile data — 'this method is the top allocation source, here are the numbers' — so the work targets the real bottleneck rather than the model's guess. I ask for current and proposed time complexity, the specific bottleneck addressed, and explicitly what gets worse, because optimizations always trade something. Coming out, BenchmarkDotNet judges: models assert performance improvements with total fluency whether or not they're real, so no optimization merges on the model's word. 'Optimize this' with no data gets you confident micro-optimization of the wrong thing." },
+        { "number": 6, "question": "Walk me through building a non-trivial algorithm with a model.", "answer": "Design before code. I state the problem with concrete input→output examples including the edge cases — empty input, duplicates, boundaries — which doubles as my future test set. I ask for two or three candidate approaches with time complexity and trade-offs, reasoning step by step. I make the choice — that trade-off is engineering judgment I don't delegate. Then implementation of the chosen approach only, with the approved design as context, and my original examples become the tests. The workflow exists to prevent one specific expensive failure: a beautifully fluent implementation of the wrong approach, which reads well and reviews hard." },
+        { "number": 7, "question": "How do you use AI for data-structure decisions?", "answer": "I bring the workload, it brings the analysis. 'Fifty thousand items, thousands of lookups by ID per request, inserts rare, ordering irrelevant, single-threaded' — with that, I ask for the recommended collection with per-operation costs, the runner-up, and the break-even point where the recommendation would flip. That last part matters: knowing the answer flips at 'frequent mid-list inserts' tells me what to watch as requirements evolve. For explanations, I ask for the structure in terms of our domain objects instead of abstract examples — it aids retention and surfaces mismatches immediately. Textbook questions get textbook answers; workload questions get engineering." },
+        { "number": 8, "question": "Can prompts enforce your team's coding standards?", "answer": "Raise compliance, yes; enforce, no. We keep a versioned standards profile — naming, nullability, async rules, error policy, forbidden patterns — that rides in the system message of every generation prompt, plus an exemplar class because demonstrated style transmits better than described style. That gets most generated code through the gate untouched. But the gate itself is deterministic: .editorconfig, Roslyn analyzers, CI breaking the build. The profile's job is minimizing friction with that gate, and the two must stay in sync — when they disagree, every generation wastes an Improve turn on predictable violations." },
+        { "number": 9, "question": "What are hallucinated APIs and how do you defend against them?", "answer": "Invented members, overloads, or packages — pattern completion filling gaps my prompt left. The loud ones fail compilation and cost minutes. The dangerous ones compile: a real method used with wrong semantic assumptions, a deprecated call, the wrong overload with subtly different behavior around culture or timezones. Defense in layers: grounding first — pasting real contracts makes invention unnecessary, and I treat a hallucinated member in output as a smell of missing context in input; then compiler and analyzers as the deterministic gate; then docs-check on semantic claims for unfamiliar APIs; then tests that exercise behavior, not just signatures." },
+        { "number": 10, "question": "How does training-data lag show up in generated C#, and what do you do about it?", "answer": "As stale idioms that work: pre-nullable null gymnastics, Newtonsoft.Json where System.Text.Json is our standard, old hosting patterns, missing file-scoped namespaces. Nothing breaks, so it accretes quietly and ages the codebase. Countermeasures: pin versions in every prompt — '.NET 8, C# 12, nullable enabled' shifts the output distribution noticeably; keep exemplars modern since imitation pulls style forward; encode current idioms in the standards profile explicitly; and treat the model's 'best practice' claims as assertions to verify, because its 'modern' may be two years old. Analyzers with current rulesets catch the remainder." },
+        { "number": 11, "question": "More context is better context when pasting code — agree?", "answer": "Disagree — precision beats volume. Whole-file pastes spend the context window on irrelevant members and dilute the instructions; in long prompts, constraints can effectively fall out of attention. My rules: paste exactly the members the task touches, verbatim; summarize the rest in a sentence — 'also implements IDisposable, not relevant here'; contracts in full, exemplars partially; instructions adjacent to the end where generation begins. And when a task genuinely needs a lot of code, that's a signal to decompose the task, not inflate the paste — sequence stages, each with focused context." },
+        { "number": 12, "question": "Would you let a model review pull requests?", "answer": "As a pre-filter, enthusiastically; as a gate, never. The shape that works: paste the diff plus our standards profile and relevant contracts, ask for issues ranked by severity with line references and suggested fixes, and require explicit 'nothing found in category X' statements so silence is meaningful. Humans then start from those findings and spend their attention on design and domain logic the model can't judge. The limits are structural: probabilistic recall means absence of findings proves nothing; no runtime knowledge means its perf and concurrency comments are hypotheses; and there's an anchoring risk — reviewers under-looking where the model said clean — which is why the human bar stays unchanged." },
+        { "number": 13, "question": "Does AI-generated code deserve a different review bar?", "answer": "Same bar — that's the point. Generated code fails differently than human code — plausible invented APIs, edge cases the prompt didn't mention, confident wrong domain logic, stylistic drift from our conventions — so review attention shifts toward those failure modes. But the standard doesn't drop: compiles is a draft milestone, not an approval; tests and analyzers apply; a human owns every merge. The moment 'the AI wrote it' becomes a reason for lighter review is the moment quality starts compounding downward, because generation volume is high and its errors are systematically plausible-looking." },
+        { "number": 14, "question": "Which prompting patterns from general practice matter most for coding, and how do they map?", "answer": "All of them, concretely. Ask → Review → Improve is the per-prompt loop, with the compiler and analyzers joining review as deterministic critics. Explain → Generate → Refine is mandatory for legacy work — understanding verified before modification. Prompt sequences become skeleton-first scaffolding and file-by-file migrations — stages with verified boundaries. Chain-of-thought powers algorithm design and incompatibility analysis. And grounding is the coding superpower: contracts and exemplars pasted verbatim are what turn generic generation into codebase extension. The debugging pattern rounds it out when generated code misbehaves: minimal repro, ranked hypotheses, confirm before fixing." },
+        { "number": 15, "question": "Your team's AI-assisted code quality is inconsistent across developers. How do you standardize?", "answer": "Make the good prompts a team asset instead of individual craft. Concretely: a versioned standards profile required in generation prompts; shared prompt templates for the recurring shapes — scaffolding with the four context layers, behavior-preserving refactors, layered explanation — so the discipline is embedded in the tool, not the person; analyzers and .editorconfig synced to the profile so the build enforces what prompts request; and a one-page guide with two worked examples, good and bad, because the difference is visceral when seen. Then measure lightly — analyzer violations per PR, review findings on generated code — and iterate the templates like any other engineering asset. Consistency comes from shared artifacts, not shared exhortations." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "Scaffolding", "definition": "Generating the structural skeleton of code — classes, stubs, wiring — to be reviewed and filled in stages; the highest-leverage generation task." },
+        { "term": "Context pack", "definition": "The grounding bundle for a coding prompt: requirement, contracts verbatim, one exemplar class, and pinned constraints." },
+        { "term": "Exemplar class", "definition": "A real class from your codebase pasted as a style model; few-shot prompting in its natural coding form." },
+        { "term": "Refactoring", "definition": "Restructuring code to improve design without changing observable behavior; with models, the preservation constraint must be explicit." },
+        { "term": "Behavior-preserving change", "definition": "A change keeping observable behavior, signatures, exceptions, and side effects identical — proven by tests, not asserted." },
+        { "term": "Characterization test", "definition": "A test pinning what code actually does today (including oddities), enabling refactoring with proof that nothing moved." },
+        { "term": "Legacy code", "definition": "Existing, often under-documented code that must be understood — via layered, verified explanation — before being changed." },
+        { "term": "Code smell", "definition": "A named symptom of a design problem (duplication, long method); naming it focuses a refactoring prompt on one transformation." },
+        { "term": "Clean code criteria", "definition": "Specific reviewable rules (guard clauses, nesting limits, naming) that replace the useless adjective 'clean' in prompts." },
+        { "term": "Time complexity", "definition": "Growth of running time with input size (O(1), O(n), O(n log n)) — the analytical language for optimization and data-structure prompts." },
+        { "term": "Algorithm design-first workflow", "definition": "Examples → candidate approaches with complexity → human choice → implementation → examples as tests; prevents fluent implementations of wrong approaches." },
+        { "term": "Edge case", "definition": "Boundary input (empty, null, duplicate, maximum) that must appear in the problem examples and the resulting tests." },
+        { "term": "Data structure", "definition": "An organization of data with characteristic operation costs; prompted about effectively by supplying the actual workload." },
+        { "term": "Workload description", "definition": "The item counts, operation mix, ordering and memory requirements that turn a data-structure question from textbook to engineering." },
+        { "term": "Coding standards", "definition": "Team rules for naming, layout, idioms, and patterns — promptable via a standards profile, enforceable only by the toolchain." },
+        { "term": "Standards profile", "definition": "A compact, versioned prompt fragment encoding team conventions, included with every generation request (typically in the system message)." },
+        { "term": "Style guide", "definition": "The written source of truth for coding standards, mirrored both into the standards profile and into analyzer configuration." },
+        { "term": "Static analyzer", "definition": "Build-time rule enforcement (Roslyn analyzers, StyleCop, .editorconfig) — the deterministic layer that actually enforces standards on generated code." },
+        { "term": "Idiomatic code", "definition": "Code written in the language's natural current style; requested explicitly in translation and migration prompts ('idiomatic, not literal')." },
+        { "term": "Hallucinated API", "definition": "An invented member, overload, or package produced by pattern completion; usually evidence that real contracts were missing from the prompt." },
+        { "term": "Training-data lag", "definition": "The gap between a model's learned idioms and the platform's current ones; countered by pinned versions, modern exemplars, and analyzers." },
+        { "term": "Grounding", "definition": "Supplying real code — contracts, exemplars, dependencies — so generation extends your codebase instead of approximating a generic one." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary & Key Takeaways",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Coding prompts are context engineering: the model has never seen your codebase, and every quality gap is context you didn't supply.",
+          "Scaffold with the four-layer context pack — requirement, contracts, exemplar, constraints — and deliver skeleton-first, filling one method per prompt.",
+          "Refactoring's iron rule is explicit behavior preservation, proven by tests green before and after; legacy work starts with verified explanation and characterization tests.",
+          "Replace adjectives with criteria: clean is a checklist, fast is a measured claim. Design algorithms before implementing them; your examples become your tests.",
+          "Data-structure advice is only as good as the workload you describe — supply counts, operation mix, and constraints; ask for costs and break-even points.",
+          "Standards profiles and exemplars raise compliance; analyzers and CI enforce it. Keep them in sync.",
+          "Know the coding failure modes: hallucinated APIs (missing context), stale idioms (pin versions), unverified optimization claims (benchmark), and 'also fixed' refactors (reject).",
+          "Generated code that compiles is a draft. The merge bar — review, tests, analyzers — is identical to human code, and that identical bar is what keeps quality flat as volume grows."
+        ] },
+        { "type": "paragraph", "text": "You can now direct a model through the full coding workday: greenfield scaffolds, careful refactors, legacy archaeology, algorithm design, and standards-true generation. The next tutorial extends the craft to the artifacts around the code: tests and documentation." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Continue with the next tutorial in the path: Prompting for Testing & Documentation — generating xUnit test suites that actually test something, edge-case discovery, XML docs, READMEs, and the verification discipline that keeps generated tests honest." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: build your context pack for one real feature — contracts, exemplar, standards profile — and scaffold it skeleton-first; count the Improve turns saved versus your usual approach.",
+          "Practice: take one smelly method you know, write characterization tests, then drive a one-smell-per-prompt refactor; verify green after every step.",
+          "Practice: run the layered explanation on a module you inherited; verify layer one against source before requesting layer two.",
+          "Practice: take a data-structure choice in your current code and ask the workload question — including the break-even; check whether your current choice survives it.",
+          "Reading: the C# coding conventions on Microsoft Learn (raw material for your standards profile) and the Roslyn analyzers overview (your enforcement layer)."
+        ] },
+        { "type": "note", "style": "info", "text": "Path position: tutorial 4 of 27 · Previous: developer-prompting-patterns · Next: prompting-for-testing-and-docs" }
+      ]
+    }
+  ]
+}
