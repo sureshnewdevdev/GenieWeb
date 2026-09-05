@@ -1,0 +1,479 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Overview of Azure OpenAI",
+  "slug": "azure-openai-overview",
+  "level": "Beginner to Intermediate",
+  "codeLanguage": "C#",
+  "tutorialNumber": 10,
+  "totalTutorials": 27,
+  "prev": "advanced-copilot-usage",
+  "next": "calling-azure-openai-from-csharp",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Overview of Azure OpenAI"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "What Azure OpenAI provides",
+    "Deployment models",
+    "Available models: GPT-4o, GPT-4 Turbo, embeddings",
+    "Pricing concepts: tokens and quotas",
+    "Responsible AI principles",
+    "Azure OpenAI Studio",
+    "Choosing the right model for a scenario"
+  ],
+  "tooltips": {
+    "Azure OpenAI": "The Azure service hosting OpenAI models inside your Azure subscription — enterprise identity, networking, compliance, and billing wrapped around the models.",
+    "model deployment": "A named instance of a model you create in your resource; your code calls the deployment name, not the model directly.",
+    "deployment name": "The name you choose when deploying a model — the identifier your application code targets in every request.",
+    "endpoint": "Your resource's HTTPS address (https://<resource>.openai.azure.com) — where all API calls for that resource go.",
+    "GPT-4o": "OpenAI's multimodal 'omni' flagship family — strong general capability; the mini variant trades peak capability for much lower cost and latency.",
+    "GPT-4 Turbo": "An earlier-generation large-context model, still deployed in many regions but generally superseded by the GPT-4o family.",
+    "embeddings model": "A model converting text into vectors for semantic search and RAG — e.g. the text-embedding-3 family; far cheaper and faster than chat models.",
+    "token": "The unit models read, write, and bill by (~4 English characters); both directions are metered per token.",
+    "input tokens": "Everything you send — system message, history, documents — billed at the input rate.",
+    "output tokens": "Everything the model generates — billed at the output rate, typically several times the input rate.",
+    "quota": "Your capacity allowance per region and model — tokens-per-minute and requests-per-minute — divided among your deployments.",
+    "tokens per minute": "TPM — the throughput ceiling assigned to a deployment; exceeding it yields 429 responses your client must back off from.",
+    "provisioned throughput": "A purchase model reserving dedicated capacity (PTUs) for predictable latency at scale — the alternative to pay-as-you-go.",
+    "Responsible AI": "Microsoft's principle framework — fairness, reliability and safety, privacy and security, inclusiveness, transparency, accountability — applied to the service.",
+    "content filtering": "The built-in safety layer classifying prompts and completions across harm categories and blocking above configured severity thresholds.",
+    "Azure OpenAI Studio": "The web portal (now part of Azure AI Foundry) for deploying models, testing in playgrounds, and managing the service without code.",
+    "playground": "The portal's interactive chat environment — the place to iterate on prompts and settings before writing any code.",
+    "region": "The Azure geography of a resource; model availability, quota, and data residency all vary by region.",
+    "Microsoft Entra ID": "Azure's identity platform — the keyless, role-based way production applications should authenticate to the service.",
+    "model catalog": "The evolving set of deployable models; capabilities, versions, and regional availability change often — the portal shows current truth.",
+    "capability–cost–latency triangle": "The model-selection framework: no model wins all three axes, so each scenario picks its corner — mini-first, escalating on measured evidence."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview",
+      "content": [
+        { "type": "paragraph", "text": "Modules 1 and 2 made AI your assistant. Module 3 reverses the arrow: your applications become the caller, and OpenAI's models become a service your C# code consumes. The front door to that world for .NET teams is Azure OpenAI — OpenAI's model families operated as a first-class Azure service, inside your subscription, your identity system, your network, and your compliance boundary." },
+        { "type": "paragraph", "text": "This tutorial is the map before the journey: what the service actually provides, how resources and deployments are structured, which model families exist and what they cost, the quota system that governs throughput, the Responsible AI machinery built into the platform, the Studio portal where you'll prototype, and — the decision every project makes early — how to choose the right model for a scenario." },
+        { "type": "paragraph", "text": "Nothing here requires writing code yet; everything here is assumed by the code you'll write next. Teams that skip this layer end up confused about why their 'GPT-4o' code fails (they never deployed one), why bills surprise them (output tokens), or why load tests hit 429s (quota) — an hour of concepts now prevents all three." },
+        { "type": "note", "style": "info", "text": "This is tutorial 10 of 27 and opens Module 3 (Building AI Applications in C#). The next tutorial writes the first real C# calls against everything defined here." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "paragraph", "text": "After completing this tutorial, you will be able to:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Explain what Azure OpenAI provides beyond raw model access — identity, networking, compliance, and data-handling guarantees.",
+          "Describe the resource → deployment → call structure and why code targets deployment names.",
+          "Distinguish standard, global, and provisioned throughput deployment options at a concept level.",
+          "Survey the model families — GPT-4o and its mini variant, GPT-4 Turbo, embeddings models — and their roles.",
+          "Reason about pricing: input vs output tokens, and quotas expressed as tokens per minute.",
+          "State Microsoft's Responsible AI principles and how content filtering embodies them in the service.",
+          "Navigate Azure OpenAI Studio (Azure AI Foundry) for deployments and playground experiments.",
+          "Choose a model for a scenario using the capability–cost–latency triangle."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorial 1's foundations: tokens, context windows, embeddings, and the three Microsoft AI products.",
+          "Basic Azure familiarity: subscriptions, resources, resource groups, and the portal.",
+          "An Azure subscription if you want to follow the step-by-step section hands-on (not required for the concepts).",
+          "No new C# is needed this tutorial — code arrives in tutorial 11."
+        ] }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "What Azure OpenAI Provides",
+      "content": [
+        { "type": "paragraph", "text": "Azure OpenAI is not 'a proxy to someone else's API'. It is the OpenAI model families — chat, reasoning, embeddings, image generation — operated by Microsoft as an Azure service, which changes four things that enterprises care about more than model quality:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Identity and access: calls authenticate with API keys or, properly, Microsoft Entra ID with role-based access — the same identity fabric as the rest of your estate; no shared secrets in production.",
+          "Network posture: resources support private endpoints and VNet integration, so AI traffic never crosses the public internet if you so choose.",
+          "Data handling: your prompts and completions are not used to train the foundation models, and processing stays within your chosen Azure geography — the contractual answers to 'where does our data go?'.",
+          "Operations: billing on your subscription, quotas you manage, Azure Monitor integration, SLAs, and regional deployment choices — a model as a managed Azure dependency, not an external experiment."
+        ] },
+        { "type": "paragraph", "text": "The mental model that organizes everything else: an Azure OpenAI resource is a container you create in a region; inside it you create one or more model deployments — named instances of specific models; and your code talks to the resource's endpoint, addressing a deployment name. The deployment indirection is the practical genius of the design: applications reference 'chat-prod', and which underlying model version that means is an operational decision you can change without touching code." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Deployment Models: From Resource to Running Requests",
+      "content": [
+        { "type": "animation", "title": "From Azure resource to model response", "intro": "The structure every call flows through — set up once, used forever.", "nodes": [
+          { "id": "sub", "label": "Subscription", "sub": "billing + quota" },
+          { "id": "res", "label": "AOAI resource", "sub": "region + endpoint" },
+          { "id": "dep", "label": "Deployment", "sub": "'chat-prod' → GPT-4o" },
+          { "id": "app", "label": "Your C# app", "sub": "endpoint + name" },
+          { "id": "resp", "label": "Response", "sub": "tokens metered" }
+        ], "steps": [
+          { "highlight": ["sub"], "caption": "Your subscription holds the service registration, the bills, and the regional quota pools." },
+          { "highlight": ["res"], "caption": "You create an Azure OpenAI resource in a chosen region — it gets an endpoint URL and keys, and inherits your network and identity configuration." },
+          { "highlight": ["dep"], "caption": "Inside the resource you deploy models: 'chat-prod' → GPT-4o, 'embed' → text-embedding-3-large. Each deployment gets a slice of your quota." },
+          { "highlight": ["app"], "caption": "Your application calls the endpoint, addressing the deployment name — never the raw model. Swap the underlying model later without code changes." },
+          { "highlight": ["resp"], "caption": "Responses stream back with usage metadata — input and output token counts — feeding both your costs and your quota consumption." }
+        ] },
+        { "type": "paragraph", "text": "Deployments come in flavors that matter at different scales. Standard is pay-as-you-go against your regional quota — the default for development and most production workloads. Global variants route requests across Microsoft's global capacity for better availability of scarce models, trading strict regional processing. Provisioned throughput reserves dedicated capacity (purchased as PTUs) for workloads needing predictable latency at high volume — call-center scale, not side-project scale. Names and exact options evolve; the concept triangle — shared vs global vs dedicated capacity — is stable." },
+        { "type": "note", "style": "tip", "text": "Region choice is a real decision, made at resource creation: model availability differs by region, quota is granted per region, and data residency follows the region. Check the model-availability table for your must-have models before creating the resource — moving later means a new resource." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "The Model Families: GPT-4o, GPT-4 Turbo, and Embeddings",
+      "content": [
+        { "type": "paragraph", "text": "The model catalog is a moving target — new versions ship, old ones retire on published schedules — but the family structure is durable and is what you should learn:" },
+        { "type": "table", "headers": ["Family", "Role", "Traits that drive selection"], "rows": [
+          ["GPT-4o", "The multimodal flagship: chat, reasoning over text and images", "Highest general capability; large context; premium price per token"],
+          ["GPT-4o mini", "The workhorse: same family, smaller", "A fraction of the cost and latency; remarkably capable for extraction, classification, summarization — the default until proven insufficient"],
+          ["GPT-4 Turbo", "Previous-generation large model", "Still deployed in the wild; large context; generally superseded — prefer 4o-family for new work"],
+          ["Reasoning models (o-series)", "Extended internal reasoning for hard problems", "Slower and costlier per request; shines on complex multi-step tasks; overkill for routine calls"],
+          ["text-embedding-3 (small/large)", "Text → vectors for search and RAG", "Not a chat model at all; very cheap; the engine behind tutorial 15's retrieval"]
+        ] },
+        { "type": "paragraph", "text": "Two structural points beginners miss. First, chat models and embeddings models are different tools, not quality tiers — a complete AI feature typically deploys one of each (retrieval finds, chat writes; tutorial 1's division of labor). Second, model versions are explicit: a deployment pins a model version, versions have retirement dates, and upgrades are your scheduled operational act — with your regression set from tutorial 6 run before the switch, because prompts are model-sensitive." },
+        { "type": "note", "style": "warning", "text": "Whatever table this tutorial prints is aging as you read it. The durable skill is knowing the families and the selection axes; the current truth about versions, context sizes, and regional availability lives in the portal's model catalog and the official documentation." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Pricing: Tokens, Meters, and Quotas",
+      "content": [
+        { "type": "paragraph", "text": "Azure OpenAI's economics reduce to one sentence: you pay per token, in both directions, at rates that vary by model — and you are throttled per minute by quota. Everything you send — system message, conversation history, retrieved documents — meters as input tokens; everything generated meters as output tokens, at a higher rate (often 3–4×). This is why tutorial 3's history management and tutorial 4's context precision are cost engineering, not just craft: replayed history is re-billed every turn." },
+        { "type": "animation", "title": "Where the money and the throttling happen", "intro": "One request's journey through the meters.", "nodes": [
+          { "id": "req", "label": "Request", "sub": "prompt + history" },
+          { "id": "inmeter", "label": "Input meter", "sub": "everything sent" },
+          { "id": "gen", "label": "Generation", "sub": "output meter ×3-4" },
+          { "id": "tpm", "label": "Quota check", "sub": "TPM / RPM" },
+          { "id": "bill", "label": "Usage report", "sub": "in the response" }
+        ], "steps": [
+          { "highlight": ["req"], "caption": "Your request carries the full context: system message, history, documents. All of it counts." },
+          { "highlight": ["inmeter"], "caption": "Input tokens metered at the model's input rate. A fat prompt on a premium model is a real line item at volume." },
+          { "highlight": ["gen"], "caption": "Output tokens meter as they generate — at the premium rate. Verbose responses cost more than verbose prompts." },
+          { "highlight": ["tpm"], "caption": "Both directions count against your deployment's tokens per minute. Exceed it and requests get 429s — your client needs retry-with-backoff." },
+          { "highlight": ["bill"], "caption": "Every response reports exact usage — input and output counts. Log them from day one (tutorial 1's advice, now with a bill attached)." }
+        ] },
+        { "type": "paragraph", "text": "Quota is the operational half: each subscription receives per-region, per-model capacity expressed as tokens per minute (with a derived requests-per-minute), which you divide among deployments when creating them. Quota is not a bill — it's a ceiling; you can request increases. Provisioned throughput replaces the shared-pool model entirely with reserved capacity for workloads where p99 latency matters more than pay-as-you-go flexibility. The practical rules: watch usage metadata from day one, alert on 429 rates, and remember that the cheapest optimization is almost always a smaller model or a leaner prompt, not a bigger quota." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Responsible AI: Principles Into Platform",
+      "content": [
+        { "type": "paragraph", "text": "Microsoft operates Azure OpenAI under its Responsible AI standard — six principles that sound abstract until you meet their concrete platform embodiments: fairness (systems should treat people equitably), reliability and safety (systems should perform safely under expected and unexpected conditions), privacy and security (data protected and under user control), inclusiveness (systems should empower everyone), transparency (people should understand how decisions are made), and accountability (humans remain answerable for the systems they deploy)." },
+        { "type": "paragraph", "text": "In the service, the principles are machinery, not posters. Content filtering runs on every request by default: classifiers screen both prompts and completions across harm categories (hate, sexual, violence, self-harm, plus jailbreak detection), blocking above configurable severity thresholds — your application must handle 'the filter blocked this' as a normal response case. Access controls and abuse monitoring govern the service itself. Data-handling commitments (no training on your prompts; regional processing) implement privacy. And the accountability principle lands on you: the platform provides the guardrails, but what your application does with model output — tutorial 6's validation, gating, and human-in-the-loop design — remains your responsibility, explicitly." },
+        { "type": "note", "style": "info", "text": "For .NET developers the practical takeaways are three: expect and handle content-filter responses in code; know your workload's filter configuration (defaults are adjustable within policy limits); and treat Responsible AI as a design input for your features, not a compliance checkbox the platform already ticked. Tutorial 24 goes deep on application-level AI security." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Azure OpenAI Studio and the Tooling Around the Service",
+      "content": [
+        { "type": "paragraph", "text": "Azure OpenAI Studio — whose capabilities now live in the Azure AI Foundry portal — is the service's workbench: the place where concepts in this tutorial become clickable reality. What you do there:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Deployments: browse the model catalog (families, versions, regional availability), create deployments, assign quota slices, and manage version upgrades.",
+          "The chat playground: interactive prompt iteration against your deployments — system message editing, parameter sliders (temperature, max tokens), and conversation testing. Tutorial 2's iteration loop has a home here before any code exists.",
+          "View code: the playground exports your current setup as starter code — a bridge to tutorial 11.",
+          "Content filter configuration: view and (within policy) adjust category thresholds per deployment.",
+          "Quota management: see per-region allocations and consumption, request increases."
+        ] },
+        { "type": "paragraph", "text": "Around the portal sits the standard Azure toolchain: everything the Studio does is scriptable via the Azure CLI and infrastructure-as-code (Bicep/Terraform) for real environments — resource, deployments, and network configuration in source control like any other infrastructure. And for code, the SDK families (Azure.AI.OpenAI for .NET among them) speak to the same endpoints — next tutorial's subject. The workflow that works: prototype prompts in the playground, export the shape, industrialize in C# with configuration and identity done properly." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "Choosing the Right Model for a Scenario",
+      "content": [
+        { "type": "paragraph", "text": "Model selection is a triangle: capability (can it do the task well?), cost (per token, at your volume), and latency (time to first token and to completion). You cannot maximize all three; scenarios pick their corner:" },
+        { "type": "table", "headers": ["Scenario", "Sensible starting model", "Why"], "rows": [
+          ["High-volume extraction / classification (tickets, invoices)", "GPT-4o mini", "Structured tasks with clear prompts; mini-class capability suffices; volume makes cost dominant"],
+          ["Customer-facing chat over your docs (RAG)", "GPT-4o mini or GPT-4o + text-embedding-3", "Retrieval does the knowledge work; chat model writes; upgrade only if answer quality demands"],
+          ["Complex analysis, multi-step reasoning, hard synthesis", "GPT-4o (or a reasoning model for the hardest cases)", "Capability corner: errors cost more than tokens"],
+          ["Semantic search / similarity / clustering", "text-embedding-3 (small or large)", "Not a chat problem at all; embeddings are the tool and cost pennies"],
+          ["Real-time UX (autocomplete-ish, interactive)", "Smallest model that clears quality bar", "Latency corner; streaming + small model beats brilliant + slow"],
+          ["Batch overnight processing", "Larger model acceptable", "Latency irrelevant; spend the budget on quality where it counts"]
+        ] },
+        { "type": "paragraph", "text": "The professional's default: start with the mini-class model and real test cases; escalate to the flagship only where measured quality falls short; and split pipelines — a cheap model for the bulk step, the expensive model for the hard 10%. Selection is also not permanent: the deployment indirection means the model behind 'chat-prod' is an operational dial, and your tutorial 6 regression set is the gate every time you turn it." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples in C#",
+      "content": [
+        { "type": "paragraph", "text": "Code proper begins next tutorial; here, the two C# artifacts worth having before any call is made. First, configuration that mirrors the service's structure — resource endpoint plus deployment names, never raw model names, never secrets in source:" },
+        { "type": "code", "language": "csharp", "title": "Configuration shaped like the service (appsettings + user-secrets)", "code": [
+          "// appsettings.json (non-secret parts):",
+          "// {",
+          "//   \"AzureOpenAI\": {",
+          "//     \"Endpoint\": \"https://my-resource.openai.azure.com/\",",
+          "//     \"ChatDeployment\": \"chat-prod\",       // -> GPT-4o mini today; swappable",
+          "//     \"EmbeddingDeployment\": \"embed-prod\"  // -> text-embedding-3-large",
+          "//   }",
+          "// }",
+          "// Key (dev only - prefer Entra ID in production):",
+          "//   dotnet user-secrets set \"AzureOpenAI:ApiKey\" \"<key>\"",
+          "",
+          "public sealed class AzureOpenAIOptions",
+          "{",
+          "    public const string SectionName = \"AzureOpenAI\";",
+          "",
+          "    public required Uri Endpoint { get; init; }",
+          "    public required string ChatDeployment { get; init; }",
+          "    public required string EmbeddingDeployment { get; init; }",
+          "    public string? ApiKey { get; init; } // null => use Entra ID credential",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "Second, a tiny cost model — the kind of helper that keeps token economics visible in design discussions before any invoice arrives:" },
+        { "type": "code", "language": "csharp", "title": "Back-of-envelope cost estimation (rates are placeholders — check current pricing)", "code": [
+          "public static class TokenCost",
+          "{",
+          "    // Illustrative per-1K-token rates - REAL rates vary by model and change;",
+          "    // read them from configuration, sourced from current published pricing.",
+          "    public static decimal EstimateRequestCost(",
+          "        int inputTokens, int outputTokens,",
+          "        decimal inputPer1K, decimal outputPer1K) =>",
+          "        inputTokens / 1000m * inputPer1K +",
+          "        outputTokens / 1000m * outputPer1K;",
+          "",
+          "    // ~4 chars per token English heuristic (tutorial 1) for pre-call sizing:",
+          "    public static int RoughTokens(string text) =>",
+          "        (int)Math.Ceiling(text.Length / 4.0);",
+          "}",
+          "",
+          "// Design-time sanity check for a summarization feature:",
+          "// 2,000 input tokens + 300 output, 50k requests/month",
+          "// -> run the numbers per candidate model BEFORE building."
+        ] }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step-by-Step: Standing Up Your First Azure OpenAI Resource",
+      "content": [
+        { "type": "paragraph", "text": "The hands-on path from nothing to a tested deployment — portal edition (every step scriptable later via CLI/Bicep):" },
+        { "type": "list", "style": "numbered", "items": [
+          "Check model availability first: consult the model-availability documentation and pick a region that has the models you want (a chat model and an embeddings model). Region is hard to change later.",
+          "Create the resource: Azure portal → Create resource → Azure OpenAI; choose subscription, resource group, the region from step 1, a resource name (it becomes your endpoint), and a pricing tier.",
+          "Open the Studio/Foundry portal from the resource and go to Deployments: deploy a chat model — pick the family (e.g. GPT-4o mini to start), a version, a deployment name your code will use ('chat-dev'), and a quota slice (TPM).",
+          "Deploy an embeddings model the same way ('embed-dev' → a text-embedding-3 model) — most real features need both, and deploying now saves a context switch later.",
+          "Test in the chat playground: select 'chat-dev', write a system message, converse; adjust temperature and max tokens and watch behavior change — tutorial 2's iteration loop, live.",
+          "Trip the content filter deliberately (ask for something the harm categories block) to see what a filtered response looks like — your code will need to handle this case gracefully.",
+          "Collect connection details: from the resource — endpoint URL and keys (Keys and Endpoint blade). Note them into user-secrets, not source; production will use Microsoft Entra ID instead.",
+          "Check Quotas: see your TPM allocation per model and region, how much your deployments consumed, and where to request increases — the page you'll revisit when load testing.",
+          "Optional but wise: use 'View code' in the playground to see your setup expressed as SDK calls — a preview of exactly what tutorial 11 builds properly."
+        ] },
+        { "type": "note", "style": "tip", "text": "Cost control while learning: mini-class models, small max-token settings, and deleting unused deployments keep experimentation costs near-trivial. The expensive surprises come from big models × big prompts × loops — none of which a careful learner needs." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Everything specific ages fast: model names, versions, context sizes, prices, quota defaults, and portal layouts all change on months-scale. The families, the resource→deployment structure, and the selection axes are the durable knowledge; verify specifics against current documentation at build time.",
+          "Naming is in transition: 'Azure OpenAI Studio' capabilities now live in the Azure AI Foundry portal — expect both names in docs and this course; they refer to the same workbench.",
+          "Model availability is uneven across regions; the model you want may dictate your region, with data-residency consequences to check.",
+          "Quota is a ceiling, not a guarantee of instant capacity — scarce models can be constrained; production plans include retry/backoff and sometimes multi-region strategies.",
+          "Content filtering will occasionally block legitimate content (false positives) — handle filtered responses as a normal case, and know the adjustment process for your workload.",
+          "Model retirements are real: deployments pin versions, versions have end-of-life dates, and upgrades are scheduled operational work gated by your regression set.",
+          "Pricing in this tutorial is deliberately unstated in numbers: any figure printed here would be wrong within months. The cost model (input/output per-token, output premium) is the stable part."
+        ] },
+        { "type": "note", "style": "warning", "text": "API-accuracy disclosure: the C# shown is configuration and arithmetic only — standard C# with no service calls, hence version-safe. All service specifics (model names like GPT-4o and text-embedding-3, deployment types, Studio/Foundry features, filter categories) are described at the architecture level as of this writing and evolve — treat the official Azure OpenAI documentation as the source of truth for current details." }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices and Common Mistakes",
+      "content": [
+        { "type": "paragraph", "text": "The habits to establish before writing a line of calling code:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Name deployments by role ('chat-prod', 'embed-dev'), never by model — preserve the indirection that makes upgrades codeless.",
+          "Choose regions by model availability and residency needs, deliberately, first.",
+          "Start with mini-class models; escalate on measured evidence, not vibes; split pipelines cheap-bulk/expensive-hard.",
+          "Log usage metadata from the first prototype call; estimate costs at design time with the back-of-envelope model.",
+          "Keep secrets in user-secrets/Key Vault from day one; plan production for Entra ID, not keys.",
+          "Prototype prompts in the playground; export via View code; industrialize in C#.",
+          "Handle content-filter blocks and 429s as normal response cases in every client you write."
+        ] },
+        { "type": "paragraph", "text": "The beginner mistakes this tutorial exists to prevent:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Calling model names instead of deployment names, then being confused by 404s.",
+          "Creating the resource in a region that lacks the model you actually wanted.",
+          "Defaulting to the flagship model for everything and discovering the bill at month-end.",
+          "Ignoring output-token premium — 'it's just a summary' at 4× input rates, times a million calls.",
+          "Load-testing into 429s with no backoff and calling the service 'unreliable'.",
+          "Treating content filtering as an error to eliminate rather than a case to handle.",
+          "Hard-coding keys in source 'temporarily' — tutorial 6's rule did not expire.",
+          "Assuming today's model catalog is tomorrow's — skipping the regression gate on upgrades."
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz",
+      "items": [
+        { "number": 1, "question": "What does Azure OpenAI fundamentally provide?", "options": { "A": "A proxy that forwards to a public API", "B": "OpenAI's model families operated as an Azure service — inside your subscription's identity, network, compliance, and billing boundary", "C": "Open-source models to self-host", "D": "Only GitHub Copilot's backend" }, "correctAnswer": "B", "explanation": "The models are OpenAI's; the operations are Azure's. That combination — Entra ID auth, private networking, no-training data handling, regional processing, subscription billing — is what makes it the enterprise front door rather than an external experiment." },
+        { "number": 2, "question": "Why does application code target a deployment name rather than a model name?", "options": { "A": "Model names are secret", "B": "The indirection lets operations change the underlying model/version without any code change", "C": "Deployment names are shorter", "D": "The API forbids model names for safety" }, "correctAnswer": "B", "explanation": "'chat-prod' is a stable contract for your code; which model version it resolves to is an operational dial. This is also why deployments are named by role, not by model — 'gpt4o-deployment' defeats the purpose the day you upgrade." },
+        { "number": 3, "question": "What is the resource → deployment structure?", "options": { "A": "One resource per API call", "B": "A regional resource (endpoint, keys, network config) containing named model deployments, each with a quota slice", "C": "Deployments contain resources", "D": "A global resource with no regions" }, "correctAnswer": "B", "explanation": "The resource anchors region, endpoint, identity, and networking; deployments instantiate specific models under names your code calls. A typical feature uses one resource with a chat deployment and an embeddings deployment." },
+        { "number": 4, "question": "Which pairing correctly matches model family to role?", "options": { "A": "text-embedding-3 for chat; GPT-4o for vectors", "B": "GPT-4o family for chat/reasoning; text-embedding-3 family for converting text to vectors", "C": "GPT-4 Turbo only for images", "D": "All models do all tasks equally" }, "correctAnswer": "B", "explanation": "Chat models generate; embeddings models locate meaning as vectors. They're different tools, not quality tiers — real features typically deploy one of each, with retrieval finding and the chat model writing." },
+        { "number": 5, "question": "What is GPT-4o mini's role in a well-run system?", "options": { "A": "A deprecated test model", "B": "The default workhorse: a fraction of flagship cost/latency, sufficient for most structured tasks — escalate only on measured evidence", "C": "Only for mobile apps", "D": "The embeddings engine" }, "correctAnswer": "B", "explanation": "Extraction, classification, summarization, and RAG answers usually clear the quality bar on mini-class models. The professional default is mini-first with escalation where tests show real quality gaps — the cost difference at volume is large." },
+        { "number": 6, "question": "How does Azure OpenAI pricing meter a request?", "options": { "A": "Flat per request", "B": "Per token, both directions — input (all you send) and output (all generated), with output typically several times the input rate", "C": "Per minute of wall time", "D": "Per deployment per day" }, "correctAnswer": "B", "explanation": "Everything sent (system message, history, documents) meters as input; everything generated meters as output at a premium. This is why history management and prompt precision are cost engineering, and why verbose outputs deserve max-token limits." },
+        { "number": 7, "question": "What does a deployment's TPM (tokens per minute) quota govern?", "options": { "A": "The monthly bill cap", "B": "Throughput: the token ceiling per minute, beyond which requests receive 429s requiring client backoff", "C": "The model's context window", "D": "Response quality" }, "correctAnswer": "B", "explanation": "Quota is capacity, not cost: a per-region, per-model allowance divided among deployments. Exceeding it throttles rather than bills. Production clients handle 429s with retry-and-backoff, and teams alert on 429 rates." },
+        { "number": 8, "question": "When does provisioned throughput make sense over standard pay-as-you-go?", "options": { "A": "For every hobby project", "B": "High-volume workloads needing predictable latency — reserved capacity (PTUs) instead of the shared pool", "C": "Whenever quota requests are denied once", "D": "Never; it's legacy" }, "correctAnswer": "B", "explanation": "PTUs buy dedicated capacity: p99 latency stability at serious scale, at reservation-style cost. Standard's shared pool is right for development and most workloads; provisioned is the call-center-scale option." },
+        { "number": 9, "question": "Which are Microsoft's Responsible AI principles embodied in the service?", "options": { "A": "Speed, scale, savings", "B": "Fairness, reliability & safety, privacy & security, inclusiveness, transparency, accountability", "C": "Only data privacy", "D": "Open weights and open data" }, "correctAnswer": "B", "explanation": "The six principles turn into machinery: content filtering (safety), data-handling commitments (privacy), documentation and transparency notes, and — critically — accountability that remains with you for what your application does with outputs." },
+        { "number": 10, "question": "How should your application treat content filtering?", "options": { "A": "As a fatal error to eliminate in testing", "B": "As a normal response case: classifiers screen prompts and completions across harm categories and may block — code handles it gracefully", "C": "As something to disable immediately", "D": "As applying only to images" }, "correctAnswer": "B", "explanation": "Filtering runs by default both directions, with configurable thresholds (within policy). False positives happen; blocked responses are a case your client handles like any other outcome — and deliberately tripping the filter in the playground shows you the shape." },
+        { "number": 11, "question": "What is Azure OpenAI Studio (Azure AI Foundry) primarily for?", "options": { "A": "Editing model weights", "B": "The service workbench: deploy models from the catalog, iterate in the chat playground, configure filters, manage quota — then export starter code", "C": "Hosting your web app", "D": "Writing C# unit tests" }, "correctAnswer": "B", "explanation": "It's where concepts become clickable: deployments, playground iteration (tutorial 2's loop, live), filter and quota management, and View code as the bridge into the SDK work of tutorial 11." },
+        { "number": 12, "question": "Why does region choice matter at resource creation?", "options": { "A": "It only affects latency cosmetically", "B": "Model availability, quota grants, and data residency all follow the region — and moving later means a new resource", "C": "Regions determine the SDK language", "D": "It doesn't; all regions are identical" }, "correctAnswer": "B", "explanation": "Not every model is in every region; quota is per-region; residency commitments follow the region. The step-zero habit: check the model-availability table for your must-haves before creating anything." },
+        { "number": 13, "question": "A real-time interactive feature needs snappy responses at scale. Which triangle corner leads, and what follows?", "options": { "A": "Capability — use the flagship", "B": "Latency — smallest model clearing the quality bar, plus streaming", "C": "Cost — batch it overnight", "D": "None — triangles are for architects" }, "correctAnswer": "B", "explanation": "Capability–cost–latency: interactive UX lives in the latency corner, so a fast small model with streaming beats a brilliant slow one. Batch jobs make the opposite call. Scenarios pick their corner; no model wins all three." },
+        { "number": 14, "question": "What operational fact about model versions must production teams plan for?", "options": { "A": "Versions never change", "B": "Deployments pin versions, versions have retirement dates, and upgrades are scheduled work gated by your prompt regression set", "C": "Versions auto-upgrade mid-request", "D": "Only embeddings models have versions" }, "correctAnswer": "B", "explanation": "Model lifecycle is real operations: retirements are published, upgrades are your action, and because prompts are model-sensitive (tutorial 6), the regression set runs before any switch. The deployment indirection makes the swap codeless — not riskless." },
+        { "number": 15, "question": "Which authentication approach should production applications use?", "options": { "A": "API keys committed to source for reliability", "B": "Microsoft Entra ID with role-based access — keyless identity; keys only for local development, stored in user-secrets", "C": "A shared password in team chat", "D": "No auth — the endpoint is public" }, "correctAnswer": "B", "explanation": "Keys are acceptable for local dev (in user-secrets, never source); production uses the identity platform — managed identity + RBAC — eliminating shared secrets entirely. Tutorial 6's secrets rule, now with an Azure-native answer." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam Questions",
+      "items": [
+        { "number": 1, "question": "Enumerate what Azure OpenAI provides beyond raw model access, and explain why each matters to an enterprise .NET team.", "modelAnswer": "(1) Identity integration: Entra ID with RBAC replaces shared API keys — access is auditable, revocable, role-scoped, and consistent with the rest of the estate. (2) Network posture: private endpoints/VNet integration keep AI traffic off the public internet — a hard requirement in many regulated environments. (3) Data handling: contractual commitments that prompts/completions don't train foundation models and processing stays in-region — the answers compliance teams need in writing. (4) Operations: subscription billing, per-region quota management, monitoring integration, SLAs — the model becomes a managed dependency with the same operational story as a database. (5) Responsible AI machinery: default content filtering and abuse monitoring. Collectively these convert 'calling an AI API' into 'consuming an Azure service' — which is why the enterprise path runs through Azure OpenAI rather than direct public endpoints." },
+        { "number": 2, "question": "Explain the resource → deployment → call architecture and the engineering value of the deployment indirection.", "modelAnswer": "A resource is created per region: it owns the endpoint URL, keys/identity binding, network configuration, and residency. Inside it, deployments instantiate specific model versions under chosen names, each allocated a TPM slice. Applications call the resource endpoint addressing a deployment name — never a raw model. Value of the indirection: (1) codeless upgrades — swap the model behind 'chat-prod' as an operational act, gated by regression tests, with zero deployments of application code; (2) environment separation — 'chat-dev' and 'chat-prod' can differ in model, version, and quota while code stays identical across environments via configuration; (3) capacity management — quota is assigned where it's needed per deployment; (4) role clarity — naming by function ('summarize', 'embed') documents intent. The anti-pattern is naming deployments after models, which forfeits benefit (1) the day the catalog moves." },
+        { "number": 3, "question": "Survey the model families and give the selection reasoning a team should apply, including the mini-first default.", "modelAnswer": "Families: GPT-4o — multimodal flagship, highest general capability, premium price; GPT-4o mini — same family scaled down, a fraction of cost/latency, remarkably capable on structured tasks; GPT-4 Turbo — prior-generation large model, superseded for new work; reasoning models (o-series) — extended deliberation for genuinely hard multi-step problems at higher latency/cost; text-embedding-3 small/large — text-to-vector models for search/RAG, priced in pennies. Selection reasoning: model choice is the capability–cost–latency triangle, and scenarios pick a corner. The mini-first default: start with the cheapest family member and real test cases; escalate only where measured quality falls short, because at volume the cost multiple between mini and flagship dominates budgets; split pipelines so the expensive model handles only the hard fraction. Chat and embeddings are different tools — most features deploy one of each. And selection is revisitable: the deployment indirection makes the model a dial, with the regression set as the gate." },
+        { "number": 4, "question": "Break down the pricing and quota model, and derive four cost-engineering practices from it.", "modelAnswer": "Model: per-token metering in both directions — input tokens (everything sent: system message, replayed history, retrieved documents) at the base rate; output tokens (everything generated) at a premium, commonly 3–4×; rates vary by model, so the same request costs multiples across the catalog. Quota: per-region, per-model TPM allowances divided among deployments; exceeding yields 429 throttling, not billing; increases are requestable; provisioned throughput (PTUs) replaces the shared pool with reserved capacity for latency-critical scale. Practices: (1) log usage metadata from the first call — the response reports exact counts; (2) design-time estimation — tokens × volume × candidate-model rates before building, not after the invoice; (3) prompt/history economy — trimmed context and summarized history are billable-goods savings (tutorials 3–4 as cost tools); (4) right-size the model — mini-first is the single largest lever; also cap max output tokens (the premium direction) and alert on 429 rates as the capacity signal." },
+        { "number": 5, "question": "Present Microsoft's six Responsible AI principles and trace each to something concrete a .NET developer encounters.", "modelAnswer": "Fairness → equitable treatment across users: shows up in your obligation to test features across user populations and locales, and in service documentation about model limitations. Reliability & safety → content filtering on every request (prompts and completions classified across harm categories, blocked above thresholds) — your code handles filtered responses as a normal case. Privacy & security → data-handling commitments (no foundation-model training on your prompts, regional processing) plus Entra ID and private networking — the answers you give your DPO. Inclusiveness → accessibility and multi-language capability considerations in feature design. Transparency → transparency notes and model documentation you should actually read, plus your own duty to disclose AI involvement to end users where it matters. Accountability → the principle with your name on it: the platform guards the rails, but validation, gating, human-in-the-loop, and consequences of outputs (tutorial 6) remain the deploying team's responsibility — explicitly not delegated to the platform." },
+        { "number": 6, "question": "Describe Azure OpenAI Studio's role in a professional workflow, from prototype to production.", "modelAnswer": "The Studio (Azure AI Foundry portal) is the pre-code and beside-code workbench. Prototype: the chat playground hosts tutorial 2's iteration loop against real deployments — system message drafts, parameter experiments (temperature, max tokens), conversation shapes — with zero code and instant feedback; the deliberate content-filter trip test belongs here too. Transition: View code exports the working configuration as SDK starter code, carrying the validated prompt shape into tutorial 11's proper implementation (configuration, identity, error handling). Operate: deployments management (catalog browsing, version selection, quota slices, upgrades), filter configuration per deployment, and quota monitoring — the pages an operating team revisits at load-test and incident time. Discipline note: the Studio is for iteration and operations visibility; real environments script everything it does via CLI/Bicep so resources and deployments live in source control like any infrastructure." },
+        { "number": 7, "question": "A team must pick regions and structure resources for dev and prod. Lay out the decision process and a sensible baseline topology.", "modelAnswer": "Decision order: (1) model availability — list must-have models (chat + embeddings at minimum), consult the availability table, shortlist regions carrying all; (2) data residency — filter the shortlist by where processing is permitted for your data classes; (3) quota reality — confirm obtainable TPM for target models in candidate regions; (4) latency — prefer proximity to users/backends among survivors. Baseline topology: separate resources for dev and prod (isolation of keys, quotas, filters, and blast radius), same region unless residency dictates otherwise; role-named deployments in each ('chat-dev'/'chat-prod', 'embed-dev'/'embed-prod'), letting dev run smaller models or slices; configuration carries endpoint + deployment names per environment; identity via Entra ID in prod, keys-in-user-secrets for local dev. Growth options later: multi-region for resilience/scarce-capacity strategies, provisioned throughput for latency-critical workloads — both fitting the same code because of the deployment indirection." },
+        { "number": 8, "question": "Explain why 'chat model vs embeddings model' is a division of labor, not a quality tier, with a concrete feature walkthrough.", "modelAnswer": "They solve different mathematical problems: chat models generate token sequences (write, answer, transform); embeddings models map text to vectors positioned by meaning (locate, compare, cluster). Neither substitutes: a chat model 'searching' your documents means stuffing them all into context (expensive, capped, unfocused), while an embeddings model cannot write a sentence. Feature walkthrough — 'answer questions from our product docs' (tutorial 15's RAG in preview): ingestion pipeline embeds every doc chunk via text-embedding-3 and stores vectors; at query time the user's question is embedded (same model), nearest chunks retrieved by cosine similarity, and only those chunks travel to the GPT-4o-family deployment with the question — the chat model writes an answer grounded in retrieved facts. Two deployments, two meters, two roles: pennies for the finding, premium tokens only for the writing — which is also the cost story of why the division exists." },
+        { "number": 9, "question": "Design the client-side handling for the two 'normal failure' cases this tutorial introduces: content-filter blocks and 429 throttling.", "modelAnswer": "Content filter: treat as an expected outcome, not an exception path surprise. Detect the filtered result (the SDK/response indicates filter action), log the category/severity metadata for tuning conversations with your filter configuration, and respond by design: user-facing features show a graceful 'can't help with that' message; pipeline features route the item to a human queue; never blind-retry (same input, same block) and never expose raw filter internals to end users. Track false-positive rates — recurring legitimate blocks justify a threshold review within policy. 429 throttling: exponential backoff with jitter, honoring any retry-after signal; cap retries and fail into a designed degradation (queue, cached answer, reduced feature); emit metrics on 429 rate per deployment — sustained throttling is a capacity signal (rebalance quota slices, request increases, or split load), not a transient to hide. Both cases belong in the client from the first prototype, because both will occur in the first load test." },
+        { "number": 10, "question": "What is the model lifecycle operational burden, and what does a mature team's upgrade playbook look like?", "modelAnswer": "Burden: deployments pin model versions; versions have published retirement dates; new versions ship with behavior differences (prompts are model-sensitive — tutorial 6); and availability/pricing shift. Ignoring it means forced upgrades at retirement time under pressure. Mature playbook: (1) inventory — know which deployments pin which versions and their retirement dates (calendar them); (2) regression harness — the per-prompt test sets from tutorial 6 runnable on demand; (3) staged rollout — deploy the new version under a parallel deployment name ('chat-prod-next'), run the full regression + cost/latency comparison, then flip configuration (or the deployment) — codeless thanks to the indirection; (4) rollback path — keep the prior deployment warm until confidence; (5) cadence — treat upgrades as scheduled maintenance quarterly-ish rather than retirement-eve emergencies. The theme: the platform makes swapping trivial; the team's job is making it evidenced." },
+        { "number": 11, "question": "Argue the pricing triangle (capability/cost/latency) with three scenarios where each different corner wins, including the reasoning.", "modelAnswer": "Capability corner — quarterly contract-analysis feature: low volume, high stakes; a wrong synthesis costs multiples of any token bill, and users wait happily. Flagship (or reasoning model) justified; optimization effort goes to grounding and validation, not model downsizing. Cost corner — ticket classification at 100k/day: task is structured with clear prompts; mini-class accuracy is within a point or two of flagship on your test set; the per-token multiple times volume is the entire economics. Mini wins; the 2% hard cases route to a bigger model (split pipeline). Latency corner — inline suggestion UX: users abandon at hundreds of milliseconds; time-to-first-token rules. Smallest acceptable model + streaming + tight max tokens; quality bar enforced by measurement, and work that needs depth moves out of the interactive path. Meta-lesson: 'which model is best' is malformed — 'which corner does this scenario live in' is the question, answered with test data rather than defaults." },
+        { "number": 12, "question": "How do this tutorial's platform concepts retroactively explain practices from Modules 1–2? Trace at least four connections.", "modelAnswer": "(1) Tutorial 1/3's history-management advice becomes literal money: replayed history is re-billed input tokens per turn — trimming and summarizing are line-item reductions. (2) Tutorial 4's context precision (paste members, not files) is simultaneously prompt-quality and input-meter engineering. (3) Tutorial 6's regression sets find their operational trigger: model versions retire and upgrade, and the set is the gate that makes deployment swaps safe — the platform's indirection makes them easy, the tests make them sound. (4) Tutorial 6's secrets discipline lands on Azure rails: user-secrets locally, Entra ID + managed identity in production — the 'never in prompts, never in source' rule now has a platform-native keyless endgame. (5) Tutorial 2's iteration loop gets a home with real models — the playground — before any SDK code exists. The pattern: Module 1 taught behaviors whose economic and operational justifications live in this layer." },
+        { "number": 13, "question": "Write the briefing you'd give a security/compliance officer evaluating Azure OpenAI adoption.", "modelAnswer": "Data flow: prompts/completions processed within our selected Azure region; contractual commitment that our data is not used to train foundation models; no cross-customer data exposure; optional private endpoints keep traffic on our network backbone. Identity: production access via Entra ID with RBAC and managed identities — no shared keys; key-based access confined to local development under secret-store discipline. Content safety: default bidirectional filtering across harm categories with severity thresholds, adjustable within Microsoft's policy limits; abuse monitoring at platform level. Compliance posture: the service inherits Azure's certification portfolio and our tenant's governance (policy, logging, cost management). Residual responsibilities that stay ours: what data we choose to send (our redaction/minimization discipline per tutorial 6), output validation and human gating for consequential actions, user transparency about AI involvement, and application-layer security (tutorial 24's scope — prompt injection defenses etc.). Ask of them: classify which data categories may enter prompts under which conditions, so engineering can encode policy as tooling." },
+        { "number": 14, "question": "Plan the first two weeks of a team's Azure OpenAI enablement, before feature development starts.", "modelAnswer": "Week 1 — foundation: region decision via availability/residency/quota analysis; dev + prod resources stood up via Bicep (portal for exploration, IaC for record); role-named chat and embeddings deployments in dev with modest TPM; secrets discipline live (user-secrets locally, Key Vault + managed identity path designed for prod); all engineers through the playground exercise including deliberate filter trips; cost model spreadsheet with current rates for candidate models and expected volumes. Week 2 — operational readiness: usage logging and 429/filter-rate metrics defined as the standard client wrapper's outputs (previewing tutorial 11's code); quota page reviewed and increase process tested once; model-version inventory + retirement calendar started; the regression-set convention agreed (every production prompt ships with test inputs); a one-page 'which model for what' guide adopting mini-first defaults; and a walking-skeleton call from C# proving endpoint + identity wiring end to end. Exit criteria: any engineer can explain the resource/deployment structure, run the playground loop, and estimate a feature's monthly cost within an order of magnitude." },
+        { "number": 15, "question": "Scenario: a startup defaults everything to the flagship model and gets a shocking first invoice; latency also disappoints. Diagnose using this tutorial's concepts and prescribe.", "modelAnswer": "Diagnosis: model selection skipped the triangle — capability corner chosen for workloads living in cost and latency corners. Compounding factors visible in the story: no design-time cost estimation (bill discovered, not predicted), likely fat prompts and unmanaged history (input meter), no max-token discipline (output premium), and possibly quota contention behind the latency complaints (429 retries hiding as slowness). Prescribe: (1) measure — pull usage metadata per feature; attribute cost and latency to endpoints; (2) mini-first migration — move structured workloads (extraction, classification, routine summaries) to GPT-4o mini behind the same deployment indirection, gated by quick regression sets; expect the majority of spend to drop; (3) split pipelines — cheap model bulk, flagship only for the measured-hard fraction; (4) prompt/history economy pass per tutorial 3–4; cap output tokens; (5) latency corner properly: streaming + small models for interactive paths; (6) institute the design-time cost model and 429 monitoring so the next feature launches with a forecast, not a surprise. Close with the reframe: the flagship wasn't 'too expensive' — it was mis-assigned; corners, not brands." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Azure OpenAI in one sentence", "back": "OpenAI's model families operated as an Azure service — inside your identity, network, compliance, and billing boundary. Enterprise wrapper around frontier models." },
+        { "number": 2, "front": "Resource → deployment → call", "back": "Regional resource (endpoint, keys/identity, network) → named model deployments (with quota slices) → code calls the deployment NAME, never the raw model." },
+        { "number": 3, "front": "Why deployment names by role", "back": "'chat-prod', not 'gpt4o-dep' — the indirection makes model upgrades a codeless operational act (gated by your regression set)." },
+        { "number": 4, "front": "The model families", "back": "GPT-4o (flagship, multimodal) · GPT-4o mini (cheap workhorse — the default) · GPT-4 Turbo (superseded) · o-series (deep reasoning) · text-embedding-3 (vectors)." },
+        { "number": 5, "front": "Chat vs embeddings models", "back": "Different tools, not tiers: chat generates, embeddings locate meaning as vectors. Real features deploy one of each — retrieval finds, chat writes." },
+        { "number": 6, "front": "Pricing model", "back": "Per token, both directions. Input = everything sent (incl. replayed history). Output = everything generated, at ~3–4× premium. Rates vary hugely by model." },
+        { "number": 7, "front": "Quota (TPM)", "back": "Per-region, per-model tokens-per-minute ceiling, divided among deployments. Exceed → 429s (backoff required). A ceiling, not a bill — increases requestable." },
+        { "number": 8, "front": "Provisioned throughput (PTU)", "back": "Reserved dedicated capacity for predictable latency at scale — the alternative to the shared pay-as-you-go pool. Call-center scale, not side projects." },
+        { "number": 9, "front": "Responsible AI — six principles", "back": "Fairness · Reliability & safety · Privacy & security · Inclusiveness · Transparency · Accountability. Platform provides machinery; accountability stays with you." },
+        { "number": 10, "front": "Content filtering", "back": "Default classifiers on prompts AND completions across harm categories; blocks above thresholds. Handle 'filtered' as a normal response case in code." },
+        { "number": 11, "front": "Azure OpenAI Studio / AI Foundry", "back": "The workbench: model catalog + deployments, chat playground (prompt iteration live), filter config, quota pages, View-code export to SDK." },
+        { "number": 12, "front": "Region choice", "back": "Decided at resource creation: model availability, quota grants, and data residency all follow it. Check the availability table BEFORE creating." },
+        { "number": 13, "front": "Capability–cost–latency triangle", "back": "No model wins all three. Interactive UX → latency corner; volume pipelines → cost corner (mini-first); hard analysis → capability corner." },
+        { "number": 14, "front": "Mini-first default", "back": "Start with GPT-4o mini + real test cases; escalate only on measured quality gaps; split pipelines: cheap bulk, flagship for the hard 10%." },
+        { "number": 15, "front": "Model lifecycle ops", "back": "Deployments pin versions; versions retire on schedule; upgrades = parallel deployment + regression set + config flip + warm rollback." },
+        { "number": 16, "front": "Production auth", "back": "Microsoft Entra ID + managed identity + RBAC — keyless. API keys only for local dev, in user-secrets, never source. (Tutorial 6's rule, Azure-native.)" }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions & Answers",
+      "items": [
+        { "number": 1, "question": "Why would an enterprise use Azure OpenAI instead of calling a model provider's public API directly?", "answer": "Because the hard part of enterprise AI isn't the model call — it's identity, networking, compliance, and operations, and Azure OpenAI answers those natively. Authentication runs through Entra ID with RBAC instead of shared keys; traffic can stay on private endpoints; there's a contractual commitment that our prompts don't train the foundation models and processing stays in our chosen region; and the whole thing bills, monitors, and scales as a normal Azure dependency with quotas we manage. Same model families, but as a governed service inside our boundary rather than an external API our security team has to build a fence around." },
+        { "number": 2, "question": "Explain deployments and why your code never references a model name directly.", "answer": "A resource contains named deployments — 'chat-prod' pointing at, say, GPT-4o mini, with a quota slice. Code calls the deployment name against the resource endpoint. The indirection is deliberately the whole point: model versions retire and improve, and with role-based names the upgrade is an operational flip — stand up the new version under a parallel deployment, run the prompt regression set, switch configuration, keep the old one warm for rollback — zero application deployments. Teams that name deployments after models forfeit exactly that. It also gives clean environment separation: dev and prod deployments differ in model and quota while the code stays identical." },
+        { "number": 3, "question": "How do you choose a model for a new feature?", "answer": "With the capability–cost–latency triangle and test data, not brand loyalty. First, classify the corner: interactive UX lives in latency, volume pipelines live in cost, genuinely hard reasoning lives in capability. Then mini-first: I start with GPT-4o mini and a real test set; it clears the quality bar for most structured work — extraction, classification, grounded answers — at a fraction of flagship price and latency. I escalate only where measurements show a real gap, and often split the pipeline instead: cheap model for the bulk, flagship for the routed hard fraction. Embeddings questions aren't model-tier questions at all — semantic search takes text-embedding-3, not a bigger chat model. And selection stays revisable behind the deployment indirection." },
+        { "number": 4, "question": "Walk me through the cost model and how you keep bills predictable.", "answer": "Per-token, both directions: everything sent meters as input — including the system message, retrieved documents, and crucially the replayed conversation history — and everything generated meters as output at a several-fold premium, with rates varying by model. Predictability comes from habits: a design-time estimate — expected tokens per request times volume times candidate-model rates — before any feature is built; usage metadata logged from the first prototype call, since every response reports exact counts; prompt and history economy as standing practice, because trimmed context is a line item; max-token caps on output, the premium direction; and mini-first model selection, which is the single biggest lever. The bill surprises come from flagship-by-default times fat prompts times loops — all preventable at design time." },
+        { "number": 5, "question": "What's quota, and how does it differ from billing?", "answer": "Quota is capacity, not cost: a per-region, per-model allowance — tokens per minute, with a requests-per-minute companion — that you divide among your deployments. Blow through it and you get 429 throttling, not a bigger bill; the client needs exponential backoff and the team needs a 429-rate alert, because sustained throttling is a capacity-planning signal, not noise. Increases are requestable, and for workloads where p99 latency genuinely matters at scale, provisioned throughput replaces the shared pool with reserved PTUs. In load tests, 'the service is flaky' almost always decodes to 'we never implemented backoff and we're quota-throttled' — which is a client bug wearing an infrastructure costume." },
+        { "number": 6, "question": "What does Responsible AI mean concretely when you build on this platform?", "answer": "Six principles, but the concrete developer contact points are three. Content filtering: every request's prompt and completion pass harm classifiers with configurable thresholds — so my client code handles 'filtered' as a normal case with graceful UX, logs the category metadata, and I've tripped the filter deliberately in the playground to know its shape. Data commitments: no foundation-model training on our prompts, regional processing — which is what I hand our compliance team, alongside our own minimization discipline for what we choose to send. And accountability, which is the sharp one: the platform guards its rails, but output validation, human gating on consequential actions, and honest disclosure to users remain ours — Responsible AI is a design input for my features, not a box the platform pre-ticked." },
+        { "number": 7, "question": "What role does the Studio/playground play for a professional team?", "answer": "Three roles. Prototyping: the chat playground is where prompt iteration happens against real deployments before any code — system message drafts, temperature and token experiments, the tutorial-style loop with instant feedback; it's dramatically faster than iterating through code. Bridging: View code exports the validated setup as SDK starter code, so what leaves the playground is a tested prompt shape, not a hope. Operations: the deployment catalog, filter configuration, and quota pages are where an operating team looks during load tests and incidents. The discipline that keeps it professional: the portal is for iteration and visibility, but real environments are scripted — Bicep or CLI — so resources and deployments live in source control like any other infrastructure." },
+        { "number": 8, "question": "How do regions affect your architecture decisions?", "answer": "Region is a first-class decision made at resource creation, on three axes. Model availability: not every model ships everywhere — the must-have list gets checked against the availability table before anything is created, because the model you need can dictate the region. Data residency: processing follows the resource's region, which is a compliance input, sometimes the binding one. Quota: grants are per-region per-model, so obtainable capacity varies. Latency to users matters but usually ranks after those three. Getting it wrong is expensive in the annoying way — there's no move button; it's a new resource — and growth patterns like multi-region resilience or scarce-model chasing are real architectures that the deployment indirection fortunately makes code-compatible." },
+        { "number": 9, "question": "Chat models versus embeddings models — why does a typical feature need both?", "answer": "They're orthogonal tools. A chat model generates — answers, summaries, code. An embeddings model maps text to vectors so meaning becomes computable — nearest-neighbor search, clustering, similarity. The canonical pairing is retrieval-augmented generation: embed your document chunks once, embed each incoming question, retrieve the closest chunks by cosine similarity for pennies, and send only those chunks plus the question to the chat model, which writes a grounded answer. Using a chat model alone means stuffing entire document sets into premium-priced context; using embeddings alone means you can find but never phrase. Two deployments — 'embed' and 'chat' — two meters, and the economics are the point: cheap finding, premium writing only where it earns it." },
+        { "number": 10, "question": "What operational surprises should a team expect in their first quarter with the service?", "answer": "Four classics. First 429s during the first load test — quota was never mapped to expected throughput and the client had no backoff; fix is capacity math plus retry discipline. Second, the invoice's shape — output tokens at premium rates and replayed chat history dominating input costs; fix is usage logging from day one and history management. Third, content-filter blocks on legitimate inputs — a false-positive rate nobody planned UX for; fix is treating filtered as a designed case and reviewing thresholds within policy. Fourth, a model-retirement notice for a pinned version — the upgrade playbook (parallel deployment, regression set, config flip) suddenly matters. All four are predictable, which is why the enablement fortnight covers them before feature work starts." },
+        { "number": 11, "question": "How does authentication differ between development and production?", "answer": "Local development: API keys are acceptable, held in user-secrets — never in appsettings committed to source, never in code — because dev convenience matters and the blast radius is a dev resource. Production: keyless — Microsoft Entra ID with managed identity and role-based access, so the app authenticates as itself with no shared secret to leak, rotate, or paste into a chat window (tutorial 6's incident, structurally prevented). RBAC scopes what each identity can do, access is auditable, and revocation is instant. The configuration design supports both: an options class carrying endpoint and deployment names, with the credential chosen per environment — key if present, identity otherwise. That shape also makes the security review a one-paragraph answer instead of a remediation project." },
+        { "number": 12, "question": "A stakeholder asks: 'Is our data used to train the AI?' Give your precise answer.", "answer": "For Azure OpenAI: no — contractually. Prompts and completions are processed to serve our requests within our selected Azure region and are not used to train the foundation models; our data doesn't leak into anyone else's model. I'd add the honest scope notes: 'not used for training' isn't 'never logged' — there's platform-level abuse monitoring under defined conditions, and our own application logs are governed by us; and the commitment covers this service, not any consumer AI tools employees might use on the side — which is why our AI usage policy distinguishes governed platforms from public tools. And I'd close the loop in our direction: independent of platform guarantees, we minimize what we send — redaction and synthetic data by default — because the cheapest data-protection is data not transmitted." },
+        { "number": 13, "question": "How would you design the upgrade process when a model version faces retirement?", "answer": "As scheduled maintenance, never as a retirement-eve scramble. Standing inventory: which deployments pin which versions, retirement dates on the team calendar. When upgrading: create a parallel deployment of the successor version — 'chat-prod-next' — and run the evidence: the full prompt regression sets (tutorial 6's habit, now operationally load-bearing, since prompts are model-sensitive), plus cost and latency comparison at realistic volumes. On green: flip configuration to the new deployment name — or repoint the deployment — with zero code changes thanks to the indirection; keep the prior deployment warm as rollback until confidence settles. Anything degraded gets prompt-tuning against the new version before the flip, not after. The platform makes the swap trivial; the process makes it safe." },
+        { "number": 14, "question": "What belongs in a team's 'which model for what' one-pager?", "answer": "The triangle at the top: capability, cost, latency — pick your corner per scenario. Then defaults: GPT-4o mini for structured volume work — extraction, classification, summaries, RAG answers; flagship GPT-4o for measured-hard reasoning and synthesis; o-series only for genuinely deep multi-step problems that justify the latency; text-embedding-3 for anything that is search, similarity, or clustering — never a chat model's job. Then rules: escalation requires test-set evidence, not vibes; split pipelines before upgrading wholesale; every production prompt carries a regression set; deployment names are roles; and current model versions, context sizes, and rates live in a linked sheet synced from official docs — because the one-pager's numbers rot, while its decision logic doesn't. One page, because a two-page guide doesn't get read at design time." },
+        { "number": 15, "question": "Sum up what a developer must internalize from the platform layer before writing calling code.", "answer": "Five things. Structure: resource → deployment → call — code targets role-named deployments, and that indirection is your upgrade path. Economics: tokens both directions with an output premium, so prompt economy and model right-sizing are engineering, and usage metadata is logged from call one. Capacity: quota throttles rather than bills — backoff and 429 alerts are part of any client. Safety: content filtering and data commitments are platform machinery, but validation, gating, and disclosure stay in my application — accountability doesn't delegate. And volatility: the catalog, prices, and portals evolve on months-scale, so I learn families and decision frameworks, keep specifics in configuration, and gate every change with regression sets. With those internalized, the SDK code in the next tutorial is almost boring — which is exactly what production code should be." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "Azure OpenAI", "definition": "OpenAI's model families operated as an Azure service — identity, networking, compliance, quota, and billing within your subscription." },
+        { "term": "Resource (Azure OpenAI)", "definition": "The regional container you create: owns the endpoint, keys/identity binding, network configuration, and data-residency anchor." },
+        { "term": "Model deployment", "definition": "A named instance of a specific model version inside a resource, with an assigned quota slice — the thing your code actually calls." },
+        { "term": "Deployment name", "definition": "The role-based identifier ('chat-prod') applications target; the indirection that makes model upgrades codeless." },
+        { "term": "Endpoint", "definition": "The resource's base URL (https://<name>.openai.azure.com) receiving all API calls for its deployments." },
+        { "term": "GPT-4o family", "definition": "The current multimodal flagship line; the mini variant is the cost/latency workhorse and the sensible default." },
+        { "term": "GPT-4 Turbo", "definition": "Previous-generation large-context model, still encountered in deployments but superseded for new work." },
+        { "term": "Reasoning models (o-series)", "definition": "Models performing extended internal reasoning — higher latency and cost, justified by genuinely hard multi-step problems." },
+        { "term": "text-embedding-3", "definition": "The embeddings family (small/large) converting text to vectors for search, similarity, and RAG — priced in pennies." },
+        { "term": "Input tokens", "definition": "The metered measure of everything sent: system message, history, documents. Replayed history re-bills every turn." },
+        { "term": "Output tokens", "definition": "The metered measure of everything generated — billed at a premium, hence max-token caps and concise-output design." },
+        { "term": "Quota", "definition": "Per-region, per-model capacity allowance (TPM/RPM) divided among deployments; exceeding it throttles with 429s." },
+        { "term": "Tokens per minute (TPM)", "definition": "The throughput ceiling unit of quota; the number capacity planning maps expected load against." },
+        { "term": "Provisioned throughput (PTU)", "definition": "Reserved dedicated capacity purchased for predictable latency at scale — the alternative to the shared pool." },
+        { "term": "Responsible AI principles", "definition": "Microsoft's six: fairness, reliability & safety, privacy & security, inclusiveness, transparency, accountability — machinery in the platform, obligations in your app." },
+        { "term": "Content filtering", "definition": "Default classifiers on prompts and completions across harm categories, blocking above thresholds; a normal response case for client code." },
+        { "term": "Azure OpenAI Studio", "definition": "The service workbench — now within the Azure AI Foundry portal: deployments, playground, filters, quota, View-code export." },
+        { "term": "Playground", "definition": "The interactive chat environment for prompt iteration against real deployments before any code exists." },
+        { "term": "Region", "definition": "The resource's Azure geography — determining model availability, quota grants, and data residency; effectively immutable per resource." },
+        { "term": "Model catalog", "definition": "The evolving set of deployable models and versions; current truth lives in the portal, not in tutorials." },
+        { "term": "Model retirement", "definition": "The published end-of-life of a model version, making upgrades scheduled operational work gated by regression sets." },
+        { "term": "Capability–cost–latency triangle", "definition": "The selection framework: scenarios pick a corner; no model wins all three; mini-first with measured escalation." },
+        { "term": "Microsoft Entra ID (for AOAI)", "definition": "The keyless production authentication path: managed identity + RBAC replacing shared API keys." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary & Key Takeaways",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Azure OpenAI = frontier models + enterprise wrapper: Entra ID, private networking, no-training data commitments, regional processing, subscription operations.",
+          "Structure everything on resource → deployment → call; name deployments by role and keep the indirection that makes upgrades codeless.",
+          "Know the families — GPT-4o flagship, mini workhorse, o-series reasoning, text-embedding-3 vectors — and that chat vs embeddings is a division of labor.",
+          "Economics: tokens both ways, output at a premium, history re-billed — prompt economy is cost engineering; log usage from call one.",
+          "Quota throttles (429s), it doesn't bill — backoff, alerts, and capacity math are client responsibilities; PTUs exist for latency-critical scale.",
+          "Responsible AI is machinery (content filtering, data handling) plus your retained accountability — filtered responses are a normal case to handle.",
+          "The Studio/Foundry playground hosts prompt iteration before code; View code bridges to the SDK; real environments are scripted as IaC.",
+          "Choose models by the capability–cost–latency triangle: mini-first, escalate on evidence, split pipelines, and re-verify with regression sets on every swap."
+        ] },
+        { "type": "paragraph", "text": "The platform layer is mapped. Next: the code — building a proper C# client for everything defined here, with configuration, identity, streaming, and error handling done the production way." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Continue with the next tutorial in the path: Calling Azure OpenAI from C# — the Azure.AI.OpenAI SDK, chat completions, streaming, embeddings calls, and the client patterns (retry, usage logging, filter handling) that this tutorial's concepts demand." },
+        { "type": "list", "style": "bullet", "items": [
+          "Hands-on: run the section 12 walkthrough — resource, two deployments, playground session, deliberate filter trip, quota page visit.",
+          "Practice: compute a design-time cost estimate for one feature you'd actually build — tokens per request × volume × current rates for two candidate models.",
+          "Practice: write your team's deployment-naming convention and region-decision notes — one paragraph each, versioned with your infrastructure code.",
+          "Reading: the Azure OpenAI models documentation (current families, versions, availability) and the quotas & limits page — the two pages this tutorial deliberately refuses to freeze in time.",
+          "Looking ahead: keep the resource from the walkthrough alive — tutorial 11's code connects to it in the first ten minutes."
+        ] },
+        { "type": "note", "style": "info", "text": "Path position: tutorial 10 of 27 · Previous: advanced-copilot-usage · Next: calling-azure-openai-from-csharp" }
+      ]
+    }
+  ]
+}

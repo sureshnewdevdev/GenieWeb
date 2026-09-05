@@ -1,0 +1,565 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Calling Azure OpenAI from C#",
+  "slug": "calling-azure-openai-from-csharp",
+  "level": "Intermediate",
+  "codeLanguage": "C#",
+  "tutorialNumber": 11,
+  "totalTutorials": 27,
+  "prev": "azure-openai-overview",
+  "next": "function-calling-and-tools",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Calling Azure OpenAI from C#"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "The chat completion API",
+    "The embeddings API",
+    "Key parameters: temperature and max tokens",
+    "Handling errors and retries safely",
+    "Building a .NET console app that sends a prompt and displays the response",
+    "Managing configuration and API keys"
+  ],
+  "tooltips": {
+    "chat completion": "The API operation that takes a list of role-tagged messages and returns the model's next reply as generated text.",
+    "embedding": "A numeric vector that captures the meaning of a piece of text so similar texts end up close together.",
+    "temperature": "A sampling parameter (roughly 0 to 2) that controls randomness: low values give focused, repeatable output; high values give varied output.",
+    "max tokens": "The upper limit on how many tokens the model may generate in its response; the reply is cut off when the limit is reached.",
+    "token": "A small chunk of text (a few characters, often part of a word) that models read and write; usage and pricing are counted in tokens.",
+    "deployment": "Your named instance of a model inside an Azure OpenAI resource; client code targets the deployment name, not the raw model name.",
+    "endpoint": "The base URL of your Azure OpenAI resource (https://<resource>.openai.azure.com) that all API requests are sent to.",
+    "API key": "A secret credential string that authenticates requests to your Azure OpenAI resource; anyone holding it can spend your quota.",
+    "system message": "The first message in a chat request, with role 'system', that sets the assistant's behavior, tone, and constraints.",
+    "rate limit": "A cap on how many requests or tokens your deployment may consume per time window; exceeding it returns HTTP 429.",
+    "exponential backoff": "A retry strategy that doubles the wait time after each failed attempt (e.g. 1s, 2s, 4s) so a busy service can recover.",
+    "transient fault": "A temporary failure such as a 429 or a brief 5xx outage that is likely to succeed if the same request is retried shortly after.",
+    "user secrets": "The .NET development-time secret store (dotnet user-secrets) that keeps keys in your user profile, outside the project folder and source control.",
+    "environment variable": "An operating-system-level key/value setting a process reads at runtime; a common way to supply endpoints and keys without hardcoding.",
+    "Managed Identity": "An Azure-managed service identity your app can use to authenticate to Azure OpenAI without storing any key at all.",
+    "vector": "An ordered array of numbers; embeddings are vectors, typically with hundreds or thousands of dimensions.",
+    "cosine similarity": "A measure of how similar two vectors are based on the angle between them; close to 1 means very similar meaning.",
+    "NuGet": "The .NET package manager used to install libraries such as the Azure OpenAI client SDK into your project.",
+    "console app": "A .NET application that runs in a terminal (dotnet new console) — the simplest host for learning and testing API calls end to end."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview: From Portal to Program",
+      "content": [
+        { "type": "paragraph", "text": "In the previous tutorial you provisioned an Azure OpenAI resource and created a model deployment. This tutorial makes it real: you will call that deployment from C# code. We cover the two operations you will use most — the chat completion API for generating text and the embeddings API for turning text into a vector — and the practical engineering around them: tuning temperature and max tokens, handling errors and retries safely, and keeping your endpoint and API key out of source code." },
+        { "type": "paragraph", "text": "By the end you will have built a complete .NET console app that reads a prompt from the user, sends it to Azure OpenAI, and displays the response. Everything here is foundation for the rest of the course: function calling, RAG, and Semantic Kernel all sit on top of the same client, the same parameters, and the same error-handling discipline you learn now." },
+        { "type": "note", "style": "info", "text": "This tutorial is for developers comfortable with C# and the .NET CLI. You need an Azure OpenAI resource with at least one chat model deployment (for example gpt-4o-mini) and ideally one embedding model deployment." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Call the chat completion API from C# with system and user messages and read the generated reply.",
+          "Call the embeddings API and understand what the returned vector represents and what it is used for.",
+          "Explain what temperature and max tokens do, and choose sensible values for different kinds of tasks.",
+          "Recognize transient faults such as HTTP 429 rate limit errors and implement retries with exponential backoff.",
+          "Build and run a .NET console app that sends a prompt and displays the response end to end.",
+          "Manage configuration and API keys safely using environment variables, user secrets, and Managed Identity — never hardcoded strings."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "C# fundamentals: classes, async/await, exception handling, and using the .NET CLI (dotnet new, dotnet run).",
+          ".NET 8 SDK installed on your machine.",
+          "An Azure OpenAI resource with a chat model deployment (note its deployment name) and the resource's endpoint URL and API key from the Azure portal.",
+          "Concepts from earlier tutorials: what a token is, what a prompt is, and what an Azure OpenAI deployment is."
+        ] },
+        { "type": "note", "style": "tip", "text": "If you do not have an embedding model deployed yet, deploy text-embedding-3-small alongside your chat model — the embeddings section of this tutorial uses it, and later RAG tutorials depend on it." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "Key Concepts: The Client, the Deployment, and Two APIs",
+      "content": [
+        { "type": "paragraph", "text": "All access goes through a client object from the official SDK, installed from NuGet as the Azure.AI.OpenAI package. You construct the client once with two pieces of information: the endpoint of your resource and a credential (an API key or an Azure identity). From that client you ask for an operation-specific sub-client bound to a deployment name — a chat client for text generation, an embedding client for vectors." },
+        { "type": "paragraph", "text": "The distinction between model and deployment matters in code: you never pass 'gpt-4o' to the client. You pass the name you chose when you created the deployment (which might also be 'gpt-4o', but is your label, not the model id). This indirection is what lets operations teams swap model versions without changing application code." },
+        { "type": "table", "headers": ["API", "Input", "Output", "Typical use"], "rows": [
+          ["Chat completion", "A list of role-tagged messages (system, user, assistant)", "Generated text (the assistant's next message)", "Q&A, summarization, drafting, code help, chatbots"],
+          ["Embeddings", "One or more strings of text", "A vector of floating-point numbers per string", "Semantic search, similarity, clustering, RAG retrieval"]
+        ] },
+        { "type": "paragraph", "text": "Both APIs are metered in tokens and both are governed by the rate limit assigned to your deployment. That is why parameters like max tokens and habits like exponential backoff retries are not optional extras — they are how you keep a real application within quota, on budget, and resilient." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Deep Dive 1: The Chat Completion API",
+      "content": [
+        { "type": "paragraph", "text": "A chat completion request is a conversation snapshot: an ordered list of messages, each tagged with a role. The system message sets the assistant's behavior and constraints ('You are a concise assistant for .NET developers. Answer in C#.'). User messages carry what the human said. Assistant messages carry what the model said earlier — you include them when you want the model to see conversation history, because the API itself is stateless: it remembers nothing between calls." },
+        { "type": "animation", "title": "Anatomy of a chat completion call", "intro": "Follow one request from your C# code to the generated reply.", "nodes": [
+          { "id": "app", "label": "Your C# app", "sub": "builds messages" },
+          { "id": "req", "label": "Request", "sub": "messages + options" },
+          { "id": "dep", "label": "Deployment", "sub": "your model instance" },
+          { "id": "gen", "label": "Model", "sub": "generates tokens" },
+          { "id": "resp", "label": "Response", "sub": "assistant message" }
+        ], "steps": [
+          { "highlight": ["app"], "caption": "Your app assembles a system message (behavior) and a user message (the actual question)." },
+          { "highlight": ["req"], "caption": "The SDK packages the messages plus options like temperature and max tokens into one HTTPS request to your endpoint." },
+          { "highlight": ["dep"], "caption": "Azure routes the request to your named deployment — the deployment name in code selects which model instance runs." },
+          { "highlight": ["gen"], "caption": "The model generates the reply one token at a time until it finishes or hits the max tokens limit." },
+          { "highlight": ["resp"], "caption": "The response arrives as an assistant message with content text, a finish reason, and token usage counts your app can log." }
+        ] },
+        { "type": "paragraph", "text": "The response contains more than text. The finish reason tells you why generation stopped: 'stop' means the model completed naturally, 'length' means it was truncated by the max tokens limit, and a content-filter reason means Azure's Responsible AI filters intervened. Usage counts report prompt tokens and completion tokens — log them, because they are exactly what you are billed for and what your rate limit consumes." },
+        { "type": "note", "style": "info", "text": "Because the API is stateless, a multi-turn chatbot must resend relevant history with every call. That history counts as prompt tokens each time — conversation memory is a cost decision, not just a UX decision." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Deep Dive 2: The Embeddings API",
+      "content": [
+        { "type": "paragraph", "text": "The embeddings API does not generate text at all. You send it a string and it returns an embedding — a vector of floating-point numbers (1,536 dimensions for text-embedding-3-small) that encodes the meaning of the text. Two texts that mean similar things produce vectors that point in similar directions, which you can measure with cosine similarity. That single property powers semantic search: instead of matching keywords, you match meaning." },
+        { "type": "animation", "title": "How embeddings enable semantic search", "intro": "Watch a user question find the right document by meaning, not keywords.", "nodes": [
+          { "id": "docs", "label": "Documents", "sub": "your content" },
+          { "id": "embed", "label": "Embeddings API", "sub": "text to vector" },
+          { "id": "store", "label": "Vector store", "sub": "saved vectors" },
+          { "id": "query", "label": "User question", "sub": "embedded too" },
+          { "id": "match", "label": "Best match", "sub": "cosine similarity" }
+        ], "steps": [
+          { "highlight": ["docs", "embed"], "caption": "Ahead of time, each document (or chunk of one) is sent to the embeddings API and converted into a vector." },
+          { "highlight": ["store"], "caption": "The vectors are saved in a store alongside the original text — a database column, a search index, or an in-memory list." },
+          { "highlight": ["query", "embed"], "caption": "At query time the user's question goes through the same embedding model, producing a vector in the same space." },
+          { "highlight": ["store", "match"], "caption": "The store compares the question vector against document vectors using cosine similarity and returns the closest matches." },
+          { "highlight": ["match"], "caption": "The best-matching text is returned — often to be pasted into a chat completion prompt, which is the heart of RAG." }
+        ] },
+        { "type": "paragraph", "text": "In C#, the flow is symmetrical with chat: get an embedding client bound to your embedding deployment, call it with text, and read back the vector as a ReadOnlyMemory of float. Embeddings are cheap and fast compared with chat completions, but they still consume tokens and rate limit, and one rule is absolute: vectors are only comparable when produced by the same embedding model. If you switch models, re-embed everything." },
+        { "type": "note", "style": "tip", "text": "Chat generates, embeddings measure. When a task is 'find the most relevant X' rather than 'write me a Y', reach for the embeddings API — it is orders of magnitude cheaper than asking a chat model to compare texts." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Deep Dive 3: Key Parameters — Temperature and Max Tokens",
+      "content": [
+        { "type": "paragraph", "text": "Temperature controls how the model picks each next token. At low temperature (near 0) it almost always picks the most probable token, giving focused, consistent, near-deterministic output. At higher temperature (0.8 and up) it samples more freely, giving varied and creative output — and a higher chance of drifting off course. Temperature does not make the model smarter or dumber; it changes how adventurous its choices are." },
+        { "type": "table", "headers": ["Task", "Suggested temperature", "Why"], "rows": [
+          ["Code generation, data extraction, classification", "0.0 – 0.2", "You want the most probable, repeatable answer"],
+          ["Q&A, summarization, documentation", "0.2 – 0.5", "Mostly factual with a little natural variation"],
+          ["Brainstorming, marketing copy, story ideas", "0.7 – 1.0", "Variety is the point; repeated calls should differ"]
+        ] },
+        { "type": "paragraph", "text": "Max tokens caps the length of the generated response — it limits output tokens only, not your prompt. It is a hard stop: when the cap is reached the reply is truncated mid-thought and the finish reason comes back as 'length'. Set it deliberately: high enough for a complete answer, low enough to bound cost and latency. A one-line classifier might need 20 tokens; a code explanation might need 800. Remember that in .NET SDK code the property is named MaxOutputTokenCount, but the concept everyone says out loud is max tokens." },
+        { "type": "note", "style": "warning", "text": "If users report answers that stop mid-sentence, check the finish reason before blaming the model — a 'length' finish means your max tokens value is too small for the task. Detect it in code and either raise the limit or tell the user the answer was truncated." },
+        { "type": "paragraph", "text": "These two parameters interact with cost directly: temperature costs nothing extra, but sloppy max tokens settings do. A safe pattern is to set temperature per task type in configuration, set max tokens to about double your typical expected answer length, and log actual usage so you can tighten both with data." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Deep Dive 4: Errors, Retries, and Protecting Your API Key",
+      "content": [
+        { "type": "paragraph", "text": "Calls to Azure OpenAI fail in two fundamentally different ways, and your code must treat them differently. A transient fault — HTTP 429 when you exceed your rate limit, or an occasional 5xx service hiccup — will likely succeed if retried after a short wait. A permanent error — 401 (bad API key), 404 (wrong endpoint or deployment name), 400 (malformed request or prompt blocked by content filtering) — will fail identically every time, and retrying it is pure waste. Retry the first kind; fix the second." },
+        { "type": "animation", "title": "Retrying a rate-limited request with exponential backoff", "intro": "See how a 429 becomes a success instead of a crash.", "nodes": [
+          { "id": "call", "label": "API call", "sub": "attempt n" },
+          { "id": "limit", "label": "429 returned", "sub": "rate limit hit" },
+          { "id": "wait", "label": "Backoff wait", "sub": "1s, 2s, 4s..." },
+          { "id": "retry", "label": "Retry call", "sub": "same request" },
+          { "id": "ok", "label": "200 OK", "sub": "response returned" }
+        ], "steps": [
+          { "highlight": ["call"], "caption": "Your app sends a request while the deployment is already at its tokens-per-minute limit." },
+          { "highlight": ["limit"], "caption": "Azure answers with HTTP 429 — a transient fault meaning 'too fast right now', not 'request is wrong'." },
+          { "highlight": ["wait"], "caption": "Instead of failing, the app waits. Each successive failure doubles the delay — exponential backoff — with a small random jitter so parallel clients do not retry in lockstep." },
+          { "highlight": ["retry"], "caption": "The identical request is sent again. Capacity has freed up in the window." },
+          { "highlight": ["ok"], "caption": "The call succeeds. The user saw slightly higher latency instead of an error page — after a bounded number of attempts (3–5), give up and surface a friendly message." }
+        ] },
+        { "type": "paragraph", "text": "The second discipline of this section is configuration. Your endpoint and API key must never appear in source code or appsettings.json committed to a repository. In local development, use an environment variable or the .NET user secrets store (dotnet user-secrets), both of which live outside the project folder. In production, prefer Managed Identity: your app authenticates as an Azure identity with a role assignment on the Azure OpenAI resource, and there is simply no key to leak, rotate, or steal. When a key is unavoidable, keep it in Azure Key Vault and rotate it on a schedule." },
+        { "type": "note", "style": "warning", "text": "A leaked API key is spendable money: anyone holding it can consume your quota at your expense until you regenerate it. Treat keys like passwords — never in code, never in screenshots, never in logs." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Ecosystem and Tools",
+      "content": [
+        { "type": "table", "headers": ["Tool / package", "Role in this tutorial"], "rows": [
+          ["Azure.AI.OpenAI (NuGet)", "The official .NET client SDK; provides AzureOpenAIClient, chat and embedding sub-clients"],
+          ["Azure.Identity (NuGet)", "Provides DefaultAzureCredential and Managed Identity support for keyless authentication"],
+          ["dotnet user-secrets", "CLI tool that stores development secrets in your user profile, outside source control"],
+          ["Azure Key Vault", "Production-grade secret storage with access policies and rotation"],
+          ["Azure AI Foundry portal", "Where you create deployments, find your endpoint and API key, and try prompts in the playground"],
+          ["Polly (NuGet)", "A resilience library for .NET offering retry, backoff, and circuit-breaker policies when you outgrow hand-rolled loops"]
+        ] },
+        { "type": "paragraph", "text": "The Azure.AI.OpenAI package builds on the general OpenAI .NET library, so chat message types like SystemChatMessage and UserChatMessage come from the OpenAI.Chat namespace while the Azure-specific entry point, AzureOpenAIClient, handles the endpoint and credential. Install both Azure.AI.OpenAI and Azure.Identity via NuGet and you have everything the code in this tutorial needs." },
+        { "type": "note", "style": "tip", "text": "The SDK has built-in retry behavior for some transient failures, and libraries like Polly can express sophisticated policies in a few lines. Learn the manual backoff loop first — in this tutorial — so you understand exactly what those layers are doing for you." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "Use Cases",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Internal help desk assistant: a console or web tool where staff ask policy questions and a chat completion call answers from a grounded prompt.",
+          "Document summarizer: a batch job that feeds long reports through the chat completion API with low temperature and a generous max tokens budget.",
+          "Semantic FAQ search: embed every FAQ entry once, embed each incoming user question, and use cosine similarity to surface the right answer without any keyword matching.",
+          "Support ticket router: an embedding of each new ticket compared against category examples to auto-assign teams — cheaper and faster than asking a chat model to classify.",
+          "Code review helper: a CLI tool that sends a diff to your deployment and prints suggested improvements, with retries so CI does not fail on a momentary rate limit.",
+          "Duplicate detection: embeddings of bug reports compared pairwise to flag likely duplicates before a human triages them."
+        ] },
+        { "type": "paragraph", "text": "Notice the pattern across all of these: chat completions where text must be produced, embeddings where texts must be compared, tuned temperature and max tokens per task, and retry logic anywhere the call sits in an automated pipeline." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples",
+      "content": [
+        { "type": "paragraph", "text": "Three complete examples follow. They assume the environment variables AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_KEY are set, and a chat deployment named gpt-4o-mini plus an embedding deployment named text-embedding-3-small exist on your resource. Install packages first: dotnet add package Azure.AI.OpenAI and dotnet add package Azure.Identity." },
+        { "type": "code", "language": "csharp", "title": "Example 1 — Minimal chat completion", "code": [
+          "using Azure;",
+          "using Azure.AI.OpenAI;",
+          "using OpenAI.Chat;",
+          "",
+          "// Read the endpoint and API key from environment variables — never hardcode them.",
+          "string endpoint = Environment.GetEnvironmentVariable(\"AZURE_OPENAI_ENDPOINT\")",
+          "    ?? throw new InvalidOperationException(\"Set AZURE_OPENAI_ENDPOINT first.\");",
+          "string apiKey = Environment.GetEnvironmentVariable(\"AZURE_OPENAI_KEY\")",
+          "    ?? throw new InvalidOperationException(\"Set AZURE_OPENAI_KEY first.\");",
+          "",
+          "// One client for the resource; a chat sub-client bound to a deployment name.",
+          "AzureOpenAIClient azureClient = new(new Uri(endpoint), new AzureKeyCredential(apiKey));",
+          "ChatClient chat = azureClient.GetChatClient(\"gpt-4o-mini\");",
+          "",
+          "ChatCompletion completion = await chat.CompleteChatAsync(",
+          "    new SystemChatMessage(\"You are a concise assistant for .NET developers.\"),",
+          "    new UserChatMessage(\"Explain async/await in two sentences.\"));",
+          "",
+          "Console.WriteLine(completion.Content[0].Text);",
+          "Console.WriteLine($\"Finish reason: {completion.FinishReason}\");"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 2 — Setting temperature and max tokens", "code": [
+          "using OpenAI.Chat;",
+          "",
+          "// Low temperature for a factual task; a tight output cap to bound cost.",
+          "ChatCompletionOptions options = new()",
+          "{",
+          "    Temperature = 0.2f,",
+          "    MaxOutputTokenCount = 300   // the SDK name for the max tokens limit",
+          "};",
+          "",
+          "ChatCompletion completion = await chat.CompleteChatAsync(",
+          "    new ChatMessage[]",
+          "    {",
+          "        new SystemChatMessage(\"Answer with a short, accurate definition.\"),",
+          "        new UserChatMessage(\"What is dependency injection?\")",
+          "    },",
+          "    options);",
+          "",
+          "if (completion.FinishReason == ChatFinishReason.Length)",
+          "{",
+          "    Console.WriteLine(\"[Warning] Reply was truncated by the max tokens limit.\");",
+          "}",
+          "Console.WriteLine(completion.Content[0].Text);"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 3 — Embeddings with cosine similarity", "code": [
+          "using OpenAI.Embeddings;",
+          "",
+          "EmbeddingClient embedder = azureClient.GetEmbeddingClient(\"text-embedding-3-small\");",
+          "",
+          "OpenAIEmbedding a = await embedder.GenerateEmbeddingAsync(\"How do I read a file in C#?\");",
+          "OpenAIEmbedding b = await embedder.GenerateEmbeddingAsync(\"Reading file contents with .NET\");",
+          "",
+          "float[] va = a.ToFloats().ToArray();",
+          "float[] vb = b.ToFloats().ToArray();",
+          "",
+          "// Cosine similarity: dot product over the product of magnitudes.",
+          "double dot = 0, magA = 0, magB = 0;",
+          "for (int i = 0; i < va.Length; i++)",
+          "{",
+          "    dot += va[i] * vb[i];",
+          "    magA += va[i] * va[i];",
+          "    magB += vb[i] * vb[i];",
+          "}",
+          "double similarity = dot / (Math.Sqrt(magA) * Math.Sqrt(magB));",
+          "",
+          "Console.WriteLine($\"Vector dimensions: {va.Length}\");",
+          "Console.WriteLine($\"Similarity: {similarity:F4}\");  // similar meanings score close to 1"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 4 — Retry loop with exponential backoff", "code": [
+          "using System.ClientModel;",
+          "using OpenAI.Chat;",
+          "",
+          "async Task<ChatCompletion> CompleteWithRetryAsync(",
+          "    ChatClient chat, ChatMessage[] messages, ChatCompletionOptions options,",
+          "    int maxAttempts = 4)",
+          "{",
+          "    var random = new Random();",
+          "    for (int attempt = 1; ; attempt++)",
+          "    {",
+          "        try",
+          "        {",
+          "            return await chat.CompleteChatAsync(messages, options);",
+          "        }",
+          "        catch (ClientResultException ex)",
+          "            when ((ex.Status == 429 || ex.Status >= 500) && attempt < maxAttempts)",
+          "        {",
+          "            // Transient fault: wait 1s, 2s, 4s... plus jitter, then retry.",
+          "            int delayMs = (int)(Math.Pow(2, attempt - 1) * 1000) + random.Next(0, 250);",
+          "            Console.WriteLine($\"Attempt {attempt} got {ex.Status}; retrying in {delayMs} ms...\");",
+          "            await Task.Delay(delayMs);",
+          "        }",
+          "        // 401/404/400 fall through and throw immediately — retrying cannot fix them.",
+          "    }",
+          "}"
+        ] }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step by Step: A Console App That Sends a Prompt and Displays the Response",
+      "content": [
+        { "type": "paragraph", "text": "This walkthrough builds the tutorial's deliverable from an empty folder: a console app that asks the user for a prompt, calls your chat deployment, and prints the reply — with safe configuration and a retry loop." },
+        { "type": "list", "style": "numbered", "items": [
+          "Create the project: run 'dotnet new console -n AskAzureOpenAI' and 'cd AskAzureOpenAI'.",
+          "Add packages from NuGet: 'dotnet add package Azure.AI.OpenAI' and 'dotnet add package Azure.Identity'.",
+          "Store your secrets outside the code. Enable the store with 'dotnet user-secrets init', then run 'dotnet user-secrets set AzureOpenAI:Endpoint https://<your-resource>.openai.azure.com' and 'dotnet user-secrets set AzureOpenAI:Key <your-api-key>'. (Alternatively, set the two environment variables from Example 1.)",
+          "Load configuration in Program.cs using Microsoft.Extensions.Configuration with AddUserSecrets and AddEnvironmentVariables so either source works.",
+          "Create the client: new AzureOpenAIClient(new Uri(endpoint), new AzureKeyCredential(key)), then GetChatClient with your deployment name.",
+          "Read the user's prompt with Console.ReadLine(), build a SystemChatMessage plus a UserChatMessage, and set ChatCompletionOptions with Temperature = 0.3f and MaxOutputTokenCount = 400.",
+          "Send the request through the CompleteWithRetryAsync helper from Example 4 so a 429 rate limit becomes a short wait instead of a crash.",
+          "Display the response text, and if the finish reason is Length, warn that the answer hit the max tokens cap.",
+          "Run it with 'dotnet run', type a question such as 'What is a C# record type?', and confirm the model's answer prints.",
+          "Verify safety: check that 'git status' shows no file containing your key, and that deleting the environment variables plus user secrets makes the app fail fast with a clear error message."
+        ] },
+        { "type": "code", "language": "csharp", "title": "Program.cs — the complete console app", "code": [
+          "using Azure;",
+          "using Azure.AI.OpenAI;",
+          "using Microsoft.Extensions.Configuration;",
+          "using OpenAI.Chat;",
+          "",
+          "var config = new ConfigurationBuilder()",
+          "    .AddUserSecrets<Program>()          // dev-time secrets, outside the repo",
+          "    .AddEnvironmentVariables()          // or environment variables in CI / prod",
+          "    .Build();",
+          "",
+          "string endpoint = config[\"AzureOpenAI:Endpoint\"] ?? config[\"AZURE_OPENAI_ENDPOINT\"]",
+          "    ?? throw new InvalidOperationException(\"No endpoint configured.\");",
+          "string key = config[\"AzureOpenAI:Key\"] ?? config[\"AZURE_OPENAI_KEY\"]",
+          "    ?? throw new InvalidOperationException(\"No API key configured.\");",
+          "",
+          "var azureClient = new AzureOpenAIClient(new Uri(endpoint), new AzureKeyCredential(key));",
+          "ChatClient chat = azureClient.GetChatClient(\"gpt-4o-mini\");",
+          "",
+          "Console.Write(\"Ask me anything: \");",
+          "string question = Console.ReadLine() ?? string.Empty;",
+          "",
+          "var options = new ChatCompletionOptions { Temperature = 0.3f, MaxOutputTokenCount = 400 };",
+          "var messages = new ChatMessage[]",
+          "{",
+          "    new SystemChatMessage(\"You are a helpful assistant for .NET developers.\"),",
+          "    new UserChatMessage(question)",
+          "};",
+          "",
+          "ChatCompletion reply = await CompleteWithRetryAsync(chat, messages, options);",
+          "",
+          "Console.WriteLine();",
+          "Console.WriteLine(reply.Content[0].Text);",
+          "if (reply.FinishReason == ChatFinishReason.Length)",
+          "    Console.WriteLine(\"[Note] Answer truncated — raise MaxOutputTokenCount for longer replies.\");"
+        ] },
+        { "type": "note", "style": "tip", "text": "For a keyless variant, replace AzureKeyCredential with new DefaultAzureCredential() from Azure.Identity and grant your identity the 'Cognitive Services OpenAI User' role on the resource — the code change is one line, and there is no key to manage." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "SDK surface changes between versions. The examples target the Azure.AI.OpenAI 2.x line (AzureOpenAIClient, GetChatClient, CompleteChatAsync, MaxOutputTokenCount, ClientResultException). Exact type, method, and property names differ in the older 1.x SDK and may evolve — treat the examples as correct in spirit and check the package's current documentation if a name does not compile.",
+          "The chat completion API is stateless: no conversation memory exists unless you resend history, and resent history is billed as prompt tokens on every call.",
+          "Max tokens limits output only; it does not protect you from oversized prompts. The model's total context window bounds prompt plus response together.",
+          "Embedding vectors from different models (or different versions of a model) are not comparable — switching embedding deployments means re-embedding your whole corpus.",
+          "Retries multiply cost and latency: a request that consumed tokens before failing may still have counted against your quota. Cap attempts (3–5) and never retry 400/401/404.",
+          "Content filtering can block a prompt or a completion; your code must handle a filtered result as a normal outcome, not an exception path only.",
+          "Environment variables and user secrets are development conveniences, not production security. Production apps should use Managed Identity or Key Vault.",
+          "Deployment names in this tutorial (gpt-4o-mini, text-embedding-3-small) are examples — yours are whatever you named them in the portal."
+        ] }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Create one client per application (it is thread-safe) rather than one per request — register it as a singleton in dependency injection.",
+          "Always send a system message; an unanchored model drifts. Keep it short, specific, and version it with your code.",
+          "Set temperature and max tokens explicitly for every call path — defaults tuned for chat demos are rarely right for production tasks.",
+          "Check the finish reason on every completion and handle 'length' and content-filter outcomes deliberately.",
+          "Log token usage (prompt and completion counts) from day one; it is your cost dashboard and your early warning for rate limit pressure.",
+          "Retry only transient faults (429, 5xx) with exponential backoff plus jitter and a bounded attempt count; fail fast on everything else.",
+          "Keep credentials in the environment, user secrets, Key Vault, or best of all eliminate them with Managed Identity — and rotate any long-lived API key on a schedule.",
+          "Validate configuration at startup and fail with a clear message, rather than surfacing a confusing 401 deep inside a user request."
+        ] },
+        { "type": "table", "headers": ["Common mistake", "Do this instead"], "rows": [
+          ["Hardcoding the API key 'just for testing'", "Set an environment variable or user secret from minute one — test code gets committed"],
+          ["Retrying every exception in a blanket catch", "Match on status: retry 429/5xx, throw immediately on 400/401/404"],
+          ["Setting max tokens to the maximum 'to be safe'", "Budget output per task; oversized caps hide runaway prompts and inflate worst-case cost"],
+          ["Comparing embeddings from two different models", "Pin one embedding deployment per index and re-embed if it ever changes"]
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz: Calling Azure OpenAI from C#",
+      "items": [
+        { "number": 1, "question": "What does a chat completion request consist of?", "options": { "A": "A single plain-text string only", "B": "An ordered list of role-tagged messages plus optional parameters", "C": "A vector of floating-point numbers", "D": "A deployment name and nothing else" }, "correctAnswer": "B", "explanation": "The chat completion API takes a conversation snapshot: messages tagged system, user, or assistant, in order, along with options like temperature and max tokens. The model returns the next assistant message." },
+        { "number": 2, "question": "Which message role is used to set the assistant's overall behavior and constraints?", "options": { "A": "user", "B": "assistant", "C": "system", "D": "function" }, "correctAnswer": "C", "explanation": "The system message establishes persona, tone, and rules before any user input. User messages carry the human's input and assistant messages carry prior model replies." },
+        { "number": 3, "question": "What does the embeddings API return for an input string?", "options": { "A": "A shortened version of the text", "B": "A vector of floating-point numbers representing the text's meaning", "C": "A grammar-corrected copy of the text", "D": "A list of keywords extracted from the text" }, "correctAnswer": "B", "explanation": "An embedding is a numeric vector (for example 1,536 dimensions for text-embedding-3-small). Texts with similar meaning produce vectors that are close together, which enables semantic search." },
+        { "number": 4, "question": "Which task is the embeddings API better suited for than the chat completion API?", "options": { "A": "Writing a product description", "B": "Finding which stored document is most similar to a user's question", "C": "Translating a paragraph into French", "D": "Generating unit tests for a class" }, "correctAnswer": "B", "explanation": "Embeddings measure similarity between texts via cosine similarity, which is far cheaper and faster than asking a generative model to compare documents. Generation tasks belong to chat completions." },
+        { "number": 5, "question": "What effect does lowering temperature toward 0 have?", "options": { "A": "The model answers faster because it thinks less", "B": "Output becomes more focused, consistent, and repeatable", "C": "The response is allowed to be longer", "D": "The model gains access to newer training data" }, "correctAnswer": "B", "explanation": "Temperature controls sampling randomness. Near 0 the model almost always picks the most probable next token, which is what you want for code generation, extraction, and classification." },
+        { "number": 6, "question": "What exactly does the max tokens setting limit?", "options": { "A": "The combined size of prompt and response", "B": "The number of tokens in the user's prompt", "C": "The number of tokens the model may generate in its response", "D": "The number of API calls allowed per minute" }, "correctAnswer": "C", "explanation": "Max tokens (MaxOutputTokenCount in the .NET SDK) caps output only. The prompt is bounded separately by the model's context window, and calls per minute are governed by the rate limit." },
+        { "number": 7, "question": "A completion comes back with finish reason 'length'. What happened?", "options": { "A": "The prompt was too short to answer", "B": "The response was truncated because it hit the max tokens limit", "C": "The content filter blocked the reply", "D": "The model finished its answer naturally" }, "correctAnswer": "B", "explanation": "'length' means generation stopped at the output cap, so the reply is likely cut off mid-thought. 'stop' is the natural finish; a content-filter finish indicates Responsible AI intervention." },
+        { "number": 8, "question": "Your app receives HTTP 429 from Azure OpenAI. What does it mean and what should you do?", "options": { "A": "The API key is invalid; regenerate it", "B": "The deployment does not exist; check the name", "C": "You exceeded the rate limit; wait and retry with backoff", "D": "The request body is malformed; fix the JSON" }, "correctAnswer": "C", "explanation": "429 is a transient fault: your deployment's requests-per-minute or tokens-per-minute quota was exceeded. Waiting with exponential backoff and retrying usually succeeds; 401, 404, and 400 are the permanent errors in the other options." },
+        { "number": 9, "question": "Which retry strategy is recommended for transient Azure OpenAI failures?", "options": { "A": "Retry immediately in a tight loop until success", "B": "Exponential backoff with jitter and a bounded number of attempts", "C": "Retry every error including 401 and 404", "D": "Never retry; always surface the error to the user" }, "correctAnswer": "B", "explanation": "Doubling the delay between attempts (1s, 2s, 4s) gives the service room to recover, jitter prevents synchronized retries from parallel clients, and a cap (3–5 attempts) bounds latency. Permanent errors like 401/404 should never be retried." },
+        { "number": 10, "question": "Which of these is a safe place for your Azure OpenAI API key during local development?", "options": { "A": "A const string in Program.cs", "B": "appsettings.json committed to the repository", "C": "The .NET user secrets store or an environment variable", "D": "A comment in the README for teammates" }, "correctAnswer": "C", "explanation": "User secrets live in your user profile outside the project folder, and environment variables never enter source control. Anything committed to the repo — code, appsettings.json, or docs — leaks the key to everyone with repo access." },
+        { "number": 11, "question": "What is the main security advantage of Managed Identity over an API key?", "options": { "A": "It makes API calls complete faster", "B": "There is no secret to store, leak, or rotate at all", "C": "It removes the deployment's rate limit", "D": "It encrypts the prompt text end to end" }, "correctAnswer": "B", "explanation": "With Managed Identity, Azure issues and rotates credentials for your app's identity automatically; your code uses DefaultAzureCredential and holds no key. It changes authentication only — performance, quotas, and encryption are unaffected." },
+        { "number": 12, "question": "Which NuGet package provides the official Azure OpenAI client for .NET?", "options": { "A": "Azure.AI.OpenAI", "B": "Microsoft.ML", "C": "System.Net.Http.Json", "D": "Newtonsoft.Json" }, "correctAnswer": "A", "explanation": "Azure.AI.OpenAI supplies AzureOpenAIClient plus the chat and embedding sub-clients, building on the OpenAI .NET library. Azure.Identity adds keyless authentication; the other packages are unrelated." },
+        { "number": 13, "question": "What value do you pass to GetChatClient(...) when creating a chat client?", "options": { "A": "The raw model id exactly as published, always", "B": "The deployment name you chose in your Azure OpenAI resource", "C": "The resource's API key", "D": "The full endpoint URL" }, "correctAnswer": "B", "explanation": "Client code targets your deployment name — your label for a model instance in the resource. It may happen to match the model name, but it is the deployment that routing, quota, and version pinning attach to." },
+        { "number": 14, "question": "Why must a multi-turn chatbot resend earlier messages with each chat completion call?", "options": { "A": "Because the API rejects requests with only one message", "B": "Because the API is stateless and remembers nothing between calls", "C": "Because resending history is required to stay authenticated", "D": "Because embeddings expire after each request" }, "correctAnswer": "B", "explanation": "Each call stands alone: the model only sees what is in that request's message list. Conversation memory is your application's job — and resent history is billed as prompt tokens each time." },
+        { "number": 15, "question": "Two embedding vectors have a cosine similarity of 0.97. What can you conclude?", "options": { "A": "The two texts are almost identical in meaning", "B": "The two texts have the same number of words", "C": "One text is a summary of the other", "D": "Nothing — cosine similarity is random" }, "correctAnswer": "A", "explanation": "Cosine similarity near 1 means the vectors point in nearly the same direction, which for embeddings means very similar meaning. It says nothing about length, wording, or which text derived from which." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam: Written Questions",
+      "items": [
+        { "number": 1, "question": "Describe the anatomy of a chat completion request and response, naming the three message roles and three useful fields on the response.", "modelAnswer": "A request contains an ordered list of messages, each tagged with a role: system (sets behavior and constraints), user (the human's input), and assistant (the model's earlier replies, resent for context). It also carries options such as temperature and max tokens. The response contains the generated assistant message content; a finish reason ('stop' for natural completion, 'length' for truncation at the output cap, or a content-filter reason); and usage counts for prompt and completion tokens, which drive billing and rate-limit consumption." },
+        { "number": 2, "question": "Explain why the chat completion API being stateless matters for both application design and cost.", "modelAnswer": "Stateless means the service retains nothing between calls — each request must contain every message the model should consider. For design, the application owns conversation memory: it must store history and decide how much to resend (all of it, a window, or a summary). For cost, every resent message is billed as prompt tokens on every call, so a long conversation grows linearly more expensive per turn. Techniques like windowing or summarizing old turns trade fidelity for cost." },
+        { "number": 3, "question": "What is an embedding, and what property of embeddings makes semantic search possible?", "modelAnswer": "An embedding is a fixed-length vector of floating-point numbers produced by a model from a piece of text — 1,536 dimensions for text-embedding-3-small. The key property is that semantically similar texts map to vectors that are close together (high cosine similarity), regardless of shared keywords. Semantic search embeds all documents ahead of time, embeds the query at search time with the same model, and returns the documents whose vectors are closest to the query vector." },
+        { "number": 4, "question": "Why can you not compare embedding vectors produced by two different embedding models, and what is the operational consequence?", "modelAnswer": "Each model defines its own vector space — the dimensions have no meaning across models, and even the vector lengths may differ. A distance between a vector from model A and one from model B is meaningless. The operational consequence: an index or vector store is pinned to the embedding model that produced it. If you upgrade or switch embedding deployments, you must re-embed the entire corpus with the new model before queries give sensible results." },
+        { "number": 5, "question": "Compare temperature 0.1 and temperature 0.9 for the task of generating C# code, and justify which you would choose.", "modelAnswer": "At 0.1 the model nearly always picks its most probable token, producing consistent, conventional code — the same request yields nearly the same result, which aids testing and review. At 0.9 sampling is much freer: more varied idioms and creative structures, but a higher chance of subtle mistakes and inconsistency between runs. For code generation, choose low temperature (0.0–0.2): correctness and reproducibility matter more than variety. High temperature suits brainstorming, naming ideas, or creative text." },
+        { "number": 6, "question": "A user reports that answers from your app sometimes stop mid-sentence. Walk through how you would diagnose and fix this.", "modelAnswer": "First check the finish reason on the affected completions. If it is 'length', the max tokens cap (MaxOutputTokenCount) is too small for the task — the model was cut off, not confused. Fix by raising the cap to fit a complete answer (roughly double the typical expected length), or by detecting the 'length' finish in code and either warning the user or issuing a follow-up request. If the finish reason is a content-filter value instead, the reply was blocked by Responsible AI filtering and needs different handling. Log finish reasons and token usage so this diagnosis takes minutes, not guesswork." },
+        { "number": 7, "question": "Classify these errors as transient or permanent, and state the correct handling for each: HTTP 429, HTTP 401, HTTP 503, HTTP 404.", "modelAnswer": "429 (rate limit exceeded) is transient: wait using exponential backoff and retry a bounded number of times. 503 (service temporarily unavailable) is transient: same treatment. 401 (unauthorized) is permanent: the API key or identity is wrong — fail fast, fix configuration, never retry. 404 (not found) is permanent: the endpoint URL or deployment name is wrong — fail fast and fix. The dividing line: retry only when the identical request could plausibly succeed in a few seconds." },
+        { "number": 8, "question": "Design a retry policy for production Azure OpenAI calls. Specify what you retry, the delay schedule, why jitter is included, and when you give up.", "modelAnswer": "Retry only transient faults: 429 and 5xx status codes (and transport-level timeouts). Use exponential backoff — for example 1s, 2s, 4s, 8s — so a saturated deployment gets recovery room. Add random jitter (e.g. 0–250 ms) to each delay so many parallel clients that failed together do not retry in synchronized waves that re-trigger the rate limit. Cap attempts at 3–5; on final failure, surface a clear, friendly error and log the details. Never retry 400/401/404, and remember failed attempts may still have consumed quota, so a low cap also protects cost." },
+        { "number": 9, "question": "List the layers of configuration/secret management for an Azure OpenAI app from development to production, and state when each is appropriate.", "modelAnswer": "Development: environment variables (simple, works everywhere) or the .NET user secrets store (dotnet user-secrets — per-user, outside the project folder, cannot be committed accidentally). CI/CD: pipeline secret variables injected as environment variables. Production with a key: Azure Key Vault, giving access control, audit, and rotation. Production, preferred: Managed Identity with DefaultAzureCredential — the app authenticates as an Azure identity holding the 'Cognitive Services OpenAI User' role, so no key exists to leak or rotate. The constant rule at every layer: the key never appears in source code or committed config files." },
+        { "number": 10, "question": "Explain the difference between a model and a deployment in Azure OpenAI, and why client code uses the deployment name.", "modelAnswer": "A model is the published artifact (gpt-4o, text-embedding-3-small) with a version. A deployment is your named instance of a chosen model version inside your resource, with its own quota and rate limit. Client code calls GetChatClient or GetEmbeddingClient with the deployment name because that indirection decouples code from model versions: operations can create a new deployment on a newer model version and update configuration, and application code — which only knows the deployment name — does not change." },
+        { "number": 11, "question": "Outline the steps to build a console app that sends a prompt to Azure OpenAI and displays the response, including package installation and secret setup.", "modelAnswer": "1) dotnet new console and cd into it. 2) dotnet add package Azure.AI.OpenAI (plus Azure.Identity for keyless auth). 3) dotnet user-secrets init, then set AzureOpenAI:Endpoint and AzureOpenAI:Key with dotnet user-secrets set (or export environment variables). 4) In Program.cs, build configuration from user secrets and environment variables; fail fast if values are missing. 5) Create AzureOpenAIClient with the endpoint and credential, then GetChatClient with the deployment name. 6) Read Console.ReadLine into a UserChatMessage under a SystemChatMessage; set Temperature and MaxOutputTokenCount explicitly. 7) Call CompleteChatAsync inside a retry helper. 8) Print the content text and warn if the finish reason is Length. 9) dotnet run and verify; confirm no secret is visible to git." },
+        { "number": 12, "question": "Why should the Azure OpenAI client be created once and shared rather than instantiated per request?", "modelAnswer": "The client is thread-safe and manages underlying HTTP connections. Creating one per request wastes sockets and handshake time, can exhaust connection pools under load, and defeats connection reuse. The correct pattern in ASP.NET Core is registering AzureOpenAIClient (or the sub-clients) as a singleton in dependency injection; a console app simply creates it once at startup. Per-call objects should be limited to messages and options." },
+        { "number": 13, "question": "What does token usage reporting on each response give you, and name three decisions it should inform.", "modelAnswer": "Each completion reports prompt tokens and completion tokens consumed. Logged over time, this is (1) your cost model — billing is per token, so usage logs are a per-feature cost dashboard; (2) your rate-limit early warning — tokens per minute against quota shows how close you run to 429s and whether to request more quota or add backoff; (3) your tuning feedback — if completions regularly use far less than max tokens you can tighten the cap, and if prompts balloon you know conversation history or context stuffing needs a windowing strategy." },
+        { "number": 14, "question": "How should an application handle a response blocked by content filtering, and why is treating it as a crash wrong?", "modelAnswer": "Content filtering is a normal, expected outcome in Azure OpenAI: a prompt or completion that trips the Responsible AI filters returns a filtered result or a specific error rather than generated text. The app should detect this case, show the user a clear message ('this request couldn't be completed'), log it for review, and continue running. Treating it as an unhandled exception crashes or confuses the app for something that is working as designed — filtering is a feature protecting the service and users, and legitimate inputs occasionally trigger it, so graceful handling is mandatory." },
+        { "number": 15, "question": "Your team wants semantic FAQ search. Describe the full pipeline using the embeddings API, including what happens at index time and at query time.", "modelAnswer": "Index time: for each FAQ entry, call the embeddings API with the entry text (question plus answer, or question alone) and store the returned vector next to the original text — in a database, a search index, or memory for small sets. Record which embedding deployment produced the vectors. Query time: embed the incoming user question with the same deployment, compute cosine similarity between the query vector and every stored vector (or use a vector index for scale), and return the top matches above a similarity threshold. Optionally pass the best match plus the question to a chat completion call to phrase a natural answer — which is the essence of RAG, covered later in this course." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Chat completion API", "back": "Takes an ordered list of role-tagged messages (system/user/assistant) and returns the model's next reply. Stateless — resend history for multi-turn context." },
+        { "number": 2, "front": "System message", "back": "The behavior-setting message at the start of a chat request: persona, tone, rules. Keep it short, specific, and versioned with your code." },
+        { "number": 3, "front": "Embeddings API", "back": "Converts text into a vector of floats that encodes meaning. Similar texts → similar vectors. Used for semantic search, clustering, RAG retrieval." },
+        { "number": 4, "front": "Cosine similarity", "back": "Similarity measure based on the angle between two vectors; near 1 = very similar meaning. The standard way to compare embeddings." },
+        { "number": 5, "front": "Temperature", "back": "Sampling randomness control. ~0 = focused and repeatable (code, extraction); ~0.8+ = varied and creative (brainstorming). Does not change model knowledge." },
+        { "number": 6, "front": "Max tokens", "back": "Cap on generated output tokens (SDK: MaxOutputTokenCount). Hitting it truncates the reply with finish reason 'length'. Limits output only, not the prompt." },
+        { "number": 7, "front": "Finish reason", "back": "Why generation stopped: 'stop' = natural end, 'length' = hit max tokens, content-filter = blocked by Responsible AI. Check it on every completion." },
+        { "number": 8, "front": "HTTP 429", "back": "Rate limit exceeded — a transient fault. Correct response: exponential backoff with jitter, bounded retries. Not an authentication or request error." },
+        { "number": 9, "front": "Exponential backoff", "back": "Retry delays that double each attempt (1s, 2s, 4s…), plus random jitter to desynchronize parallel clients. Cap at 3–5 attempts." },
+        { "number": 10, "front": "Transient vs permanent errors", "back": "Transient (429, 5xx): retry with backoff. Permanent (400, 401, 404): fix the request, key, or names — retrying is waste." },
+        { "number": 11, "front": "Deployment name", "back": "Your label for a model instance in your Azure OpenAI resource. What you pass to GetChatClient/GetEmbeddingClient — decouples code from model versions." },
+        { "number": 12, "front": "AzureOpenAIClient", "back": "Entry-point class from the Azure.AI.OpenAI NuGet package. Built once with endpoint + credential; hands out chat and embedding sub-clients. Thread-safe singleton." },
+        { "number": 13, "front": ".NET user secrets", "back": "dotnet user-secrets — dev-time store in your user profile, outside the repo. Right place for endpoint/key during development; not a production mechanism." },
+        { "number": 14, "front": "Managed Identity", "back": "Azure-issued identity for your app; authenticate with DefaultAzureCredential and a role assignment. No API key exists to leak or rotate — preferred in production." },
+        { "number": 15, "front": "Token usage (prompt + completion)", "back": "Reported on every response. Log it: it is your billing meter, rate-limit early warning, and evidence for tuning max tokens and history windowing." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions and Answers",
+      "items": [
+        { "number": 1, "question": "Walk me through what happens when your C# code calls the chat completion API.", "answer": "The app builds an ordered message list — a system message defining behavior and a user message with the input — plus options like temperature and max tokens. The SDK sends this over HTTPS to the resource endpoint, where Azure routes it to the named deployment. The model generates the reply token by token until it finishes or hits the output cap. The response returns the assistant message content, a finish reason, and token usage counts. The API is stateless, so any conversation history the model should see must be resent in the message list." },
+        { "number": 2, "question": "When would you use embeddings instead of chat completions?", "answer": "Whenever the task is comparison or retrieval rather than generation: semantic search, finding duplicates, clustering feedback, routing tickets to categories, or fetching relevant context for RAG. Embeddings turn text into vectors so similarity becomes cheap math — cosine similarity — instead of an expensive generative call. My rule of thumb: 'write me X' is chat; 'find the most relevant X' is embeddings." },
+        { "number": 3, "question": "How do you choose a temperature value for a feature?", "answer": "By how much variability the task tolerates. Deterministic tasks — code generation, extraction, classification — get 0.0 to 0.2 so results are consistent and testable. Explanatory tasks like summarization sit around 0.3 to 0.5. Creative tasks where repeated calls should differ — brainstorming, copywriting — get 0.7 and up. I set it explicitly per call path in configuration rather than trusting defaults, and I keep it low anywhere output feeds automated processing." },
+        { "number": 4, "question": "What does max tokens actually control, and what goes wrong when it is misconfigured?", "answer": "It caps output tokens only — the reply the model generates — not the prompt. Too low, and answers truncate mid-sentence with finish reason 'length', which users experience as a broken product. Too high, and worst-case cost and latency balloon, and runaway generations go unnoticed. I size it to roughly double the typical complete answer for the task, check the finish reason in code, and adjust from logged usage data." },
+        { "number": 5, "question": "You get a spike of HTTP 429 responses in production. What is your response, immediately and long-term?", "answer": "Immediately: confirm backoff-and-retry is absorbing the spike — 429 is transient, so exponential backoff with jitter and a 3–5 attempt cap turns most of them into slightly slower successes. Short-term: check whether a deploy or a traffic surge raised token consumption; usage logs show which. Long-term: request a higher quota for the deployment, reduce prompt sizes (trim resent history), split load across deployments, or add client-side rate limiting so we stay under tokens-per-minute rather than bouncing off it." },
+        { "number": 6, "question": "Which errors from Azure OpenAI should never be retried, and why?", "answer": "400 (malformed request or filtered input), 401 (invalid key or identity), and 404 (wrong endpoint or deployment name). They are deterministic: the identical request fails identically every time, so retrying adds latency and load without any chance of success. Retries belong exclusively to transient faults — 429 and 5xx — where the same request can plausibly succeed seconds later. A blanket catch-and-retry is a design smell that hides real configuration bugs." },
+        { "number": 7, "question": "How do you keep the API key out of source control across dev, CI, and production?", "answer": "Dev: dotnet user-secrets or environment variables — both live outside the project folder so they cannot be committed. CI: the pipeline's secret variables injected into the environment at run time. Production: preferably no key at all — Managed Identity with DefaultAzureCredential and a role assignment on the resource; where a key is unavoidable, Azure Key Vault with rotation. And configuration loading is written so a missing secret fails fast at startup with a clear message instead of a mysterious 401 later." },
+        { "number": 8, "question": "What is the advantage of Managed Identity over storing a key in Key Vault?", "answer": "Key Vault protects a secret that still exists — it can still be mishandled after retrieval, must be rotated, and access to the vault becomes the new secret to guard. Managed Identity removes the secret entirely: Azure issues and rotates credentials for the app's identity automatically, the code path is just DefaultAzureCredential, and access control is a role assignment you can audit. Less to leak, less to rotate, less to get wrong — which is why it is the production default where supported." },
+        { "number": 9, "question": "Why does the SDK have you call GetChatClient with a deployment name instead of a model name?", "answer": "Because the deployment is the operational unit in Azure OpenAI: it pins a model version and carries the quota and rate limit. Code that targets a deployment name is decoupled from model churn — ops can stand up a new deployment on a newer model version, flip a configuration value, and the application never changes. It also allows different deployments of the same model with different quotas for different workloads." },
+        { "number": 10, "question": "How would you add conversation memory to a chatbot built on this API?", "answer": "The API is stateless, so the app stores history — in session, a database, or a cache keyed by conversation id — and replays it in the message list on each call. Because replayed history bills as prompt tokens every turn, I bound it: keep the last N turns, or summarize older turns into a single system-side note and resend the summary plus recent messages. Which strategy depends on how much earlier context genuinely changes answers; usage logs tell you what the memory is costing." },
+        { "number": 11, "question": "What would you log for every Azure OpenAI call in production, and why?", "answer": "Timestamp, deployment name, prompt and completion token counts, latency, finish reason, status code, and retry count — plus a correlation id linking to the user request. Token counts are the cost meter and quota early-warning; finish reasons reveal truncation and content filtering trends; retry counts expose rate-limit pressure; latency feeds SLOs. I do not log prompt or response bodies by default — they may contain user data — or at most log them redacted under a debug flag." },
+        { "number": 12, "question": "A teammate compares embeddings generated by text-embedding-3-small against vectors made last year by an older model. What do you tell them?", "answer": "The comparison is meaningless: every embedding model defines its own vector space, so distances across models are noise even when dimensions happen to match. The index must be pinned to one embedding deployment, and mixing generations silently degrades search quality — often without obvious errors. The fix is to re-embed the entire corpus with the current model before comparing, and to record the embedding model name alongside the index so this cannot happen unnoticed." },
+        { "number": 13, "question": "How do you make an app resilient to Azure OpenAI content filtering?", "answer": "Treat a filtered outcome as a normal branch, not an exception path: detect the content-filter finish reason or error, show the user a clear non-technical message, log the event for review, and continue serving. Legitimate inputs occasionally trigger filters, so the UX must not look like a crash. On the input side, basic validation and prompt design reduce accidental triggers; on the process side, recurring false positives are worth reviewing against the filter configuration options available on the resource." },
+        { "number": 14, "question": "Describe how you would structure Azure OpenAI access in an ASP.NET Core application rather than a console app.", "answer": "Register AzureOpenAIClient as a singleton in dependency injection — it is thread-safe and should share connections. Wrap it in a small service interface (e.g. IChatService) so controllers depend on an abstraction that is easy to mock in tests. Bind endpoint and deployment names from configuration via the options pattern; the credential comes from DefaultAzureCredential in production. Retry policy lives in the service (or a Polly pipeline), and token usage logging is middleware-adjacent so every call is metered uniformly." },
+        { "number": 15, "question": "What is jitter in a retry policy and why does it matter at scale?", "answer": "Jitter is a small random addition to each backoff delay. Without it, many clients that failed at the same moment — say when a deployment hit its rate limit — all retry at exactly 1s, 2s, 4s, arriving in synchronized waves that re-saturate the service and fail together again (the thundering herd). Randomizing each client's delay spreads retries over time so capacity recovers. It costs one line of code and materially improves recovery behavior for any multi-instance deployment." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "Chat completion API", "definition": "The Azure OpenAI operation that accepts a list of role-tagged messages and generates the assistant's next reply. Stateless between calls." },
+        { "term": "Embeddings API", "definition": "The operation that converts text into a numeric vector representing its meaning, enabling similarity comparison and semantic search." },
+        { "term": "System message", "definition": "The first message in a chat request, role 'system', defining the assistant's behavior, tone, and constraints." },
+        { "term": "Embedding", "definition": "A fixed-length vector of floating-point numbers encoding the meaning of a text; similar texts produce nearby vectors." },
+        { "term": "Vector", "definition": "An ordered array of numbers. Embedding vectors typically have hundreds to thousands of dimensions." },
+        { "term": "Cosine similarity", "definition": "A measure of the angle between two vectors; values near 1 indicate very similar meaning. The standard metric for comparing embeddings." },
+        { "term": "Temperature", "definition": "Sampling parameter controlling randomness of token selection: low = focused and repeatable, high = varied and creative." },
+        { "term": "Max tokens", "definition": "The cap on tokens the model may generate in one response (MaxOutputTokenCount in the .NET SDK). Exceeding it truncates the reply." },
+        { "term": "Token", "definition": "A small unit of text the model processes; both billing and rate limits are counted in tokens." },
+        { "term": "Finish reason", "definition": "Response field explaining why generation ended: natural stop, max tokens truncation ('length'), or content filtering." },
+        { "term": "Deployment", "definition": "A named instance of a model version inside an Azure OpenAI resource, carrying its own quota and rate limit; what client code targets." },
+        { "term": "Endpoint", "definition": "The base URL of an Azure OpenAI resource to which all API requests for that resource are addressed." },
+        { "term": "API key", "definition": "A secret string authenticating requests to a resource. Must be kept out of source control and rotated; replaceable by Managed Identity." },
+        { "term": "Rate limit", "definition": "The requests-per-minute and tokens-per-minute caps on a deployment. Exceeding them returns HTTP 429." },
+        { "term": "Exponential backoff", "definition": "Retry strategy where the wait doubles after each failed attempt, usually with random jitter and a bounded attempt count." },
+        { "term": "Transient fault", "definition": "A temporary failure (429, 5xx) likely to succeed on retry, as opposed to permanent errors (400, 401, 404) that must be fixed." },
+        { "term": "User secrets", "definition": "The .NET development-time secret store (dotnet user-secrets) keeping configuration values in the user profile, outside the repository." },
+        { "term": "Managed Identity", "definition": "An Azure-managed identity an app uses to authenticate to services via role assignments — eliminating stored keys entirely." },
+        { "term": "Console app", "definition": "A terminal-hosted .NET application (dotnet new console); in this tutorial, the host for sending a prompt to Azure OpenAI and displaying the response." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "One client (AzureOpenAIClient from the Azure.AI.OpenAI NuGet package), built from an endpoint plus a credential, hands out chat and embedding sub-clients bound to deployment names.",
+          "The chat completion API generates text from role-tagged messages and is stateless — your app owns conversation memory and pays for resent history in prompt tokens.",
+          "The embeddings API turns text into a vector; cosine similarity between vectors powers semantic search, and vectors are only comparable within one embedding model.",
+          "Temperature tunes randomness (low for code and facts, high for creativity); max tokens caps output length and truncates with finish reason 'length' when hit.",
+          "Retry only transient faults — 429 rate limit and 5xx — using exponential backoff with jitter and a bounded attempt count; fail fast on 400/401/404.",
+          "Keep the endpoint and API key in an environment variable or user secrets during development, and prefer Managed Identity in production so no key exists at all."
+        ] },
+        { "type": "paragraph", "text": "You now have the complete request path from C# code to a model deployment and back, including the two parameters you will tune most and the failure modes you will meet first. The console app you built — configuration, client, prompt, retry, display — is the skeleton every later project in this course grows from. Keep the discipline you practiced here: explicit parameters, checked finish reasons, logged token usage, and secrets that never touch the repository." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Next tutorial: Function Calling and Tools (function-calling-and-tools). So far the model can only answer with text; function calling lets it request that your C# code run a method — check an order, query a database, call an API — and then use the result in its reply. That turns the model from a text generator into the reasoning core of an application, and it is the doorway to agents later in the course." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: extend the console app into a multi-turn chat loop that resends history, then add a '/reset' command that clears it — watch prompt token usage grow and shrink in your logs.",
+          "Practice: embed ten of your own FAQ entries, then embed three test questions and rank the FAQs by cosine similarity — verify the best match is the right one.",
+          "Practice: temporarily set MaxOutputTokenCount to 30, observe the 'length' finish reason, and make the app print a clear truncation warning.",
+          "Practice: switch the console app from AzureKeyCredential to DefaultAzureCredential and authenticate with your developer identity instead of a key.",
+          "Read: the official 'Azure OpenAI Service documentation' quickstarts for C#, the 'Azure SDK for .NET' guidance on retries, and the 'Microsoft identity platform' pages on Managed Identity."
+        ] },
+        { "type": "note", "style": "tip", "text": "Keep your console app in a repository — tutorials 12 (function calling) and 15 (RAG) both build directly on it, and you will extend rather than restart." }
+      ]
+    }
+  ]
+}
