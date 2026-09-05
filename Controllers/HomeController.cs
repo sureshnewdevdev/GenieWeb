@@ -64,7 +64,7 @@ public class HomeController : Controller
     {
         if (string.Equals(id, "AIDotnet", StringComparison.OrdinalIgnoreCase))
         {
-            return RedirectToAction("Index", "Tutorials");
+            return RedirectToAction("Course", "Tutorials");
         }
         return View("CourseCatalog");
     }

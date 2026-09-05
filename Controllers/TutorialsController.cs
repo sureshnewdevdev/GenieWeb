@@ -16,10 +16,16 @@ namespace GenieWeb.Controllers
         [HttpGet("")]
         public IActionResult Index()
         {
+            return RedirectToActionPermanent("Course");
+        }
+
+        [HttpGet("GenAI.NET")]
+        public IActionResult Course()
+        {
             ViewData["Title"] = "GenAI-Powered .NET Application Development";
             ViewData["ActiveMenu"] = "GenAIDotNet";
             ViewData["ActivePage"] = "TutorialsIndex";
-            return View(_tutorials.GetAll());
+            return View("Index", _tutorials.GetAll());
         }
 
         [HttpGet("{slug}")]
