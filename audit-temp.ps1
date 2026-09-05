@@ -71,7 +71,7 @@ $checks = [ordered]@{
   "09 validation/guardrails   " = "(?i)guardrail"
   "10 e2e testing/quality tune" = "(?i)end-to-end testing"
   "11 deployment best practice" = "(?i)deployment best practices"
-  "12 AI vs traditional code  " = "(?i)traditional code"
+  "12 AI vs traditional code  " = "(?i)build-vs-buy-vs-augment"
   "13 enterprise governance   " = "(?i)enterprise governance"
   "14 reference project ideas " = "(?i)reference project"
 }
