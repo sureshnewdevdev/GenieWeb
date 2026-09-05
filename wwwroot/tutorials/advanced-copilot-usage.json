@@ -1,0 +1,494 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Advanced GitHub Copilot Usage",
+  "slug": "advanced-copilot-usage",
+  "level": "Intermediate",
+  "codeLanguage": "C#",
+  "tutorialNumber": 9,
+  "totalTutorials": 27,
+  "prev": "github-copilot-for-dotnet",
+  "next": "azure-openai-overview",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Advanced GitHub Copilot Usage"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "AI-assisted code reviews",
+    "Generating unit and integration tests",
+    "Identifying bugs and improvements",
+    "Validating AI-generated code",
+    "Human-in-the-loop validation and its limits"
+  ],
+  "tooltips": {
+    "AI-assisted code review": "Using the model as a first-pass reviewer — ranked findings with line references — before human review, never instead of it.",
+    "pre-review": "The AI pass that runs before human eyes: it catches mechanical issues so human attention goes to design and domain logic.",
+    "diff": "The changed lines of a pull request — the correct scope for review prompts; whole files bury the signal.",
+    "severity": "The ranking demanded from AI review findings (blocker/major/minor) so humans triage instead of wading.",
+    "unit test": "A test of one behavior in isolation; the fast, focused base of the test pyramid.",
+    "integration test": "A test exercising components together — real HTTP pipeline, real database interactions — where wiring bugs live.",
+    "mock": "A stand-in object that records or scripts interactions with a dependency — used in unit tests to isolate the code under test.",
+    "test double": "The family name for mocks, stubs, and fakes — anything substituting for a real dependency in tests.",
+    "sabotage check": "Deliberately breaking code to confirm tests go red — the honesty test for any generated suite (tutorial 5).",
+    "regression test": "A test that pins a fixed bug or existing behavior so it cannot silently return.",
+    "code smell": "A named symptom of a design problem — what improvement sweeps ask the model to find and rank.",
+    "hallucinated API": "A plausible invented member — the reason validation starts with the compiler and real contracts in context.",
+    "behavior-preserving": "The refactoring contract: identical observable behavior — stated explicitly, proven by tests.",
+    "deterministic gate": "Compiler, analyzers, tests, CI — the non-negotiable machine judges of all code, generated or typed.",
+    "validation pipeline": "The ordered checks AI-generated code passes: compile → analyzers → tests → AI self-review → human review.",
+    "human-in-the-loop": "A person gating output before it takes effect — powerful, finite, and subject to failure modes of its own.",
+    "rubber-stamping": "The HITL failure where approvals become reflexive — high volume turns judgment into clicking.",
+    "anchoring bias": "The HITL failure where the model's confident framing narrows the human's independent judgment.",
+    "review fatigue": "Declining attention across many sequential reviews — why AI pre-filtering must reduce, not multiply, human load.",
+    "custom instructions": "Repository-level guidance files that steer Copilot's behavior for every request in that repo — conventions stated once."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview",
+      "content": [
+        { "type": "paragraph", "text": "Tutorial 8 taught Copilot as a personal tool: completions, chat, daily craft. This tutorial graduates it into your team's workflow: AI-assisted code reviews that run before human eyes, test generation that spans unit and integration levels, systematic bug hunts and improvement sweeps, and — the load-bearing theme — the validation discipline that decides how much of any of it to trust." },
+        { "type": "paragraph", "text": "The closing subject matters most: human-in-the-loop validation and its limits. 'A human reviews it' is the standard answer to AI risk, and it is a good answer — until review volume, anchoring bias, and rubber-stamping quietly hollow it out. Advanced Copilot usage means knowing exactly what the machine checks, what the human checks, and where each one fails." },
+        { "type": "note", "style": "info", "text": "This is tutorial 9 of 27, completing Module 2. It leans heavily on tutorial 5 (test honesty) and tutorial 6 (defense in depth). Next, Module 3 begins: building AI applications with Azure OpenAI." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "paragraph", "text": "After completing this tutorial, you will be able to:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Run AI-assisted code reviews as a pre-review pass with ranked, line-referenced findings.",
+          "Generate both unit tests and integration tests with Copilot, knowing what each level can and cannot catch.",
+          "Drive systematic bug hunts and improvement sweeps over existing code.",
+          "Build a validation pipeline for AI-generated code: compiler → analyzers → tests → AI self-review → human review.",
+          "Configure repository-level custom instructions so Copilot follows team conventions by default.",
+          "Name the failure modes of human-in-the-loop validation — rubber-stamping, anchoring bias, review fatigue — and design against them.",
+          "Decide, per task, how much validation is enough — and who (or what) provides it."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorial 8 (GitHub Copilot for .NET Development) — completions, chat, slash commands, and the acceptance discipline.",
+          "Tutorial 5's test honesty toolkit: oracles, assertion review, the sabotage check.",
+          "Working knowledge of NUnit and ideally some exposure to ASP.NET Core integration testing.",
+          "A team codebase (or any realistic project) to practice review and validation workflows on."
+        ] }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "From Assistant to Workflow: The Trust Pipeline",
+      "content": [
+        { "type": "paragraph", "text": "Basic Copilot use optimizes individual moments: a completion here, a chat answer there. Advanced use optimizes the flow of work: where AI output enters your process, what checks it passes through, and how much human attention each artifact deserves. The organizing idea is a trust pipeline — every AI contribution travels an ordered sequence of validators, each catching what the previous one cannot." },
+        { "type": "paragraph", "text": "The pipeline's stages, cheapest first: the compiler (hallucinated APIs, type errors — free and instant); static analyzers and formatters (convention drift, known bug patterns — free and instant); tests (behavioral wrongness — cheap once written, and AI writes them); AI self-review (mechanical slips, checklist violations — one extra request); and human review (design judgment, domain correctness, the things only context and taste can catch — expensive, finite, precious). Advanced usage is largely the art of pushing each class of defect to the cheapest stage that reliably catches it." },
+        { "type": "paragraph", "text": "This inverts a common instinct. Teams worried about AI code quality often respond by demanding more human review — the most expensive validator — while leaving analyzers loose and generated tests unverified. The better posture: tighten the machine stages until they catch everything mechanical, then spend scarce human attention exclusively on what machines cannot judge. The human stays in the loop; the loop is designed so the human's judgment is actually used." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "AI-Assisted Code Reviews",
+      "content": [
+        { "type": "paragraph", "text": "AI-assisted code review works as a pre-review: the model examines the change before human reviewers do, producing ranked findings the humans then verify and extend. The prompt shape that works, in Copilot Chat with the changed files (or in richer setups, against the PR itself): 'Review this diff against our standards [profile]. Report findings ranked by severity — blocker, major, minor — each with file/line reference, a one-line rationale, and a suggested fix. State explicitly which categories you found nothing in.' The explicit-nothing clause matters: silence must be distinguishable from not-looked." },
+        { "type": "animation", "title": "The AI pre-review pipeline", "intro": "Where the AI pass sits, and what it hands the humans.", "nodes": [
+          { "id": "pr", "label": "Pull request", "sub": "the diff" },
+          { "id": "gate", "label": "Machine gate", "sub": "CI, analyzers, tests" },
+          { "id": "ai", "label": "AI pre-review", "sub": "ranked findings" },
+          { "id": "human", "label": "Human review", "sub": "design + domain" },
+          { "id": "merge", "label": "Merge", "sub": "human decision" }
+        ], "steps": [
+          { "highlight": ["pr"], "caption": "A PR opens. The diff — not whole files — is the review scope; it keeps the signal dense." },
+          { "highlight": ["gate"], "caption": "The deterministic gate runs first: build, analyzers, tests. Anything it can catch never reaches a reader's attention." },
+          { "highlight": ["ai"], "caption": "The AI pass reviews the diff against the standards profile: ranked findings, line references, rationales, explicit 'nothing found in X'." },
+          { "highlight": ["human"], "caption": "Humans start from the findings — verifying, dismissing, extending — and spend their real attention on design, domain logic, and intent." },
+          { "highlight": ["merge"], "caption": "Merge remains a human decision. The AI accelerated review; it never became the reviewer of record." }
+        ] },
+        { "type": "paragraph", "text": "What AI review reliably catches: convention violations, missing null/edge handling, error-swallowing, obvious inefficiencies, naming drift, missed async patterns — the mechanical middle of review. What it cannot judge: whether the change solves the right problem, fits the architecture's direction, or handles the domain correctly — plus anything requiring runtime knowledge (its performance and concurrency comments are hypotheses). And its recall is probabilistic: an empty finding list proves nothing, which is why AI review augments the checklist and never becomes the gate." },
+        { "type": "note", "style": "tip", "text": "Aim the tool at both kinds of code: AI pre-review is just as valuable on human-written PRs as on Copilot-assisted ones. The failure modes differ; the pre-filter helps both." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Generating Unit and Integration Tests",
+      "content": [
+        { "type": "paragraph", "text": "Tutorial 8 covered unit test generation; the advanced move is extending Copilot up the pyramid to integration tests — and knowing what each level buys. A unit test isolates one behavior with test doubles standing in for dependencies; it runs in milliseconds and localizes failures precisely. An integration test exercises real wiring — the actual HTTP pipeline, real serialization, real database mappings — where an entire class of bugs lives that no amount of unit testing reaches: DI registration errors, middleware ordering, EF Core query translation, contract mismatches between layers." },
+        { "type": "paragraph", "text": "Copilot generates integration tests well when you supply the pattern: an exemplar integration test using your stack's conventions (for ASP.NET Core, typically a WebApplicationFactory-based test class), the endpoint or flow under test, and the scenario list. The prompt shape: 'Generate integration tests for the POST /orders endpoint using the same pattern as this exemplar: real pipeline, in-memory or containerized database per our convention, covering: valid order → 201 with location header; invalid payload → 400 with validation details; duplicate idempotency key → 409. Include arrange helpers consistent with the exemplar.'" },
+        { "type": "code", "language": "csharp", "title": "The shape of a generated ASP.NET Core integration test (illustrative — see section 13)", "code": [
+          "[TestFixture]",
+          "public class OrdersEndpointTests",
+          "{",
+          "    private WebApplicationFactory<Program> _factory = null!;",
+          "    private HttpClient _client = null!;",
+          "",
+          "    [SetUp]",
+          "    public void SetUp()",
+          "    {",
+          "        _factory = new WebApplicationFactory<Program>();",
+          "        _client = _factory.CreateClient();",
+          "    }",
+          "",
+          "    [TearDown]",
+          "    public void TearDown()",
+          "    {",
+          "        _client.Dispose();",
+          "        _factory.Dispose();",
+          "    }",
+          "",
+          "    [Test]",
+          "    public async Task PostOrder_ValidPayload_Returns201WithLocation()",
+          "    {",
+          "        var response = await _client.PostAsJsonAsync(\"/orders\", new",
+          "        {",
+          "            customerId = 42,",
+          "            lines = new[] { new { sku = \"ABC-1\", qty = 2 } }",
+          "        });",
+          "",
+          "        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));",
+          "        Assert.That(response.Headers.Location, Is.Not.Null);",
+          "    }",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "Division of labor between the levels: generate unit tests for logic-heavy classes (fast feedback, precise localization, mock the edges), integration tests for wiring-heavy flows (endpoints, persistence, auth policies). The review discipline scales up with the level: integration tests are slower and flakier by nature, so demand determinism in the prompt — seeded data builders, no shared state between tests, explicit cleanup — and apply the tutorial 5 honesty rules unchanged: a green integration suite that survives sabotage of the endpoint's core logic is theater, not protection." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Identifying Bugs and Improvements",
+      "content": [
+        { "type": "paragraph", "text": "Beyond reacting to failures, Copilot supports proactive sweeps: pointed prompts that hunt classes of defects across code you select. The craft is asking for specific failure classes rather than 'find bugs' — the generic ask produces generic nitpicks, while a targeted ask focuses the model's pattern-matching where it excels:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Concurrency sweep: 'Examine this class for async/await mistakes: missing awaits, async void, .Result/.Wait() deadlock risks, unawaited fire-and-forget, missing cancellation propagation. Line references.'",
+          "Resource sweep: 'Find undisposed IDisposables, missing using statements, HttpClient misuse, and connection/stream leaks.'",
+          "Null-safety sweep: 'With nullable reference types in mind, find dereferences that can throw and parameters missing guards.'",
+          "Edge-case sweep: 'For each public method, list inputs that would break it: empty, null, negative, maximum, duplicate, concurrent.'",
+          "Improvement sweep: 'Rank the top 5 refactoring opportunities by payoff: name the code smell, the behavior-preserving fix, and the risk. Do not change anything.'"
+        ] },
+        { "type": "paragraph", "text": "Two disciplines keep sweeps honest. First, findings are hypotheses: every claimed bug gets verified — reproduced with a test or traced in the debugger — before it earns a fix, exactly like tutorial 3's ranked-hypotheses rule; a model 'confirming' its own finding is not confirmation. Second, improvements are proposals: the improvement sweep explicitly forbids changes ('do not change anything'), because the decision of what is worth churning belongs to humans with context about risk, roadmap, and hot paths. The best output of an improvement sweep is a prioritized backlog, not a diff." },
+        { "type": "note", "style": "tip", "text": "Sweep timing that works: concurrency and resource sweeps before merging anything touching async or IO; edge-case sweeps when writing the test case list (they feed it); improvement sweeps quarterly per module, not continuously — churn has a cost." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Validating AI Code — and the Limits of Human-in-the-Loop",
+      "content": [
+        { "type": "paragraph", "text": "Assemble the pieces into the validation pipeline every AI-assisted change should travel: (1) the compiler — free, catches hallucinated APIs and type errors; (2) analyzers and formatters — free, catch convention drift and known bug patterns; (3) tests — unit and integration, honesty-checked, catching behavioral wrongness; (4) AI self-review — one request, catching checklist violations and mechanical slips; (5) human review — the finite, precious stage for design, domain, and intent. The pipeline's design goal: nothing mechanical survives to stage 5, so stage 5's scarce attention is spent entirely on judgment." },
+        { "type": "animation", "title": "Human-in-the-loop: where it shines and where it fails", "intro": "The human gate is the strongest validator — and the only one that degrades with volume.", "nodes": [
+          { "id": "vol", "label": "Volume rises", "sub": "AI output scales" },
+          { "id": "fatigue", "label": "Review fatigue", "sub": "attention declines" },
+          { "id": "anchor", "label": "Anchoring bias", "sub": "AI framing narrows" },
+          { "id": "stamp", "label": "Rubber-stamping", "sub": "judgment → clicking" },
+          { "id": "design", "label": "Redesign the loop", "sub": "scope + instrument" }
+        ], "steps": [
+          { "highlight": ["vol"], "caption": "AI multiplies output volume. Every generated PR, test, and doc lands on the same finite human attention." },
+          { "highlight": ["fatigue"], "caption": "Review fatigue: the fortieth review of the day gets a fraction of the first one's scrutiny — silently." },
+          { "highlight": ["anchor"], "caption": "Anchoring bias: the model's confident summary and clean findings frame the human's read — 'looks fine' arrives pre-installed." },
+          { "highlight": ["stamp"], "caption": "Rubber-stamping: gates crossed reflexively at volume. The control still exists on paper; the judgment is gone." },
+          { "highlight": ["design"], "caption": "The fix is design, not exhortation: shrink what needs human eyes (harden machine stages), scope gates to real judgment calls, and instrument the gate (edit rates, rejection rates) so its health is measured." }
+        ] },
+        { "type": "paragraph", "text": "Human-in-the-loop is the right terminal control — and it is a resource with failure modes, not a magic word. It degrades predictably: with volume (fatigue), with AI assistance itself (anchoring — reviewers under-look where the model said clean), and with time (rubber-stamping as gates become ritual). Designing against the limits: keep human gates few and consequential rather than many and diluted; never let the AI's own review be the only input a human sees (show the diff, not just the summary); rotate deep-review duty so fresh eyes hit high-risk changes; and measure the gate — approval latency, edit rate, rejection rate. A gate that approves 100% of items at ten seconds each is not a gate; it is a metric pretending to be a control." },
+        { "type": "note", "style": "warning", "text": "The uncomfortable truth to plan around: as AI volume grows, undifferentiated 'a human checks everything' scales into 'a human checks nothing carefully'. Choose consciously what deserves deep human judgment — and make the machine stages earn the rest." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Team-Scale Copilot: Instructions, Policies, CI",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Repository custom instructions: a checked-in instructions file (e.g. .github/copilot-instructions.md) that steers Copilot for everyone in the repo — conventions, framework versions, forbidden patterns, test style — the standards profile (tutorial 4) applied automatically instead of pasted.",
+          "Copilot's PR-integration features (availability varies by plan/platform): AI-generated PR summaries and review suggestions — useful inputs, same non-gate status as any AI review.",
+          "CI as the enforcement floor: analyzers, formatters, test runs, and coverage thresholds run on every PR — the machine stages of the pipeline, executed without exception.",
+          "Organization policy settings: enablement scope, public-code filtering, telemetry — reviewed at rollout (tutorial 8) and revisited as the product evolves.",
+          "Team prompt assets: shared review checklists, sweep prompts, and test-generation instructions kept in the repo beside the code they serve — tutorial 7's library, team edition."
+        ] },
+        { "type": "paragraph", "text": "Custom instructions deserve emphasis: they are the highest-leverage team configuration, because they fix the context problem at the source — every developer's Copilot sees the team's conventions on every request, without anyone remembering to paste a profile. Keep the file short, concrete, and versioned like code; audit it when suggestion quality drifts; and mirror its rules in analyzers, because instructions raise compliance while analyzers enforce it (the tutorial 4 truth, one level up)." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "The Advanced Workflow Catalog",
+      "content": [
+        { "type": "table", "headers": ["Workflow", "Mechanism", "The guardrail"], "rows": [
+          ["Pre-review every PR", "Diff + standards profile → ranked findings with lines", "Human verifies findings; empty list proves nothing"],
+          ["Integration-test an endpoint", "Exemplar + scenario list → WebApplicationFactory-style suite", "Determinism demanded; sabotage check applies"],
+          ["Pre-merge concurrency sweep", "Targeted async/await failure-class prompt", "Findings verified before fixes"],
+          ["Quarterly improvement sweep", "Ranked refactoring backlog per module", "Proposals only — humans pick what's worth churn"],
+          ["Bug-fix validation", "Regression test (fails pre-fix) + AI review of the fix", "Diagnosis confirmed before fixing (tutorial 3)"],
+          ["Onboard to unfamiliar module", "/explain layers + risk inventory + characterization tests", "Explanations verified against source"],
+          ["Standards rollout", "Custom instructions file + mirrored analyzers", "Instructions raise compliance; analyzers enforce"],
+          ["Review-load management", "Machine stages hardened; human gates scoped + instrumented", "Gate metrics watched: edit rate, rejection rate"]
+        ] },
+        { "type": "paragraph", "text": "Read the guardrail column as the point: every advanced workflow is a basic workflow plus the check that keeps it honest at scale. Teams that adopt the left column without the right column get tutorial 8's warning — speed with a defect tax — at team scale." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples in C#",
+      "content": [
+        { "type": "paragraph", "text": "A team review-prompt asset — checked into the repo, used by everyone, versioned like code:" },
+        { "type": "code", "language": "csharp", "title": "Shared AI pre-review prompt (team asset)", "code": [
+          "public static class ReviewPrompts",
+          "{",
+          "    // v5: added explicit-nothing clause + async category (2026-09).",
+          "    public const string PreReview = \"\"\"",
+          "        Review the following diff as a first-pass reviewer.",
+          "        Categories: correctness, async/await mistakes, error handling,",
+          "        null-safety, naming/conventions, security-sensitive patterns.",
+          "",
+          "        Report: findings ranked by severity (blocker/major/minor),",
+          "        each with file:line, a one-line rationale, and a suggested fix.",
+          "        For every category with NO findings, state that explicitly.",
+          "        Do not comment on style covered by our analyzers.",
+          "        Do not propose refactors unrelated to the diff.",
+          "        \"\"\";",
+          "}"
+        ] },
+        { "type": "paragraph", "text": "And the validation pipeline expressed as a checklist type — the kind of small artifact that turns discipline into default:" },
+        { "type": "code", "language": "csharp", "title": "The validation pipeline as an executable checklist", "code": [
+          "public sealed record AiChangeValidation",
+          "{",
+          "    public bool CompilesClean { get; init; }          // stage 1: compiler",
+          "    public bool AnalyzersPass { get; init; }          // stage 2: analyzers/format",
+          "    public bool TestsGreen { get; init; }             // stage 3: unit + integration",
+          "    public bool SabotageCheckDone { get; init; }      // stage 3b: suite honesty (tutorial 5)",
+          "    public bool AiSelfReviewDone { get; init; }       // stage 4: one extra request",
+          "    public bool HumanReviewDone { get; init; }        // stage 5: judgment, not ritual",
+          "",
+          "    public bool ReadyToMerge =>",
+          "        CompilesClean && AnalyzersPass && TestsGreen &&",
+          "        SabotageCheckDone && AiSelfReviewDone && HumanReviewDone;",
+          "}"
+        ] },
+        { "type": "note", "style": "info", "text": "Teams wire the first three stages into CI so they are not optional; the record above is the human-side reminder that stages 3b–5 exist. The order is the economics: each stage catches what it is cheapest to catch there." }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step-by-Step: An AI-Assisted PR Review, End to End",
+      "content": [
+        { "type": "paragraph", "text": "A realistic pull request — a teammate's Copilot-assisted feature adding an order-cancellation endpoint — reviewed with the full pipeline. Replay it on your next real PR." },
+        { "type": "list", "style": "numbered", "items": [
+          "Machine gate first: CI has run — build clean, analyzers clean, tests green. You look at nothing until this is true; anything else wastes attention on what machines catch free.",
+          "AI pre-review: run the team's PreReview prompt against the diff in Copilot Chat. It returns: one major (missing cancellation propagation in the new service call), two minors (naming, a redundant null check), and explicit 'nothing found' in security and error handling.",
+          "Verify the major: open the code path — confirmed, the CancellationToken stops at the controller. A real finding; comment with the fix.",
+          "Anchoring counter-move: before trusting the clean categories, read the diff yourself for the two things AI review is weakest at — does this change fit the architecture, and is the domain logic right? You find a domain question the model could never catch: cancellation is allowed for shipped orders, which the ticket excludes. That's the review's most important finding, and a human made it.",
+          "Test scrutiny: the PR includes generated tests. Names against the scenario list — the duplicate-cancellation case is missing; request it. Assertions spot-checked; one asserts on the mock instead of the response — request the fix (tutorial 5's classic).",
+          "Sabotage spot-check (risk-based, not every PR): the cancellation state check is this PR's crux — flip it locally, run the suite: two tests go red. The suite earns its green for this change.",
+          "Human verdict: approve with changes — the major, the missing case, the mock assertion, and the domain question back to the author. Merge happens after re-review of those points.",
+          "Close the loop (30 seconds): the missing-cancellation-propagation finding recurs across PRs — add it to the custom instructions file so Copilot stops generating the pattern at the source."
+        ] },
+        { "type": "note", "style": "tip", "text": "Count the division of labor: machines caught the mechanical, AI caught the checklist-able, and the human caught the domain error and the architecture fit — each validator doing exactly what it is best at. That is the pipeline working." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "AI review recall is probabilistic: an empty findings list is not a clean bill of health, and 'nothing found in security' means 'nothing pattern-matched', not 'secure'. The human read of the diff stays.",
+          "Anchoring is insidious precisely because the AI's framing is usually right — the 95% of good calls train you to under-verify the 5%. Structural counters (read the diff before the findings on high-risk PRs) beat willpower.",
+          "Integration tests amplify flakiness risks: shared state, timing, real IO. Demand determinism in generation prompts and treat a flaky generated suite as worse than none — it trains the team to ignore red.",
+          "Sweeps produce false positives confidently; verification-before-fix is not optional. They also produce false negatives silently; sweeps supplement, never replace, testing and review.",
+          "Custom instructions steer probabilistically — they are not policy enforcement. Mirror every rule that matters in analyzers or CI.",
+          "Human gates degrade measurably with volume; an uninstrumented gate should be presumed degraded. Edit and rejection rates are the health check.",
+          "Team features (PR summaries, review integrations, instruction file mechanics) vary by plan and evolve quickly — verify current capabilities against official documentation."
+        ] },
+        { "type": "note", "style": "warning", "text": "API-accuracy disclosure: the integration test example uses the standard ASP.NET Core WebApplicationFactory pattern (Microsoft.AspNetCore.Mvc.Testing) with NUnit; exact setup details vary by framework version — verify against current documentation. The C# prompt assets are plain raw string literals (C# 11+). Copilot team features and instruction-file mechanics are described at the concept level; current specifics live in the official GitHub Copilot documentation." }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices and Common Mistakes",
+      "content": [
+        { "type": "paragraph", "text": "The advanced habit set:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Order the pipeline by cost: compiler → analyzers → tests → AI review → human judgment; push every defect class to its cheapest reliable catcher.",
+          "Demand ranked, line-referenced, explicit-nothing findings from AI review; verify before acting.",
+          "Generate tests at both levels — unit for logic, integration for wiring — with determinism demanded and honesty checks applied.",
+          "Run targeted sweeps (concurrency, resources, null-safety, edge cases) at defined moments; verify findings before fixes; keep improvement sweeps as backlogs, not diffs.",
+          "Encode team conventions in custom instructions and mirror the enforceable subset in analyzers.",
+          "Scope human gates to genuine judgment calls; instrument them; rotate deep-review duty.",
+          "Feed recurring findings back into instructions and analyzers — fix the source, not just the instances."
+        ] },
+        { "type": "paragraph", "text": "The mistakes that appear at team scale:" },
+        { "type": "list", "style": "bullet", "items": [
+          "Responding to AI-quality worries with more human review instead of harder machine stages — spending the most expensive validator on the cheapest defects.",
+          "Treating an empty AI findings list as approval.",
+          "Letting the AI's summary be the only thing the human reads — anchoring by design.",
+          "Shipping flaky generated integration suites that teach the team to ignore red.",
+          "Applying sweep fixes without verifying the findings.",
+          "Custom instructions that contradict the analyzers — every generation wastes an Improve turn.",
+          "Uninstrumented human gates presumed healthy — rubber-stamping discovered only after the incident.",
+          "Forgetting the terminal rule: merge is a human decision, made on evidence the pipeline assembled."
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz",
+      "items": [
+        { "number": 1, "question": "What is the correct role of AI-assisted code review in a team workflow?", "options": { "A": "The merge gate — it approves PRs", "B": "A pre-review pass producing ranked, line-referenced findings that humans verify and extend", "C": "A replacement for CI", "D": "Documentation generation" }, "correctAnswer": "B", "explanation": "AI review is a first-pass filter: it catches the mechanical middle (conventions, null handling, async mistakes) so human attention concentrates on design and domain. It never gates — its recall is probabilistic, and merge stays a human decision." },
+        { "number": 2, "question": "Why demand 'state explicitly which categories you found nothing in' from AI review?", "options": { "A": "It pads the report", "B": "So silence is distinguishable from not-looked — an unqualified empty list could mean either", "C": "Compliance requires it", "D": "It reduces token usage" }, "correctAnswer": "B", "explanation": "Without the clause, a missing category might mean 'clean' or 'never examined'. With it, you at least know the model claims to have looked — while remembering that 'nothing found' still means 'nothing pattern-matched', not 'proven clean'." },
+        { "number": 3, "question": "What class of bugs do integration tests catch that unit tests structurally cannot?", "options": { "A": "Arithmetic errors", "B": "Wiring bugs: DI registration, middleware ordering, serialization, EF query translation, cross-layer contract mismatches", "C": "Naming inconsistencies", "D": "None — unit tests catch everything" }, "correctAnswer": "B", "explanation": "Unit tests replace dependencies with test doubles, so the real wiring is exactly what they don't exercise. Integration tests run the actual pipeline — where registration, ordering, and translation bugs live. Each level earns its place." },
+        { "number": 4, "question": "What must an integration-test generation prompt demand to avoid a suite worse than none?", "options": { "A": "Maximum test count", "B": "Determinism: seeded data, no shared state, explicit cleanup — because a flaky suite trains the team to ignore red", "C": "Only happy paths", "D": "Mocks for everything" }, "correctAnswer": "B", "explanation": "Integration tests touch real IO and state, so flakiness is the native risk. A suite that fails randomly erodes trust in every red — worse than no suite. Determinism is demanded in the prompt and verified in review." },
+        { "number": 5, "question": "Why do targeted sweeps ('find async/await mistakes') outperform 'find bugs'?", "options": { "A": "Shorter prompts run faster", "B": "Naming the failure class focuses pattern-matching where the model excels; generic asks produce generic nitpicks", "C": "Models refuse generic requests", "D": "They don't — generic is better" }, "correctAnswer": "B", "explanation": "The model's strength is recognizing known defect patterns. 'Missing awaits, async void, .Result deadlocks, unpropagated cancellation' aims that strength; 'find bugs' invites noise. Sweep prompts are checklists in disguise." },
+        { "number": 6, "question": "A sweep reports a probable race condition. What happens next?", "options": { "A": "Apply the suggested fix immediately", "B": "Verify the finding — reproduce with a test or trace it — before any fix; sweep findings are hypotheses", "C": "Ask the model to confirm its own finding", "D": "Delete the flagged code" }, "correctAnswer": "B", "explanation": "Tutorial 3's rule at sweep scale: confident findings are hypotheses until verified by evidence. Self-confirmation by the model is not confirmation. False-positive fixes add churn and risk for zero benefit." },
+        { "number": 7, "question": "Why should improvement sweeps end in a backlog rather than a diff?", "options": { "A": "Diffs are too large for chat", "B": "What's worth churning is a human judgment involving risk, roadmap, and hot paths — the sweep ranks opportunities; humans choose", "C": "Models cannot produce diffs", "D": "Backlogs are easier to ignore" }, "correctAnswer": "B", "explanation": "Refactoring has costs (risk, review load, merge conflicts) the model can't weigh. 'Do not change anything — rank the top 5 by payoff' produces decision support; automatic churn produces unreviewable noise." },
+        { "number": 8, "question": "Order the validation pipeline stages by cost, cheapest first.", "options": { "A": "Human review → AI review → tests → analyzers → compiler", "B": "Compiler → analyzers → tests → AI self-review → human review", "C": "Tests → compiler → human review → analyzers → AI review", "D": "Order doesn't matter" }, "correctAnswer": "B", "explanation": "Free-and-instant first (compiler, analyzers), then cheap-once-written (tests), then one-request (AI review), then the finite resource (human judgment). The design goal: nothing mechanical survives to the expensive stage." },
+        { "number": 9, "question": "What is anchoring bias in AI-assisted review?", "options": { "A": "Reviewing only the first file", "B": "The model's confident framing (summary, clean findings) narrowing the human's independent read — 'looks fine' pre-installed", "C": "Pinning PRs to reviewers", "D": "Preferring senior reviewers" }, "correctAnswer": "B", "explanation": "It's insidious because the AI is usually right — the good calls train under-verification of the bad ones. Structural counter: on high-risk PRs, read the diff before the findings; never let the summary be the only input." },
+        { "number": 10, "question": "What is rubber-stamping, and what makes a gate susceptible?", "options": { "A": "Using approval stamps in PR tools", "B": "Reflexive approval at volume — the control exists on paper while judgment is gone; caused by too many diluted gates", "C": "Approving only stamped documents", "D": "A CI feature" }, "correctAnswer": "B", "explanation": "When humans approve hundreds of items, approval becomes clicking. Susceptibility rises with gate count and volume, falls with scoping (few, consequential gates) and instrumentation (edit/rejection rates watched)." },
+        { "number": 11, "question": "Which metric most directly reveals a degraded human gate?", "options": { "A": "Lines of code reviewed per day (higher is better)", "B": "Approval rate near 100% with seconds-level review latency", "C": "Number of reviewers", "D": "PR description length" }, "correctAnswer": "B", "explanation": "A gate approving everything instantly is a metric pretending to be a control. Healthy gates show non-trivial edit and rejection rates and latency proportional to risk. Uninstrumented gates should be presumed degraded." },
+        { "number": 12, "question": "What are repository custom instructions for?", "options": { "A": "Encrypting the repository", "B": "Steering Copilot with team conventions on every request in the repo — the standards profile applied automatically", "C": "Blocking Copilot entirely", "D": "Generating README files" }, "correctAnswer": "B", "explanation": "A checked-in instructions file gives every developer's Copilot the team's conventions without pasting profiles. It raises compliance probabilistically — which is why enforceable rules are mirrored in analyzers (instructions steer; analyzers enforce)." },
+        { "number": 13, "question": "The AI pre-review found nothing in the 'security' category. The correct interpretation is:", "options": { "A": "The change is secure", "B": "Nothing pattern-matched the model's security checks — the human security read of risky diffs remains", "C": "Security review is complete", "D": "The category was skipped" }, "correctAnswer": "B", "explanation": "Probabilistic recall means absence of findings proves nothing — especially in security, where consequences are highest. AI review augments the checklist; it never discharges the human obligation on sensitive changes." },
+        { "number": 14, "question": "In the walkthrough, which finding could ONLY the human make?", "options": { "A": "The missing CancellationToken propagation", "B": "The redundant null check", "C": "That cancellation was allowed for shipped orders, contradicting the ticket — a domain-correctness error", "D": "The naming inconsistency" }, "correctAnswer": "C", "explanation": "Domain intent lives outside the code and the model's context — no pattern-match can know what the ticket excluded. That's precisely the judgment human review must stay fresh for, and why the pipeline protects human attention." },
+        { "number": 15, "question": "As AI output volume grows, what happens to 'a human checks everything'?", "options": { "A": "It scales linearly and remains effective", "B": "It silently becomes 'a human checks nothing carefully' — volume dilutes attention; the loop must be redesigned, not exhorted", "C": "It becomes cheaper", "D": "Nothing changes" }, "correctAnswer": "B", "explanation": "Human attention is the one validator that degrades with volume. The design response: harden machine stages until they catch the mechanical, scope human gates to consequential judgment, and instrument gate health — deliberate triage over heroic vigilance." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam Questions",
+      "items": [
+        { "number": 1, "question": "Define the trust pipeline for AI-assisted development: stages, ordering rationale, and design goal.", "modelAnswer": "Stages in order: (1) compiler — free, instant, catches hallucinated APIs and type errors; (2) static analyzers/formatters — free, catch convention drift and known bug patterns; (3) tests, unit and integration, honesty-checked — cheap once written, catch behavioral wrongness; (4) AI self-review — one request, catches checklist violations and mechanical slips; (5) human review — expensive and finite, catches design misfit and domain errors nothing else can. Ordering is pure economics: each defect class is pushed to the cheapest stage that reliably catches it. Design goal: nothing mechanical survives to stage 5, so scarce human judgment is spent entirely on what machines cannot judge — inverting the common instinct of answering AI-quality worries with more human review while machine stages stay loose." },
+        { "number": 2, "question": "Specify a production-grade AI pre-review prompt and justify each element.", "modelAnswer": "Elements: scope = the diff (not whole files — signal density); category list (correctness, async, error handling, null-safety, conventions, security-sensitive patterns) — targeted categories aim pattern-matching and make coverage auditable; ranked severity (blocker/major/minor) — humans triage instead of wading; file:line references with one-line rationales — verifiable, actionable findings; suggested fixes — accelerates resolution; the explicit-nothing clause ('for every category with no findings, say so') — distinguishes silence from not-looked; exclusions ('no style covered by analyzers, no unrelated refactors') — prevents noise and machine-stage duplication. Justification thread: every element either aims the model's strength (known patterns), makes output verifiable, or protects human attention — the three currencies of review." },
+        { "number": 3, "question": "Compare unit and integration test generation with Copilot: what each level catches, prompt requirements, and review differences.", "modelAnswer": "Unit tests: isolate one behavior with test doubles; catch logic errors with millisecond feedback and precise localization; generation needs the code under test, a behavior spec (oracle), and an exemplar — tutorial 5/8 unchanged. Integration tests: exercise real wiring (HTTP pipeline via WebApplicationFactory-style hosts, real serialization, database mappings); catch DI registration errors, middleware ordering, EF translation, contract mismatches — the class unit tests structurally cannot see because doubles replace exactly the wiring in question. Integration prompts additionally demand: an exemplar of the team's integration pattern, the scenario list (status codes, headers, error shapes), and determinism (seeded builders, no shared state, explicit cleanup). Review differences: flakiness scrutiny is first-class (a flaky suite is worse than none), runtime cost is watched, and the sabotage check applies at the flow's crux. Division of labor: unit for logic-heavy classes, integration for wiring-heavy flows." },
+        { "number": 4, "question": "Design a sweep program for a mature codebase: which sweeps, when, and the disciplines that keep them honest.", "modelAnswer": "Sweeps: concurrency (async/await failure classes) and resource (disposal, HttpClient misuse) — before merging anything touching async or IO; null-safety — on modules migrating to nullable reference types; edge-case enumeration — during test-case-list design, feeding the suite; improvement sweep (ranked top-5 refactoring backlog per module) — quarterly, not continuously, because churn costs. Disciplines: (1) findings are hypotheses — every claimed bug is reproduced by test or trace before a fix; model self-confirmation is not confirmation; (2) improvement sweeps are proposals — 'do not change anything' in the prompt; humans weigh risk, roadmap, and hot paths before any churn; (3) sweeps supplement testing and review — false negatives are silent, so a clean sweep discharges nothing; (4) recurring findings feed back into custom instructions and analyzers, fixing the source pattern rather than instances forever." },
+        { "number": 5, "question": "Name and analyze the three failure modes of human-in-the-loop validation, with structural countermeasures for each.", "modelAnswer": "(1) Review fatigue: attention declines across volume — the fortieth review gets a fraction of the first's scrutiny. Counters: shrink what needs human eyes (harden machine stages), rotate deep-review duty, route by risk so fresh attention meets consequential changes. (2) Anchoring bias: the AI's confident framing pre-installs 'looks fine'; insidious because the model is usually right, training under-verification. Counters: on high-risk PRs read the diff before the AI findings; never present the summary as the sole input; occasionally seed known issues to calibrate reviewers. (3) Rubber-stamping: gates crossed reflexively at volume — control on paper, judgment gone. Counters: few, consequential gates instead of many diluted ones; instrument (approval latency, edit rate, rejection rate) and treat 100%-approval-in-seconds as an alarm; periodically audit samples of approved items. Meta-principle: exhortation doesn't scale, design does — the loop is engineered so remaining human judgment is real." },
+        { "number": 6, "question": "Explain custom instructions: mechanism, relationship to analyzers, and maintenance discipline.", "modelAnswer": "Mechanism: a checked-in repository file (e.g. .github/copilot-instructions.md) whose content steers Copilot for every request in that repo — conventions, framework versions, forbidden patterns, test style — the tutorial 4 standards profile applied automatically to all developers instead of pasted per prompt. Relationship to analyzers: instructions raise compliance probabilistically (generation follows them most of the time); analyzers/CI enforce deterministically. Every rule that matters gets mirrored: instructions reduce friction at generation time, analyzers guarantee at build time; contradictions between them waste an Improve turn per generation, so drift is a bug. Maintenance: keep it short and concrete (long instruction files dilute), version and review changes like code, audit when suggestion quality drifts, and feed recurring review findings into it — the walkthrough's close-the-loop step institutionalized." },
+        { "number": 7, "question": "Argue for and against sabotage-checking on every PR, and state a defensible policy.", "modelAnswer": "For: the sabotage check is the only direct evidence a suite can fail — without it, assertion-free and tautological tests ride green into main, and generated suites make that failure mode cheap to produce at volume. Against: per-PR sabotage costs real time, most PRs are low-risk, and ritualizing it invites checkbox compliance (the rubber-stamping dynamic applied to a good practice). Defensible policy: risk-based application — mandatory when a PR introduces a new suite or materially changes core logic (sabotage the crux, as in the walkthrough); periodic for existing suites (mutation-testing tools automate this at scale, e.g. scheduled Stryker runs); waived for trivial changes under an already-honest suite. Complement: assertion reading on the riskiest tests stays per-PR because it's cheap. The principle: honesty evidence proportional to the trust being extended." },
+        { "number": 8, "question": "The walkthrough's most important finding came from the human, not the AI. Generalize: what review contributions are structurally human, and what protects the capacity to make them?", "modelAnswer": "Structurally human: domain correctness against intent that lives outside the code (the ticket excluded shipped orders — no pattern-match can know that); architectural fit and direction (does this change belong here, does it push the design where we want it); requirement interpretation and scope judgment; risk appetite decisions (is this worth shipping Friday afternoon); and organizational context (who depends on this behavior). These share one property: the ground truth is not in the diff, so no amount of model capability retrieves it. Protection: the entire pipeline design — machines catching the mechanical, AI catching the checklist-able — exists to deliver human attention intact to exactly these questions; plus anchoring counters (diff before findings) so the judgment is independent, and gate instrumentation so its erosion is visible. The human contribution is not a residual; it is the point the system is built to preserve." },
+        { "number": 9, "question": "Design the metrics for an AI-assisted review process: what you measure, what each signals, and the traps.", "modelAnswer": "Gate health: approval latency distribution, human edit rate on approved items, rejection rate — near-zero rejection with seconds-latency signals rubber-stamping; falling edit rates may signal improving quality or degrading attention, so pair with audits. AI-review value: verified-finding rate (findings humans confirmed) and false-positive rate per category — directs prompt tuning; recurring-finding classes feed instructions/analyzers. Outcome truth: escaped-defect rate and incident attribution — the metric everything else proxies; if velocity rises while escapes rise, tutorial 8's defect tax is operating. Suite honesty: mutation scores where automated, sabotage-check completion where manual. Traps: coverage as quality (tutorial 5), velocity as success alone, gate throughput as productivity (rewards stamping), and measuring individuals rather than process (invites gaming and blame). Measurement philosophy: metrics watch the process's health, and the process — not the metrics — is the control." },
+        { "number": 10, "question": "A teammate proposes auto-merging PRs when AI review returns no blockers and CI is green. Evaluate.", "modelAnswer": "Reject, with a path to partial automation. Why reject: AI review recall is probabilistic — empty findings prove nothing, especially in the highest-consequence categories; anchoring already tempts under-review, and auto-merge institutionalizes it into no-review; the structurally human contributions (domain correctness, architectural fit) are exactly what the proposal deletes, and they cannot be recovered post-merge cheaply. What can be automated: the machine gate is already automated (CI); expanding it — stricter analyzers, mutation-score thresholds, contract tests — legitimately shrinks what humans must inspect. Acceptable middle: risk-tiered flows where genuinely mechanical changes (dependency bumps passing full suites, generated docs regeneration) auto-merge under narrow, audited rules, while any behavioral change keeps the human verdict. Frame: merge is a human decision on pipeline-assembled evidence; automation improves the evidence, not the verdict." },
+        { "number": 11, "question": "How does the tutorial 5 test-honesty discipline extend to integration tests, and what new failure modes appear at that level?", "modelAnswer": "Extensions: the oracle rule (scenarios derive from the API contract and requirements, not from what the endpoint currently returns — deriving expected status codes from current behavior enshrines wiring bugs); assertion reading (does the test assert the contract — status, headers, body shape — or merely 'not null'); the sabotage check at the flow's crux (break the endpoint's core logic; the suite must go red). New failure modes: flakiness from real IO, timing, and shared state — a red that isn't reproducible erodes all trust, so determinism (seeded builders, isolated state, cleanup) is reviewed as hard as correctness; false confidence from in-memory substitutes (an in-memory database that doesn't reproduce the real engine's translation quirks passes tests the production database fails) — know what your substitute doesn't simulate; and cost creep — suites slow enough that developers skip them locally, which is a suite design bug, not a developer discipline bug." },
+        { "number": 12, "question": "Describe the close-the-loop practice from the walkthrough and argue why it compounds.", "modelAnswer": "Practice: when review — human or AI — finds the same issue class repeatedly (missing cancellation propagation, in the walkthrough), the fix is applied at the generation source, not just the instances: add the rule to the repository's custom instructions so every developer's Copilot stops producing the pattern, and mirror it in an analyzer where enforceable so the machine gate catches any that slip through. Why it compounds: each fed-back rule permanently removes a finding class from every future PR — review attention freed, forever; instructions accumulate into an executable statement of team conventions that new members' tools obey on day one; and the feedback loop converts review from a repeating cost into a system-improvement engine. It is tutorial 7's library flywheel at team scale: capture what works (or what fails), encode it, and let the baseline rise. Teams that skip it re-find the same issues monthly; teams that practice it watch their finding mix shift toward the genuinely novel." },
+        { "number": 13, "question": "Propose a rollout plan for the advanced workflows in a 10-developer team currently using Copilot casually.", "modelAnswer": "Phase 1 (weeks 1–2), foundations: write the custom instructions file from existing conventions; sync analyzers to it; publish the shared PreReview prompt and the validation-pipeline checklist; one workshop on the pipeline concept and anchoring counters. Phase 2 (weeks 3–6), pre-review habit: AI pre-review on all PRs with humans verifying findings; explicit-nothing clause enforced; recurring findings fed to instructions weekly; sabotage checks mandatory on new suites only. Phase 3 (weeks 7–10), test depth: integration-test exemplar built and blessed; generation prompts standardized; determinism review added to PR checklist; first quarterly improvement sweeps run per module, producing backlogs for planning. Phase 4 (ongoing), instrumentation: gate metrics dashboarded (latency, edit, rejection rates); escaped-defect tracking tied to attribution; quarterly review of instruction-file effectiveness and sweep cadence. Throughout: merge stays human; metrics watch process health, not individuals; and each phase's practices are added only when the previous phase's are habitual — layering discipline, not dumping it." },
+        { "number": 14, "question": "Explain why 'more human review' is often the wrong answer to AI code-quality concerns, and what the right answer is.", "modelAnswer": "Wrong because it misallocates the scarcest validator: human attention is finite, degrades with volume (fatigue, rubber-stamping), and is uniquely capable of judgments machines cannot make — spending it on defects the compiler, analyzers, or tests would catch free both wastes it and dilutes it, so the mechanical defects still slip through (tired reviewers miss them too) while design and domain errors get less scrutiny than before. Right answer: harden the cheap stages until they reliably catch the mechanical — strict analyzers mirroring conventions, honesty-checked test suites at both levels, AI pre-review with ranked findings absorbing the checklist-able — then scope the human stage to genuine judgment (domain, architecture, intent) and instrument it so its health is visible. The counterintuitive result: fewer human review-minutes per PR with more actual human judgment applied — because the minutes that remain are spent where only humans add value." },
+        { "number": 15, "question": "Scenario: after six months of heavy Copilot use, a team's velocity is up 40%, escaped defects up 25%, and two incidents traced to 'reviewed' AI code nobody remembers scrutinizing. Diagnose fully and prescribe.", "modelAnswer": "Diagnosis: the defect tax at team scale — volume rose into an unredesigned loop. The 'reviewed but unscrutinized' incidents are the signature of rubber-stamping plus anchoring: gates existed, judgment didn't; likely accompanied by loose machine stages (analyzers not mirroring conventions, generated tests trusted on green without honesty checks) sending mechanical defects to tired humans. Prescribe in order: (1) instrument the gates immediately — latency/edit/rejection rates plus an audit of recent approvals; establish the baseline truth; (2) harden machine stages — analyzer sync with a new custom-instructions file, mandatory sabotage checks on new suites, CI thresholds — shrinking the human surface; (3) restructure review — AI pre-review with verified findings, diff-before-findings on high-risk PRs, risk-tiered routing so deep attention meets consequential changes, deep-review rotation; (4) close loops — incident findings and recurring review findings encoded into instructions and analyzers; (5) re-measure by escaped defects, not velocity — expect velocity to dip slightly and recover as the pipeline absorbs what humans were failing to catch. Message to the team: the tool didn't fail, the loop design did — and loops are fixable." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Trust pipeline (5 stages)", "back": "Compiler → analyzers → tests (honesty-checked) → AI self-review → human review. Push each defect class to its cheapest reliable catcher." },
+        { "number": 2, "front": "Pipeline design goal", "back": "Nothing mechanical survives to human review — so finite human judgment is spent only on what machines can't judge (design, domain, intent)." },
+        { "number": 3, "front": "AI pre-review prompt essentials", "back": "Diff scope · named categories · severity ranking · file:line + rationale · suggested fixes · explicit-nothing clause · exclusions (analyzer-covered style, unrelated refactors)." },
+        { "number": 4, "front": "Explicit-nothing clause", "back": "'For every category with no findings, say so' — distinguishes silence from not-looked. Still: 'nothing found' ≠ clean; recall is probabilistic." },
+        { "number": 5, "front": "What AI review can't judge", "back": "Right problem? Fits architecture? Domain correct? Runtime behavior? Those are structurally human — the ground truth isn't in the diff." },
+        { "number": 6, "front": "Unit vs integration tests", "back": "Unit: doubles isolate logic — fast, precise. Integration: real wiring (pipeline, serialization, DB) — catches DI, ordering, translation, contract bugs doubles hide." },
+        { "number": 7, "front": "Integration-test prompt demands", "back": "Team exemplar (WebApplicationFactory-style) + scenario list (statuses, headers, shapes) + determinism: seeded builders, isolated state, cleanup." },
+        { "number": 8, "front": "Flaky generated suite", "back": "Worse than none — random red trains the team to ignore all red. Determinism is reviewed as hard as correctness." },
+        { "number": 9, "front": "Targeted sweeps", "back": "Name the failure class: async/await, disposal, null-safety, edge cases. Checklists in disguise — generic 'find bugs' yields generic nitpicks." },
+        { "number": 10, "front": "Sweep discipline", "back": "Findings are hypotheses → verify (test/trace) before fixing. Improvement sweeps output ranked backlogs, never diffs — humans choose the churn." },
+        { "number": 11, "front": "HITL failure mode: anchoring bias", "back": "AI's confident framing pre-installs 'looks fine'. Counter: diff before findings on high-risk PRs; summary never the sole input." },
+        { "number": 12, "front": "HITL failure mode: rubber-stamping", "back": "Volume turns approval into clicking — control on paper, judgment gone. Counter: few consequential gates, instrumented (edit/rejection rates)." },
+        { "number": 13, "front": "Gate health check", "back": "~100% approval at seconds-level latency = alarm. Healthy gates show real edit/rejection rates and risk-proportional latency. Uninstrumented = presume degraded." },
+        { "number": 14, "front": "Custom instructions", "back": "Checked-in repo file steering every developer's Copilot — the standards profile applied automatically. Raises compliance; analyzers still enforce." },
+        { "number": 15, "front": "Close the loop", "back": "Recurring findings → custom instructions + analyzers. Fix the generation source, not instances — each fed-back rule frees review attention forever." },
+        { "number": 16, "front": "The terminal rule", "back": "Merge is a human decision made on pipeline-assembled evidence. Automation improves the evidence — never the verdict." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions & Answers",
+      "items": [
+        { "number": 1, "question": "How would you integrate AI review into a team's PR process?", "answer": "As a pre-review stage between CI and humans. The machine gate runs first — build, analyzers, tests — so nothing mechanical reaches anyone's attention. Then an AI pass over the diff with our shared prompt: named categories, severity-ranked findings with file-and-line references, suggested fixes, and an explicit statement for every category where it found nothing, so silence is distinguishable from not-looked. Humans start from those findings — verifying, dismissing, extending — and spend their real attention on what the model structurally can't judge: domain correctness, architectural fit, intent. Merge stays a human decision. The AI accelerates review; it never becomes the reviewer of record, because its recall is probabilistic and an empty findings list proves nothing." },
+        { "number": 2, "question": "What's the difference between how you'd use Copilot for unit versus integration tests?", "answer": "Different targets, different demands. Unit tests isolate logic with test doubles — I generate them from the code plus a behavior spec plus an exemplar, tutorial-standard. Integration tests exercise the real wiring — actual HTTP pipeline, real serialization, database mappings — which is exactly where a whole bug class lives that unit tests structurally can't see: DI registration, middleware ordering, query translation. For those, my prompt supplies our WebApplicationFactory-style exemplar, the scenario list with expected statuses and shapes, and hard determinism demands: seeded data builders, no shared state, explicit cleanup — because a flaky integration suite is worse than none; it trains people to ignore red. Honesty discipline applies at both levels: assertions checked against the contract, and a sabotage check at the flow's crux." },
+        { "number": 3, "question": "Tell me about proactive bug-hunting with AI.", "answer": "Targeted sweeps, not 'find bugs'. I name the failure class so the model's pattern-matching has a checklist: async/await sweeps for missing awaits, async void, .Result deadlocks, unpropagated cancellation; resource sweeps for disposal and HttpClient misuse; null-safety and edge-case sweeps at test-design time. Timing is deliberate — concurrency sweeps before merging anything async-heavy, improvement sweeps quarterly per module producing a ranked backlog, never a diff, because what's worth churning is a human call involving risk and roadmap. And the iron discipline: every finding is a hypothesis until I've reproduced it with a test or traced it — the model confirming its own finding is not confirmation. Sweeps supplement testing and review; a clean sweep discharges nothing." },
+        { "number": 4, "question": "What does 'validating AI-generated code' actually mean in your workflow?", "answer": "An ordered pipeline where each stage catches what it's cheapest to catch. Compiler first — free, kills hallucinated APIs. Analyzers second — free, kills convention drift; ours mirror our custom instructions so generation and enforcement agree. Tests third — both levels, and honesty-checked: I've watched the suite fail under sabotage before I trust its green. AI self-review fourth — one extra request that catches checklist violations. Human review last and most precious — scoped to design, domain, and intent, because everything mechanical died upstream. The design goal is exactly that scoping: if a human is spending review minutes on a missing null check, the pipeline is broken — that was the analyzer's job or the AI pass's job, three stages cheaper." },
+        { "number": 5, "question": "What are the limits of human-in-the-loop validation?", "answer": "It's the strongest validator and the only one that degrades with volume — through three predictable failure modes. Review fatigue: the fortieth review gets a fraction of the first's attention. Anchoring bias: the AI's confident summary pre-installs 'looks fine', and it's insidious precisely because the model's usually right — the good calls train you to under-verify the bad ones. Rubber-stamping: at sufficient volume, approval becomes clicking; the gate exists on paper while the judgment is gone. The response is design, not exhortation: shrink what needs human eyes by hardening the machine stages, scope gates to genuine judgment calls, show reviewers the diff and not just the AI's summary on risky changes, and instrument the gate — near-total approval at seconds-level latency is an alarm, not a throughput win." },
+        { "number": 6, "question": "How do you prevent reviewers from being anchored by AI findings?", "answer": "Structurally, because willpower loses to a mostly-right model. On high-risk PRs, the norm is diff-before-findings: the reviewer forms an independent read before opening the AI's report, so their judgment isn't framed by 'two minors and everything else clean'. The AI summary is never the only artifact — the diff is primary. We rotate deep-review duty so fresh attention hits consequential changes, and occasionally we calibrate: a PR with known seeded issues, to measure whether the process catches what the AI pass missed. And we keep the walkthrough lesson visible: the most important finding in a typical review — the domain error, the ticket contradiction — is one the AI structurally cannot make, which reframes the human role from 'checking the AI' to 'doing the part only humans can'." },
+        { "number": 7, "question": "What are repository custom instructions and how do you use them well?", "answer": "A checked-in file that steers every developer's Copilot in that repo — our conventions, framework versions, forbidden patterns, test style — the standards profile applied automatically instead of pasted per prompt. Used well: kept short and concrete, because long instruction files dilute; versioned and reviewed like code; mirrored in analyzers for every enforceable rule, since instructions raise compliance probabilistically while analyzers enforce deterministically — and a contradiction between them wastes an Improve turn on every generation. The compounding move is feeding review findings back into it: when the same issue class recurs across PRs — missing cancellation propagation, say — a line in the instructions removes it at the generation source for every future PR. That's review converting from repeating cost into system improvement." },
+        { "number": 8, "question": "Would you ever let AI review gate a merge?", "answer": "Gate, no; inform, absolutely. The case against gating is structural: probabilistic recall means empty findings prove nothing, the highest-consequence categories — security, domain correctness — are where its blind spots concentrate, and the human contributions that matter most can't be recovered after an auto-merge. What I do support is expanding the deterministic gate: stricter analyzers, mutation-score thresholds, contract tests — machine checks that legitimately shrink the human surface. And there's a defensible narrow middle: risk-tiered auto-merge for genuinely mechanical changes — dependency bumps passing full suites, regenerated docs — under audited rules. But any behavioral change keeps the human verdict. The principle I hold: automation improves the evidence a human decides on; it doesn't replace the deciding." },
+        { "number": 9, "question": "How do you measure whether an AI-assisted review process is healthy?", "answer": "Three layers. Gate health: approval latency, human edit rate on approved items, rejection rate — near-100% approval at seconds each is rubber-stamping wearing a control's costume; uninstrumented gates I presume degraded. Process value: verified-finding rates from the AI pass per category (directs prompt tuning), and recurring-finding classes trending down as they're fed back into instructions and analyzers. Ground truth: escaped-defect rate and incident attribution — the number everything else proxies; velocity up with escapes up is the defect tax operating. Traps I avoid: coverage as quality, gate throughput as productivity, and measuring individuals instead of process — the metrics watch the system's health, and people game person-metrics instantly. The philosophy: instrument enough to see degradation before the incident does the seeing for you." },
+        { "number": 10, "question": "A sweep flags 15 'bugs' in a legacy module. Walk me through your handling.", "answer": "Triage as hypotheses, not defects. First pass: rank by claimed severity and plausibility, and check for category patterns — if ten are variations of one issue class, that's one root pattern, not ten bugs. Verification before any fix: for each finding worth pursuing, reproduce it — a failing test is the gold standard, a debugger trace acceptable — because sweep false-positives are confident and common, and 'fixing' them adds churn and risk for nothing. Real confirmed bugs get the full treatment: regression test that fails pre-fix, fix, green, and a check whether the pattern recurs elsewhere in the codebase. False positives get noted — recurring false-positive classes mean the sweep prompt needs tuning. And the module-level signal matters: fifteen findings clustered in one area is an argument for the quarterly improvement sweep's backlog, maybe for characterization tests before anyone touches it further." },
+        { "number": 11, "question": "How does test honesty change at the integration level?", "answer": "The principles hold; the failure modes multiply. Oracle rule unchanged: scenarios derive from the API contract and requirements — deriving expected responses from what the endpoint currently returns enshrines the wiring bugs integration tests exist to catch. Assertion reading unchanged: does it assert the contract — status, headers, body shape — or just 'response is not null'. Sabotage unchanged: break the flow's core logic, demand red. New at this level: flakiness is a first-class review target, because real IO and state make random failure the native risk and a flaky suite destroys trust in every red; substitute-fidelity awareness — an in-memory database that doesn't reproduce the real engine's query translation passes tests production fails, so I know what my substitute doesn't simulate; and cost discipline — a suite too slow to run locally is a design bug that will get skipped, not a developer-virtue problem." },
+        { "number": 12, "question": "What's your 'close the loop' practice and why do you rate it so highly?", "answer": "When review finds the same issue class twice — human or AI finding, doesn't matter — the fix goes to the source, not just the instances: a rule added to the repo's custom instructions so everyone's Copilot stops generating the pattern, mirrored in an analyzer where enforceable so the machine gate catches stragglers. I rate it highly because it's the only review activity whose value compounds: every fed-back rule permanently deletes a finding class from all future PRs, review attention is freed forever, and the instructions file accrues into an executable statement of our conventions that a new hire's tooling obeys on day one. Teams without the practice re-find the same issues monthly and call it rigor. With it, the finding mix shifts steadily toward the genuinely novel — which is what expensive human review was always supposed to be for." },
+        { "number": 13, "question": "Your team's AI-assisted velocity is up but incident count is creeping. Board asks if the AI was a mistake. Your answer?", "answer": "No — the loop design lagged the volume, and loops are fixable. The evidence pattern — velocity up, escapes up, incidents in 'reviewed' code nobody deeply remembers — is the known signature of unredesigned human gates under AI volume: rubber-stamping plus anchoring, usually with loose machine stages underneath sending mechanical defects to tired reviewers. The fix is a sequence, not a rollback: instrument the gates and audit recent approvals to establish truth; harden the machine stages — analyzers synced to a custom-instructions file, honesty checks on generated suites — to shrink the human surface; restructure review around risk-tiering, diff-before-findings, and rotation; feed incident findings back into instructions and analyzers. Expect a small velocity dip, then recovery with escapes falling. The tool multiplied output exactly as advertised; we're now building the process that multiplies judgment to match. Removing the tool would cut the output and keep the process debt." },
+        { "number": 14, "question": "Where should a team be one year into advanced Copilot adoption?", "answer": "Machine stages doing the heavy lifting: analyzers mirroring a mature custom-instructions file, CI enforcing thresholds, mutation testing scheduled on core suites — the mechanical defect classes essentially extinct in review. AI pre-review absorbing the checklist-able middle with tuned per-category prompts and verified-finding rates tracked. Human review transformed rather than reduced: fewer minutes per PR, but nearly all of them on domain, design, and intent — with gate metrics proving the judgment is real, not ritual. Test depth normalized: both levels generated routinely, determinism and honesty checks habitual. The instructions file as living team memory, fed by review and incident findings. And culturally: 'the AI wrote it' earning neither suspicion nor a pass — just the same evidence-based pipeline every change travels. The one-year test: show me an incident post-mortem, and the process improvements land in files — instructions, analyzers, prompts — not in exhortations." },
+        { "number": 15, "question": "Sum up your philosophy of advanced AI-assisted development.", "answer": "Scale the checking with the generating. Basic AI use makes individuals faster; advanced use redesigns the flow so quality survives the speed: an ordered pipeline where the compiler, analyzers, and honesty-checked tests kill the mechanical for free, AI pre-review absorbs the checklist-able for pennies, and human judgment — the only validator that can't be scaled and the only one that catches domain and design errors — arrives protected, scoped, and instrumented at the decisions that need it. Around the pipeline, feedback loops: recurring findings encoded into instructions and analyzers so the system improves instead of the same issues recurring. And underneath it all, the terminal rule that never moves: merge is a human decision on machine-assembled evidence. The teams that thrive with AI aren't the ones that trust it most or least — they're the ones that engineered where trust goes." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "AI-assisted code review", "definition": "A model pass over the diff producing ranked, line-referenced findings before human review — a pre-filter, never the gate." },
+        { "term": "Pre-review", "definition": "The AI stage between CI and humans; absorbs the checklist-able middle so human attention reaches design and domain intact." },
+        { "term": "Explicit-nothing clause", "definition": "Requiring 'no findings in category X' statements so silence is distinguishable from not-looked; recall remains probabilistic either way." },
+        { "term": "Severity ranking", "definition": "Blocker/major/minor ordering demanded from AI findings so humans triage instead of wading." },
+        { "term": "Trust pipeline", "definition": "The ordered validators every AI contribution travels: compiler → analyzers → tests → AI self-review → human review, cheapest first." },
+        { "term": "Deterministic gate", "definition": "The machine stages — compiler, analyzers, tests, CI — that catch mechanical defects free, protecting human attention." },
+        { "term": "Integration test", "definition": "A test exercising real wiring (HTTP pipeline, serialization, database) — catching DI, ordering, and translation bugs unit tests structurally miss." },
+        { "term": "WebApplicationFactory", "definition": "The standard ASP.NET Core in-process test host pattern for integration tests; the exemplar shape given to Copilot for endpoint suites." },
+        { "term": "Test double", "definition": "Mocks, stubs, fakes — dependency substitutes that make unit tests fast and precise, and that hide exactly the wiring integration tests exist to check." },
+        { "term": "Determinism (tests)", "definition": "Seeded data, isolated state, explicit cleanup — demanded in generation prompts because flaky suites train teams to ignore red." },
+        { "term": "Targeted sweep", "definition": "A bug hunt scoped to a named failure class (async/await, disposal, null-safety) — a checklist aimed at the model's pattern-matching strength." },
+        { "term": "Improvement sweep", "definition": "A ranked refactoring-opportunity backlog per module — proposals only; humans decide what is worth churn." },
+        { "term": "Finding-as-hypothesis", "definition": "The sweep discipline: every claimed bug is reproduced or traced before a fix; model self-confirmation is not confirmation." },
+        { "term": "Validation pipeline", "definition": "The concrete checklist an AI-assisted change completes before merge: compile, analyzers, tests, sabotage check, AI self-review, human review." },
+        { "term": "Human-in-the-loop (limits)", "definition": "The terminal control — powerful, finite, and degrading predictably with volume via fatigue, anchoring, and rubber-stamping." },
+        { "term": "Review fatigue", "definition": "Attention decline across sequential reviews; countered by shrinking the human surface and rotating deep-review duty." },
+        { "term": "Anchoring bias", "definition": "The AI's confident framing narrowing independent judgment; countered by diff-before-findings on high-risk changes." },
+        { "term": "Rubber-stamping", "definition": "Reflexive approval at volume — control on paper, judgment gone; detected by near-total approval at trivial latency." },
+        { "term": "Gate instrumentation", "definition": "Measuring approval latency, edit rate, and rejection rate so gate degradation is visible before incidents reveal it." },
+        { "term": "Custom instructions", "definition": "A checked-in repository file steering Copilot for all developers — conventions stated once, mirrored in analyzers for enforcement." },
+        { "term": "Close the loop", "definition": "Feeding recurring findings into instructions and analyzers — fixing generation at the source so finding classes go extinct." },
+        { "term": "Terminal rule", "definition": "Merge is a human decision made on pipeline-assembled evidence; automation improves the evidence, never the verdict." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary & Key Takeaways",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Advanced Copilot usage is workflow design: a trust pipeline where each validator catches what it is cheapest to catch — compiler, analyzers, tests, AI review, then humans.",
+          "AI pre-review absorbs the mechanical middle with ranked, line-referenced, explicit-nothing findings — humans verify, extend, and keep the judgments only they can make.",
+          "Generate tests at both levels: unit for logic, integration for wiring — with determinism demanded and tutorial 5's honesty checks applied unchanged.",
+          "Hunt bugs with targeted sweeps and treat findings as hypotheses; improvement sweeps produce backlogs, not diffs.",
+          "Human-in-the-loop is a finite resource with failure modes — fatigue, anchoring, rubber-stamping — managed by design and instrumentation, not exhortation.",
+          "Custom instructions encode team conventions at the generation source; analyzers enforce what instructions request; recurring findings feed back into both.",
+          "The terminal rule never moves: merge is a human decision on machine-assembled evidence."
+        ] },
+        { "type": "paragraph", "text": "Module 2 is complete: Copilot as daily craft and as team workflow. Module 3 changes the direction of the relationship — from AI helping you write applications to applications you write calling AI: Azure OpenAI, from first concepts to production code." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Continue with the next tutorial in the path: Overview of Azure OpenAI — the service model, deployments, security posture, and the concepts underlying every AI feature you will build in the rest of this course." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: run the section 12 walkthrough on your next real PR — including the anchoring counter-move and the 30-second close-the-loop.",
+          "Practice: draft your team's custom instructions file from the conventions your reviews enforce most often.",
+          "Practice: generate one integration test suite from an exemplar, then audit it for determinism before running it.",
+          "Practice: run one targeted concurrency sweep on an async-heavy class; verify (or falsify) every finding.",
+          "Reading: your CI configuration — map which pipeline stages exist today and which defect classes currently survive to human review."
+        ] },
+        { "type": "note", "style": "info", "text": "Path position: tutorial 9 of 27 · Previous: github-copilot-for-dotnet · Next: azure-openai-overview" }
+      ]
+    }
+  ]
+}
