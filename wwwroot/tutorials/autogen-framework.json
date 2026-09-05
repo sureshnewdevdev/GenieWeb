@@ -1,0 +1,546 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "AutoGen Multi-Agent Framework",
+  "slug": "autogen-framework",
+  "level": "Advanced",
+  "codeLanguage": "C#",
+  "tutorialNumber": 19,
+  "totalTutorials": 27,
+  "prev": "semantic-kernel-advanced",
+  "next": "agent-first-architecture",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "AutoGen Multi-Agent Framework"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "AutoGen fundamentals",
+    "Agent collaboration patterns",
+    "Tool use and function calling in AutoGen",
+    "Debugging and controlling agents",
+    "Building a multi-agent problem-solving system",
+    "Agent roles: Planner, Developer, Reviewer"
+  ],
+  "tooltips": {
+    "AutoGen": "A multi-agent framework, with a .NET (AutoGen.NET) surface alongside its Python roots, built around conversable agents that solve tasks by talking to each other.",
+    "conversable agent": "AutoGen's core abstraction: an agent that participates in a conversation, sending and receiving messages and optionally invoking tools.",
+    "AssistantAgent": "An AutoGen agent role backed by a language model that reasons, drafts, and responds within a conversation toward a goal.",
+    "UserProxyAgent": "An AutoGen agent role that represents the human or the executing environment — it can run code/tools and relay results back into the conversation.",
+    "GroupChat": "An AutoGen construct where multiple agents share one conversation and take turns, coordinated by a manager and a speaker-selection rule.",
+    "GroupChatManager": "The AutoGen component that orchestrates a GroupChat: selecting the next speaker and deciding when the conversation should stop.",
+    "speaker selection": "The rule (round-robin, model-driven, or custom) that decides which agent in a GroupChat takes the next turn.",
+    "conversation pattern": "A reusable structure for how agents interact — two-agent chat, group chat, or nested chats — chosen to fit a given collaboration.",
+    "tool use": "An agent's ability to invoke a registered function during a conversation and use its result to continue reasoning, mirroring function calling.",
+    "function map": "The registry in AutoGen mapping function names the model can request to the actual C# methods that execute them.",
+    "code execution": "AutoGen's capability for an agent (typically a UserProxyAgent) to run generated code and feed the output back into the conversation.",
+    "human-in-the-loop": "A mode where a human is consulted at defined points in an agent conversation — always, on demand, or never — to approve or redirect actions.",
+    "termination condition": "The rule that ends an AutoGen conversation: a keyword, a maximum turn count, or a custom check on the message history.",
+    "agent role": "A named responsibility assigned to an agent in a multi-agent system, such as Planner, Developer, or Reviewer, each with distinct instructions.",
+    "Planner agent": "An agent role responsible for breaking a goal into a sequence of steps for other agents to carry out.",
+    "Developer agent": "An agent role responsible for producing an artifact — typically code — based on the Planner's steps.",
+    "Reviewer agent": "An agent role responsible for critiquing or approving another agent's output before it is accepted or acted on.",
+    "chat history": "The ordered record of messages exchanged in an agent conversation, used for context, debugging, and deciding termination."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview: Agents That Talk to Each Other",
+      "content": [
+        { "type": "paragraph", "text": "Semantic Kernel's Agent Framework gave you agents, planners, and orchestration patterns built around a kernel of plugins and threads. AutoGen approaches the same problem — coordinating multiple AI agents toward a goal — from a different angle: agents are fundamentally conversable, and collaboration happens by agents exchanging messages in a conversation, with roles, tools, and termination rules layered on top of that simple idea. AutoGen has a .NET surface (AutoGen.NET) alongside its Python roots, so the concepts and much of the API shape carry directly into C#." },
+        { "type": "paragraph", "text": "This advanced tutorial covers AutoGen fundamentals — conversable agents, AssistantAgent, and UserProxyAgent; agent collaboration patterns like two-agent chat and GroupChat; tool use and function calling in AutoGen, which mirrors what you built in tutorial 12 and automated in tutorial 17; debugging and controlling agents through chat history, human-in-the-loop modes, and termination conditions; and building a multi-agent problem-solving system with the classic Planner, Developer, Reviewer role split. Everything here is a second, contrasting answer to the same design questions Semantic Kernel's Agent Framework raised in the previous tutorial." },
+        { "type": "note", "style": "info", "text": "This is a comparison tutorial by design: every AutoGen concept has a Semantic Kernel counterpart from tutorial 18. Read for the differences in philosophy — conversation-centric versus kernel-and-plugin-centric — not just the new vocabulary." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Explain AutoGen fundamentals: conversable agents, AssistantAgent, UserProxyAgent, and how a conversation drives collaboration.",
+          "Compare agent collaboration patterns — two-agent chat and GroupChat with speaker selection — and choose the right one for a task.",
+          "Register and use tools/functions in AutoGen so agents can call real code, and relate it to tutorial 12's function calling.",
+          "Debug and control AutoGen agents using chat history, human-in-the-loop modes, and termination conditions.",
+          "Design agent roles — Planner, Developer, Reviewer — with distinct responsibilities and instructions.",
+          "Build a multi-agent problem-solving system in .NET combining roles, tools, and controlled termination."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorial 18 in full: agents, threads, planners, orchestration patterns, termination and selection strategies — the concepts this tutorial contrasts against.",
+          "Tutorial 12's function-calling loop and its safety disciplines, since AutoGen's tool use rests on the same foundation.",
+          "C# comfort with async/await and delegates/callbacks, used when registering functions with AutoGen agents.",
+          "An Azure OpenAI chat deployment, reused here as the model backing AutoGen's AssistantAgent."
+        ] },
+        { "type": "note", "style": "tip", "text": "Keep tutorial 18's group-chat Writer/Reviewer example in mind. You will rebuild an equivalent system in AutoGen and can compare the two designs directly." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "Key Concepts: Everything Is a Conversation",
+      "content": [
+        { "type": "paragraph", "text": "AutoGen's organizing idea is that a conversable agent is the one abstraction you need: an agent that can send and receive messages, optionally call tools, and participate in a conversation with other agents. Two built-in roles cover most needs: an AssistantAgent is model-backed and reasons, drafts, and responds; a UserProxyAgent represents the human or the execution environment, and can run code or tools and relay results back in. Multiple agents collaborate by exchanging messages — either directly (two-agent chat) or through a GroupChat with a manager that selects speakers and decides when to stop." },
+        { "type": "table", "headers": ["AutoGen concept", "Semantic Kernel counterpart (tutorial 18)", "Core difference"], "rows": [
+          ["Conversable agent", "ChatCompletionAgent", "AutoGen frames everything as message-passing; SK frames it as kernel + instructions + thread"],
+          ["AssistantAgent / UserProxyAgent", "Agent with a role via instructions", "AutoGen has two named built-in roles baked into the framework"],
+          ["GroupChat + GroupChatManager", "Group chat orchestration + selection/termination strategy", "Same idea, different names and configuration shape"],
+          ["Tool use / function map", "Plugins + native functions + automatic function calling", "Both mirror tutorial 12's function calling; different registration mechanics"],
+          ["Termination condition", "Termination strategy", "Same concept, same non-negotiable need for a hard backstop"]
+        ] },
+        { "type": "paragraph", "text": "The practical upshot: nearly everything you learned about autonomy, orchestration, and guardrails in tutorial 18 transfers conceptually. What changes is the vocabulary and the default mental model — AutoGen nudges you to think in terms of who is talking to whom, while Semantic Kernel nudges you to think in terms of a kernel's capabilities and a thread's state. Neither is more correct; they are different, useful lenses on the same underlying problem." },
+        { "type": "note", "style": "warning", "text": "Because both frameworks solve the same problem, mixing metaphors mid-project causes confusion. Pick one framework's mental model per system, even if you use both frameworks across different systems in an organization." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Deep Dive 1: AutoGen Fundamentals and Agent Collaboration Patterns",
+      "content": [
+        { "type": "paragraph", "text": "An AssistantAgent wraps a chat model with a system message defining its role, exactly like a ChatCompletionAgent's instructions. A UserProxyAgent is the counterpart that can act on the assistant's behalf — running code, calling tools, or (in human-in-the-loop mode) actually pausing for a person's input — and relaying the outcome back into the conversation. The simplest collaboration pattern, two-agent chat, has exactly these two exchange messages until a termination condition fires." },
+        { "type": "code", "language": "csharp", "title": "A minimal two-agent chat (illustrative)", "code": [
+          "using AutoGen.Core;",
+          "using AutoGen.OpenAI;",
+          "",
+          "// AssistantAgent: model-backed, reasons and drafts.",
+          "var assistant = new OpenAIChatAgent(",
+          "    chatClient: azureOpenAIChatClient,",
+          "    name: \"assistant\",",
+          "    systemMessage: \"You are a helpful assistant that writes concise C# code.\")",
+          "    .RegisterMessageConnector();",
+          "",
+          "// UserProxyAgent: represents the human/environment; can auto-reply or wait for input.",
+          "var userProxy = new UserProxyAgent(",
+          "    name: \"user\",",
+          "    humanInputMode: HumanInputMode.NEVER);   // fully automated for this run",
+          "",
+          "// Two-agent chat: they exchange messages until a termination condition fires.",
+          "var conversation = await userProxy.InitiateChatAsync(",
+          "    receiver: assistant,",
+          "    message: \"Write a C# method that reverses a string.\",",
+          "    maxRound: 5);",
+          "",
+          "foreach (var msg in conversation)",
+          "    Console.WriteLine($\"{msg.From}: {msg.GetContent()}\");"
+        ] },
+        { "type": "animation", "title": "Two-agent chat versus GroupChat", "intro": "The same collaboration, two different shapes.", "nodes": [
+          { "id": "user", "label": "UserProxyAgent", "sub": "executes, relays" },
+          { "id": "asst", "label": "AssistantAgent", "sub": "reasons, drafts" },
+          { "id": "gc", "label": "GroupChat", "sub": "shared conversation" },
+          { "id": "mgr", "label": "GroupChatManager", "sub": "selects speaker" },
+          { "id": "n", "label": "N agents", "sub": "take turns" }
+        ], "steps": [
+          { "highlight": ["user", "asst"], "caption": "Two-agent chat: UserProxyAgent and AssistantAgent exchange messages directly until termination — the simplest pattern." },
+          { "highlight": ["gc"], "caption": "GroupChat scales this to more than two participants sharing one conversation thread." },
+          { "highlight": ["mgr"], "caption": "A GroupChatManager decides who speaks next (speaker selection) and whether the conversation should end (termination condition)." },
+          { "highlight": ["n"], "caption": "Any number of agents — Planner, Developer, Reviewer, or more — can participate, each contributing when selected." }
+        ] },
+        { "type": "paragraph", "text": "GroupChat generalizes two-agent chat to more participants: a GroupChatManager selects the next speaker (round-robin, a model-driven choice, or a custom rule — the same job as Semantic Kernel's selection strategy) and evaluates termination (the same job as a termination strategy). Choosing between two-agent chat and GroupChat mirrors tutorial 18's choice between a single agent and orchestration: use two-agent chat for a focused exchange (ask, execute, report back), and GroupChat when three or more distinct perspectives need to collaborate. Both are conversation patterns — reusable structures for how agents interact — and picking the right one for a given collaboration is a design decision, not a default." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Deep Dive 2: Tool Use and Function Calling in AutoGen",
+      "content": [
+        { "type": "paragraph", "text": "Tool use in AutoGen mirrors tutorial 12's function calling directly: you describe a function, the model requests it during the conversation, and your code executes it and returns the result as a message. AutoGen's mechanism is a function map — a registry connecting function names the model can request to the actual C# methods that run them — typically attached to the UserProxyAgent, since it is the agent that acts on the assistant's behalf." },
+        { "type": "code", "language": "csharp", "title": "Registering a tool/function in AutoGen (illustrative)", "code": [
+          "// The function the model can request — same safety discipline as tutorial 12.",
+          "async Task<string> GetOrderStatusAsync(string orderNumber)",
+          "{",
+          "    if (!orderNumber.StartsWith(\"ORD-\")) return \"{\\\"error\\\":\\\"invalid order number\\\"}\";",
+          "    var status = await OrderRepository.FindAsync(orderNumber);",
+          "    return status is null ? \"{\\\"error\\\":\\\"not found\\\"}\"",
+          "                          : $\"{{\\\"stage\\\":\\\"{status.Stage}\\\",\\\"eta\\\":\\\"{status.Eta}\\\"}}\";",
+          "}",
+          "",
+          "// The function map: name the model uses -> the delegate that executes it.",
+          "var functionMap = new Dictionary<string, Func<string, Task<string>>>",
+          "{",
+          "    [\"get_order_status\"] = GetOrderStatusAsync",
+          "};",
+          "",
+          "var userProxy = new UserProxyAgent(",
+          "    name: \"user\",",
+          "    humanInputMode: HumanInputMode.NEVER)",
+          "    .RegisterMessageConnector()",
+          "    // AutoGen wires the function map so tool calls the assistant requests get executed here.",
+          "    .RegisterFunctionMap(functionMap);"
+        ] },
+        { "type": "paragraph", "text": "The assistant, given a description of get_order_status (name, description, parameters — the same information as a tutorial-12 JSON schema or a Semantic Kernel [KernelFunction]), can request it mid-conversation; the UserProxyAgent looks the name up in the function map, executes the corresponding delegate, and returns the result as the next message. The loop — request, execute, respond, continue — is the same tool-calling mechanism across tutorial 12, Semantic Kernel, and AutoGen; only the registration mechanics differ. A related capability, code execution, lets a UserProxyAgent run model-generated code directly (not just a pre-registered function) and feed the output back into the conversation — useful for open-ended tasks, but it demands the same sandboxing and validation caution as any function that executes arbitrary logic." },
+        { "type": "note", "style": "warning", "text": "Tool use in AutoGen carries the exact same responsibility as everywhere else: validate arguments, authorize as the real user, keep functions idempotent, and return structured errors. The function map executes real code — treat every entry in it as production code, because it is." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Deep Dive 3: Debugging and Controlling Agents",
+      "content": [
+        { "type": "paragraph", "text": "AutoGen's chat history is the primary debugging tool: the full ordered record of messages, including tool requests and results, that a conversation produced. Because collaboration is literally a sequence of messages, reading that sequence back tells you exactly what each agent said, when, and why the conversation ended — the same value tutorial 18's step-by-step logging provided, but built into the conversation object itself rather than added separately." },
+        { "type": "paragraph", "text": "Control comes from two mechanisms. Human-in-the-loop mode on a UserProxyAgent — ALWAYS, NEVER, or TERMINATE (ask only when the conversation would otherwise end) — decides whether and when a human is consulted before the proxy acts, directly implementing tutorial 18's human-in-the-loop checkpoint concept as a first-class agent setting rather than custom code around a plan. Termination conditions — a keyword in a message, a maximum round count, or a custom function over the chat history — decide when the conversation stops, exactly mirroring tutorial 18's termination strategy, and exactly as non-negotiable: a semantic condition alone is not enough." },
+        { "type": "animation", "title": "Controlling an AutoGen conversation", "intro": "Two independent dials: who is consulted, and when it stops.", "nodes": [
+          { "id": "conv", "label": "Conversation", "sub": "agents exchanging messages" },
+          { "id": "him", "label": "Human input mode", "sub": "ALWAYS / TERMINATE / NEVER" },
+          { "id": "term", "label": "Termination condition", "sub": "keyword / max rounds / custom" },
+          { "id": "hist", "label": "Chat history", "sub": "full message record" }
+        ], "steps": [
+          { "highlight": ["conv"], "caption": "Agents exchange messages, possibly including tool requests and results." },
+          { "highlight": ["him"], "caption": "The UserProxyAgent's human input mode decides whether a person is consulted before it relays a message or executes a tool." },
+          { "highlight": ["term"], "caption": "Independently, a termination condition evaluates the conversation after each round and decides whether to stop." },
+          { "highlight": ["hist"], "caption": "The chat history captures everything, letting you debug exactly what happened and why — or didn't — terminate." }
+        ] },
+        { "type": "code", "language": "csharp", "title": "A hard round cap as a termination backstop (illustrative)", "code": [
+          "// maxRound is AutoGen's equivalent of Semantic Kernel's MaximumIterations —",
+          "// a hard backstop alongside any keyword/custom termination check.",
+          "var conversation = await userProxy.InitiateChatAsync(",
+          "    receiver: assistant,",
+          "    message: \"Draft and refine a summary until it says APPROVED.\",",
+          "    maxRound: 8);   // stops here even if APPROVED never appears",
+          "",
+          "bool converged = conversation.Any(m => m.GetContent()?.Contains(\"APPROVED\") == true);",
+          "logger.LogInformation(\"Conversation ended after {Rounds} messages; converged={Converged}\",",
+          "    conversation.Count, converged);"
+        ] },
+        { "type": "note", "style": "warning", "text": "The lesson from tutorial 18 carries over unchanged: always pair a semantic termination condition with a hard maxRound backstop, and always log the outcome so you can tell whether a run converged or was cut off." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Deep Dive 4: Agent Roles — Planner, Developer, Reviewer",
+      "content": [
+        { "type": "paragraph", "text": "A common, well-tested multi-agent problem-solving system assigns three specialized agent roles to a GroupChat. A Planner agent breaks a goal into a sequence of concrete steps. A Developer agent produces an artifact — typically code — implementing the current step. A Reviewer agent critiques the artifact, approving it or requesting specific changes. Each role is just an AssistantAgent with a system message narrowly scoped to that responsibility — the same 'narrow, specific instructions' discipline tutorial 18 recommended for every agent." },
+        { "type": "code", "language": "csharp", "title": "Planner, Developer, Reviewer in a GroupChat (illustrative)", "code": [
+          "var planner = new OpenAIChatAgent(azureOpenAIChatClient, name: \"planner\",",
+          "    systemMessage: \"Break the goal into a short numbered list of concrete steps. \" +",
+          "                   \"Do not write code yourself.\")",
+          "    .RegisterMessageConnector();",
+          "",
+          "var developer = new OpenAIChatAgent(azureOpenAIChatClient, name: \"developer\",",
+          "    systemMessage: \"Implement the current step in C#. Wait for Reviewer approval \" +",
+          "                   \"before moving to the next step.\")",
+          "    .RegisterMessageConnector();",
+          "",
+          "var reviewer = new OpenAIChatAgent(azureOpenAIChatClient, name: \"reviewer\",",
+          "    systemMessage: \"Review the Developer's code for correctness and clarity. \" +",
+          "                   \"Reply APPROVED or list specific required changes.\")",
+          "    .RegisterMessageConnector();",
+          "",
+          "var groupChat = new GroupChat(",
+          "    members: new[] { planner, developer, reviewer },",
+          "    admin: reviewer);   // e.g. reviewer's APPROVED can gate progress/termination",
+          "",
+          "var manager = new GroupChatManager(groupChat) { MaxRound = 12 };   // hard backstop",
+          "var result = await manager.InitiateChatAsync(",
+          "    \"Goal: implement and review a C# method that validates an email address.\");"
+        ] },
+        { "type": "paragraph", "text": "This role split maps directly onto tutorial 18's orchestration patterns: it is essentially a group chat orchestration with three specialized agents, a speaker-selection rule that lets Planner start, Developer act, and Reviewer gate progress, and a termination condition (Reviewer's approval, backstopped by MaxRound). Building a multi-agent problem-solving system, in AutoGen or Semantic Kernel, comes down to the same design sequence: define each role's narrow responsibility, choose how turns are sequenced, and set a termination condition with a hard cap before running anything." },
+        { "type": "note", "style": "tip", "text": "Give the Reviewer explicit, checkable approval language ('reply APPROVED or list changes') rather than open-ended critique — a vague Reviewer is the single most common reason a Planner/Developer/Reviewer system fails to converge." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Ecosystem and Tools",
+      "content": [
+        { "type": "table", "headers": ["Piece", "Role"], "rows": [
+          ["AutoGen.NET (NuGet)", "The .NET surface of AutoGen: conversable agents, GroupChat, function maps"],
+          ["AssistantAgent", "Model-backed agent that reasons and drafts within a conversation"],
+          ["UserProxyAgent", "Agent representing the human/environment; executes tools/code and can pause for human input"],
+          ["GroupChat + GroupChatManager", "Multi-agent conversation container plus its speaker-selection and termination logic"],
+          ["Function map", "Registry connecting model-requested function names to real C# delegates"],
+          ["Human input modes (ALWAYS/TERMINATE/NEVER)", "Built-in control over when a human is consulted"],
+          ["Azure OpenAI", "The model provider backing AssistantAgent in these examples, same deployments as earlier tutorials"],
+          ["Semantic Kernel Agent Framework (tutorial 18)", "The contrasting framework covered previously — same problems, conversation-centric vs kernel-centric answers"]
+        ] },
+        { "type": "paragraph", "text": "AutoGen and Semantic Kernel's Agent Framework are not mutually exclusive in an organization's toolkit — some teams use Semantic Kernel where deep integration with plugins, memory, and the wider kernel ecosystem matters, and AutoGen where its conversation-first model and role-based patterns (Planner/Developer/Reviewer) fit the problem more naturally. Both ultimately call the same underlying Azure OpenAI deployments and need the same guardrails." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "Use Cases",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Code generation and review: a Planner/Developer/Reviewer GroupChat produces, critiques, and refines a small piece of code from a natural-language goal.",
+          "Automated research assistant: a two-agent chat where an AssistantAgent researches and a UserProxyAgent executes search/tool calls and relays results back.",
+          "Data analysis pipelines: an agent proposes an analysis approach, a tool-using agent executes it against real data, and a reviewer agent checks the output.",
+          "Human-supervised automation: a UserProxyAgent in TERMINATE human-input mode lets agents run autonomously but pauses for approval at natural conversation endpoints.",
+          "Debugging support tools: an AssistantAgent proposes a fix, a UserProxyAgent runs tests via a registered function, and results feed back for another round.",
+          "Comparative prototyping: teams prototype the same multi-agent idea in both AutoGen and Semantic Kernel to evaluate which framework's model fits their system better before committing.",
+          "Structured problem decomposition: any goal too broad for one prompt (build a feature, produce a report, resolve an incident) benefits from a Planner breaking it down before other agents act."
+        ] },
+        { "type": "paragraph", "text": "As with Semantic Kernel orchestration, the throughline is coordination: whenever a task benefits from distinct roles conversing toward a goal, AutoGen provides a conversation-native way to build it, with the same guardrail requirements as any autonomous multi-agent system." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples",
+      "content": [
+        { "type": "paragraph", "text": "These examples assemble AutoGen's pieces into one flow: a tool-using UserProxyAgent, an AssistantAgent, and a controlled conversation with logging." },
+        { "type": "code", "language": "csharp", "title": "Example 1 — Tool-using two-agent chat with logging", "code": [
+          "var assistant = new OpenAIChatAgent(azureOpenAIChatClient, name: \"assistant\",",
+          "    systemMessage: \"Answer order questions using get_order_status. Never invent details.\")",
+          "    .RegisterMessageConnector();",
+          "",
+          "var userProxy = new UserProxyAgent(name: \"user\", humanInputMode: HumanInputMode.NEVER)",
+          "    .RegisterMessageConnector()",
+          "    .RegisterFunctionMap(new Dictionary<string, Func<string, Task<string>>>",
+          "    {",
+          "        [\"get_order_status\"] = GetOrderStatusAsync",
+          "    });",
+          "",
+          "var conversation = await userProxy.InitiateChatAsync(",
+          "    receiver: assistant, message: \"Where is ORD-1042?\", maxRound: 5);",
+          "",
+          "foreach (var msg in conversation)",
+          "    logger.LogInformation(\"{From}: {Content}\", msg.From, msg.GetContent());"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 2 — Human-in-the-loop before a consequential action", "code": [
+          "// TERMINATE mode: a human is asked only when the conversation would otherwise end,",
+          "// which naturally happens right before a high-stakes action is finalized.",
+          "var supervisedProxy = new UserProxyAgent(",
+          "    name: \"user\",",
+          "    humanInputMode: HumanInputMode.TERMINATE)",
+          "    .RegisterMessageConnector()",
+          "    .RegisterFunctionMap(new Dictionary<string, Func<string, Task<string>>>",
+          "    {",
+          "        [\"cancel_order\"] = CancelOrderAsync   // an irreversible action",
+          "    });",
+          "",
+          "var conversation = await supervisedProxy.InitiateChatAsync(",
+          "    receiver: assistant, message: \"Cancel order ORD-1042.\", maxRound: 6);",
+          "// A human is prompted before the conversation concludes, giving a real",
+          "// checkpoint before cancel_order's effects are treated as final."
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 3 — GroupChat with a custom termination check", "code": [
+          "var groupChat = new GroupChat(members: new[] { planner, developer, reviewer }, admin: reviewer);",
+          "var manager = new GroupChatManager(groupChat)",
+          "{",
+          "    MaxRound = 12,   // hard backstop",
+          "    // Custom check alongside the round cap -- stop early if Reviewer approves.",
+          "    IsTerminationMessage = msg => msg.GetContent()?.Contains(\"APPROVED\") == true",
+          "                                   && msg.From == \"reviewer\"",
+          "};",
+          "",
+          "var result = await manager.InitiateChatAsync(",
+          "    \"Goal: implement and review a C# email validator method.\");"
+        ] }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step by Step: A Planner/Developer/Reviewer Problem-Solving System",
+      "content": [
+        { "type": "paragraph", "text": "This walkthrough builds a small but complete multi-agent problem-solving system in AutoGen, then compares it directly against tutorial 18's Semantic Kernel group-chat equivalent." },
+        { "type": "list", "style": "numbered", "items": [
+          "In a project with the AutoGen.NET package installed, configure an OpenAIChatAgent-based connector against your existing Azure OpenAI chat deployment.",
+          "Define the Planner agent: system message restricting it to producing a short numbered step list, explicitly forbidding it from writing code itself.",
+          "Define the Developer agent: system message instructing it to implement the current step in C# and wait for Reviewer approval before proceeding.",
+          "Define the Reviewer agent: system message instructing it to reply APPROVED or list specific required changes — explicit, checkable language, not open-ended critique.",
+          "Assemble a GroupChat with all three agents and a GroupChatManager configured with both a custom termination check (Reviewer says APPROVED) and a hard MaxRound backstop.",
+          "Send an initial goal message ('implement and review a C# method that validates an email address') and invoke the chat, printing each agent's turn from the returned conversation/chat history.",
+          "Confirm the conversation actually stops on Reviewer's APPROVED; then instruct the Reviewer to never approve and confirm MaxRound stops it instead — the same two-sided termination test as tutorial 18.",
+          "Add a tool: register a function (e.g. a mock code-analysis check) in the UserProxyAgent's function map so the Developer's code can be automatically checked before the Reviewer comments.",
+          "Add a human-in-the-loop checkpoint: switch the relevant UserProxyAgent to HumanInputMode.TERMINATE and observe that a person is consulted at the natural end of the conversation.",
+          "Compare against tutorial 18: rebuild the same Planner/Developer/Reviewer system as a Semantic Kernel GroupChatOrchestration and note which felt more natural to configure — the conversation-first API or the kernel-and-strategy API — for this particular team and task."
+        ] },
+        { "type": "note", "style": "tip", "text": "Log the full chat history to a file for at least one run and read it end to end. Seeing the raw conversation — including tool calls — is the fastest way to build accurate intuition for how AutoGen agents actually behave." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "API surface caveat: AutoGen.NET's exact types and method names (OpenAIChatAgent, RegisterMessageConnector, RegisterFunctionMap, GroupChat, GroupChatManager, HumanInputMode values) are illustrative of shape and intent here and have moved across AutoGen versions and its Python/.NET parity efforts — verify against the installed package before relying on them.",
+          "Framework choice is not free: adopting both Semantic Kernel and AutoGen in one system adds two mental models and two sets of dependencies; most teams should pick one per system rather than mixing them within a single agent workflow.",
+          "Tool use safety is unchanged from tutorial 12: AutoGen's function map executes real code with real effects, so validation, authorization, idempotency, and structured errors are still entirely your responsibility.",
+          "Termination conditions share Semantic Kernel's caveat exactly: a keyword or custom check can misfire or never trigger, so a hard maxRound/MaxRound backstop is mandatory, not optional.",
+          "Human-in-the-loop modes are a control surface, not a substitute for reviewing what they actually gate: ALWAYS mode that a person rubber-stamps without reading provides no real safety.",
+          "Debugging still requires deliberate logging discipline: chat history captures messages, but interpreting why a GroupChat's speaker selection or a custom termination check behaved a certain way often needs additional instrumentation.",
+          "Cost and latency scale with agent count and rounds exactly as in Semantic Kernel orchestration: each message is a model call, so role count and MaxRound double as cost controls.",
+          "AutoGen's Python ecosystem is more mature than its .NET surface at present; some capabilities or community examples may only exist in Python and require translation to C# concepts."
+        ] }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Give each agent role (Planner, Developer, Reviewer, or any custom role) a narrow, explicit system message — the same specificity discipline as every prior tutorial's instructions and tool descriptions.",
+          "Make Reviewer-style approval language explicit and checkable ('reply APPROVED or list changes'), not open-ended, so termination conditions can match it reliably.",
+          "Always pair a semantic termination condition with a hard maxRound/MaxRound backstop, exactly as in Semantic Kernel orchestration.",
+          "Keep tutorial 12's function-level safety inside every function registered in a function map — tool use is still function calling, with the same stakes.",
+          "Use HumanInputMode.TERMINATE (or ALWAYS for higher-stakes systems) for any workflow with irreversible or consequential actions, and ensure a human actually reviews the content, not just clicks approve.",
+          "Log the full chat history for every run in development, and keep structured logging (agent, message, tool calls, termination outcome) in production.",
+          "Choose two-agent chat for focused ask/execute/report exchanges and GroupChat only when three or more distinct perspectives genuinely improve the outcome.",
+          "When a team already has deep Semantic Kernel investment (plugins, memory, Foundry integration), prefer extending that rather than introducing AutoGen for the same problem, and vice versa — avoid running both for one workflow without a clear reason."
+        ] },
+        { "type": "table", "headers": ["Common mistake", "Do this instead"], "rows": [
+          ["Vague Reviewer instructions ('give feedback')", "Explicit, checkable approval language a termination condition can match"],
+          ["No maxRound backstop on a GroupChat", "Always set MaxRound alongside any semantic termination check"],
+          ["Trusting function map entries because 'it's just AutoGen'", "Apply the same validation/authorization/idempotency discipline as any tool"],
+          ["ALWAYS human-in-the-loop mode nobody actually reads", "Ensure the human checkpoint is meaningfully reviewed, not rubber-stamped"],
+          ["Mixing AutoGen and Semantic Kernel in one workflow without reason", "Pick one framework per system; compare frameworks across systems, not within one"],
+          ["No logging of chat history", "Log every run's full conversation, especially during development and debugging"]
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz: AutoGen Multi-Agent Framework",
+      "items": [
+        { "number": 1, "question": "What is AutoGen's core organizing abstraction?", "options": { "A": "A kernel holding plugins", "B": "A conversable agent that sends and receives messages and can call tools", "C": "A vector database", "D": "A JSON schema validator" }, "correctAnswer": "B", "explanation": "AutoGen frames collaboration as conversation: a conversable agent sends and receives messages, optionally invoking tools, and multiple agents collaborate by exchanging messages — contrasting with Semantic Kernel's kernel-and-plugin-centric model." },
+        { "number": 2, "question": "What is an AssistantAgent?", "options": { "A": "An agent that only executes code, never reasons", "B": "A model-backed agent that reasons, drafts, and responds within a conversation", "C": "A database connector", "D": "A logging utility" }, "correctAnswer": "B", "explanation": "AssistantAgent wraps a chat model with a system message defining its role, and produces reasoning and drafts within the conversation — the AutoGen counterpart to a Semantic Kernel ChatCompletionAgent." },
+        { "number": 3, "question": "What role does a UserProxyAgent play?", "options": { "A": "It represents the human or execution environment, and can run code/tools and relay results back", "B": "It is a second, redundant assistant", "C": "It only stores configuration", "D": "It replaces the need for a model" }, "correctAnswer": "A", "explanation": "UserProxyAgent stands in for the human or the executing environment: it can invoke registered functions/tools, run code, and — depending on its human input mode — pause for actual human input before proceeding." },
+        { "number": 4, "question": "What does a GroupChatManager do?", "options": { "A": "Trains new models", "B": "Selects the next speaker and decides when a GroupChat conversation should terminate", "C": "Stores embeddings", "D": "Formats console output" }, "correctAnswer": "B", "explanation": "The GroupChatManager orchestrates a GroupChat, handling speaker selection (whose turn is next) and evaluating termination conditions (should the conversation stop) — the AutoGen counterparts to Semantic Kernel's selection and termination strategies." },
+        { "number": 5, "question": "In AutoGen, what is a function map used for?", "options": { "A": "Mapping UI routes", "B": "Registering which C# delegates execute which model-requested function names, enabling tool use", "C": "Storing chat history", "D": "Configuring the model's temperature" }, "correctAnswer": "B", "explanation": "A function map connects the names of functions the model can request to the real C# methods (delegates) that execute them, typically attached to a UserProxyAgent — the AutoGen mechanism for tool use and function calling." },
+        { "number": 6, "question": "How does AutoGen's tool use relate to tutorial 12's function calling?", "options": { "A": "It is unrelated — a completely different mechanism", "B": "It mirrors the same loop: describe a function, the model requests it, code executes it and returns a result", "C": "It removes the need for any function description", "D": "It only works with embeddings" }, "correctAnswer": "B", "explanation": "AutoGen's tool use is the same request-execute-respond loop as tutorial 12's hand-rolled function calling and Semantic Kernel's automatic function calling — only the registration mechanics (a function map) differ across the three." },
+        { "number": 7, "question": "What does HumanInputMode.TERMINATE do on a UserProxyAgent?", "options": { "A": "It always asks a human before every message", "B": "It asks a human only when the conversation would otherwise end, providing a natural checkpoint", "C": "It disables all human input permanently", "D": "It terminates the process immediately" }, "correctAnswer": "B", "explanation": "TERMINATE mode consults a human specifically at the point the conversation would conclude — a practical human-in-the-loop checkpoint right before a proposed action or final answer is treated as done, without requiring approval at every single turn." },
+        { "number": 8, "question": "Why is a hard maxRound/MaxRound backstop still necessary in AutoGen even with a keyword termination check?", "options": { "A": "It isn't necessary if the keyword is well chosen", "B": "A semantic condition can misfire or never trigger due to model variability, so a hard cap guarantees the conversation stops regardless", "C": "AutoGen requires it by law", "D": "It only matters for two-agent chat, not GroupChat" }, "correctAnswer": "B", "explanation": "Exactly as with Semantic Kernel's termination strategies, a keyword or custom check depends on model behavior and can fail to fire reliably. A hard round cap bounds cost and risk regardless of whether the semantic condition ever triggers." },
+        { "number": 9, "question": "What is the chat history's primary value in AutoGen?", "options": { "A": "It speeds up model responses", "B": "It is the full ordered record of messages (including tool calls) that lets you debug exactly what happened and why a conversation ended", "C": "It replaces the need for a system message", "D": "It automatically fixes bugs in agent instructions" }, "correctAnswer": "B", "explanation": "Because collaboration is literally a message sequence, the chat history captures everything needed to understand what each agent said, what tools were called, and why termination did or didn't fire — built into the conversation object itself." },
+        { "number": 10, "question": "In the Planner/Developer/Reviewer pattern, what is the Planner agent's responsibility?", "options": { "A": "Writing all the final code", "B": "Breaking the goal into a sequence of concrete steps for other agents to carry out", "C": "Approving or rejecting the Developer's work", "D": "Executing tools directly" }, "correctAnswer": "B", "explanation": "The Planner decomposes a broad goal into a short, concrete sequence of steps — explicitly not writing code itself — which the Developer then implements and the Reviewer then checks, dividing responsibility narrowly across the three roles." },
+        { "number": 11, "question": "What should the Reviewer agent's instructions emphasize to make a Planner/Developer/Reviewer system converge reliably?", "options": { "A": "Open-ended, general feedback with no fixed format", "B": "Explicit, checkable approval language, like replying APPROVED or listing specific required changes", "C": "Never approving anything, to maximize quality", "D": "Ignoring the Developer's output entirely" }, "correctAnswer": "B", "explanation": "A vague Reviewer is the most common reason such a system fails to converge. Explicit, checkable language lets a termination condition reliably detect approval, mirroring tutorial 18's advice about clear termination signals." },
+        { "number": 12, "question": "How does the Planner/Developer/Reviewer pattern map onto Semantic Kernel's orchestration patterns from tutorial 18?", "options": { "A": "It has no equivalent in Semantic Kernel", "B": "It is essentially a group chat orchestration with three specialized agents, a speaker-selection rule, and a termination condition", "C": "It is the same as concurrent orchestration", "D": "It requires no orchestration pattern at all" }, "correctAnswer": "B", "explanation": "Three roles conversing in a shared thread, taking turns, with Reviewer approval gating termination, is structurally the same as Semantic Kernel's group chat orchestration — the same design problem, different framework vocabulary and configuration shape." },
+        { "number": 13, "question": "What responsibility does registering a function in AutoGen's function map NOT remove?", "options": { "A": "The need to write any code at all", "B": "The need for validation, authorization, idempotency, and structured errors inside the function", "C": "The need for a system message", "D": "The need for a chat model" }, "correctAnswer": "B", "explanation": "A function map entry executes real code with real effects. AutoGen automates the request/execute/respond mechanics, but the safety discipline from tutorial 12 — validating arguments, authorizing as the user, idempotency, structured errors — remains entirely the developer's responsibility." },
+        { "number": 14, "question": "When should a team choose two-agent chat over GroupChat?", "options": { "A": "Always — GroupChat is never useful", "B": "For a focused exchange, like ask-execute-report, where only two participants are genuinely needed", "C": "Only when tools are not used", "D": "Only for Planner/Developer/Reviewer systems" }, "correctAnswer": "B", "explanation": "Two-agent chat fits a direct exchange between an assistant and a proxy acting on its behalf. GroupChat is reserved for problems genuinely needing three or more distinct perspectives collaborating — adding participants without that need only adds cost and complexity." },
+        { "number": 15, "question": "What is the recommended approach when a team has both AutoGen and Semantic Kernel available?", "options": { "A": "Always use both frameworks together in every workflow", "B": "Pick one framework per system based on fit, rather than mixing both within a single agent workflow", "C": "Use AutoGen only for logging", "D": "Semantic Kernel and AutoGen cannot both exist in one organization" }, "correctAnswer": "B", "explanation": "Both frameworks solve the same coordination problems with different philosophies. Mixing them within one workflow adds two mental models and dependency sets for no clear benefit; the recommended approach is choosing per system based on fit — e.g. deep kernel/plugin/memory integration favors Semantic Kernel, conversation-first role patterns favor AutoGen." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam: Written Questions",
+      "items": [
+        { "number": 1, "question": "Explain AutoGen's fundamental abstraction and how it differs philosophically from Semantic Kernel's Agent Framework.", "modelAnswer": "AutoGen's fundamental abstraction is the conversable agent: an entity that sends and receives messages, optionally invokes tools, and participates in a conversation with other agents. Two built-in roles cover most needs — AssistantAgent, model-backed and responsible for reasoning and drafting, and UserProxyAgent, representing the human or execution environment, capable of running code/tools and relaying results. Collaboration in AutoGen is literally message exchange, whether two-agent chat or a GroupChat with a manager. Semantic Kernel's Agent Framework, by contrast, is kernel-and-plugin-centric: an agent is a kernel (holding connectors and plugins) plus persistent instructions and a thread, and orchestration patterns coordinate multiple such kernel-backed agents. Both solve the same underlying problem — coordinating AI reasoning with tools and multiple participants toward a goal — but AutoGen's default mental model is 'who is saying what to whom,' while Semantic Kernel's is 'what capabilities does this kernel have and what does its thread remember.' Neither is objectively superior; they are different lenses suited to different team intuitions and existing investments." },
+        { "number": 2, "question": "Compare two-agent chat and GroupChat as agent collaboration patterns, including when each is the right choice.", "modelAnswer": "Two-agent chat is the simplest AutoGen collaboration pattern: an AssistantAgent and a UserProxyAgent exchange messages directly — the assistant reasons and drafts, the proxy executes tools or code and relays results — continuing until a termination condition fires. It fits focused exchanges: ask a question, execute what's needed, report back, with exactly two participants. GroupChat generalizes this to three or more agents sharing one conversation, coordinated by a GroupChatManager that performs speaker selection (deciding whose turn is next — round-robin, model-driven, or custom) and evaluates termination. GroupChat is the right choice when a problem genuinely benefits from multiple distinct perspectives collaborating, such as a Planner/Developer/Reviewer system where each role contributes something the others cannot. Choosing between them mirrors Semantic Kernel's single-agent-versus-orchestration decision from tutorial 18: default to the simpler two-agent pattern, and only introduce GroupChat's added complexity (mandatory speaker selection and termination configuration, more model calls per round) when the task's shape actually requires more than two participants." },
+        { "number": 3, "question": "Describe how tool use and function calling work in AutoGen, and explain what safety responsibilities remain unchanged from earlier tutorials.", "modelAnswer": "Tool use in AutoGen follows the same request-execute-respond loop as function calling everywhere else in this course: a function is described to the model (name, description, parameters), the model requests it mid-conversation when relevant, and code executes the corresponding logic and returns a result as the next message, which the conversation continues from. AutoGen's specific mechanism is the function map — a dictionary-like registry connecting function names the model can request to actual C# delegates — typically registered on the UserProxyAgent via RegisterFunctionMap, since that agent acts on the assistant's behalf. What remains unchanged: every function map entry executes real code with real effects, so it must validate its arguments defensively (they originate from model output), authorize as the actual requesting user rather than trusting the conversation's context, remain idempotent since conversations can retry or loop, and return structured errors rather than throwing, exactly as tutorial 12 established. AutoGen automates the mechanics of the loop; it does not and cannot automate the correctness or safety of the functions themselves." },
+        { "number": 4, "question": "Explain the tools and techniques for debugging and controlling AutoGen agents, and how each maps to a Semantic Kernel concept from tutorial 18.", "modelAnswer": "Three main tools. First, chat history: the full ordered record of every message exchanged, including tool requests and results, which is the primary debugging artifact — reading it back reveals exactly what each agent said and why a conversation ended or didn't; this plays the same role as the step-by-step logging tutorial 18 recommended building manually around Semantic Kernel orchestrations, except AutoGen provides it as an intrinsic part of the conversation object. Second, human input modes on a UserProxyAgent (ALWAYS, NEVER, TERMINATE) control when a human is consulted before the proxy relays a message or executes a tool — TERMINATE specifically asks only at the natural end of a conversation, giving a practical checkpoint before a result is finalized; this directly implements tutorial 18's human-in-the-loop checkpoint concept as a built-in agent setting rather than custom code wrapped around a plan. Third, termination conditions (a keyword, a maxRound/MaxRound cap, or a custom function over the chat history) decide when a conversation stops, exactly mirroring Semantic Kernel's termination strategy, with the identical requirement that a semantic condition alone is insufficient and must be paired with a hard round-count backstop." },
+        { "number": 5, "question": "Walk through building a multi-agent problem-solving system using the Planner, Developer, Reviewer roles, and explain the responsibility of each.", "modelAnswer": "Three AssistantAgents, each with a narrowly scoped system message. The Planner agent's responsibility is decomposition: given a goal, it produces a short, concrete, numbered sequence of steps, and its instructions explicitly forbid it from writing code itself, keeping its role focused on breaking down the problem rather than solving it. The Developer agent's responsibility is implementation: it takes the current step from the Planner and produces an artifact — typically C# code — and its instructions direct it to wait for Reviewer approval before advancing to the next step, preventing it from racing ahead on unapproved work. The Reviewer agent's responsibility is quality control: it critiques the Developer's output and replies with explicit, checkable language — APPROVED, or a specific list of required changes — which is essential because a vague Reviewer is the most common cause of non-convergence. These three are assembled into a GroupChat with a GroupChatManager configured with both a custom termination check (Reviewer's APPROVED message) and a hard MaxRound backstop, and an initial goal message starts the conversation. The system is then a working, bounded, three-role collaboration that decomposes, implements, and reviews a task end to end." },
+        { "number": 6, "question": "Justify why the same termination-strategy caveat from Semantic Kernel (tutorial 18) applies identically to AutoGen's termination conditions, using a concrete failure scenario.", "modelAnswer": "Both frameworks' termination mechanisms ultimately depend on model-generated text matching an expected pattern or a model-driven judgment being correct, and models are probabilistic, not deterministic rule engines. Concretely: in a Planner/Developer/Reviewer AutoGen GroupChat, the termination condition might check whether the Reviewer's message contains the literal string 'APPROVED'. If the Reviewer, due to normal variation in how models phrase things, instead writes 'This looks approved and ready to ship' or 'Approved.' with different capitalization or punctuation than the exact match expects, the termination condition never fires. Without a hard maxRound/MaxRound backstop, the conversation would continue indefinitely — Planner, Developer, and Reviewer cycling through more rounds, each an additional model call, with no natural end. This is exactly the failure mode tutorial 18 described for Semantic Kernel's termination strategies, and it transfers unchanged because the underlying cause (semantic conditions depending on unreliable exact-match or judgment-based signals from a probabilistic model) is a property of language models and multi-agent conversation generally, not of either specific framework's implementation." },
+        { "number": 7, "question": "Compare the tool-use registration mechanics across tutorial 12 (raw function calling), Semantic Kernel (tutorial 17), and AutoGen (this tutorial), highlighting what's identical and what differs.", "modelAnswer": "Identical across all three: the underlying loop of describe-a-function, model-requests-it, code-executes-it, result-feeds-back, and the non-negotiable safety requirements inside every function (validation, authorization, idempotency, structured errors) — none of that changes based on framework. What differs is registration mechanics and where responsibility for the loop sits. In tutorial 12's raw approach, you hand-write a JSON schema describing each function and hand-write the entire loop yourself: detecting the tool-call finish reason, executing the function, appending a tool message per call id, and looping. In Semantic Kernel, you annotate a C# method with [KernelFunction] and [Description], the framework generates the schema from your code, you register it as a plugin, and enabling automatic function calling makes the kernel run the entire loop for you. In AutoGen, you build a function map — a dictionary from function name to delegate — typically registered on a UserProxyAgent via RegisterFunctionMap, and the framework's conversation mechanics handle detecting requests and routing them through the map, with the UserProxyAgent's role in the conversation naturally being 'the one who executes and reports back.' So the spectrum runs from fully manual (tutorial 12) to attribute-driven automation (Semantic Kernel) to conversation-role-driven registration (AutoGen), converging on the same guarantees but with three different developer experiences." },
+        { "number": 8, "question": "Design the safety architecture for an AutoGen-based system that can cancel customer orders, addressing both the tool and the conversation control layers.", "modelAnswer": "At the tool layer: the cancel_order function registered in the function map validates that the order number is well-formed and exists, checks the order is in a cancellable state, authorizes against the actual requesting user's identity (not anything the conversation implies), executes idempotently so a repeated call doesn't double-cancel or double-refund, and returns a structured result (success detail or a specific error) rather than throwing — identical to the discipline required in tutorial 12 and unchanged by AutoGen's involvement. At the conversation control layer: the UserProxyAgent that owns this function map is configured with HumanInputMode.TERMINATE (or ALWAYS for a higher-stakes deployment), so a human is consulted specifically before the conversation concludes with the cancellation treated as final — the proposal is visible and requires explicit sign-off before being accepted as done. The conversation as a whole has both a semantic termination condition (e.g. the assistant confirming the action or a Reviewer-style approval) and a hard maxRound cap, so the interaction cannot run away regardless of how the semantic signal behaves. The full chat history is logged with a correlation id covering the goal, the proposed cancellation, the human's decision, and the tool's actual result, giving a complete audit trail for a customer-facing financial action." },
+        { "number": 9, "question": "Explain how the Planner/Developer/Reviewer pattern in AutoGen maps onto Semantic Kernel's orchestration patterns from tutorial 18, and what this reveals about the relationship between the two frameworks.", "modelAnswer": "Structurally, Planner/Developer/Reviewer is a group chat orchestration: three specialized agents share one conversation, a rule decides whose turn is next (the Planner naturally starts, the Developer acts on its steps, the Reviewer gates progress), and a termination condition (the Reviewer's approval, backstopped by a hard round cap) decides when the collaboration is done. AutoGen's GroupChat plus GroupChatManager implements this with an admin/speaker-selection configuration and an IsTerminationMessage-style check; Semantic Kernel's GroupChatOrchestration implements the identical structure with a selection strategy and a termination strategy object. The specific class names, configuration objects, and idioms differ, but the design decisions a team must make — how many roles, what does each own, how do turns sequence, when does it stop, what's the hard backstop — are exactly the same regardless of which framework implements them. This reveals that the two frameworks are, for this category of problem, largely interchangeable expressions of the same underlying multi-agent coordination theory; the meaningful choice for a team is less 'which framework solves this problem' and more 'which framework's ergonomics, ecosystem, and existing investment fit our system best,' since either can correctly implement a Planner/Developer/Reviewer system." },
+        { "number": 10, "question": "A junior engineer proposes using both AutoGen and Semantic Kernel together within a single agent workflow to 'get the best of both.' Evaluate this proposal.", "modelAnswer": "The proposal underestimates the cost of maintaining two mental models and two dependency sets for a single workflow, for a benefit that is usually illusory: both frameworks solve the same coordination problems (conversable/kernel-based agents, tool use, orchestration/collaboration patterns, termination strategies/conditions), so combining them within one workflow typically means re-solving the same problem twice rather than genuinely combining complementary strengths. Concretely, a workflow that uses a Semantic Kernel agent for one step and an AutoGen agent for another needs custom glue code to pass state and results between two different conversation/thread representations, doubles the debugging surface (two different chat-history/logging shapes to reconcile), and doubles the version-management burden (two fast-moving SDKs to track). The rare legitimate exception is when a specific capability genuinely only exists well-supported in one framework for one isolated component — but even then, isolating that component behind a clean interface (so the rest of the system doesn't need to know which framework implements it) is far better than interleaving both frameworks' agents within one conversation. The better default recommendation: pick one framework for this system based on fit (existing kernel/plugin/memory investment favors Semantic Kernel; a conversation-first, role-based design favors AutoGen), and reserve using the other framework for a genuinely separate system, not this workflow." },
+        { "number": 11, "question": "What debugging discipline would you establish for a team's first AutoGen-based multi-agent system in production, and why?", "modelAnswer": "First, log the complete chat history for every run, including tool requests and results, tagged with a correlation id — because collaboration is literally a message sequence, this single artifact answers most 'why did it do that' questions without additional instrumentation. Second, log the outcome of every termination evaluation (did the semantic condition fire, or did the hard round cap trigger) so the team can immediately distinguish 'the system converged correctly' from 'the system was cut off,' which have very different implications for reliability. Third, log every function-map invocation separately with its arguments and structured result, mirroring tutorial 12's function-calling trace logging, since tool calls are where real-world side effects happen and need their own audit trail distinct from the conversational back-and-forth. Fourth, track per-run metrics — round count, model calls, and which agent roles participated — as a cost and health signal, since AutoGen conversations scale cost with rounds and participants just as Semantic Kernel orchestrations do. The reasoning throughout is that a multi-agent system's behavior emerges from many small model decisions in sequence, so the debugging discipline must capture that sequence completely; sampling or partial logging leaves exactly the gaps needed to explain an unexpected result." },
+        { "number": 12, "question": "Explain the significance of AutoGen having a .NET surface (AutoGen.NET) alongside Python roots, and what caveat this implies for a .NET-focused team.", "modelAnswer": "AutoGen originated in the Python ecosystem, where its core concepts (conversable agents, GroupChat, function maps) were first developed and where the majority of community examples, documentation, and cutting-edge features tend to appear first. AutoGen.NET brings the same conceptual model to C#, letting a .NET-focused team use the framework without leaving their primary language or runtime — consistent with this course's approach of teaching every concept through .NET even where an ecosystem is Python-rooted. The caveat this implies: a .NET team should expect the .NET surface to sometimes lag the Python one in maturity, community examples, or the very newest features, and should be prepared to translate Python-centric documentation or examples into C# equivalents by understanding the underlying concept (which transfers directly) rather than expecting a line-for-line API match. It also means verifying current AutoGen.NET type and method names against the installed package is especially important, since parity efforts between the two language surfaces are ongoing and naming can differ or lag between them even when the concepts are identical." },
+        { "number": 13, "question": "How would a team decide, in practice, whether to build a new multi-agent feature in Semantic Kernel or AutoGen?", "modelAnswer": "I'd frame it as a fit question across several practical dimensions rather than a philosophical one. First, existing investment: if the team already has significant Semantic Kernel plugins, semantic memory, or Azure AI Foundry integration, extending that ecosystem for a new feature avoids duplicating infrastructure and credential/connection management. Second, the natural shape of the problem: if the team's mental model for the feature is 'who needs to talk to whom, in what order, saying what,' AutoGen's conversation-first API tends to map onto that thinking more directly; if the mental model is 'what capabilities and memory does this component need,' Semantic Kernel's kernel-and-plugin framing fits more naturally. Third, whether the feature needs deep integration with Semantic Kernel-specific capabilities (its planner ecosystem, its particular memory connectors) that would be awkward to replicate in AutoGen, or conversely needs a role-based conversational pattern (like Planner/Developer/Reviewer) that AutoGen expresses very directly. Fourth, team familiarity — a framework the team already knows well reduces risk regardless of small theoretical fit differences. In practice, for many features either framework would work correctly, so the decision often comes down to points two through four rather than any hard technical limitation of either." },
+        { "number": 14, "question": "What common failure mode undermines the Planner/Developer/Reviewer pattern even when the framework and code are implemented correctly, and how do you prevent it?", "modelAnswer": "The most common failure mode is a Reviewer agent given vague, open-ended instructions ('give feedback on the code' or 'review this'), which produces critique that never reaches a clean, matchable conclusion — the Reviewer might hedge indefinitely, restate minor stylistic preferences forever, or phrase approval in a way a termination condition's exact-match or keyword check never catches, so the conversation runs to its hard round cap without ever 'finishing' in the intended sense even though the code produced along the way might actually be fine. This isn't a framework bug; it's an instructions design failure that no amount of correct GroupChat/GroupChatManager configuration fixes. Prevention: give the Reviewer explicit, checkable output requirements as part of its system message — for example, 'reply with exactly APPROVED if the code is correct and complete, or a numbered list of specific required changes otherwise' — so there is a clear, narrow output space the termination condition can reliably detect. This mirrors a broader lesson from earlier tutorials about prompt and instruction quality: the framework automates mechanics, but the quality of an agent's instructions still determines whether the mechanics produce the intended outcome, and a Reviewer role is especially sensitive to this because its output is the thing the whole system's termination depends on." },
+        { "number": 15, "question": "Reflecting on tutorials 17 through 19, articulate the general lesson about frameworks that a developer should carry forward, independent of any specific framework's API.", "modelAnswer": "The general lesson is that the underlying problems in building capable AI applications — giving a model access to real functions safely, letting it reason across multiple turns toward a goal, coordinating multiple specialized perspectives, and bounding autonomy with guardrails like termination conditions and human checkpoints — are framework-agnostic engineering problems with a fairly small, stable set of correct answers. Tutorial 12 solved them by hand; Semantic Kernel (tutorials 17-18) automated them with a kernel-and-plugin philosophy; AutoGen (this tutorial) automates the same problems with a conversation-and-role philosophy; and any future framework a developer encounters will very likely be another expression of the same small set of ideas — describe capabilities clearly, validate and authorize every real action regardless of what requested it, decide explicitly how turns and participants are sequenced, and never let autonomy run without a hard bound and, for consequential actions, a genuine human checkpoint. A developer who understands why these patterns exist, from having built them by hand once, can pick up any new agent framework quickly by mapping its vocabulary onto this stable underlying model, rather than needing to relearn agent-based AI development from scratch for every new library — which is precisely why this course built the raw mechanism first and only introduced frameworks once that foundation was solid." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "AutoGen", "back": "A multi-agent framework (with a .NET surface, AutoGen.NET) built around conversable agents that solve tasks by exchanging messages, contrasting with Semantic Kernel's kernel-centric model." },
+        { "number": 2, "front": "Conversable agent", "back": "AutoGen's core abstraction: an agent that sends/receives messages and can invoke tools, participating in a conversation with other agents." },
+        { "number": 3, "front": "AssistantAgent", "back": "Model-backed agent that reasons, drafts, and responds within a conversation — AutoGen's counterpart to a ChatCompletionAgent." },
+        { "number": 4, "front": "UserProxyAgent", "back": "Represents the human/environment; can run code/tools and relay results back into the conversation; its HumanInputMode controls human consultation." },
+        { "number": 5, "front": "Two-agent chat vs GroupChat", "back": "Two-agent chat: focused exchange between exactly two agents. GroupChat: 3+ agents share one thread, coordinated by a GroupChatManager." },
+        { "number": 6, "front": "GroupChatManager", "back": "Orchestrates a GroupChat: speaker selection (who's next) + termination evaluation (when to stop) — same jobs as SK's selection/termination strategies." },
+        { "number": 7, "front": "Function map", "back": "Registry mapping model-requested function names to real C# delegates, typically on a UserProxyAgent via RegisterFunctionMap — AutoGen's tool-use mechanism." },
+        { "number": 8, "front": "Tool use in AutoGen = tutorial 12's loop", "back": "Same describe→request→execute→respond mechanism as raw function calling and Semantic Kernel; only registration mechanics differ. Same safety discipline required." },
+        { "number": 9, "front": "HumanInputMode", "back": "ALWAYS / NEVER / TERMINATE on a UserProxyAgent. TERMINATE = ask a human only when the conversation would otherwise end — a practical checkpoint." },
+        { "number": 10, "front": "Termination condition (AutoGen)", "back": "Keyword, maxRound/MaxRound cap, or custom check over chat history. ALWAYS pair a semantic check with a hard round cap — same rule as Semantic Kernel." },
+        { "number": 11, "front": "Chat history", "back": "The full ordered record of exchanged messages (incl. tool calls) — AutoGen's built-in debugging artifact, equivalent to SK's manually-added step logging." },
+        { "number": 12, "front": "Planner agent", "back": "Breaks a goal into a numbered sequence of concrete steps; explicitly does NOT write code itself." },
+        { "number": 13, "front": "Developer agent", "back": "Implements the current step (typically as code); waits for Reviewer approval before advancing." },
+        { "number": 14, "front": "Reviewer agent", "back": "Critiques/approves the Developer's output. Needs EXPLICIT checkable language (\"APPROVED\" or specific changes) or termination won't reliably fire." },
+        { "number": 15, "front": "AutoGen vs Semantic Kernel choice", "back": "Pick ONE framework per system based on fit (existing investment, conversation-first vs kernel-first mental model) — don't mix both in one workflow." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions and Answers",
+      "items": [
+        { "number": 1, "question": "How would you explain AutoGen to someone who already knows Semantic Kernel's Agent Framework?", "answer": "Same problem, different lens. Semantic Kernel frames an agent as a kernel plus persistent instructions plus a thread — you think in terms of capabilities (plugins) and state (thread). AutoGen frames everything as conversation: a conversable agent sends and receives messages, and collaboration is literally message exchange between agents like AssistantAgent (model-backed, reasons and drafts) and UserProxyAgent (represents the human/environment, executes tools). Multi-agent coordination in AutoGen is a GroupChat with a manager doing speaker selection and termination — directly mirroring Semantic Kernel's selection and termination strategies, just named and configured differently. If someone's fluent in one, the fastest onboarding to the other is mapping each concept one-to-one, because the underlying design problems — and their correct solutions, like always backstopping termination with a hard round cap — are identical." },
+        { "number": 2, "question": "Walk me through tool use in AutoGen and how it compares to Semantic Kernel's automatic function calling.", "answer": "Same loop underneath: describe a function to the model, the model requests it mid-conversation, code executes it, the result feeds back in, and the conversation continues. AutoGen's specific mechanism is a function map — a dictionary from function name to a C# delegate — typically registered on the UserProxyAgent, since that's the agent conceptually responsible for acting on the assistant's behalf. Compare that to Semantic Kernel, where you annotate a method with [KernelFunction] and [Description] and the framework generates the schema and runs the whole loop via automatic function calling. The registration mechanics differ — attribute-driven code generation versus an explicit name-to-delegate dictionary — but what never changes is the safety responsibility: every function actually executing real logic still needs to validate its arguments, authorize as the real user, stay idempotent, and return structured errors, regardless of which framework routed the request to it." },
+        { "number": 3, "question": "What's your approach to debugging a multi-agent AutoGen conversation that isn't behaving as expected?", "answer": "Start with the chat history — the full ordered message record, including tool calls, is AutoGen's built-in debugging artifact, and reading it end to end usually shows exactly where behavior diverged from expectation. I check whether the conversation stopped via its intended semantic termination condition or hit the hard round cap instead — those imply very different problems, one being 'it never converged' and the other being 'a safety net caught it.' If a termination keyword isn't firing, I look for phrasing drift — the model saying something semantically equivalent to 'approved' but not matching an exact string check. For tool-call issues, I look at the function map entries' logged arguments and results the same way I would for any function-calling bug. The whole approach mirrors debugging tutorial 12's hand-rolled loop or a Semantic Kernel orchestration — same categories of failure (wrong instructions, brittle termination matching, tool bugs), just surfaced through AutoGen's conversation object instead of a manually built log." },
+        { "number": 4, "question": "How would you design the Planner/Developer/Reviewer pattern to actually converge reliably?", "answer": "The single highest-leverage fix is making the Reviewer's approval language explicit and narrow — 'reply with exactly APPROVED if correct and complete, otherwise a numbered list of specific required changes' — rather than open-ended feedback, because a vague Reviewer is the most common reason this pattern fails to terminate cleanly. The Planner's instructions should explicitly forbid it from writing code, keeping decomposition and implementation cleanly separated. The Developer should be told to wait for Reviewer sign-off before moving to the next step, preventing it from racing ahead on unapproved work. Then, at the orchestration layer, I configure a termination condition that matches the Reviewer's exact approval signal, always paired with a hard MaxRound backstop — and I test both paths deliberately: does it converge on a genuinely correct submission, and does it also stop cleanly if I instruct the Reviewer to never approve. Converging reliably is mostly an instructions-design problem, not a framework-configuration problem." },
+        { "number": 5, "question": "A stakeholder asks why you'd ever need both AutoGen and Semantic Kernel in an organization instead of standardizing on one. How do you respond?", "answer": "I'd agree that for any single system, standardizing on one framework is right — mixing both within one workflow just doubles the mental models and dependency surface for no real benefit, since they solve the same problems. But at the organization level, different teams and different systems can reasonably land on different frameworks based on fit: a team with heavy existing investment in Semantic Kernel plugins, memory connectors, and Foundry integration should keep extending that rather than switching. A team building a naturally conversation-first, role-based system (like a Planner/Developer/Reviewer code-review bot) might find AutoGen's API maps onto their design more directly. Having both available in the toolkit lets each team pick the better fit for their specific system, the same way an organization might reasonably have some services in one language and some in another — the goal isn't framework purity across the whole org, it's the right, singular choice per system." },
+        { "number": 6, "question": "What safety architecture would you put around an AutoGen system that can take a real, irreversible action like cancelling an order?", "answer": "Two layers, matching what I'd do in any framework. At the function layer: the cancel_order delegate in the function map validates the order exists and is cancellable, authorizes against the real requesting user rather than trusting conversational context, executes idempotently so retries can't double-cancel, and returns a structured result instead of throwing — identical to tutorial 12's discipline, completely unaffected by AutoGen being involved. At the conversation layer: the UserProxyAgent owning that function gets HumanInputMode.TERMINATE (or ALWAYS for higher stakes), so a human is consulted right before the conversation concludes with the cancellation as final — visible, explicit sign-off before it's treated as done. The conversation also carries both a semantic termination check and a hard round cap, and the full chat history plus the human's decision get logged with a correlation id for a complete audit trail. None of this is AutoGen-specific; it's the same layered-guardrail architecture I'd build around any autonomous system that can take a consequential action." },
+        { "number": 7, "question": "Explain why 'always pair a semantic termination condition with a hard round cap' is not just a Semantic Kernel rule but applies to AutoGen too.", "answer": "It's a property of language models and multi-agent conversation in general, not something specific to either framework's implementation. Any semantic termination check — a keyword match, a model judging 'is this done' — depends on the model producing exactly the expected signal, and models are probabilistic: phrasing varies, and an exact-match check can miss a semantically-correct approval phrased slightly differently, or a judgment call can be inconsistent run to run. In AutoGen specifically, I've seen a Reviewer write something like 'This is approved and ready' when the termination check looked for the literal string APPROVED — the check never fires, and without a hard maxRound/MaxRound backstop the conversation just keeps going, burning model calls indefinitely. The backstop guarantees a bound regardless of whether the semantic signal ever behaves as expected, which is why I treat it as mandatory in every multi-agent system I build, in either framework — it's not extra caution, it's the actual safety net." },
+        { "number": 8, "question": "How do you decide between two-agent chat and GroupChat for a new AutoGen feature?", "answer": "I default to two-agent chat and only move to GroupChat when I can articulate a specific reason three or more distinct perspectives genuinely improve the outcome. Two-agent chat fits a focused pattern — an assistant reasons, a proxy executes tools or code on its behalf and relays results — which covers a large share of real tasks. GroupChat adds real cost: more agents means more model calls per round, mandatory speaker-selection configuration, and a termination condition that now has to account for a more complex multi-party conversation instead of a simple back-and-forth. I've found the decision test is the same one I'd apply in Semantic Kernel — does this problem actually need multiple specialized roles collaborating (like Planner decomposing, Developer implementing, Reviewer gating), or would one well-instructed assistant plus a tool-executing proxy solve it just as well at a fraction of the complexity and cost. Defaulting to the simpler pattern and adding participants only when justified keeps the system both cheaper and easier to debug." },
+        { "number": 9, "question": "What would concern you about a team's first production AutoGen deployment, and what would you check before sign-off?", "answer": "My biggest concern is usually insufficient guardrails around autonomy, since that's the most common gap in a first deployment. I'd check: does every conversation with a semantic termination condition also have a hard round cap configured — I've seen teams add the keyword check and forget the backstop. Does every function registered in a function map have the full tutorial-12 safety discipline (validation, authorization, idempotency, structured errors), or is something trusting the conversation's context too much. For any consequential action, is there a genuine human-in-the-loop checkpoint, and is a person actually reading what they're approving rather than rubber-stamping an ALWAYS-mode prompt. Is chat history being logged for every production run with a correlation id, so an unexpected result is debuggable after the fact rather than only reproducible by luck. And is cost bounded and monitored, since agent count times round count times model calls can scale faster than a team expects if nobody's watching it. None of these are AutoGen-specific concerns — they're the same checklist I'd apply to any autonomous multi-agent system, in any framework." },
+        { "number": 10, "question": "How does AutoGen's .NET surface compare to its Python roots, and what does that mean practically for a .NET team?", "answer": "AutoGen originated in Python, where the core concepts and most examples and community activity first appeared; AutoGen.NET brings the same conceptual model — conversable agents, GroupChat, function maps — to C#, so a .NET team can use it without switching ecosystems. Practically, this means the .NET surface can lag the Python one in maturity or the newest features, and a lot of documentation or community examples a team finds online will be in Python and need translating into C# equivalents. That translation is usually straightforward once you understand the underlying concept — an AssistantAgent is an AssistantAgent regardless of language — but it does mean verifying exact type and method names against the installed AutoGen.NET package rather than trusting Python-flavored blog posts or even slightly older .NET examples, since parity between the two surfaces is still evolving." },
+        { "number": 11, "question": "Someone on your team wants to implement a code-review bot. Would you reach for AutoGen's Planner/Developer/Reviewer pattern, and why or why not?", "answer": "It's a strong fit conceptually — code review naturally splits into distinct roles (someone plans what needs checking, someone examines the code, someone decides pass/fail) that map cleanly onto Planner, Developer, and Reviewer, or a variant of them. I'd build it as a GroupChat with those three roles, register any needed tools (like a static-analysis check or test runner) in the function map on the appropriate UserProxyAgent, give the Reviewer explicit checkable approval language, and configure a termination condition backstopped by a hard round cap. Before committing, though, I'd sanity-check whether the task genuinely needs three separate agents talking, or whether a single well-instructed AssistantAgent with tool access could do the job at lower cost and complexity — for smaller code changes, one agent that reviews directly might be entirely sufficient, and I'd only add the full role split once I saw evidence that a single agent's output quality or scope needed the extra structure." },
+        { "number": 12, "question": "What's the relationship between what you'd log for an AutoGen system and what tutorial 13's structured logging established for a plain Azure OpenAI call?", "answer": "It's the same principles applied at a different granularity. Tutorial 13 established structured logging per model call — latency, token counts, finish reason, correlation id — so a single AI call's behavior is queryable and traceable. An AutoGen system needs the same thing per model call within the conversation (each agent turn is a model call), plus additional structure specific to multi-agent conversation: which agent produced which message, what tool calls were made and their results, what the termination evaluation decided at each round, and how many total rounds and agents were involved in the run. The correlation id ties all of it together into one traceable story for a single logical task, exactly as it did for a single AI call — it just now spans potentially dozens of underlying model calls and multiple agent identities instead of one. The core discipline (structured, queryable, correlation-tagged logging, never logging secrets, capturing enough to answer 'what happened and why') is identical; AutoGen conversations just have more moving parts to capture." },
+        { "number": 13, "question": "How would you pitch the value of learning both Semantic Kernel and AutoGen to a developer who feels like they're 'just learning the same thing twice'?", "answer": "I'd validate the observation — the underlying concepts genuinely are the same, and that's the point, not a redundancy. Learning one framework deeply teaches the concepts (agents, tool use, orchestration/collaboration patterns, termination, guardrails); learning the second framework on top of that mostly teaches you that those concepts are framework-agnostic engineering truths, not quirks of one library's API. That's valuable because it means the developer isn't locked into one vendor's abstractions — when a third framework appears next year, they'll recognize its 'agent' and 'termination condition' equivalents immediately instead of learning from scratch. It also makes them a better technical decision-maker: understanding both means they can genuinely evaluate which framework fits a new system's needs, rather than defaulting to whichever one they happen to know. The 'same thing twice' feeling is actually the signal that the underlying model has been internalized well enough to see through both frameworks' surface syntax to the shared design problem beneath — which is exactly the transferable skill worth having." },
+        { "number": 14, "question": "In a Planner/Developer/Reviewer system, what would make you suspect the Developer agent's instructions need tightening, based on the conversation's behavior?", "answer": "A few tells. If the Developer produces code that ignores or contradicts the Planner's current step — implementing something unrelated or jumping ahead to a later step — its instructions probably aren't anchoring it tightly enough to 'implement only the current step.' If the Developer keeps resubmitting the same rejected code with cosmetic changes rather than addressing the Reviewer's specific listed changes, its instructions likely need to explicitly require addressing each named point from the Reviewer's feedback. If the conversation runs long and the Developer's messages contain a lot of hedging or exploratory rambling rather than a clean code artifact, tightening the instructions to require a specific output format (e.g., 'respond with only the code block, no explanation, unless the Reviewer's feedback needs direct acknowledgment') often shortens convergence significantly. In general, when a role's behavior in the chat history doesn't match its intended narrow responsibility, the fix is almost always sharpening that role's system message rather than adjusting the orchestration configuration around it." },
+        { "number": 15, "question": "What single piece of advice would you give a team about to build their first serious multi-agent AutoGen system?", "answer": "Build the two-agent version first, get it working reliably with proper logging and a hard termination backstop, and only then add more roles or move to GroupChat if you find a concrete, specific gap that more participants would fill. The temptation with a flashy multi-agent framework is to reach immediately for an elaborate Planner/Developer/Reviewer-style system because it's the compelling example everyone shows, but starting there means debugging multiple simultaneous unknowns — role instructions, speaker selection, termination matching, and tool safety — all at once. Starting with the simplest AssistantAgent-plus-UserProxyAgent pattern, with one tool and one clear termination condition backstopped by a round cap, lets you build confidence in the fundamentals (does my termination check actually fire, do my tool functions behave safely, does the chat history give me what I need to debug) before layering on the genuine complexity of multiple specialized roles. Every additional agent and every additional orchestration pattern should be a deliberate, justified addition to a working simpler system, not the starting point." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "AutoGen", "definition": "A multi-agent framework with a .NET surface (AutoGen.NET) alongside Python roots, built around conversable agents that collaborate through message exchange." },
+        { "term": "Conversable agent", "definition": "AutoGen's core abstraction: an agent that sends and receives messages, optionally invoking tools, as part of a conversation with other agents." },
+        { "term": "AssistantAgent", "definition": "A model-backed AutoGen agent role that reasons, drafts, and responds within a conversation toward a goal." },
+        { "term": "UserProxyAgent", "definition": "An AutoGen agent role representing the human or execution environment; can run code/tools and relay results, with a configurable human input mode." },
+        { "term": "GroupChat", "definition": "An AutoGen construct where multiple agents share one conversation and take turns, coordinated by a manager and a speaker-selection rule." },
+        { "term": "GroupChatManager", "definition": "The AutoGen component orchestrating a GroupChat: selecting the next speaker and evaluating whether the conversation should terminate." },
+        { "term": "Speaker selection", "definition": "The rule (round-robin, model-driven, or custom) that decides which agent in a GroupChat takes the next turn." },
+        { "term": "Conversation pattern", "definition": "A reusable structure for agent interaction — two-agent chat, GroupChat, or nested chats — chosen to fit a given collaboration." },
+        { "term": "Tool use", "definition": "An agent's ability to invoke a registered function during a conversation and use its result to continue reasoning, mirroring function calling." },
+        { "term": "Function map", "definition": "AutoGen's registry connecting function names the model can request to the actual C# methods that execute them." },
+        { "term": "Code execution", "definition": "AutoGen's capability for an agent, typically a UserProxyAgent, to run generated code and feed the output back into the conversation." },
+        { "term": "Human-in-the-loop", "definition": "A mode where a human is consulted at defined points in an agent conversation — always, on demand, or never — to approve or redirect actions." },
+        { "term": "Termination condition", "definition": "The rule ending an AutoGen conversation: a keyword, a maximum turn count, or a custom check on the message history." },
+        { "term": "Agent role", "definition": "A named responsibility assigned to an agent in a multi-agent system, such as Planner, Developer, or Reviewer, each with distinct instructions." },
+        { "term": "Planner agent", "definition": "An agent role responsible for breaking a goal into a sequence of steps for other agents to carry out." },
+        { "term": "Developer agent", "definition": "An agent role responsible for producing an artifact, typically code, based on the Planner's steps." },
+        { "term": "Reviewer agent", "definition": "An agent role responsible for critiquing or approving another agent's output before it is accepted or acted on." },
+        { "term": "Chat history", "definition": "The ordered record of messages exchanged in an agent conversation, used for context, debugging, and deciding termination." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "AutoGen's fundamental abstraction is the conversable agent — collaboration happens through message exchange, with AssistantAgent (model-backed) and UserProxyAgent (executes tools, relays results) as the two core built-in roles.",
+          "Agent collaboration patterns run from focused two-agent chat to GroupChat, where a GroupChatManager handles speaker selection and termination for three or more participants.",
+          "Tool use and function calling in AutoGen mirror tutorial 12's loop exactly, registered via a function map — the same safety discipline (validation, authorization, idempotency, structured errors) applies unchanged.",
+          "Debugging and controlling agents rests on chat history (the built-in message record), human input modes (ALWAYS/TERMINATE/NEVER), and termination conditions — always backstopped by a hard round cap.",
+          "The Planner/Developer/Reviewer role pattern decomposes a goal, implements it, and reviews it in a GroupChat, converging reliably only when the Reviewer's approval language is explicit and checkable.",
+          "Every AutoGen concept maps directly onto Semantic Kernel's Agent Framework from tutorial 18 — the two frameworks are different, largely interchangeable answers to the same multi-agent coordination problem, and a team should pick one per system rather than mixing them."
+        ] },
+        { "type": "paragraph", "text": "You now have two complete, contrasting toolkits for building autonomous multi-agent systems in .NET — Semantic Kernel's kernel-and-plugin philosophy and AutoGen's conversation-and-role philosophy — and, more importantly, the underlying design vocabulary (agents, tools, orchestration/collaboration patterns, termination, human-in-the-loop) that transfers to whatever framework you encounter next. With both approaches to multi-agent coordination in hand, the course now turns from framework mechanics to architecture: how agent-first thinking reshapes application design at a higher level." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Next tutorial: Agent-First Architecture (agent-first-architecture). Having built agents in both Semantic Kernel and AutoGen, the next tutorial steps back from framework-specific mechanics to the architectural question: how do you design an application around agents as the primary unit of functionality, rather than bolting agent capability onto an existing request/response design?" },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: rebuild tutorial 18's Writer/Reviewer group chat orchestration as an AutoGen GroupChat, and compare which framework's configuration felt clearer for your team.",
+          "Practice: build the full Planner/Developer/Reviewer system from the walkthrough, then deliberately give the Reviewer vague instructions and observe the convergence failure before fixing it.",
+          "Practice: add a function map tool to a two-agent chat, then switch the UserProxyAgent to HumanInputMode.TERMINATE and observe the checkpoint before the conversation concludes.",
+          "Practice: log a full chat history to a file for one run and use it to answer 'why did this conversation take exactly this many rounds' without adding any extra instrumentation.",
+          "Read: the official AutoGen documentation for 'AutoGen.NET', 'Conversable agents', 'GroupChat', and the AutoGen function-calling/tool-use guide."
+        ] },
+        { "type": "note", "style": "tip", "text": "Keep both your Semantic Kernel and AutoGen role-based systems from tutorials 18 and 19. The agent-first architecture tutorial draws on both as concrete examples of 'agents as a unit of design,' regardless of which framework implements them." }
+      ]
+    }
+  ]
+}

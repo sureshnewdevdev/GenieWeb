@@ -1,4 +1,4 @@
-$path = "C:\Genie\GenieWeb\wwwroot\tutorials\semantic-kernel-advanced.json"
+$path = "C:\Genie\GenieWeb\wwwroot\tutorials\autogen-framework.json"
 $raw = Get-Content $path -Raw -Encoding UTF8
 try { $j = $raw | ConvertFrom-Json } catch { "Valid JSON: NO - $($_.Exception.Message)"; exit 1 }
 
@@ -60,10 +60,12 @@ $glossText = (($j.sections | Where-Object key -eq "glossary").items | ForEach-Ob
 $ttText = ($j.tooltips.PSObject.Properties | ForEach-Object { "$($_.Name) $($_.Value)" }) -join " "
 
 $checks = [ordered]@{
-  "1 agent framework concepts " = "(?i)\bagent\b"
-  "2 planner patterns         " = "(?i)\bplanner\b"
-  "3 orchestration patterns   " = "(?i)orchestration pattern"
-  "4 multi-step workflows     " = "(?i)multi-step workflow"
+  "1 AutoGen fundamentals     " = "(?i)AutoGen"
+  "2 agent collaboration      " = "(?i)conversation pattern"
+  "3 tool use / function call " = "(?i)function map"
+  "4 debug/control agents     " = "(?i)chat history"
+  "5 multi-agent problem sys  " = "(?i)Planner agent"
+  "6 Planner/Developer/Rev.   " = "(?i)Reviewer agent"
 }
 foreach ($k in $checks.Keys) {
   $t = $checks[$k]
