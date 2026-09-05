@@ -1,0 +1,486 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Azure AI Foundry",
+  "slug": "azure-ai-foundry",
+  "level": "Beginner to Intermediate",
+  "codeLanguage": "C#",
+  "tutorialNumber": 16,
+  "totalTutorials": 27,
+  "prev": "rag-with-azure-ai-search",
+  "next": "semantic-kernel-framework",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Azure AI Foundry"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "What Azure AI Foundry is",
+    "How Azure AI Foundry works",
+    "When to use Azure AI Foundry",
+    "Exploring the Foundry portal",
+    "Where Foundry fits alongside Azure OpenAI"
+  ],
+  "tooltips": {
+    "Azure AI Foundry": "Azure's unified platform for building, evaluating, deploying, and managing AI applications — bringing models, data, tools, and observability into one place.",
+    "Foundry portal": "The web studio for Azure AI Foundry where you browse models, run playgrounds, build and evaluate apps, and manage deployments without writing code.",
+    "hub": "A top-level Azure AI Foundry resource that centralizes shared settings — security, connections, and compute — for one or more projects under it.",
+    "project": "A workspace inside a hub where a specific AI application's models, data, deployments, and evaluations live, isolated from other projects.",
+    "model catalog": "The browsable library of models in Azure AI Foundry — Azure OpenAI models plus many open and partner models — that you can compare and deploy.",
+    "playground": "An interactive area in the Foundry portal for testing prompts and chat against a deployed model before writing any code.",
+    "deployment": "A named, running instance of a model in a project that your application calls; the same deployment concept used with Azure OpenAI.",
+    "connection": "A stored, secured link from a project to an external resource — a search index, storage, or another Azure service — reusable across the project.",
+    "evaluation": "Foundry's built-in workflow for scoring an AI app's outputs on metrics like groundedness, relevance, and safety against a test dataset.",
+    "groundedness": "An evaluation metric measuring how well an answer is supported by its provided source context — central to checking RAG systems.",
+    "content safety": "Azure's filters and tooling that detect and block harmful content in prompts and responses, configurable per deployment in Foundry.",
+    "tracing": "Capturing the step-by-step execution of an AI app — prompts, retrievals, tool calls, tokens — so you can debug and monitor it.",
+    "Azure OpenAI": "The service providing OpenAI models (GPT-4o, embeddings) on Azure; in Foundry it is one model provider surfaced through the catalog and deployments.",
+    "Azure AI Foundry SDK": "The .NET/Python client libraries for working with Foundry projects programmatically — resolving connections and calling deployed models from code.",
+    "SDK": "A client library that lets your application code call a service; Foundry offers SDKs so code can use project connections and deployments.",
+    "responsible AI": "Practices and tools for building safe, fair, transparent AI; Foundry surfaces them through content safety, evaluations, and tracing.",
+    "prompt flow": "A Foundry tool for authoring, testing, and orchestrating multi-step LLM workflows (retrieval, prompts, logic) as a visual, evaluable graph.",
+    "fine-tuning": "Adapting a base model on your examples to change its behavior or style; Foundry provides a managed workflow for it."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview: One Place for the Whole AI Lifecycle",
+      "content": [
+        { "type": "paragraph", "text": "Over the last several tutorials you assembled AI capabilities one at a time: an Azure OpenAI deployment, embeddings, function calling, resilience and logging, a web integration, and a full RAG pipeline. Each was a separate piece you wired together in code. Azure AI Foundry is the platform that brings those pieces into one managed place — a single environment to discover models, test them, connect data, build and evaluate applications, deploy them, and watch them run. Where the earlier tutorials taught the building blocks, this one introduces the workshop they all live in." },
+        { "type": "paragraph", "text": "This is a mostly conceptual tutorial, aimed from beginner to intermediate. You will learn what Azure AI Foundry is and the problem it solves; how it works, through its hub-and-project structure, model catalog, playgrounds, evaluations, and deployments; when reaching for Foundry pays off versus calling a bare API; how to find your way around the Foundry portal; and — importantly for everything you have already built — exactly where Foundry fits alongside Azure OpenAI, because they are complementary, not competing." },
+        { "type": "note", "style": "info", "text": "You do not throw away anything from earlier tutorials to use Foundry. Your Azure OpenAI deployments, your RAG code, and your IChatService all still apply — Foundry organizes and augments them rather than replacing them." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Explain what Azure AI Foundry is and the end-to-end AI lifecycle problem it addresses.",
+          "Describe how Azure AI Foundry works: hubs and projects, the model catalog, playgrounds, connections, evaluation, and deployments.",
+          "Decide when to use Azure AI Foundry versus calling a model API directly from code.",
+          "Navigate the Foundry portal to browse models, test in a playground, and manage a project's deployments.",
+          "Explain where Foundry fits alongside Azure OpenAI, and how your existing deployments and code relate to a Foundry project.",
+          "Connect a Foundry project to code with the Azure AI Foundry SDK at a conceptual level."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "The earlier tutorials' concepts: what a model deployment, an embedding, function calling, and a RAG pipeline are.",
+          "Familiarity with Azure OpenAI from tutorials 10–11 — endpoints, deployments, and the model catalog concept.",
+          "Basic Azure portal navigation: subscriptions, resource groups, and creating a resource.",
+          "C# at a reading level for this tutorial's illustrative SDK snippet; no new coding is required to follow along."
+        ] },
+        { "type": "note", "style": "tip", "text": "The best way to absorb this tutorial is with the Foundry portal open in another tab. It is conceptual by necessity, but every concept maps to something you can click." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "Key Concepts: The Unified AI Platform",
+      "content": [
+        { "type": "paragraph", "text": "Building a serious AI application touches many concerns: which model, tested how, connected to what data, deployed where, evaluated against what, monitored by whom. Handle each with a separate tool and you get a fragmented workflow and no single view of your app's health. Azure AI Foundry exists to unify that lifecycle — model discovery, prompt testing, data connections, application building, evaluation, deployment, content safety, and tracing — under one platform with one portal and matching SDKs." },
+        { "type": "table", "headers": ["Lifecycle stage", "What Foundry provides"], "rows": [
+          ["Discover", "A model catalog of Azure OpenAI, open, and partner models to compare"],
+          ["Experiment", "Playgrounds to test prompts and chat with no code"],
+          ["Connect", "Connections to data and services (e.g. a search index for RAG)"],
+          ["Build", "Prompt flow and app tooling to orchestrate multi-step workflows"],
+          ["Evaluate", "Evaluations scoring groundedness, relevance, safety on test data"],
+          ["Deploy", "Managed deployments your app calls, with content safety configured"],
+          ["Operate", "Tracing and monitoring of prompts, tokens, and outcomes"]
+        ] },
+        { "type": "paragraph", "text": "Two structural ideas organize all of this. A hub is a top-level resource holding shared settings — security, connections, compute — that multiple projects inherit. A project is a workspace under a hub for one application, containing its models, data, deployments, and evaluations in isolation from other projects. This mirrors how teams actually work: a hub is the shared foundation an organization or team sets up once; projects are the individual apps built on it. Everything else — catalog, playground, evaluation, tracing — operates within that hub-and-project frame." },
+        { "type": "note", "style": "info", "text": "Keep the frame in mind: Foundry is not a new model or a new API to learn from scratch — it is an organizing platform whose pieces you have already met individually, now with a shared home and a lifecycle around them." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Deep Dive 1: What Azure AI Foundry Is",
+      "content": [
+        { "type": "paragraph", "text": "Azure AI Foundry is Azure's unified platform for building, evaluating, deploying, and managing AI applications. That single sentence carries three claims worth unpacking. First, unified: it deliberately spans the whole lifecycle rather than one slice, so discovery, testing, building, evaluation, deployment, and monitoring share one environment. Second, for applications, not just models: Foundry's unit of work is an AI app — a chatbot, a RAG assistant, an agent — with its models, data connections, and evaluations bundled together, not a bare model endpoint. Third, managed: security, connections, content safety, and observability are provided by the platform instead of assembled by hand." },
+        { "type": "paragraph", "text": "Concretely, Foundry gives you: a model catalog spanning Azure OpenAI models plus a large selection of open and partner models; playgrounds for no-code experimentation; connections that securely link a project to data and services; prompt flow and app tooling to build multi-step workflows; an evaluation system to measure quality and safety; managed deployments; and responsible AI features like content safety and tracing. It is accessed through the Foundry portal (a web studio) and the Azure AI Foundry SDK (client libraries), so the same project is reachable by clicking or by code." },
+        { "type": "paragraph", "text": "It helps to contrast Foundry with what you used before. In tutorials 10–11 you worked directly with Azure OpenAI: one service, its models, its deployments. Foundry is a layer above that scope: Azure OpenAI becomes one provider within Foundry's catalog, and around it Foundry adds the multi-model catalog, the lifecycle tooling, and the project structure. If Azure OpenAI is the engine, Foundry is the whole workshop where you choose engines, test builds, and ship vehicles." },
+        { "type": "note", "style": "warning", "text": "Cloud AI platforms evolve quickly and names shift — Foundry grew out of and unifies earlier Azure AI Studio / Azure Machine Learning studio experiences. Treat exact portal labels as current-at-writing and expect the UI to keep changing; the concepts are stable even when the buttons move." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Deep Dive 2: How Azure AI Foundry Works",
+      "content": [
+        { "type": "paragraph", "text": "Foundry's mechanics follow the lifecycle. You start by creating a hub (the shared foundation) and a project within it (your application's workspace). Inside the project you browse the model catalog and pick a model, deploy it to get a deployment your code and the playground can call, and try it in a playground. You add connections to bring in data — a search index for RAG, a storage account, another service — as secured, reusable links. You build the application logic, optionally with prompt flow for multi-step orchestration. You run evaluations against a test dataset to score quality and safety. And you monitor the running app with tracing." },
+        { "type": "animation", "title": "The Foundry lifecycle, end to end", "intro": "From an empty project to a monitored, deployed AI app.", "nodes": [
+          { "id": "proj", "label": "Hub + Project", "sub": "the workspace" },
+          { "id": "catalog", "label": "Model catalog", "sub": "pick + deploy" },
+          { "id": "connect", "label": "Connections", "sub": "data + services" },
+          { "id": "eval", "label": "Evaluation", "sub": "score quality" },
+          { "id": "operate", "label": "Deploy + trace", "sub": "run + monitor" }
+        ], "steps": [
+          { "highlight": ["proj"], "caption": "Create a hub for shared settings, then a project for this specific application." },
+          { "highlight": ["catalog"], "caption": "Browse the model catalog, compare models, and deploy the chosen one to get a deployment to call." },
+          { "highlight": ["connect"], "caption": "Add connections — for example a search index — so the app can reach its data securely and reusably." },
+          { "highlight": ["eval"], "caption": "Run evaluations over a test dataset, scoring groundedness, relevance, and safety before shipping." },
+          { "highlight": ["operate"], "caption": "Deploy the app and turn on tracing to monitor prompts, tokens, and outcomes in production." }
+        ] },
+        { "type": "paragraph", "text": "The hub-and-project split is what makes this work for teams. Set up once at the hub: security and access, shared connections, content safety policy, compute. Then spin up projects under it that inherit those settings, each isolated so one team's app cannot disturb another's. A connection defined at the hub can be shared across projects; models deployed in a project are scoped to it. This is governance built into the structure — a platform team configures the hub, application teams work in projects, and the boundaries are enforced rather than hoped for." },
+        { "type": "code", "language": "csharp", "title": "Reaching a Foundry project from .NET (illustrative)", "code": [
+          "using Azure.AI.Projects;",
+          "using Azure.Identity;",
+          "",
+          "// A project has an endpoint/connection string; auth via Managed Identity.",
+          "var projectClient = new AIProjectClient(",
+          "    new Uri(projectEndpoint),",
+          "    new DefaultAzureCredential());",
+          "",
+          "// Resolve a connection (e.g. the project's Azure OpenAI) and call a deployment.",
+          "// The point: code uses the PROJECT's configured connections and deployments,",
+          "// so endpoints and keys are managed centrally, not scattered in appsettings.",
+          "ChatClient chat = projectClient",
+          "    .GetAzureOpenAIChatClient(deploymentName: \"gpt-4o-mini\");",
+          "",
+          "ChatCompletion reply = await chat.CompleteChatAsync(",
+          "    new UserChatMessage(\"Summarize what Azure AI Foundry provides.\"));",
+          "Console.WriteLine(reply.Content[0].Text);"
+        ] },
+        { "type": "note", "style": "info", "text": "The exact Foundry SDK types and method names (AIProjectClient and connection helpers) are evolving across preview and release versions — the snippet shows the intent: code talks to a project and uses its managed connections and deployments. Verify current names against the package, as noted in section 13." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Deep Dive 3: When to Use Azure AI Foundry",
+      "content": [
+        { "type": "paragraph", "text": "Foundry is not always the right level of tool, and knowing when it pays off is part of using it well. It shines when your work spans the lifecycle: comparing multiple models before committing, needing no-code playgrounds so non-developers can experiment, requiring evaluation of quality and safety as a gate before release, wiring several data connections, collaborating as a team that needs shared governance, or operating apps that must be traced and monitored. In short, the more of the build-evaluate-deploy-operate cycle you need — and the more people involved — the stronger the case for Foundry." },
+        { "type": "paragraph", "text": "Conversely, if you only need to send a prompt to one known model from one service in a small script, calling the Azure OpenAI API directly (tutorial 11) is simpler and entirely sufficient; wrapping a one-line call in a full platform is overkill. The honest framing is a spectrum, not a binary: a quick experiment or a single-model production call can stay bare-API; a multi-model, evaluated, team-owned, monitored application benefits from Foundry's structure. Many projects even start bare and adopt Foundry as they grow into evaluation and operations needs." },
+        { "type": "table", "headers": ["Situation", "Lean toward"], "rows": [
+          ["One prompt, one known model, small script", "Direct Azure OpenAI API"],
+          ["Comparing several models before choosing", "Foundry model catalog"],
+          ["Non-developers need to experiment", "Foundry playgrounds"],
+          ["Quality/safety must be measured before release", "Foundry evaluations"],
+          ["Team collaboration with shared governance", "Foundry hub + projects"],
+          ["Production app needing tracing and monitoring", "Foundry operate tooling"],
+          ["Managed fine-tuning workflow", "Foundry fine-tuning"]
+        ] },
+        { "type": "note", "style": "tip", "text": "A useful test: count how many lifecycle stages and how many people are involved. One stage and one person leans bare-API; several stages or several people leans Foundry. The value is coordination, so it grows with scope." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Deep Dive 4: Exploring the Foundry Portal & Fit with Azure OpenAI",
+      "content": [
+        { "type": "paragraph", "text": "The Foundry portal is the web studio that makes all of this tangible. Landmarks you will use most: the model catalog, where you browse and compare models and open a model card; a Deploy action that turns a chosen model into a deployment; the playground (often a chat playground), where you test prompts, set a system message, and chat with a deployment before writing code; a connections area for linking data and services; an evaluations area to run and review scored test runs; and a tracing/monitoring view for a deployed app. All of it sits inside a selected project, with the hub's shared settings behind it." },
+        { "type": "animation", "title": "A walk through the Foundry portal", "intro": "The typical first-session path from catalog to a working playground.", "nodes": [
+          { "id": "home", "label": "Project home", "sub": "select project" },
+          { "id": "cat", "label": "Model catalog", "sub": "browse models" },
+          { "id": "dep", "label": "Deploy", "sub": "create deployment" },
+          { "id": "play", "label": "Playground", "sub": "test prompts" },
+          { "id": "eval", "label": "Evaluate", "sub": "score outputs" }
+        ], "steps": [
+          { "highlight": ["home"], "caption": "Open the portal and select (or create) a project — the workspace all your actions happen inside." },
+          { "highlight": ["cat"], "caption": "Go to the model catalog, filter and compare models, and open a model card to read its details." },
+          { "highlight": ["dep"], "caption": "Choose Deploy to create a deployment of the model, giving you something the playground and your code can call." },
+          { "highlight": ["play"], "caption": "Open the playground, set a system message, and chat with the deployment to test behavior with no code." },
+          { "highlight": ["eval"], "caption": "When ready, run an evaluation over a dataset to score groundedness, relevance, and safety before shipping." }
+        ] },
+        { "type": "paragraph", "text": "Now the question that matters most for everything you have already built: where does Foundry fit alongside Azure OpenAI? They are complementary layers, not alternatives. Azure OpenAI is a service that provides specific models (GPT-4o, embeddings) and the deployments you call. Foundry is the platform around and above it: Azure OpenAI appears as one provider in Foundry's catalog, its models are among those you can deploy, and Foundry adds the multi-model catalog, lifecycle tooling, project governance, evaluation, and monitoring on top. You can absolutely keep using Azure OpenAI directly — as tutorials 11–15 did — and reach for Foundry when you want the platform features around it." },
+        { "type": "table", "headers": ["Aspect", "Azure OpenAI (service)", "Azure AI Foundry (platform)"], "rows": [
+          ["Scope", "Specific OpenAI models + deployments", "Whole AI app lifecycle across many models"],
+          ["Models", "OpenAI family (GPT-4o, embeddings)", "Catalog: Azure OpenAI + open + partner models"],
+          ["Experimentation", "API + limited studio", "Portal playgrounds, prompt flow"],
+          ["Evaluation & monitoring", "You assemble it", "Built-in evaluations and tracing"],
+          ["Structure", "Resource + deployments", "Hub + projects with governance"],
+          ["Relationship", "A provider within Foundry", "The platform that surfaces Azure OpenAI"]
+        ] },
+        { "type": "note", "style": "info", "text": "Practical takeaway: your existing Azure OpenAI deployments and your IChatService-based code are not obsolete. A Foundry project can use those very deployments as connections, so adopting Foundry is additive — you gain catalog, evaluation, and monitoring without rewriting your model calls." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Ecosystem and Tools",
+      "content": [
+        { "type": "table", "headers": ["Piece", "What it is / does"], "rows": [
+          ["Foundry portal", "The web studio for all Foundry work: catalog, playgrounds, connections, evaluations, deployments, tracing"],
+          ["Azure AI Foundry SDK (Azure.AI.Projects et al.)", "Client libraries to reach a project's connections and deployments from .NET/Python code"],
+          ["Model catalog", "The browsable library of Azure OpenAI, open, and partner models to compare and deploy"],
+          ["Azure OpenAI", "A model provider surfaced in the catalog; the engine behind much of this course"],
+          ["Prompt flow", "Tooling to author, test, and orchestrate multi-step LLM workflows as an evaluable graph"],
+          ["Evaluations", "Built-in scoring of outputs (groundedness, relevance, safety) against datasets"],
+          ["Azure AI Content Safety", "Filters for harmful content, configurable per deployment for responsible AI"],
+          ["Tracing / monitoring", "Observability of prompts, tokens, retrievals, and tool calls for deployed apps"]
+        ] },
+        { "type": "paragraph", "text": "Everything here connects back to earlier tutorials. The model catalog and deployments generalize the Azure OpenAI deployment you created in tutorial 10. Connections are how a project reaches the Azure AI Search index from tutorial 15. Evaluations and tracing are the managed forms of the structured logging and quality concerns from tutorials 13 and 25. Foundry does not introduce a new mental model so much as gather the ones you already have into a coherent, governed platform — which is exactly why the next tutorials on Semantic Kernel and agents sit comfortably on top of it." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "Use Cases",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Model selection: a team compares several catalog models in playgrounds and evaluations to pick the best quality-per-cost before committing code.",
+          "RAG application lifecycle: build the RAG assistant from tutorial 15 in a project, connect the search index, evaluate groundedness, deploy, and trace it — all in one place.",
+          "Cross-functional experimentation: product managers and analysts test prompts in no-code playgrounds while developers build against the same project.",
+          "Safety gating: run evaluations for groundedness and content safety as a release gate, so an app cannot ship until it clears thresholds.",
+          "Governed enterprise rollout: a platform team configures a hub with security, shared connections, and content safety; app teams build isolated projects under it.",
+          "Multi-model apps: a workflow that uses different models for different steps, orchestrated with prompt flow and monitored together.",
+          "Managed fine-tuning: adapt a base model on curated examples through Foundry's workflow when behavior tuning is genuinely needed."
+        ] },
+        { "type": "paragraph", "text": "The pattern across these is coordination at scale: many models, many people, many lifecycle stages, real governance and monitoring. Wherever an AI effort outgrows a single script and a single developer, Foundry's structure earns its place — and the more of the lifecycle you need managed, the more it returns." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples",
+      "content": [
+        { "type": "paragraph", "text": "Foundry is primarily a portal experience, so the 'code' here is mostly the conceptual flow plus one illustrative SDK snippet. The key idea: code targets a project and uses its managed connections and deployments, rather than hardcoding endpoints and keys." },
+        { "type": "code", "language": "csharp", "title": "Example 1 — Connecting to a Foundry project (illustrative)", "code": [
+          "using Azure.AI.Projects;",
+          "using Azure.Identity;",
+          "",
+          "// The project endpoint comes from the Foundry portal; auth via Managed Identity.",
+          "var project = new AIProjectClient(",
+          "    new Uri(projectEndpoint),",
+          "    new DefaultAzureCredential());",
+          "",
+          "// Use a deployment the project defines — no endpoint/key scattered in config.",
+          "ChatClient chat = project.GetAzureOpenAIChatClient(deploymentName: \"gpt-4o-mini\");",
+          "ChatCompletion reply = await chat.CompleteChatAsync(",
+          "    new UserChatMessage(\"Give me three benefits of a unified AI platform.\"));",
+          "Console.WriteLine(reply.Content[0].Text);"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 2 — Where this fits your IChatService (conceptual)", "code": [
+          "// Nothing above the service layer changes. The Foundry-connected client",
+          "// is just another way to construct the ChatClient inside ChatService —",
+          "// endpoints, keys, and model choice become project-managed instead of",
+          "// options-bound. IChatService, the web endpoints, RAG, and streaming",
+          "// from tutorials 13-15 stay exactly as they are.",
+          "//",
+          "// Direct (tutorials 11-15):",
+          "//   new AzureOpenAIClient(endpoint, credential).GetChatClient(deployment)",
+          "// Foundry-managed (this tutorial):",
+          "//   projectClient.GetAzureOpenAIChatClient(deployment)",
+          "//",
+          "// Same ChatClient type downstream => the service layer is unchanged."
+        ] },
+        { "type": "note", "style": "info", "text": "These snippets are illustrative of intent, not guaranteed signatures — the Azure.AI.Projects SDK surface is evolving. The durable lesson is architectural: because your model access already lives behind IChatService, switching from direct Azure OpenAI construction to Foundry-managed connections is a one-place change." }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step by Step: Your First Foundry Project",
+      "content": [
+        { "type": "paragraph", "text": "This walkthrough is a portal exercise: create a project, deploy a model, test it, and connect your RAG data — establishing the environment the rest of the course's platform features build on. No new code is required." },
+        { "type": "list", "style": "numbered", "items": [
+          "Open the Foundry portal and sign in with your Azure account; note the project selector at the top.",
+          "Create a hub if you do not have one (choosing subscription, resource group, and region), then create a project under it — the workspace for this app.",
+          "Open the model catalog, filter for a chat model (for example a GPT-4o family model), and open its model card to review capabilities and cost.",
+          "Choose Deploy to create a deployment; give it a clear name — this is the same deployment concept your code already calls.",
+          "Open the chat playground, set a system message ('You are a concise .NET assistant'), and send a few prompts to confirm the deployment behaves as expected — all with no code.",
+          "Add a connection to your Azure AI Search index from tutorial 15, so a Foundry-built RAG app (or your existing one) can reach the same data through the project.",
+          "Explore the evaluations area: create a small test dataset of question/expected-answer pairs and run an evaluation to see groundedness and relevance scored.",
+          "Find the tracing/monitoring view and note what it captures — prompts, tokens, latency — the managed form of tutorial 13's structured logging.",
+          "Optionally, point a copy of your tutorial-15 app at the project: swap the direct AzureOpenAIClient construction for the project-managed client inside ChatService, leaving everything above it untouched.",
+          "Reflect on fit: your Azure OpenAI deployment, your search index, and your code are all now organized inside one governed project — nothing was rewritten, and you gained catalog, evaluation, and monitoring."
+        ] },
+        { "type": "note", "style": "tip", "text": "Do the no-code path (steps 1–8) fully before touching code. Foundry's value is clearest when you experience the lifecycle in the portal first; the SDK is just the same project reached programmatically." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Fast-moving product and shifting names: Azure AI Foundry unifies and renames earlier experiences (Azure AI Studio, parts of Azure Machine Learning studio), and portal labels and SDK surfaces change frequently. Treat specific names in this tutorial as current-at-writing; the concepts outlast the UI.",
+          "SDK signature caveat: the Azure.AI.Projects client (AIProjectClient, GetAzureOpenAIChatClient, connection resolution) is illustrative here and evolving across preview/GA — verify exact types and methods against the installed package before relying on the snippets.",
+          "Not a replacement for fundamentals: Foundry organizes and augments; it does not remove the need to understand deployments, prompts, RAG, and resilience from earlier tutorials. It is a workshop, not a substitute for knowing the tools.",
+          "Overkill for tiny tasks: a single prompt to a single known model is better served by the direct Azure OpenAI API; wrapping it in a full platform adds setup without payoff.",
+          "Cost and quota still apply: models deployed via Foundry consume the same token-based billing and rate limits as elsewhere; the platform organizes them but does not make them free.",
+          "Governance is configured, not automatic: hubs give you the structure for security, content safety, and access control, but someone must actually set the policies — an empty hub governs nothing.",
+          "Evaluation is a tool, not a guarantee: Foundry's metrics (groundedness, relevance, safety) are valuable signals but depend on good test datasets and thresholds you define; they inform judgment rather than replace it.",
+          "Regional and model availability varies: not every catalog model or feature is available in every region or subscription, so plan around what your subscription actually offers."
+        ] }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Structure with hubs and projects deliberately: one hub as the governed shared foundation, a project per application, so isolation and shared settings both come for free.",
+          "Experiment in playgrounds before coding: settle the model, system message, and prompt shape with no code, then build — it is faster and cheaper than iterating in a compiler.",
+          "Use the model catalog to compare, not just to grab the default: evaluate a few models on your task for quality and cost before committing.",
+          "Gate releases with evaluations: define test datasets and thresholds for groundedness, relevance, and safety, and treat passing them as a ship requirement.",
+          "Prefer project-managed connections and Managed Identity over scattered endpoints and keys, so credentials and data links are centralized and governed.",
+          "Turn on tracing for deployed apps from the start; observability after an incident is too late.",
+          "Match the tool to the scope: stay on the direct API for one-model scripts, adopt Foundry as lifecycle stages and collaborators accumulate.",
+          "Keep your service-layer abstraction: because model access lives behind IChatService, moving to Foundry-managed clients is a one-place change, not a rewrite."
+        ] },
+        { "type": "table", "headers": ["Common mistake", "Do this instead"], "rows": [
+          ["Treating Foundry as a competitor to Azure OpenAI", "See it as the platform that surfaces Azure OpenAI as one provider"],
+          ["Jumping to the SDK before using the portal", "Experience the lifecycle in the portal first; code the same project after"],
+          ["Adopting Foundry for a one-line prompt call", "Use the direct API for trivial tasks; reserve Foundry for real lifecycle needs"],
+          ["An empty hub assumed to be 'governed'", "Actually configure security, content safety, and connections at the hub"],
+          ["Shipping without evaluation", "Score groundedness/relevance/safety on a test set as a release gate"],
+          ["Hardcoding endpoints and keys in each app", "Use project connections and Managed Identity managed centrally"]
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz: Azure AI Foundry",
+      "items": [
+        { "number": 1, "question": "What is Azure AI Foundry, most accurately?", "options": { "A": "A single new large language model", "B": "Azure's unified platform for building, evaluating, deploying, and managing AI applications", "C": "A replacement for the C# language", "D": "A billing dashboard for Azure" }, "correctAnswer": "B", "explanation": "Foundry is a platform spanning the whole AI application lifecycle — discovery, experimentation, building, evaluation, deployment, and monitoring — not a single model or a narrow tool. It brings models, data, tooling, and observability into one place." },
+        { "number": 2, "question": "In Foundry, what is the relationship between a hub and a project?", "options": { "A": "They are the same thing with different names", "B": "A hub is a top-level resource holding shared settings that projects inherit; a project is a workspace for one application", "C": "A project contains many hubs", "D": "A hub is a single model deployment" }, "correctAnswer": "B", "explanation": "A hub centralizes shared security, connections, and compute; projects under it are isolated per-application workspaces that inherit those settings. This mirrors a platform team configuring the foundation and app teams building on it." },
+        { "number": 3, "question": "What is the model catalog in Foundry?", "options": { "A": "A list of your past prompts", "B": "A browsable library of models — Azure OpenAI plus open and partner models — you can compare and deploy", "C": "The pricing page", "D": "A log of deployments only" }, "correctAnswer": "B", "explanation": "The model catalog lets you discover and compare many models across providers, open a model card, and deploy the one you choose. It generalizes the single-provider view of Azure OpenAI to a multi-model library." },
+        { "number": 4, "question": "What is a playground used for?", "options": { "A": "Writing production C# code", "B": "Testing prompts and chatting with a deployed model interactively, with no code", "C": "Storing embeddings", "D": "Configuring billing alerts" }, "correctAnswer": "B", "explanation": "A playground is the no-code experimentation area: set a system message, send prompts, and see how a deployment behaves before writing any application code. It speeds iteration and lets non-developers participate." },
+        { "number": 5, "question": "How does Azure OpenAI relate to Azure AI Foundry?", "options": { "A": "Foundry replaces Azure OpenAI, which is deprecated", "B": "They are unrelated services", "C": "Azure OpenAI is a model provider surfaced within Foundry's platform and catalog", "D": "Azure OpenAI is a paid tier of Foundry only" }, "correctAnswer": "C", "explanation": "They are complementary layers. Azure OpenAI provides specific models and deployments; Foundry is the platform around it, surfacing Azure OpenAI as one provider in its catalog and adding lifecycle tooling, governance, evaluation, and monitoring." },
+        { "number": 6, "question": "When is calling the Azure OpenAI API directly the better choice over Foundry?", "options": { "A": "Never — always use Foundry", "B": "When you only need one prompt to one known model in a small script", "C": "When you need to compare many models", "D": "When a team needs shared governance" }, "correctAnswer": "B", "explanation": "For a single-model, single-purpose call, the direct API is simpler and sufficient; wrapping it in a full platform is overkill. Foundry's value grows with lifecycle stages and collaborators, so trivial tasks stay on the bare API." },
+        { "number": 7, "question": "What does a connection provide in a Foundry project?", "options": { "A": "A new model architecture", "B": "A secured, reusable link from the project to external data or services, like a search index", "C": "A faster network cable", "D": "A billing discount" }, "correctAnswer": "B", "explanation": "A connection securely links a project to a resource — a search index, storage, another Azure service — so the app can reach it without scattering endpoints and keys. Hub-level connections can be shared across projects." },
+        { "number": 8, "question": "What do Foundry evaluations do?", "options": { "A": "Deploy the model to production automatically", "B": "Score an app's outputs on metrics like groundedness, relevance, and safety against a test dataset", "C": "Write the system prompt for you", "D": "Encrypt the connections" }, "correctAnswer": "B", "explanation": "Evaluations run your app over a test dataset and score outputs on quality and safety metrics, so you can gate releases on measured thresholds rather than gut feel — the managed form of the RAG evaluation discipline from tutorial 15." },
+        { "number": 9, "question": "What is groundedness as an evaluation metric?", "options": { "A": "How fast the model responds", "B": "How well an answer is supported by its provided source context", "C": "How many tokens were used", "D": "Whether the model is deployed" }, "correctAnswer": "B", "explanation": "Groundedness measures whether an answer is actually backed by the source passages it was given — central to evaluating RAG systems, where an ungrounded answer is exactly the failure mode you want to catch before release." },
+        { "number": 10, "question": "Adopting Foundry for an app you already built directly on Azure OpenAI requires…", "options": { "A": "Rewriting all your model-calling code from scratch", "B": "Additive changes — a project can use your existing deployments and search index as connections", "C": "Abandoning your IChatService abstraction", "D": "Switching programming languages" }, "correctAnswer": "B", "explanation": "Foundry is additive: your Azure OpenAI deployments and data can become project connections, and because model access already sits behind IChatService, switching to a project-managed client is a one-place change. You gain catalog, evaluation, and monitoring without a rewrite." },
+        { "number": 11, "question": "What is the Azure AI Foundry SDK for?", "options": { "A": "Designing web page layouts", "B": "Reaching a Foundry project's connections and deployments from code (e.g. .NET)", "C": "Training GPUs directly", "D": "Managing DNS records" }, "correctAnswer": "B", "explanation": "The Foundry SDK lets application code target a project and use its managed connections and deployments, so endpoints and credentials are centralized rather than hardcoded. It is the code-side counterpart to the portal." },
+        { "number": 12, "question": "Which statement best captures when Foundry's value is highest?", "options": { "A": "When exactly one person sends one prompt to one model", "B": "When many models, people, and lifecycle stages must be coordinated and governed", "C": "Only when writing Python", "D": "Only for image generation" }, "correctAnswer": "B", "explanation": "Foundry's core value is coordination: multiple models to compare, multiple collaborators, multiple lifecycle stages (build, evaluate, deploy, operate), and governance. The more of these apply, the more the platform returns; a single call needs none of it." },
+        { "number": 13, "question": "What does tracing provide for a deployed Foundry app?", "options": { "A": "Automatic prompt writing", "B": "Observability into prompts, tokens, retrievals, and outcomes for debugging and monitoring", "C": "A discount on tokens", "D": "A new model version" }, "correctAnswer": "B", "explanation": "Tracing captures the step-by-step execution of an AI app so you can debug and monitor it in production — the managed equivalent of the structured logging and correlation ids you built by hand in tutorial 13." },
+        { "number": 14, "question": "Why are exact Foundry portal labels and SDK names treated cautiously in this tutorial?", "options": { "A": "They are secret", "B": "The platform evolves quickly and renames/rearranges features, though the concepts remain stable", "C": "They only exist in one region", "D": "They change per user" }, "correctAnswer": "B", "explanation": "Cloud AI platforms move fast — Foundry itself unifies and renames earlier studios — so specific labels and SDK signatures shift over time. The tutorial anchors on durable concepts (hubs, projects, catalog, evaluation) rather than volatile UI text." },
+        { "number": 15, "question": "What is content safety in the Foundry context?", "options": { "A": "A backup of your prompts", "B": "Filters and tooling that detect and block harmful content in prompts and responses, configurable per deployment", "C": "A way to speed up responses", "D": "The billing model" }, "correctAnswer": "B", "explanation": "Content safety is part of Foundry's responsible AI features: configurable filters that catch harmful content in inputs and outputs, set per deployment. It is one of the governance capabilities the platform provides around the raw model." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam: Written Questions",
+      "items": [
+        { "number": 1, "question": "Define Azure AI Foundry and explain the three claims embedded in calling it a 'unified platform for building, evaluating, deploying, and managing AI applications'.", "modelAnswer": "Azure AI Foundry is Azure's unified platform spanning the full lifecycle of AI applications. Three claims sit inside that description. Unified: it deliberately covers the whole lifecycle — model discovery, experimentation, building, evaluation, deployment, and monitoring — in one environment rather than one slice, so teams do not stitch together separate tools with no shared view. For applications, not just models: the unit of work is an AI app (a chatbot, RAG assistant, agent) with its models, data connections, and evaluations bundled, not a bare model endpoint. Managed: security, connections, content safety, and observability are provided by the platform instead of hand-assembled. Concretely it offers a multi-provider model catalog, no-code playgrounds, secured connections, prompt flow and app tooling, evaluations, managed deployments, and responsible AI features, all reachable through the Foundry portal and the Foundry SDK." },
+        { "number": 2, "question": "Explain the hub-and-project structure and why it suits how teams actually work.", "modelAnswer": "A hub is a top-level Foundry resource that holds shared settings — security and access, connections, content safety policy, and compute — configured once. A project is a workspace created under a hub for a single application, containing that app's models, data, deployments, and evaluations, isolated from other projects but inheriting the hub's shared settings. This suits real teams because it separates two roles cleanly: a platform team sets up the hub as a governed foundation (security, shared connections, safety policy), and application teams build in individual projects on top of it. Isolation means one team's app cannot disturb another's; inheritance means governance and shared resources do not have to be re-created per app. The boundaries are structural and enforced rather than relying on convention, so governance scales as more projects are added under the same hub." },
+        { "number": 3, "question": "Walk through how Foundry works across the lifecycle, from creating a project to monitoring a deployed app.", "modelAnswer": "Start by creating a hub (shared foundation) and a project (the app's workspace). In the project, browse the model catalog, compare models, and deploy the chosen one to get a deployment the playground and your code can call. Add connections to bring in data and services — for example the Azure AI Search index for RAG — as secured, reusable links. Experiment in a playground to settle the model, system message, and prompt shape with no code. Build the application logic, optionally using prompt flow for multi-step orchestration. Run evaluations over a test dataset to score groundedness, relevance, and safety before shipping. Deploy the app, and turn on tracing to monitor prompts, tokens, latency, and outcomes in production. Each stage lives in the same project, with the hub's settings behind it, so discovery, testing, building, evaluation, deployment, and operation form one continuous, governed flow rather than disconnected steps." },
+        { "number": 4, "question": "When should a team use Foundry, and when is the direct Azure OpenAI API the better call? Frame it as a spectrum.", "modelAnswer": "It is a spectrum from a single bare call to a fully managed lifecycle. At the simple end — one prompt to one known model in a small script — the direct Azure OpenAI API is simpler and entirely sufficient; wrapping it in a platform adds setup with no payoff. Foundry's value rises with two axes: how many lifecycle stages you need (comparing models, no-code experimentation, evaluation gates, connecting data, deploying, tracing) and how many people are involved (developers plus non-developers, multiple teams needing shared governance). A multi-model, evaluated, team-owned, monitored application benefits clearly from Foundry's structure. A useful test is to count stages and collaborators: one of each leans bare-API, several of either leans Foundry. Many projects start bare and adopt Foundry as they grow into evaluation and operations needs, which is a healthy path rather than a contradiction — the tool should match the current scope." },
+        { "number": 5, "question": "Explain precisely where Azure AI Foundry fits alongside Azure OpenAI, and why adopting Foundry does not obsolete existing Azure OpenAI code.", "modelAnswer": "They are complementary layers, not competitors. Azure OpenAI is a service that provides specific models (GPT-4o, embeddings) and the deployments you call directly. Foundry is the platform around and above that: Azure OpenAI appears as one provider within Foundry's model catalog, its models are among those you can deploy from a project, and Foundry adds the multi-model catalog, lifecycle tooling, project governance, evaluation, and monitoring on top. Because of this layering, existing Azure OpenAI code is not obsoleted: a Foundry project can use your existing Azure OpenAI deployments as connections, and since your model access already sits behind an abstraction like IChatService, switching from direct client construction to a project-managed client is a single localized change. Adoption is additive — you keep your deployments, RAG code, and service layer, and gain catalog comparison, evaluation, and tracing. The analogy: Azure OpenAI is the engine; Foundry is the workshop that surfaces it among other engines and adds the tooling around building the whole vehicle." },
+        { "number": 6, "question": "Describe the main landmarks of the Foundry portal and what a typical first session accomplishes.", "modelAnswer": "The portal is the web studio where everything happens inside a selected project, with the hub's shared settings behind it. Key landmarks: the model catalog for browsing and comparing models and opening model cards; a Deploy action that turns a chosen model into a deployment; the playground (often a chat playground) for setting a system message and testing prompts with no code; a connections area for linking data and services; an evaluations area for running and reviewing scored test runs; and a tracing/monitoring view for deployed apps. A typical first session: open or create a project, browse the catalog and open a model card, deploy the model, open the playground and chat with it to confirm behavior, then optionally add a connection (like a search index) and run a small evaluation. By the end you have gone from an empty project to a tested, deployed model with data connected and quality measured — all without writing code, which is the fastest way to internalize the lifecycle before reaching for the SDK." },
+        { "number": 7, "question": "How do Foundry's evaluations and tracing relate to the manual disciplines from earlier tutorials?", "modelAnswer": "They are managed, platform-provided forms of things you built by hand. In tutorial 15 you evaluated a RAG system by logging retrieved passages and checking whether answers were grounded and correctly cited; Foundry's evaluations formalize this as a workflow that scores groundedness, relevance, and safety over a test dataset with defined thresholds, so quality becomes a measurable release gate rather than an ad hoc check. In tutorial 13 you added structured logging with correlation ids to make every AI call traceable and measurable; Foundry's tracing provides that observability as a platform feature, capturing prompts, tokens, retrievals, and tool calls for a deployed app. The relationship matters two ways: understanding the manual versions means you know exactly what the managed features are doing and can trust or extend them, and the managed features remove boilerplate and add consistency across projects. Foundry does not introduce new concepts here so much as operationalize the good practices the course already taught." },
+        { "number": 8, "question": "A stakeholder says 'we already use Azure OpenAI directly and it works — Foundry sounds like unnecessary complexity.' Respond.", "modelAnswer": "I would agree that for what they do today it may be, and then reframe around growth. If the current use is one or two known models called from code with quality checked informally, the direct API is fine and Foundry would add setup without immediate payoff — matching the tool to the scope is correct. The question is where the effort is heading. The moment they need to compare several models objectively, let non-developers experiment, gate releases on measured groundedness and safety, connect multiple data sources under shared governance, or trace production behavior for incident response, doing each with a separate tool fragments the workflow and leaves no single view of the app's health — which is exactly the pain Foundry removes. Crucially, adopting it is additive and low-risk: existing Azure OpenAI deployments become project connections, and because model calls sit behind our service layer, the code change is localized. So my recommendation is to stay on the direct API while the scope is small, and adopt Foundry deliberately as evaluation, collaboration, and operations needs appear — not as a rewrite, but as organizing the tools they already use." },
+        { "number": 9, "question": "Explain the role of connections in Foundry and how they improve on hardcoding endpoints and keys.", "modelAnswer": "A connection is a stored, secured link from a project to an external resource — a search index, a storage account, another Azure service, or a model provider — defined once and reused across the project, and shareable at the hub level across projects. It improves on hardcoding endpoints and keys in several ways. Centralization: the link and its credentials live in one governed place rather than scattered through each app's configuration, so rotating a credential or repointing to a new resource is a single change. Security: connections integrate with managed identity and the platform's access controls, reducing the number of raw secrets that exist at all. Reuse and consistency: multiple projects or components use the same connection rather than each re-declaring it, avoiding drift. Governance: a platform team can define approved connections at the hub, and app teams consume them without handling the underlying secrets. In code, this means the application targets the project and asks for its connections and deployments, rather than reading an endpoint and key from appsettings — the same architectural win as tutorial 13's secrets discipline, now provided by the platform." },
+        { "number": 10, "question": "Summarize the limitations and caveats a team should keep in mind when adopting Foundry.", "modelAnswer": "Several. The product moves fast and renames things — Foundry unifies earlier studios — so portal labels and SDK surfaces (like the Azure.AI.Projects client) change and should be verified against current versions rather than trusted from any tutorial. It organizes and augments but does not replace fundamentals: you still need to understand deployments, prompts, RAG, and resilience, and it is overkill for trivial single-prompt tasks. Cost and quota are unchanged — Foundry-deployed models bill and rate-limit the same as elsewhere. Governance is configured, not automatic: a hub only governs if someone sets its security, content safety, and connection policies. Evaluation is a valuable signal but depends on good test datasets and thresholds you define; it informs judgment rather than guaranteeing quality. And regional and model availability varies, so not every catalog model or feature exists in every subscription or region. The throughline: Foundry is a powerful organizing platform whose benefits require deliberate configuration and sound understanding beneath it, and whose specifics evolve — adopt it for genuine lifecycle needs, configure it properly, and anchor on concepts over UI." },
+        { "number": 11, "question": "How would you use Foundry to choose a model for a new feature, and why is that better than defaulting to one?", "modelAnswer": "I would use the model catalog and playgrounds to compare candidates on my actual task before committing. Concretely: shortlist a few catalog models suited to the task (a capable general model, a cheaper/faster one, perhaps a specialized option), read their model cards for capabilities, context window, and cost, then deploy each and test the same representative prompts in playgrounds to judge quality and behavior with no code. For a rigorous choice, run a Foundry evaluation over a shared test dataset so the comparison is measured — scoring groundedness and relevance — rather than impressionistic, and weigh quality against per-token cost and latency. This beats defaulting to one model because model suitability is task-specific: a smaller, cheaper model often matches a flagship on a narrow task at a fraction of the cost, while a hard task may justify the expensive one; you cannot know without comparing on your data. Defaulting risks overpaying for capability you do not need or under-serving a task that needs more, and it leaves the decision undocumented. Foundry makes the comparison cheap and evidence-based, which is exactly when model selection stops being guesswork." },
+        { "number": 12, "question": "Describe how an app built across earlier tutorials would map onto a Foundry project, component by component.", "modelAnswer": "The tutorial-15 RAG assistant maps cleanly. The Azure OpenAI chat and embedding deployments become deployments within the project (or existing deployments surfaced as connections), reached through the project rather than a hardcoded endpoint. The Azure AI Search index becomes a project connection, so retrieval reaches the same data under the project's governance. The IChatService implementation stays intact, but the point where it constructs its ChatClient can switch from direct AzureOpenAIClient construction to a project-managed client — a localized change, since the ChatClient type downstream is the same and the service interface, web endpoints, streaming, and RAG logic are untouched. The structured logging from tutorial 13 is complemented by Foundry tracing on the deployed app. The RAG evaluation you did manually becomes a Foundry evaluation with a test dataset and thresholds. Governance — secrets, access, content safety — moves from your own configuration into the hub. The net effect: nothing is rewritten; the components you built are organized inside one governed project and gain catalog comparison, managed evaluation, and monitoring. This is the concrete meaning of 'Foundry is additive'." },
+        { "number": 13, "question": "What is responsible AI in the Foundry context, and which features support it?", "modelAnswer": "Responsible AI is the practice of building AI that is safe, fair, and transparent, and Foundry surfaces it through concrete, configurable features rather than leaving it to good intentions. Content safety provides filters that detect and block harmful content in both prompts and responses, configurable per deployment, so an app has guardrails against generating or acting on unsafe material. Evaluations let you measure safety-relevant metrics — including groundedness (is the answer supported by sources, reducing hallucination) and other quality/safety scores — against test data, turning safety into something you can gate releases on. Tracing gives transparency into what the app actually did — the prompts, retrievals, and outputs — which is essential for auditing, debugging harmful outcomes, and accountability. Governance through hubs lets an organization set and enforce these policies centrally. Together they operationalize responsible AI: safety filtering at runtime, measurement before release, observability in production, and governance across projects. The key point is that these are platform-provided capabilities you configure and enforce, converting responsible-AI principles into checkable, repeatable engineering practice." },
+        { "number": 14, "question": "Explain why this tutorial is positioned right before the Semantic Kernel and agents tutorials in the course.", "modelAnswer": "Because Foundry is the platform those higher-level building patterns sit on, so establishing it first gives the remaining tutorials a home. Up to this point the course built raw capabilities: deployments, embeddings, function calling, resilience, web integration, RAG — each wired by hand. Semantic Kernel (next) and agent frameworks are orchestration layers that coordinate models, tools, and memory into more autonomous applications; they benefit from exactly what Foundry provides — a model catalog to choose from, managed deployments and connections to call, evaluation to measure the more complex behaviors, and tracing to debug multi-step execution that is otherwise hard to follow. Introducing Foundry now means the subsequent tutorials can assume a managed environment for their models and data rather than re-explaining setup, and can lean on evaluation and observability for behaviors (agent decisions, tool chains) that genuinely need them. Pedagogically it also completes an arc: the course taught the parts, then the workshop that organizes the parts, and now proceeds to more sophisticated ways of assembling them — each new layer resting on the platform just introduced." },
+        { "number": 15, "question": "Give a balanced recommendation for a mid-size team currently calling Azure OpenAI directly, on whether and how to adopt Foundry.", "modelAnswer": "My recommendation is to adopt Foundry deliberately and incrementally rather than all at once or not at all. First, assess the trajectory: if the team is moving toward multiple models, non-developer collaborators, release gating on quality/safety, several data connections, or production monitoring — which most mid-size AI efforts are — the coordination and governance case is real, and continuing with fragmented tooling will hurt. Second, adopt additively: stand up a hub with proper governance (security, content safety, shared connections) as a platform-team task, then create a project and bring existing Azure OpenAI deployments and the search index in as connections — no rewrite, because model access sits behind the service layer, so the code change is localized. Third, start with the highest-value features for their pain: usually evaluations as a release gate and tracing for production visibility, since those address correctness and operability directly. Fourth, keep the direct API where it still fits — trivial scripts do not need the platform. And throughout, anchor on concepts over UI, since the product evolves. The balanced position: not a mandatory migration, but a well-timed, low-risk organizing step that pays off precisely as the team's lifecycle needs grow, taken feature-by-feature rather than as a big bang." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "Azure AI Foundry", "back": "Azure's unified platform for building, evaluating, deploying, and managing AI applications — models, data, tools, and observability in one place. A workshop, not a single model." },
+        { "number": 2, "front": "Hub vs project", "back": "Hub = top-level resource with shared settings (security, connections, compute). Project = per-application workspace under a hub, isolated but inheriting hub settings." },
+        { "number": 3, "front": "Model catalog", "back": "Browsable library of models — Azure OpenAI + open + partner — to compare via model cards and deploy. Generalizes Azure OpenAI's single-provider view." },
+        { "number": 4, "front": "Playground", "back": "No-code area in the Foundry portal to set a system message, test prompts, and chat with a deployment before writing any code." },
+        { "number": 5, "front": "Connection", "back": "A secured, reusable link from a project to external data/services (e.g. a search index). Centralizes endpoints and credentials instead of hardcoding them." },
+        { "number": 6, "front": "Deployment (in Foundry)", "back": "A named, running instance of a model in a project that code and playgrounds call — the same deployment concept used with Azure OpenAI." },
+        { "number": 7, "front": "Evaluation", "back": "Built-in workflow scoring app outputs on groundedness, relevance, and safety against a test dataset — the managed form of tutorial 15's RAG evaluation." },
+        { "number": 8, "front": "Groundedness", "back": "Evaluation metric: how well an answer is supported by its provided source context. Central to catching RAG hallucination before release." },
+        { "number": 9, "front": "Tracing", "back": "Observability capturing an AI app's execution — prompts, tokens, retrievals, tool calls — for debugging and monitoring. Managed form of tutorial 13's logging." },
+        { "number": 10, "front": "Foundry vs Azure OpenAI", "back": "Complementary layers. Azure OpenAI = a service providing specific models/deployments. Foundry = the platform surfacing it as one provider plus lifecycle tooling and governance." },
+        { "number": 11, "front": "When to use Foundry", "back": "As lifecycle stages and collaborators grow: comparing models, no-code experimentation, evaluation gates, data connections, governance, monitoring. One-model scripts stay on the direct API." },
+        { "number": 12, "front": "Adopting Foundry is additive", "back": "Existing Azure OpenAI deployments + search index become project connections; IChatService means switching to a project-managed client is a one-place change. No rewrite." },
+        { "number": 13, "front": "Foundry portal", "back": "The web studio: model catalog, Deploy, playground, connections, evaluations, tracing — all inside a selected project. The no-code face of the platform." },
+        { "number": 14, "front": "Azure AI Foundry SDK", "back": "Client libraries (e.g. Azure.AI.Projects) to reach a project's connections and deployments from code, so endpoints/keys are project-managed, not hardcoded." },
+        { "number": 15, "front": "Content safety / responsible AI", "back": "Configurable filters blocking harmful content per deployment, plus evaluations and tracing — Foundry's responsible-AI features you configure and enforce." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions and Answers",
+      "items": [
+        { "number": 1, "question": "In one answer, what is Azure AI Foundry and why does it exist?", "answer": "Azure AI Foundry is Azure's unified platform for building, evaluating, deploying, and managing AI applications. It exists because a serious AI app touches many concerns — which model, tested how, connected to what data, deployed where, evaluated against what, monitored by whom — and handling each with a separate tool fragments the workflow and leaves no single view of the app's health. Foundry brings model discovery, no-code experimentation, data connections, application building, evaluation, deployment, content safety, and tracing into one platform with a portal and matching SDKs, organized around hubs and projects. It is the workshop the individual building blocks — deployments, embeddings, RAG — live in, rather than a new model or API you learn from scratch." },
+        { "number": 2, "question": "How do hubs and projects work, and why does that structure matter?", "answer": "A hub is a top-level resource holding shared settings — security, connections, content safety, compute — set up once. A project is a per-application workspace under a hub, containing that app's models, data, deployments, and evaluations, isolated from other projects but inheriting the hub's settings. It matters because it maps onto how organizations actually operate: a platform team configures the hub as a governed foundation, and application teams build in individual projects on top, isolated so they don't interfere yet consistent because they share the hub's governance. The boundaries are structural rather than conventional, so governance scales as you add projects — you configure security and shared connections once and every project inherits them." },
+        { "number": 3, "question": "Where does Foundry fit relative to Azure OpenAI? People find this confusing.", "answer": "They're complementary layers, not competitors. Azure OpenAI is a service that provides specific models — GPT-4o, embeddings — and the deployments you call. Foundry is the platform around and above it: Azure OpenAI shows up as one provider in Foundry's model catalog, its models are among those you can deploy from a project, and Foundry adds the multi-model catalog, lifecycle tooling, project governance, evaluation, and monitoring. The engine-and-workshop analogy helps: Azure OpenAI is an engine, Foundry is the workshop where you compare engines, test builds, and ship. Practically, you can keep calling Azure OpenAI directly and adopt Foundry when you want the platform features — and your existing deployments can become connections in a project, so it's additive." },
+        { "number": 4, "question": "When would you NOT use Foundry?", "answer": "When the task is genuinely small — one prompt to one known model in a script or a single-model production call. There, the direct Azure OpenAI API is simpler and sufficient, and wrapping it in a full platform adds setup with no payoff. I treat it as a spectrum: value rises with the number of lifecycle stages you need (model comparison, no-code experimentation, evaluation gates, data connections, deployment, tracing) and the number of people involved (developers plus non-developers, multiple teams needing governance). A quick test is to count stages and collaborators — one of each leans bare-API, several of either leans Foundry. It's also fine, and common, to start bare and adopt Foundry as you grow into evaluation and operations needs. Matching the tool to the current scope is the discipline, not defaulting to the biggest tool." },
+        { "number": 5, "question": "If a team already built a RAG app directly on Azure OpenAI, what does adopting Foundry involve?", "answer": "It's additive, not a rewrite. The Azure OpenAI chat and embedding deployments and the Azure AI Search index become project connections, so the app reaches the same models and data through a governed project. The IChatService implementation stays intact; only the point where it constructs its ChatClient can switch from direct AzureOpenAIClient construction to a project-managed client, which is a localized change because the ChatClient type downstream is the same and the interface, web endpoints, streaming, and RAG logic are untouched. On top of that, the team gains catalog comparison, managed evaluations (formalizing the RAG groundedness checks they did by hand), and tracing (the managed form of their structured logging), plus hub-level governance for secrets and content safety. So the payoff is organization and lifecycle features without touching the working model-calling code — which is exactly why keeping model access behind a service abstraction earlier pays off now." },
+        { "number": 6, "question": "How would you use Foundry to pick a model for a new feature?", "answer": "Compare candidates on the actual task instead of defaulting. I'd shortlist a few catalog models — a capable general one, a cheaper/faster one, maybe a specialized option — read their model cards for capabilities, context window, and cost, then deploy each and test the same representative prompts in playgrounds with no code. For rigor I'd run a Foundry evaluation over a shared test dataset so the comparison is measured (groundedness, relevance) rather than impressionistic, and weigh quality against per-token cost and latency. This beats defaulting because model fit is task-specific: a smaller model often matches a flagship on a narrow task far more cheaply, while a hard task may justify the expensive one — and you only know by comparing on your data. Foundry makes that comparison cheap and evidence-based, and documents the decision." },
+        { "number": 7, "question": "What are Foundry evaluations and how do they relate to what you'd otherwise do manually?", "answer": "Evaluations run your app over a test dataset and score its outputs on metrics like groundedness, relevance, and safety, so you can gate releases on measured thresholds. They're the managed, formalized version of what I'd otherwise do by hand — in a RAG system, logging retrieved passages and manually checking whether answers are grounded and correctly cited. Foundry turns that into a repeatable workflow with defined datasets and thresholds, which matters because it makes quality a ship criterion rather than a gut call, and it's consistent across projects and re-runnable after any change to prompts, models, or retrieval. Understanding the manual version is what lets me trust and configure the managed one well — I know what groundedness is measuring and why the test set matters. Evaluation is a signal that informs judgment, not a guarantee, so the dataset and thresholds I define carry the weight." },
+        { "number": 8, "question": "A stakeholder calls Foundry 'unnecessary complexity since Azure OpenAI already works.' How do you respond?", "answer": "I'd concede it may be unnecessary for what they do today and reframe around trajectory. If they call one or two known models from code and check quality informally, the direct API is fine and Foundry would add setup without immediate return — matching tool to scope is right. But the moment they need to compare models objectively, let non-developers experiment, gate releases on measured groundedness and safety, connect several data sources under shared governance, or trace production for incident response, doing each with separate tools fragments the workflow and gives no single view of the app's health — which is the pain Foundry removes. And adoption is low-risk and additive: existing deployments become connections, and because model calls sit behind our service layer, the code change is localized. So: stay on the direct API while scope is small, adopt Foundry deliberately as evaluation, collaboration, and operations needs appear — feature by feature, not a big-bang migration." },
+        { "number": 9, "question": "What does tracing give you, and why care about it for AI specifically?", "answer": "Tracing captures the step-by-step execution of an AI app — prompts, tokens, retrievals, tool calls, latency, outcomes — so you can debug and monitor it. It's the managed form of the structured logging and correlation ids I'd build by hand. It matters especially for AI because these apps are non-deterministic and multi-step: when an answer is wrong or an agent misbehaves, you need to see what it actually did — which passages were retrieved, which tool was called with what arguments, what the prompt looked like — to tell a retrieval failure from a generation failure from a tool bug. Without that visibility, debugging is guesswork and re-running-and-hoping. Tracing also feeds cost and quality monitoring (token spend, latency, error rates) and is essential for auditing and accountability when an AI system produces a harmful or disputed output. For anything beyond a trivial call, observability isn't optional, and Foundry provides it as a platform feature." },
+        { "number": 10, "question": "Explain connections and why they're better than endpoints and keys in config.", "answer": "A connection is a stored, secured link from a project to an external resource — a search index, storage, another service, a model provider — defined once, reused across the project, and shareable at the hub level. It's better than scattering endpoints and keys through each app's config in several ways: centralization, so rotating a credential or repointing to a new resource is one change; security, because connections integrate with managed identity and platform access controls, cutting the number of raw secrets that exist; reuse and consistency, since components share one connection instead of re-declaring it and drifting; and governance, because a platform team can define approved connections at the hub and app teams consume them without touching the underlying secrets. In code, the app targets the project and asks for its connections and deployments rather than reading an endpoint and key from appsettings — the same secrets-hygiene win from earlier tutorials, now provided by the platform structurally." },
+        { "number": 11, "question": "What caveats would you flag before a team commits to Foundry?", "answer": "A handful. The product moves fast and renames things — it unifies earlier studios — so portal labels and SDK surfaces like Azure.AI.Projects change and must be verified against current versions, not trusted from docs written months ago. It augments but doesn't replace fundamentals — you still need to understand deployments, prompts, RAG, and resilience — and it's overkill for trivial single-prompt tasks. Cost and quota are unchanged; Foundry organizes billing but doesn't reduce it. Governance is configured, not automatic — a hub only governs if someone actually sets its security, content safety, and connection policies. Evaluation depends on good datasets and thresholds you define; it's a signal, not a guarantee. And regional and model availability varies, so not every catalog model or feature exists in every subscription. The throughline: it's a powerful organizing platform whose benefits need deliberate configuration and solid understanding beneath, and whose specifics evolve — anchor on concepts, adopt for real needs, configure properly." },
+        { "number": 12, "question": "How does Foundry support responsible AI in practice, not just principle?", "answer": "Through concrete, configurable features. Content safety provides filters that detect and block harmful content in both prompts and responses, set per deployment, so apps have runtime guardrails. Evaluations let me measure safety-relevant metrics — groundedness to catch hallucination, plus other quality and safety scores — against test data, turning safety into a release gate rather than a hope. Tracing gives transparency into what the app actually did, which is essential for auditing and debugging harmful outcomes and for accountability. Hub-level governance lets an organization set and enforce these policies centrally across projects. So responsible AI becomes operational: filtering at runtime, measurement before release, observability in production, and governance across the org. The important shift is from principle to enforceable engineering practice — these are things you configure, measure, and gate on, not aspirations, which is what makes them credible." },
+        { "number": 13, "question": "Why is Foundry taught right before Semantic Kernel and agents in this course?", "answer": "Because it's the platform those higher-level patterns rest on, so establishing it first gives them a home. The course built raw capabilities up to here — deployments, embeddings, function calling, resilience, web integration, RAG — each wired by hand. Semantic Kernel and agent frameworks are orchestration layers that coordinate models, tools, and memory into more autonomous apps, and they benefit directly from what Foundry offers: a catalog to choose models, managed deployments and connections to call, evaluation to measure the more complex behaviors, and tracing to debug multi-step execution that's otherwise hard to follow. Introducing Foundry now lets the later tutorials assume a managed environment instead of re-explaining setup, and lean on evaluation and observability for behaviors — agent decisions, tool chains — that genuinely need them. It also completes an arc: learn the parts, then the workshop that organizes the parts, then more sophisticated ways of assembling them, each layer resting on the last." },
+        { "number": 14, "question": "Someone asks whether Foundry means they no longer need to understand embeddings, RAG, or resilience. Your answer?", "answer": "No — Foundry organizes and augments those; it doesn't remove the need to understand them. It's a workshop, and a workshop doesn't teach you which tool to use or why. To build a good RAG app in Foundry you still need to understand chunking, embeddings, hybrid search, and grounding, because the platform gives you connections and evaluations but you decide how to retrieve and prompt. To interpret an evaluation's groundedness score you need to know what grounding is. To configure resilience and understand tracing you need the concepts from the resilience tutorial. Foundry can remove boilerplate — managed deployments, built-in evaluation and tracing instead of hand-rolled — and it adds governance, but it sits on top of the fundamentals, not in place of them. In fact, the better you understand the parts, the more effectively you use the platform, because you know what its features are doing and where their limits are. Treating Foundry as a substitute for understanding is how teams build things they can't debug." },
+        { "number": 15, "question": "Give your overall recommendation for a mid-size team on adopting Foundry.", "answer": "Adopt it deliberately and incrementally, not all-at-once or never. First assess trajectory: if they're heading toward multiple models, non-developer collaborators, release gating on quality and safety, several data connections, or production monitoring — as most mid-size AI efforts are — the coordination and governance case is real and fragmented tooling will hurt. Second, adopt additively: stand up a hub with proper governance as a platform-team task, then create a project and bring existing Azure OpenAI deployments and the search index in as connections — no rewrite, since model access sits behind the service layer. Third, lead with the highest-value features for their pain, usually evaluations as a release gate and tracing for production visibility. Fourth, keep the direct API where it still fits — trivial scripts don't need the platform. And anchor on concepts over UI, since the product evolves. The balanced position: not a mandatory migration, but a well-timed, low-risk organizing step taken feature by feature as lifecycle needs grow." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "Azure AI Foundry", "definition": "Azure's unified platform for building, evaluating, deploying, and managing AI applications, bringing models, data, tools, and observability into one environment." },
+        { "term": "Foundry portal", "definition": "The web studio for Azure AI Foundry: browse the model catalog, run playgrounds, build and evaluate apps, and manage deployments — largely no-code." },
+        { "term": "Hub", "definition": "A top-level Foundry resource centralizing shared settings — security, connections, compute — for one or more projects that inherit them." },
+        { "term": "Project", "definition": "A workspace inside a hub for one AI application, holding its models, data, deployments, and evaluations, isolated from other projects." },
+        { "term": "Model catalog", "definition": "The browsable library of models in Foundry — Azure OpenAI plus open and partner models — to compare via model cards and deploy." },
+        { "term": "Playground", "definition": "An interactive, no-code area in the Foundry portal for testing prompts and chatting with a deployed model before writing code." },
+        { "term": "Deployment", "definition": "A named, running instance of a model in a project that applications and playgrounds call — the same concept used with Azure OpenAI." },
+        { "term": "Connection", "definition": "A stored, secured link from a project to an external resource (a search index, storage, another service), reusable and centrally managed." },
+        { "term": "Evaluation", "definition": "Foundry's workflow for scoring app outputs on metrics like groundedness, relevance, and safety against a test dataset, to gate releases." },
+        { "term": "Groundedness", "definition": "An evaluation metric measuring how well an answer is supported by its provided source context; central to checking RAG systems." },
+        { "term": "Content safety", "definition": "Azure filters and tooling that detect and block harmful content in prompts and responses, configurable per deployment in Foundry." },
+        { "term": "Tracing", "definition": "Capturing an AI app's step-by-step execution — prompts, retrievals, tool calls, tokens — for debugging and monitoring deployed apps." },
+        { "term": "Azure OpenAI", "definition": "The service providing OpenAI models (GPT-4o, embeddings) on Azure; within Foundry it is one provider surfaced through the catalog and deployments." },
+        { "term": "Azure AI Foundry SDK", "definition": "The .NET/Python client libraries for working with Foundry projects in code — resolving connections and calling deployed models programmatically." },
+        { "term": "Prompt flow", "definition": "A Foundry tool for authoring, testing, and orchestrating multi-step LLM workflows as a visual, evaluable graph." },
+        { "term": "Responsible AI", "definition": "Practices and tools for safe, fair, transparent AI; in Foundry, surfaced through content safety, evaluations, tracing, and hub governance." },
+        { "term": "Fine-tuning", "definition": "Adapting a base model on your examples to change its behavior or style; Foundry provides a managed workflow for it." },
+        { "term": "Model card", "definition": "A model's detail page in the catalog describing its capabilities, context window, cost, and usage guidance to inform selection." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Azure AI Foundry is Azure's unified platform for building, evaluating, deploying, and managing AI applications — the workshop the course's building blocks live in, not a new model or API.",
+          "It works through a hub-and-project structure: a hub holds shared, governed settings; projects are isolated per-application workspaces that inherit them, with the catalog, playgrounds, connections, evaluations, and tracing all operating inside a project.",
+          "Use it when the work spans the lifecycle and involves several models or people — model comparison, no-code experimentation, evaluation gates, data connections, governance, monitoring; stay on the direct Azure OpenAI API for one-model scripts.",
+          "The Foundry portal is the no-code face — catalog, Deploy, playground, connections, evaluations, tracing — and the Foundry SDK reaches the same project from code so endpoints and keys are project-managed.",
+          "Foundry and Azure OpenAI are complementary: Azure OpenAI is a service providing specific models and deployments; Foundry is the platform that surfaces it as one provider and adds catalog, lifecycle tooling, governance, evaluation, and monitoring.",
+          "Adopting Foundry is additive: existing deployments and the search index become connections, and because model access sits behind IChatService, moving to a project-managed client is a one-place change — you gain the platform without a rewrite."
+        ] },
+        { "type": "paragraph", "text": "You now have the map of the platform your earlier work fits into. Deployments, embeddings, RAG, resilience, and web integration are the parts; Foundry is where they are organized, compared, evaluated, deployed, and watched, under governance a team can trust. Nothing you built is obsolete — it becomes better organized and better observed. With that platform in view, the course turns to more powerful ways of assembling these parts, beginning with the Semantic Kernel framework, which orchestrates models, memory, and tools into applications that sit naturally on top of everything introduced here." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Next tutorial: Semantic Kernel Framework (semantic-kernel-framework). You have built AI features by hand and seen the platform that organizes them. Semantic Kernel is a .NET framework that orchestrates models, prompts, memory, and tools (plugins) into applications — automating much of the boilerplate you wrote manually, like the function-calling loop from tutorial 12, and sitting comfortably on the Foundry deployments and connections introduced here." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: complete the no-code portal path — create a project, deploy a model, and test it in a playground — to internalize the lifecycle before any code.",
+          "Practice: add your tutorial-15 Azure AI Search index as a project connection and note how the same data is now reachable under project governance.",
+          "Practice: build a small evaluation dataset and run it, reading the groundedness and relevance scores as a release-gate signal.",
+          "Practice: (optional) point a copy of your RAG app at the project by swapping the client construction inside ChatService, confirming everything above the service layer is untouched.",
+          "Read: the official documentation for 'Azure AI Foundry', 'Azure AI Foundry hubs and projects', 'Model catalog', 'Evaluation of generative AI applications', and the Azure AI Foundry SDK for .NET."
+        ] },
+        { "type": "note", "style": "tip", "text": "Keep your Foundry project. The Semantic Kernel and agent tutorials that follow assume a managed home for models and data, and reading their orchestration as 'on top of Foundry' makes the whole architecture click." }
+      ]
+    }
+  ]
+}

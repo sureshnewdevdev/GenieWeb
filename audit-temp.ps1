@@ -1,4 +1,4 @@
-$path = "C:\Genie\GenieWeb\wwwroot\tutorials\ai-in-aspnet-web-apps.json"
+$path = "C:\Genie\GenieWeb\wwwroot\tutorials\azure-ai-foundry.json"
 $raw = Get-Content $path -Raw -Encoding UTF8
 try { $j = $raw | ConvertFrom-Json } catch { "Valid JSON: NO - $($_.Exception.Message)"; exit 1 }
 
@@ -60,11 +60,11 @@ $glossText = (($j.sections | Where-Object key -eq "glossary").items | ForEach-Ob
 $ttText = ($j.tooltips.PSObject.Properties | ForEach-Object { "$($_.Name) $($_.Value)" }) -join " "
 
 $checks = [ordered]@{
-  "1 UI+AI via REST APIs      " = "(?i)REST API"
-  "2 streaming to browser     " = "(?i)streaming"
-  "3 long-running operations  " = "(?i)long-running operation"
-  "4 loading + error handling " = "(?i)loading state"
-  "5 clean architecture       " = "(?i)clean architecture"
+  "1 what Foundry is          " = "(?i)Azure AI Foundry"
+  "2 how Foundry works        " = "(?i)\bproject\b"
+  "3 when to use Foundry      " = "(?i)playground"
+  "4 exploring the portal     " = "(?i)Foundry portal"
+  "5 fit with Azure OpenAI    " = "(?i)Azure OpenAI"
 }
 foreach ($k in $checks.Keys) {
   $t = $checks[$k]

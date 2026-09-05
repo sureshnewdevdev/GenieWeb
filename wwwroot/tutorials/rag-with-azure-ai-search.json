@@ -1,0 +1,550 @@
+{
+  "schemaVersion": 1,
+  "courseName": "GenAI-Powered .NET",
+  "category": "GenAI-Powered .NET Application Development",
+  "title": "Retrieval-Augmented Generation (RAG) with Azure AI Search",
+  "slug": "rag-with-azure-ai-search",
+  "level": "Intermediate",
+  "codeLanguage": "C#",
+  "tutorialNumber": 15,
+  "totalTutorials": 27,
+  "prev": "ai-in-aspnet-web-apps",
+  "next": "azure-ai-foundry",
+  "breadcrumbs": ["Home", "Learners", "GenAI-Powered .NET Application Development", "Retrieval-Augmented Generation (RAG) with Azure AI Search"],
+  "generatedDate": "2026-09-05",
+  "subtopics": [
+    "Why enterprises need RAG",
+    "Vector databases",
+    "Azure AI Search",
+    "Creating an index and defining fields and schema",
+    "Keyword vs semantic search",
+    "Integrating search results into a RAG pipeline in .NET",
+    "Enhancing prompts with retrieved context",
+    "Grounding and citations"
+  ],
+  "tooltips": {
+    "RAG": "Retrieval-Augmented Generation: retrieve relevant text from your own data and put it in the prompt so the model answers from real knowledge, not memory.",
+    "retrieval": "The step that finds the most relevant passages for a question from an index, before any text is generated.",
+    "grounding": "Basing the model's answer on supplied source passages rather than its training memory, so claims trace to real documents.",
+    "citation": "A reference in the answer pointing back to the source passage it came from, letting a user verify the claim.",
+    "hallucination": "Fluent but false model output; RAG reduces it for knowledge questions by giving the model real passages to answer from.",
+    "vector database": "A store that indexes embedding vectors and answers 'which items are most similar to this one' quickly, even over millions of vectors.",
+    "embedding": "A numeric vector capturing the meaning of text, so semantically similar texts sit close together in vector space.",
+    "vector search": "Finding the nearest embedding vectors to a query vector by similarity — retrieval by meaning rather than exact words.",
+    "cosine similarity": "A measure of how close two vectors point in the same direction; near 1 means very similar meaning. The usual vector-search metric.",
+    "Azure AI Search": "Azure's managed search service supporting keyword, vector, and hybrid retrieval with semantic ranking — a common RAG retrieval backend.",
+    "index": "The searchable store in Azure AI Search holding your documents as fields; you query it to retrieve passages for a question.",
+    "field": "A named, typed property of a document in the index (e.g. content, title, vector), each configured as searchable, filterable, or retrievable.",
+    "schema": "The index definition: the set of fields, their types, and their attributes that together describe the shape of each searchable document.",
+    "keyword search": "Lexical retrieval matching the actual terms in the query against the text, ranked by algorithms like BM25 — great for exact words and codes.",
+    "semantic search": "Retrieval that ranks by meaning, using vectors and/or a semantic reranker, so paraphrases match even without shared keywords.",
+    "hybrid search": "Combining keyword and vector search in one query and fusing the results, capturing both exact-term and meaning matches.",
+    "semantic ranker": "An Azure AI Search feature that re-scores top results with a language model for relevance and can return concise captions.",
+    "chunking": "Splitting documents into passage-sized pieces before embedding and indexing, so retrieval returns focused context that fits the prompt budget.",
+    "context window": "The maximum tokens a model can consider at once; retrieved passages plus the question and answer must fit within it.",
+    "system prompt": "The instruction message that tells the model to answer only from the provided context and to cite sources — the grounding rule in RAG."
+  },
+  "sections": [
+    {
+      "number": 1,
+      "key": "overview",
+      "title": "Overview: Teaching the Model What It Doesn't Know",
+      "content": [
+        { "type": "paragraph", "text": "A model knows only what it saw in training. It has never read your product manuals, your internal policies, last quarter's report, or the ticket a customer opened yesterday — and when asked about them it will often produce a confident hallucination rather than admit ignorance. RAG, Retrieval-Augmented Generation, closes that gap without retraining anything. The idea is simple and powerful: before the model answers, retrieve the most relevant passages from your own data and put them into the prompt, then instruct the model to answer from that supplied context and cite it. The model's fluency meets your organization's facts." },
+        { "type": "paragraph", "text": "This tutorial builds the whole pipeline in .NET. You will see why enterprises reach for RAG over fine-tuning; how a vector database and embeddings make retrieval by meaning possible; how Azure AI Search provides that retrieval as a managed service; how to create an index and define its fields and schema; the difference between keyword and semantic search and why hybrid usually wins; how to integrate search results into a RAG pipeline behind the same IChatService from earlier tutorials; how to enhance prompts with retrieved context; and how to enforce grounding and return citations so answers are trustworthy and verifiable." },
+        { "type": "note", "style": "info", "text": "RAG is the single most common enterprise GenAI pattern. A chat-with-your-documents assistant, an internal knowledge bot, a support-deflection tool — nearly all of them are RAG underneath." }
+      ]
+    },
+    {
+      "number": 2,
+      "key": "learning-objectives",
+      "title": "Learning Objectives",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Explain why enterprises need RAG and when it beats fine-tuning or a bigger context window.",
+          "Describe how a vector database, embeddings, and vector search retrieve passages by meaning.",
+          "Use Azure AI Search as a retrieval backend, creating an index and defining its fields and schema.",
+          "Contrast keyword search, semantic search, and hybrid search, and choose the right mode.",
+          "Integrate search results into a RAG pipeline in .NET, retrieving context before calling the model.",
+          "Enhance prompts with retrieved context and a grounding system prompt so the model answers only from sources.",
+          "Return grounding and citations so users can trace and verify every claim in an answer."
+        ] }
+      ]
+    },
+    {
+      "number": 3,
+      "key": "prerequisites",
+      "title": "Prerequisites",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Tutorial 11: the embeddings API — turning text into vectors and comparing them with cosine similarity.",
+          "Tutorials 13–14: an IChatService behind DI with resilience and logging, exposed over a streaming web endpoint.",
+          "C# comfort with async/await, records, and calling an Azure SDK client (you will add the Azure AI Search client).",
+          "An Azure OpenAI resource with a chat deployment and an embedding deployment (text-embedding-3-small), plus an Azure AI Search service to create an index in."
+        ] },
+        { "type": "note", "style": "tip", "text": "If you built the streaming assistant page in tutorial 14, keep it open — this tutorial changes only what the server does before calling the model, so a grounded answer will stream into the very same page." }
+      ]
+    },
+    {
+      "number": 4,
+      "key": "key-concepts",
+      "title": "Key Concepts: Retrieve, Augment, Generate",
+      "content": [
+        { "type": "paragraph", "text": "RAG is three steps named in its expansion. Retrieve: given the user's question, find the most relevant passages from your indexed data. Augment: insert those passages into the prompt as context, alongside a system prompt telling the model to answer only from them. Generate: the model produces an answer grounded in the supplied passages, with citations back to the sources. Everything in this tutorial is an elaboration of those three steps and the machinery that makes retrieval fast and accurate." },
+        { "type": "table", "headers": ["Step", "What happens", "Key technology"], "rows": [
+          ["Retrieve", "Find passages relevant to the question", "Azure AI Search (keyword + vector + semantic ranker)"],
+          ["Augment", "Build a prompt: system rule + retrieved context + question", "Prompt construction in the service layer"],
+          ["Generate", "Model answers from the context and cites sources", "Chat completion with a grounding system prompt"]
+        ] },
+        { "type": "paragraph", "text": "Two ingredients from earlier tutorials power retrieval. Embeddings turn both your documents and each question into vectors, so similarity of meaning becomes distance in vector space; a vector database indexes those vectors and answers nearest-neighbor queries quickly. But retrieval by meaning alone misses exact terms — a product code, an error number — which is where keyword search and the combination called hybrid search come in. Azure AI Search bundles all of it, so most of your work is preparing data well (chunking, schema) and constructing the augmented prompt carefully." },
+        { "type": "note", "style": "info", "text": "The quality ceiling of a RAG system is set by retrieval, not the model. If the right passage is not retrieved, no amount of prompt polish or model upgrade will produce a correct grounded answer." }
+      ]
+    },
+    {
+      "number": 5,
+      "key": "concept-deep-dive-1",
+      "title": "Deep Dive 1: Why Enterprises Need RAG",
+      "content": [
+        { "type": "paragraph", "text": "Enterprises need answers grounded in private, current, verifiable knowledge, and a raw model provides none of those. Its training data is frozen at a cutoff, so it cannot know this morning's policy change. It never saw your internal documents at all. And it cannot show its work — an ungrounded answer is a claim with no source, unusable where being right and being checkable both matter. RAG addresses all three: it injects current, private passages at question time, and it makes every answer traceable through citations." },
+        { "type": "paragraph", "text": "The natural question is why not fine-tune the model on company data instead. Fine-tuning changes a model's style and behavior, but it is a poor and expensive way to inject facts: it must be redone whenever the data changes, it blurs rather than stores exact information (so it still hallucinates specifics and cannot cite), and it risks memorizing sensitive data into weights. RAG keeps knowledge in an index you can update in seconds, add and remove documents from, apply access control to, and cite precisely. As a rule: fine-tune to change how the model behaves; use RAG to change what it knows." },
+        { "type": "table", "headers": ["Need", "Raw model", "Fine-tuning", "RAG"], "rows": [
+          ["Private / internal knowledge", "No", "Baked in, hard to update", "Injected at query time, always current"],
+          ["Fresh / changing data", "Frozen at cutoff", "Stale until retrained", "Update the index instantly"],
+          ["Citations / verifiability", "None", "None", "Every claim traces to a source"],
+          ["Access control per document", "N/A", "No", "Filter retrieval by permissions"],
+          ["Cost to update knowledge", "Retrain", "Retrain", "Re-index a document"]
+        ] },
+        { "type": "note", "style": "warning", "text": "RAG is not a licence to skip data governance. If a user should not see a document, it must be filtered out of retrieval — the model will faithfully quote whatever context you hand it, including things that user was never allowed to read." }
+      ]
+    },
+    {
+      "number": 6,
+      "key": "concept-deep-dive-2",
+      "title": "Deep Dive 2: Vector Databases and Retrieval by Meaning",
+      "content": [
+        { "type": "paragraph", "text": "Keyword systems match words; RAG needs to match meaning, because a user asking 'how do I get my money back?' should find a passage titled 'Refund Policy' that shares not one keyword with the question. Embeddings make this possible: the embedding API maps text to a vector such that similar meanings produce nearby vectors. Embed the refund policy and embed the question, and their vectors sit close together even with no shared words. Closeness is measured by cosine similarity — the cosine of the angle between vectors, near 1 for very similar meaning." },
+        { "type": "paragraph", "text": "A vector database is the store built to exploit this. It indexes embedding vectors and answers the query 'give me the k nearest vectors to this one' efficiently — the operation called vector search — even across millions of vectors, using approximate nearest-neighbor algorithms so it stays fast at scale. Conceptually you could compute cosine similarity against every stored vector yourself (as in tutorial 11), but that is linear and collapses at scale; a vector database is what makes retrieval by meaning practical in production." },
+        { "type": "animation", "title": "Retrieval by meaning with vector search", "intro": "A question with no shared keywords still finds the right passage.", "nodes": [
+          { "id": "docs", "label": "Documents", "sub": "chunked" },
+          { "id": "embed", "label": "Embeddings", "sub": "text to vectors" },
+          { "id": "store", "label": "Vector database", "sub": "indexed vectors" },
+          { "id": "q", "label": "Question", "sub": "embedded too" },
+          { "id": "near", "label": "Nearest passages", "sub": "by similarity" }
+        ], "steps": [
+          { "highlight": ["docs", "embed"], "caption": "Ahead of time, each document chunk is embedded into a vector capturing its meaning." },
+          { "highlight": ["store"], "caption": "The vectors are indexed in a vector database that supports fast nearest-neighbor search." },
+          { "highlight": ["q", "embed"], "caption": "At query time the user's question is embedded with the same model, landing in the same vector space." },
+          { "highlight": ["store", "near"], "caption": "The database returns the vectors closest to the question by cosine similarity — the most semantically relevant passages." },
+          { "highlight": ["near"], "caption": "'How do I get my money back?' retrieves the 'Refund Policy' passage despite zero shared keywords — retrieval by meaning." }
+        ] },
+        { "type": "note", "style": "tip", "text": "One rule is absolute: index and query must use the same embedding model. Vectors from different models are not comparable, so switching embedding models means re-embedding and re-indexing everything." }
+      ]
+    },
+    {
+      "number": 7,
+      "key": "concept-deep-dive-3",
+      "title": "Deep Dive 3: Azure AI Search — Index, Fields, and Schema",
+      "content": [
+        { "type": "paragraph", "text": "You could run a vector database yourself, but Azure AI Search provides retrieval as a managed service that does keyword, vector, and hybrid search plus a semantic ranker in one place — which is why it is a common RAG backend. Its central object is the index: a searchable collection of documents. Before you add anything you define the index's schema — the set of fields, each with a name, a type, and attributes controlling how it behaves. Getting the schema right is most of the setup work." },
+        { "type": "paragraph", "text": "A field's attributes decide its role. Searchable makes a text field full-text searchable (keyword search). A field typed as a collection of singles with a vector-search configuration holds an embedding for vector search. Filterable lets you restrict results (by category, or by an allowed-users field for access control). Retrievable means the value is returned with results — your content and any source id for citations must be retrievable. Key marks the unique document id. A typical RAG index carries at least: an id (key), the chunk content (searchable, retrievable), a content vector (vector-searchable), a title or source path (retrievable, for citations), and often filter fields." },
+        { "type": "code", "language": "csharp", "title": "Defining a RAG index schema in .NET", "code": [
+          "using Azure.Search.Documents.Indexes;",
+          "using Azure.Search.Documents.Indexes.Models;",
+          "",
+          "// One searchable document = one chunk of a source file.",
+          "var index = new SearchIndex(\"knowledge-index\")",
+          "{",
+          "    Fields =",
+          "    {",
+          "        new SimpleField(\"id\", SearchFieldDataType.String) { IsKey = true },",
+          "        new SearchableField(\"content\") { IsFilterable = false },   // full-text keyword search",
+          "        new SearchableField(\"title\") { IsFilterable = true },       // shown in citations, filterable",
+          "        new SimpleField(\"sourcePath\", SearchFieldDataType.String) { IsFilterable = true }, // citation link",
+          "        new VectorSearchField(\"contentVector\", 1536, \"vector-profile\")  // embedding for vector search",
+          "    },",
+          "    // Vector search + semantic ranking configuration attach to the index.",
+          "    VectorSearch = new() { /* HNSW algorithm + profile named 'vector-profile' */ },",
+          "    SemanticSearch = new() { /* semantic configuration naming title + content */ }",
+          "};",
+          "",
+          "var indexClient = new SearchIndexClient(endpoint, credential);",
+          "await indexClient.CreateOrUpdateIndexAsync(index);"
+        ] },
+        { "type": "paragraph", "text": "Before indexing you must chunk your documents — split them into passage-sized pieces (a few hundred tokens, often with slight overlap) — and embed each chunk. Chunking matters because retrieval returns whole documents' worth of noise if chunks are too big, and loses context if too small; passage-sized chunks give focused, citable context that fits the prompt budget. Each chunk becomes one index document: its text in content, its embedding in contentVector, and its origin in title/sourcePath so the answer can cite it." },
+        { "type": "note", "style": "info", "text": "Exact SearchField/VectorSearch/SemanticSearch construction details differ across versions of the Azure.Search.Documents SDK — the example shows the shape and intent; verify the precise configuration objects against the current package (see section 13)." }
+      ]
+    },
+    {
+      "number": 8,
+      "key": "concept-deep-dive-4",
+      "title": "Deep Dive 4: Keyword vs Semantic Search — and Hybrid",
+      "content": [
+        { "type": "paragraph", "text": "Retrieval has two complementary strategies, and understanding when each wins is central to good RAG. Keyword search (lexical) matches the actual terms of the query against the indexed text, ranked by algorithms such as BM25. It is unbeatable for exact strings — a product code 'RX-4400', an error like 'ORA-00942', a person's name, an acronym — because those must match literally, and it needs no embedding. Its weakness is vocabulary mismatch: 'get my money back' and 'refund' share no words, so keyword search misses the connection." },
+        { "type": "paragraph", "text": "Semantic search retrieves by meaning. In Azure AI Search this means vector search over embeddings, optionally sharpened by the semantic ranker, which re-scores the top candidates with a language model and can return concise captions. Semantic search handles paraphrase and synonym effortlessly — the refund case just works — but can underperform on exact tokens, sometimes returning a passage that is topically close yet misses the specific code the user typed. The strengths are mirror images, which points straight at the answer: use both." },
+        { "type": "table", "headers": ["Query type", "Keyword wins", "Semantic wins"], "rows": [
+          ["Exact code / ID / acronym", "Yes — literal match", "May miss the exact token"],
+          ["Paraphrase / synonym", "Misses (no shared words)", "Yes — matches meaning"],
+          ["Natural-language question", "Partial", "Yes"],
+          ["Rare proper noun", "Yes", "Sometimes"]
+        ] },
+        { "type": "animation", "title": "Hybrid search fuses both signals", "intro": "One query runs keyword and vector retrieval, then results are merged and reranked.", "nodes": [
+          { "id": "q", "label": "Query", "sub": "text + vector" },
+          { "id": "kw", "label": "Keyword search", "sub": "BM25 on terms" },
+          { "id": "vec", "label": "Vector search", "sub": "nearest embeddings" },
+          { "id": "fuse", "label": "Fuse results", "sub": "combine ranks" },
+          { "id": "rank", "label": "Semantic ranker", "sub": "rerank top" }
+        ], "steps": [
+          { "highlight": ["q"], "caption": "The query is sent as both text (for keyword) and an embedding vector (for vector search) in one hybrid request." },
+          { "highlight": ["kw"], "caption": "Keyword search finds passages containing the literal terms — catching exact codes and names." },
+          { "highlight": ["vec"], "caption": "Vector search finds passages with similar meaning — catching paraphrases keyword search would miss." },
+          { "highlight": ["fuse"], "caption": "The two result sets are fused into one ranked list, so a passage strong on either signal surfaces." },
+          { "highlight": ["rank"], "caption": "The semantic ranker re-scores the top fused results with a language model for final relevance — the best of both worlds." }
+        ] },
+        { "type": "paragraph", "text": "Hybrid search — issuing keyword and vector search together and fusing the results, then optionally applying the semantic ranker — is the recommended default for RAG because real user questions mix exact terms and natural language. Azure AI Search performs the fusion for you; your job is to supply both the query text and the query embedding and enable the semantic configuration. This is the retrieval quality that sets your RAG system's ceiling, so it is worth tuning." }
+      ]
+    },
+    {
+      "number": 9,
+      "key": "ecosystem-and-tools",
+      "title": "Ecosystem and Tools",
+      "content": [
+        { "type": "table", "headers": ["Technology", "Role in the RAG pipeline"], "rows": [
+          ["Azure AI Search", "The retrieval backend: index, keyword + vector + hybrid search, semantic ranker"],
+          ["Azure.Search.Documents (NuGet)", "The .NET client for creating indexes, uploading documents, and querying"],
+          ["Azure OpenAI embeddings (text-embedding-3-small)", "Turns document chunks and questions into vectors for vector search"],
+          ["Azure OpenAI chat deployment", "Generates the grounded answer from the augmented prompt"],
+          ["IChatService (tutorials 13–14)", "Where the RAG pipeline lives — retrieval then generation, behind the same interface"],
+          ["Integrated vectorization / indexers (Azure AI Search)", "Optional: let the service chunk and embed during indexing instead of doing it in code"],
+          ["Semantic Kernel / other orchestrators", "Higher-level frameworks (later tutorials) that provide RAG 'memory' connectors over the same search service"]
+        ] },
+        { "type": "paragraph", "text": "You can build the pipeline at two levels. Hand-rolled, you chunk and embed documents in your own code, upload them to the index, and at query time embed the question, run a hybrid query, and construct the prompt — full control, and the version this tutorial teaches so the mechanics are visible. Higher up, Azure AI Search's integrated vectorization and indexers can chunk and embed for you during ingestion, and orchestration frameworks wrap retrieval as reusable 'memory'. Understand the hand-rolled pipeline first; the conveniences then read as shortcuts over parts you already know." }
+      ]
+    },
+    {
+      "number": 10,
+      "key": "use-cases",
+      "title": "Use Cases",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Internal knowledge assistant: employees ask natural-language questions and get answers grounded in policies, wikis, and runbooks, each with a citation to the source page.",
+          "Customer support deflection: a help widget answers from the product documentation and knowledge base, citing articles so users can read more.",
+          "Contract and document Q&A: upload a set of contracts and ask 'what is the termination notice period?', getting the exact clause with a citation.",
+          "Technical support with exact codes: hybrid search shines when a user pastes an error code and describes the symptom in words — keyword catches the code, vector catches the description.",
+          "Onboarding helper: new staff query scattered documentation through one assistant instead of hunting across systems.",
+          "Research assistant over a report library: ask across many documents and get a synthesized, cited answer rather than a list of links.",
+          "Compliance-aware search: retrieval filtered by the user's permissions so answers only ever draw on documents they are allowed to see."
+        ] },
+        { "type": "paragraph", "text": "The common thread: a body of private or specialized text, natural-language questions over it, and a hard requirement that answers be correct and verifiable. Wherever those three meet, RAG is the fitting pattern — and the citation requirement is usually what rules out an ungrounded model." }
+      ]
+    },
+    {
+      "number": 11,
+      "key": "code-examples",
+      "title": "Code Examples",
+      "content": [
+        { "type": "paragraph", "text": "These examples build the query-time RAG pipeline in .NET: embed the question, run a hybrid search against Azure AI Search, construct a grounded prompt, and generate a cited answer — all inside the IChatService from earlier tutorials. Indexing (schema in deep dive 3, plus chunk-embed-upload) is assumed done." },
+        { "type": "code", "language": "csharp", "title": "Example 1 — Retrieve: hybrid search for relevant chunks", "code": [
+          "using Azure.Search.Documents;",
+          "using Azure.Search.Documents.Models;",
+          "",
+          "public sealed record Passage(string Content, string Title, string SourcePath);",
+          "",
+          "// Embed the question, then run keyword + vector search in one hybrid query.",
+          "async Task<IReadOnlyList<Passage>> RetrieveAsync(string question, int k, CancellationToken ct)",
+          "{",
+          "    // Same embedding model used when indexing (deep dive 2's rule).",
+          "    OpenAIEmbedding qEmbedding =",
+          "        await _embedder.GenerateEmbeddingAsync(question, cancellationToken: ct);",
+          "",
+          "    var options = new SearchOptions",
+          "    {",
+          "        Size = k,",
+          "        VectorSearch = new()",
+          "        {",
+          "            Queries = { new VectorizedQuery(qEmbedding.ToFloats())",
+          "                        { KNearestNeighborsCount = k, Fields = { \"contentVector\" } } }",
+          "        },",
+          "        // Enable semantic ranking over the fused hybrid results.",
+          "        QueryType = SearchQueryType.Semantic,",
+          "        SemanticSearch = new() { SemanticConfigurationName = \"default-semantic\" }",
+          "    };",
+          "    options.Select.Add(\"content\");",
+          "    options.Select.Add(\"title\");",
+          "    options.Select.Add(\"sourcePath\");",
+          "",
+          "    // Passing both the text (question) and the vector query makes it hybrid.",
+          "    SearchResults<SearchDocument> results =",
+          "        await _search.SearchAsync<SearchDocument>(question, options, ct);",
+          "",
+          "    var passages = new List<Passage>();",
+          "    await foreach (SearchResult<SearchDocument> r in results.GetResultsAsync())",
+          "    {",
+          "        passages.Add(new Passage(",
+          "            (string)r.Document[\"content\"],",
+          "            (string)r.Document[\"title\"],",
+          "            (string)r.Document[\"sourcePath\"]));",
+          "    }",
+          "    return passages;",
+          "}"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 2 — Augment: build a grounded prompt with numbered sources", "code": [
+          "// Number each passage so the model can cite it as [1], [2], ...",
+          "static (string context, IReadOnlyList<Passage> sources) BuildContext(IReadOnlyList<Passage> passages)",
+          "{",
+          "    var sb = new System.Text.StringBuilder();",
+          "    for (int i = 0; i < passages.Count; i++)",
+          "    {",
+          "        sb.AppendLine($\"[{i + 1}] {passages[i].Title}\");",
+          "        sb.AppendLine(passages[i].Content);",
+          "        sb.AppendLine();",
+          "    }",
+          "    return (sb.ToString(), passages);",
+          "}",
+          "",
+          "const string GroundingSystemPrompt =",
+          "    \"You are a knowledge assistant. Answer ONLY using the numbered sources below. \" +",
+          "    \"Cite the sources you use with their bracket numbers, e.g. [1]. \" +",
+          "    \"If the sources do not contain the answer, say you don't know — do not use outside knowledge.\";"
+        ] },
+        { "type": "code", "language": "csharp", "title": "Example 3 — Generate: the full RAG method behind IChatService", "code": [
+          "public async Task<GroundedAnswer> AskGroundedAsync(string question, CancellationToken ct = default)",
+          "{",
+          "    // 1. Retrieve",
+          "    IReadOnlyList<Passage> passages = await RetrieveAsync(question, k: 5, ct);",
+          "    if (passages.Count == 0)",
+          "        return new GroundedAnswer(\"I couldn't find anything relevant to answer that.\", Array.Empty<Passage>());",
+          "",
+          "    // 2. Augment",
+          "    (string context, var sources) = BuildContext(passages);",
+          "    var messages = new ChatMessage[]",
+          "    {",
+          "        new SystemChatMessage(GroundingSystemPrompt),",
+          "        new UserChatMessage($\"Sources:\\n{context}\\nQuestion: {question}\")",
+          "    };",
+          "",
+          "    // 3. Generate (reusing tutorial 13's resilient call; low temperature for grounding)",
+          "    var options = new ChatCompletionOptions { Temperature = 0.1f, MaxOutputTokenCount = 500 };",
+          "    ChatCompletion completion = await CompleteResilientlyAsync(messages, options, ct);",
+          "",
+          "    // Return the answer AND the sources so the UI can render citations.",
+          "    return new GroundedAnswer(completion.Content[0].Text, sources);",
+          "}",
+          "",
+          "public sealed record GroundedAnswer(string Text, IReadOnlyList<Passage> Sources);"
+        ] }
+      ]
+    },
+    {
+      "number": 12,
+      "key": "step-by-step",
+      "title": "Step by Step: A Grounded, Cited Assistant",
+      "content": [
+        { "type": "paragraph", "text": "This walkthrough builds an end-to-end RAG assistant: index a small document set, then answer questions from it with citations, streamed into the tutorial-14 page." },
+        { "type": "list", "style": "numbered", "items": [
+          "Provision: an Azure AI Search service plus your existing Azure OpenAI chat and embedding deployments. Add the Azure.Search.Documents package to the project.",
+          "Create the index: define the schema from deep dive 3 (id key, searchable content, retrievable title and sourcePath, a 1536-dim contentVector, plus vector and semantic configurations) and call CreateOrUpdateIndexAsync.",
+          "Prepare data: take a handful of documents (policies, FAQs, a manual) and chunk them into passage-sized pieces of a few hundred tokens with slight overlap.",
+          "Embed and upload: for each chunk, call the embedding deployment, then upload a document per chunk (id, content, title, sourcePath, contentVector) with the index's upload/merge API.",
+          "Implement retrieval (Example 1): embed the incoming question with the same model and run a hybrid query — text plus vector — with semantic ranking, selecting content, title, and sourcePath.",
+          "Build the grounded prompt (Example 2): number the retrieved passages, and write a system prompt that forbids outside knowledge and requires bracket citations.",
+          "Generate (Example 3): call the chat deployment at low temperature through tutorial 13's resilient wrapper, returning both the answer text and the source list as a GroundedAnswer.",
+          "Expose it: add AskGroundedAsync to IChatService and a web endpoint that returns the answer plus a citations array; render citations under the answer in the tutorial-14 page, linking each [n] to its sourcePath.",
+          "Test grounding: ask a question whose answer is in your documents and confirm the answer cites the right source; then ask something absent from the documents and confirm the assistant says it doesn't know rather than inventing an answer.",
+          "Test hybrid retrieval: ask once using an exact code or name from a document and once by paraphrase, and confirm both retrieve the correct passage — keyword catching the code, vector catching the paraphrase.",
+          "Stream it: switch generation to the streaming path from tutorial 14 so the grounded answer types into the page, then append the citations when the stream completes."
+        ] },
+        { "type": "note", "style": "tip", "text": "Log the retrieved passages (titles and scores) for every question during development. When an answer is wrong, this instantly tells you whether retrieval failed (wrong passages) or generation failed (right passages, bad answer) — a diagnosis you will make constantly." }
+      ]
+    },
+    {
+      "number": 13,
+      "key": "limitations-and-caveats",
+      "title": "Limitations and Caveats",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "SDK naming caveat: the Azure.Search.Documents SDK's field and query construction (SearchableField, VectorSearchField, VectorizedQuery, SemanticSearch/VectorSearch configuration objects) varies across versions — the examples are correct in shape and intent, but verify exact type and property names against the current package before relying on them.",
+          "Retrieval sets the ceiling: if the right passage is not retrieved, the answer cannot be correct no matter the model or prompt. Most RAG quality work is retrieval and chunking work, not prompt tweaking.",
+          "Chunking is a real design decision: chunks too large dilute relevance and waste the context window; too small lose the surrounding meaning. Passage-sized with slight overlap is a starting point, not a universal answer.",
+          "Grounding is instructed, not guaranteed: a model told to answer only from context will usually comply, but can still leak training knowledge or miscite. Low temperature, a firm system prompt, and evaluation reduce but do not eliminate this.",
+          "Citations can be wrong: the model may attribute a claim to the wrong bracket number. Treat citations as strong hints to verify, and consider post-checking that cited passages actually support the claim.",
+          "Context window limits how many passages you can include; more retrieval is not always better, and stuffing the prompt raises cost and can bury the relevant passage. Tune k.",
+          "Access control lives in retrieval: you must filter the index by the user's permissions, because the model will quote any context it is given regardless of who is asking.",
+          "Freshness depends on your indexing pipeline: RAG is only as current as the last time you re-indexed changed documents — an ingestion schedule or change feed is part of the system, not an afterthought.",
+          "Embedding-model consistency is mandatory: index and query must share the same embedding model, so changing it forces a full re-embed and re-index."
+        ] }
+      ]
+    },
+    {
+      "number": 14,
+      "key": "best-practices",
+      "title": "Best Practices",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "Default to hybrid search with the semantic ranker; reach for pure keyword or pure vector only when you have measured a reason to.",
+          "Invest in chunking and schema before prompt tuning — retrieval quality dominates RAG outcomes.",
+          "Always ground explicitly: a system prompt that says 'answer only from the sources, cite them, and say you don't know otherwise' — and keep temperature low.",
+          "Return sources with every answer and render citations in the UI; verifiability is usually the whole point of choosing RAG.",
+          "Filter retrieval by the user's permissions so answers never draw on documents the user cannot access.",
+          "Keep index and query on the same embedding model, and version your index so a model change is a deliberate re-index, not a silent regression.",
+          "Log retrieved passages and scores per query; it is the fastest way to tell a retrieval failure from a generation failure.",
+          "Tune k (number of passages) against your context window and cost — enough to cover the answer, few enough to keep the relevant passage prominent."
+        ] },
+        { "type": "table", "headers": ["Common mistake", "Do this instead"], "rows": [
+          ["Pure vector search only, missing exact codes", "Hybrid search so keyword catches literal terms and vector catches meaning"],
+          ["Huge chunks (whole documents) per index entry", "Passage-sized chunks with slight overlap, focused and citable"],
+          ["No grounding instruction, so the model free-associates", "A firm system prompt: answer only from sources, cite, or say you don't know"],
+          ["Answer with no sources returned", "Return and render citations so users can verify every claim"],
+          ["Different embedding models for index and query", "One embedding model everywhere; re-index on any change"],
+          ["Blaming the model for wrong answers", "Log retrieved passages first — most 'model' errors are retrieval errors"]
+        ] }
+      ]
+    },
+    {
+      "number": 15,
+      "key": "quiz",
+      "title": "Quiz: RAG with Azure AI Search",
+      "items": [
+        { "number": 1, "question": "What does RAG stand for and do?", "options": { "A": "Rapid AI Generation — makes the model answer faster", "B": "Retrieval-Augmented Generation — retrieves relevant passages and puts them in the prompt so the model answers from real data", "C": "Recursive Answer Grading — scores model answers", "D": "Reinforced Adaptive Grounding — a training technique" }, "correctAnswer": "B", "explanation": "RAG retrieves the most relevant passages from your data, augments the prompt with them, and has the model generate an answer grounded in that context — injecting current, private, citable knowledge without retraining." },
+        { "number": 2, "question": "Why do enterprises typically choose RAG over fine-tuning to give a model company knowledge?", "options": { "A": "Fine-tuning is impossible with Azure OpenAI", "B": "RAG keeps knowledge in an updatable, citable index; fine-tuning bakes facts into weights, is costly to update, and cannot cite", "C": "RAG makes the model larger", "D": "Fine-tuning cannot change model behavior" }, "correctAnswer": "B", "explanation": "Fine-tuning changes behavior/style but is a poor way to inject facts: it must be redone when data changes, blurs exact information, and cannot cite. RAG updates an index in seconds and traces every claim to a source. Fine-tune for behavior; use RAG for knowledge." },
+        { "number": 3, "question": "How do embeddings enable retrieval by meaning?", "options": { "A": "They translate text into keywords", "B": "They map text to vectors where similar meanings are close together, so a question's vector lands near relevant passages' vectors", "C": "They compress documents to save space", "D": "They encrypt the query" }, "correctAnswer": "B", "explanation": "The embedding model places semantically similar text nearby in vector space. 'Get my money back' and 'Refund Policy' end up close despite no shared words, so nearest-neighbor search retrieves the right passage by meaning." },
+        { "number": 4, "question": "What is a vector database's core job?", "options": { "A": "Store relational tables with foreign keys", "B": "Index embedding vectors and quickly return the nearest ones to a query vector, even at large scale", "C": "Generate embeddings from text", "D": "Run the language model" }, "correctAnswer": "B", "explanation": "A vector database indexes vectors and answers 'give me the k nearest to this one' efficiently using approximate nearest-neighbor algorithms, making vector search practical over millions of vectors — far beyond brute-force cosine similarity." },
+        { "number": 5, "question": "In Azure AI Search, what is an index?", "options": { "A": "A performance counter", "B": "A searchable collection of documents defined by a schema of fields", "C": "The embedding model", "D": "A billing tier" }, "correctAnswer": "B", "explanation": "An index is the searchable store of documents. Its schema defines the fields — their names, types, and attributes (searchable, filterable, retrievable, key, vector) — that describe each document's shape and searchability." },
+        { "number": 6, "question": "Which field attribute must a chunk's content and source id have so they can appear in citations?", "options": { "A": "Filterable", "B": "Key", "C": "Retrievable", "D": "Sortable" }, "correctAnswer": "C", "explanation": "Retrievable means the field's value is returned with search results. Content and the source id/path must be retrievable so the pipeline can show the answer and render a citation back to the source; a non-retrievable field is searchable but not returned." },
+        { "number": 7, "question": "When does keyword search outperform semantic search?", "options": { "A": "For paraphrased questions", "B": "For exact strings like product codes, error numbers, and acronyms that must match literally", "C": "For synonyms", "D": "Never — semantic always wins" }, "correctAnswer": "B", "explanation": "Keyword (lexical) search matching literal terms is unbeatable for exact codes, IDs, and names that must match character-for-character. Semantic search may return something topically close but miss the specific token, which is why hybrid combines them." },
+        { "number": 8, "question": "What is hybrid search?", "options": { "A": "Searching two indexes at once", "B": "Running keyword and vector search together and fusing the results, optionally reranked semantically", "C": "Alternating between keyword and vector by day", "D": "Vector search with a bigger model" }, "correctAnswer": "B", "explanation": "Hybrid search issues both keyword and vector retrieval in one query and fuses the ranked results, so a passage strong on either signal surfaces. With the semantic ranker on top, it is the recommended RAG default because real questions mix exact terms and natural language." },
+        { "number": 9, "question": "What does the semantic ranker in Azure AI Search do?", "options": { "A": "Generates the final answer", "B": "Re-scores the top retrieved candidates with a language model for relevance and can return concise captions", "C": "Creates the embeddings", "D": "Encrypts results" }, "correctAnswer": "B", "explanation": "The semantic ranker takes the top results from keyword/vector retrieval and reranks them using a language model to improve relevance ordering, and can produce short captions. It sharpens what retrieval surfaces before generation." },
+        { "number": 10, "question": "In the RAG pipeline, what does the 'augment' step do?", "options": { "A": "Trains the model on retrieved data", "B": "Inserts the retrieved passages into the prompt as context, with a grounding instruction", "C": "Increases the model's parameter count", "D": "Deletes irrelevant documents from the index" }, "correctAnswer": "B", "explanation": "Augment builds the prompt: a system instruction to answer only from the sources plus the retrieved passages (usually numbered) and the question. The model then generates an answer grounded in that supplied context." },
+        { "number": 11, "question": "What is a grounding system prompt responsible for?", "options": { "A": "Choosing the embedding model", "B": "Instructing the model to answer only from the provided sources, cite them, and say it doesn't know otherwise", "C": "Defining the index schema", "D": "Setting the search service region" }, "correctAnswer": "B", "explanation": "The grounding system prompt is the rule that keeps the answer tied to the retrieved context: use only the sources, cite them by number, and admit ignorance rather than using outside knowledge — the instruction that operationalizes grounding." },
+        { "number": 12, "question": "Why should retrieved passages be numbered when building the prompt?", "options": { "A": "To sort them alphabetically", "B": "So the model can cite specific sources by their bracket numbers, enabling verifiable citations", "C": "To compress the prompt", "D": "Numbering has no effect" }, "correctAnswer": "B", "explanation": "Numbering each passage gives the model stable references ([1], [2]) to cite, and gives your UI a way to link each citation back to its source. It is the mechanism that turns 'grounded' into 'verifiable'." },
+        { "number": 13, "question": "The primary quality ceiling of a RAG system is set by which step?", "options": { "A": "Generation — pick a bigger model", "B": "Retrieval — if the right passage isn't retrieved, no prompt or model fixes the answer", "C": "The system prompt wording alone", "D": "The UI rendering" }, "correctAnswer": "B", "explanation": "RAG can only ground an answer in what retrieval surfaces. A missing or wrong passage cannot be repaired downstream, so retrieval quality — embeddings, hybrid search, chunking — dominates outcomes. Most RAG tuning is retrieval tuning." },
+        { "number": 14, "question": "Why must index and query use the same embedding model?", "options": { "A": "To save money", "B": "Because vectors from different models live in incompatible spaces and are not comparable", "C": "Because Azure requires it for billing", "D": "They don't — any embedding model works" }, "correctAnswer": "B", "explanation": "Each embedding model defines its own vector space; distances across models are meaningless. Querying with a different model than you indexed with produces garbage similarity, so switching models means re-embedding and re-indexing everything." },
+        { "number": 15, "question": "A user asks about a document they are not permitted to see. What must the RAG system do?", "options": { "A": "Trust the model to refuse", "B": "Filter that document out of retrieval based on the user's permissions", "C": "Lower the temperature", "D": "Return the document with a warning" }, "correctAnswer": "B", "explanation": "Access control lives in retrieval: the model will faithfully quote any context handed to it, so a forbidden document must never be retrieved for that user. Filtering the index by the user's permissions is the enforcement point, not the prompt." }
+      ]
+    },
+    {
+      "number": 16,
+      "key": "exam",
+      "title": "Exam: Written Questions",
+      "items": [
+        { "number": 1, "question": "Explain the three steps of RAG and what each contributes to a trustworthy answer.", "modelAnswer": "Retrieve: given the question, find the most relevant passages from an index of your data — this supplies current, private knowledge the model never had. Augment: build a prompt containing those passages (usually numbered) plus a system instruction to answer only from them and cite them — this constrains the model to your facts and sets up verifiability. Generate: the model produces an answer grounded in the supplied context, citing sources — this yields a response that is both fluent and traceable. Together they turn a model that answers from frozen, unciteable memory into one that answers from fresh, private, verifiable sources; the contribution of each is, respectively, knowledge, constraint, and a checkable result." },
+        { "number": 2, "question": "Make the case for RAG over fine-tuning when the goal is to give a model access to company knowledge.", "modelAnswer": "Fine-tuning adjusts a model's weights to change its behavior and style; it is the wrong tool for injecting facts. Facts change, and re-tuning for every update is slow and costly, so a fine-tuned model is stale between runs. Fine-tuning also blurs information into weights rather than storing it precisely, so it still hallucinates specifics and cannot produce citations, and it risks memorizing sensitive data into the model. RAG instead keeps knowledge in an external index: you add, update, or remove documents in seconds; you can apply per-document access control; and because the answer is generated from retrieved passages, every claim can cite its source. The rule of thumb captures it — fine-tune to change how the model behaves, use RAG to change what it knows. Most 'teach the model our data' requirements are knowledge problems, so RAG is usually the answer, sometimes combined with light fine-tuning for tone." },
+        { "number": 3, "question": "Describe how embeddings and a vector database enable retrieval by meaning, and why brute-force similarity is insufficient at scale.", "modelAnswer": "An embedding model maps text to a vector so that semantically similar texts produce nearby vectors; closeness is measured by cosine similarity. Embedding both the documents (ahead of time) and the question (at query time) places them in the same space, so the passages nearest the question vector are the most semantically relevant — retrieval by meaning, which finds 'Refund Policy' for 'how do I get my money back' despite zero shared words. A vector database indexes these vectors and answers k-nearest-neighbor queries efficiently using approximate nearest-neighbor algorithms. Brute force — computing cosine similarity against every stored vector, as one might in a demo — is linear in the number of vectors and becomes far too slow over hundreds of thousands or millions of chunks. The vector database's specialized index is what keeps retrieval fast at production scale, which is why it is a core RAG component rather than an optional optimization." },
+        { "number": 4, "question": "You are designing an Azure AI Search index for RAG. Walk through the fields you would define and the attributes each needs.", "modelAnswer": "One index document represents one chunk. Fields: id (String, Key) — the unique chunk identifier. content (Searchable, Retrievable) — the chunk text; searchable so keyword search works, retrievable so it can be handed to the model and shown. contentVector (a single-collection vector field with a vector-search profile, 1536 dimensions for text-embedding-3-small) — the chunk's embedding for vector search. title (Searchable, Retrievable, Filterable) — the source title, shown in citations and usable as a filter. sourcePath (Retrievable, Filterable) — where the chunk came from, used to link the citation. Optionally, permission/category fields (Filterable) for access control and scoping. The index also carries a vector-search configuration (e.g. HNSW) and a semantic configuration naming the title and content fields for the semantic ranker. The reasoning is that each attribute maps to a job: Key identifies, Searchable enables keyword retrieval, the vector field enables meaning retrieval, Retrievable makes content and citation data available downstream, and Filterable enforces access control and scoping." },
+        { "number": 5, "question": "Contrast keyword and semantic search with concrete examples, and explain why hybrid search is the RAG default.", "modelAnswer": "Keyword (lexical) search matches the literal terms of the query, ranked by algorithms like BM25. It excels at exact strings: a query for error 'ORA-00942' or product 'RX-4400' or a proper name must match character-for-character, and keyword search does that reliably with no embedding. Its failure is vocabulary mismatch — 'get my money back' shares no words with 'refund', so it misses. Semantic search retrieves by meaning via embeddings (optionally reranked by the semantic ranker): the refund case just works, as do paraphrases and synonyms, but it can underperform on exact tokens, returning a topically-near passage that lacks the specific code. Their strengths are complementary, so hybrid search runs both and fuses the results, letting a passage that scores well on either signal surface; the semantic ranker then reorders the top of the fused list. Because real user questions mix exact terms and natural language ('I get ORA-00942 when I try to open the report'), hybrid captures both and is the recommended default; pure modes are reserved for measured special cases." },
+        { "number": 6, "question": "Explain the role of chunking in RAG and the consequences of chunks that are too large or too small.", "modelAnswer": "Chunking splits source documents into passage-sized pieces before embedding and indexing, so each searchable unit is a focused span rather than a whole file. It matters because retrieval returns whole chunks, and the chunk is what lands in the prompt and gets cited. Too large — say a whole document per chunk — and retrieval is coarse: a match on one paragraph drags in pages of irrelevant text, diluting relevance scoring, wasting the context window, spending tokens, and making citations vague. Too small — a sentence — and each chunk loses the surrounding context needed to be meaningful, so an embedding may not capture the idea and the model gets fragments it cannot reason over. Passage-sized chunks (a few hundred tokens) with slight overlap are a common starting point: big enough to carry a coherent idea and cite cleanly, small enough to keep retrieval precise and fit several passages in the prompt. Overlap prevents an answer that straddles a boundary from being split. Chunking is a genuine design parameter to tune per corpus, not a fixed setting." },
+        { "number": 7, "question": "Trace the query-time RAG pipeline in .NET from question to grounded answer, naming what happens at each stage.", "modelAnswer": "Retrieve: embed the user's question with the same embedding deployment used at indexing, then issue a hybrid search to Azure AI Search — passing the question text (keyword) and the question vector (vector search) in one request, with semantic ranking enabled — and select the content, title, and sourcePath of the top k passages. Augment: number the passages and build the prompt — a grounding system message ('answer only from the numbered sources, cite them, say you don't know otherwise') and a user message containing the sources block and the question. Generate: call the chat deployment at low temperature through the resilient wrapper from tutorial 13, so transient faults and timeouts are handled. Return: package the answer text together with the source list as a GroundedAnswer, so the endpoint can send both the answer and a citations array; the UI renders the answer and links each bracket number to its sourcePath. Throughout, the whole pipeline lives inside IChatService behind the same interface earlier tutorials established, so the web layer and streaming path are unchanged." },
+        { "number": 8, "question": "What does a grounding system prompt contain, and why is grounding instructed rather than guaranteed?", "modelAnswer": "A grounding system prompt tells the model to answer using only the provided numbered sources, to cite the sources it uses by their bracket numbers, and to say it doesn't know if the sources don't contain the answer rather than falling back on outside knowledge. It operationalizes grounding by constraining where the model may draw information and requiring attribution. It is instructed, not guaranteed, because a language model is probabilistic: it strongly tends to follow a clear instruction, especially at low temperature, but it can still leak memorized training knowledge, blend outside facts with the sources, or attribute a claim to the wrong number. So grounding is a strong bias, not a hard constraint. Mitigations stack — a firm system prompt, low temperature, well-scoped retrieval so the context genuinely contains the answer, and evaluation or post-checks that verify cited passages actually support the claims — but none make it absolute, which is why citations are framed as verifiable hints the user (or an automated check) can confirm." },
+        { "number": 9, "question": "Why is retrieval, not generation, usually the limiting factor in RAG quality, and how does that shape where you spend effort?", "modelAnswer": "Generation can only work with what it is given; if the passage containing the answer is not retrieved, the model has no way to produce a correct grounded answer — it will either say it doesn't know (if well-grounded) or hallucinate (if not), and no prompt wording or model upgrade recovers the missing fact. So the retrieved set is a hard ceiling on achievable answer quality. This reshapes effort: rather than endlessly tuning the model or prompt, you invest in retrieval — good chunking, the right embedding model, hybrid search with the semantic ranker, appropriate k, and filters that keep the corpus relevant. It also shapes debugging: when an answer is wrong, first log and inspect the retrieved passages. If the right passage isn't there, it's a retrieval problem (fix chunking, search mode, or indexing); if the right passage is there but the answer is wrong, it's a generation or prompt problem. Most teams discover the majority of failures are retrieval failures wearing a generation costume." },
+        { "number": 10, "question": "Describe how access control and data freshness are handled in a RAG system, and why each is part of the architecture rather than an add-on.", "modelAnswer": "Access control is enforced at retrieval, not generation, because the model will faithfully quote any context it receives — it has no notion of who is asking. So the index carries permission metadata (allowed groups/users) as filterable fields, and every query filters retrieval to documents the requesting user may see. Skipping this means a user can extract restricted content simply by asking a question whose answer lives in a document they were never authorized to read. Freshness depends on the indexing pipeline: RAG answers are only as current as the last time changed documents were re-chunked, re-embedded, and re-indexed. So an ingestion process — scheduled runs, a change feed, or indexers — that keeps the index synchronized with source systems is a first-class component. Both are architectural because they are properties of the retrieval layer that the elegant retrieve-augment-generate story omits: the demo works without them, but a real system that ignores access control leaks data and one that ignores freshness confidently cites stale facts. They belong in the design from the start, alongside the search and prompt logic." },
+        { "number": 11, "question": "How does this tutorial's RAG pipeline fit the IChatService and web architecture from tutorials 13 and 14?", "modelAnswer": "It slots in behind the same interface with no change to the layers above. Tutorials 13–14 established IChatService as the single abstraction the web layer depends on, with the SDK and resilience inside its implementation and a streaming endpoint delivering answers to the browser. RAG adds a new method — AskGroundedAsync — whose implementation does retrieval (embed the question, hybrid-search Azure AI Search) and augmentation (build the grounded prompt) before calling the model through the same resilient wrapper, then returns the answer plus its sources. Because retrieval and prompt construction happen inside the service, the controller/endpoint, DTOs, streaming, cancellation, and error handling from tutorial 14 are untouched — the endpoint just calls a different service method and includes a citations array in the response DTO. The clean architecture pays off exactly as designed: a significant capability (grounded, cited answers over a search backend) is added by extending one edge implementation, and the grounded answer streams into the very page built in tutorial 14 without a front-end rewrite." },
+        { "number": 12, "question": "A stakeholder wants to include the top 50 retrieved passages 'to be safe'. Explain the trade-offs and give your recommendation.", "modelAnswer": "More passages is not strictly safer and is often worse. Costs: every passage is prompt tokens on every call, so 50 chunks multiply cost and latency and may not fit the context window at all. Quality: stuffing many passages can bury the one relevant chunk among mostly-irrelevant text, and models attend less reliably to material in the middle of a long context, so the answer can degrade even when the right passage is technically present — the opposite of the goal. Retrieval precision also drops as k grows, since lower-ranked results are by definition less relevant. The recommendation is to keep k modest — typically a handful (say 3–8) — chosen by evaluation: enough to reliably contain the answer for your corpus and question mix, few enough to keep the relevant passage prominent and cost bounded. If a small k misses answers, the fix is usually better retrieval (chunking, hybrid search, reranking) rather than a bigger k. 'To be safe' is better served by improving what the top few passages are than by adding many weak ones." },
+        { "number": 13, "question": "What is the difference between keyword, vector, and hybrid search in terms of what they match, and how would you decide to deviate from hybrid as the default?", "modelAnswer": "Keyword search matches literal terms (lexical overlap, BM25-ranked) — it matches the words the user typed. Vector search matches meaning — it matches passages whose embeddings are near the question's embedding, regardless of shared words. Hybrid runs both and fuses the results, matching either literal terms or meaning, and is the default because real questions contain both. You would deviate only with evidence. Pure keyword might suffice for a corpus and query pattern that is overwhelmingly exact-match — code lookups, part numbers — where embeddings add cost without benefit and could even introduce fuzzy false positives. Pure vector might be chosen for a highly conversational corpus where exact tokens never matter and you want to minimize a keyword index's upkeep. But these are optimizations justified by measurement on your own queries; absent such evidence, hybrid with the semantic ranker gives the best expected relevance across the mix of questions users actually ask, so it stays the default and deviation carries the burden of proof." },
+        { "number": 14, "question": "Explain grounding and citations as distinct concepts and how each is implemented in the pipeline.", "modelAnswer": "Grounding is the property that the answer's content derives from the supplied source passages rather than the model's training memory. Citations are references in the answer that point back to which source each claim came from. They are related but distinct: an answer can be grounded (drawn from sources) yet uncited (no references shown), or cited yet not truly grounded (the model attaches a bracket number to a claim the passage doesn't actually support). Grounding is implemented by retrieval plus the grounding system prompt: retrieval ensures the relevant passages are in the prompt, and the system prompt instructs the model to use only them and refuse otherwise, with low temperature reinforcing compliance. Citations are implemented by numbering the passages when building the prompt and instructing the model to cite by number, then returning the source list alongside the answer so the UI can render each bracket number as a link to its sourcePath. Good RAG needs both — grounding for correctness, citations for verifiability — and because grounding is instructed rather than guaranteed, citations double as the user's (and an evaluator's) means to check that grounding actually held." },
+        { "number": 15, "question": "Outline how you would evaluate and debug a RAG assistant that sometimes gives wrong answers.", "modelAnswer": "First, separate the two failure modes by logging, for each question, the retrieved passages (titles and scores) alongside the answer. When an answer is wrong, inspect those passages: if the passage containing the correct answer is absent or low-ranked, it is a retrieval failure; if the correct passage was retrieved but the answer is wrong or miscited, it is a generation/prompt failure. Retrieval failures are fixed upstream — revisit chunking (size/overlap), confirm hybrid search and the semantic ranker are on, check the embedding model matches indexing, tune k, and verify the document is even indexed and not filtered out by permissions. Generation failures are fixed in the prompt and parameters — strengthen the grounding instruction, lower temperature, ensure passages are clearly numbered, and check the answer isn't exceeding max tokens. For systematic evaluation, build a test set of representative questions with known correct answers and expected sources, and measure retrieval quality (is the right passage in the top k?) separately from answer quality (is the answer correct and correctly cited?), because they have different fixes. Add automated checks that cited passages actually contain support for the claims. Re-run this suite on any change to chunking, search config, embedding or chat model, or prompt — it is the regression net for a system whose behavior is otherwise hard to pin down." }
+      ]
+    },
+    {
+      "number": 17,
+      "key": "flashcards",
+      "title": "Flashcards",
+      "items": [
+        { "number": 1, "front": "RAG (Retrieval-Augmented Generation)", "back": "Retrieve relevant passages from your data → augment the prompt with them → generate a grounded, cited answer. Injects current, private, verifiable knowledge without retraining." },
+        { "number": 2, "front": "RAG vs fine-tuning", "back": "Fine-tune to change how the model behaves; use RAG to change what it knows. RAG updates instantly, cites sources, and applies access control; fine-tuning bakes facts into weights, can't cite, and goes stale." },
+        { "number": 3, "front": "Why enterprises need RAG", "back": "Models are frozen at a cutoff, never saw private data, and can't cite. RAG supplies fresh, private passages at query time and makes every claim traceable." },
+        { "number": 4, "front": "Embedding + cosine similarity", "back": "Embedding maps text to a vector where similar meanings are near. Cosine similarity (near 1 = similar) measures closeness — the basis of retrieval by meaning." },
+        { "number": 5, "front": "Vector database", "back": "Indexes embedding vectors and returns the k nearest to a query vector fast (approximate nearest neighbor), making vector search practical over millions of chunks." },
+        { "number": 6, "front": "Azure AI Search", "back": "Managed retrieval service doing keyword + vector + hybrid search with a semantic ranker. Central object: the index, defined by a field schema. Common RAG backend." },
+        { "number": 7, "front": "Index field attributes", "back": "Key = unique id; Searchable = full-text/keyword; vector field = embedding for vector search; Filterable = restrict (incl. access control); Retrievable = returned with results (needed for content + citations)." },
+        { "number": 8, "front": "Keyword search", "back": "Lexical match on literal terms (BM25). Best for exact codes, IDs, acronyms, names. Fails on vocabulary mismatch ('money back' ≠ 'refund')." },
+        { "number": 9, "front": "Semantic search", "back": "Retrieval by meaning via embeddings (+ semantic ranker). Handles paraphrase/synonyms; can miss exact tokens. Mirror image of keyword's strengths." },
+        { "number": 10, "front": "Hybrid search", "back": "Run keyword + vector together, fuse results, optionally rerank with the semantic ranker. The RAG default — real questions mix exact terms and natural language." },
+        { "number": 11, "front": "Semantic ranker", "back": "Re-scores the top retrieved candidates with a language model for better relevance ordering; can return concise captions. Sharpens what generation sees." },
+        { "number": 12, "front": "Chunking", "back": "Split docs into passage-sized pieces (~hundreds of tokens, slight overlap) before embedding/indexing. Too big = noisy/costly; too small = lost context. A tunable design choice." },
+        { "number": 13, "front": "Grounding system prompt", "back": "'Answer ONLY from the numbered sources, cite them with [n], and say you don't know otherwise.' Plus low temperature. Instructs — but does not guarantee — grounding." },
+        { "number": 14, "front": "Citations", "back": "References ([1], [2]) tying claims to source passages. Implement by numbering passages in the prompt and returning the source list so the UI links each to its sourcePath. Verifiability." },
+        { "number": 15, "front": "Retrieval is the quality ceiling", "back": "If the right passage isn't retrieved, no model or prompt can fix the answer. Debug wrong answers by logging retrieved passages first — most 'model' errors are retrieval errors." }
+      ]
+    },
+    {
+      "number": 18,
+      "key": "interview-qa",
+      "title": "Interview Questions and Answers",
+      "items": [
+        { "number": 1, "question": "What is RAG and why has it become the dominant enterprise GenAI pattern?", "answer": "RAG — Retrieval-Augmented Generation — retrieves relevant passages from your own data, augments the prompt with them, and has the model generate an answer grounded in that context with citations. It dominates the enterprise because it solves the three things a raw model can't: it supplies private knowledge the model never trained on, it stays current because you update an index rather than retrain, and it makes answers verifiable through citations. Almost every enterprise GenAI product — internal knowledge bots, support deflection, chat-with-your-documents — is RAG underneath, because those settings all demand answers that are private, fresh, and checkable, which is exactly RAG's value proposition." },
+        { "number": 2, "question": "When would you fine-tune instead of, or in addition to, using RAG?", "answer": "Fine-tune to change behavior, not to add facts. If I need the model to adopt a specific tone, format, or domain style consistently — always answer as terse structured JSON, or match a particular writing voice — fine-tuning teaches that better than prompting. If I need it to know things — policies, product details, anything that changes — RAG is right, because facts belong in an updatable, citable index, not baked into weights that go stale and can't cite. The two compose: I might fine-tune for how the assistant talks and use RAG for what it knows. But the common mistake is fine-tuning to inject knowledge; that's expensive, blurry, un-citable, and needs redoing on every data change, so I push back on it hard and reach for RAG." },
+        { "number": 3, "question": "Walk me through how retrieval by meaning actually works.", "answer": "It rests on embeddings. An embedding model maps text to a vector such that similar meanings land near each other, with closeness measured by cosine similarity. Offline, I chunk my documents and embed each chunk, storing the vectors in a vector database. At query time I embed the user's question with the same model, so it lands in the same space, and ask the database for the nearest vectors — that's vector search. Those nearest chunks are the most semantically relevant passages, so a question like 'how do I get my money back' retrieves the 'Refund Policy' chunk even with no shared words. The vector database matters because it does approximate nearest-neighbor search efficiently over millions of vectors; brute-force cosine similarity against everything would be far too slow at scale." },
+        { "number": 4, "question": "How do you set up an index for RAG in Azure AI Search?", "answer": "I define a schema where one document equals one chunk. Minimum fields: a key id; a searchable, retrievable content field for the chunk text; a vector field holding the chunk's embedding, dimensioned to the embedding model (1536 for text-embedding-3-small) with a vector-search profile; and retrievable title and sourcePath fields for citations, often filterable. I add filterable permission or category fields when I need access control or scoping. Then I attach a vector-search configuration (like HNSW) and a semantic configuration naming the text fields for the ranker. Before indexing I chunk the source documents into passage-sized pieces, embed each, and upload one document per chunk. The attribute choices are deliberate — searchable enables keyword, the vector field enables meaning, retrievable makes content and citation data available, filterable enforces access control." },
+        { "number": 5, "question": "Explain keyword vs semantic search and why you'd combine them.", "answer": "Keyword search matches the literal terms of the query, ranked by something like BM25. It's unbeatable for exact strings — error codes, product IDs, acronyms, names — that have to match character-for-character. Its weakness is vocabulary mismatch: it can't connect 'money back' to 'refund'. Semantic search matches meaning through embeddings, optionally reranked by the semantic ranker, so paraphrases and synonyms work, but it can slip on exact tokens, returning something topically close that misses the specific code. The strengths are mirror images, so I combine them as hybrid search — run both, fuse the ranked results, rerank the top with the semantic ranker. Real questions mix exact terms and natural language, like pasting an error code and describing the symptom, so hybrid captures both. I default to hybrid and only go pure-keyword or pure-vector if I measure a reason." },
+        { "number": 6, "question": "What's the biggest lever on RAG answer quality, and how does that change how you work?", "answer": "Retrieval, by a wide margin. Generation can only ground in what retrieval surfaces, so if the right passage isn't retrieved, no prompt tweak or bigger model produces a correct grounded answer — the retrieved set is a hard ceiling. So I spend my effort on retrieval: chunking strategy, the right embedding model, hybrid search with the semantic ranker, tuning k, and filters that keep the corpus relevant — before I touch prompt wording. And it changes debugging completely: when an answer is wrong, I log and look at the retrieved passages first. If the correct passage isn't there, it's a retrieval bug; if it's there but the answer is wrong, it's a generation bug. Teams that skip this waste time tuning the model for what are actually retrieval failures." },
+        { "number": 7, "question": "How do you make a RAG answer trustworthy — cover grounding and citations.", "answer": "Two distinct things. Grounding means the answer comes from the supplied sources, not the model's memory. I implement it with retrieval that actually contains the answer plus a firm grounding system prompt — 'use only the numbered sources, say you don't know otherwise' — at low temperature. Citations mean each claim points back to its source. I implement those by numbering the passages in the prompt, instructing the model to cite by bracket number, and returning the source list alongside the answer so the UI links each [n] to its document. They're separable — you can be grounded but uncited, or cited but wrongly attributed — and you need both: grounding for correctness, citations for verifiability. And because grounding is instructed, not guaranteed, the citations double as the mechanism for a user or an automated check to confirm the grounding actually held." },
+        { "number": 8, "question": "Where do access control and freshness fit in a RAG system?", "answer": "Both live in the retrieval layer, and both are architecture, not afterthoughts. Access control has to be enforced at retrieval because the model quotes whatever context I give it — it has no idea who's asking. So I store permission metadata as filterable fields and filter every query to what the user is allowed to see; otherwise someone can extract a restricted document just by asking a question it answers. Freshness depends on the indexing pipeline: answers are only as current as the last re-index of changed documents, so a scheduled ingestion, change feed, or indexer that keeps the index synced with source systems is a first-class component. The clean retrieve-augment-generate story hides both, and a demo works without them, but a real system that skips access control leaks data and one that skips freshness confidently cites stale facts." },
+        { "number": 9, "question": "Someone reports the assistant gave a confidently wrong answer. How do you investigate?", "answer": "I pull the log for that question showing the retrieved passages with scores, next to the answer. First branch: was the correct passage retrieved? If not, it's a retrieval failure — I check whether the document is even indexed, whether it was filtered out by permissions, whether chunking split the answer awkwardly, whether hybrid and the semantic ranker are on, and whether the embedding model matches indexing; then I fix chunking or search config and re-test. If the correct passage was retrieved but the answer ignored it or miscited, it's a generation failure — I strengthen the grounding prompt, lower temperature, make sure passages are clearly numbered and not truncated by max tokens. 'Confidently wrong' specifically often means grounding didn't hold — the model used training memory — so I tighten the instruction and verify the context actually contained the answer. Then I add that question to an evaluation set so the fix is regression-tested." },
+        { "number": 10, "question": "How do you decide how many passages (k) to retrieve?", "answer": "By evaluation, aiming for the smallest k that reliably contains the answer. More isn't safer: every passage is prompt tokens, so large k inflates cost and latency and may overflow the context window, and it can actually hurt quality by burying the relevant chunk among weaker ones — models attend less reliably to the middle of a long context. So I start with a handful, maybe 3 to 8, and measure on a representative question set whether the answer-bearing passage is present and whether answers are correct. If small k misses answers, the right fix is usually better retrieval — chunking, hybrid, reranking — rather than cranking k up. I treat k as a tuned parameter balanced against the context window and cost, not a 'bigger is safer' dial." },
+        { "number": 11, "question": "What's the significance of index and query using the same embedding model?", "answer": "It's mandatory for correctness. Each embedding model defines its own vector space with its own geometry, so a vector from model A and a vector from model B aren't comparable — the distance between them is meaningless even if the dimensions line up. If I index with one model and query with another, vector search returns essentially random results, and the failure is silent: no error, just bad retrieval. So the same embedding model must be used everywhere, and changing it is a big operation — I have to re-embed and re-index the entire corpus, not just switch the query side. That's why I version the index against its embedding model and treat a model change as a deliberate migration, and why I'd never mix a new query-time model with an index built on an old one." },
+        { "number": 12, "question": "How does RAG integrate with the service and web architecture you'd already have?", "answer": "It drops in behind the existing service interface. If I've got an IChatService abstraction with the SDK and resilience inside it and a streaming web endpoint on top, RAG is a new method on that service — retrieve, augment, generate — whose implementation embeds the question, runs hybrid search, builds the grounded prompt, and calls the model through the same resilient wrapper, returning the answer plus its sources. The controllers, DTOs, streaming, cancellation, and error handling above don't change; the endpoint just calls a different method and adds a citations array to the response. That's the payoff of clean architecture: a major capability is added by extending one edge implementation, and the grounded answer streams into the same UI. Retrieval is 'what the server does before calling the model', which is exactly the seam the service layer exists to own." },
+        { "number": 13, "question": "What are the failure modes and limits of RAG you'd flag to a team adopting it?", "answer": "Several. Retrieval is the ceiling, so bad chunking or search config caps quality regardless of the model. Grounding is instructed, not guaranteed — the model can still leak training knowledge or miscite, so citations need verifying and evaluation is essential. Chunking is a real tuning problem with no universal setting. The context window and cost limit how many passages you can include, so more retrieval isn't free or always better. Access control must be enforced in retrieval or you leak data, and freshness depends entirely on your indexing pipeline. Embedding-model consistency is mandatory, making model changes a full re-index. And RAG adds moving parts — a search service, an ingestion pipeline, embeddings — so it's more to operate and monitor than a bare model call. None of these are dealbreakers; they're the things that separate a demo that works from a production system that stays correct." },
+        { "number": 14, "question": "Would you build the RAG pipeline by hand or use higher-level tooling like integrated vectorization or an orchestration framework?", "answer": "I'd understand the hand-rolled pipeline first and then adopt tooling deliberately. Building it by hand — chunk, embed, upload, then embed the question, hybrid-search, construct the prompt — makes every moving part visible, which is essential for debugging retrieval and for knowing what the conveniences are doing. Once I understand it, integrated vectorization and indexers in Azure AI Search can handle chunking and embedding during ingestion, saving a lot of pipeline code, and orchestration frameworks like Semantic Kernel wrap retrieval as reusable memory. I'd use those where they reduce boilerplate without hiding decisions I need control over — chunking strategy, search mode, k, the grounding prompt. The anti-pattern is starting with a framework you don't understand, hitting a retrieval quality problem, and having no idea which layer to fix. So: learn the mechanics, then let tooling remove the parts you've mastered." },
+        { "number": 15, "question": "How would you evaluate a RAG system before and after shipping?", "answer": "I separate retrieval evaluation from answer evaluation because they have different fixes. I build a representative test set of questions with known correct answers and the source passages that should support them. Retrieval metric: is the correct passage in the top k? That isolates chunking, embeddings, and search config. Answer metric: is the response correct and correctly cited given the retrieved context? That isolates the prompt and model. I'd add automated checks that cited passages actually contain support for the claims, catching miscitation. In production I log retrieved passages and scores per query, track 'don't know' rates and user feedback, and watch for drift. Any change to chunking, search settings, embedding or chat model, or the grounding prompt triggers a re-run of the suite, because RAG behavior is otherwise hard to reason about and easy to regress silently. Evaluation is what turns 'seems to work in the demo' into a system you can change with confidence." }
+      ]
+    },
+    {
+      "number": 19,
+      "key": "glossary",
+      "title": "Glossary",
+      "items": [
+        { "term": "RAG", "definition": "Retrieval-Augmented Generation: retrieve relevant passages from your data, augment the prompt with them, and generate a grounded, cited answer — without retraining the model." },
+        { "term": "Retrieval", "definition": "The step that finds the most relevant passages for a question from an index, before any generation happens. Sets the quality ceiling of a RAG system." },
+        { "term": "Grounding", "definition": "Basing the model's answer on supplied source passages rather than training memory, so claims trace to real documents. Instructed via the system prompt, not guaranteed." },
+        { "term": "Citation", "definition": "A reference in the answer (e.g. [1]) pointing back to the source passage a claim came from, enabling users to verify it." },
+        { "term": "Hallucination", "definition": "Fluent but false model output; RAG reduces it for knowledge questions by supplying real passages and instructing the model to answer only from them." },
+        { "term": "Vector database", "definition": "A store that indexes embedding vectors and returns the nearest ones to a query vector efficiently, making vector search practical at scale." },
+        { "term": "Embedding", "definition": "A numeric vector capturing the meaning of text, so semantically similar texts sit close together in vector space." },
+        { "term": "Vector search", "definition": "Finding the nearest embedding vectors to a query vector by similarity — retrieval by meaning rather than by matching words." },
+        { "term": "Cosine similarity", "definition": "A measure of how closely two vectors point in the same direction; near 1 means very similar meaning. The usual vector-search metric." },
+        { "term": "Azure AI Search", "definition": "Azure's managed search service supporting keyword, vector, and hybrid retrieval with a semantic ranker; a common RAG retrieval backend." },
+        { "term": "Index", "definition": "The searchable collection of documents in Azure AI Search, defined by a field schema; you query it to retrieve passages." },
+        { "term": "Field", "definition": "A named, typed property of an index document (content, title, vector) with attributes like searchable, filterable, retrievable, or key." },
+        { "term": "Schema", "definition": "The index definition — its fields, their types, and attributes — describing the shape and searchability of each document." },
+        { "term": "Keyword search", "definition": "Lexical retrieval matching the query's literal terms against the text (BM25-style), ideal for exact codes, IDs, and names." },
+        { "term": "Semantic search", "definition": "Retrieval by meaning using embeddings and/or a semantic reranker, matching paraphrases and synonyms without shared keywords." },
+        { "term": "Hybrid search", "definition": "Combining keyword and vector search in one query and fusing the results, capturing both exact-term and meaning matches. The RAG default." },
+        { "term": "Semantic ranker", "definition": "An Azure AI Search feature that re-scores the top results with a language model for relevance and can return concise captions." },
+        { "term": "Chunking", "definition": "Splitting documents into passage-sized pieces before embedding and indexing, so retrieval returns focused, citable context that fits the prompt." },
+        { "term": "Context window", "definition": "The maximum tokens a model can consider at once; retrieved passages plus the question and answer must fit within it." },
+        { "term": "System prompt", "definition": "The instruction message that, in RAG, tells the model to answer only from the provided sources and to cite them — the grounding rule." }
+      ]
+    },
+    {
+      "number": 20,
+      "key": "summary",
+      "title": "Summary",
+      "content": [
+        { "type": "list", "style": "bullet", "items": [
+          "RAG retrieves relevant passages from your data, augments the prompt with them, and generates a grounded, cited answer — supplying private, current, verifiable knowledge without retraining. Fine-tune for behavior; use RAG for knowledge.",
+          "Embeddings map text to vectors so meaning becomes distance; a vector database indexes those vectors and returns nearest neighbors fast, enabling retrieval by meaning at scale — with index and query bound to the same embedding model.",
+          "Azure AI Search provides retrieval as a managed service; its index is defined by a field schema (key, searchable content, a vector field, retrievable citation fields, filterable access-control fields), and documents are passage-sized chunks.",
+          "Keyword search nails exact terms, semantic search nails meaning, and hybrid search fuses both with a semantic ranker — the recommended default because real questions mix codes and natural language.",
+          "The .NET pipeline lives behind IChatService: embed the question, run hybrid search, build a grounded prompt with numbered sources, and generate at low temperature — returning the answer plus its sources.",
+          "Grounding (answer only from sources) is enforced by a firm system prompt and low temperature but not guaranteed; citations (references back to passages) make answers verifiable, and retrieval quality — not the model — sets the system's ceiling."
+        ] },
+        { "type": "paragraph", "text": "RAG is the workhorse pattern of enterprise GenAI, and you have now built it end to end: retrieval by meaning over an Azure AI Search index, hybrid search for the best of keyword and semantic, and a grounded, cited answer streamed into the web app from earlier tutorials — all behind the same clean interface. The disciplines that make it production-grade are the retrieval ones: chunk well, search hybrid, ground firmly, cite honestly, filter by permission, and keep the index fresh. With grounded answers in hand, the course now turns to the platform that unifies these building blocks, as the next tutorial introduces Azure AI Foundry." }
+      ]
+    },
+    {
+      "number": 21,
+      "key": "next-steps",
+      "title": "Next Steps",
+      "content": [
+        { "type": "paragraph", "text": "Next tutorial: Azure AI Foundry (azure-ai-foundry). You have assembled AI capabilities piece by piece — deployments, embeddings, function calling, and now retrieval. Azure AI Foundry is the unified platform for building, evaluating, and managing these AI applications: model catalog and deployments, playgrounds, evaluation, and the tooling that ties the building blocks of this course into a managed workflow." },
+        { "type": "list", "style": "bullet", "items": [
+          "Practice: build the full pipeline — create the index, chunk and embed a small document set, and answer questions with citations, confirming an out-of-scope question yields an honest 'I don't know'.",
+          "Practice: run the same question as an exact code and as a paraphrase, and log the retrieved passages to see keyword and vector each earn their keep in hybrid search.",
+          "Practice: deliberately vary chunk size (very large vs very small) and observe the effect on retrieval relevance and answer quality.",
+          "Practice: add a permission filter to retrieval and verify that a restricted document never appears in answers for an unauthorized user.",
+          "Read: the official documentation for 'Azure AI Search', 'Vector search in Azure AI Search', 'Semantic ranking', 'Retrieval-Augmented Generation (RAG) in Azure AI Search', and the Azure.Search.Documents .NET client library."
+        ] },
+        { "type": "note", "style": "tip", "text": "Keep your grounded assistant — it is a portfolio-quality demonstration of the most in-demand enterprise GenAI skill, and later tutorials on evaluation and monitoring will use it as the system under test." }
+      ]
+    }
+  ]
+}
